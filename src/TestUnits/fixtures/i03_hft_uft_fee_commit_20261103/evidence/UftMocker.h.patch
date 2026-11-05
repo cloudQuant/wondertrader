@@ -1,0 +1,36 @@
+--- before/UftMocker.h
++++ after/UftMocker.h
+@@ -191,7 +191,12 @@
+ 
+ 
+ 	//////////////////////////////////////////////////////////////////////////
+-	virtual void on_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price);
++	virtual void on_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price);
++
++protected:
++	bool apply_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price);
++
++public:
+ 
+ 	virtual void on_order(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled);
+ 
+@@ -212,7 +217,9 @@
+ 
+ 	bool	procOrder(uint32_t localid);
+ 
+-	void	update_position(const char* stdCode, bool isLong, uint32_t offset, double qty, double price = 0.0);
++	bool	update_position(const char* stdCode, bool isLong, uint32_t offset, double qty, double price, const std::vector<double>& fees);
++	std::function<bool()> trade_state_guard(const std::string& key);
++	bool plan_trade_fees(const char* stdCode, bool isLong, uint32_t offset, const std::vector<double>& volumes, double price, const wt_fee::Context& context, std::vector<std::vector<double>>& fees);
+ 	void	update_dyn_profit(const char* stdCode, WTSTickData* newTick);
+ 
+ 	void	dump_outputs();
+@@ -371,7 +378,7 @@
+ 
+ 		std::vector<DetailInfo> _details;
+ 
+-		_PosItem()
++		_PosItem() : _long(false)
+ 		{
+ 			_prevol = 0;
+ 			_newvol = 0;

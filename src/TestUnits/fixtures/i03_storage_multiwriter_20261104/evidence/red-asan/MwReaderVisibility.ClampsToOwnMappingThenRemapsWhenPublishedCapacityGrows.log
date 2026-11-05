@@ -1,0 +1,39 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = MwReaderVisibility.ClampsToOwnMappingThenRemapsWhenPublishedCapacityGrows
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from MwReaderVisibility
+[ RUN      ] MwReaderVisibility.ClampsToOwnMappingThenRemapsWhenPublishedCapacityGrows
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1977==ERROR: AddressSanitizer: SEGV on unknown address 0x000104e394b4 (pc 0x00010483d720 bp 0x00016b7346d0 sp 0x00016b734610 T0)
+==1977==The signal is caused by a READ memory access.
+    #0 0x00010483d720 in wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)::$_0::operator()(wtp::WTSTickStruct const&, wtp::WTSTickStruct const&) const+0x80 (mw_reader:arm64+0x100175720)
+    #1 0x00010483d440 in std::__1::__invoke_result_impl<void, wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)::$_0&, wtp::WTSTickStruct&, wtp::WTSTickStruct const&>::type std::__1::__invoke[abi:nqe220108]<wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)::$_0&, wtp::WTSTickStruct&, wtp::WTSTickStruct const&>(wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)::$_0&, wtp::WTSTickStruct&, wtp::WTSTickStruct const&)+0x84 (mw_reader:arm64+0x100175440)
+    #2 0x00010483d0f8 in wtp::WTSTickStruct* std::__1::__lower_bound_bisecting[abi:nqe220108]<std::__1::_ClassicAlgPolicy, wtp::WTSTickStruct*, wtp::WTSTickStruct, std::__1::__identity, wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)::$_0>(wtp::WTSTickStruct*, wtp::WTSTickStruct const&, std::__1::iterator_traits<wtp::WTSTickStruct*>::difference_type, wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)::$_0&, std::__1::__identity&)+0x214 (mw_reader:arm64+0x1001750f8)
+    #3 0x00010483ce98 in wtp::WTSTickStruct* std::__1::__lower_bound[abi:nqe220108]<std::__1::_ClassicAlgPolicy, wtp::WTSTickStruct*, wtp::WTSTickStruct*, wtp::WTSTickStruct, std::__1::__identity, wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)::$_0>(wtp::WTSTickStruct*, wtp::WTSTickStruct*, wtp::WTSTickStruct const&, wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)::$_0&, std::__1::__identity&)+0xb4 (mw_reader:arm64+0x100174e98)
+    #4 0x0001046e4c4c in wtp::WTSTickStruct* std::__1::lower_bound[abi:nqe220108]<wtp::WTSTickStruct*, wtp::WTSTickStruct, wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)::$_0>(wtp::WTSTickStruct*, wtp::WTSTickStruct*, wtp::WTSTickStruct const&, wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)::$_0)+0x174 (mw_reader:arm64+0x10001cc4c)
+    #5 0x0001046dfb8c in wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)+0x10cc (mw_reader:arm64+0x100017b8c)
+    #6 0x0001048927b4 in q03::MwReaderVisibility_ClampsToOwnMappingThenRemapsWhenPublishedCapacityGrows_Test::TestBody()+0x9a4 (mw_reader:arm64+0x1001ca7b4)
+    #7 0x00010494e378 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (mw_reader:arm64+0x100286378)
+    #8 0x00010494e2c0 in testing::Test::Run()+0xcc (mw_reader:arm64+0x1002862c0)
+    #9 0x00010494eea0 in testing::TestInfo::Run()+0xd0 (mw_reader:arm64+0x100286ea0)
+    #10 0x00010494f924 in testing::TestSuite::Run()+0x1c4 (mw_reader:arm64+0x100287924)
+    #11 0x00010495ad4c in testing::internal::UnitTestImpl::RunAllTests()+0x52c (mw_reader:arm64+0x100292d4c)
+    #12 0x00010495a6f8 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (mw_reader:arm64+0x1002926f8)
+    #13 0x00010495a65c in testing::UnitTest::Run()+0x78 (mw_reader:arm64+0x10029265c)
+    #14 0x00010493b65c in main+0x40 (mw_reader:arm64+0x10027365c)
+    #15 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+==1977==Register values:
+ x[0] = 0x000000016b734940   x[1] = 0x0000000104e39418   x[2] = 0x000000016b734bd0   x[3] = 0x000000016b734940  
+ x[4] = 0x000000016b734950   x[5] = 0x00000000000000a0   x[6] = 0x000000016af3c000   x[7] = 0x0000000000000001  
+ x[8] = 0x0000008000020000   x[9] = 0x0000000104e39418  x[10] = 0x0000000000000001  x[11] = 0x0000000000000000  
+x[12] = 0x0000000000003000  x[13] = 0x0000000104e36418  x[14] = 0x00000000f301f201  x[15] = 0x000010800001ffff  
+x[16] = 0x00000001883d7090  x[17] = 0x00000001f5bd5568  x[18] = 0x0000000000000000  x[19] = 0x000000016b734760  
+x[20] = 0x0000000000000001  x[21] = 0x0000619000000a80  x[22] = 0x0000619000000a80  x[23] = 0x0000000000000000  
+x[24] = 0x0000000104abe000  x[25] = 0x0000000000000000  x[26] = 0x0000000000000000  x[27] = 0x000000016b736950  
+x[28] = 0x0000000000000001     fp = 0x000000016b7346d0     lr = 0x000000010483d444     sp = 0x000000016b734610  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (mw_reader:arm64+0x100175720) in wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)::$_0::operator()(wtp::WTSTickStruct const&, wtp::WTSTickStruct const&) const+0x80
+==1977==ABORTING

@@ -1,0 +1,29 @@
+exit=-6
+==================
+WARNING: ThreadSanitizer: data race (pid=32060)
+  Write of size 4 at 0x00010b800c5c by main thread:
+    #0 StateMonitor::advanceOnce(unsigned int, unsigned int) StateMonitor.cpp:345 (red-tsan:arm64+0x1000045f0)
+    #1 R154StateMonitorTestAccess::advance(StateMonitor&) probe.cpp:31 (red-tsan:arm64+0x100016e90)
+    #2 main probe.cpp:85 (red-tsan:arm64+0x100016e90)
+
+  Previous read of size 4 at 0x00010b800c5c by thread T1:
+    #0 StateMonitor::isAnyInState(tagSimpleState) const StateMonitor.h:179 (red-tsan:arm64+0x1000192d4)
+    #1 main::$_3::operator()() const probe.cpp:84 (red-tsan:arm64+0x1000192d4)
+    #2 std::__1::__invoke_result_impl<void, main::$_3>::type std::__1::__invoke[abi:nqe220108]<main::$_3>(main::$_3&&) invoke.h:90 (red-tsan:arm64+0x1000192d4)
+    #3 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_3, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_3>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (red-tsan:arm64+0x1000192d4)
+    #4 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_3>>(void*) thread.h:169 (red-tsan:arm64+0x1000192d4)
+
+  Location is heap block of size 64 at 0x00010b800c40 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x92928)
+    #1 R154StateMonitorTestAccess::attach(StateMonitor&, DataManager*, wtp::WTSSessionInfo*, tagSimpleState) probe.cpp:22 (red-tsan:arm64+0x1000172f0)
+    #2 main probe.cpp:82 (red-tsan:arm64+0x100016db0)
+
+  Thread T1 (tid=987572, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (red-tsan:arm64+0x100016e38)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_3, 0>(main::$_3&&) thread.h:218 (red-tsan:arm64+0x100016e38)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_3, 0>(main::$_3&&) thread.h:209 (red-tsan:arm64+0x100016e38)
+    #4 main probe.cpp:84 (red-tsan:arm64+0x100016e38)
+
+SUMMARY: ThreadSanitizer: data race StateMonitor.cpp:345 in StateMonitor::advanceOnce(unsigned int, unsigned int)
+==================

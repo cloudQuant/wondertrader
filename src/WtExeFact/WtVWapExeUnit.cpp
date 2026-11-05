@@ -2,6 +2,7 @@
 23.5.23--zhaoyk--VWAP
 */
 #include "WtVWapExeUnit.h"
+#include "../Includes/IExecPluginV2.h"
 
 #include <cmath>
 #include <sstream>
@@ -117,8 +118,8 @@ inline bool validSessionDatePair(WTSSessionInfo* session, uint32_t actionDate,
 		diagnostic = "VWAP tick action/trading date is not a valid calendar date";
 		return false;
 	}
-	sessionDate = session->getOffsetDate(actionDate, hhmm);
-	if (!validActionDate(sessionDate))
+	if (!session->tryGetOffsetDate(actionDate, hhmm, sessionDate)
+		|| !validActionDate(sessionDate))
 	{
 		diagnostic = "VWAP session-adjusted date cannot be verified";
 		return false;
@@ -245,6 +246,8 @@ const char * WtVWapExeUnit::getName()
 
 void WtVWapExeUnit::init(ExecuteContext * ctx, const char * stdCode, WTSVariant * cfg)
 {
+	// Reserved host key (IExecPluginV2.h): automatic timeout cancels only with host-verified identity.
+	_host_order_identity = cfg != NULL && cfg->getUInt32(WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY) == 1;
 	_init_succeeded = false;
 	_config_valid = false;
 	_target_pos = 0;
@@ -487,6 +490,13 @@ void WtVWapExeUnit::on_tick(WTSTickData * newTick)
 			newTick->actiondate(), newTick->actiontime()).c_str());
 		return;
 	}
+	uint32_t checkedSessionDate = 0;
+	if (_sess_info == NULL || !_sess_info->tryGetOffsetDate(newTick->actiondate(),
+		newTick->actiontime() / 100000, checkedSessionDate))
+	{
+		_ctx->writeLog("VWAP tick rejected: session-adjusted date cannot be verified");
+		return;
+	}
 	const uint64_t curTickTime = static_cast<uint64_t>(tickTime);
 	if (curTickTime <= _tick_time_high_water)
 	{
@@ -622,6 +632,20 @@ void WtVWapExeUnit::on_tick(WTSTickData * newTick)
 		if (_ord_sticky != 0 && _orders_mon.has_order())
 		{
 			_orders_mon.check_orders_with_generation(_ord_sticky, now, [this, now](uint32_t localid, uint64_t generation) {
+				if (_host_order_identity)
+				{
+					// 迭代03 卡5 / N05-003：宿主按 owner 与不可复用身份核验后才撤单；核验失败即隔离，不回退裸 ID。
+					const int verified = _orders_mon.cancel_timeout_verified(localid, generation, _ord_sticky, now,
+						[this](uint32_t id) { return _ctx->cancel(id); });
+					if (verified > 0)
+					{
+					_cancel_cnt++;
+						_ctx->writeLog((std::string("Expired order ") + std::to_string(localid) + " of " + _code + " canceled with host-verified identity").c_str());
+					}
+					else if (verified < 0)
+						_ctx->writeLog((std::string("Expired order ") + std::to_string(localid) + " of " + _code + " cannot be auto-canceled: host could not verify its identity; order remains monitored").c_str());
+					return;
+				}
 				if (!_orders_mon.mark_unverified_timeout(localid, generation, _ord_sticky, now))
 					return; // 终态或 localid 已复用；不得复活旧快照
 				_ctx->writeLog(fmt::format("Expired order {} of {} cannot be auto-canceled: legacy localid is unverified; order remains monitored",
@@ -708,7 +732,9 @@ void WtVWapExeUnit::do_calc()
 		_ctx->writeLog(fmt::format("{}尚有未完成的撤单指令，暂时退出本轮执行", _code).c_str());
 		return;
 	}
-	if (decimal::eq(diffQty, 0))
+	// BUG-R7-004（卡15复核）：清仓指令在净持仓为零时仍可能有锁仓（多空毛仓）；原先在此
+	// 直接返回使下方清仓分支成为不可达代码，清仓时继续进入该分支。
+	if (decimal::eq(diffQty, 0) && !is_clear(_target_pos))
 		return;
 	//每一次发单要保障成交,所以如果有未完成单,说明上一轮没完成
 	//有未完成订单&&与实际仓位变动方向相反
@@ -745,6 +771,8 @@ void WtVWapExeUnit::do_calc()
 			return;
 		//如果还有多头仓位，则将目标仓位设置为非0，强制触发    
 		newVol = -min(lPos, _order_lots);
+		// Size the slice from the forced closing target (net is zero here).
+		diffQty = newVol - curPos;
 		_ctx->writeLog(fmtutil::format("Clearing process triggered, target position of {} has been set to {}", _code.c_str(), newVol));
 	}
 	//如果相比上次没有更新的tick进来，则先不下单，防止开盘前集中下单导致通道被封

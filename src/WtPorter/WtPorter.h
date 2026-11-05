@@ -95,10 +95,11 @@ extern "C"
 	 * @param fnlBarLoader 最终K线数据加载器
 	 * @param rawBarLoader 原始K线数据加载器
 	 * @param fctLoader 复权因子加载器
-	 * @param tickLoader Tick数据加载器
+	 * @param tickLoader Tick数据加载器（实盘 runner 当前不支持：数据管理器没有向外部加载器请求 tick 的路径，
+	 *        非空时只记录告警、永不调用；见 BUG-R134-004）
 	 * @details 用于注册外部数据加载器，实现自定义数据源的接入
 	 *          当系统需要加载历史数据时，会调用这些加载器函数
-	 *          支持加载K线数据、复权因子和Tick数据
+	 *          支持加载K线数据与复权因子；Tick 加载器不受支持
 	 */
 	EXPORT_FLAG void		register_ext_data_loader(FuncLoadFnlBars fnlBarLoader, FuncLoadRawBars rawBarLoader, FuncLoadAdjFactors fctLoader, FuncLoadRawTicks tickLoader);
 
@@ -118,6 +119,7 @@ extern "C"
 	 * @details 用于直接向框架输入原始Tick数据，主要在使用外部数据源时使用
 	 *          这些数据会被框架内部处理并提供给策略使用
 	 *          Tick数据是最小的行情单元，包含最近一笔成交的价格和数量等信息
+	 *          注意：实盘 runner 未实现该接口，调用只记录错误日志、数据被丢弃（BUG-R134-004）
 	 */
 	EXPORT_FLAG void		feed_raw_ticks(WTSTickStruct* ticks, WtUInt32 count);
 
@@ -224,6 +226,18 @@ extern "C"
 	 *          此void API的返回不表示延后清理已完成。
 	 */
 	EXPORT_FLAG	void		release_porter();
+
+	/**
+	 * @brief 显式、可审计的账户恢复命令（迭代03 卡6b）
+	 * @details 仅当操作员、原因非空、expectedGeneration 等于当前暂停代数且审计日志落盘成功时恢复；
+	 *          返回 AccountTradingGate::ResumeStatus（0=Ok，1=NotPaused，2=InvalidRequest/未知 trader，
+	 *          3=StaleGeneration，4=AuditUnavailable，5=AuditWriteFailed，6=ParticipantRejected）。
+	 */
+	EXPORT_FLAG	int32_t		resume_account_trading(WtString traderId, WtString operatorId, WtString reason,
+		WtUInt64 expectedGeneration, WtString reference);
+
+	/** @brief 账户门禁当前暂停代数（操作员复核用）；未知 trader 返回 0 */
+	EXPORT_FLAG	WtUInt64	get_account_pause_generation(WtString traderId);
 
 	/* Fixed-width values used by the versioned execution-unit status API. */
 	#define WT_EXEC_ENGINE_CTA_V2 UINT32_C(999)
@@ -725,13 +739,13 @@ extern "C"
 	/**
 	 * @brief 创建选股策略上下文
 	 * @param name 策略名称
-	 * @param date 日期，格式YYYYMMDD
-	 * @param time 时间，格式HHMMSS
-	 * @param period 周期，如d1/w1/m1等
+	 * @param date 调度日（决策 K27=A）：d/min 忽略；w 为星期 0..6；m 为每月第几日 1..31；y 为 MMDD
+	 * @param time 调度时间（决策 K27=A）：HHMM（00:00..23:59）；min 周期为 1..1440 的间隔分钟数
+	 * @param period 周期，仅接受 d/w/m/y/min（与 WtRunner、HisDataReplayer 一致；d1/w1/m1 等别名不受支持）
 	 * @param trdtpl 交易模板，默认为"CHINA"
 	 * @param session 交易时段，默认为"TRADING"
 	 * @param slippage 滑点设置，默认为0
-	 * @return 返回策略上下文句柄
+	 * @return 返回策略上下文句柄；period 为空/未知、date/time 不能触发（K27）或 name/trdtpl/session 为空时返回 0，不创建上下文
 	 * @details 创建一个选股策略的上下文环境
 	 *          选股策略主要用于管理股票池，可以根据不同标准选择股票
 	 *          策略初始化时可以指定日期、时间和周期，对应不同的选股频率
@@ -1087,6 +1101,19 @@ extern "C"
 	 *          在高频策略中，跟踪未完成订单对于计算实际持仓和控制订单风险非常重要
 	 */
 	EXPORT_FLAG	double		hft_get_undone(CtxHandler cHandle, const char* stdCode);
+
+	/*
+	 * BUG-R42-002 版本化数量查询（新增导出，旧 hft_get_position/hft_get_undone 签名与行为不变，
+	 * 旧接口只对已登记且已绑定交易通道的句柄承诺结果；未知句柄仍返回 0，无法与真实零值区分）。
+	 * 返回状态码；仅 WT_HFT_QTY_OK_V2 时 *outQty 为有效数量，其余状态 *outQty 置为 NaN（outQty 非空时）。
+	 */
+	#define WT_HFT_QTY_OK_V2                INT32_C(0)
+	#define WT_HFT_QTY_INVALID_ARGUMENT_V2  INT32_C(1)	/* stdCode 或 outQty 为空 */
+	#define WT_HFT_QTY_UNKNOWN_CONTEXT_V2   INT32_C(2)	/* 句柄未登记（含因未知 trader 创建失败返回的 0） */
+	#define WT_HFT_QTY_TRADER_UNBOUND_V2    INT32_C(3)	/* 上下文未绑定交易通道 */
+
+	EXPORT_FLAG	int32_t		hft_get_position_v2(CtxHandler cHandle, const char* stdCode, bool bOnlyValid, double* outQty);
+	EXPORT_FLAG	int32_t		hft_get_undone_v2(CtxHandler cHandle, const char* stdCode, double* outQty);
 
 	/**
 	 * @brief 获取指定合约的最新价格

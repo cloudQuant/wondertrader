@@ -1,4 +1,5 @@
 #include <Includes/IParserApi.h>
+#include <Includes/IParserLifecycleV2.h>
 #include <Includes/WTSVariant.hpp>
 
 #include <cstdint>
@@ -61,6 +62,41 @@ extern "C" R130_PARSER_EXPORT void deleteParser(wtp::IParserApi*& parser)
 	++g_delete_count;
 	delete parser;
 	parser = nullptr;
+}
+
+// I03-NEW-061 (card 9a): hosts require a parser lifecycle V2 table before
+// createParser. The fake has no asynchronous producer; the test's explicit
+// r130_parser_prove_quiescent() signal is what makes wait_drained report
+// DRAINED. destroy_api performs the final synchronous IParserApi::release and
+// the deletion inside this module, so the release/delete counters keep their
+// original meaning (one each, and only after the quiescence signal).
+namespace
+{
+WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL r130_preflight() { return WT_PARSER_LIFECYCLE_V2_OK; }
+WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL r130_request_stop(void*) { return WT_PARSER_LIFECYCLE_V2_OK; }
+WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL r130_can_wait(void*) { return WT_PARSER_LIFECYCLE_V2_OK; }
+WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL r130_wait_drained(void*, uint32_t)
+{
+	return g_quiescent ? WT_PARSER_LIFECYCLE_V2_DRAINED : WT_PARSER_LIFECYCLE_V2_PENDING;
+}
+WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL r130_destroy_api(void** api)
+{
+	wtp::IParserApi* parser = static_cast<wtp::IParserApi*>(*api);
+	parser->release();
+	++g_delete_count;
+	delete parser;
+	*api = nullptr;
+	return WT_PARSER_LIFECYCLE_V2_OK;
+}
+}
+
+extern "C" R130_PARSER_EXPORT const WtParserLifecycleApiV2* WT_PARSER_LIFECYCLE_V2_CALL getParserLifecycleApiV2(uint32_t major)
+{
+	static const WtParserLifecycleApiV2 table = {
+		sizeof(WtParserLifecycleApiV2), WT_PARSER_LIFECYCLE_V2_ABI_VERSION,
+		WT_PARSER_LIFECYCLE_V2_REQUIRED_CAPABILITIES, {0, 0},
+		r130_preflight, r130_request_stop, r130_can_wait, r130_wait_drained, r130_destroy_api };
+	return major == WT_PARSER_LIFECYCLE_V2_ABI_MAJOR ? &table : nullptr;
 }
 
 extern "C" R130_PARSER_EXPORT void r130_parser_reset_counts()

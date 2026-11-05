@@ -1,0 +1,33 @@
+src/TestUnits/fixtures/i03_r15_hft_tags_20261104s5/run.sh: line 67:  1511 Abort trap: 6           ASAN_OPTIONS=detect_leaks=0:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 TSAN_OPTIONS=halt_on_error=1:second_deadlock_stack=1 /usr/bin/perl -e 'alarm shift; exec @ARGV' 300 "$out/test" --gtest_filter="$filter" --gtest_output=xml:"$out/result.xml" > "$out/test.log" 2>&1
+  0x607000006980: fa fa fd fd fd fd fd fd fd fd fd fa fa fa fa fa
+  0x607000006a00: 00 00 00 00 00 00 00 00 00 fa fa fa fa fa fd fd
+  0x607000006a80: fd fd fd fd fd fd fd fd fa fa fa fa fd fd fd fd
+  0x607000006b00: fd fd fd fd fd fa fa fa fa fa 00 00 00 00 00 00
+=>0x607000006b80: 00 00 00 fa fa fa fa fa[fd]fd fd fd fd fd fd fd
+  0x607000006c00: fd fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x607000006c80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x607000006d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x607000006d80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x607000006e00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1511==ABORTING
+exit=134
+exit=134

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -28,6 +31,15 @@ public:
 	void RegisterFront(char* value) override;
 	void Init() override;
 	int Join() override;
+	int ReqQryInstrument(CThostFtdcQryInstrumentField* pField, int nRequestID) override;
+
+private:
+	// I03-NEW-115 (test-side TSan): Init() waits until the SPI query worker
+	// has dispatched the queued instrument query before reporting the front
+	// disconnect, so the worker's stub call happens-before run()'s teardown.
+	std::mutex _qry_mtx;
+	std::condition_variable _qry_cv;
+	bool _qry_dispatched = false;
 };
 
 T6YamlCtpApiStub& t6_yaml_ctp_api();

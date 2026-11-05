@@ -18,12 +18,35 @@
 
 #include "../Includes/WTSDataDef.hpp"
 #include "../Includes/WTSVariant.hpp"
+#include "../Includes/DateMappingBinding.h"
 
 #include "../WTSTools/WTSLogger.h"
 #include "../WTSTools/WTSDataFactory.h"
 
 
 WTSDataFactory g_dataFact;
+
+namespace
+{
+	//卡11=B：缓存对象被已借出的切片共享（引用计数大于1）时，写入前复制一份新对象，
+	//已借出的切片继续引用旧对象，缓存改用新对象。
+	WTSKlineData* clone_kline_data(WTSKlineData* src)
+	{
+		WTSKlineData* dst = WTSKlineData::create(src->code(), 0);
+		dst->setPeriod(src->period(), src->times());
+		dst->setClosed(src->isClosed());
+		dst->setUnixTime(src->isUnixTime());
+		dst->getDataRef() = src->getDataRef();
+		return dst;
+	}
+
+	WTSHisTickData* clone_his_ticks(WTSHisTickData* src)
+	{
+		WTSHisTickData* dst = WTSHisTickData::create(src->code(), src->isValidOnly(), src->factor());
+		dst->getDataRef() = src->getDataRef();
+		return dst;
+	}
+}
 
 WtDtMgr::WtDtMgr()
 	: _reader(NULL)
@@ -81,6 +104,19 @@ bool WtDtMgr::initStore(WTSVariant* cfg)
 		WTSLogger::error("Creating instance of data reader module {} failed", module.c_str());
 		DLLHelper::free_library(hInst);
 		return false;
+	}
+
+	// K31=A: inject the host DateMappingV1 table before init when the module exports the binder.
+	if (_has_date_mapping)
+	{
+		const int bound = wtp::bindDateMappingV1(DLLHelper::get_symbol(hInst, WT_BIND_DATA_READER_DATE_MAPPING_V1),
+			_reader, _date_mapping);
+		if (bound == 1)
+			WTSLogger::info("Data reader module {} bound to the host date mapping table", module.c_str());
+		else if (bound == 0)
+			WTSLogger::warn("Data reader module {} rejected the host date mapping table; it keeps the legacy mapping path", module.c_str());
+		else
+			WTSLogger::info("Data reader module {} has no date mapping binder; it keeps the legacy mapping path", module.c_str());
 	}
 
 	_reader->init(cfg, this, _loader);
@@ -255,6 +291,13 @@ void WtDtMgr::on_bar(const char* code, WTSKlinePeriod period, WTSBarStruct* newB
 			continue;
 
 		WTSKlineData* kData = (WTSKlineData*)it->second;
+		if (!kData->isSingleRefs())
+		{
+			//已存在的键原地替换，不改变 map 结构；add 会释放缓存对旧对象的引用
+			WTSKlineData* fresh = clone_kline_data(kData);
+			_bars_cache->add(it->first, fresh, false);
+			kData = fresh;
+		}
 		if(kData->times() != 1)
 		{
 			g_dataFact.updateKlineData(kData, newBar, sInfo, _align_by_section);
@@ -301,6 +344,12 @@ void WtDtMgr::handle_push_quote(const char* stdCode, WTSTickData* newTick)
 		if (tData->isValidOnly() && newTick->volume() == 0)
 			return;
 
+		if (!tData->isSingleRefs())
+		{
+			WTSHisTickData* fresh = clone_his_ticks(tData);
+			_ticks_adjusted->add(stdCode, fresh, false);
+			tData = fresh;
+		}
 		tData->appendTick(newTick->getTickStruct());
 	}
 }
@@ -441,6 +490,8 @@ WTSTickSlice* WtDtMgr::get_tick_slice(const char* stdCode, uint32_t count, uint6
 	uint32_t cnt = min(eIdx + 1, count);
 	uint32_t sIdx = eIdx + 1 - cnt;
 	WTSTickSlice* slice = WTSTickSlice::create(stdCode, &ticks.front() + sIdx, cnt);
+	if (slice != NULL)
+		slice->addOwner(makeSliceOwner(hisTick));
 	return slice;
 }
 
@@ -492,8 +543,8 @@ WTSKlineSlice* WtDtMgr::get_kline_slice(const char* stdCode, WTSKlinePeriod peri
 	if (_reader == NULL)
 		return NULL;
 
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}-{}", stdCode, (uint32_t)period);
+	// I03-NEW-039: caller stdCode is unbounded; no fixed 64-byte key buffer
+	std::string key = fmt::format("{}-{}", stdCode, (uint32_t)period);
 
 	// 如果不强制缓存，并且重采样倍数为1，则直接读取slice返回
 	if (times == 1 && !_force_cache)
@@ -522,7 +573,7 @@ WTSKlineSlice* WtDtMgr::get_kline_slice(const char* stdCode, WTSKlinePeriod peri
 	if (_bars_cache == NULL)
 		_bars_cache = DataCacheMap::create();
 
-	fmtutil::format_to(key, "{}-{}-{}", stdCode, (uint32_t)period, times);
+	key = fmt::format("{}-{}-{}", stdCode, (uint32_t)period, times);
 
 	WTSKlineData* kData = (WTSKlineData*)_bars_cache->get(key);
 	//如果缓存里的K线条数大于请求的条数, 则直接返回
@@ -607,5 +658,7 @@ WTSKlineSlice* WtDtMgr::get_kline_slice(const char* stdCode, WTSKlinePeriod peri
 	sIdx = closedSz - rtCnt;
 	WTSBarStruct* rtHead = kData->at(sIdx);
 	WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, times, rtHead, rtCnt);
+	if (slice != NULL)
+		slice->addOwner(makeSliceOwner(kData));
 	return slice;
 }

@@ -9,6 +9,7 @@
  */
 
 #include "ShmCaster.h"
+#include <atomic>
 #include "../Includes/WTSVariant.hpp"
 #include "../Includes/WTSDataDef.hpp"
 #include "../Share/StdUtils.hpp"
@@ -116,6 +117,7 @@ void ShmCaster::broadcast(WTSTickData* curTick)
 	 *	写完了以后，再移动读的下标
 	 */
 	// 原子操作获取并且递增写指针
+	std::lock_guard<std::mutex> writeLock(_write_mtx);	// K21: serialize in-process producers
 	uint64_t wIdx = _queue->_writable++;
 	// 计算实际的环形缓冲区下标
 	uint64_t realIdx = wIdx % _queue->_capacity;
@@ -124,6 +126,8 @@ void ShmCaster::broadcast(WTSTickData* curTick)
 	// 将Tick数据复制到队列中的相应位置
 	memcpy(&_queue->_items[realIdx]._tick, &curTick->getTickStruct(), sizeof(WTSTickStruct));
 	// 更新可读指针，让其他进程知道有新数据可读
+	// K21: the payload must be visible before the readable index is published.
+	std::atomic_thread_fence(std::memory_order_release);
 	_queue->_readable = wIdx;
 }
 
@@ -143,6 +147,7 @@ void ShmCaster::broadcast(WTSOrdQueData* curOrdQue)
 	 *	写完了以后，再移动读的下标
 	 */
 	// 原子操作获取并且递增写指针
+	std::lock_guard<std::mutex> writeLock(_write_mtx);	// K21: serialize in-process producers
 	uint64_t wIdx = _queue->_writable++;
 	// 计算实际的环形缓冲区下标
 	uint64_t realIdx = wIdx % _queue->_capacity;
@@ -151,6 +156,8 @@ void ShmCaster::broadcast(WTSOrdQueData* curOrdQue)
 	// 将委托队列数据复制到队列中的相应位置
 	memcpy(&_queue->_items[realIdx]._queue, &curOrdQue->getOrdQueStruct(), sizeof(WTSOrdQueStruct));
 	// 更新可读指针，让其他进程知道有新数据可读
+	// K21: the payload must be visible before the readable index is published.
+	std::atomic_thread_fence(std::memory_order_release);
 	_queue->_readable = wIdx;
 }
 
@@ -170,6 +177,7 @@ void ShmCaster::broadcast(WTSOrdDtlData* curOrdDtl)
 	 *	写完了以后，再移动读的下标
 	 */
 	// 原子操作获取并且递增写指针
+	std::lock_guard<std::mutex> writeLock(_write_mtx);	// K21: serialize in-process producers
 	uint64_t wIdx = _queue->_writable++;
 	// 计算实际的环形缓冲区下标
 	uint64_t realIdx = wIdx % _queue->_capacity;
@@ -178,6 +186,8 @@ void ShmCaster::broadcast(WTSOrdDtlData* curOrdDtl)
 	// 将逆序委托明细数据复制到队列中的相应位置
 	memcpy(&_queue->_items[realIdx]._order, &curOrdDtl->getOrdDtlStruct(), sizeof(WTSOrdDtlStruct));
 	// 更新可读指针，让其他进程知道有新数据可读
+	// K21: the payload must be visible before the readable index is published.
+	std::atomic_thread_fence(std::memory_order_release);
 	_queue->_readable = wIdx;
 }
 
@@ -197,6 +207,7 @@ void ShmCaster::broadcast(WTSTransData* curTrans)
 	 *	写完了以后，再移动读的下标
 	 */
 	// 原子操作获取并且递增写指针
+	std::lock_guard<std::mutex> writeLock(_write_mtx);	// K21: serialize in-process producers
 	uint64_t wIdx = _queue->_writable++;
 	// 计算实际的环形缓冲区下标
 	uint64_t realIdx = wIdx % _queue->_capacity;
@@ -205,5 +216,7 @@ void ShmCaster::broadcast(WTSTransData* curTrans)
 	// 将逆序成交数据复制到队列中的相应位置
 	memcpy(&_queue->_items[realIdx]._trans, &curTrans->getTransStruct(), sizeof(WTSTransStruct));
 	// 更新可读指针，让其他进程知道有新数据可读
+	// K21: the payload must be visible before the readable index is published.
+	std::atomic_thread_fence(std::memory_order_release);
 	_queue->_readable = wIdx;
 }

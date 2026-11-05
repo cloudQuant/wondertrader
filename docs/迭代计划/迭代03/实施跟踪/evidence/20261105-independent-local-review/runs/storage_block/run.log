@@ -1,0 +1,40 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = P10ProcBlockTest.*
+[==========] Running 15 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 15 tests from P10ProcBlockTest
+[ RUN      ] P10ProcBlockTest.RawV2BarBlockKeepsHeadUntouched
+[       OK ] P10ProcBlockTest.RawV2BarBlockKeepsHeadUntouched (1 ms)
+[ RUN      ] P10ProcBlockTest.RawV2BarBlockStripsHead
+[       OK ] P10ProcBlockTest.RawV2BarBlockStripsHead (0 ms)
+[ RUN      ] P10ProcBlockTest.CmpV2BarBlockDecompresses
+[       OK ] P10ProcBlockTest.CmpV2BarBlockDecompresses (1 ms)
+[ RUN      ] P10ProcBlockTest.CmpV2DecompressKeepHeadRewritesRawV2Header
+[       OK ] P10ProcBlockTest.CmpV2DecompressKeepHeadRewritesRawV2Header (0 ms)
+[ RUN      ] P10ProcBlockTest.CmpV2LengthMismatchesRejectedInChildren
+[       OK ] P10ProcBlockTest.CmpV2LengthMismatchesRejectedInChildren (11 ms)
+[ RUN      ] P10ProcBlockTest.OldBarBlockTransferredToNewStruct
+[       OK ] P10ProcBlockTest.OldBarBlockTransferredToNewStruct (0 ms)
+[ RUN      ] P10ProcBlockTest.OldTickBlockTransferredToNewStruct
+[       OK ] P10ProcBlockTest.OldTickBlockTransferredToNewStruct (0 ms)
+[ RUN      ] P10ProcBlockTest.UnknownVersionPassesThrough
+[       OK ] P10ProcBlockTest.UnknownVersionPassesThrough (0 ms)
+[ RUN      ] P10ProcBlockTest.BlockFlagMismatchRejectsWithoutMutatingContent
+[       OK ] P10ProcBlockTest.BlockFlagMismatchRejectsWithoutMutatingContent (0 ms)
+[ RUN      ] P10ProcBlockTest.OldCompressedBarBlockDecompressesAndUpgradesStruct
+[       OK ] P10ProcBlockTest.OldCompressedBarBlockDecompressesAndUpgradesStruct (0 ms)
+[ RUN      ] P10ProcBlockTest.IsSessionProceededUsesReadyWriterDateState
+[       OK ] P10ProcBlockTest.IsSessionProceededUsesReadyWriterDateState (1 ms)
+[ RUN      ] P10ProcBlockTest.EmptyInputRejectedInChild
+[       OK ] P10ProcBlockTest.EmptyInputRejectedInChild (2 ms)
+[ RUN      ] P10ProcBlockTest.FourByteInputRejectedInChild
+[       OK ] P10ProcBlockTest.FourByteInputRejectedInChild (1 ms)
+[ RUN      ] P10ProcBlockTest.OtherIncompleteBaseHeadersRejectedInChildren
+[       OK ] P10ProcBlockTest.OtherIncompleteBaseHeadersRejectedInChildren (4 ms)
+[ RUN      ] P10ProcBlockTest.TruncatedCompressedHeadersRejectedInChildren
+[       OK ] P10ProcBlockTest.TruncatedCompressedHeadersRejectedInChildren (18 ms)
+[----------] 15 tests from P10ProcBlockTest (44 ms total)
+
+[----------] Global test environment tear-down
+[==========] 15 tests from 1 test suite ran. (44 ms total)
+[  PASSED  ] 15 tests.

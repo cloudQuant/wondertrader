@@ -35,6 +35,12 @@ public:
 	 */
 	virtual ~ExpHftContext(){}
 
+	/**
+	 * @brief 是否已绑定交易通道（BUG-R42-002 版本化数量查询用）
+	 * @details 非虚函数，不改变对象布局或虚表
+	 */
+	inline bool isTraderBound() const { return _trader != nullptr; }
+
 public:
 	/**
 	 * @brief K线闭合回调

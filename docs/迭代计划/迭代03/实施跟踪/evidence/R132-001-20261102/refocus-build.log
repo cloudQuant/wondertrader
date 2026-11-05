@@ -1,0 +1,34 @@
+[0/2] Re-checking globbed directories...
+[1/128] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/WtHelper.cpp.o
+[2/128] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/HftMocker.cpp.o
+FAILED: WtBtCore/CMakeFiles/WtBtCore.dir/HftMocker.cpp.o 
+/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/opt/homebrew/include -I/usr/local/include -isystem /tmp/wt-i03-r132-20261102/source/src -include stdlib.h -fsanitize=address,undefined -fno-omit-frame-pointer -include /tmp/wt-i03-r132-20261102/source/src/Share/fmt_enum_compat.h -fPIC -g -std=gnu++17 -Wall -Wextra -Wno-deprecated-copy-with-user-provided-copy "-Wno-#pragma-messages" -Werror -fprofile-instr-generate -fcoverage-mapping -MD -MT WtBtCore/CMakeFiles/WtBtCore.dir/HftMocker.cpp.o -MF WtBtCore/CMakeFiles/WtBtCore.dir/HftMocker.cpp.o.d -o WtBtCore/CMakeFiles/WtBtCore.dir/HftMocker.cpp.o -c /tmp/wt-i03-r132-20261102/source/src/WtBtCore/HftMocker.cpp
+In file included from /tmp/wt-i03-r132-20261102/source/src/WtBtCore/HftMocker.cpp:10:
+/tmp/wt-i03-r132-20261102/source/src/WtBtCore/HftMocker.h:978:11: error: first argument in call to 'memset' is a pointer to non-trivially copyable type 'HftMocker::_OrderInfo' [-Werror,-Wnontrivial-memcall]
+  978 |                         memset(this, 0, sizeof(_OrderInfo));
+      |                                ^
+/tmp/wt-i03-r132-20261102/source/src/WtBtCore/HftMocker.h:978:11: note: explicitly cast the pointer to silence this warning
+  978 |                         memset(this, 0, sizeof(_OrderInfo));
+      |                                ^
+      |                                (void*)
+/tmp/wt-i03-r132-20261102/source/src/WtBtCore/HftMocker.h:988:11: error: first argument in call to 'memcpy' is a pointer to non-trivially copyable type 'HftMocker::_OrderInfo' [-Werror,-Wnontrivial-memcall]
+  988 |                         memcpy(this, &rhs, sizeof(_OrderInfo));
+      |                                ^
+/tmp/wt-i03-r132-20261102/source/src/WtBtCore/HftMocker.h:988:11: note: explicitly cast the pointer to silence this warning
+  988 |                         memcpy(this, &rhs, sizeof(_OrderInfo));
+      |                                ^
+      |                                (void*)
+/tmp/wt-i03-r132-20261102/source/src/WtBtCore/HftMocker.h:999:11: error: first argument in call to 'memcpy' is a pointer to non-trivially copyable type 'HftMocker::_OrderInfo' [-Werror,-Wnontrivial-memcall]
+  999 |                         memcpy(this, &rhs, sizeof(_OrderInfo));
+      |                                ^
+/tmp/wt-i03-r132-20261102/source/src/WtBtCore/HftMocker.h:999:11: note: explicitly cast the pointer to silence this warning
+  999 |                         memcpy(this, &rhs, sizeof(_OrderInfo));
+      |                                ^
+      |                                (void*)
+3 errors generated.
+[3/128] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/UftMocker.cpp.o
+[4/128] Building CXX object TraderCTP/CMakeFiles/TraderCTP.dir/TraderCTP.cpp.o
+[5/128] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/SelMocker.cpp.o
+[6/128] Building CXX object TraderCTPMini/CMakeFiles/TraderCTPMini.dir/TraderCTPMini.cpp.o
+[7/128] Building CXX object ParserUDP/CMakeFiles/ParserUDP.dir/ParserUDP.cpp.o
+ninja: build stopped: subcommand failed.

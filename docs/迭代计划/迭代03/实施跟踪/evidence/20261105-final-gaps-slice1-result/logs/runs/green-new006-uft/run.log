@@ -1,0 +1,66 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S1New006UftOrderClock.*:R203UftLocalOrderId.*:q04_trader_entrust.*:q04_trader_usertag_bounds*
+[==========] Running 25 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 22 tests from q04_trader_entrust
+[ RUN      ] q04_trader_entrust.four_direction_actions_are_assembled_correctly
+[       OK ] q04_trader_entrust.four_direction_actions_are_assembled_correctly (2 ms)
+[ RUN      ] q04_trader_entrust.price_type_and_order_flag_mapping
+[       OK ] q04_trader_entrust.price_type_and_order_flag_mapping (1 ms)
+[ RUN      ] q04_trader_entrust.malformed_standard_codes_fail_before_vendor_calls
+[       OK ] q04_trader_entrust.malformed_standard_codes_fail_before_vendor_calls (1 ms)
+[ RUN      ] q04_trader_entrust.insert_failure_returns_uint_max_without_counting_undone
+[       OK ] q04_trader_entrust.insert_failure_returns_uint_max_without_counting_undone (0 ms)
+[ RUN      ] q04_trader_entrust.rejection_without_this_adapters_usertag_does_not_change_undone
+[       OK ] q04_trader_entrust.rejection_without_this_adapters_usertag_does_not_change_undone (0 ms)
+[ RUN      ] q04_trader_entrust.duplicate_rejection_does_not_consume_another_live_order
+[       OK ] q04_trader_entrust.duplicate_rejection_does_not_consume_another_live_order (1 ms)
+[ RUN      ] q04_trader_entrust.reentrant_rejection_and_negative_return_leave_other_order_unchanged
+[       OK ] q04_trader_entrust.reentrant_rejection_and_negative_return_leave_other_order_unchanged (0 ms)
+[ RUN      ] q04_trader_entrust.duplicate_trade_does_not_reduce_undone_twice
+[       OK ] q04_trader_entrust.duplicate_trade_does_not_reduce_undone_twice (0 ms)
+[ RUN      ] q04_trader_entrust.duplicate_cancellation_does_not_reduce_undone_twice
+[       OK ] q04_trader_entrust.duplicate_cancellation_does_not_reduce_undone_twice (0 ms)
+[ RUN      ] q04_trader_entrust.older_order_snapshot_does_not_undo_live_trade
+[       OK ] q04_trader_entrust.older_order_snapshot_does_not_undo_live_trade (0 ms)
+[ RUN      ] q04_trader_entrust.fill_reported_by_order_and_trade_is_counted_once
+[       OK ] q04_trader_entrust.fill_reported_by_order_and_trade_is_counted_once (0 ms)
+[ RUN      ] q04_trader_entrust.late_live_report_after_cancel_does_not_reopen_order
+[       OK ] q04_trader_entrust.late_live_report_after_cancel_does_not_reopen_order (1 ms)
+[ RUN      ] q04_trader_entrust.unattributable_trades_do_not_change_undone
+[       OK ] q04_trader_entrust.unattributable_trades_do_not_change_undone (1 ms)
+[ RUN      ] q04_trader_entrust.duplicate_trade_is_notified_and_positioned_once
+[       OK ] q04_trader_entrust.duplicate_trade_is_notified_and_positioned_once (2 ms)
+[ RUN      ] q04_trader_entrust.accepted_report_during_insert_keeps_order_despite_negative_return
+[       OK ] q04_trader_entrust.accepted_report_during_insert_keeps_order_despite_negative_return (1 ms)
+[ RUN      ] q04_trader_entrust.snapshot_absent_orders_use_the_query_epoch
+[       OK ] q04_trader_entrust.snapshot_absent_orders_use_the_query_epoch (4 ms)
+[ RUN      ] q04_trader_entrust.usertag_pattern_is_scoped_per_channel
+[       OK ] q04_trader_entrust.usertag_pattern_is_scoped_per_channel (0 ms)
+[ RUN      ] q04_trader_entrust.cancel_single_order_goes_through_doCancel
+[       OK ] q04_trader_entrust.cancel_single_order_goes_through_doCancel (1 ms)
+[ RUN      ] q04_trader_entrust.cancel_single_order_fails_closed_without_manager_or_contract
+[       OK ] q04_trader_entrust.cancel_single_order_fails_closed_without_manager_or_contract (1 ms)
+[ RUN      ] q04_trader_entrust.cancel_all_filters_alive_orders_by_full_code
+[       OK ] q04_trader_entrust.cancel_all_filters_alive_orders_by_full_code (0 ms)
+[ RUN      ] q04_trader_entrust.cancel_all_with_lookup_only_contract_info
+[       OK ] q04_trader_entrust.cancel_all_with_lookup_only_contract_info (0 ms)
+[ RUN      ] q04_trader_entrust.cancel_all_skips_unknown_contract_and_cancels_known_orders
+[       OK ] q04_trader_entrust.cancel_all_skips_unknown_contract_and_cancels_known_orders (0 ms)
+[----------] 22 tests from q04_trader_entrust (27 ms total)
+
+[----------] 1 test from R203UftLocalOrderId
+[ RUN      ] R203UftLocalOrderId.ConcurrentFirstOrdersHaveUniqueIds
+[       OK ] R203UftLocalOrderId.ConcurrentFirstOrdersHaveUniqueIds (32 ms)
+[----------] 1 test from R203UftLocalOrderId (32 ms total)
+
+[----------] 2 tests from S1New006UftOrderClock
+[ RUN      ] S1New006UftOrderClock.ClockFailureRejectsEntryBeforeTheProvider
+[       OK ] S1New006UftOrderClock.ClockFailureRejectsEntryBeforeTheProvider (0 ms)
+[ RUN      ] S1New006UftOrderClock.EveryDirectionIsGatedAndTheDefaultClockIsRestored
+[       OK ] S1New006UftOrderClock.EveryDirectionIsGatedAndTheDefaultClockIsRestored (0 ms)
+[----------] 2 tests from S1New006UftOrderClock (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 25 tests from 3 test suites ran. (61 ms total)
+[  PASSED  ] 25 tests.

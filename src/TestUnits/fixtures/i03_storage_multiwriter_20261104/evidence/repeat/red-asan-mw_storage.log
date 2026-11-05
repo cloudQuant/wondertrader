@@ -1,0 +1,720 @@
+
+Repeating all tests (iteration 1) . . .
+
+Note: Google Test filter = MwStorage.TwoProcess*:MwStorage.Concurrent*
+[==========] Running 3 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 3 tests from MwStorage
+[ RUN      ] MwStorage.TwoProcessTransAppendNoLossNoTear
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:375: Failure
+Expected equality of these values:
+  head._size
+    Which is: 11934
+  2 * N
+    Which is: 12000
+published record count
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:398: Failure
+Expected equality of these values:
+  torn
+    Which is: 355
+  0u
+    Which is: 0
+records with mixed or empty payload
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:400: Failure
+Expected equality of these values:
+  reordered
+    Which is: 274
+  0u
+    Which is: 0
+each writer's own records must keep their order
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:401: Failure
+Expected equality of these values:
+  seen.size()
+    Which is: 11579
+  (size_t)(2 * N)
+    Which is: 12000
+lost records
+
+[  FAILED  ] MwStorage.TwoProcessTransAppendNoLossNoTear (261 ms)
+[ RUN      ] MwStorage.TwoProcessTickCacheIndexAndSharedStream
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:425: Failure
+Expected equality of these values:
+  ch._size
+    Which is: 50
+  2 * codes + 1
+    Which is: 49
+every code exactly one cache entry
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:444: Failure
+Expected equality of these values:
+  th._size
+    Which is: 3
+  rounds
+    Which is: 60
+m1c0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:444: Failure
+Expected equality of these values:
+  th._size
+    Which is: 3
+  rounds
+    Which is: 60
+m1c1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c16
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c17
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c18
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c19
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c20
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c21
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c22
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c23
+
+[  FAILED  ] MwStorage.TwoProcessTickCacheIndexAndSharedStream (319 ms)
+[ RUN      ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+checked=11949 bad=353 remaps=3
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:652: Failure
+Expected equality of these values:
+  rr
+    Which is: 2
+  0
+reader exit (2=torn/foreign record seen, 3=published count never reached, -1=signal 0)
+
+[  FAILED  ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords (140247 ms)
+[----------] 3 tests from MwStorage (140829 ms total)
+
+[==========] 3 tests from 1 test suite ran. (140829 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] MwStorage.TwoProcessTransAppendNoLossNoTear
+[  FAILED  ] MwStorage.TwoProcessTickCacheIndexAndSharedStream
+[  FAILED  ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+
+ 3 FAILED TESTS
+
+Repeating all tests (iteration 2) . . .
+
+Note: Google Test filter = MwStorage.TwoProcess*:MwStorage.Concurrent*
+[==========] Running 3 tests from 1 test suite.
+[----------] 3 tests from MwStorage
+[ RUN      ] MwStorage.TwoProcessTransAppendNoLossNoTear
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:375: Failure
+Expected equality of these values:
+  head._size
+    Which is: 11956
+  2 * N
+    Which is: 12000
+published record count
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:398: Failure
+Expected equality of these values:
+  torn
+    Which is: 364
+  0u
+    Which is: 0
+records with mixed or empty payload
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:400: Failure
+Expected equality of these values:
+  reordered
+    Which is: 257
+  0u
+    Which is: 0
+each writer's own records must keep their order
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:401: Failure
+Expected equality of these values:
+  seen.size()
+    Which is: 11592
+  (size_t)(2 * N)
+    Which is: 12000
+lost records
+
+[  FAILED  ] MwStorage.TwoProcessTransAppendNoLossNoTear (226 ms)
+[ RUN      ] MwStorage.TwoProcessTickCacheIndexAndSharedStream
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:425: Failure
+Expected equality of these values:
+  ch._size
+    Which is: 50
+  2 * codes + 1
+    Which is: 49
+every code exactly one cache entry
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c15
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c16
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c17
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c18
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c19
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c20
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c21
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c22
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c23
+
+[  FAILED  ] MwStorage.TwoProcessTickCacheIndexAndSharedStream (233 ms)
+[ RUN      ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+checked=11950 bad=353 remaps=3
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:652: Failure
+Expected equality of these values:
+  rr
+    Which is: 2
+  0
+reader exit (2=torn/foreign record seen, 3=published count never reached, -1=signal 0)
+
+[  FAILED  ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords (140215 ms)
+[----------] 3 tests from MwStorage (140675 ms total)
+
+[==========] 3 tests from 1 test suite ran. (140675 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] MwStorage.TwoProcessTransAppendNoLossNoTear
+[  FAILED  ] MwStorage.TwoProcessTickCacheIndexAndSharedStream
+[  FAILED  ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+
+ 3 FAILED TESTS
+
+Repeating all tests (iteration 3) . . .
+
+Note: Google Test filter = MwStorage.TwoProcess*:MwStorage.Concurrent*
+[==========] Running 3 tests from 1 test suite.
+[----------] 3 tests from MwStorage
+[ RUN      ] MwStorage.TwoProcessTransAppendNoLossNoTear
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:375: Failure
+Expected equality of these values:
+  head._size
+    Which is: 11945
+  2 * N
+    Which is: 12000
+published record count
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:398: Failure
+Expected equality of these values:
+  torn
+    Which is: 336
+  0u
+    Which is: 0
+records with mixed or empty payload
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:400: Failure
+Expected equality of these values:
+  reordered
+    Which is: 252
+  0u
+    Which is: 0
+each writer's own records must keep their order
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:401: Failure
+Expected equality of these values:
+  seen.size()
+    Which is: 11609
+  (size_t)(2 * N)
+    Which is: 12000
+lost records
+
+[  FAILED  ] MwStorage.TwoProcessTransAppendNoLossNoTear (193 ms)
+[ RUN      ] MwStorage.TwoProcessTickCacheIndexAndSharedStream
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:425: Failure
+Expected equality of these values:
+  ch._size
+    Which is: 50
+  2 * codes + 1
+    Which is: 49
+every code exactly one cache entry
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c16
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c17
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c18
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c19
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c20
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c21
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c22
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c23
+
+[  FAILED  ] MwStorage.TwoProcessTickCacheIndexAndSharedStream (209 ms)
+[ RUN      ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+checked=11964 bad=369 remaps=3
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:652: Failure
+Expected equality of these values:
+  rr
+    Which is: 2
+  0
+reader exit (2=torn/foreign record seen, 3=published count never reached, -1=signal 0)
+
+[  FAILED  ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords (140201 ms)
+[----------] 3 tests from MwStorage (140604 ms total)
+
+[==========] 3 tests from 1 test suite ran. (140604 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] MwStorage.TwoProcessTransAppendNoLossNoTear
+[  FAILED  ] MwStorage.TwoProcessTickCacheIndexAndSharedStream
+[  FAILED  ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+
+ 3 FAILED TESTS
+
+Repeating all tests (iteration 4) . . .
+
+Note: Google Test filter = MwStorage.TwoProcess*:MwStorage.Concurrent*
+[==========] Running 3 tests from 1 test suite.
+[----------] 3 tests from MwStorage
+[ RUN      ] MwStorage.TwoProcessTransAppendNoLossNoTear
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:375: Failure
+Expected equality of these values:
+  head._size
+    Which is: 11927
+  2 * N
+    Which is: 12000
+published record count
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:398: Failure
+Expected equality of these values:
+  torn
+    Which is: 403
+  0u
+    Which is: 0
+records with mixed or empty payload
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:400: Failure
+Expected equality of these values:
+  reordered
+    Which is: 315
+  0u
+    Which is: 0
+each writer's own records must keep their order
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:401: Failure
+Expected equality of these values:
+  seen.size()
+    Which is: 11524
+  (size_t)(2 * N)
+    Which is: 12000
+lost records
+
+[  FAILED  ] MwStorage.TwoProcessTransAppendNoLossNoTear (214 ms)
+[ RUN      ] MwStorage.TwoProcessTickCacheIndexAndSharedStream
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:425: Failure
+Expected equality of these values:
+  ch._size
+    Which is: 50
+  2 * codes + 1
+    Which is: 49
+every code exactly one cache entry
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c16
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c17
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c18
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c19
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c20
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c21
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c22
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m2c23
+
+[  FAILED  ] MwStorage.TwoProcessTickCacheIndexAndSharedStream (290 ms)
+[ RUN      ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+checked=11614 bad=441 remaps=3
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:652: Failure
+Expected equality of these values:
+  rr
+    Which is: 2
+  0
+reader exit (2=torn/foreign record seen, 3=published count never reached, -1=signal 0)
+
+[  FAILED  ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords (140223 ms)
+[----------] 3 tests from MwStorage (140729 ms total)
+
+[==========] 3 tests from 1 test suite ran. (140729 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] MwStorage.TwoProcessTransAppendNoLossNoTear
+[  FAILED  ] MwStorage.TwoProcessTickCacheIndexAndSharedStream
+[  FAILED  ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+
+ 3 FAILED TESTS
+
+Repeating all tests (iteration 5) . . .
+
+Note: Google Test filter = MwStorage.TwoProcess*:MwStorage.Concurrent*
+[==========] Running 3 tests from 1 test suite.
+[----------] 3 tests from MwStorage
+[ RUN      ] MwStorage.TwoProcessTransAppendNoLossNoTear
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:375: Failure
+Expected equality of these values:
+  head._size
+    Which is: 11905
+  2 * N
+    Which is: 12000
+published record count
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:398: Failure
+Expected equality of these values:
+  torn
+    Which is: 549
+  0u
+    Which is: 0
+records with mixed or empty payload
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:400: Failure
+Expected equality of these values:
+  reordered
+    Which is: 418
+  0u
+    Which is: 0
+each writer's own records must keep their order
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:401: Failure
+Expected equality of these values:
+  seen.size()
+    Which is: 11356
+  (size_t)(2 * N)
+    Which is: 12000
+lost records
+
+[  FAILED  ] MwStorage.TwoProcessTransAppendNoLossNoTear (201 ms)
+[ RUN      ] MwStorage.TwoProcessTickCacheIndexAndSharedStream
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:425: Failure
+Expected equality of these values:
+  ch._size
+    Which is: 50
+  2 * codes + 1
+    Which is: 49
+every code exactly one cache entry
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c17
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c18
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c19
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c20
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c21
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c22
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442: Failure
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c23
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:444: Failure
+Expected equality of these values:
+  th._size
+    Which is: 2
+  rounds
+    Which is: 60
+m2c0
+
+[  FAILED  ] MwStorage.TwoProcessTickCacheIndexAndSharedStream (220 ms)
+[ RUN      ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+checked=11945 bad=354 remaps=3
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:652: Failure
+Expected equality of these values:
+  rr
+    Which is: 2
+  0
+reader exit (2=torn/foreign record seen, 3=published count never reached, -1=signal 0)
+
+[  FAILED  ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords (140214 ms)
+[----------] 3 tests from MwStorage (140636 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 1 test suite ran. (140636 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] MwStorage.TwoProcessTransAppendNoLossNoTear
+[  FAILED  ] MwStorage.TwoProcessTickCacheIndexAndSharedStream
+[  FAILED  ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+
+ 3 FAILED TESTS

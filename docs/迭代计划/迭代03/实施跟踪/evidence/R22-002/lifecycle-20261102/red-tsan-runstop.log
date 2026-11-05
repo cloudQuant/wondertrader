@@ -1,0 +1,53 @@
+exit=-6
+==================
+WARNING: ThreadSanitizer: data race (pid=32062)
+  Write of size 8 at 0x00016f0debb0 by thread T2:
+    #0 std::__1::enable_if<is_move_constructible<std::__1::thread*>::value && is_move_assignable<std::__1::thread*>::value, void>::type std::__1::swap[abi:nqe220108]<std::__1::thread*>(std::__1::thread*&, std::__1::thread*&) swap.h:45 (red-tsan:arm64+0x1000069cc)
+    #1 std::__1::shared_ptr<std::__1::thread>::swap[abi:nqe220108](std::__1::shared_ptr<std::__1::thread>&) shared_ptr.h:547 (red-tsan:arm64+0x1000069cc)
+    #2 void std::__1::shared_ptr<std::__1::thread>::reset[abi:nqe220108]<std::__1::thread, 0>(std::__1::thread*) shared_ptr.h:555 (red-tsan:arm64+0x1000069cc)
+    #3 StateMonitor::run() StateMonitor.cpp:550 (red-tsan:arm64+0x1000069cc)
+    #4 main::$_1::operator()() const probe.cpp:63 (red-tsan:arm64+0x100018b04)
+    #5 std::__1::__invoke_result_impl<void, main::$_1>::type std::__1::__invoke[abi:nqe220108]<main::$_1>(main::$_1&&) invoke.h:90 (red-tsan:arm64+0x100018b04)
+    #6 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_1, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_1>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (red-tsan:arm64+0x100018b04)
+    #7 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_1>>(void*) thread.h:169 (red-tsan:arm64+0x100018b04)
+
+  Previous read of size 8 at 0x00016f0debb0 by thread T8:
+    #0 std::__1::shared_ptr<std::__1::thread>::get[abi:nqe220108]() const shared_ptr.h:571 (red-tsan:arm64+0x100006864)
+    #1 std::__1::shared_ptr<std::__1::thread>::operator bool[abi:nqe220108]() const shared_ptr.h:592 (red-tsan:arm64+0x100006864)
+    #2 bool std::__1::operator==[abi:nqe220108]<std::__1::thread>(std::__1::shared_ptr<std::__1::thread> const&, std::nullptr_t) shared_ptr.h:1011 (red-tsan:arm64+0x100006864)
+    #3 StateMonitor::run() StateMonitor.cpp:547 (red-tsan:arm64+0x100006864)
+    #4 main::$_1::operator()() const probe.cpp:63 (red-tsan:arm64+0x100018b04)
+    #5 std::__1::__invoke_result_impl<void, main::$_1>::type std::__1::__invoke[abi:nqe220108]<main::$_1>(main::$_1&&) invoke.h:90 (red-tsan:arm64+0x100018b04)
+    #6 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_1, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_1>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (red-tsan:arm64+0x100018b04)
+    #7 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_1>>(void*) thread.h:169 (red-tsan:arm64+0x100018b04)
+
+  Location is stack of main thread.
+
+  Thread T2 (tid=987603, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (red-tsan:arm64+0x1000189bc)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_1, 0>(main::$_1&&) thread.h:218 (red-tsan:arm64+0x1000189bc)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_1, 0>(main::$_1&&) thread.h:209 (red-tsan:arm64+0x1000189bc)
+    #4 void std::__1::allocator<std::__1::thread>::construct[abi:nqe220108]<std::__1::thread, main::$_1>(std::__1::thread*, main::$_1&&) allocator.h:141 (red-tsan:arm64+0x1000189bc)
+    #5 void std::__1::allocator_traits<std::__1::allocator<std::__1::thread>>::construct[abi:nqe220108]<std::__1::thread, main::$_1, 0>(std::__1::allocator<std::__1::thread>&, std::__1::thread*, main::$_1&&) allocator_traits.h:296 (red-tsan:arm64+0x1000189bc)
+    #6 std::__1::thread* std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::__emplace_back_slow_path<main::$_1>(main::$_1&&) vector.h:1123 (red-tsan:arm64+0x1000187a0)
+    #7 std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_1>(main::$_1&&)::'lambda0'()::operator()() const vector.h:1163 (red-tsan:arm64+0x1000187a0)
+    #8 void std::__1::__if_likely_else[abi:nqe220108]<std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_1>(main::$_1&&)::'lambda'(), std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_1>(main::$_1&&)::'lambda0'()>(bool, std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_1>(main::$_1&&)::'lambda'(), std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_1>(main::$_1&&)::'lambda0'()) vector.h:1143 (red-tsan:arm64+0x100016668)
+    #9 std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_1>(main::$_1&&) vector.h:1157 (red-tsan:arm64+0x100016668)
+    #10 main probe.cpp:63 (red-tsan:arm64+0x100016668)
+
+  Thread T8 (tid=987609, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (red-tsan:arm64+0x1000189bc)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_1, 0>(main::$_1&&) thread.h:218 (red-tsan:arm64+0x1000189bc)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_1, 0>(main::$_1&&) thread.h:209 (red-tsan:arm64+0x1000189bc)
+    #4 void std::__1::allocator<std::__1::thread>::construct[abi:nqe220108]<std::__1::thread, main::$_1>(std::__1::thread*, main::$_1&&) allocator.h:141 (red-tsan:arm64+0x1000189bc)
+    #5 void std::__1::allocator_traits<std::__1::allocator<std::__1::thread>>::construct[abi:nqe220108]<std::__1::thread, main::$_1, 0>(std::__1::allocator<std::__1::thread>&, std::__1::thread*, main::$_1&&) allocator_traits.h:296 (red-tsan:arm64+0x1000189bc)
+    #6 void std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::__emplace_back_assume_capacity[abi:nqe220108]<main::$_1>(main::$_1&&) vector.h:481 (red-tsan:arm64+0x100016618)
+    #7 std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_1>(main::$_1&&)::'lambda'()::operator()() const vector.h:1160 (red-tsan:arm64+0x100016618)
+    #8 void std::__1::__if_likely_else[abi:nqe220108]<std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_1>(main::$_1&&)::'lambda'(), std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_1>(main::$_1&&)::'lambda0'()>(bool, std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_1>(main::$_1&&)::'lambda'(), std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_1>(main::$_1&&)::'lambda0'()) vector.h:1141 (red-tsan:arm64+0x100016618)
+    #9 std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_1>(main::$_1&&) vector.h:1157 (red-tsan:arm64+0x100016618)
+    #10 main probe.cpp:63 (red-tsan:arm64+0x100016618)
+
+SUMMARY: ThreadSanitizer: data race swap.h:45 in std::__1::enable_if<is_move_constructible<std::__1::thread*>::value && is_move_assignable<std::__1::thread*>::value, void>::type std::__1::swap[abi:nqe220108]<std::__1::thread*>(std::__1::thread*&, std::__1::thread*&)
+==================

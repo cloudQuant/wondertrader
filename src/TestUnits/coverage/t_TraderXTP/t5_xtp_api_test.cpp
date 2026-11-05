@@ -12,6 +12,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <cstdio>
 #include <cstring>
 #include <cstdlib>
 #include <string>
@@ -102,6 +103,10 @@ public:
 	{ logins_.push_back({ bSucc, msg ? msg : "", tradingdate }); }
 	virtual void handleTraderLog(WTSLogLevel ll, const char* message) override
 	{ logs_.push_back({ (int)ll, message ? message : "" }); }
+	// BUG-L01-014
+	std::vector<std::string> unresolved_raw_;
+	virtual void onUnresolvedProviderReport(const char* kind, const char* reason, const char* raw) override
+	{ (void)reason; unresolved_raw_.push_back(std::string(kind ? kind : "") + "|" + (raw ? raw : "")); }
 
 	virtual void onPushOrder(WTSOrderInfo* orderInfo) override
 	{
@@ -150,6 +155,19 @@ public:
 			if (ayOrders->size() > 0)
 				fill_order(static_cast<WTSOrderInfo*>(const_cast<WTSArray*>(ayOrders)->at(0)));
 		}
+	}
+
+	// K42 (BUG-I02-NEW-154): versioned order-query result.
+	uint32_t n_rsp_orders_status_ = 0;
+	uint32_t last_query_status_ = 0xFFFFFFFFu;
+	std::size_t status_orders_size_ = 0;
+	bool status_orders_null_ = false;
+	virtual void onRspOrdersWithStatus(const WTSArray* ayOrders, uint32_t status) override
+	{
+		++n_rsp_orders_status_;
+		last_query_status_ = status;
+		status_orders_null_ = (ayOrders == NULL);
+		status_orders_size_ = ayOrders ? ayOrders->size() : 0;
 	}
 
 	virtual void onRspTrades(const WTSArray* ayTrades) override
@@ -330,7 +348,9 @@ protected:
 	void SetUp() override
 	{
 		WTSVariant* cfg = makeXTVCfg("xtp_t5_flow");
-		ASSERT_TRUE(api_.init(cfg));
+		// BUG-R93-005 (s5): without the XTP vendor module init fails closed; the
+		// cases below only use the parsed configuration and callbacks.
+		ASSERT_FALSE(api_.init(cfg));
 		cfg->release();
 
 		// 现货分支（isStock 为真时方向恒 WDT_LONG）
@@ -398,7 +418,9 @@ TEST_F(TraderXTPTest, init_defaults_flowdir_and_release_is_repeatable)
 	TraderXTP other;
 	XTPSink other_sink;
 	other.registerSpi(&other_sink);
-	ASSERT_TRUE(other.init(cfg));
+	// BUG-R93-005 (s5): no XTP vendor module on this host -> explicit init failure;
+	// the flowdir default is applied while parsing, before the module load.
+	ASSERT_FALSE(other.init(cfg));
 	cfg->release();
 
 	other.release();
@@ -661,6 +683,23 @@ TEST_F(TraderXTPTest, trade_event_of_unregistered_contract_dropped)
 	EXPECT_EQ("000001", sink_.bd_.last_code_);
 }
 
+/// 迭代03 第五会话主线程：BUG-L01-014——未知合约成交在宿主声明能力后上送原始结构，不外发成交
+TEST_F(TraderXTPTest, l01014_unregistered_trade_is_forwarded_raw_when_host_supports_it)
+{
+	XTPTradeReport trd;
+	memset(&trd, 0, sizeof(trd));
+	trd.market = XTP_MKT_SZ_A;
+	snprintf(trd.ticker, sizeof(trd.ticker), "%s", "000001");
+	api_.OnTradeEvent(&trd, 1);
+	EXPECT_TRUE(sink_.unresolved_raw_.empty());
+
+	api_.setSpiFeatures(WT_TRADER_SPI_FEATURE_RAW_UNRESOLVED);
+	api_.OnTradeEvent(&trd, 1);
+	EXPECT_EQ(0u, sink_.n_push_trade_);
+	ASSERT_EQ(1u, sink_.unresolved_raw_.size());
+	EXPECT_EQ(0u, sink_.unresolved_raw_[0].rfind("trade|struct=XTPTradeReport;size=", 0)) << sink_.unresolved_raw_[0];
+}
+
 /// 订单查询分页：非 last 累积、last 一次性外发
 TEST_F(TraderXTPTest, query_order_accumulates_then_publishes_on_last)
 {
@@ -690,6 +729,60 @@ TEST_F(TraderXTPTest, query_order_accumulates_then_publishes_on_last)
 	ASSERT_EQ(2u, sink_.n_rsp_orders_);
 	EXPECT_FALSE(sink_.got_null_orders_);
 	EXPECT_EQ(0u, sink_.last_array_size_);
+}
+
+/// BUG-I02-NEW-154 / K42：宿主声明 WT_TRADER_SPI_FEATURE_QUERY_STATUS 后，委托查询末包按完整性报告：
+/// 无错误→COMPLETE（含空结果），有行无法转换→PARTIAL，带错误→FAILED（SDK 未约定空结果错误码，
+/// 按卡14c 无契约前 fail-closed）；未声明能力的宿主仍只收到旧 onRspOrders。
+TEST_F(TraderXTPTest, k42_order_query_reports_completeness_when_host_supports_it)
+{
+	XTPQueryOrderRsp o;
+	memset(&o, 0, sizeof(o));
+	o.market = XTP_MKT_SH_A;
+	snprintf(o.ticker, sizeof(o.ticker), "%s", "600000");
+	o.quantity = 100;
+	o.side = XTP_SIDE_BUY;
+	o.order_client_id = 5101;
+	o.order_status = XTP_ORDER_STATUS_NOTRADEQUEUEING;
+
+	// Legacy host: only the old callback.
+	api_.OnQueryOrder(&o, NULL, 40, true, 1);
+	EXPECT_EQ(1u, sink_.n_rsp_orders_);
+	EXPECT_EQ(0u, sink_.n_rsp_orders_status_);
+
+	api_.setSpiFeatures(WT_TRADER_SPI_FEATURE_QUERY_STATUS);
+	const uint32_t legacyBefore = sink_.n_rsp_orders_;
+	api_.OnQueryOrder(&o, NULL, 41, true, 1);
+	ASSERT_EQ(1u, sink_.n_rsp_orders_status_);
+	EXPECT_EQ(WT_QUERY_STATUS_COMPLETE, sink_.last_query_status_);
+	EXPECT_EQ(1u, sink_.status_orders_size_);
+	EXPECT_EQ(legacyBefore, sink_.n_rsp_orders_) << "a host that understands status gets only the versioned callback";
+
+	api_.OnQueryOrder(NULL, NULL, 42, true, 1);	// no orders, no error
+	EXPECT_EQ(WT_QUERY_STATUS_COMPLETE, sink_.last_query_status_);
+	EXPECT_FALSE(sink_.status_orders_null_) << "a complete empty snapshot is an empty array";
+	EXPECT_EQ(0u, sink_.status_orders_size_);
+
+	XTPQueryOrderRsp unknown = o;
+	unknown.market = XTP_MKT_SZ_A;
+	snprintf(unknown.ticker, sizeof(unknown.ticker), "%s", "000001");	// not in base data
+	api_.OnQueryOrder(&o, NULL, 43, false, 1);
+	api_.OnQueryOrder(&unknown, NULL, 43, true, 1);
+	EXPECT_EQ(WT_QUERY_STATUS_PARTIAL, sink_.last_query_status_) << "a dropped row makes the snapshot partial";
+	EXPECT_EQ(1u, sink_.status_orders_size_);
+
+	XTPRI err;
+	memset(&err, 0, sizeof(err));
+	err.error_id = 11000350;
+	snprintf(err.error_msg, sizeof(err.error_msg), "%s", "query failed");
+	api_.OnQueryOrder(&o, &err, 44, true, 1);
+	EXPECT_EQ(WT_QUERY_STATUS_FAILED, sink_.last_query_status_);
+
+	// The next query starts clean.
+	api_.OnQueryOrder(&o, NULL, 45, true, 1);
+	EXPECT_EQ(WT_QUERY_STATUS_COMPLETE, sink_.last_query_status_);
+	EXPECT_EQ(1u, sink_.status_orders_size_);
+	EXPECT_EQ(legacyBefore, sink_.n_rsp_orders_);
 }
 
 /// 成交查询：error_id≠0 的行被跳过；last 才外发
@@ -829,8 +922,8 @@ TEST_F(TraderXTPTest, order_event_with_error_converts_entrust_and_error)
 
 /* ------------------------------------------------------- 不能进的路径 */
 
-/// connect() → reconnect() 调用 m_funcCreator（本机恒 NULL）→ 空函数指针调用，必崩
-TEST_F(TraderXTPTest, DISABLED_connect_calls_null_creator_and_writes_flow_dirs)
+/// 迭代03 最终验收复核后启用（原禁用：connect 无 creator 时调用空函数指针；现 connect 记错误后返回）。
+TEST_F(TraderXTPTest, connect_calls_null_creator_and_writes_flow_dirs)
 {
 	api_.connect();
 }
@@ -842,7 +935,9 @@ TEST_F(TraderXTPTest, DISABLED_query_apis_dereference_null_api_without_guard)
 }
 
 /// OnOrderEvent 错误分支：makeEntrust 返回 NULL 时产品侧仍然 entrust->release() → NULL 解引用
-TEST_F(TraderXTPTest, DISABLED_order_event_error_branch_releases_null_entrust)
+/// I03-NEW-068（s5 第三轮）：启用为红绿对照。改前子进程内 SIGSEGV；改后不解引用 NULL，
+/// 错误仍以 onRspEntrust(NULL, error) 交给宿主（宿主自行拒绝无 tag 的回报）。
+TEST_F(TraderXTPTest, order_event_error_branch_releases_null_entrust)
 {
 	XTPRI err;
 	memset(&err, 0, sizeof(err));
@@ -852,7 +947,15 @@ TEST_F(TraderXTPTest, DISABLED_order_event_error_branch_releases_null_entrust)
 	memset(&ord, 0, sizeof(ord));
 	ord.market = XTP_MKT_SZ_A;                         // 未登记 → makeEntrust 返回 NULL
 	snprintf(ord.ticker, sizeof(ord.ticker), "%s", "999999");
+	EXPECT_EXIT({ api_.OnOrderEvent(&ord, &err, 1); std::fflush(stdout); std::_Exit(0); },
+		::testing::ExitedWithCode(0), "") << "NULL entrust released in the error branch";
+	if (::testing::Test::HasFailure())
+		return;	// red control: do not crash the whole binary in-process
 	api_.OnOrderEvent(&ord, &err, 1);
+	ASSERT_EQ(1u, sink_.n_rsp_entrust_);
+	EXPECT_TRUE(sink_.last_entrust_null_);
+	EXPECT_EQ(WEC_ORDERINSERT, sink_.last_err_code_);
+	EXPECT_EQ("bad order", sink_.last_err_msg_);
 }
 
 /* ---------------------------------------------------------------- 工厂 */
@@ -873,3 +976,23 @@ TEST(xtp_plugin_factory, create_and_delete_roundtrip_null_safe)
 }
 
 } // namespace
+
+/// 卡6：XTP 委托/成交查询中未知合约的行，宿主声明能力后上送原始结构；最终数组照常回调
+TEST_F(TraderXTPTest, l01014_unregistered_query_rows_are_forwarded_raw)
+{
+	api_.setSpiFeatures(WT_TRADER_SPI_FEATURE_RAW_UNRESOLVED);
+	XTPQueryOrderRsp o;
+	memset(&o, 0, sizeof(o));
+	o.market = XTP_MKT_SZ_A;
+	snprintf(o.ticker, sizeof(o.ticker), "%s", "000001");
+	o.order_xtp_id = 777;
+	api_.OnQueryOrder(&o, NULL, 21, true, 1);
+	XTPQueryTradeRsp t;
+	memset(&t, 0, sizeof(t));
+	t.market = XTP_MKT_SZ_A;
+	snprintf(t.ticker, sizeof(t.ticker), "%s", "000001");
+	api_.OnQueryTrade(&t, NULL, 22, true, 1);
+	ASSERT_EQ(2u, sink_.unresolved_raw_.size());
+	EXPECT_EQ(0u, sink_.unresolved_raw_[0].rfind("order|struct=XTPQueryOrderRsp;size=", 0)) << sink_.unresolved_raw_[0];
+	EXPECT_EQ(0u, sink_.unresolved_raw_[1].rfind("trade|struct=XTPQueryTradeRsp;size=", 0)) << sink_.unresolved_raw_[1];
+}

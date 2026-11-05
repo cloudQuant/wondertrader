@@ -1,0 +1,23 @@
+diff --git a/src/TestUnits/coverage/CMakeLists.txt b/tmp/wt-i03-new095-20261102/snapshot/src/TestUnits/coverage/CMakeLists.txt
+index a58d5d5a..71be60d0 100644
+--- a/src/TestUnits/coverage/CMakeLists.txt
++++ b/tmp/wt-i03-new095-20261102/snapshot/src/TestUnits/coverage/CMakeLists.txt
+@@ -278,7 +278,7 @@ ENDFUNCTION()
+ SET(WT_COV_SPLIT_TARGETS
+ 	"wtcore|WtCore|dir:n01_wtcore_tradepaths,dir:n02_wtcore_engines,dir:p01_wtcore_stractx,dir:p02_wtcore_engines2,dir:p11_wtcore_traderadapter,dir:q01_wtcore3"
+ 	"uftcore|WtUftCore|dir:n03_uftcore_index,dir:p06_uftcore2,dir:q04_uftcore3"
+-	"btcore|WtBtCore|dir:l06_wtbtcore,dir:n04_btcore_mockers,dir:p03_btcore_mockers2,dir:p04_btcore_replayer,dir:p07_btcore_replayer2,dir:p08_btcore_mockers3,dir:q02_btcore3"
++	"btcore|WtBtCore|p03_btcore_mockers2/r180_btcore_mockers2_test.cpp+p03_btcore_mockers2/r210_btcore_residual_test.cpp"
+ 	# WtDtCore 是 STATIC 且与 WtCore 有同名 wtp::ParserAdapter/ParserAdapterMgr/WtHelper，
+ 	# 两者一起链进主目标会被静态库惰性抽取静默择一（BUG-L00-005），所以单独立目标；
+ 	# WtDtServo/WtDtHelper 是 hidden SHARED，其 TU 一并编进来才能测内部。
+@@ -387,6 +387,9 @@ FOREACH(spec ${WT_COV_SPLIT_TARGETS})
+ 		CONTINUE()
+ 	ENDIF()
+ 
++	IF(suffix STREQUAL "btcore")
++		SET_SOURCE_FILES_PROPERTIES("${CMAKE_CURRENT_SOURCE_DIR}/p03_btcore_mockers2/r180_btcore_mockers2_test.cpp" PROPERTIES COMPILE_OPTIONS "-Wno-error=sign-compare")
++	ENDIF()
+ 	WT_COV_ISOLATE_INST_HLP(${tus})
+ 	ADD_EXECUTABLE(CoverageTests_${suffix} ${srcs} ${tus})
+ 	TARGET_INCLUDE_DIRECTORIES(CoverageTests_${suffix} PRIVATE ${WT_COV_INCS})

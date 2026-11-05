@@ -270,11 +270,15 @@ WTSTradeInfo* r71MakeTradeReport(WTSContractInfo* contract, const std::string& u
 	return trade;
 }
 
+// 2026-11-03 Diff 目标批次重构（P02-005，evidence/20261103-date-diff-review）起，
+// Diff 在同一更新临界区先提交目标/差额账本，再以非阻塞方式请求单元；在途创建由
+// registerCreatedUnit 在注册时读取最新账本与通道状态补投。因此同码调用方不再阻塞
+// 等待创建者（原 DIFF_WAITS_FOR_CREATOR 预期），与 Arbi 一样记账后立即返回。
 enum class R71PendingCreationBehavior
 {
 	LOCAL_COALESCES_TARGET,
 	ARBI_RETURNS_BEFORE_REGISTRATION,
-	DIFF_WAITS_FOR_CREATOR
+	DIFF_RECORDS_TARGET_BEFORE_REGISTRATION
 };
 
 struct R71SubmittedOrder
@@ -515,18 +519,6 @@ protected:
 		EXPECT_TRUE(second_started.load());
 		ExecUnitInitStatus pending = executer.queryUnitInitStatus("SHFE.ag.2512");
 		const auto pending_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
-		if (behavior == R71PendingCreationBehavior::DIFF_WAITS_FOR_CREATOR)
-		{
-			while (pending.waiting_callers < 1 && std::chrono::steady_clock::now() < pending_deadline)
-			{
-				std::this_thread::yield();
-				pending = executer.queryUnitInitStatus("SHFE.ag.2512");
-			}
-			EXPECT_EQ(pending.waiting_callers, 1u)
-				<< "Diff getUnit contract blocks a same-code caller until its creator completes";
-			EXPECT_FALSE(second_finished.load());
-		}
-		else
 		{
 			while (!second_finished.load() && std::chrono::steady_clock::now() < pending_deadline)
 				std::this_thread::yield();
@@ -535,7 +527,9 @@ protected:
 			EXPECT_EQ(pending.waiting_callers, 0u)
 				<< (behavior == R71PendingCreationBehavior::LOCAL_COALESCES_TARGET ?
 					"Local merges the in-flight target without waiting" :
-					"Arbi publishes target first and returns when the unit is not registered yet");
+					behavior == R71PendingCreationBehavior::ARBI_RETURNS_BEFORE_REGISTRATION ?
+					"Arbi publishes target first and returns when the unit is not registered yet" :
+					"Diff commits the ledger first and returns while the creator is still pending");
 		}
 		EXPECT_EQ(pending.state, ExecUnitInitState::INITIALIZING);
 		EXPECT_GT(pending.generation, 0u);
@@ -712,21 +706,6 @@ protected:
 			std::this_thread::yield();
 		EXPECT_EQ(started.load(), waiter_count);
 		ExecUnitInitStatus pending = initializing;
-		if (behavior == R71PendingCreationBehavior::DIFF_WAITS_FOR_CREATOR)
-		{
-			const auto waiter_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
-			while (pending.waiting_callers < waiter_count &&
-				std::chrono::steady_clock::now() < waiter_deadline)
-			{
-				std::this_thread::yield();
-				pending = executer.queryUnitInitStatus("SHFE.ag.2512");
-			}
-			EXPECT_EQ(pending.waiting_callers, waiter_count)
-				<< "Diff callers wait for the creator and share its failed generation";
-			EXPECT_EQ(returned.load(), 0u)
-				<< "Diff callers must remain blocked until the creator completes";
-		}
-		else
 		{
 			const auto return_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
 			while (returned.load() < waiter_count &&
@@ -736,9 +715,11 @@ protected:
 			EXPECT_EQ(returned.load(), waiter_count)
 				<< (behavior == R71PendingCreationBehavior::LOCAL_COALESCES_TARGET ?
 					"Local coalesces in-flight targets without waiting" :
-					"Arbi records the target and returns before registration");
+					behavior == R71PendingCreationBehavior::ARBI_RETURNS_BEFORE_REGISTRATION ?
+					"Arbi records the target and returns before registration" :
+					"Diff records the target and returns while its creator is pending");
 			EXPECT_EQ(pending.waiting_callers, 0u)
-				<< "Local and Arbi do not expose these callers as blocked waiters";
+				<< "Local, Arbi and Diff do not expose these callers as blocked waiters";
 		}
 		EXPECT_EQ(pending.generation, initializing.generation);
 
@@ -1361,6 +1342,82 @@ TEST_F(R71ExecTest, DiffV2FailedInitializationStillRequiresSafeAutomaticRetry)
 	GTEST_FLAG_SET(death_test_style, oldStyle);
 }
 
+// 决策 K06=B（2026-11-04 用户裁定）：可证明无副作用的创建失败（自动重试允许）在后续代创建成功后，
+// 协调 quiesce 可以完成；未重试成功前保持不完整。改前任一创建失败都使 quiesce 永久不完整。
+TEST_F(R71ExecTest, K06DiffCleanFailureFollowedBySuccessfulRetryLetsQuiesceComplete)
+{
+	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT({
+		WtExecuterMgr manager;
+		R71BlockingExecStub blockingStub;
+		blockingStub.comm_ = comm;
+		blockingStub.sess_ = sess;
+		blockingStub.hot_ = &traderEnv.hot;
+		auto diff = std::make_shared<WtDiffExecuter>(&factory, "r71_k06_retry", &dm, &traderEnv.bd);
+		manager.add_executer(diff);
+		diff->setStub(&blockingStub);
+		WTSVariant* c = cfg("r71_k06_retry", "WtExeFact.WtDiffMinImpactExeUnit", NULL);
+		if (c == NULL || !diff->init(c))
+			std::exit(90);
+		c->release();
+		diff->setTrader(&trader);
+		trader.addSink(diff.get());
+
+		blockingStub.comm_ = NULL;	// clean failure before any side effect
+		diff->on_position_changed("SHFE.ag.2512", 1.0);
+		if (diff->queryUnitInitStatus("SHFE.ag.2512").state != ExecUnitInitState::FAILED)
+			std::exit(91);
+		blockingStub.comm_ = comm;
+		R71PositionTargets targets;
+		targets["SHFE.ag.2512"] = 1.0;
+		diff->set_position(targets);
+		if (diff->queryUnitInitStatus("SHFE.ag.2512").state != ExecUnitInitState::READY)
+			std::exit(92);
+
+		WtExecQuiesceCoordinator coordinator({ &manager });
+		const bool quiesced = coordinator.quiesce_all();
+		const bool complete = coordinator.is_complete();
+		std::cerr << "K06_CLEAN_RETRY quiesced=" << quiesced << " complete=" << complete << std::endl;
+		std::exit(quiesced && complete ? 0 : 93);
+	}, ::testing::ExitedWithCode(0), "K06_CLEAN_RETRY quiesced=1 complete=1");
+	GTEST_FLAG_SET(death_test_style, oldStyle);
+}
+
+TEST_F(R71ExecTest, K06DiffCleanFailureWithoutSuccessfulRetryKeepsQuiesceIncomplete)
+{
+	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT({
+		WtExecuterMgr manager;
+		R71BlockingExecStub blockingStub;
+		blockingStub.comm_ = comm;
+		blockingStub.sess_ = sess;
+		blockingStub.hot_ = &traderEnv.hot;
+		auto diff = std::make_shared<WtDiffExecuter>(&factory, "r71_k06_noretry", &dm, &traderEnv.bd);
+		manager.add_executer(diff);
+		diff->setStub(&blockingStub);
+		WTSVariant* c = cfg("r71_k06_noretry", "WtExeFact.WtDiffMinImpactExeUnit", NULL);
+		if (c == NULL || !diff->init(c))
+			std::exit(90);
+		c->release();
+		diff->setTrader(&trader);
+		trader.addSink(diff.get());
+
+		blockingStub.comm_ = NULL;
+		diff->on_position_changed("SHFE.ag.2512", 1.0);
+		if (diff->queryUnitInitStatus("SHFE.ag.2512").state != ExecUnitInitState::FAILED)
+			std::exit(91);
+
+		WtExecQuiesceCoordinator coordinator({ &manager });
+		const bool quiesced = coordinator.quiesce_all();
+		const bool complete = coordinator.is_complete();
+		std::cerr << "K06_NO_RETRY quiesced=" << quiesced << " complete=" << complete << std::endl;
+		std::exit(complete ? 93 : 0);
+	}, ::testing::ExitedWithCode(0), "K06_NO_RETRY");
+	GTEST_FLAG_SET(death_test_style, oldStyle);
+}
+
 TEST_F(R71ExecTest, UnitInitializationStatusIsQueryableAndFailedStatusCanBeCleared)
 {
 	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
@@ -1547,7 +1604,7 @@ TEST_F(R71ExecTest, ConcurrentSameCodeCreationAndPreRegistrationChannelEdges)
 			new R71ObservableExecuter<WtDiffExecuter>(&factory, "r71_diff_concurrent", &dm,
 				&traderEnv.bd));
 		verifyConcurrentCreation(diff, *blockingStub, "r71_diff_concurrent",
-			"WtExeFact.WtDiffMinImpactExeUnit", R71PendingCreationBehavior::DIFF_WAITS_FOR_CREATOR,
+			"WtExeFact.WtDiffMinImpactExeUnit", R71PendingCreationBehavior::DIFF_RECORDS_TARGET_BEFORE_REGISTRATION,
 			1u, quiesceGuard, diffTrader, diffApi);
     }
 }
@@ -1636,12 +1693,12 @@ TEST_F(R71ExecTest, DiffFailedInitializationWaitersShareOneGeneration)
 			&factory, "r71_diff_failed_waiters", &dm, &traderEnv.bd);
 		manager.add_executer(diff);
 		verifyFailedInitializationWaiters(*diff, blockingStub, "r71_diff_failed_waiters",
-			"WtExeFact.WtDiffMinImpactExeUnit", R71PendingCreationBehavior::DIFF_WAITS_FOR_CREATOR,
+			"WtExeFact.WtDiffMinImpactExeUnit", R71PendingCreationBehavior::DIFF_RECORDS_TARGET_BEFORE_REGISTRATION,
 			1.0);
 		const ExecUnitInitStatus failed = diff->queryUnitInitStatus("SHFE.ag.2512");
 		ASSERT_EQ(failed.state, ExecUnitInitState::FAILED);
 		EXPECT_EQ(blockingStub.commodity_queries.load(), 1u)
-			<< "all six callers consumed the failed generation; none is a retry request";
+			<< "all six callers joined the failed generation before it failed; none is a retry request";
 		WtExecQuiesceCoordinator coordinator({ &manager });
 		const bool quiesced = coordinator.quiesce_all();
 		const bool complete = coordinator.is_complete();

@@ -38,6 +38,9 @@
 USING_NS_WTP;
 
 extern WtRtRunner& getRunner();
+// BUG-R42-002 gate (迭代03): HFT contexts bind only a registered trader; the
+// fixtures below register a module-less local adapter (see i03_s5_test_trader_support.cpp).
+TraderAdapterPtr i03s5_register_test_trader(WtRtRunner& runner, const char* id);
 
 namespace
 {
@@ -143,7 +146,7 @@ namespace
 		"\"sections\":[{\"from\":0,\"to\":2359}]}}";
 
 	const char* kCommodities =
-		"{\"SHFE\":{\"rb\":{\"name\":\"Rebar\",\"session\":\"TRADING\",\"pricetick\":1,"
+		"{\"SHFE\":{\"rb\":{\"name\":\"Rebar\",\"session\":\"TRADING\",\"holiday\":\"CHINA\",\"pricetick\":1,"
 		"\"volscale\":10,\"covermode\":0,\"pricemode\":0,\"trademode\":0,\"category\":1}}}";
 
 	const char* kContracts =
@@ -153,6 +156,7 @@ namespace
 	{
 		return "{\"basefiles\":{"
 			"\"session\":\"" + dir + "/sessions.json\","
+			"\"holiday\":\"" + dir + "/holidays.json\","
 			"\"commodity\":\"" + dir + "/commodities.json\","
 			"\"contract\":\"" + dir + "/contracts.json\"},"
 			"\"env\":{\"name\":\"" + std::string(env) + "\"},"
@@ -172,6 +176,7 @@ namespace
 			if (dir.empty())
 				return false;
 			write_text(dir + "/sessions.json", kSessions);
+			write_text(dir + "/holidays.json", "{\"CHINA\":[]}");	// 卡1（DateMappingV1）：按品种映射交易日须有交易日历；品种缺 holiday 模板或未加载节假日文件即 MissingCalendar，K 线读取为空。
 			write_text(dir + "/commodities.json", kCommodities);
 			write_text(dir + "/contracts.json", kContracts);
 			// ActionPolicyMgr::init requires a default group in the initial policy.
@@ -239,7 +244,7 @@ TEST(R134PorterBars, SelGetBarsReturnsLoadedBlocks)
 	LiveFixture fx;
 	ASSERT_TRUE(fx.setup("sel_bars", "sel"));
 
-	const CtxHandler h = create_sel_context("r134_sel_bars", 20240102, 93000, "d");
+	const CtxHandler h = create_sel_context("r134_sel_bars", 20240102, 930, "d");	/* K27=A（2026-11-04 用户裁定）：SEL 调度时间为 HHMM，HHMMSS 值在入口被拒；原写法 93000/153000 见证据 before/。 */
 	ASSERT_NE(h, 0U);
 
 	const WtUInt32 cnt = sel_get_bars(h, kCode, "d", 5, bars_cb);
@@ -262,7 +267,8 @@ TEST(R134PorterBars, HftGetBarsReturnsLoadedBlocks)
 	LiveFixture fx;
 	ASSERT_TRUE(fx.setup("hft_bars", "hft"));
 
-	const CtxHandler h = create_hft_context("r134_hft_bars", "R134_TRADER_ABSENT", false, 0);
+	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "r134_test_trader") != nullptr);
+	const CtxHandler h = create_hft_context("r134_hft_bars", "r134_test_trader", false, 0);
 	ASSERT_NE(h, 0U);
 
 	const WtUInt32 cnt = hft_get_bars(h, kCode, "d", 5, bars_cb);

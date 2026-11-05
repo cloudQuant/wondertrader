@@ -1,0 +1,17 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=4049)
+  Write of size 4 at 0x000104578098 by thread T1:
+    #0 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>>(void*) <null> (race:arm64+0x100007ab0)
+
+  Previous write of size 4 at 0x000104578098 by main thread:
+    #0 main <null> (race:arm64+0x100007998)
+
+  Location is global 'g' at 0x000104578098 (race+0x10000c098)
+
+  Thread T1 (tid=6811628, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 main <null> (race:arm64+0x100007954)
+
+SUMMARY: ThreadSanitizer: data race (race:arm64+0x100007ab0) in void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>>(void*)+0x6c
+==================
+ThreadSanitizer: reported 1 warnings

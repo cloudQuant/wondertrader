@@ -10,6 +10,7 @@
  */
 #include "WtArbiExecuter.h"
 #include "WtExecuterSchedule.h"
+#include "ExecPolicyConfig.h"
 #include "TraderAdapter.h"
 #include "WtEngine.h"
 
@@ -17,12 +18,16 @@
 #include "../Includes/IDataManager.h"
 #include "../Includes/WTSVariant.hpp"
 #include "../Includes/IHotMgr.h"
+#include "../Includes/WTSContractInfo.hpp"
 #include "../Share/decimal.h"
 
 #include "../WTSTools/WTSLogger.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
+#include <locale>
+#include <sstream>
 #include <tuple>
 #include <vector>
 
@@ -30,6 +35,40 @@ USING_NS_WTP;
 
 namespace
 {
+
+bool readExecutionScale(WTSVariant* params, double& result)
+{
+	WTSVariant* value = params->get("scale");
+	if (value == NULL) return false;
+	switch (value->type())
+	{
+	case WTSVariant::VT_Int32:
+	case WTSVariant::VT_Uint32:
+	case WTSVariant::VT_Int64:
+	case WTSVariant::VT_Uint64:
+	case WTSVariant::VT_Real:
+		result = value->asDouble();
+		break;
+	case WTSVariant::VT_String:
+	{
+		std::istringstream input(value->asString());
+		input.imbue(std::locale::classic());
+		input >> result;
+		// libc++ may set failbit for a representable subnormal while still
+		// consuming the complete token and assigning the correct value.
+		const bool subnormal = input.fail() && input.eof() &&
+			std::fpclassify(result) == FP_SUBNORMAL;
+		if (input.bad() || (input.fail() && !subnormal)) return false;
+		if (subnormal) input.clear(input.rdstate() & ~std::ios::failbit);
+		input >> std::ws;
+		if (!input.eof()) return false;
+		break;
+	}
+	default:
+		return false;
+	}
+	return std::isfinite(result) && result > 0.0;
+}
 }
 
 
@@ -45,8 +84,10 @@ WtArbiExecuter::WtArbiExecuter(WtExecuterFactory* factory, const char* name, IDa
 	, _trader(NULL)
 , _factory(factory)
 	, _data_mgr(dataMgr)
+	, _config(NULL)
 	, _scale(1.0)
 	, _auto_clear(true)
+	, _strict_sync(false)
 	, _channel_ready(false)
 	{
 }
@@ -64,6 +105,14 @@ WtArbiExecuter::~WtArbiExecuter()
 	// fail-stops in its destructor rather than release a borrowed context.
 	requestQuiesce();
 	(void)waitQuiesced();
+	account_net_limits::Registry::instance().release(this);
+	// I03-NEW-137: init() retains params as _config; return that reference once the
+	// executer is quiesced (no ingress can read _config any more).
+	if (_config != NULL)
+	{
+		_config->release();
+		_config = NULL;
+	}
 }
 
 WtArbiExecuter::QuiesceIngress::QuiesceIngress(WtArbiExecuter* owner)
@@ -460,6 +509,10 @@ void WtArbiExecuter::failUnitDrain(const ExecuteUnitPtr& unit,
 void WtArbiExecuter::setTrader(TraderAdapter* adapter)
 {
 	_trader = adapter;
+	_owner_claims.bind(_trader != NULL ? _trader->accountGate() : std::shared_ptr<AccountTradingGate>(),
+		ExecOwnerModes::ownerId(name()));
+	if (_trader != NULL)
+		_trader->declareOwnerSink(this, ExecOwnerModes::ownerId(name()));
 }
 
 /*!
@@ -468,15 +521,76 @@ void WtArbiExecuter::setTrader(TraderAdapter* adapter)
  * \param params 初始化参数，包含执行器的各种配置
  * \return 是否初始化成功
  */
+bool WtArbiExecuter::validateConfig(WTSVariant* params, std::string& error)
+{
+	if (params == NULL || params->type() != WTSVariant::VT_Object)
+	{
+		error = "executer configuration must be an object";
+		return false;
+	}
+	double scale = 0.0;
+	if (!readExecutionScale(params, scale))
+	{
+		error = "scale must be a finite positive number";
+		return false;
+	}
+	execution_groups::Groups groupRules;
+	std::string groupError;
+	if (!execution_groups::parse(params, groupRules, groupError))
+	{
+		error = "invalid group configuration: " + groupError;
+		return false;
+	}
+	account_net_limits::Limits accountLimits;
+	if (!account_net_limits::parse(params, accountLimits, error))
+		return false;
+	return exec_policy_config::validateClear(params, error) &&
+		exec_policy_config::validatePolicy(params, error);
+}
+
 bool WtArbiExecuter::init(WTSVariant* params)
 {
 	if (params == NULL)
 		return false;
 
+	// Card 8b=A: validate the complete configuration before any side effect.
+	std::string configError;
+	if (!validateConfig(params, configError))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid executer configuration: {}", configError);
+		return false;
+	}
+
+	double scale = 0.0;
+	if (!readExecutionScale(params, scale))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid execution scale");
+		return false;
+	}
+
+	execution_groups::Groups groupRules;
+	std::string groupError;
+	if (!execution_groups::parse(params, groupRules, groupError))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid group configuration: {}", groupError);
+		return false;
+	}
+	_group_rules.swap(groupRules);
+	{
+		account_net_limits::Limits accountLimits;
+		std::string accountError;
+		if (!account_net_limits::parse(params, accountLimits, accountError))
+		{
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid account limits: {}", accountError);
+			return false;
+		}
+		_account_limits = accountLimits;
+	}
+
 	_config = params;
 	_config->retain();
 
-	_scale = params->getDouble("scale");
+	_scale = scale;
 	_strict_sync  = params->getBoolean("strict_sync");
 
 	uint32_t poolsize = params->getUInt32("poolsize");
@@ -521,27 +635,16 @@ bool WtArbiExecuter::init(WTSVariant* params)
 		}
 	}
 
-	WTSVariant* cfgGroups = params->get("groups");
-	if (cfgGroups)
+	for (const execution_groups::Group& group : _group_rules)
 	{
-		auto names = cfgGroups->memberNames();
-		for(const std::string& gpname : names)
+		CodeGroupPtr gpInfo(new CodeGroup);
+		wt_strcpy(gpInfo->_name, group.name.c_str(), group.name.size());
+		for (const auto& item : group.items)
 		{
-			CodeGroupPtr& gpInfo = _groups[gpname];
-			if (gpInfo == NULL)
-			{
-				gpInfo.reset(new CodeGroup);
-				wt_strcpy(gpInfo->_name, gpname.c_str(), gpname.size());
-			}
-
-			WTSVariant* cfgGrp = cfgGroups->get(gpname.c_str());
-			auto codes = cfgGrp->memberNames();
-			for(const std::string& code : codes)
-			{
-				gpInfo->_items[code] = cfgGrp->getDouble(code.c_str());
-				_code_to_groups[code] = gpInfo;
-			}
+			gpInfo->_items[item.first] = item.second;
+			_code_to_groups[item.first] = gpInfo;
 		}
+		_groups[group.name] = gpInfo;
 	}
 
 	WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Local executer inited, scale: {}, auto_clear: {}, strict_sync: {}, thread poolsize: {}, code_groups: {}",
@@ -723,12 +826,22 @@ ExecuteUnitPtr WtArbiExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 			std::lock_guard<std::mutex> stateLock(state->mutex);
 			state->side_effects_possible = true;
 		}
-		unit = _factory->createExeUnit(name);
+		bool pluginEntered = true;
+		unit = _factory->createExeUnit(name, pluginEntered);
 		if (unit == NULL)
+		{
+			// A host-side factory rejection ran no plugin code; keep it retryable.
+			if (!pluginEntered)
+			{
+				std::lock_guard<std::mutex> stateLock(state->mutex);
+				state->side_effects_possible = false;
+			}
 			return failCreation("execution-unit creation failed");
+		}
 		std::string error;
-		if (!unit->initialize(this, stdCode, cfg, error) || unit->self() == NULL)
+		if (!unit->initialize(this, stdCode, cfg, error, true) || unit->self() == NULL)
 			return failCreation(error.empty() ? "plugin initialization failed" : error.c_str());
+		_owner_modes.setSharedCapable(stdCode, unit->hostOrderIdentitySupported());
 
 		// Publish a strong owner into the already map-owned lifecycle state before
 		// any startup callbacks or later allocations can fail. Failed initialized
@@ -767,7 +880,7 @@ ExecuteUnitPtr WtArbiExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 					std::lock_guard<std::mutex> stateLock(state->mutex);
 					state->initial_target_sequence = targetSequence;
 				}
-				const double traderTarget = round(targetIt->second * _scale);
+				const double traderTarget = targetIt->second * _scale;
 				targetEvent.callback = [code, traderTarget](ExecuteUnit* target) {
 					target->set_position(code.c_str(), traderTarget);
 				};
@@ -1181,6 +1294,8 @@ double WtArbiExecuter::getUndoneQty(const char* stdCode)
 	if (NULL == _trader)
 		return 0.0;
 
+	if (_trader->isOwnerRoutingEnabled())
+		return _trader->getUndoneQtyForOwner(stdCode, ExecOwnerModes::ownerId(name()));
 	return _trader->getUndoneQty(stdCode);
 }
 
@@ -1195,6 +1310,8 @@ OrderMap* WtArbiExecuter::getOrders(const char* stdCode)
 	if (NULL == _trader)
 		return NULL;
 
+	if (_trader->isOwnerRoutingEnabled())
+		return _trader->getOrdersForOwner(stdCode, ExecOwnerModes::ownerId(name()));
 	return _trader->getOrders(stdCode);
 }
 
@@ -1212,7 +1329,9 @@ OrderIDs WtArbiExecuter::buy(const char* stdCode, double price, double qty, bool
 	if (!_channel_ready)
 		return OrderIDs();
 
-	return _trader->buy(stdCode, price, qty, 0, bForceClose);
+	// Card 5c: the order belongs to this executer (owner-verified cancels/routing).
+	return _trader->buyAsOwner(ExecOwnerModes::ownerId(name()), _owner_modes.sharedCapable(stdCode),
+		stdCode, price, qty, 0, bForceClose);
 }
 
 /*!
@@ -1229,7 +1348,8 @@ OrderIDs WtArbiExecuter::sell(const char* stdCode, double price, double qty, boo
 	if (!_channel_ready)
 		return OrderIDs();
 
-	return _trader->sell(stdCode, price, qty, 0, bForceClose);
+	return _trader->sellAsOwner(ExecOwnerModes::ownerId(name()), _owner_modes.sharedCapable(stdCode),
+		stdCode, price, qty, 0, bForceClose);
 }
 
 /*!
@@ -1243,7 +1363,8 @@ bool WtArbiExecuter::cancel(uint32_t localid)
 	if (!_channel_ready)
 		return false;
 
-	return _trader->cancel(localid);
+	// Owner-verified: never another owner's order; while paused only verified identities.
+	return _trader->cancelForOwner(localid, ExecOwnerModes::ownerId(name()));
 }
 
 /*!
@@ -1259,7 +1380,7 @@ OrderIDs WtArbiExecuter::cancel(const char* stdCode, bool isBuy, double qty)
 	if (!_channel_ready)
 		return OrderIDs();
 
-	return _trader->cancel(stdCode, isBuy, qty);
+	return _trader->cancelForOwner(stdCode, isBuy, qty, ExecOwnerModes::ownerId(name()));
 }
 
 /*!
@@ -1323,9 +1444,8 @@ uint64_t WtArbiExecuter::getCurTime()
 void WtArbiExecuter::set_position(const wt_hashmap<std::string, double>& targets)
 {
 	QuiesceIngress ingress(this);
-	if (!ingress)
-		return;
-	set_position_with_sequence(targets, beginPositionBatch());
+	if (!ingress) return;
+	submitTargetBatch(targets, false);
 }
 
 uint64_t WtArbiExecuter::beginPositionBatch()
@@ -1333,187 +1453,187 @@ uint64_t WtArbiExecuter::beginPositionBatch()
 	std::lock_guard<std::mutex> positionLock(_mtx_positions);
 	const uint64_t sequence = _next_position_sequence++;
 	_latest_position_batch_sequence = sequence;
+	++_target_revision;
 	return sequence;
 }
 
 void WtArbiExecuter::set_position_with_sequence(
-	const wt_hashmap<std::string, double>& targets, uint64_t batchSequence)
+	const wt_hashmap<std::string, double>& targets, uint64_t sequence)
 {
-	/*
-	 *	先要把目标头寸进行组合匹配
-	 */
-	auto real_targets = targets;
-	// Only transform the currently defined, unambiguous integer case. Group
-	// direction, fractional quantities, and overlapping groups need an explicit
-	// contract; preserve the caller's targets for those inputs.
-	bool nonnegativeIntegerTargets = true;
-	for (const auto& target : targets)
+	submitTargetBatch(targets, false, sequence);
+}
+
+void WtArbiExecuter::submitTargetBatch(const wt_hashmap<std::string, double>& targets,
+	bool incremental, uint64_t sequence)
+{
+	struct Action
 	{
-		if (!decimal::ge(target.second, 0.0) || !decimal::eq(target.second, round(target.second)))
-		{
-			nonnegativeIntegerTargets = false;
-			break;
-		}
-	}
-	if (_groups.size() == 1 && nonnegativeIntegerTargets)
-	{
-		const CodeGroupPtr& gpInfo = _groups.begin()->second;
-		if (gpInfo != nullptr && !gpInfo->_items.empty() &&
-			targets.find(gpInfo->_name) == targets.end() &&
-			gpInfo->_items.find(gpInfo->_name) == gpInfo->_items.end())
-		{
-			bool bHit = true;
-			double gpQty = DBL_MAX;
-			// Require non-negative integer targets and positive integer member
-			// quantities, so this path never invents fractional or signed lots.
-			for (const auto& item : gpInfo->_items)
-			{
-				const double unit = item.second;
-				auto target = targets.find(item.first);
-				if (target == targets.end() || !decimal::gt(unit, 0.0) ||
-					!decimal::eq(unit, round(unit)) || !decimal::ge(target->second, 0.0) ||
-					!decimal::eq(target->second, round(target->second)))
-				{
-					bHit = false;
-					break;
-				}
-				gpQty = std::min(gpQty, target->second / unit);
-			}
-
-			if (bHit && decimal::gt(gpQty, 0.0) && decimal::eq(gpQty, round(gpQty)))
-			{
-				bool integerResiduals = true;
-				for (const auto& item : gpInfo->_items)
-				{
-					const double residual = targets.find(item.first)->second - gpQty * item.second;
-					if (!decimal::ge(residual, 0.0) || !decimal::eq(residual, round(residual)))
-					{
-						integerResiduals = false;
-						break;
-					}
-				}
-
-				if (integerResiduals)
-				{
-					real_targets[gpInfo->_name] = gpQty;
-					for (const auto& item : gpInfo->_items)
-						real_targets[item.first] = targets.find(item.first)->second - gpQty * item.second;
-				}
-			}
-		}
-	}
-
-
-	bool superseded = false;
-	for (auto it = real_targets.begin(); it != real_targets.end(); it++)
-	{
-		const char* stdCode = it->first.c_str();
-		double newVol = it->second;
-		// 账户的理论持仓要经过修正
-		const double traderTarget = round(newVol * _scale);
-		const bool orderAllowed = !_trader || _trader->checkOrderLimits(stdCode);
-		double oldVol = 0;
+		Action(const std::string& valueCode, double valueTarget, bool valueBypass = false)
+			: code(valueCode), target(valueTarget), bypass(valueBypass) {}
+		std::string code;
+		double target = 0.0;
+		bool allowed = true;
+		bool bypass = false;
+		bool queued = false;
+		bool drain = false;
 		ExecuteUnitPtr unit;
 		std::shared_ptr<UnitLifecycleState> state;
-		bool shouldDrain = false;
-		bool targetQueued = false;
-		{
-			std::lock_guard<std::mutex> positionLock(_mtx_positions);
-			if (_latest_position_batch_sequence > batchSequence)
-			{
-				superseded = true;
-				break;
-			}
-			auto latest = _target_update_sequences.find(stdCode);
-			if (latest != _target_update_sequences.end() && latest->second > batchSequence)
-				continue;
-			_target_update_sequences[stdCode] = batchSequence;
-			oldVol = _target_pos[stdCode];
-			_target_pos[stdCode] = newVol;
-			_target_dispatch_allowed[stdCode] = orderAllowed;
-			if (orderAllowed)
-			{
-				SpinLock unitsLock(_mtx_units);
-				auto unitIt = _unit_map.find(stdCode);
-				auto stateIt = _unit_states.find(stdCode);
-				if (unitIt != _unit_map.end() && stateIt != _unit_states.end())
-				{
-					unit = unitIt->second;
-					state = stateIt->second;
-					uint64_t initialTargetSequence = 0;
-					{
-						std::lock_guard<std::mutex> stateLock(state->mutex);
-						initialTargetSequence = state->initial_target_sequence;
-					}
-					if (initialTargetSequence >= batchSequence)
-						targetQueued = true;
-					else
-					{
-						UnitLifecycleState::Event event;
-						event.callback = [code = std::string(stdCode), traderTarget](ExecuteUnit* target) {
-							target->set_position(code.c_str(), traderTarget);
-						};
-						event.target_update = true;
-						event.position_sequence = batchSequence;
-						shouldDrain = appendUnitEvent(state, event);
-						targetQueued = true;
-					}
-				}
-			}
-		}
-
-		if(!decimal::eq(oldVol, newVol))
-		{
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Target position of {} changed: {} -> {} : {} with scale{}", stdCode, oldVol, newVol, traderTarget, _scale);
-		}
-
-		if (!orderAllowed)
-		{
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_WARN, "{} is disabled due to entrust limit control ", stdCode);
-			continue;
-		}
-
-		if (unit == NULL)
-			unit = getUnit(stdCode);
-		if (unit == NULL)
-			continue;
-		if (state == NULL)
-			state = getUnitState(stdCode);
-		if (unit == NULL || state == NULL)
-			continue;
-		if (!targetQueued)
-		{
-			uint64_t initialTargetSequence = 0;
-			{
-				std::lock_guard<std::mutex> stateLock(state->mutex);
-				initialTargetSequence = state->initial_target_sequence;
-			}
-			std::lock_guard<std::mutex> positionLock(_mtx_positions);
-			auto latest = _target_update_sequences.find(stdCode);
-			if (_latest_position_batch_sequence > batchSequence ||
-				(latest != _target_update_sequences.end() && latest->second > batchSequence) ||
-				initialTargetSequence >= batchSequence)
-				continue;
-			UnitLifecycleState::Event event;
-			event.callback = [code = std::string(stdCode), traderTarget](ExecuteUnit* target) {
-				target->set_position(code.c_str(), traderTarget);
-			};
-			event.target_update = true;
-			event.position_sequence = batchSequence;
-			shouldDrain = appendUnitEvent(state, event);
-		}
-		kickUnitEventDrain(unit, state, shouldDrain);
+	};
+	wt_hashmap<std::string, double> previous;
+	std::vector<std::string> channelHolds;
+	uint64_t revision = 0;
+	{
+		std::lock_guard<std::mutex> lock(_mtx_positions);
+		previous = _target_pos;
+		revision = _target_revision;
+		if (_strict_sync) channelHolds.assign(_channel_holds.begin(), _channel_holds.end());
 	}
-	if (superseded)
+	wt_hashmap<std::string, double> proposed = incremental ? previous : targets;
+	if (incremental)
+	{
+		const auto& change = *targets.begin();
+		auto it = previous.find(change.first);
+		const double oldTarget = it == previous.end() ? 0.0 : it->second;
+		const double value = oldTarget + change.second;
+		if (!std::isfinite(value)) return;
+		proposed[change.first] = value;
+	}
+	execution_groups::Positions realTargets, physical;
+	std::string error;
+	if (!execution_groups::calculate(_group_rules, proposed, _scale, realTargets, physical, error, !incremental))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Target batch rejected: {}", error);
 		return;
-
-	//在原来的目标头寸中，但是不在新的目标头寸中，则需要自动设置为0
-	clearMissingTargets(snapshotMissingTargets(real_targets), real_targets, batchSequence);
-
-	//如果开启了严格同步，则需要检查通道持仓
-	//如果通道持仓不在管理中，则直接平掉
-	if(_strict_sync)
-		clearUnmanagedChannelHolds(snapshotUnmanagedChannelHolds(), batchSequence);
+	}
+	for (const auto& item : physical)
+	{
+		if (item.second >= 0.0) continue;
+		WTSCommodityInfo* commodity = _stub ? _stub->get_comm_info(item.first.c_str()) : NULL;
+		if (!commodity || !commodity->canShort())
+		{
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+				"Target batch rejected: short permission unavailable for {}", item.first);
+			return;
+		}
+	}
+	std::vector<Action> actions;
+	if (incremental)
+	{
+		const std::string& code = targets.begin()->first;
+		actions.emplace_back(code, realTargets.at(code));
+	}
+	else
+	{
+		for (const auto& target : realTargets) actions.emplace_back(target.first, target.second);
+		for (const auto& target : previous)
+			if (!realTargets.count(target.first)) actions.emplace_back(target.first, 0.0, true);
+		for (const std::string& code : channelHolds)
+			if (!previous.count(code) && !realTargets.count(code)) actions.emplace_back(code, 0.0, true);
+	}
+	for (Action& action : actions)
+		if (!action.bypass) action.allowed = !_trader || _trader->checkOrderLimits(action.code.c_str());
+	// Card 8 / BUG-P02-005: per-contract account net limit shared by every
+	// executer on the same account (trader quantity, after scale); group
+	// limits were checked above and both must pass.
+	account_net_limits::Positions accountTargets;
+	for (const auto& item : physical)
+		if (item.second != 0.0) accountTargets[item.first] = item.second * _scale;
+	const std::shared_ptr<const void> accountKeepalive = _trader ?
+		std::shared_ptr<const void>(_trader->accountGate()) : std::shared_ptr<const void>();
+	const void* accountKey = accountKeepalive ? accountKeepalive.get() : static_cast<const void*>(this);
+	bool stale = false;
+	std::string accountError;
+	{
+		std::lock_guard<std::mutex> positionLock(_mtx_positions);
+		account_net_limits::Positions previousAccount;
+		const void* previousAccountKey = NULL;
+		if (_target_revision != revision || (sequence && _latest_position_batch_sequence > sequence))
+			stale = true;
+		else if (!account_net_limits::Registry::instance().apply(accountKey, accountKeepalive, this,
+			_name, _account_limits, accountTargets, previousAccount, previousAccountKey, accountError))
+			stale = true;
+		else
+		{
+			if (!sequence)
+			{
+				sequence = _next_position_sequence++;
+				if (!incremental) _latest_position_batch_sequence = sequence;
+			}
+			auto newTargets = _target_pos;
+			auto newAllowed = _target_dispatch_allowed;
+			auto newSequences = _target_update_sequences;
+			for (const Action& action : actions)
+			{
+				newTargets[action.code] = action.target;
+				newAllowed[action.code] = action.allowed;
+				newSequences[action.code] = sequence;
+			}
+			_target_pos.swap(newTargets);
+			_target_dispatch_allowed.swap(newAllowed);
+			_target_update_sequences.swap(newSequences);
+			++_target_revision;
+			SpinLock unitsLock(_mtx_units);
+			for (Action& action : actions)
+			{
+				if (!action.allowed) continue;
+				auto unit = _unit_map.find(action.code);
+				auto state = _unit_states.find(action.code);
+				if (unit == _unit_map.end() || state == _unit_states.end()) continue;
+				action.unit = unit->second;
+				action.state = state->second;
+				uint64_t initialSequence = 0;
+				{
+					std::lock_guard<std::mutex> stateLock(action.state->mutex);
+					initialSequence = action.state->initial_target_sequence;
+				}
+				if (initialSequence >= sequence) { action.queued = true; continue; }
+				const std::string code = action.code; const double target = action.target * _scale;
+				UnitLifecycleState::Event event;
+				event.callback = [code, target](ExecuteUnit* unit) { unit->set_position(code.c_str(), target); };
+				event.target_update = true;
+				event.position_sequence = sequence;
+				action.drain = appendUnitEvent(action.state, event);
+				action.queued = true;
+			}
+		}
+	}
+	if (stale)
+	{
+		if (!accountError.empty())
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Target batch rejected: {}", accountError);
+		else
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Target batch rejected: target state changed during validation");
+		return;
+	}
+	for (Action& action : actions)
+	{
+		if (!action.allowed) continue;
+		if (!action.unit) action.unit = getUnit(action.code.c_str());
+		if (!action.unit) continue;
+		if (!action.state) action.state = getUnitState(action.code.c_str());
+		if (!action.state) continue;
+		if (!action.queued)
+		{
+			uint64_t initialSequence = 0;
+			{
+				std::lock_guard<std::mutex> stateLock(action.state->mutex);
+				initialSequence = action.state->initial_target_sequence;
+			}
+			std::lock_guard<std::mutex> positionLock(_mtx_positions);
+			auto latest = _target_update_sequences.find(action.code);
+			if (_latest_position_batch_sequence > sequence ||
+				(latest != _target_update_sequences.end() && latest->second > sequence) ||
+				initialSequence >= sequence)
+				continue;
+			const std::string code = action.code; const double target = action.target * _scale;
+			UnitLifecycleState::Event event;
+			event.callback = [code, target](ExecuteUnit* unit) { unit->set_position(code.c_str(), target); };
+			event.target_update = true;
+			event.position_sequence = sequence;
+			action.drain = appendUnitEvent(action.state, event);
+		}
+		kickUnitEventDrain(action.unit, action.state, action.drain);
+	}
 }
 
 std::vector<std::string> WtArbiExecuter::snapshotMissingTargets(
@@ -1551,6 +1671,7 @@ void WtArbiExecuter::clearMissingTargets(const std::vector<std::string>& codes,
 				continue;
 			_target_update_sequences[oldCode] = batchSequence;
 			pos->second = 0;
+			++_target_revision;
 			_target_dispatch_allowed[oldCode] = true;
 			SpinLock unitsLock(_mtx_units);
 			auto unitIt = _unit_map.find(oldCode);
@@ -1645,6 +1766,7 @@ void WtArbiExecuter::clearUnmanagedChannelHolds(const std::vector<std::string>& 
 				continue;
 			_target_update_sequences[stdCode] = batchSequence;
 			_target_pos[stdCode] = 0;
+			++_target_revision;
 			_target_dispatch_allowed[stdCode] = true;
 			SpinLock unitsLock(_mtx_units);
 			auto unitIt = _unit_map.find(stdCode);
@@ -1748,103 +1870,12 @@ void WtArbiExecuter::on_tick(const char* stdCode, WTSTickData* newTick)
  */
 void WtArbiExecuter::on_position_changed(const char* stdCode, double diffPos)
 {
-	if (stdCode == NULL || stdCode[0] == '\0')
-		return;
+	if (stdCode == NULL || stdCode[0] == '\0') return;
 	QuiesceIngress ingress(this);
-	if (!ingress)
-		return;
-	const std::string code(stdCode);
-	const bool orderAllowed = !_trader || _trader->checkOrderLimits(stdCode);
-	double oldVol = 0;
-	double newVol = 0;
-	uint64_t batchSequence = 0;
-	ExecuteUnitPtr unit;
-	std::shared_ptr<UnitLifecycleState> state;
-	bool shouldDrain = false;
-	bool targetQueued = false;
-	{
-		std::lock_guard<std::mutex> positionLock(_mtx_positions);
-		batchSequence = _next_position_sequence++;
-		_target_update_sequences[code] = batchSequence;
-		oldVol = _target_pos[code];
-		newVol = oldVol + diffPos;
-		_target_pos[code] = newVol;
-		_target_dispatch_allowed[code] = orderAllowed;
-		if (orderAllowed)
-		{
-			SpinLock unitsLock(_mtx_units);
-			auto unitIt = _unit_map.find(code);
-			auto stateIt = _unit_states.find(code);
-			if (unitIt != _unit_map.end() && stateIt != _unit_states.end())
-			{
-				unit = unitIt->second;
-				state = stateIt->second;
-				uint64_t initialTargetSequence = 0;
-				{
-					std::lock_guard<std::mutex> stateLock(state->mutex);
-					initialTargetSequence = state->initial_target_sequence;
-				}
-				if (initialTargetSequence >= batchSequence)
-					targetQueued = true;
-				else
-				{
-					const double traderTarget = round(newVol * _scale);
-					UnitLifecycleState::Event event;
-					event.callback = [code, traderTarget](ExecuteUnit* target) {
-						target->set_position(code.c_str(), traderTarget);
-					};
-					event.target_update = true;
-					event.position_sequence = batchSequence;
-					shouldDrain = appendUnitEvent(state, event);
-					targetQueued = true;
-				}
-			}
-		}
-	}
-
-	double traderTarget = round(newVol * _scale);
-
-	if(!decimal::eq(diffPos, 0))
-	{
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Target position of {} changed: {} -> {} : {} with scale:{}", stdCode, oldVol, newVol, traderTarget, _scale);
-	}
-
-	if (!orderAllowed)
-	{
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is disabled", stdCode);
-		return;
-	}
-	if (unit == NULL)
-		unit = getUnit(stdCode);
-	if (unit == NULL)
-		return;
-	if (state == NULL)
-		state = getUnitState(stdCode);
-	if (state == NULL)
-		return;
-	if (!targetQueued)
-	{
-		uint64_t initialTargetSequence = 0;
-		{
-			std::lock_guard<std::mutex> stateLock(state->mutex);
-			initialTargetSequence = state->initial_target_sequence;
-		}
-		std::lock_guard<std::mutex> positionLock(_mtx_positions);
-		auto latest = _target_update_sequences.find(code);
-		if ((latest != _target_update_sequences.end() && latest->second > batchSequence) ||
-			initialTargetSequence >= batchSequence)
-			return;
-		const double traderTarget = round(newVol * _scale);
-		UnitLifecycleState::Event event;
-		event.callback = [code, traderTarget](ExecuteUnit* target) {
-			target->set_position(code.c_str(), traderTarget);
-		};
-		event.target_update = true;
-		event.position_sequence = batchSequence;
-		shouldDrain = appendUnitEvent(state, event);
-	}
-
-	kickUnitEventDrain(unit, state, shouldDrain);
+	if (!ingress || !std::isfinite(diffPos) || !std::isfinite(diffPos * _scale)) return;
+	wt_hashmap<std::string, double> targets;
+	targets.emplace(stdCode, diffPos);
+	submitTargetBatch(targets, true);
 }
 
 /*!
@@ -2081,7 +2112,7 @@ void WtArbiExecuter::on_position(const char* stdCode, bool /*isLong*/, double /*
 		return;
 	{
 		std::lock_guard<std::mutex> positionLock(_mtx_positions);
-		_channel_holds.insert(stdCode);
+		if (_channel_holds.insert(stdCode).second) ++_target_revision;
 	}
 
 	/*

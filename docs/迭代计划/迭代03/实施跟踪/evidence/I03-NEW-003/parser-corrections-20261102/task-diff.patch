@@ -1,0 +1,472 @@
+--- /tmp/wt-i03-parser-correction/baseline/WtRunner.cpp	2026-11-02 14:01:58
++++ src/WtRunner/WtRunner.cpp	2026-11-02 14:04:26
+@@ -1309,6 +1309,7 @@
+ 
+ 		_runtime_started.store(true, std::memory_order_release);
+ 		_parser_commands_submitted.store(false, std::memory_order_release);
++		_run_succeeded.store(false, std::memory_order_release);
+ 		{
+ 			ScopedBoolReset startupGuard(_runtime_starting);
+ 			try
+@@ -1359,6 +1360,7 @@
+ 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+ 			}
+ 		}
++		_run_succeeded.store(true, std::memory_order_release);
+ 	}
+ 	catch (...)
+ 	{
+--- /tmp/wt-i03-parser-correction/baseline/WtRunner.h	2026-11-02 14:01:58
++++ src/WtRunner/WtRunner.h	2026-11-02 14:04:26
+@@ -90,6 +90,11 @@
+ 	 * True does not indicate provider connection or readiness.
+ 	 */
+ 	bool parserCommandsSubmitted() const { return _parser_commands_submitted.load(); }
++	/** Whether the accepted run invocation returned normally after startup.
++	 * False includes not started, still running synchronously, early shutdown,
++	 * and an exception. This does not imply parser submission or readiness.
++	 */
++	bool runSucceeded() const { return _run_succeeded.load(std::memory_order_acquire); }
+ 
+ 	/**
+ 	 * @brief Stop this runner and quiesce every executor manager.
+@@ -217,6 +222,7 @@
+ 	bool				_shutdown_in_progress = false;
+ 	std::atomic<bool> _runtime_started;	//!< Runtime config is frozen after run begins.
+ 	std::atomic<bool> _parser_commands_submitted{false}; //!< Command submission, not provider readiness.
++	std::atomic<bool> _run_succeeded{false}; //!< Normal completion of the accepted run invocation.
+ 	std::atomic<bool> _shutdown_requested;	//!< Reject config after any shutdown attempt.
+ 	std::vector<ParserAdapterPtr> _failed_parser_owners; //!< Retain partial parser initializations fail-closed.
+ };
+--- /tmp/wt-i03-parser-correction/baseline/main.cpp	2026-11-02 14:01:58
++++ src/WtRunner/main.cpp	2026-11-02 14:09:37
+@@ -124,9 +124,8 @@
+ 	 * @param false 表示同步运行，程序会阻塞直到收到退出信号
+ 	 */
+ 	runner.run(false);
+-	// run(false) retains all owners while its event loop is active. Report a
+-	// failed initial parser command only after the loop returns normally; a
+-	// command submission does not establish provider connection or readiness.
+-	return runner.parserCommandsSubmitted() ? 0 : 1;
++	// Report exceptions/early shutdown and failed parser command submission
++	// after run returns; parser submission does not imply provider readiness.
++	return runner.runSucceeded() && runner.parserCommandsSubmitted() ? 0 : 1;
+ }
+ 
+--- /tmp/wt-i03-parser-correction/baseline/WtDtRunner.cpp	2026-11-02 14:01:58
++++ src/WtDtPorter/WtDtRunner.cpp	2026-11-02 14:04:26
+@@ -232,7 +232,7 @@
+ 	try
+ 	{
+ 		std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+-		startupBlocked = _startup_blocked;
++		startupBlocked = _startup_blocked || _config_load_failed;
+ 		parserRegistryStopped = _parser_registry_stopped || _to_exit.load();
+ 		if (!startupBlocked && !parserRegistryStopped && !_parser_registry_started)
+ 		{
+@@ -345,6 +345,10 @@
+ 
+ 	if(config == NULL)
+ 	{
++		{
++			std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
++			_config_load_failed = true;
++		}
+ 		WTSLogger::error("Loading config file {} failed", cfgFile);
+ 		return;
+ 	}
+@@ -362,6 +366,10 @@
+ 			parserFileConfig->release();
+ 		config->release();
+ 		return;
++	}
++	{
++		std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
++		_config_load_failed = false;
+ 	}
+ 
+ 	//基础数据文件
+--- /tmp/wt-i03-parser-correction/baseline/WtDtRunner.h	2026-11-02 14:10:35
++++ src/WtDtPorter/WtDtRunner.h	2026-11-02 14:04:26
+@@ -1,123 +1,124 @@
+-/*!
+- * \file WtDtRunner.h
+- * \project	WonderTrader
+- *
+- * \author Wesley
+- * \date 2020/03/30
+- * 
+- * \brief 
+- */
+-#pragma once
+-#include "PorterDefs.h"
+-#include "ExpDumper.h"
+-
+-#include "../WtDtCore/DataManager.h"
+-#include "../WtDtCore/ParserAdapter.h"
+-#include "../WtDtCore/StateMonitor.h"
+-#include "../WtDtCore/UDPCaster.h"
+-#include "../WtDtCore/IndexWorkerMgr.h"
+-#include "../WtDtCore/ShmCaster.h"
+-
+-#include "../WTSTools/WTSHotMgr.h"
+-#include "../WTSTools/WTSBaseDataMgr.h"
+-
+-#include <boost/asio.hpp>
+-#include <atomic>
+-#include <vector>
+-
+-NS_WTP_BEGIN
+-class WTSVariant;
+-NS_WTP_END
+-
+-class WtDtRunner
+-{
+-public:
+-	WtDtRunner();
+-	~WtDtRunner();
+-
+-public:
+-	void	initialize(const char* cfgFile, const char* logCfg, const char* modDir = "", bool bCfgFile = true, bool bLogCfgFile = true);
+-	void	start(bool bAsync = false, bool bAlldayMode = false);
+-	bool	isAlldayMode() const { return _allday_mode; }
+-	// Status of the initial start snapshot only; excludes dynamically added parsers.
+-	// True means commands were submitted, not that providers are connected.
+-	bool initialParserCommandsSubmitted() const { return _initial_parser_commands_submitted.load(); }
+-
+-	bool	createExtParser(const char* id);
+-
+-
+-//////////////////////////////////////////////////////////////////////////
+-//扩展Parser
+-public:
+-	void registerParserPorter(FuncParserEvtCallback cbEvt, FuncParserSubCallback cbSub);
+-
+-	void parser_init(const char* id);
+-	void parser_connect(const char* id);
+-	void parser_release(const char* id);
+-	void parser_disconnect(const char* id);
+-	void parser_subscribe(const char* id, const char* code);
+-	void parser_unsubscribe(const char* id, const char* code);
+-
+-	void on_ext_parser_quote(const char* id, WTSTickStruct* curTick, uint32_t uProcFlag);
+-
+-//////////////////////////////////////////////////////////////////////////
+-//扩展Dumper
+-public:
+-	bool createExtDumper(const char* id);
+-
+-	void registerExtDumper(FuncDumpBars barDumper, FuncDumpTicks tickDumper);
+-
+-	void registerExtHftDataDumper(FuncDumpOrdQue ordQueDumper, FuncDumpOrdDtl ordDtlDumper, FuncDumpTrans transDumper);
+-
+-	bool dumpHisBars(const char* id, const char* stdCode, const char* period, WTSBarStruct* bars, uint32_t count);
+-
+-	bool dumpHisTicks(const char* id, const char* stdCode, uint32_t uDate, WTSTickStruct* ticks, uint32_t count);
+-
+-	bool dumpHisOrdQue(const char* id, const char* stdCode, uint32_t uDate, WTSOrdQueStruct* item, uint32_t count);
+-
+-	bool dumpHisOrdDtl(const char* id, const char* stdCode, uint32_t uDate, WTSOrdDtlStruct* items, uint32_t count);
+-
+-	bool dumpHisTrans(const char* id, const char* stdCode, uint32_t uDate, WTSTransStruct* items, uint32_t count);
+-
+-private:
+-	void initDataMgr(WTSVariant* config, bool bAlldayMode = false);
+-	void initParsers(WTSVariant* cfg);
+-
+-private:
+-
+-	WTSBaseDataMgr	_bd_mgr;
+-	WTSHotMgr		_hot_mgr;
+-	boost::asio::io_context _async_io;
+-	StateMonitor	_state_mon;
+-	UDPCaster		_udp_caster;
+-	ShmCaster		_shm_caster;
+-	DataManager		_data_mgr;
+-	IndexWorkerMgr	_idx_factory;
+-	ParserAdapterMgr	_parsers;
+-	// Failed external parser candidates remain outside the runnable manager,
+-	// but their API may still hold the adapter's SPI pointer. Keep the candidate
+-	// and its borrowed runner graph alive until a provider-specific drain exists.
+-	std::vector<ParserAdapterPtr> _quarantined_ext_parsers;
+-
+-	FuncParserEvtCallback	_cb_parser_evt;
+-	FuncParserSubCallback	_cb_parser_sub;
+-
+-	FuncDumpBars	_dumper_for_bars;
+-	FuncDumpTicks	_dumper_for_ticks;
+-
+-	FuncDumpOrdQue	_dumper_for_ordque;
+-	FuncDumpOrdDtl	_dumper_for_orddtl;
+-	FuncDumpTrans	_dumper_for_trans;
+-
+-	typedef std::shared_ptr<ExpDumper> ExpDumperPtr;
+-	typedef std::map<std::string, ExpDumperPtr>  ExpDumpers;
+-	ExpDumpers		_dumpers;
+-
+-	std::atomic<bool> _to_exit;
+-	bool _allday_mode;
+-	bool _startup_blocked; // guarded by parser registry mutex; required init failed
+-	bool _parser_registry_started; // guarded with ParserAdapterMgr by registry mutex
+-	bool _parser_registry_stopped; // guarded with ParserAdapterMgr by registry mutex
+-	std::atomic<bool> _initial_parser_commands_submitted{false};
+-};
+-
++/*!
++ * \file WtDtRunner.h
++ * \project	WonderTrader
++ *
++ * \author Wesley
++ * \date 2020/03/30
++ * 
++ * \brief 
++ */
++#pragma once
++#include "PorterDefs.h"
++#include "ExpDumper.h"
++
++#include "../WtDtCore/DataManager.h"
++#include "../WtDtCore/ParserAdapter.h"
++#include "../WtDtCore/StateMonitor.h"
++#include "../WtDtCore/UDPCaster.h"
++#include "../WtDtCore/IndexWorkerMgr.h"
++#include "../WtDtCore/ShmCaster.h"
++
++#include "../WTSTools/WTSHotMgr.h"
++#include "../WTSTools/WTSBaseDataMgr.h"
++
++#include <boost/asio.hpp>
++#include <atomic>
++#include <vector>
++
++NS_WTP_BEGIN
++class WTSVariant;
++NS_WTP_END
++
++class WtDtRunner
++{
++public:
++	WtDtRunner();
++	~WtDtRunner();
++
++public:
++	void	initialize(const char* cfgFile, const char* logCfg, const char* modDir = "", bool bCfgFile = true, bool bLogCfgFile = true);
++	void	start(bool bAsync = false, bool bAlldayMode = false);
++	bool	isAlldayMode() const { return _allday_mode; }
++	// Status of the initial start snapshot only; excludes dynamically added parsers.
++	// True means commands were submitted, not that providers are connected.
++	bool initialParserCommandsSubmitted() const { return _initial_parser_commands_submitted.load(); }
++
++	bool	createExtParser(const char* id);
++
++
++//////////////////////////////////////////////////////////////////////////
++//扩展Parser
++public:
++	void registerParserPorter(FuncParserEvtCallback cbEvt, FuncParserSubCallback cbSub);
++
++	void parser_init(const char* id);
++	void parser_connect(const char* id);
++	void parser_release(const char* id);
++	void parser_disconnect(const char* id);
++	void parser_subscribe(const char* id, const char* code);
++	void parser_unsubscribe(const char* id, const char* code);
++
++	void on_ext_parser_quote(const char* id, WTSTickStruct* curTick, uint32_t uProcFlag);
++
++//////////////////////////////////////////////////////////////////////////
++//扩展Dumper
++public:
++	bool createExtDumper(const char* id);
++
++	void registerExtDumper(FuncDumpBars barDumper, FuncDumpTicks tickDumper);
++
++	void registerExtHftDataDumper(FuncDumpOrdQue ordQueDumper, FuncDumpOrdDtl ordDtlDumper, FuncDumpTrans transDumper);
++
++	bool dumpHisBars(const char* id, const char* stdCode, const char* period, WTSBarStruct* bars, uint32_t count);
++
++	bool dumpHisTicks(const char* id, const char* stdCode, uint32_t uDate, WTSTickStruct* ticks, uint32_t count);
++
++	bool dumpHisOrdQue(const char* id, const char* stdCode, uint32_t uDate, WTSOrdQueStruct* item, uint32_t count);
++
++	bool dumpHisOrdDtl(const char* id, const char* stdCode, uint32_t uDate, WTSOrdDtlStruct* items, uint32_t count);
++
++	bool dumpHisTrans(const char* id, const char* stdCode, uint32_t uDate, WTSTransStruct* items, uint32_t count);
++
++private:
++	void initDataMgr(WTSVariant* config, bool bAlldayMode = false);
++	void initParsers(WTSVariant* cfg);
++
++private:
++
++	WTSBaseDataMgr	_bd_mgr;
++	WTSHotMgr		_hot_mgr;
++	boost::asio::io_context _async_io;
++	StateMonitor	_state_mon;
++	UDPCaster		_udp_caster;
++	ShmCaster		_shm_caster;
++	DataManager		_data_mgr;
++	IndexWorkerMgr	_idx_factory;
++	ParserAdapterMgr	_parsers;
++	// Failed external parser candidates remain outside the runnable manager,
++	// but their API may still hold the adapter's SPI pointer. Keep the candidate
++	// and its borrowed runner graph alive until a provider-specific drain exists.
++	std::vector<ParserAdapterPtr> _quarantined_ext_parsers;
++
++	FuncParserEvtCallback	_cb_parser_evt;
++	FuncParserSubCallback	_cb_parser_sub;
++
++	FuncDumpBars	_dumper_for_bars;
++	FuncDumpTicks	_dumper_for_ticks;
++
++	FuncDumpOrdQue	_dumper_for_ordque;
++	FuncDumpOrdDtl	_dumper_for_orddtl;
++	FuncDumpTrans	_dumper_for_trans;
++
++	typedef std::shared_ptr<ExpDumper> ExpDumperPtr;
++	typedef std::map<std::string, ExpDumperPtr>  ExpDumpers;
++	ExpDumpers		_dumpers;
++
++	std::atomic<bool> _to_exit;
++	bool _allday_mode;
++	bool _startup_blocked; // guarded by parser registry mutex; required init failed
++	bool _config_load_failed = false; // guarded by parser registry mutex; a later valid config may retry
++	bool _parser_registry_started; // guarded with ParserAdapterMgr by registry mutex
++	bool _parser_registry_stopped; // guarded with ParserAdapterMgr by registry mutex
++	std::atomic<bool> _initial_parser_commands_submitted{false};
++};
++
+--- /tmp/wt-i03-parser-correction/baseline/r28_runner_main_test.cpp	2026-11-02 14:01:58
++++ src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp	2026-11-02 14:07:52
+@@ -102,11 +102,49 @@
+ class R28ParserCommandEngine final : public WtEngine
+ {
+ public:
+-	void run() override { ++calls; }
++	void run() override { ++calls; if (throwOnRun) throw std::runtime_error("engine start failure"); }
+ 	void on_bar(const char*, const char*, uint32_t, WTSBarStruct*) override {}
+ 	int calls = 0;
++	bool throwOnRun = false;
+ };
++
++TEST(R28ParserCommands, engine_exception_does_not_report_success_after_parser_submission)
++{
++	for (bool async : {false, true})
++	{
++		auto runner = std::make_unique<WtRunner>();
++		auto engine = std::make_unique<R28ParserCommandEngine>();
++		runner->_engine = engine.get();
++		engine->throwOnRun = true;
++		auto parser = std::make_shared<ParserAdapter>();
++		auto* api = new R28ParserCommandApi();
++		api->result = true;
++		ASSERT_TRUE(parser->initExt("throwing", api, engine.get(), &runner->_bd_mgr));
++		ASSERT_TRUE(runner->_parsers.addAdapter("throwing", parser));
++		runner->run(async);
++		EXPECT_TRUE(runner->parserCommandsSubmitted());
++		EXPECT_FALSE(runner->runSucceeded());
++		EXPECT_EQ(engine->calls, 1);
++	}
++}
+ 
++TEST(R28ParserCommands, shutdown_during_startup_does_not_report_success)
++{
++	auto runner = std::make_unique<WtRunner>();
++	auto engine = std::make_unique<R28ParserCommandEngine>();
++	runner->_engine = engine.get();
++	auto parser = std::make_shared<ParserAdapter>();
++	auto* api = new R28ParserCommandApi();
++	api->result = true;
++	api->onConnect = [&] { EXPECT_FALSE(runner->shutdown()); };
++	ASSERT_TRUE(parser->initExt("shutdown", api, engine.get(), &runner->_bd_mgr));
++	ASSERT_TRUE(runner->_parsers.addAdapter("shutdown", parser));
++	runner->run(true);
++	EXPECT_TRUE(runner->parserCommandsSubmitted());
++	EXPECT_FALSE(runner->runSucceeded());
++	EXPECT_EQ(engine->calls, 0);
++}
++
+ TEST(R28ParserCommands, runner_reports_partial_submission_without_releasing_owners)
+ {
+ 	auto runner = std::make_unique<WtRunner>();
+@@ -124,9 +162,11 @@
+ 	ASSERT_TRUE(runner->_parsers.addAdapter("failure", failed));
+ 	ASSERT_TRUE(runner->_parsers.addAdapter("success", good));
+ 	EXPECT_FALSE(runner->parserCommandsSubmitted());
++	EXPECT_FALSE(runner->runSucceeded());
+ 	runner->run(true);
+ 	EXPECT_FALSE(callbackSawSubmitted);
+ 	EXPECT_FALSE(runner->parserCommandsSubmitted());
++	EXPECT_TRUE(runner->runSucceeded());
+ 	EXPECT_EQ(failedApi->calls, 1);
+ 	EXPECT_EQ(goodApi->calls, 1);
+ 	EXPECT_EQ(engine->calls, 1);
+@@ -150,6 +190,7 @@
+ 	runner->run(true);
+ 	EXPECT_FALSE(callbackSawSubmitted);
+ 	EXPECT_TRUE(runner->parserCommandsSubmitted());
++	EXPECT_TRUE(runner->runSucceeded());
+ 	EXPECT_EQ(api->calls, 1);
+ 	EXPECT_EQ(engine->calls, 1);
+ 	runner.reset();
+@@ -170,6 +211,7 @@
+ 		ASSERT_TRUE(runner->_parsers.addAdapter("sync", parser));
+ 		runner->run(false);
+ 		EXPECT_EQ(runner->parserCommandsSubmitted(), result);
++		EXPECT_TRUE(runner->runSucceeded());
+ 		EXPECT_EQ(api->calls, 1);
+ 		EXPECT_EQ(runner->_parsers.getAdapter("sync"), parser);
+ 		runner.reset();
+--- /tmp/wt-i03-parser-correction/baseline/i03_parser_start_status_test.cpp	2026-11-02 14:01:58
++++ src/TestUnits/coverage/r22_dtporter/i03_parser_start_status_test.cpp	2026-11-02 14:09:00
+@@ -36,6 +36,50 @@
+  if (event == EVENT_PARSER_CONNECT) throw std::runtime_error("test connect failure");
+ }
+ 
++TEST(I03DtPorterStart, failed_config_load_does_not_report_empty_snapshot_success)
++{
++ WtDtRunner runner;
++ runner.initialize("/this/path/does/not/exist/i03-config.json", "/this/path/does/not/exist/i03-log.json", "", true, true);
++ runner.start(true,true);
++ EXPECT_FALSE(runner.initialParserCommandsSubmitted());
++}
++
++TEST(I03DtPorterStart, failed_config_keeps_registered_parser_without_connecting)
++{
++ WtDtRunner runner;
++ auto parser=std::make_shared<ParserAdapter>(&runner._bd_mgr, &runner._data_mgr, nullptr);
++ auto* api=new ParserForStart(); api->result=true;
++ ASSERT_TRUE(parser->initExt("retained",api));
++ ASSERT_TRUE(runner._parsers.addAdapter("retained",parser));
++ runner.initialize("/this/path/does/not/exist/i03-config.json", "/this/path/does/not/exist/i03-log.json", "", true, true);
++ runner.start(true,true);
++ EXPECT_FALSE(runner.initialParserCommandsSubmitted());
++ EXPECT_EQ(api->calls,0);
++ EXPECT_EQ(runner._parsers.getAdapter("retained"),parser);
++ runner._parsers.release();
++}
++
++TEST(I03DtPorterStart, valid_empty_parser_config_reports_empty_snapshot_success)
++{
++ WtDtRunner runner;
++ runner.initialize("{\"basefiles\":{},\"writer\":{\"module\":\"no_i03_writer\"},\"allday\":true,\"parsers\":[]}",
++                   "/this/path/does/not/exist/i03-log.json", "", false, true);
++ runner.start(true,true);
++ EXPECT_TRUE(runner.initialParserCommandsSubmitted());
++}
++
++TEST(I03DtPorterStart, config_load_failure_can_retry_before_start)
++{
++ WtDtRunner runner;
++ runner.initialize("/this/path/does/not/exist/i03-config.json", "/this/path/does/not/exist/i03-log.json", "", true, true);
++ runner.start(true,true);
++ EXPECT_FALSE(runner.initialParserCommandsSubmitted());
++ runner.initialize("{\"basefiles\":{},\"writer\":{\"module\":\"no_i03_writer\"},\"allday\":true,\"parsers\":[]}",
++                   "/this/path/does/not/exist/i03-log.json", "", false, true);
++ runner.start(true,true);
++ EXPECT_TRUE(runner.initialParserCommandsSubmitted());
++}
++
+ TEST(I03DtPorterStart, partial_submission_does_not_release_owners)
+ {
+  WtDtRunner runner;

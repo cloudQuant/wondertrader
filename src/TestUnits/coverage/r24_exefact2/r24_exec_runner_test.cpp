@@ -142,13 +142,15 @@ const char* const kTradersBody = R"({
 // local / diff / dist 三条分别对应 runner L254-281 / L282-309 / L310-318
 // e3 的 trader 不存在 -> L273-276；e4 没写 trader -> L261-264；e5 不写 name -> 默认 local L251-252
 // 全部不写 poolsize -> 不建线程池
+// 卡8 8b=A（用户裁定，eager 全量预校验）：active 的 local/diff 执行器须带有限正数 scale 与含 default 的 policy；
+// 补最小合法参数（同 r104），单元仍惰性创建，本用例不建单元。
 const char* const kExecutersBody = R"({
 	"executers":[
-		{"id":"e1","name":"local","active":true,"trader":"r24t1","scale":1.0},
-		{"id":"e2","name":"diff","active":true,"trader":"r24t1","scale":1.0},
-		{"id":"e3","name":"local","active":true,"trader":"r24t_missing"},
+		{"id":"e1","name":"local","active":true,"trader":"r24t1","scale":1.0,"policy":{"default":{"name":"WtExeFact.WtMinImpactExeUnit"}}},
+		{"id":"e2","name":"diff","active":true,"trader":"r24t1","scale":1.0,"policy":{"default":{"name":"WtExeFact.WtMinImpactExeUnit"}}},
+		{"id":"e3","name":"local","active":true,"trader":"r24t_missing","scale":1.0,"policy":{"default":{"name":"WtExeFact.WtMinImpactExeUnit"}}},
 		{"id":"e4","name":"dist","active":true,"scale":2.0},
-		{"id":"e5","active":true,"trader":"r24t1"},
+		{"id":"e5","active":true,"trader":"r24t1","scale":1.0,"policy":{"default":{"name":"WtExeFact.WtMinImpactExeUnit"}}},
 		{"id":"e6","name":"local","active":false,"trader":"r24t1"}
 	]
 })";
@@ -251,7 +253,7 @@ void expectFailedConfigKeepsRunnerInactive(WtExecRunner& runner)
 	EXPECT_NO_THROW(runner.run());
 	WTSTickData* tick = mkRTick("SHFE.rb.2405", 20240102, 103015500, 3500.0);
 	EXPECT_NO_THROW(runner.handle_push_quote(tick));
-	EXPECT_EQ(runner.get_real_time(), timeBeforeQuote);
+	EXPECT_EQ(runner.get_real_time(), static_cast<uint64_t>(timeBeforeQuote));
 	EXPECT_EQ(runner.get_trading_day(), 0u);
 	EXPECT_EQ(WtHelper::getDate(), 20240203u);
 	EXPECT_EQ(WtHelper::getTime(), 1011u);
@@ -409,7 +411,7 @@ TEST(r24_runner, unknown_store_sessionRejectsConfigAndQuoteWithoutStateChange)
 	WTSTickData* tick = mkRTick("SHFE.rb.2405", 20240102, 103015500, 3500.0);
 	EXPECT_NO_THROW(runner.handle_push_quote(tick));
 	EXPECT_EQ(runner.get_trading_day(), 0u);
-	EXPECT_EQ(runner.get_real_time(), timeBeforeQuote);
+	EXPECT_EQ(runner.get_real_time(), static_cast<uint64_t>(timeBeforeQuote));
 	EXPECT_EQ(WtHelper::getDate(), 20240203u);
 	EXPECT_EQ(WtHelper::getTime(), 1011u);
 	EXPECT_EQ(WtHelper::getSecs(), 1213u);
@@ -536,13 +538,9 @@ TEST(r24_runner, session_and_commodity_queries_after_config)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// 缺陷复现（越界指针运算，不能启用）：空串标准化代码
-// CodeHelper::extractStdCode（src/Share/CodeHelper.hpp:604-607）先
-// `findFirst(stdCode, '.')`，空串得到 npos，随后 `stdCode + idx + 1` 已经在缓冲区之外，
-// 第二次 findFirst 就从越界指针开始扫。runner L442 不做入参校验，直接把它转给 extractStdCode。
-// 实测本用例 SIGSEGV（见 bugs/R24_exefact.md BUG-R24-001）
+// 迭代03 最终验收复核后启用（原禁用：BUG-R24-001 空串标准化代码越界）。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_runner, DISABLED_get_sess_info_with_empty_code_crashes_code_helper)
+TEST(r24_runner, get_sess_info_with_empty_code_crashes_code_helper)
 {
 	R24Fixture fx{ "emptycode" };
 	WtExecRunner runner;

@@ -100,33 +100,47 @@ TEST_F(R68StateMonitorInputsTest, JsonNullMemberIsTreatedAsAbsent)
 	EXPECT_TRUE(mon.isAllInState(SS_ORIGINAL));
 }
 
-// StateMonitor.cpp:68-74 —— 会话值不是对象（数字）时 getUInt32 取不到键，
-// 三个时间字段退回 0；会话模板存在，所以仍会构造 StateInfo 并保持 SS_ORIGINAL。
+// 会话值不是对象（数字）。
+// I03-NEW-053：合同依据为卡 1=A+C（入口前置校验兜底）及 2026-11-03 已复核的
+// StateMonitor 初始化“整批校验后发布”：非对象会话项是配置错误，不能以全 0 时间
+// 登记（全 0 会让状态机在 00:00 收盘/作业），初始化失败且不发布任何状态；
+// 原用例期望退回默认时间 0 并登记，与之冲突，改写如下。
 TEST_F(R68StateMonitorInputsTest, NumericSessionEntryDefaultsTimesToZero)
 {
 	StateMonitor mon;
 	fs::path cfg = initStateCfg(R"JSON({"SSE": 12345})JSON");
-	ASSERT_TRUE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
+	EXPECT_FALSE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
 
+	EXPECT_FALSE(mon.isInState("SSE", SS_ORIGINAL));
+	EXPECT_FALSE(mon.isAnyInState(SS_ORIGINAL));
+	EXPECT_FALSE(mon.isAnyInState(SS_RECEIVING));
+
+	// 合法配置仍按 key 精确匹配登记；之后的非法重新初始化不破坏已发布状态。
+	fs::path good = initStateCfg(R"JSON({"SSE": {"inittime": 900, "closetime": 1510, "proctime": 1530}})JSON");
+	ASSERT_TRUE(mon.initialize(good.string().c_str(), &_bdMgr, nullptr));
 	EXPECT_TRUE(mon.isInState("SSE", SS_ORIGINAL));
 	// 大小写/尾随空格不同即为另一个 key（_map 用 std::string 精确匹配）
 	EXPECT_FALSE(mon.isInState("sse", SS_ORIGINAL));
 	EXPECT_FALSE(mon.isInState("SSE ", SS_ORIGINAL));
-	EXPECT_FALSE(mon.isAnyInState(SS_RECEIVING));
+	fs::path bad = initStateCfg(R"JSON({"SSE": 12345})JSON");
+	EXPECT_FALSE(mon.initialize(bad.string().c_str(), &_bdMgr, nullptr));
+	EXPECT_TRUE(mon.isInState("SSE", SS_ORIGINAL));
 	EXPECT_TRUE(mon.isAllInState(SS_ORIGINAL));
 }
 
-// StateMonitor.cpp:68-74 —— 布尔会话值同样落到默认时间（getUInt32 → defVal=0），
-// 且夜盘模板的集合竞价/交易区间换算循环仍会执行。
+// 会话值为布尔。
+// I03-NEW-053：合同依据为卡 1=A+C（入口前置校验兜底）及 2026-11-03 已复核的
+// StateMonitor 初始化“整批校验后发布”：非对象会话项是配置错误，不能以全 0 时间
+// 登记（全 0 会让状态机在 00:00 收盘/作业），初始化失败且不发布任何状态；
+// 原用例期望退回默认时间 0 并登记，与之冲突，改写如下。
 TEST_F(R68StateMonitorInputsTest, BooleanSessionEntryDefaultsTimesToZero)
 {
 	StateMonitor mon;
 	fs::path cfg = initStateCfg(R"JSON({"SHFE": true})JSON");
-	ASSERT_TRUE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
+	EXPECT_FALSE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
 
-	EXPECT_TRUE(mon.isInState("SHFE", SS_ORIGINAL));
-	EXPECT_TRUE(mon.isAnyInState(SS_ORIGINAL));
-	// 时间字段全 0 也不会在 initialize 阶段推进任何状态
+	EXPECT_FALSE(mon.isInState("SHFE", SS_ORIGINAL));
+	EXPECT_FALSE(mon.isAnyInState(SS_ORIGINAL));
 	EXPECT_FALSE(mon.isAnyInState(SS_INITIALIZED));
 	EXPECT_FALSE(mon.isAnyInState(SS_PAUSED));
 }

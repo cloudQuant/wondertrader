@@ -1,0 +1,339 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/WtBtCore/HisDataReplayer.cpp	2026-11-03 21:43:58
++++ src/WtBtCore/HisDataReplayer.cpp	2026-11-04 20:24:51
+@@ -809,6 +809,9 @@
+ 
+ void HisDataReplayer::reset()
+ {
++	for (auto& skipped : _hft_out_of_session)
++		skipped.store(0);
++	_hft_out_of_session_logged.clear();
+ 	// Replay buckets own their vectors. Drop them on reset so reruns restart at
+ 	// the configured range without touching vectors borrowed by history slices.
+ 	_replay_ticks_cache.clear();
+@@ -1053,6 +1056,8 @@
+ 	{
+ 		_replay_failure_code = errorCode == WT_REPLAY_ERROR_NONE ? WT_REPLAY_ERROR_INTERNAL : errorCode;
+ 		_replay_failure_message = message.empty() ? "Replay failed" : message;
++		// I03-NEW-019: make the first recorded failure observable in the log.
++		WTSLogger::error("Replay failed with replay error {}: {}", _replay_failure_code, _replay_failure_message);
+ 	}
+ 	_terminated.store(true);
+ }
+@@ -1729,7 +1734,17 @@
+ 			uint32_t nextTDate = _opened_tdate;
+ 			if(isDay || (!isDay && sInfo->offsetTime(nextTime, false) != sInfo->getCloseTime(true)))
+ 			{
+-				nextTDate = _bd_mgr.calcTradingDate(commId.c_str(), nextDate, nextTime, false);
++				// Decision card 1: a failed mapping stops the replay before any
++				// session callback or clock change.
++				const wtp::DateMappingResult32 mappedTDate = _bd_mgr.checkedCalcTradingDate(commId.c_str(), nextDate, nextTime, false);
++				if (mappedTDate.status != wtp::DateMappingStatus::Ok)
++				{
++					WTSLogger::error("Cannot map bar time {}.{} of {} to a trading date: status {}", nextDate, nextTime,
++						commId.c_str(), static_cast<uint32_t>(mappedTDate.status));
++					report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Replay trading date mapping failed");
++					break;
++				}
++				nextTDate = mappedTDate.value;
+ 				if (_opened_tdate != nextTDate)
+ 				{
+ 					if(_closed_tdate != _opened_tdate)
+@@ -1771,10 +1786,15 @@
+ 							}
+ 							if (!hasHftEvents)
+ 							{
+-								const uint64_t beginBoundary = _bd_mgr.getBoundaryTime(sInfo->id(), nextTDate, true, true);
++								const wtp::DateMappingResult64 beginBoundary = _bd_mgr.checkedGetBoundaryTime(sInfo->id(), nextTDate, true, true);
++								if (beginBoundary.status != wtp::DateMappingStatus::Ok)
++								{
++									report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Replay session boundary mapping failed");
++									break;
++								}
+ 								// With an empty HFT bucket, keep the regular session open boundary
+ 								// while preventing it from preceding the already-published replay clock.
+-								hftNaturalTime = std::max(hftNaturalTime, natural_time_from_boundary(beginBoundary));
++								hftNaturalTime = std::max(hftNaturalTime, natural_time_from_boundary(beginBoundary.value));
+ 							}
+ 							useHftClock = true;
+ 							sessionDate = static_cast<uint32_t>(hftNaturalTime / 1000000000);
+@@ -1786,9 +1806,14 @@
+ 
+ 					if (!useHftClock)
+ 					{
+-						const uint64_t beginTimeofDay = _bd_mgr.getBoundaryTime(sInfo->id(), nextTDate, true, true);
+-						sessionDate = static_cast<uint32_t>(beginTimeofDay / 10000);
+-						sessionTime = static_cast<uint32_t>(beginTimeofDay % 10000);
++						const wtp::DateMappingResult64 beginTimeofDay = _bd_mgr.checkedGetBoundaryTime(sInfo->id(), nextTDate, true, true);
++						if (beginTimeofDay.status != wtp::DateMappingStatus::Ok)
++						{
++							report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Replay session boundary mapping failed");
++							break;
++						}
++						sessionDate = static_cast<uint32_t>(beginTimeofDay.value / 10000);
++						sessionTime = static_cast<uint32_t>(beginTimeofDay.value % 10000);
+ 					}
+ 					_cur_date = sessionDate;
+ 					_cur_time = sessionTime;
+@@ -1915,9 +1940,14 @@
+ 							_day_cache.clear();
+ 						}
+ 						_cur_tdate = flushTDate;
+-						uint64_t beginTime = _bd_mgr.getBoundaryTime(sInfo->id(), flushTDate, true, true);
+-						if (beginTime == 0)
+-							beginTime = static_cast<uint64_t>(flushTDate) * 10000 + _range_begin_hhmm;
++						// Decision card 1: no boundary=0 fallback; a failed mapping stops the replay.
++						const wtp::DateMappingResult64 mappedBegin = _bd_mgr.checkedGetBoundaryTime(sInfo->id(), flushTDate, true, true);
++						if (mappedBegin.status != wtp::DateMappingStatus::Ok)
++						{
++							report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Replay session boundary mapping failed");
++							break;
++						}
++						uint64_t beginTime = mappedBegin.value;
+ 						uint32_t sessionDate = static_cast<uint32_t>(beginTime / 10000);
+ 						uint32_t sessionTime = static_cast<uint32_t>(beginTime % 10000);
+ 						uint32_t sessionSecs = 0;
+@@ -2003,9 +2033,12 @@
+ 	_cur_date = static_cast<uint32_t>(_bar_begin_time / 10000);
+ 	_cur_time = static_cast<uint32_t>(_bar_begin_time % 10000);
+ 	_cur_secs = 0;
+-	_cur_tdate = _bd_mgr.calcTradingDate(
+-		(strlen(_task->_session) == 0) ? DEFAULT_SESSIONID : _task->_session,
+-		_cur_date, _cur_time, true);
++	{
++		const wtp::DateMappingResult32 mapped = _bd_mgr.checkedCalcTradingDate(
++			(strlen(_task->_session) == 0) ? DEFAULT_SESSIONID : _task->_session,
++			_cur_date, _cur_time, true);
++		_cur_tdate = mapped.status == wtp::DateMappingStatus::Ok ? mapped.value : 0;
++	}
+ 
+ 	//时间调度任务不为空,则按照时间调度任务回放
+ 	WTSSessionInfo* sInfo = NULL;
+@@ -2142,7 +2175,13 @@
+ 					continue;
+ 				}
+ 
+-				uint32_t newTDate = _bd_mgr.calcTradingDate(DEF_SESS, _cur_date, _cur_time, true);
++				const wtp::DateMappingResult32 mappedTDate = _bd_mgr.checkedCalcTradingDate(DEF_SESS, _cur_date, _cur_time, true);
++				if (mappedTDate.status != wtp::DateMappingStatus::Ok)
++				{
++					report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Task replay trading date mapping failed");
++					break;
++				}
++				uint32_t newTDate = mappedTDate.value;
+ 
+ 				if (newTDate != _cur_tdate)
+ 				{
+@@ -2180,7 +2219,15 @@
+ 
+ 			_cur_date = TimeUtils::getNextDate(_cur_date);
+ 			_cur_time = endtime;
+-			_cur_tdate = _bd_mgr.calcTradingDate(DEF_SESS, _cur_date, _cur_time, true);
++			{
++				const wtp::DateMappingResult32 mappedTDate = _bd_mgr.checkedCalcTradingDate(DEF_SESS, _cur_date, _cur_time, true);
++				if (mappedTDate.status != wtp::DateMappingStatus::Ok)
++				{
++					report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Task replay trading date mapping failed");
++					break;
++				}
++				_cur_tdate = mappedTDate.value;
++			}
+ 
+ 			uint64_t nextTime = (uint64_t)_cur_date * 10000 + _cur_time;
+ 			if (nextTime > _bar_end_time)
+@@ -2318,7 +2365,13 @@
+ 			{
+ 				//换日了
+ 				mins = std::min(_task->_time, tradingMins);
+-				uint32_t nextTDate = _bd_mgr.getNextTDate(_task->_trdtpl, _cur_tdate, 1, true);
++				const wtp::DateMappingResult32 mappedNext = _bd_mgr.checkedNextTradingDate(_task->_trdtpl, _cur_tdate, 1, true);
++				if (mappedNext.status != wtp::DateMappingStatus::Ok)
++				{
++					report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Task replay next trading date mapping failed");
++					break;
++				}
++				uint32_t nextTDate = mappedNext.value;
+ 
+ 				if (sInfo->getOffsetMins() != 0)
+ 				{
+@@ -2645,6 +2698,25 @@
+ 
+ 							curTS.price = newPx;
+ 							curTS.volume = nextBar.vol;
++
++							// BUG-I02-NEW-109: get_day_price (public "当日价格") reads _day_cache
++							// when ticks are disabled. Accumulate the day's open/high/low/last
++							// from the simulated OHLC sequence, as the minute arm does; the
++							// dispatched simulated tick itself is unchanged.
++							WTSTickStruct& dayTS = _day_cache[barsList->_code];
++							strcpy(dayTS.code, barsList->_code.c_str());
++							dayTS.action_date = _cur_date;
++							dayTS.action_time = curTS.action_time;
++							dayTS.price = newPx;
++							dayTS.volume = nextBar.vol;
++							if (decimal::eq(dayTS.open, 0))
++								dayTS.open = newPx;
++							dayTS.high = max(newPx, dayTS.high);
++							if (decimal::eq(dayTS.low, 0))
++								dayTS.low = newPx;
++							else
++								dayTS.low = min(newPx, dayTS.low);
++
+ 							update_price(barsList->_code.c_str(), curTS.price);
+ 							dispatch_sim_tick(realCode.c_str(), WTSTickData::create(curTS), cInfo.isExright(), barsList, barsList->_cursor);
+ 						}
+@@ -3704,6 +3776,17 @@
+ 	auto itemTime = [](const auto& item) {
+ 		return static_cast<uint64_t>(item.action_date) * 1000000000ull + item.action_time;
+ 	};
++	auto note_out_of_session = [this](uint32_t kind, const std::string& code, uint32_t date,
++		uint32_t actionDate, uint32_t actionTime)
++	{
++		static const char* const kStreamNames[4] = { "order detail", "transaction", "tick", "order queue" };
++		if (kind >= 4) return;
++		++_hft_out_of_session[kind];
++		const std::string key = fmtutil::format("{}#{}#{}", kind, code.c_str(), date);
++		if (_hft_out_of_session_logged.insert(key).second)
++			WTSLogger::warn("Out-of-session {} record of {} at {}.{} in trading-date bucket {} is not dispatched",
++				kStreamNames[kind], code.c_str(), actionDate, actionTime, date);
++	};
+ 	auto enqueue = [&](auto& list, const std::string& code, uint32_t date, uint32_t kind)
+ 	{
+ 		const std::size_t count = std::min(list._count, list._items.size());
+@@ -3719,7 +3802,10 @@
+ 			const uint64_t time = itemTime(item);
+ 			if (time < stime) { ++list._cursor; continue; }
+ 			if (time >= etime) return;
+-			if (kind == 2)
++			// BUG-I02-NEW-029 (E): every HFT stream (tick, order detail, order queue,
++			// transaction) applies the same trading-session/validity filter. A record
++			// outside the session is not dispatched and not reconciled; it is counted
++			// per stream and reported once per stream/code/bucket.
+ 			{
+ 				WTSSessionInfo* session = get_session_info(code.c_str(), true);
+ 				const uint32_t hhmm = item.action_time / 100000;
+@@ -3729,7 +3815,11 @@
+ 				if (session == NULL || (session->getTradingMins() != 1440 &&
+ 					(session->offsetTime(minute, false) > session->getCloseTime(true) ||
+ 						!session->isInTradingTime(minute))) || !validActionTime)
+-				{ ++list._cursor; continue; }
++				{
++					note_out_of_session(kind, code, date, item.action_date, item.action_time);
++					++list._cursor;
++					continue;
++				}
+ 			}
+ 			std::size_t round = 0;
+ 			std::size_t previous = list._cursor - 1;
+@@ -5092,26 +5182,37 @@
+ 		curTick.action_date = uDate;
+ 		curTick.action_time = uTime;
+ 
+-		const auto validEnd = tickList._items.begin() + std::min(tickList._count, tickList._items.size());
+-		auto tit = std::lower_bound(tickList._items.begin(), validEnd, curTick, [](const WTSTickStruct& a, const WTSTickStruct& b){
++		// BUG-R103-002 (E): each record owns the left-closed, right-open interval
++		// [t_i, t_{i+1}); the visible prefix is every record with time <= now and
++		// the query returns its last element. Same-time records keep their stable
++		// load order, so the last inserted one is visible at that time. Before the
++		// first record and strictly after the last record the result is empty.
++		const auto validBegin = tickList._items.begin();
++		const auto validEnd = validBegin + std::min(tickList._count, tickList._items.size());
++		if (validBegin == validEnd)
++			return NULL;
++		auto before = [](const WTSTickStruct& a, const WTSTickStruct& b) {
+ 			if (a.action_date != b.action_date)
+ 				return a.action_date < b.action_date;
+ 			else
+ 				return a.action_time < b.action_time;
+-		});
+-		if (tit == validEnd)
++		};
++		const WTSTickStruct& tail = *(validEnd - 1);
++		if (before(tail, curTick))
+ 			return NULL;
+-		if (tit->action_date > uDate || (tit->action_date == uDate && tit->action_time > uTime))
+-		{
+-			if (tit == tickList._items.begin())
+-				return NULL;
+-			--tit;
+-		}
+-		tickList._query_cursor = static_cast<std::size_t>(tit - tickList._items.begin()) + 1;
++		auto tit = std::upper_bound(validBegin, validEnd, curTick, before);
++		if (tit == validBegin)
++			return NULL;
++		tickList._query_cursor = static_cast<std::size_t>(tit - validBegin);
+ 	}
+ 	return WTSTickData::create(tickList._items[tickList._query_cursor - 1]);
+ }
+ 
++uint64_t HisDataReplayer::get_out_of_session_count(uint32_t kind) const
++{
++	return kind < 4 ? _hft_out_of_session[kind].load() : 0;
++}
++
+ WTSCommodityInfo* HisDataReplayer::get_commodity_info(const char* stdCode)
+ {
+ 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
+@@ -6357,10 +6458,14 @@
+ 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
+ 	const char* stdPID = cInfo->stdCommID();
+ 
+-	uint32_t curDate = TimeUtils::getCurDate();
+-	uint32_t curTime = TimeUtils::getCurMin() / 100;
+-
+-	uint32_t endTDate = _bd_mgr.calcTradingDate(stdPID, curDate, curTime, false);
++	// One checked clock snapshot (decision card 1, I03-NEW-006).
++	const wtp::DateMappingResult32 mappedEnd = _bd_mgr.checkedCalcTradingDate(stdPID, 0, 0, false);
++	if (mappedEnd.status != wtp::DateMappingStatus::Ok)
++	{
++		WTSLogger::error("Cannot map current trading date of {}: status {}", stdPID, static_cast<uint32_t>(mappedEnd.status));
++		return false;
++	}
++	uint32_t endTDate = mappedEnd.value;
+ 
+ 	std::string pname;
+ 	switch (period)
+@@ -6494,9 +6599,11 @@
+ 		WTSBarStruct sBar, eBar;
+ 		if (period != KP_DAY)
+ 		{
+-			uint64_t sTime = _bd_mgr.getBoundaryTime(stdPID, leftDt, false, true);
+-			uint64_t eTime = _bd_mgr.getBoundaryTime(stdPID, rightDt, false, false);
+-			if (sTime == 0 || eTime == 0 || sTime > eTime)
++			const wtp::DateMappingResult64 sBound = _bd_mgr.checkedGetBoundaryTime(stdPID, leftDt, false, true);
++			const wtp::DateMappingResult64 eBound = _bd_mgr.checkedGetBoundaryTime(stdPID, rightDt, false, false);
++			const uint64_t sTime = sBound.value;
++			const uint64_t eTime = eBound.value;
++			if (sBound.status != wtp::DateMappingStatus::Ok || eBound.status != wtp::DateMappingStatus::Ok || sTime > eTime)
+ 			{
+ 				WTSLogger::error("Invalid integrated bar section boundary for {}", stdCode);
+ 				return false;
+@@ -6730,13 +6837,8 @@
+ bool HisDataReplayer::cacheAdjustedStkBarsFromBin(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period, bool /*bSubbed*/ /* = true */)
+ {
+ 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
+-	const char* stdPID = cInfo->stdCommID();
+-
+-	uint32_t curDate = TimeUtils::getCurDate();
+-	uint32_t curTime = TimeUtils::getCurMin() / 100;
++	// The former unused current-trading-date mapping (unchecked clock) was removed.
+ 
+-	[[maybe_unused]] uint32_t endTDate = _bd_mgr.calcTradingDate(stdPID, curDate, curTime, false);
+-
+ 	_bars_cache[key].reset(new BarsList());
+ 	BarsListPtr& barsList = _bars_cache[key];
+ 	barsList->_code = stdCode;
+@@ -6979,13 +7081,8 @@
+ {
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
+ 	WTSCommodityInfo* commInfo = _bd_mgr.getCommodity(cInfo._exchg, cInfo._product);
+-	const char* stdPID = cInfo.stdCommID();
+-
+-	uint32_t curDate = TimeUtils::getCurDate();
+-	uint32_t curTime = TimeUtils::getCurMin() / 100;
++	// The former unused current-trading-date mapping (unchecked clock) was removed.
+ 
+-	[[maybe_unused]] uint32_t endTDate = _bd_mgr.calcTradingDate(stdPID, curDate, curTime, false);
+-
+ 	[[maybe_unused]] bool isDay = (period == KP_DAY);
+ 
+ 	const char* ruleTag = cInfo._ruletag;

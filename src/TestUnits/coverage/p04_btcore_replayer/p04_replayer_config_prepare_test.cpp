@@ -15,9 +15,11 @@
  */
 #include <gtest/gtest.h>
 
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <string>
 #include <system_error>
 #include <sys/resource.h>
@@ -125,9 +127,21 @@ namespace
 	{
 		WTSVariant* basefiles = WTSVariant::createObject();
 		if (withSession)
+		{
 			basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
+			// 卡1 A+C：prepare 起点 checked 映射需日历（同 I03-NEW-018）
+			basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
+		}
 		if (withCommodity)
+		{
 			basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
+			// 卡13d：费用按可核验的实际合约计算，夹具提供 SSE.000001 合约元数据
+			const std::filesystem::path contracts = std::filesystem::temp_directory_path() /
+				("p04_replayer_contracts_" + std::to_string(::getpid()) + ".json");
+			std::ofstream(contracts) << "{\"SSE\":{\"000001\":{\"name\":\"p04\",\"code\":\"000001\",\"exchg\":\"SSE\","
+				"\"product\":\"STK\",\"opendate\":20000101,\"expiredate\":20991231}}}";
+			basefiles->append("contract", contracts.string().c_str());
+		}
 		cfg->append("basefiles", basefiles);
 		basefiles->release();
 	}
@@ -301,8 +315,9 @@ TEST_F(P04ReplayerConfigTest, missingBasefilesEntriesStillInit)
 
 	// 没有品种数据 -> 品种查询为 NULL
 	EXPECT_EQ(nullptr, replayer.get_commodity_info("SSE.STK.000001"));
-	// 没有手续费配置 -> 费用恒为 0
-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("SSE.STK.000001", 10.0, 100.0, 0));
+	// 没有手续费配置：卡13d“缺费报错”，费用查询返回可观察错误（NaN），不再静默为 0
+	// （旧断言期望 0.0，与已裁定卡13d冲突，改写；原文件见证据 before/）
+	EXPECT_TRUE(std::isnan(replayer.calc_fee("SSE.STK.000001", 10.0, 100.0, 0)));
 	EXPECT_EQ(std::string(""), replayer.get_rawcode("SSE.STK.000001"));
 }
 
@@ -338,10 +353,11 @@ TEST_F(P04ReplayerConfigTest, missingFeesFileLeavesEmptyFeeMap)
 	cfg->append("fees", "/tmp/p04_definitely_missing_fee_file.json");
 
 	HisDataReplayer replayer;
-	// loadFees 读不到文件只打日志，不影响 init 返回值
-	EXPECT_TRUE(replayer.init(cfg));
+	// 卡13d“缺费报错”：配置了却读不到的费用模板使 init 显式失败，费用查询不静默为 0
+	// （旧断言期望 init 成功且费用 0.0，与已裁定卡13d冲突，改写；原文件见证据 before/）
+	EXPECT_FALSE(replayer.init(cfg));
 	cfg->release();
-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("SSE.STK.000001", 1.0, 100.0, 0));
+	EXPECT_TRUE(std::isnan(replayer.calc_fee("SSE.STK.000001", 1.0, 100.0, 0)));
 }
 
 TEST_F(P04ReplayerConfigTest, clearCacheWipesPriceMap)

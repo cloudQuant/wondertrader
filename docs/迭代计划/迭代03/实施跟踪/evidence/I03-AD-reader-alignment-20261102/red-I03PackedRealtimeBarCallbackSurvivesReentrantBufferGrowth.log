@@ -1,0 +1,26 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4ReaderADTest.I03PackedRealtimeBarCallbackSurvivesReentrantBufferGrowth
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4ReaderADTest
+[ RUN      ] R4ReaderADTest.I03PackedRealtimeBarCallbackSurvivesReentrantBufferGrowth
+/tmp/wt-i03-adreader-align-20261102/src/WtDataStorageAD/WtDataReaderAD.cpp:669:56: runtime error: member access within misaligned address 0x000106930044 for type 'WTSBarStruct', which requires 8 byte alignment
+0x000106930044: note: pointer points here
+  00 00 00 00 d7 af 34 01  00 00 00 00 1c bc c1 c4  00 00 00 00 00 00 00 00  00 c8 ae 40 00 00 00 00
+              ^ 
+    #0 0x000104a4f7d8 in wtp::WtDataReaderAD::readKlineSlice(char const*, wtp::tagKlinePeriod, unsigned int, unsigned long long) WtDataReaderAD.cpp:669
+    #1 0x000104cd187c in (anonymous namespace)::R4ReaderADTest_I03PackedRealtimeBarCallbackSurvivesReentrantBufferGrowth_Test::TestBody() r4_reader_ad_slices_test.cpp:2060
+    #2 0x000105a054e8 in void testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2664
+    #3 0x00010591aa18 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2700
+    #4 0x00010591a710 in testing::Test::Run() gtest.cc:2739
+    #5 0x00010591dd28 in testing::TestInfo::Run() gtest.cc:2885
+    #6 0x0001059222c8 in testing::TestSuite::Run() gtest.cc:3063
+    #7 0x000105954734 in testing::internal::UnitTestImpl::RunAllTests() gtest.cc:6054
+    #8 0x000105a32a20 in bool testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2664
+    #9 0x000105952c10 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2700
+    #10 0x000105952758 in testing::UnitTest::Run() gtest.cc:5594
+    #11 0x000105a59d20 in RUN_ALL_TESTS() gtest.h:2334
+    #12 0x000105a59c44 in main gtest_main.cc:64
+    #13 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-adreader-align-20261102/src/WtDataStorageAD/WtDataReaderAD.cpp:669:56 

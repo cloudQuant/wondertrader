@@ -745,58 +745,123 @@ namespace
 		}
 	}
 
-	TEST_F(R60MockerTest, same_instance_reinitializes_and_delivers_each_connect)
+	/// Card 9c=A (user decision, see 决策积压清单 card 9): an initialized TraderMocker
+	/// rejects every further init() and keeps its original configuration; once
+	/// released it is terminal (no re-init, no re-connect). A new lifecycle
+	/// therefore uses a fresh instance. Both tests below keep their original
+	/// intent (each lifecycle delivers exactly its own connect event and frees its
+	/// resources; nothing issued against a released lifecycle reaches a later one).
+	WTSVariant* r60_lifecycle_cfg(uint32_t mockerId, uint16_t port)
+	{
+		WTSVariant* cfg = WTSVariant::createObject();
+		cfg->append("span", 5);
+		cfg->append("newpx", true);
+		cfg->append("mockerid", mockerId);
+		cfg->append("maxqty", 10);
+		cfg->append("minqty", 1);
+		cfg->append("udp_port", port);
+		return cfg;
+	}
+
+	uint16_t pick_other_free_udp_port(uint16_t used)
+	{
+		uint16_t port = pick_free_udp_port();
+		for (int attempt = 0; port == used && attempt < 16; ++attempt)
+			port = pick_free_udp_port();
+		return port;
+	}
+
+	TEST_F(R60MockerTest, same_instance_rejects_reinit_and_fresh_instances_deliver_each_connect)
 	{
 		(void)pick_free_udp_port();
 		const std::vector<int> baselineFds = open_fd_snapshot();
 		std::vector<int> warmedFds;
+		R60MockerSink sink;
+		for (int cycle = 0; cycle != 2; ++cycle)
 		{
-			R60MockerSink sink;
-			TraderMocker api;
-			api.registerSpi(&sink);
-			for (int cycle = 0; cycle != 2; ++cycle)
 			{
+				TraderMocker api;
+				api.registerSpi(&sink);
 				const uint16_t port = pick_free_udp_port();
-				WTSVariant* cfg = WTSVariant::createObject();
-				cfg->append("span", 5);
-				cfg->append("newpx", true);
-				cfg->append("mockerid", 9690);
-				cfg->append("maxqty", 10);
-				cfg->append("minqty", 1);
-				cfg->append("udp_port", port);
+				const uint16_t otherPort = pick_other_free_udp_port(port);
+				ASSERT_NE(port, otherPort);
+				WTSVariant* cfg = r60_lifecycle_cfg(9690, port);
 				const bool initialized = api.init(cfg);
 				cfg->release();
-				ASSERT_TRUE(initialized);
+				ASSERT_TRUE(initialized) << "cycle " << cycle;
+
+				// 9c: a repeated init on the live instance is rejected and must not
+				// replace the first configuration (connect below must bind `port`).
+				WTSVariant* otherCfg = r60_lifecycle_cfg(9690, otherPort);
+				EXPECT_FALSE(api.init(otherCfg)) << "repeated init accepted in cycle " << cycle;
+				otherCfg->release();
+
 				const uint32_t previousEvents = sink.n_event();
 				api.connect();
 				const bool connected = wait_until([&]() { return sink.n_event() == previousEvents + 1; });
 				EXPECT_TRUE(connected) << "connect event was not delivered in cycle " << cycle;
-				EXPECT_EQ(boost::asio::error::address_in_use, try_bind_udp_port(port));
+				EXPECT_EQ(boost::asio::error::address_in_use, try_bind_udp_port(port)) << "cycle " << cycle;
+				EXPECT_FALSE(try_bind_udp_port(otherPort)) << "rejected init replaced udp_port in cycle " << cycle;
 				api.release();
 				api.release();
-				EXPECT_FALSE(try_bind_udp_port(port));
-				if (cycle == 0)
-					warmedFds = open_fd_snapshot();
-				else
-					EXPECT_EQ(warmedFds, open_fd_snapshot());
+				EXPECT_FALSE(try_bind_udp_port(port)) << "cycle " << cycle;
+
+				// 9c: the released instance stays terminal. init is rejected; connect
+				// neither re-binds the port nor delivers another connect event.
+				WTSVariant* againCfg = r60_lifecycle_cfg(9690, port);
+				EXPECT_FALSE(api.init(againCfg)) << "released instance re-initialized in cycle " << cycle;
+				againCfg->release();
+				const uint32_t releasedEvents = sink.n_event();
+				EXPECT_EQ(previousEvents + 1, releasedEvents) << "cycle " << cycle;
+				api.connect();
+				EXPECT_FALSE(try_bind_udp_port(port)) << "released instance re-bound its port in cycle " << cycle;
+				EXPECT_FALSE(wait_until([&]() { return sink.n_event() != releasedEvents; }, 200))
+					<< "released instance delivered another connect event in cycle " << cycle;
 			}
+			if (cycle == 0)
+				warmedFds = open_fd_snapshot();
+			else
+				EXPECT_EQ(warmedFds, open_fd_snapshot());
 		}
+		EXPECT_EQ(2u, sink.n_event()) << "each fresh lifecycle must deliver exactly one connect event";
 		EXPECT_EQ(baselineFds, open_fd_snapshot());
 	}
 
-	TEST_F(R60MockerTest, released_instance_does_not_deliver_old_queued_query_after_reinit)
+	TEST_F(R60MockerTest, released_instance_rejects_reinit_and_old_query_never_reaches_new_lifecycle)
 	{
-		init_api(9691, pick_free_udp_port());
+		const uint16_t firstPort = pick_free_udp_port();
+		init_api(9691, firstPort);
 		connect_api();
 		api_.release();
 
-		// The existing API accepts this post while its io_context is stopped.
-		// A later lifecycle must never deliver it to the current listener.
-		api_.queryAccount();
-		init_api(9691, pick_free_udp_port());
+		// After release, admission is closed: the query is rejected instead of being
+		// posted to the stopped io_context, and the instance cannot be revived.
+		EXPECT_EQ(-1, api_.queryAccount());
+		WTSVariant* reinitCfg = r60_lifecycle_cfg(9691, firstPort);
+		EXPECT_FALSE(api_.init(reinitCfg)) << "released instance accepted re-initialization";
+		reinitCfg->release();
 		api_.connect();
+		EXPECT_FALSE(try_bind_udp_port(firstPort)) << "released instance re-bound its port";
+
+		// The later lifecycle is a fresh instance delivering to the same listener.
+		TraderMocker fresh;
+		fresh.registerSpi(&sink_);
+		WTSVariant* freshCfg = r60_lifecycle_cfg(9691, pick_free_udp_port());
+		const bool initialized = fresh.init(freshCfg);
+		freshCfg->release();
+		ASSERT_TRUE(initialized);
+		fresh.connect();
 		ASSERT_TRUE(wait_until([this]() { return sink_.n_event() == 2; }));
-		EXPECT_EQ(0u, sink_.n_account()) << "a query queued while released crossed into the new lifecycle";
+		EXPECT_FALSE(wait_until([this]() { return sink_.n_account() != 0 || sink_.n_event() != 2; }, 200));
+		EXPECT_EQ(0u, sink_.n_account()) << "a query issued while released crossed into the new lifecycle";
+		EXPECT_EQ(2u, sink_.n_event()) << "the released instance delivered another connect event";
+
+		// Positive control: the new lifecycle's own query is delivered exactly once.
+		EXPECT_EQ(0, fresh.queryAccount());
+		EXPECT_TRUE(wait_until([this]() { return sink_.n_account() == 1; }));
+		EXPECT_FALSE(wait_until([this]() { return sink_.n_account() > 1; }, 200));
+		EXPECT_EQ(1u, sink_.n_account());
+		fresh.release();
 	}
 
 	TEST_F(R60MockerTest, release_reentered_from_connect_callback_does_not_terminate)
@@ -886,6 +951,8 @@ namespace
 		EXPECT_LT(api_.queryPositions(), 0);
 		EXPECT_LT(api_.queryOrders(), 0);
 		EXPECT_LT(api_.queryTrades(), 0);
+		EXPECT_LT(api_.login("", "", ""), 0);
+		EXPECT_FALSE(api_.isConnected());
 		EXPECT_EQ(1u, entrust->retainCount());
 		EXPECT_EQ(1u, action->retainCount());
 		WTSVariant* cfg = WTSVariant::createObject();
@@ -953,6 +1020,7 @@ namespace
 		retry->release();
 		if (closed)
 			for (int i = 0; i != 128; ++i) EXPECT_LT(api.queryAccount(), 0);
+		EXPECT_LT(api.login("", "", ""), 0);
 		WTSEntrust* entrust = WTSEntrust::create("ag2512", 2, 7000, "SHFE");
 		WTSEntrustAction* action = WTSEntrustAction::create("ag2512", "SHFE");
 		EXPECT_LT(api.orderInsert(entrust), 0);
@@ -968,6 +1036,69 @@ namespace
 		sink.resume.store(true);
 		stopper.join();
 		EXPECT_TRUE(releaseDone.load());
+	}
+
+	TEST_F(R60MockerTest, duplicate_login_preserves_running_worker)
+	{
+		const pid_t child = ::fork();
+		ASSERT_GE(child, 0);
+		if (child == 0)
+		{
+			std::set_terminate([] { std::_Exit(88); });
+			::alarm(8);
+			R60MockerSink sink;
+			TraderMocker api;
+			api.registerSpi(&sink);
+			WTSVariant* cfg = WTSVariant::createObject();
+			cfg->append("span", 5); cfg->append("mockerid", 9696);
+			cfg->append("maxqty", 10); cfg->append("minqty", 1); cfg->append("udp_port", pick_free_udp_port());
+			const bool initialized = api.init(cfg);
+			cfg->release();
+			if (!initialized) std::_Exit(11);
+			api.connect();
+			if (!wait_until([&] { return sink.n_event() == 1; })) std::_Exit(12);
+			if (api.login("", "", "") != 0 || !wait_until([&] { return sink.n_login() == 1; })) std::_Exit(13);
+			if (api.login("", "", "") >= 0) std::_Exit(14);
+			if (api.queryAccount() != 0 || !wait_until([&] { return sink.n_account() == 1; })) std::_Exit(15);
+			if (sink.n_event() != 1 || sink.n_login() != 1) std::_Exit(16);
+			api.release();
+			std::_Exit(0);
+		}
+		int status = 0;
+		ASSERT_EQ(child, ::waitpid(child, &status, 0));
+		ASSERT_TRUE(WIFEXITED(status)) << "child did not exit normally; status=" << status;
+		EXPECT_EQ(0, WEXITSTATUS(status));
+	}
+
+	TEST_F(R60MockerTest, duplicate_connect_preserves_running_worker)
+	{
+		const pid_t child = ::fork();
+		ASSERT_GE(child, 0);
+		if (child == 0)
+		{
+			std::set_terminate([] { std::_Exit(88); });
+			::alarm(8);
+			R60MockerSink sink;
+			TraderMocker api;
+			api.registerSpi(&sink);
+			WTSVariant* cfg = WTSVariant::createObject();
+			cfg->append("span", 5); cfg->append("mockerid", 9697);
+			cfg->append("maxqty", 10); cfg->append("minqty", 1); cfg->append("udp_port", pick_free_udp_port());
+			const bool initialized = api.init(cfg);
+			cfg->release();
+			if (!initialized) std::_Exit(11);
+			api.connect();
+			if (!wait_until([&] { return sink.n_event() == 1; })) std::_Exit(12);
+			api.connect();
+			if (api.queryAccount() != 0 || !wait_until([&] { return sink.n_account() == 1; })) std::_Exit(15);
+			if (sink.n_event() != 1) std::_Exit(16);
+			api.release();
+			std::_Exit(0);
+		}
+		int status = 0;
+		ASSERT_EQ(child, ::waitpid(child, &status, 0));
+		ASSERT_TRUE(WIFEXITED(status)) << "child did not exit normally; status=" << status;
+		EXPECT_EQ(0, WEXITSTATUS(status));
 	}
 
 	/* ------------------------------------------------------------------ */

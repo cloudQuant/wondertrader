@@ -1,0 +1,25 @@
+--- before/HftMocker.h
++++ after/HftMocker.h
+@@ -594,6 +594,11 @@
+ 	 */
+ 	virtual void on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag);
+ 
++protected:
++	bool apply_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag);
++
++public:
++
+ 	/**
+ 	 * @brief 订单状态回调
+ 	 * @param localid 订单的本地ID
+@@ -697,7 +702,9 @@
+ 	 * @details 直接设置指定合约的持仓量，不通过交易而是直接修改持仓数据
+ 	 *          通常用于以特定持仓量和价格初始化策略的持仓
+ 	 */
+-	void	do_set_position(const char* stdCode, double qty, double price = 0.0, const char* userTag = "");
++	bool	do_set_position(const char* stdCode, double qty, double price, const char* userTag, const std::vector<double>& fees);
++	std::function<bool()> trade_state_guard(const std::string& key);
++	bool plan_trade_fees(const char* stdCode, bool isBuy, const std::vector<double>& volumes, double price, const wt_fee::Context& context, std::vector<std::vector<double>>& fees);
+ 	/**
+ 	 * @brief 更新动态持仓盈亏
+ 	 * @param stdCode 标准化的合约代码

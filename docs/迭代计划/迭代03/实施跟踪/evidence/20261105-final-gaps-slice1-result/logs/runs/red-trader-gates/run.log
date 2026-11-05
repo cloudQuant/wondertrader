@@ -1,0 +1,116 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S1TraderEntryGate.*
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from S1TraderEntryGate
+[ RUN      ] S1TraderEntryGate.K05SiblingAdaptersOfOneAccountShareInFlightQuantity
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:169: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  b.openLong(kS1Code, 3500.0, 1.0, 0)
+    Which is: 1332976101
+adapter B must see A's 2 lots in flight: 2 + 1 exceeds the account limit
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:171: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  apiB.n_insert.load()
+    Which is: 1
+the rejected entry never reached B's provider
+
+[  FAILED  ] S1TraderEntryGate.K05SiblingAdaptersOfOneAccountShareInFlightQuantity (12 ms)
+[ RUN      ] S1TraderEntryGate.K05ConcurrentEntriesCannotBothPassTheAccountCheck
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:217: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  secondId
+    Which is: 1332976104
+the second entry passed while the first one's 2 lots were already reserved
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:218: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  api.n_insert.load()
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:219: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  trader.getUndoneQty(kS1Code)
+    Which is: 4
+
+[  FAILED  ] S1TraderEntryGate.K05ConcurrentEntriesCannotBothPassTheAccountCheck (1 ms)
+[ RUN      ] S1TraderEntryGate.K03LiveOrderReportAfterNotSentClosurePausesAccount
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:241: Failure
+Value of: trader.isTradingAdmissionClosed()
+  Actual: false
+Expected: true
+a live report of an order recorded as not sent leaves the outcome unknown
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:245: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  trader.openLong(kS1Code, 3500.0, 1.0, 0)
+    Which is: 1332976106
+new orders stay blocked until reconciliation
+
+[  FAILED  ] S1TraderEntryGate.K03LiveOrderReportAfterNotSentClosurePausesAccount (1 ms)
+[ RUN      ] S1TraderEntryGate.K03TradeAfterNotSentClosurePausesAccount
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:262: Failure
+Value of: trader.isTradingAdmissionClosed()
+  Actual: false
+Expected: true
+
+[  FAILED  ] S1TraderEntryGate.K03TradeAfterNotSentClosurePausesAccount (0 ms)
+[ RUN      ] S1TraderEntryGate.K03NotSentWithoutLiveEvidenceKeepsTheAccountOpen
+[       OK ] S1TraderEntryGate.K03NotSentWithoutLiveEvidenceKeepsTheAccountOpen (1 ms)
+[ RUN      ] S1TraderEntryGate.New006ClockFailureRejectsEntryBeforeTheProvider
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:308: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  trader.openLong(kS1Code, 3500.0, 1.0, 0)
+    Which is: 1332976110
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:309: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  api.n_insert.load()
+    Which is: 1
+no request reaches the provider without a valid clock
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:310: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  trader.getUndoneQty(kS1Code)
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:316: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  api.n_insert.load()
+    Which is: 2
+
+[  FAILED  ] S1TraderEntryGate.New006ClockFailureRejectsEntryBeforeTheProvider (1 ms)
+[----------] 6 tests from S1TraderEntryGate (18 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (20 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 5 tests, listed below:
+[  FAILED  ] S1TraderEntryGate.K05SiblingAdaptersOfOneAccountShareInFlightQuantity
+[  FAILED  ] S1TraderEntryGate.K05ConcurrentEntriesCannotBothPassTheAccountCheck
+[  FAILED  ] S1TraderEntryGate.K03LiveOrderReportAfterNotSentClosurePausesAccount
+[  FAILED  ] S1TraderEntryGate.K03TradeAfterNotSentClosurePausesAccount
+[  FAILED  ] S1TraderEntryGate.New006ClockFailureRejectsEntryBeforeTheProvider
+
+ 5 FAILED TESTS

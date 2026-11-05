@@ -18,6 +18,7 @@
 
 #include "../Includes/WTSMarcos.h"
 #include "../Share/StdUtils.hpp"
+#include "TickerDayBoundary.h"
 
 NS_WTP_BEGIN
 class WTSSessionInfo;
@@ -63,7 +64,8 @@ public:
 	 * @details 创建并启动定时器线程，处理定时事件
 	 * 当前实例为单次启动；停止后请创建新实例，不会在 run/init 中重置停止标志。
 	 */
-	void	run();
+	// I03-NEW-075: false when the ticker cannot start (e.g. no trading session).
+	bool	run();
 
 	/**
 	 * @brief 停止定时器
@@ -90,6 +92,18 @@ private:
 	 */
 	void	trigger_price(WTSTickData* curTick);
 
+	/**
+	 * @brief 处理一笔行情（调用方必须是 _strand 的 owner）
+	 */
+	void	handle_tick(WTSTickData* curTick);
+
+	/**
+	 * @brief worker 的一轮检查（调用方必须是 _strand 的 owner）
+	 * @param offTime 启动时的偏移时间
+	 * @return 是否处于需要短间隔轮询的状态
+	 */
+	bool	worker_pass(uint32_t offTime);
+
 private:
 	/**
 	 * @brief 交易时段信息指针
@@ -109,12 +123,12 @@ private:
 	/**
 	 * @brief 当前日期，格式YYYYMMDD
 	 */
-	uint32_t	_date;
+	std::atomic<uint32_t>	_date;
 
 	/**
 	 * @brief 当前时间，格式HHMMSSmmm
 	 */
-	uint32_t	_time;
+	std::atomic<uint32_t>	_time;
 
 	/**
 	 * @brief 当前分钟位置，以分钟序号表示
@@ -124,7 +138,7 @@ private:
 	/**
 	 * @brief 互斥锁，用于线程同步
 	 */
-	StdUniqueMutex	_mtx;
+	wt_ticker::EventStrand	_strand;	///< 卡9 9d=A：on_tick 与 worker 的串行化/重入排队
 
 	/**
 	 * @brief 下次检查时间，原子变量

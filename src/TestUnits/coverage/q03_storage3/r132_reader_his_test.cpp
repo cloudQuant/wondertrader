@@ -19,6 +19,12 @@
 
 #include "WTSUtils/WTSCfgLoader.h"
 #include "WtDataStorage/WtDataReader.h"
+#include <cstdint>
+#include <stdexcept>
+
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+void wt_r132_fail_next_allocation_for_test(int stage);
+#endif
 
 namespace r132 {
 
@@ -68,7 +74,7 @@ void scramble_orddtl(WTSOrdDtlStruct& s)
 	fill_bytes(s.code, sizeof(s.code));
 	s.index = rnd();
 	s.price = rnd_double();
-	s.volume = rnd_double();
+	s.volume = rnd();
 	s.orderid = rnd();
 	s.side = (rnd() & 1) ? BDT_Buy : BDT_Sell;
 	s.otype = (rnd() & 1) ? ODT_LimitPrice : ODT_AnyPrice;
@@ -80,7 +86,7 @@ void scramble_trans(WTSTransStruct& s)
 	fill_bytes(s.code, sizeof(s.code));
 	s.index = rnd();
 	s.price = rnd_double();
-	s.volume = rnd_double();
+	s.volume = rnd();
 	s.askorder = rnd();
 	s.bidorder = rnd();
 	s.side = (rnd() & 1) ? BDT_Buy : BDT_Sell;
@@ -169,6 +175,8 @@ TEST_F(R132ReaderHisTest, R132ReaderHisHftCompressedRoundTrip)
 	WTSOrdQueSlice* sq = _reader.readOrdQueSlice("SSE.STK.600000", 2, 20240109150000000ull);
 	ASSERT_TRUE(sq != NULL);
 	ASSERT_EQ(sq->size(), 2u);
+	EXPECT_EQ(reinterpret_cast<std::uintptr_t>(sq->at(0)) % alignof(WTSOrdQueStruct), 0u);
+	EXPECT_EQ(sq->at(1), sq->at(0) + 1);
 	EXPECT_EQ(sq->at(0)->action_date, 20240108u);
 	EXPECT_EQ(sq->at(1)->action_date, 20240109u);
 	EXPECT_EQ(sq->at(1)->action_time, 93100000u);
@@ -188,6 +196,8 @@ TEST_F(R132ReaderHisTest, R132ReaderHisHftCompressedRoundTrip)
 	WTSOrdDtlSlice* sd = _reader.readOrdDtlSlice("SSE.STK.600001", 2, 20240109150000000ull);
 	ASSERT_TRUE(sd != NULL);
 	ASSERT_EQ(sd->size(), 2u);
+	EXPECT_EQ(reinterpret_cast<std::uintptr_t>(sd->at(0)) % alignof(WTSOrdDtlStruct), 0u);
+	EXPECT_EQ(sd->at(1), sd->at(0) + 1);
 	EXPECT_EQ(sd->at(0)->action_date, 20240108u);
 	EXPECT_EQ(sd->at(1)->action_date, 20240109u);
 	sd->release();
@@ -206,6 +216,8 @@ TEST_F(R132ReaderHisTest, R132ReaderHisHftCompressedRoundTrip)
 	WTSTransSlice* st = _reader.readTransSlice("SSE.STK.600002", 2, 20240109150000000ull);
 	ASSERT_TRUE(st != NULL);
 	ASSERT_EQ(st->size(), 2u);
+	EXPECT_EQ(reinterpret_cast<std::uintptr_t>(st->at(0)) % alignof(WTSTransStruct), 0u);
+	EXPECT_EQ(st->at(1), st->at(0) + 1);
 	EXPECT_EQ(st->at(0)->action_date, 20240108u);
 	EXPECT_EQ(st->at(1)->action_date, 20240109u);
 	st->release();
@@ -240,6 +252,231 @@ TEST_F(R132ReaderHisTest, R132ReaderHisCompressibleQueueExpansion)
 	EXPECT_EQ(sq->at(1)->action_time, 103300000u);
 	sq->release();
 }
+
+TEST_F(R132ReaderHisTest, R132AlignedHistoricalSlicesPreserveExclusiveEnd)
+{
+	const uint32_t date = 20240109;
+	const uint32_t firstTime = 93000000;
+	const uint32_t secondTime = 93100000;
+	const vector<WTSOrdQueStruct> queues = {
+		make_ordque(date, date, firstTime, 1), make_ordque(date, date, secondTime, 2)};
+	const vector<WTSOrdDtlStruct> details = {
+		make_orddtl(date, date, firstTime, 1), make_orddtl(date, date, secondTime, 2)};
+	const vector<WTSTransStruct> transactions = {
+		make_trans(date, date, firstTime, 1), make_trans(date, date, secondTime, 2)};
+	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/600042.dsb",
+		make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(queues))));
+	ASSERT_TRUE(write_bytes("his/orders/SSE/20240109/600042.dsb",
+		make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(details))));
+	ASSERT_TRUE(write_bytes("his/trans/SSE/20240109/600042.dsb",
+		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(transactions))));
+	const char* code = "SSE.STK.600042";
+	const uint64_t first = uint64_t(date) * 1000000000ULL + firstTime;
+	const uint64_t second = uint64_t(date) * 1000000000ULL + secondTime;
+	EXPECT_EQ(_reader.readOrdQueSlice(code, 2, first), nullptr);
+	EXPECT_EQ(_reader.readOrdDtlSlice(code, 2, first), nullptr);
+	EXPECT_EQ(_reader.readTransSlice(code, 2, first), nullptr);
+	WTSOrdQueSlice* queue = _reader.readOrdQueSlice(code, 2, second);
+	WTSOrdDtlSlice* detail = _reader.readOrdDtlSlice(code, 2, second);
+	WTSTransSlice* trans = _reader.readTransSlice(code, 2, second);
+	ASSERT_NE(queue, nullptr);
+	ASSERT_NE(detail, nullptr);
+	ASSERT_NE(trans, nullptr);
+	EXPECT_EQ(queue->size(), 1u);
+	EXPECT_EQ(detail->size(), 1u);
+	EXPECT_EQ(trans->size(), 1u);
+	EXPECT_EQ(queue->at(0)->action_time, firstTime);
+	EXPECT_EQ(detail->at(0)->action_time, firstTime);
+	EXPECT_EQ(trans->at(0)->action_time, firstTime);
+	queue->release();
+	detail->release();
+	trans->release();
+}
+
+TEST_F(R132ReaderHisTest, R132AlignedSliceSurvivesOtherCacheInsertions)
+{
+	const uint32_t date = 20240109;
+	const uint64_t endTime = 20240109150000000ULL;
+	const vector<WTSOrdQueStruct> records = {make_ordque(date, date, 93000000, 1)};
+	const string block = make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(records));
+	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/610000.dsb", block));
+	WTSOrdQueSlice* held = _reader.readOrdQueSlice("SSE.STK.610000", 1, endTime);
+	ASSERT_NE(held, nullptr);
+	const WTSOrdQueStruct* heldItem = held->at(0);
+	ASSERT_NE(heldItem, nullptr);
+	for (unsigned i = 1; i <= 128; ++i)
+	{
+		const string rawCode = std::to_string(610000 + i);
+		ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/" + rawCode + ".dsb", block));
+		WTSOrdQueSlice* current = _reader.readOrdQueSlice(("SSE.STK." + rawCode).c_str(), 1, endTime);
+		ASSERT_NE(current, nullptr);
+		current->release();
+	}
+	EXPECT_EQ(held->at(0), heldItem);
+	EXPECT_EQ(held->at(0)->action_time, 93000000u);
+	held->release();
+}
+
+TEST_F(R132ReaderHisTest, R132HistoricalBadFilesCanBeReplacedAndRetried)
+{
+	const uint32_t date = 20240109;
+	const uint64_t endTime = 20240109150000000ULL;
+	const string code = "SSE.STK.610200";
+	const string queueFile = "his/queue/SSE/20240109/610200.dsb";
+	const string detailFile = "his/orders/SSE/20240109/610200.dsb";
+	const string transFile = "his/trans/SSE/20240109/610200.dsb";
+	ASSERT_TRUE(write_bytes(queueFile, "bad"));
+	ASSERT_TRUE(write_bytes(detailFile, "bad"));
+	ASSERT_TRUE(write_bytes(transFile, "bad"));
+	EXPECT_EQ(_reader.readOrdQueSlice(code.c_str(), 1, endTime), nullptr);
+	EXPECT_EQ(_reader.readOrdDtlSlice(code.c_str(), 1, endTime), nullptr);
+	EXPECT_EQ(_reader.readTransSlice(code.c_str(), 1, endTime), nullptr);
+	const vector<WTSOrdQueStruct> queues = {make_ordque(date, date, 93000000, 1)};
+	const vector<WTSOrdDtlStruct> details = {make_orddtl(date, date, 93000000, 1)};
+	const vector<WTSTransStruct> trans = {make_trans(date, date, 93000000, 1)};
+	ASSERT_TRUE(write_bytes(queueFile, make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(queues))));
+	ASSERT_TRUE(write_bytes(detailFile, make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(details))));
+	ASSERT_TRUE(write_bytes(transFile, make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(trans))));
+	WTSOrdQueSlice* q = _reader.readOrdQueSlice(code.c_str(), 1, endTime);
+	WTSOrdDtlSlice* d = _reader.readOrdDtlSlice(code.c_str(), 1, endTime);
+	WTSTransSlice* t = _reader.readTransSlice(code.c_str(), 1, endTime);
+	EXPECT_NE(q, nullptr);
+	EXPECT_NE(d, nullptr);
+	EXPECT_NE(t, nullptr);
+	if (q) { EXPECT_EQ(q->at(0)->action_time, 93000000u); q->release(); }
+	if (d) { EXPECT_EQ(d->at(0)->action_time, 93000000u); d->release(); }
+	if (t) { EXPECT_EQ(t->at(0)->action_time, 93000000u); t->release(); }
+}
+
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+TEST_F(R132ReaderHisTest, R132AllocationFailureDoesNotPublishOrInvalidateHeldSlices)
+{
+	struct ResetFailureInjection {
+		~ResetFailureInjection() { wt_r132_fail_next_allocation_for_test(0); }
+	} resetFailureInjection;
+	const uint32_t date = 20240109;
+	const uint64_t endTime = 20240109150000000ULL;
+	const vector<WTSOrdQueStruct> queues = {make_ordque(date, date, 93000000, 1)};
+	const vector<WTSOrdDtlStruct> details = {make_orddtl(date, date, 93000000, 1)};
+	const vector<WTSTransStruct> trans = {make_trans(date, date, 93000000, 1)};
+	const string qBlock = make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(queues));
+	const string dBlock = make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(details));
+	const string tBlock = make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(trans));
+	const auto writeAll = [&](const string& raw) {
+		return write_bytes("his/queue/SSE/20240109/" + raw + ".dsb", qBlock) &&
+			write_bytes("his/orders/SSE/20240109/" + raw + ".dsb", dBlock) &&
+			write_bytes("his/trans/SSE/20240109/" + raw + ".dsb", tBlock);
+	};
+	ASSERT_TRUE(writeAll("610210"));
+	WTSOrdQueSlice* heldQ = _reader.readOrdQueSlice("SSE.STK.610210", 1, endTime);
+	WTSOrdDtlSlice* heldD = _reader.readOrdDtlSlice("SSE.STK.610210", 1, endTime);
+	WTSTransSlice* heldT = _reader.readTransSlice("SSE.STK.610210", 1, endTime);
+	ASSERT_NE(heldQ, nullptr);
+	ASSERT_NE(heldD, nullptr);
+	ASSERT_NE(heldT, nullptr);
+	const auto* qPtr = heldQ->at(0);
+	const auto* dPtr = heldD->at(0);
+	const auto* tPtr = heldT->at(0);
+	for (int stage = 1; stage <= 2; ++stage)
+	{
+		const string raw = std::to_string(610210 + stage);
+		const string code = "SSE.STK." + raw;
+		ASSERT_TRUE(writeAll(raw));
+		wt_r132_fail_next_allocation_for_test(stage);
+		EXPECT_EQ(_reader.readOrdQueSlice(code.c_str(), 1, endTime), nullptr);
+		wt_r132_fail_next_allocation_for_test(stage);
+		EXPECT_EQ(_reader.readOrdDtlSlice(code.c_str(), 1, endTime), nullptr);
+		wt_r132_fail_next_allocation_for_test(stage);
+		EXPECT_EQ(_reader.readTransSlice(code.c_str(), 1, endTime), nullptr);
+		EXPECT_EQ(heldQ->at(0), qPtr);
+		EXPECT_EQ(heldD->at(0), dPtr);
+		EXPECT_EQ(heldT->at(0), tPtr);
+		EXPECT_EQ(qPtr->action_time, 93000000u);
+		EXPECT_EQ(dPtr->action_time, 93000000u);
+		EXPECT_EQ(tPtr->action_time, 93000000u);
+		WTSOrdQueSlice* q = _reader.readOrdQueSlice(code.c_str(), 1, endTime);
+		WTSOrdDtlSlice* d = _reader.readOrdDtlSlice(code.c_str(), 1, endTime);
+		WTSTransSlice* t = _reader.readTransSlice(code.c_str(), 1, endTime);
+		ASSERT_NE(q, nullptr);
+		ASSERT_NE(d, nullptr);
+		ASSERT_NE(t, nullptr);
+		q->release();
+		d->release();
+		t->release();
+	}
+	heldQ->release();
+	heldD->release();
+	heldT->release();
+}
+
+TEST_F(R132ReaderHisTest, R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape)
+{
+	struct ResetFailureInjection {
+		~ResetFailureInjection() { wt_r132_fail_next_allocation_for_test(0); }
+	} resetFailureInjection;
+	const uint32_t date = 20240109;
+	const uint64_t endTime = 20240109150000000ULL;
+	const char* code = "SSE.STK.610220";
+	const vector<WTSOrdQueStruct> queues = {make_ordque(date, date, 93000000, 1)};
+	const vector<WTSOrdDtlStruct> details = {make_orddtl(date, date, 93000000, 1)};
+	const vector<WTSTransStruct> trans = {make_trans(date, date, 93000000, 1)};
+	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/610220.dsb", make_block(BT_HIS_OrdQueue, BLOCK_VERSION_CMP_V2, pack_items(queues))));
+	ASSERT_TRUE(write_bytes("his/orders/SSE/20240109/610220.dsb", make_block(BT_HIS_OrdDetail, BLOCK_VERSION_CMP_V2, pack_items(details))));
+	ASSERT_TRUE(write_bytes("his/trans/SSE/20240109/610220.dsb", make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(trans))));
+	wt_r132_fail_next_allocation_for_test(3);
+	EXPECT_EQ(_reader.readOrdQueSlice(code, 1, endTime), nullptr);
+	wt_r132_fail_next_allocation_for_test(3);
+	EXPECT_EQ(_reader.readOrdDtlSlice(code, 1, endTime), nullptr);
+	wt_r132_fail_next_allocation_for_test(3);
+	EXPECT_EQ(_reader.readTransSlice(code, 1, endTime), nullptr);
+	EXPECT_TRUE(_sink.has_log_containing("Unexpected failure reading historical queue slice for SSE.STK.610220"));
+	EXPECT_TRUE(_sink.has_log_containing("Unexpected failure reading historical detail slice for SSE.STK.610220"));
+	EXPECT_TRUE(_sink.has_log_containing("Unexpected failure reading historical transaction slice for SSE.STK.610220"));
+
+	class ThrowingSink : public r52::ReaderSink {
+	public:
+		ThrowingSink(IBaseDataMgr* bd, IHotMgr* hot) : r52::ReaderSink(bd, hot) {}
+		void reader_log(WTSLogLevel ll, const char* message) override
+		{
+			if (throwOnLog) { ++attempts; throw std::runtime_error("injected log sink failure"); }
+			r52::ReaderSink::reader_log(ll, message);
+		}
+		bool throwOnLog = false;
+		int attempts = 0;
+	} sink(&_bd, &_hot);
+	WtDataReader reader;
+	WTSVariant* cfg = _cfg();
+	ASSERT_NE(cfg, nullptr);
+	reader.init(cfg, &sink, NULL);
+	cfg->release();
+	WTSOrdQueSlice* q = reader.readOrdQueSlice(code, 1, endTime);
+	WTSOrdDtlSlice* d = reader.readOrdDtlSlice(code, 1, endTime);
+	WTSTransSlice* t = reader.readTransSlice(code, 1, endTime);
+	ASSERT_NE(q, nullptr);
+	ASSERT_NE(d, nullptr);
+	ASSERT_NE(t, nullptr);
+	q->release(); d->release(); t->release();
+	sink.throwOnLog = true;
+	wt_r132_fail_next_allocation_for_test(3);
+	EXPECT_NO_THROW(EXPECT_EQ(reader.readOrdQueSlice(code, 1, endTime), nullptr));
+	wt_r132_fail_next_allocation_for_test(3);
+	EXPECT_NO_THROW(EXPECT_EQ(reader.readOrdDtlSlice(code, 1, endTime), nullptr));
+	wt_r132_fail_next_allocation_for_test(3);
+	EXPECT_NO_THROW(EXPECT_EQ(reader.readTransSlice(code, 1, endTime), nullptr));
+	EXPECT_EQ(sink.attempts, 3);
+	sink.throwOnLog = false;
+	q = reader.readOrdQueSlice(code, 1, endTime);
+	d = reader.readOrdDtlSlice(code, 1, endTime);
+	t = reader.readTransSlice(code, 1, endTime);
+	ASSERT_NE(q, nullptr);
+	ASSERT_NE(d, nullptr);
+	ASSERT_NE(t, nullptr);
+	EXPECT_EQ(q->at(0)->action_time, 93000000u);
+	EXPECT_EQ(d->at(0)->action_time, 93000000u);
+	EXPECT_EQ(t->at(0)->action_time, 93000000u);
+	q->release(); d->release(); t->release();
+}
+#endif
 
 // BUG-R132-002：逐笔队列、委托明细、成交必须使用各自独立的历史块缓存。
 // 同一合约/交易日依次访问不同数据类型，并在不同顺序重复读取，确认不会误命中别的类型缓存。

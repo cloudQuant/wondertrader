@@ -1,0 +1,20 @@
+# 2026-11-05 约 15:14，主构建（build2，15:00:40–15:12:39）产物；运行时 WtEngine.h(15:05:53)/WtExecMgr.h(15:08:06) 已被他人改动，
+# bin/WtPorter/libWtPorter.dylib、libWtExecMon.dylib 为 15:01 产物（改动前），CoverageTests_porter 为 15:12 链接。
+# 命令：lldb --batch -o "breakpoint set -E c++" -o "run --gtest_also_run_disabled_tests --gtest_filter=Q06PorterWrapper.DISABLED_ExtParserCreationNeedsEngine" -o "bt 12" CoverageTests_porter
+  * frame #0: libc++abi.dylib`__cxa_throw
+    frame #1: libc++.1.dylib`std::__1::__throw_system_error(std::__1::error_code, char const*) + 92
+    frame #3: libc++.1.dylib`std::__1::mutex::lock() + 40
+    frame #4: libWtExecMon.dylib`std::__1::lock_guard<std::__1::mutex>::lock_guard(this=0x000000016fdfe300, __m=0x0000000100492900) at lock_guard.h:33:10
+    frame #6: libWtExecMon.dylib`wtp::WtExecuterMgr::find_executer(this=0x0000000100492900, executorId="q06_never") const at WtExecMgr.cpp:814:30
+    frame #7: CoverageTests_porter`wtp::WtCtaEngine::findExecuter(this=0x0000000100492328, executorId="q06_never") const at WtCtaEngine.h:76:75
+    frame #8: CoverageTests_porter`WtRtRunner::createExtExecuter(this=0x0000000100492050, id="q06_never") at WtRtRunner.cpp:1004:49
+    frame #9: CoverageTests_porter`Q06PorterWrapper_DISABLED_ExtParserCreationNeedsEngine_Test::TestBody() at q06_porter_expwrapper_test.cpp:237:10
+# 同一时段 i03s5_fresh_configured_porter("sel") 内：
+    frame #0: libWtPorter.dylib`WTSLogger::log_raw(ll=LL_WARN, message="RiskMon is not configured, portfilio fund will be updated every 5s") at WTSLogger.cpp:330:6
+    frame #1: libWtPorter.dylib`wtp::WtEngine::init(...) at WtEngine.cpp:619
+    frame #2: libWtPorter.dylib`wtp::WtSelEngine::init(...)
+    frame #3: CoverageTests_porter`WtRtRunner::initEngine() at WtRtRunner.cpp:2173:15
+    frame #4: CoverageTests_porter`WtRtRunner::config(...)
+    frame #5: CoverageTests_porter`i03s5_fresh_configured_porter(engine="sel") at i03_s5_test_trader_support.cpp:147:16
+# 结果：该时段 pre-main-138（mutex lock failed: Invalid argument，20/20 失败）、pre-main-143（夹具 config=false，20/20 失败）、
+#       pre-main-140/141（第 2 轮 libc++abi terminating）。15:16–15:35 全量增量重编（build3）后上述四例 pre 均 20/20 通过（见 runs.jsonl 末段）。

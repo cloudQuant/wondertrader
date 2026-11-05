@@ -22,6 +22,8 @@ namespace fs = std::filesystem;
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/CodeHelper.hpp"
 #include "../Share/decimal.h"
+#include "../Share/FeeSchedule.hpp"
+#include <cmath>
 #include "../Share/StrUtil.hpp"
 #include "../Share/Converter.hpp"
 
@@ -297,6 +299,7 @@ void CtaMocker::dump_stradata()
 			pItem.AddMember("dynprofit", pInfo._dynprofit, allocator);
 			pItem.AddMember("lastentertime", pInfo._last_entertime, allocator);
 			pItem.AddMember("lastexittime", pInfo._last_exittime, allocator);
+			pItem.AddMember("frozen", pInfo._frozen, allocator);	//卡3 3d=C：保存冻结量，归属交易日为 fund.tdate
 
 			rj::Value details(rj::kArrayType);
 			for (auto dit = pInfo._details.begin(); dit != pInfo._details.end(); dit++)
@@ -622,12 +625,18 @@ bool CtaMocker::init_cta_factory(WTSVariant* cfg)
 	if (hInst == NULL)
 		return false;
 
-	FuncCreateStraFact creator = (FuncCreateStraFact)DLLHelper::get_symbol(hInst, "createStrategyFact");
-	FuncDeleteStraFact remover = (FuncDeleteStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
-	if (creator == NULL || remover == NULL)
+	// Card 4b=A: the backtest host accepts only a validated versioned CTA
+	// table; legacy v1 creators/deleters are never called.
+	const WtStrategyPluginApiV2* api = NULL;
+	std::string rejectReason;
+	const auto probe = wt_stra_plugin::probeModule(
+		[hInst](const char* symbol) { return DLLHelper::get_symbol(hInst, symbol); },
+		WT_STRA_PLUGIN_V2_FAMILY_CTA, api, rejectReason);
+	if (probe != wt_stra_plugin::ProbeResult::Accepted)
 	{
-		WTSLogger::error("Initializing CTA strategy factory failed: {} missing {}", module,
-			creator == NULL ? "createStrategyFact" : "deleteStrategyFact");
+		WTSLogger::error("Initializing CTA strategy factory failed: {} rejected: {}", module,
+			probe == wt_stra_plugin::ProbeResult::NotStrategyPlugin ?
+				std::string("no versioned CTA strategy plugin entry") : rejectReason);
 		DLLHelper::free_library(hInst);
 		return false;
 	}
@@ -635,7 +644,7 @@ bool CtaMocker::init_cta_factory(WTSVariant* cfg)
 	ICtaStrategyFact* fact = NULL;
 	try
 	{
-		fact = creator();
+		fact = static_cast<ICtaStrategyFact*>(api->create_factory());
 	}
 	catch (...)
 	{
@@ -652,8 +661,9 @@ bool CtaMocker::init_cta_factory(WTSVariant* cfg)
 
 	_factory._module_inst = hInst;
 	_factory._module_path = module;
-	_factory._creator = creator;
-	_factory._remover = remover;
+	_factory._creator = NULL;
+	_factory._remover = NULL;
+	_factory._api = api;
 	_factory._fact = fact;
 
 	WTSVariant* cfgStra = cfg->get("strategy");
@@ -763,6 +773,7 @@ void CtaMocker::load_incremental_data(const char* incremental_backtest_base)
 	CondEntrustMap restoredConditions;
 	StraFundInfo restoredFundInfo = _fund_info;
 	uint64_t restoredLastCondMin = _last_cond_min;
+	uint32_t restoredFrozenTDate = _frozen_tdate;
 
 	// Parse and stage the complete JSON snapshot before appending any CSV rows or
 	// changing live state. A malformed snapshot must not leave a partial restore.
@@ -834,6 +845,23 @@ void CtaMocker::load_incremental_data(const char* incremental_backtest_base)
 					pInfo._last_entertime = lastentertime->GetUint64();
 					pInfo._last_exittime = lastexittime->GetUint64();
 
+					//卡3 3d=C：frozen 可选；旧快照缺字段时冻结量为 0
+					pInfo._frozen = 0;
+					if (positionEntry.HasMember("frozen"))
+					{
+						const rj::Value* frozen = require_snapshot_member(positionEntry, "frozen", SnapshotJsonType::Number, positionPath, validationError);
+						if (frozen == nullptr)
+							return false;
+						const double frozenQty = frozen->GetDouble();
+						if (!std::isfinite(frozenQty) || decimal::lt(frozenQty, 0) ||
+							decimal::gt(frozenQty, std::max(pInfo._volume, 0.0)))
+						{
+							validationError = positionPath + ".frozen must be within [0, max(volume, 0)]";
+							return false;
+						}
+						pInfo._frozen = frozenQty;
+					}
+
 					if (positionEntry.HasMember("details"))
 					{
 						const rj::Value* details = require_snapshot_member(positionEntry, "details", SnapshotJsonType::Array, positionPath, validationError);
@@ -898,6 +926,23 @@ void CtaMocker::load_incremental_data(const char* incremental_backtest_base)
 				restoredFundInfo._total_profit = totalProfit->GetDouble();
 				restoredFundInfo._total_dynprofit = totalDynprofit->GetDouble();
 				restoredFundInfo._total_fees = totalFees->GetDouble();
+				if (fund->HasMember("tdate"))
+				{
+					const rj::Value* tdate = require_snapshot_member(*fund, "tdate", SnapshotJsonType::Uint, "$.fund", validationError);
+					if (tdate == nullptr)
+						return false;
+					restoredFrozenTDate = tdate->GetUint();
+				}
+			}
+
+			//卡3 3d=C：冻结量必须能确定归属交易日，否则无法判定 session-begin 是否清零，拒绝快照
+			bool hasFrozen = false;
+			for (const auto& posItem : restoredPositions)
+				hasFrozen = hasFrozen || !decimal::eq(posItem.second._frozen, 0);
+			if (hasFrozen && (!d.HasMember("fund") || !d["fund"].IsObject() || !d["fund"].HasMember("tdate") || restoredFrozenTDate == 0))
+			{
+				validationError = "$.fund.tdate is required when any position has non-zero frozen";
+				return false;
 			}
 
 			if (d.HasMember("signals"))
@@ -1083,6 +1128,7 @@ void CtaMocker::load_incremental_data(const char* incremental_backtest_base)
 		_condtions.swap(restoredConditions);
 		_fund_info = restoredFundInfo;
 		_last_cond_min = restoredLastCondMin;
+		_frozen_tdate = restoredFrozenTDate;
 	}
 	else if (!hasStrategyDump)
 	{
@@ -1161,7 +1207,7 @@ void CtaMocker::handle_replay_done()
 	this->on_bactest_end();
 }
 
-void CtaMocker::proc_tick(const char* stdCode, double last_px, double cur_px)
+bool CtaMocker::proc_tick(const char* stdCode, double last_px, double cur_px, const WTSContractInfo* fillContract)
 {
 	{
 		auto it = _sig_map.find(stdCode);
@@ -1175,7 +1221,8 @@ void CtaMocker::proc_tick(const char* stdCode, double last_px, double cur_px)
 					price = cur_px;
 				else
 					price = sInfo._desprice;
-				do_set_position(stdCode, sInfo._volume, price, sInfo._usertag.c_str());
+				if (!do_set_position(stdCode, sInfo._volume, price, sInfo._usertag.c_str(), fillContract))
+					return false;
 
 				//如果是条件单触发，则回调on_condition_triggered
 				if (sInfo._sigtype == 2)
@@ -1193,7 +1240,7 @@ void CtaMocker::proc_tick(const char* stdCode, double last_px, double cur_px)
 	{
 		auto it = _condtions.find(stdCode);
 		if (it == _condtions.end())
-			return;
+			return true;
 
 		const CondList& condList = it->second;
 		double curPrice = cur_px;
@@ -1361,6 +1408,7 @@ void CtaMocker::proc_tick(const char* stdCode, double last_px, double cur_px)
 			_condtions.erase(it);
 		}
 	}
+	return true;
 }
 
 
@@ -1392,7 +1440,8 @@ void CtaMocker::handle_tick(const char* stdCode, WTSTickData* newTick, uint32_t 
 	//By Wesley @ 2022.04.19
 	//虽然这段逻辑下面也根据isBarEnd复制了一段
 	//但是这一段还是要保留
-	proc_tick(stdCode, last_px, cur_px);
+	if (!proc_tick(stdCode, last_px, cur_px, newTick->getContractInfo()))
+		return;
 
 	on_tick_updated(stdCode, newTick);
 
@@ -1405,7 +1454,7 @@ void CtaMocker::handle_tick(const char* stdCode, WTSTickData* newTick, uint32_t 
 	 *	而不至于在回测的时候成交价偏离太远
 	 */
 	if(pxType != 3)
-		proc_tick(stdCode, last_px, cur_px);
+		proc_tick(stdCode, last_px, cur_px, newTick->getContractInfo());
 }
 
 
@@ -1419,8 +1468,8 @@ void CtaMocker::on_bar(const char* stdCode, const char* period, uint32_t times, 
 	thread_local static char realPeriod[8] = { 0 };
 	fmtutil::format_to(realPeriod, "{}{}", period, times);
 
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", stdCode, realPeriod);
+	// I03-NEW-039: caller stdCode is unbounded; no fixed 64-byte key buffer
+	std::string key = fmt::format("{}#{}", stdCode, realPeriod);
 
 	KlineTag& tag = _kline_tags[key];
 	tag._closed = true;
@@ -1686,16 +1735,25 @@ void CtaMocker::on_session_begin(uint32_t curTDate)
 	_cur_tdate = curTDate;
 
 	//每个交易日开始，要把冻结持仓置零
-	for (auto& it : _pos_map)
+	//卡3 3d=C：冻结量归属交易日（快照 fund.tdate 或上一个 session）与本交易日相同（同日续跑）时保留
+	if (_frozen_tdate != curTDate)
 	{
-		const char* stdCode = it.first.c_str();
-		PosInfo& pInfo = (PosInfo&)it.second;
-		if (!decimal::eq(pInfo._frozen, 0))
+		for (auto& it : _pos_map)
 		{
-			log_debug("{} of {} frozen released on {}", pInfo._frozen, stdCode, curTDate);
-			pInfo._frozen = 0;
+			const char* stdCode = it.first.c_str();
+			PosInfo& pInfo = (PosInfo&)it.second;
+			if (!decimal::eq(pInfo._frozen, 0))
+			{
+				log_debug("{} of {} frozen released on {}", pInfo._frozen, stdCode, curTDate);
+				pInfo._frozen = 0;
+			}
 		}
 	}
+	else
+	{
+		log_debug("Frozen positions kept on same-tradingday resume {}", curTDate);
+	}
+	_frozen_tdate = curTDate;
 
 	/*
 	 *	By Wesley @ 2022.04.19
@@ -2069,28 +2127,89 @@ void CtaMocker::append_signal(const char* stdCode, double qty, const char* userT
 	//save_data();
 }
 
-void CtaMocker::do_set_position(const char* stdCode, double qty, double price /* = 0.0 */, const char* userTag /* = "" */)
+bool CtaMocker::do_set_position(const char* stdCode, double qty, double price, const char* userTag, const WTSContractInfo* fillContract)
 {
-	PosInfo& pInfo = _pos_map[stdCode];
-	double curPx = price;
+	const auto posIt = _pos_map.find(stdCode);
+	const PosInfo* existing = posIt == _pos_map.end() ? NULL : &posIt->second;
+	const double current = existing == NULL ? 0.0 : existing->_volume;
+	auto fail = [&](const std::string& message) {
+		_replayer->report_fee_error(std::string("Cta fee preflight for ") + stdCode + ": " + message);
+		return false;
+	};
+	if (!std::isfinite(current) || !std::isfinite(qty)) return fail("invalid position quantity");
+	if (decimal::eq(current, qty)) return true;
+
+	wt_fee::Context feeContext;
+	std::string feeError;
+	if (!_replayer->prepare_fee_context(stdCode, fillContract, feeContext, feeError))
+		return fail(feeError);
+	WTSCommodityInfo* commInfo = fillContract != NULL ? fillContract->getCommInfo() : _replayer->get_commodity_info(stdCode);
+	if (commInfo == NULL) return fail("missing commodity metadata");
+	double trdPx = price;
 	if (decimal::eq(price, 0.0))
-		curPx = _price_map[stdCode];
-	uint64_t curTm = (uint64_t)_replayer->get_date() * 10000 + _replayer->get_min_time();
-	uint32_t curTDate = _replayer->get_trading_date();
-
-	//手数相等则不用操作了
-	if (decimal::eq(pInfo._volume, qty))
-		return;
-
-	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
-	if (commInfo == NULL)
-		return;
-
-	//成交价
-	double trdPx = curPx;
-
-	double diff = qty - pInfo._volume;
-	bool isBuy = decimal::gt(diff, 0.0);
+	{
+		auto priceIt = _price_map.find(stdCode);
+		if (priceIt == _price_map.end()) return fail("missing fill price");
+		trdPx = priceIt->second;
+	}
+	const double diff = qty - current;
+	if (!std::isfinite(diff)) return fail("position difference overflow");
+	const bool isBuy = decimal::gt(diff, 0.0);
+	if (_slippage != 0)
+	{
+		// Slippage is expressed in price ticks; a zero/invalid tick would make
+		// the ratio path divide by zero (NaN fill) and the fixed path silently
+		// drop the configured slippage. Reject before any ledger change.
+		const double priceTick = commInfo->getPriceTick();
+		if (!std::isfinite(priceTick) || priceTick <= 0.0) return fail("invalid price tick for slippage");
+		if (_ratio_slippage)
+		{
+			double slp = _slippage * trdPx / 10000.0;
+			slp = round(slp / commInfo->getPriceTick()) * commInfo->getPriceTick();
+			trdPx += slp * (isBuy ? 1 : -1);
+		}
+		else
+			trdPx += _slippage * commInfo->getPriceTick() * (isBuy ? 1 : -1);
+	}
+	const uint64_t curTm = (uint64_t)_replayer->get_date() * 10000 + _replayer->get_min_time();
+	const uint32_t curTDate = _replayer->get_trading_date();
+	std::vector<double> feePlan;
+	double plannedFees = 0.0;
+	double plannedFundFees = _fund_info._total_fees;
+	if (!std::isfinite(plannedFundFees)) return fail("invalid existing total fees");
+	auto planFee = [&](double volume, uint32_t offset) {
+		const auto calc = wt_fee::calculate(feeContext, trdPx, volume, offset);
+		if (calc.status != wt_fee::CalculationStatus::ok) return false;
+		plannedFees += calc.value;
+		plannedFundFees += calc.value;
+		if (!std::isfinite(plannedFees) || !std::isfinite(plannedFundFees)) return false;
+		feePlan.push_back(calc.value);
+		return true;
+	};
+	if (decimal::gt(current * diff, 0))
+	{
+		if (!planFee(std::abs(diff), 0)) return fail("invalid open fee");
+	}
+	else
+	{
+		double left = std::abs(diff);
+		if (existing != NULL)
+		{
+			for (const DetailInfo& detail : existing->_details)
+			{
+				if (!std::isfinite(detail._volume) || detail._volume < 0) return fail("invalid position detail");
+				const double volume = min(detail._volume, left);
+				if (decimal::eq(volume, 0)) continue;
+				if (!planFee(volume, detail._opentdate == curTDate ? 2 : 1)) return fail("invalid close fee");
+				left -= volume;
+				if (left == 0) break;
+			}
+		}
+		if (left > 0 && decimal::eq(qty, 0)) return fail("position details do not cover close");
+		if (left > 0 && !planFee(left, 0)) return fail("invalid reversal fee");
+	}
+	size_t nextFee = 0;
+	PosInfo& pInfo = _pos_map[stdCode];
 	if (decimal::gt(pInfo._volume*diff, 0))//当前持仓和仓位变化方向一致, 增加一条明细, 增加数量即可
 	{
 		pInfo._volume = qty;
@@ -2103,21 +2222,7 @@ void CtaMocker::do_set_position(const char* stdCode, double qty, double price /*
 			log_debug("{} frozen position up to {}", stdCode, pInfo._frozen);
 		}
 		
-		if (_slippage != 0)
-		{
-			if (_ratio_slippage)
-			{
-				//By Wesley @ 2023.05.05
-				//如果是比率滑点，则要根据目标成交价计算
-				//得到滑点以后，再根据pricetick做一个修正
-				double slp = (_slippage * trdPx / 10000.0);
-				slp = round(slp / commInfo->getPriceTick())*commInfo->getPriceTick();
 
-				trdPx += slp * (isBuy ? 1 : -1);
-			}
-			else
-				trdPx += _slippage * commInfo->getPriceTick()*(isBuy ? 1 : -1);
-		}
 
 		DetailInfo dInfo;
 		dInfo._long = decimal::gt(qty, 0);
@@ -2132,7 +2237,7 @@ void CtaMocker::do_set_position(const char* stdCode, double qty, double price /*
 		pInfo._details.emplace_back(dInfo);
 		pInfo._last_entertime = curTm;
 
-		double fee = _replayer->calc_fee(stdCode, trdPx, abs(diff), 0);
+		double fee = feePlan[nextFee++];
 		_fund_info._total_fees += fee;
 
 		log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(diff), userTag, fee, _schedule_times);
@@ -2140,21 +2245,7 @@ void CtaMocker::do_set_position(const char* stdCode, double qty, double price /*
 	else
 	{//持仓方向和仓位变化方向不一致,需要平仓
 		double left = abs(diff);
-		if (_slippage != 0)
-		{
-			if (_ratio_slippage)
-			{
-				//By Wesley @ 2023.05.05
-				//如果是比率滑点，则要根据目标成交价计算
-				//得到滑点以后，再根据pricetick做一个修正
-				double slp = (_slippage * trdPx / 10000.0);
-				slp = round(slp / commInfo->getPriceTick())*commInfo->getPriceTick();
 
-				trdPx += slp * (isBuy ? 1 : -1);
-			}
-			else
-				trdPx += _slippage * commInfo->getPriceTick()*(isBuy ? 1 : -1);
-		}
 
 		pInfo._volume = qty;
 		if (decimal::eq(pInfo._volume, 0))
@@ -2185,7 +2276,7 @@ void CtaMocker::do_set_position(const char* stdCode, double qty, double price /*
 			pInfo._last_exittime = curTm;
 			_fund_info._total_profit += profit;
 
-			double fee = _replayer->calc_fee(stdCode, trdPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
+			double fee = feePlan[nextFee++];
 			_fund_info._total_fees += fee;
 			//这里写成交记录
 			log_trade(stdCode, dInfo._long, false, curTm, trdPx, maxQty, userTag, fee, _schedule_times);
@@ -2208,7 +2299,7 @@ void CtaMocker::do_set_position(const char* stdCode, double qty, double price /*
 		//最后,如果还有剩余的,则需要反手了
 		if (left > 0)
 		{
-			left = left * qty / abs(qty);
+			left = std::copysign(left, qty);
 
 			//如果T+1，则冻结仓位要增加
 			if (commInfo->isT1())
@@ -2230,19 +2321,20 @@ void CtaMocker::do_set_position(const char* stdCode, double qty, double price /*
 			pInfo._details.emplace_back(dInfo);
  
 			//这里还需要写一笔成交记录
-			double fee = _replayer->calc_fee(stdCode, trdPx, abs(left), 0);
+			double fee = feePlan[nextFee++];
 			_fund_info._total_fees += fee;
 			log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(left), userTag, fee, _schedule_times);
 
 			pInfo._last_entertime = curTm;
 		}
 	}
+	return true;
 }
 
 WTSKlineSlice* CtaMocker::stra_get_bars(const char* stdCode, const char* period, uint32_t count, bool isMain /* = false */)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", stdCode, period);
+	// I03-NEW-039: caller stdCode is unbounded; no fixed 64-byte key buffer
+	std::string key = fmt::format("{}#{}", stdCode, period);
 
 	thread_local static char basePeriod[2] = { 0 };
 	basePeriod[0] = period[0];
@@ -2250,7 +2342,7 @@ WTSKlineSlice* CtaMocker::stra_get_bars(const char* stdCode, const char* period,
 	if (strlen(period) > 1)
 		times = convert::to_uint32(period + 1);
 	else
-		strcat(key, "1");
+		key += "1";
 
 	if (isMain)
 	{
@@ -2319,8 +2411,8 @@ void CtaMocker::stra_sub_ticks(const char* code)
 
 void CtaMocker::stra_sub_bar_events(const char* stdCode, const char* period)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", stdCode, period);
+	// I03-NEW-039: caller stdCode is unbounded; no fixed 64-byte key buffer
+	std::string key = fmt::format("{}#{}", stdCode, period);
 
 	KlineTag& tag = _kline_tags[key];
 	tag._notify = true;

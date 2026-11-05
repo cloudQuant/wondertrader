@@ -1,0 +1,55 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-dt-writer/before/src/WtDataStorageAD/WtDataWriterAD.h	2026-11-04 03:14:26
++++ src/WtDataStorageAD/WtDataWriterAD.h	2026-11-04 20:46:59
+@@ -102,6 +102,25 @@
+ 	 * @details 失败的 tick 不推进缓存、不广播；同步模式 writeTick 返回 false，异步模式经此计数与错误日志观察
+ 	 */
+ 	uint64_t tickPersistFailures() const { return _tick_persist_failures.load(std::memory_order_acquire); }
++
++	/**
++	 * @brief BUG-L04-004 写端子项：已接收（异步 writeTick 返回 true）但在处理时因身份或交易日
++	 * 复核失败而未进入缓存/数据库/广播的 tick 数。异步返回值只表示“已接收”，持久化结果经
++	 * tickPersistFailures()、本计数与错误日志观察；同步模式下这类失败直接返回 false。
++	 */
++	uint64_t tickRejectedAfterAcceptance() const { return _tick_rejected_after_accept.load(std::memory_order_acquire); }
++
++	/**
++	 * Writer lifecycle V1 (IDataWriter.h, card 9). requestStop closes admission (later
++	 * writeTick/getCurTick fail) and asks the async worker to finish its accepted queue; it
++	 * is nonblocking and may be called from sink/dumper callbacks and the worker itself.
++	 * canWaitDrain is false on the worker thread and inside this writer's own calls.
++	 * waitDrained returns DRAINED once no call is in flight and the worker has exited and
++	 * been joined; afterwards release() is a callback-free cleanup.
++	 */
++	void requestStop();
++	bool canWaitDrain();
++	WtDataWriterLifecycleV1Status waitDrained(uint32_t timeout_ms);
+ 
+ private:
+ 	/**
+@@ -256,6 +275,16 @@
+ 	 */
+ 	bool					_async_task;
+ 
++	// Lifecycle V1 admission (card 9): in-flight public calls, stop request, worker exit.
++	friend class AdOperationGuard;
++	StdUniqueMutex			_ops_mtx;
++	StdCondVariable			_ops_cond;
++	uint32_t				_active_ops = 0;
++	bool					_stop_requested = false;
++	bool					_task_exited = false;	///< guarded by _ops_mtx
++	bool					_task_joined = false;	///< guarded by _ops_mtx
++	std::thread::id			_task_worker_id;		///< guarded by _task_mtx
++
+ 	/**
+ 	 * @brief 数据存储基础目录
+ 	 * @details 用于存储缓存文件和数据库文件的根目录
+@@ -363,6 +392,9 @@
+ 	/// 卡13：tick 持久化失败计数
+ 	std::atomic<uint64_t>	_tick_persist_failures{0};
+ 
++	/// L04-004：已接收后复核失败（身份/交易日）而丢弃的 tick 计数
++	std::atomic<uint64_t>	_tick_rejected_after_accept{0};
++
+ 	/// 卡13：本进程已扫描进索引的 tick 缓存项数；其他 writer 新增项在发布锁内补扫
+ 	uint32_t	_tick_cache_scanned = 0;
+ 

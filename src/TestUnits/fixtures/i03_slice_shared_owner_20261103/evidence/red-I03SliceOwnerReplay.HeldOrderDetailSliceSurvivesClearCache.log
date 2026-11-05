@@ -1,0 +1,104 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03SliceOwnerReplay.HeldOrderDetailSliceSurvivesClearCache
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03SliceOwnerReplay
+[ RUN      ] I03SliceOwnerReplay.HeldOrderDetailSliceSurvivesClearCache
+=================================================================
+==65276==ERROR: AddressSanitizer: heap-use-after-free on address 0x6160000009c8 at pc 0x000104fc211c bp 0x00016b215990 sp 0x00016b215988
+READ of size 8 at 0x6160000009c8 thread T0
+    #0 0x000104fc2118 in I03SliceOwnerReplay_HeldOrderDetailSliceSurvivesClearCache_Test::TestBody()+0x820 (i03_slice_replay:arm64+0x1003da118)
+    #1 0x00010515dc60 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_replay:arm64+0x100575c60)
+    #2 0x00010515dba8 in testing::Test::Run()+0xcc (i03_slice_replay:arm64+0x100575ba8)
+    #3 0x00010515e788 in testing::TestInfo::Run()+0xd0 (i03_slice_replay:arm64+0x100576788)
+    #4 0x00010515f20c in testing::TestSuite::Run()+0x1c4 (i03_slice_replay:arm64+0x10057720c)
+    #5 0x00010516a634 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_replay:arm64+0x100582634)
+    #6 0x000105169fe0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_replay:arm64+0x100581fe0)
+    #7 0x000105169f44 in testing::UnitTest::Run()+0x78 (i03_slice_replay:arm64+0x100581f44)
+    #8 0x00010514b27c in main+0x40 (i03_slice_replay:arm64+0x10056327c)
+    #9 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x6160000009c8 is located 72 bytes inside of 624-byte region [0x616000000980,0x616000000bf0)
+freed by thread T0 here:
+    #0 0x0001060fd4d0 in _ZdlPv+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x654d0)
+    #1 0x000104dcd418 in void std::__1::__libcpp_deallocate[abi:nqe220108]<wtp::WTSOrdDtlStruct>(std::__1::__type_identity<wtp::WTSOrdDtlStruct>::type*, std::__1::__element_count, unsigned long)+0x5c (i03_slice_replay:arm64+0x1001e5418)
+    #2 0x000104dcd3a4 in std::__1::allocator<wtp::WTSOrdDtlStruct>::deallocate[abi:nqe220108](wtp::WTSOrdDtlStruct*, unsigned long)+0x44 (i03_slice_replay:arm64+0x1001e53a4)
+    #3 0x000104dcd06c in std::__1::allocator_traits<std::__1::allocator<wtp::WTSOrdDtlStruct>>::deallocate[abi:nqe220108](std::__1::allocator<wtp::WTSOrdDtlStruct>&, wtp::WTSOrdDtlStruct*, unsigned long)+0x24 (i03_slice_replay:arm64+0x1001e506c)
+    #4 0x000104dccd98 in std::__1::vector<wtp::WTSOrdDtlStruct, std::__1::allocator<wtp::WTSOrdDtlStruct>>::__destroy_vector::operator()[abi:nqe220108]()+0x2b8 (i03_slice_replay:arm64+0x1001e4d98)
+    #5 0x000104dcc9e4 in std::__1::vector<wtp::WTSOrdDtlStruct, std::__1::allocator<wtp::WTSOrdDtlStruct>>::~vector[abi:nqe220108]()+0x164 (i03_slice_replay:arm64+0x1001e49e4)
+    #6 0x000104dcc86c in std::__1::vector<wtp::WTSOrdDtlStruct, std::__1::allocator<wtp::WTSOrdDtlStruct>>::~vector[abi:nqe220108]()+0x34 (i03_slice_replay:arm64+0x1001e486c)
+    #7 0x000104dcc81c in HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>::~HftDataList()+0x38 (i03_slice_replay:arm64+0x1001e481c)
+    #8 0x000104c51e5c in HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>::~HftDataList()+0x34 (i03_slice_replay:arm64+0x100069e5c)
+    #9 0x000104cc44fc in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>::~pair()+0x38 (i03_slice_replay:arm64+0x1000dc4fc)
+    #10 0x000104cc44b0 in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>::~pair()+0x34 (i03_slice_replay:arm64+0x1000dc4b0)
+    #11 0x000104cc446c in std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>>::destroy[abi:nqe220108](std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>*)+0x58 (i03_slice_replay:arm64+0x1000dc46c)
+    #12 0x000104cc43e8 in void std::__1::allocator_traits<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>>>::destroy[abi:nqe220108]<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>, 0>(std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>>&, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>*)+0x1c (i03_slice_replay:arm64+0x1000dc3e8)
+    #13 0x000104cc417c in std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>>>::__base_destruct_at_end[abi:nqe220108](std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>*)+0x138 (i03_slice_replay:arm64+0x1000dc17c)
+    #14 0x000104cc3c5c in std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>>>::clear[abi:nqe220108]()+0x7c (i03_slice_replay:arm64+0x1000dbc5c)
+    #15 0x000104c0a720 in ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::HftDataList<wtp::WTSOrdDtlStruct>>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::clear()+0x50 (i03_slice_replay:arm64+0x100022720)
+    #16 0x000104c09f1c in HisDataReplayer::clear_cache()+0x17c (i03_slice_replay:arm64+0x100021f1c)
+    #17 0x000104fc2028 in I03SliceOwnerReplay_HeldOrderDetailSliceSurvivesClearCache_Test::TestBody()+0x730 (i03_slice_replay:arm64+0x1003da028)
+    #18 0x00010515dc60 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_replay:arm64+0x100575c60)
+    #19 0x00010515dba8 in testing::Test::Run()+0xcc (i03_slice_replay:arm64+0x100575ba8)
+    #20 0x00010515e788 in testing::TestInfo::Run()+0xd0 (i03_slice_replay:arm64+0x100576788)
+    #21 0x00010515f20c in testing::TestSuite::Run()+0x1c4 (i03_slice_replay:arm64+0x10057720c)
+    #22 0x00010516a634 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_replay:arm64+0x100582634)
+    #23 0x000105169fe0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_replay:arm64+0x100581fe0)
+    #24 0x000105169f44 in testing::UnitTest::Run()+0x78 (i03_slice_replay:arm64+0x100581f44)
+    #25 0x00010514b27c in main+0x40 (i03_slice_replay:arm64+0x10056327c)
+    #26 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+previously allocated by thread T0 here:
+    #0 0x0001060fd0e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000104f7003c in wtp::WTSOrdDtlStruct* std::__1::__libcpp_allocate[abi:nqe220108]<wtp::WTSOrdDtlStruct>(std::__1::__element_count, unsigned long)+0x54 (i03_slice_replay:arm64+0x10038803c)
+    #2 0x000104f6ff78 in std::__1::allocator<wtp::WTSOrdDtlStruct>::allocate[abi:nqe220108](unsigned long)+0x9c (i03_slice_replay:arm64+0x100387f78)
+    #3 0x000104f6fa70 in std::__1::__allocation_result<std::__1::allocator_traits<std::__1::allocator<wtp::WTSOrdDtlStruct>>::pointer, std::__1::allocator_traits<std::__1::allocator<wtp::WTSOrdDtlStruct>>::size_type> std::__1::__allocate_at_least[abi:nqe220108]<std::__1::allocator<wtp::WTSOrdDtlStruct>, std::__1::allocator_traits<std::__1::allocator<wtp::WTSOrdDtlStruct>>>(std::__1::allocator<wtp::WTSOrdDtlStruct>&, unsigned long)+0x114 (i03_slice_replay:arm64+0x100387a70)
+    #4 0x000104fc9148 in std::__1::vector<wtp::WTSOrdDtlStruct, std::__1::allocator<wtp::WTSOrdDtlStruct>>::__vallocate[abi:nqe220108](unsigned long)+0xb4 (i03_slice_replay:arm64+0x1003e1148)
+    #5 0x000104fc9a1c in void std::__1::vector<wtp::WTSOrdDtlStruct, std::__1::allocator<wtp::WTSOrdDtlStruct>>::__assign_with_size[abi:nqe220108]<std::__1::_ClassicAlgPolicy, wtp::WTSOrdDtlStruct*, wtp::WTSOrdDtlStruct*>(wtp::WTSOrdDtlStruct*, wtp::WTSOrdDtlStruct*, long)+0x2e8 (i03_slice_replay:arm64+0x1003e1a1c)
+    #6 0x000104fc96e4 in void std::__1::vector<wtp::WTSOrdDtlStruct, std::__1::allocator<wtp::WTSOrdDtlStruct>>::assign[abi:nqe220108]<wtp::WTSOrdDtlStruct*, 0>(wtp::WTSOrdDtlStruct*, wtp::WTSOrdDtlStruct*)+0x64 (i03_slice_replay:arm64+0x1003e16e4)
+    #7 0x000104fc8694 in std::__1::vector<wtp::WTSOrdDtlStruct, std::__1::allocator<wtp::WTSOrdDtlStruct>>::operator=[abi:nqe220108](std::__1::vector<wtp::WTSOrdDtlStruct, std::__1::allocator<wtp::WTSOrdDtlStruct>> const&)+0xfc (i03_slice_replay:arm64+0x1003e0694)
+    #8 0x000104fc2a14 in HisDataReplayerTestAccess::orddtl(HisDataReplayer&, char const*, unsigned int, unsigned int, double)+0x56c (i03_slice_replay:arm64+0x1003daa14)
+    #9 0x000104fc1b70 in I03SliceOwnerReplay_HeldOrderDetailSliceSurvivesClearCache_Test::TestBody()+0x278 (i03_slice_replay:arm64+0x1003d9b70)
+    #10 0x00010515dc60 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_replay:arm64+0x100575c60)
+    #11 0x00010515dba8 in testing::Test::Run()+0xcc (i03_slice_replay:arm64+0x100575ba8)
+    #12 0x00010515e788 in testing::TestInfo::Run()+0xd0 (i03_slice_replay:arm64+0x100576788)
+    #13 0x00010515f20c in testing::TestSuite::Run()+0x1c4 (i03_slice_replay:arm64+0x10057720c)
+    #14 0x00010516a634 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_replay:arm64+0x100582634)
+    #15 0x000105169fe0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_replay:arm64+0x100581fe0)
+    #16 0x000105169f44 in testing::UnitTest::Run()+0x78 (i03_slice_replay:arm64+0x100581f44)
+    #17 0x00010514b27c in main+0x40 (i03_slice_replay:arm64+0x10056327c)
+    #18 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: heap-use-after-free (i03_slice_replay:arm64+0x1003da118) in I03SliceOwnerReplay_HeldOrderDetailSliceSurvivesClearCache_Test::TestBody()+0x820
+Shadow bytes around the buggy address:
+  0x616000000700: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x616000000780: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x616000000800: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x616000000880: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fa fa
+  0x616000000900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x616000000980: fd fd fd fd fd fd fd fd fd[fd]fd fd fd fd fd fd
+  0x616000000a00: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x616000000a80: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x616000000b00: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x616000000b80: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fa fa
+  0x616000000c00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==65276==ABORTING

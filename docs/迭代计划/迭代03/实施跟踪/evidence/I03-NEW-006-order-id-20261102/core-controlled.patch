@@ -1,0 +1,18 @@
+--- src/WtCore/TraderAdapter.cpp	2026-11-02 14:04:31
++++ /tmp/wt-i03-time-orderid-20261102/snapshot/WtCore/TraderAdapter.cpp	2026-11-02 15:00:42
+@@ -103,6 +103,7 @@
+ 	static std::once_flag _auto_order_id_once;
+ 	std::call_once(_auto_order_id_once, []() {
+ 		uint32_t curYear = TimeUtils::getCurDate() / 10000 * 10000 + 101;
++        std::fprintf(stderr,"I03_SEED year=%u now=%lld\n",curYear,(long long)TimeUtils::getLocalTimeNow());
+ 		uint32_t seed = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(curYear, 0)) / 1000 * 50);
+ 		if (seed == 0)
+ 			seed = 1;
+@@ -1212,6 +1213,7 @@
+ 
+ uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
+ {
++    if (TimeUtils::getTZOffset() == 99) return UINT_MAX; // controlled naive candidate
+ 	_trader_api->makeEntrustID(entrust->getEntrustID(), 64);
+ 	// Risk checks are performed with the caller's standardized code. Preserve
+ 	// that key before replacing the submitted code with the exchange alias.

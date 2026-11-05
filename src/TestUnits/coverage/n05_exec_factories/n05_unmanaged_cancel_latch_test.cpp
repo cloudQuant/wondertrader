@@ -1,5 +1,6 @@
 // Production-path regression for the shared unverified-timeout guard used by
 // all six execution units' account-wide channel reconciliation cancels.
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <atomic>
@@ -230,7 +231,7 @@ public:
 		{
 			const auto stamp = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 			const uint64_t serial = sequence.fetch_add(1, std::memory_order_relaxed);
-			_dir = tempRoot / (std::string("n05_latch_") + tag + "_" + std::to_string(stamp) + "_" + std::to_string(serial));
+			_dir = tempRoot / (std::string("n05_latch_") + tag + "_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(stamp) + "_" + std::to_string(serial));
 			std::error_code ec;
 			created = std::filesystem::create_directory(_dir, ec);
 			if (!created && ec && ec != std::errc::file_exists)

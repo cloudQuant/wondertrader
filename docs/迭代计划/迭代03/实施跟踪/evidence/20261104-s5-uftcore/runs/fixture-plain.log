@@ -1,0 +1,22 @@
+-- Configuring done (1.2s)
+-- Generating done (0.1s)
+-- Build files have been written to: /tmp/wt-i03-s5-uftcore-fix/plain
+[1/4] Linking CXX executable uft_parser_cur
+[2/4] Building CXX object CMakeFiles/uft_parser_base.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtUftCore/WtHelper.cpp.o
+[3/4] Building CXX object CMakeFiles/uft_parser_base.dir/base_src/WtUftCore/ParserAdapter.cpp.o
+[4/4] Linking CXX executable uft_parser_base
+cur UftParserLifecycle.ModulesWithoutValidLifecycleV2AreRejectedBeforeCreate exit=0
+cur UftParserLifecycle.PendingDrainIsRetainedAndRetried exit=0
+cur UftParserLifecycle.UnsafeWaitingThreadKeepsTeardownPending exit=0
+cur UftParserLifecycle.DestroyErrorIsStickyQuarantine exit=0
+cur UftParserLifecycle.ExternalApiWithoutRemoverIsQuarantined exit=0
+cur UftParserLifecycle.ReleaseInsideCallbackIsDeferred exit=0
+cur UftParserLifecycle.ConcurrentCallbacksNeverOverlapTeardown exit=0
+base UftParserLifecycle.ModulesWithoutValidLifecycleV2AreRejectedBeforeCreate exit=1 (red control: non-zero expected)
+base UftParserLifecycle.PendingDrainIsRetainedAndRetried exit=1 (red control: non-zero expected)
+base UftParserLifecycle.UnsafeWaitingThreadKeepsTeardownPending exit=1 (red control: non-zero expected)
+base UftParserLifecycle.DestroyErrorIsStickyQuarantine exit=1 (red control: non-zero expected)
+src/TestUnits/fixtures/i03_uft_parser_lifecycle_20261104s5/run.sh: line 27:   149 Segmentation fault: 11  perl -e 'alarm 60; exec @ARGV' "$B/uft_parser_base" --gtest_filter="$c" --gtest_output=xml:"$B/run/base-$c.xml" > "$B/run/base-$c.log" 2>&1
+base UftParserLifecycle.ExternalApiWithoutRemoverIsQuarantined exit=139 (red control: non-zero expected)
+base UftParserLifecycle.ReleaseInsideCallbackIsDeferred exit=1 (red control: non-zero expected)
+base UftParserLifecycle.ConcurrentCallbacksNeverOverlapTeardown exit=0 (red control: non-zero expected)

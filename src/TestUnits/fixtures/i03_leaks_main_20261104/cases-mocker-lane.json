@@ -1,0 +1,122 @@
+[
+ {
+  "id": "mocker-base-normal",
+  "name": "LANE",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-base-normal/tests",
+  "filter": "*-t6_init.wtcore_init_ext_rejects_tradermocker_null_config",
+  "env": {},
+  "timeout": 900
+ },
+ {
+  "id": "mocker-base-asan",
+  "name": "LANE",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-base-asan/tests",
+  "filter": "*-t6_init.wtcore_init_ext_rejects_tradermocker_null_config",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 900
+ },
+ {
+  "id": "mocker-base-tsan",
+  "name": "LANE",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-base-tsan/tests",
+  "filter": "*-t6_init.wtcore_init_ext_rejects_tradermocker_null_config",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 900
+ },
+ {
+  "id": "mocker-base-normal",
+  "name": "t6_init_repeat",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-base-normal/tests",
+  "filter": "t6_init.repeated_init_is_rejected_and_first_config_kept:t6_init.init_is_repeatable_and_later_config_wins",
+  "env": {},
+  "timeout": 120
+ },
+ {
+  "id": "mocker-base-asan",
+  "name": "t6_init_repeat",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-base-asan/tests",
+  "filter": "t6_init.repeated_init_is_rejected_and_first_config_kept:t6_init.init_is_repeatable_and_later_config_wins",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "mocker-base-tsan",
+  "name": "t6_init_repeat",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-base-tsan/tests",
+  "filter": "t6_init.repeated_init_is_rejected_and_first_config_kept:t6_init.init_is_repeatable_and_later_config_wins",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "mocker-fix-normal",
+  "name": "LANE",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-normal/tests",
+  "filter": "*-t6_init.wtcore_init_ext_rejects_tradermocker_null_config",
+  "env": {},
+  "timeout": 900
+ },
+ {
+  "id": "mocker-fix-asan",
+  "name": "LANE",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-asan/tests",
+  "filter": "*-t6_init.wtcore_init_ext_rejects_tradermocker_null_config",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 900
+ },
+ {
+  "id": "mocker-fix-tsan",
+  "name": "LANE",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-tsan/tests",
+  "filter": "*-t6_init.wtcore_init_ext_rejects_tradermocker_null_config",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 900
+ },
+ {
+  "id": "mocker-fix-normal",
+  "name": "t6_init_repeat",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-normal/tests",
+  "filter": "t6_init.repeated_init_is_rejected_and_first_config_kept:t6_init.init_is_repeatable_and_later_config_wins",
+  "env": {},
+  "timeout": 120
+ },
+ {
+  "id": "mocker-fix-asan",
+  "name": "t6_init_repeat",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-asan/tests",
+  "filter": "t6_init.repeated_init_is_rejected_and_first_config_kept:t6_init.init_is_repeatable_and_later_config_wins",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "mocker-fix-tsan",
+  "name": "t6_init_repeat",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-tsan/tests",
+  "filter": "t6_init.repeated_init_is_rejected_and_first_config_kept:t6_init.init_is_repeatable_and_later_config_wins",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ }
+]

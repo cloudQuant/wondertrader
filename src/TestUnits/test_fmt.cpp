@@ -125,7 +125,7 @@ TEST(test_fmt, test_itos)
 	ticker.reset();
 	for (int i = 0; i < times; i++)
 	{
-		std::to_chars(buffer, buffer + 64, num);
+		std::to_chars(buffer, buffer + sizeof(buffer), num);	// I03-NEW-114: buffer is char[32], +64 was out of bounds
 	}
 	uint64_t t3 = ticker.nano_seconds();
 	fmt::print(buffer);

@@ -421,6 +421,7 @@ namespace r91
 		std::string adjfactor;
 		std::vector<std::string> commodities;
 		std::vector<std::pair<std::string, std::string>> rules;
+		std::string contracts;	// optional basefiles.contract (fee calculation needs verified contracts, card 13d)
 	};
 
 	inline WTSVariant* make_cfg(const std::filesystem::path& repo, const std::filesystem::path& base,
@@ -443,6 +444,8 @@ namespace r91
 		WTSVariant* basefiles = WTSVariant::createObject();
 		basefiles->append("session", (repo / "dist/common/sessions.json").string().c_str());
 		basefiles->append("holiday", (repo / "dist/common/holidays.json").string().c_str());
+		if (!opts.contracts.empty())
+			basefiles->append("contract", opts.contracts.c_str());
 
 		std::vector<std::string> commodities = opts.commodities;
 		if (commodities.empty())

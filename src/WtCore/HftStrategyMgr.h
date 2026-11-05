@@ -17,6 +17,7 @@
 
 #include "../Includes/FasterDefs.h"
 #include "../Includes/HftStrategyDefs.h"
+#include "../Includes/IStrategyPluginV2.h"
 
 #include "../Share/DLLHelper.hpp"
 
@@ -122,18 +123,30 @@ private:
 	// deleter; plugin ABI and HftStraWrapper's public layout stay unchanged.
 	struct FactoryOwner
 	{
-		FactoryOwner(IHftStrategyFact* fact, FuncDeleteHftStraFact remover, DllHandle module)
-			: _fact(fact), _remover(remover), _module_inst(module) {}
+		FactoryOwner(IHftStrategyFact* fact, const WtStrategyPluginApiV2* api, DllHandle module)
+			: _fact(fact), _api(api), _module_inst(module) {}
 		FactoryOwner(const FactoryOwner&) = delete;
 		FactoryOwner& operator=(const FactoryOwner&) = delete;
 		~FactoryOwner()
 		{
-			if (_active && _fact && _remover)
-				_remover(_fact);
+			// Card 9a: only a plugin promising synchronous teardown is asked to
+			// destroy its factory; otherwise the factory stays quarantined.
+			if (_active && _fact && wt_stra_plugin::hasSyncTeardown(_api))
+			{
+				try
+				{
+					_api->destroy_factory(static_cast<void*>(_fact));
+				}
+				catch (...)
+				{
+					// Contract violation (no exception may cross the C table);
+					// nothing else references the factory, keep the module mapped.
+				}
+			}
 		}
 
 		IHftStrategyFact* _fact;
-		FuncDeleteHftStraFact _remover;
+		const WtStrategyPluginApiV2* _api;
 		DllHandle _module_inst; // the loader reference remains resident
 		bool _active = false;  // failed/unpublished attempts stay quarantined
 	};
@@ -201,6 +214,7 @@ private:
 	 * @details 使用wt_hashmap存储策略ID与策略实例的映射关系
 	 */
 	typedef wt_hashmap<std::string, HftStrategyPtr> StrategyMap;
+	std::mutex _strategies_mutex;
 	StrategyMap	_strategies;	//!< 存储已创建的策略实例
 };
 

@@ -202,8 +202,16 @@ inline bool readProfileSignature(const rapidjson::Value& profile,
 		WTSSessionInfo::create(signature.session_id.c_str(), signature.session_id.c_str(), signature.offset_minutes));
 	if (!profile_session)
 		return fail(diagnostic, "VWAP profile session could not be constructed");
+	// I03-NEW-096: card 2/K30 make addTradingSection drop zero-length or overlapping
+	// sections silently; reject them here with the section diagnostic instead of a
+	// misleading later failure (e.g. value count) on the reduced session.
 	for (const auto& section : signature.sections)
-		profile_session->addTradingSection(section.first, section.second);
+	{
+		if (!profile_session->tryAddTradingSection(section.first, section.second))
+			return fail(diagnostic, section.first % 2400 == section.second % 2400
+				? "VWAP trading section must have a positive offset-adjusted duration"
+				: "VWAP trading sections must be ordered and non-overlapping");
+	}
 	if (!validateTradingSections(*profile_session, diagnostic))
 		return false;
 	signature.trading_minutes = profile_session->getTradingMins();

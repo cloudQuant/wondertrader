@@ -674,3 +674,51 @@ TEST(r17_mimp_gap, duplicate_init_preserves_success_and_execution)
 	EXPECT_EQ(sess->retainCount(), 1u);
 	comm->release();
 }
+
+//////////////////////////////////////////////////////////////////////////
+// 迭代03 WP1（卡5/N05-003，2026-11-04）：宿主通过保留配置键声明已按 owner 与不可复用
+// 身份核验撤单时，超时撤单经 ctx->cancel(localid) 发出且同一单只发一次；宿主拒绝核验
+// （cancel 返回 false）即转为持久隔离，不回退裸 ID、不重复撤单。未声明时保持原 fail-closed。
+//////////////////////////////////////////////////////////////////////////
+#include "Includes/IExecPluginV2.h"
+#ifndef WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY
+#define WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY "__wt_host_order_identity"
+#endif
+
+TEST(r17_mimp_gap, wp1_timeout_with_host_verified_identity_cancels_once_or_latches)
+{
+	for (int refuse = 0; refuse < 2; ++refuse)
+	{
+		Harness h;
+		h.ctx.cancelByIdRet = refuse == 0;
+		{
+			WtMinImpactExeUnit unit;
+			WTSVariant* cfg = mkCfg(0, 1, 2, 0, false, 3.0, 0.0); // expire=1s
+			cfg->append(WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY, (uint32_t)1);
+			unit.init(&h.ctx, kCode, cfg);
+			cfg->release();
+			const uint32_t id = 8171;
+			unit._orders_mon.push_order(&id, 1, h.ctx.curTime);
+			WTSTickData* t1 = mkTick(kCode, 93000000, 3505, 3500, 100, 3510, 50);
+			unit.on_tick(t1);
+			EXPECT_TRUE(h.ctx.byidCancels.empty());
+			h.ctx.curTime += 1000;
+			WTSTickData* t2 = mkTick(kCode, 93001500, 3505, 3500, 100, 3510, 50);
+			unit.on_tick(t2);
+			ASSERT_EQ(1u, h.ctx.byidCancels.size()) << "refuse=" << refuse;
+			EXPECT_EQ(id, h.ctx.byidCancels[0]);
+			EXPECT_TRUE(unit._orders_mon.has_order(id));
+			EXPECT_EQ(refuse == 1, unit._orders_mon.has_unverified_timeout());
+			EXPECT_EQ(refuse == 0, h.ctx.hasLog("canceled with host-verified identity"));
+			EXPECT_EQ(refuse == 1, h.ctx.hasLog("host could not verify its identity"));
+			h.ctx.curTime += 2000;
+			WTSTickData* t3 = mkTick(kCode, 93003000, 3505, 3500, 100, 3510, 50);
+			unit.on_tick(t3);
+			EXPECT_EQ(1u, h.ctx.byidCancels.size()) << "claimed or latched order is never re-cancelled";
+			t1->release();
+			t2->release();
+			t3->release();
+		}
+		h.comm->release();
+	}
+}

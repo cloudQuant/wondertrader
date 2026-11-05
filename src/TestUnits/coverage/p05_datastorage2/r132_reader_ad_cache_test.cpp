@@ -30,13 +30,8 @@ protected:
 
 // WtDataReaderAD.cpp: L444-467（rtBar 时间超前 → 再读 LMDB，_last_from_cache=false）
 //
-// 2026-10-28 R144：本用例是产品缺陷 BUG-R144-002 的复现，不再是夹具问题。
-// 首次 cacheBarsFromStorage 调 get_k_db 时 `return std::move(it->second)`
-// 把 _exchg_m1_dbs 的槽位掏空（既有 BUG-R4-BUG-02）；随后
-// update_cache_from_lmdb 里 `WtLMDBQuery query(*db)` 对空的 WtLMDBPtr
-// 直接解引用（WtDataReaderAD.cpp:272-274，无 null 检查），必现 SIGSEGV。
-// 该分支在公开 API 下不可达，保留契约断言并禁用，待生产代码修复后恢复。
-TEST_F(R132ReaderADCacheTest, DISABLED_R132ReaderADRtBarAheadRechecksLmdb)
+// 迭代03 最终验收复核后启用（原禁用：BUG-R144-002）。
+TEST_F(R132ReaderADCacheTest, R132ReaderADRtBarAheadRechecksLmdb)
 {
 	// CodeHelper 对两段式代码 EXQ.rb2301 解析出的品种就是 rb2301，
 	// 夹具必须按同一键注册品种，否则 getCommodity 返回 NULL（原夹具写成 rb）。
@@ -58,7 +53,7 @@ TEST_F(R132ReaderADCacheTest, DISABLED_R132ReaderADRtBarAheadRechecksLmdb)
 	WTSKlineSlice* s = _reader->readKlineSlice("EXQ.rb2301", KP_Minute1, 2,
 		20230103093400000ull);
 	ASSERT_TRUE(s != NULL);
-	ASSERT_EQ(s->size(), 2u);
+	ASSERT_EQ(s->size(), 2);
 	EXPECT_EQ(s->at(0)->time, mt(20230103, 932));
 	EXPECT_EQ(s->at(1)->time, mt(20230103, 933));
 	EXPECT_EQ(_sink->bar_calls(), 0u);

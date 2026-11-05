@@ -177,7 +177,7 @@ TEST_F(R80SliceUnsub, HotRuleFutureCsvUsesRuleDsbName)
 
 	ASSERT_TRUE(rp.prepare());
 	ASSERT_NE(nullptr, sink.slice);
-	EXPECT_EQ(1u, sink.slice->size());
+	EXPECT_EQ(1, sink.slice->size());
 	EXPECT_EQ(20200101u, sink.slice->at(0)->date);
 	EXPECT_DOUBLE_EQ(100.5, sink.slice->at(0)->close);
 
@@ -211,6 +211,9 @@ TEST_F(R80SliceUnsub, HotRuleFutureCsvUsesRuleDsbName)
 /*
  * tick 关闭时日线回放：get_day_price 越过 tick 分支直接读 _day_cache，
  * 四个 flag + default 与 get_cur_price 都必须返回当日累计值。
+ * 夹具：Jan01 日线作为回放前已完成的历史（与 HotRuleFutureCsvUsesRuleDsbName
+ * 的修正相同，回放起点为 Jan02 09:30；Jan01 09:30 起点时该日线尚未完成，
+ * 按“首根当日未收盘不可见”规则 onInit 取不到历史切片），回放 Jan02/Jan03 两根。
  */
 TEST_F(R80SliceUnsub, DayPriceReadsSimulatedDayCache)
 {
@@ -219,7 +222,7 @@ TEST_F(R80SliceUnsub, DayPriceReadsSimulatedDayCache)
 
 	HisDataReplayer rp;
 	r80::CfgOpts opts;
-	WTSVariant* cfg = r80::make_cfg(_root, _base, 202001010930ull, 202001031500ull, opts);
+	WTSVariant* cfg = r80::make_cfg(_root, _base, 202001020930ull, 202001031500ull, opts);
 	ASSERT_TRUE(rp.init(cfg));
 	cfg->release();
 

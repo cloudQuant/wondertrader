@@ -1,0 +1,11 @@
+--- /tmp/i03_servo_date_baseline_20261103/WtDtRunner.h	2026-11-03 17:43:31
++++ src/WtDtServo/WtDtRunner.h	2026-11-03 17:50:18
+@@ -182,7 +182,7 @@
+ 	 * @brief 根据日期获取K线数据
+ 	 * @param stdCode 标准化合约代码，格式如"SHFE.rb.HOT"
+ 	 * @param period K线周期，如"m1"/"d1"
+-	 * @param uDate 交易日期，格式为YYYYMMDD，如果为0则表示当前交易日
++	 * @param uDate 交易日期，格式为YYYYMMDD；0使用一次校验过的本地日期快照
+ 	 * @return WTSKlineSlice* K线数据切片指针，使用后需要调用release方法释放
+ 	 * 
+ 	 * @details 该函数获取指定交易日的K线数据。

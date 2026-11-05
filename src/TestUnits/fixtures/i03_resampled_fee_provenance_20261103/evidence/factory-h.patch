@@ -1,0 +1,38 @@
+--- /tmp/i03-resampled-provenance-baseline-20261103/WTSDataFactory.h	2026-11-03 17:28:48
++++ src/WTSTools/WTSDataFactory.h	2026-11-03 17:29:26
+@@ -9,6 +9,8 @@
+  */
+ #pragma once
+ #include "../Includes/IDataFactory.h"
++#include <utility>
++#include <vector>
+ 
+ USING_NS_WTP;
+ 
+@@ -42,6 +44,13 @@
+ 	 */
+ 	virtual WTSKlineData*	extractKlineData(WTSKlineSlice* baseKline, WTSKlinePeriod period, uint32_t times, WTSSessionInfo* sInfo, bool bIncludeOpen = true, bool bAlignSec = false);
+ 
++	// Each result maps to a half-open range in baseKline. A derived factory's
++	// virtual override is honored but has no verifiable ranges (ranges is empty).
++	using BarIndexRange = std::pair<uint32_t, uint32_t>;
++	WTSKlineData* extractKlineDataWithRanges(WTSKlineSlice* baseKline, WTSKlinePeriod period,
++		uint32_t times, WTSSessionInfo* sInfo, std::vector<BarIndexRange>& ranges,
++		bool bIncludeOpen = true, bool bAlignSec = false);
++
+ 	/*
+ 	 *	从tick数据提取秒周期的K线数据
+ 	 *	@ayTicks	tick数据
+@@ -81,6 +90,12 @@
+ 	WTSKlineData* extractDayData(WTSKlineSlice* baseKline, uint32_t times, bool bIncludeOpen = true);
+ 
+ protected:
++	WTSKlineData* extractMin1Data(WTSKlineSlice*, uint32_t, WTSSessionInfo*, bool, bool, std::vector<BarIndexRange>*);
++	WTSKlineData* extractMin5Data(WTSKlineSlice*, uint32_t, WTSSessionInfo*, bool, bool, std::vector<BarIndexRange>*);
++	WTSKlineData* extractHourData(WTSKlineSlice*, WTSSessionInfo*, bool, std::vector<BarIndexRange>*);
++	WTSKlineData* extractHalfData(WTSKlineSlice*, WTSSessionInfo*, bool, std::vector<BarIndexRange>*);
++	WTSKlineData* extractDayData(WTSKlineSlice*, uint32_t, bool, std::vector<BarIndexRange>*);
++
+ 	static uint32_t getPrevMinute(uint32_t curMinute, int period = 1);
+ };
+ 

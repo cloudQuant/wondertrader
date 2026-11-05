@@ -1,0 +1,37 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.FailedInitThenDifferentRootUsesOnlyNewRoot
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.FailedInitThenDifferentRootUsesOnlyNewRoot
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r4_ad_init_retry_isolation_test.cpp:63: Failure
+Expected equality of these values:
+  current->price()
+    Which is: 101
+  202.0
+    Which is: 202
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r4_ad_init_retry_isolation_test.cpp:69: Failure
+Expected equality of these values:
+  retryReadFile(first / "cache_m1.dmb")
+    Which is: "&^%$#@!\0\x4\0\x1\0\x1\0\0\0\x1\0\0\0RETRY\0\0\0\0\0\0\0\0\0\0\0rb01\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\xEC\xD6" "4\x1\0\0\0\0c`\xB8\xCA\0\0\0\0\0\0\0\0\0@o@\0\0\0\0\0@o@\0\0\0\0\0@o@\0\0\0\0\0@o@\0\0\0\0\0\0\0\0\0\0\0\0\0\0$@\0\0\0\0\0\0\xF0?\0\0\0\0\0\0\0@\0\0\0\0\0\0\xF0?"
+  originalM1
+    Which is: "&^%$#@!\0\x4\0\x1\0\x1\0\0\0\x1\0\0\0RETRY\0\0\0\0\0\0\0\0\0\0\0rb01\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\xEC\xD6" "4\x1\0\0\0\0b`\xB8\xCA\0\0\0\0\0\0\0\0\0@Y@\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0@Y@\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r4_ad_init_retry_isolation_test.cpp:75: Failure
+Expected equality of these values:
+  bar.close
+    Which is: 202
+  250.0
+    Which is: 250
+
+[  FAILED  ] R4WriterADTest.FailedInitThenDifferentRootUsesOnlyNewRoot (16 ms)
+[----------] 1 test from R4WriterADTest (17 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (17 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R4WriterADTest.FailedInitThenDifferentRootUsesOnlyNewRoot
+
+ 1 FAILED TEST

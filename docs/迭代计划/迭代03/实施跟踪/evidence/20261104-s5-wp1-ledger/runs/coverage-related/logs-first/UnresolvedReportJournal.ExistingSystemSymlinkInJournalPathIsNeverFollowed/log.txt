@@ -1,0 +1,41 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = UnresolvedReportJournal.ExistingSystemSymlinkInJournalPathIsNeverFollowed
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from UnresolvedReportJournal
+[ RUN      ] UnresolvedReportJournal.ExistingSystemSymlinkInJournalPathIsNeverFollowed
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/unresolved_report_journal_test.cpp:1095: Failure
+Expected equality of these values:
+  Journal::Status::UnsafePath
+    Which is: 4-byte object <09-00 00-00>
+  viaLink.createNew((fs::path("/tmp") / name / "reports.wal").string(), "test:symlink-parent", &error)
+    Which is: 4-byte object <00-00 00-00>
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/unresolved_report_journal_test.cpp:1096: Failure
+Value of: error.empty()
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/unresolved_report_journal_test.cpp:1097: Failure
+Value of: fs::is_empty(realDir)
+  Actual: false
+Expected: true
+nothing may be created behind a followed link
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/unresolved_report_journal_test.cpp:1112: Failure
+Expected equality of these values:
+  Journal::Status::Ok
+    Which is: 4-byte object <00-00 00-00>
+  real.createNew((realDir / "reports.wal").string(), "test:real-path")
+    Which is: 4-byte object <04-00 00-00>
+
+[  FAILED  ] UnresolvedReportJournal.ExistingSystemSymlinkInJournalPathIsNeverFollowed (9 ms)
+[----------] 1 test from UnresolvedReportJournal (9 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (11 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] UnresolvedReportJournal.ExistingSystemSymlinkInJournalPathIsNeverFollowed
+
+ 1 FAILED TEST

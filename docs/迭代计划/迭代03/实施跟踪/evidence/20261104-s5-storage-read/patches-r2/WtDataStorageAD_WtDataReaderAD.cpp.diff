@@ -1,0 +1,45 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before-r2/src/WtDataStorageAD/WtDataReaderAD.cpp	2026-11-04 18:12:40
++++ src/WtDataStorageAD/WtDataReaderAD.cpp	2026-11-04 21:22:17
+@@ -295,6 +295,12 @@
+ 	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "readTickSlice"))
+ 		return NULL;
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	std::string stdPID = fmtutil::format<64>("{}.{}", cInfo._exchg, cInfo._product);
+ 
+ 	uint32_t curDate, curTime, curSecs;
+@@ -890,13 +896,19 @@
+ 		// Preserve the established empty-slice shape only when this reader already
+ 		// owns a cache buffer. A first zero-count read has no backing block and
+ 		// historically returns NULL.
+-		const std::string zeroCountKey = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
++		const std::string zeroCountKey = fmt::format("{}#{}", stdCode, (uint32_t)period);
+ 		auto cached = _bars_cache.find(zeroCountKey);
+ 		if (cached == _bars_cache.end() || cached->second._bars.empty())
+ 			return NULL;
+ 	}
+ 
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	std::string stdPID = fmtutil::format<64>("{}.{}", cInfo._exchg, cInfo._product);
+ 
+ 	uint32_t curDate, curTime, curSecs;
+@@ -975,7 +987,7 @@
+ 		return NULL;
+ 	}
+ 
+-	std::string key = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
++	std::string key = fmt::format("{}#{}", stdCode, (uint32_t)period);
+ 	BarsList& barsList = _bars_cache[key];
+ 	const bool cachedFutureBar = !barsList._bars.empty() &&
+ 		(isDay ? barsList._bars.back().date : barsList._bars.back().time) > cutoffBarTime;

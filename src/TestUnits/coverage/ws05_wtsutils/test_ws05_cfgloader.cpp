@@ -4,6 +4,7 @@
  * 只读生产代码；本文件仅覆盖公开 API 及无副作用的内部转换函数。
  * 缺陷记录见 docs/迭代计划/迭代01/bugs/ws05_wtsutils.md。
  */
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include "WTSUtils/WTSCfgLoader.h"
@@ -27,7 +28,7 @@ std::filesystem::path ws05_make_temp_dir(const char* tag)
 {
 	static int s_seq = 0;
 	std::filesystem::path p = std::filesystem::temp_directory_path()
-		/ (std::string("ws05_cfg_") + tag + "_" + std::to_string(++s_seq));
+		/ (std::string("ws05_cfg_") + tag + "_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(++s_seq));	// K48: per process
 	std::error_code ec;
 	std::filesystem::remove_all(p, ec);
 	std::filesystem::create_directories(p, ec);

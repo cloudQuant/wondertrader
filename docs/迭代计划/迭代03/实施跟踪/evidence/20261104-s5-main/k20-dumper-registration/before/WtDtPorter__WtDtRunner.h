@@ -1,0 +1,132 @@
+/*!
+ * \file WtDtRunner.h
+ * \project	WonderTrader
+ *
+ * \author Wesley
+ * \date 2020/03/30
+ * 
+ * \brief 
+ */
+#pragma once
+#include "PorterDefs.h"
+#include "ExpDumper.h"
+
+#include "../WtDtCore/DataManager.h"
+#include "../WtDtCore/ParserAdapter.h"
+#include "../WtDtCore/StateMonitor.h"
+#include "../WtDtCore/UDPCaster.h"
+#include "../WtDtCore/IndexWorkerMgr.h"
+#include "../WtDtCore/ShmCaster.h"
+
+#include "../WTSTools/WTSHotMgr.h"
+#include "../WTSTools/WTSBaseDataMgr.h"
+
+#include <boost/asio.hpp>
+#include <atomic>
+#include <vector>
+
+NS_WTP_BEGIN
+class WTSVariant;
+NS_WTP_END
+
+class WtDtRunner
+{
+public:
+	WtDtRunner();
+	~WtDtRunner();
+
+public:
+	void	initialize(const char* cfgFile, const char* logCfg, const char* modDir = "", bool bCfgFile = true, bool bLogCfgFile = true);
+	void	start(bool bAsync = false, bool bAlldayMode = false);
+	bool	isAlldayMode() const { return _allday_mode; }
+	// Status of the initial start snapshot only; excludes dynamically added parsers.
+	// True means commands were submitted, not that providers are connected.
+	bool initialParserCommandsSubmitted() const { return _initial_parser_commands_submitted.load(); }
+
+	bool	createExtParser(const char* id);
+
+	// Card 9 / R5-007 teardown order: state monitor, then every parser (stop all
+	// before polling any, bounded V2 drain; external parsers are retained, not
+	// released, once their host callback gate is closed and drained), then index
+	// workers and the data manager. Returns false while any parser owner remains; the runner and its
+	// borrowed managers must then be kept alive until process exit.
+	bool	shutdown();
+
+
+//////////////////////////////////////////////////////////////////////////
+//扩展Parser
+public:
+	void registerParserPorter(FuncParserEvtCallback cbEvt, FuncParserSubCallback cbSub);
+
+	void parser_init(const char* id);
+	void parser_connect(const char* id);
+	void parser_release(const char* id);
+	void parser_disconnect(const char* id);
+	void parser_subscribe(const char* id, const char* code);
+	void parser_unsubscribe(const char* id, const char* code);
+
+	void on_ext_parser_quote(const char* id, WTSTickStruct* curTick, uint32_t uProcFlag);
+
+//////////////////////////////////////////////////////////////////////////
+//扩展Dumper
+public:
+	bool createExtDumper(const char* id);
+
+	void registerExtDumper(FuncDumpBars barDumper, FuncDumpTicks tickDumper);
+
+	void registerExtHftDataDumper(FuncDumpOrdQue ordQueDumper, FuncDumpOrdDtl ordDtlDumper, FuncDumpTrans transDumper);
+
+	bool dumpHisBars(const char* id, const char* stdCode, const char* period, WTSBarStruct* bars, uint32_t count);
+
+	bool dumpHisTicks(const char* id, const char* stdCode, uint32_t uDate, WTSTickStruct* ticks, uint32_t count);
+
+	bool dumpHisOrdQue(const char* id, const char* stdCode, uint32_t uDate, WTSOrdQueStruct* item, uint32_t count);
+
+	bool dumpHisOrdDtl(const char* id, const char* stdCode, uint32_t uDate, WTSOrdDtlStruct* items, uint32_t count);
+
+	bool dumpHisTrans(const char* id, const char* stdCode, uint32_t uDate, WTSTransStruct* items, uint32_t count);
+
+private:
+	void initDataMgr(WTSVariant* config, bool bAlldayMode = false);
+	void retainDumpersUnlessWriterReleased();
+	void initParsers(WTSVariant* cfg);
+
+private:
+
+	WTSBaseDataMgr	_bd_mgr;
+	WTSHotMgr		_hot_mgr;
+	boost::asio::io_context _async_io;
+	StateMonitor	_state_mon;
+	UDPCaster		_udp_caster;
+	ShmCaster		_shm_caster;
+	DataManager		_data_mgr;
+	IndexWorkerMgr	_idx_factory;
+	ParserAdapterMgr	_parsers;
+	// Failed external parser candidates remain outside the runnable manager,
+	// but their API may still hold the adapter's SPI pointer. Keep the candidate
+	// and its borrowed runner graph alive until a provider-specific drain exists.
+	std::vector<ParserAdapterPtr> _quarantined_ext_parsers;
+
+	FuncParserEvtCallback	_cb_parser_evt;
+	FuncParserSubCallback	_cb_parser_sub;
+
+	FuncDumpBars	_dumper_for_bars;
+	FuncDumpTicks	_dumper_for_ticks;
+
+	FuncDumpOrdQue	_dumper_for_ordque;
+	FuncDumpOrdDtl	_dumper_for_orddtl;
+	FuncDumpTrans	_dumper_for_trans;
+
+	typedef std::shared_ptr<ExpDumper> ExpDumperPtr;
+	typedef std::map<std::string, ExpDumperPtr>  ExpDumpers;
+	ExpDumpers		_dumpers;
+
+	std::atomic<bool> _to_exit;
+	bool _allday_mode;
+	bool _startup_blocked; // guarded by parser registry mutex; required init failed
+	bool _config_load_failed = false; // guarded by parser registry mutex; a later valid config may retry
+	bool _parser_registry_started; // guarded with ParserAdapterMgr by registry mutex
+	bool _parser_registry_stopped; // guarded with ParserAdapterMgr by registry mutex
+	std::atomic<bool> _initial_parser_commands_submitted{false};
+};
+

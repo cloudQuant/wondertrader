@@ -33,7 +33,13 @@ cp "$run_dir/plugins/fixture.$ext" "$run_dir/$deep_rel/fixture.$ext"
  "$src_root/WtCore/CtaStrategyMgr.cpp" "$fixture/logger_stub.cpp" "$fixture/check.cpp" $dl_lib -o "$run_dir/current"
 # HEAD is a historical control, not the previously dirty working-tree snapshot.
 git rev-parse HEAD > "$run_dir/head-commit.txt"
-git show HEAD:src/WtCore/CtaStrategyMgr.cpp > "$run_dir/head-baseline.cpp"
+# 2026-11-05: the historical control is pinned to the commit that was HEAD when this
+# fixture was written (9094fd8e; CtaStrategyMgr.cpp unchanged since 325a4d5f). The moving
+# HEAD (ccaad010 onwards) already contains the fix, so it is no longer a red control.
+hist_commit=9094fd8e6de73d19b9f011ef8a70b23416efe7da
+echo "$hist_commit" > "$run_dir/historical-control-commit.txt"
+git show "$hist_commit:src/WtCore/CtaStrategyMgr.cpp" > "$run_dir/head-baseline.cpp"
+echo "1d1c42ca751b762d533016a617abaf8ea39fa5f5ef9a4887e2af329357a35876  $run_dir/head-baseline.cpp" | shasum -a 256 -c -
 "$CXX" -std=c++17 -g -O0 -pthread -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL \
  -I"$src_root/WtCore" -I"$boost" -I"$fmt" -I"$spdlog" -include "$src_root/Share/fmt_enum_compat.h" \
  "$run_dir/head-baseline.cpp" "$fixture/logger_stub.cpp" "$fixture/check.cpp" $dl_lib -o "$run_dir/head-baseline"

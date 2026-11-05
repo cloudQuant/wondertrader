@@ -753,7 +753,9 @@ void WtBtRunner::run(bool bNeedDump /* = false */, bool bAsync /* = false */)
 		finishReplayRun();
 		controlLock.unlock();
 		finalizeDeferredReleaseAtSyncBoundary();
-		WTSLogger::error("Preparing historical data replayer failed; backtest will not run");
+		const WtReplayStatusV1 status = _replayer.replay_status();
+		WTSLogger::error("Preparing historical data replayer failed; backtest will not run: replay error {}: {}",
+			status.error_code, status.message[0] != '\0' ? status.message : "no message");
 		return;
 	}
 
@@ -814,7 +816,7 @@ void WtBtRunner::run(bool bNeedDump /* = false */, bool bAsync /* = false */)
 		}
 		catch (...)
 		{
-			WTSLogger::error("Creating asynchronous backtest worker failed; completing replay synchronously");
+			WTSLogger::error("Creating asynchronous backtest worker failed; terminating replay");
 			{
 				std::lock_guard<std::mutex> lock(_lifecycle_mutex);
 				_replay_thread_id = std::this_thread::get_id();
@@ -823,11 +825,12 @@ void WtBtRunner::run(bool bNeedDump /* = false */, bool bAsync /* = false */)
 			controlLock.unlock();
 			try
 			{
+				_replayer.report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Creating asynchronous backtest worker failed");
 				_replayer.run(bNeedDump);
 			}
 			catch (...)
 			{
-				WTSLogger::error("Exception raised while completing backtest synchronously");
+				WTSLogger::error("Exception raised while terminating failed backtest");
 			}
 			finishReplayRun();
 			finalizeDeferredReleaseAtSyncBoundary();
@@ -1013,6 +1016,10 @@ bool WtBtRunner::finalizeRelease(std::string* error)
 		if (!quiesceAndDestroyExecMocker(error))
 			return false;
 	}
+
+	// R20_wtbtcore#3 / 卡9：回放已停止且线程已 join，此时排空通知器在途发布并恰好一次
+	// 销毁 MQ server；之后 Runner/EventNotifier 析构不会重复销毁，模块按 9a=A 常驻。
+	_notifier.release();
 
 	if (_cfg)
 	{

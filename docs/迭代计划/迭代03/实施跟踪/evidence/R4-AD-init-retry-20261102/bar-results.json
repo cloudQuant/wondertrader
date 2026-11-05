@@ -1,0 +1,26 @@
+[
+  {
+    "test": "ManualDumperFailureDoesNotLosePreviousBar",
+    "argv": [
+      "/tmp/wt-i03-ad-init-review/bar-failure",
+      "--gtest_filter=R4WriterADTest.ManualDumperFailureDoesNotLosePreviousBar"
+    ],
+    "exit": 1
+  },
+  {
+    "test": "ManualDumperRetainsBorrowedBarAfterReturn",
+    "argv": [
+      "/tmp/wt-i03-ad-init-review/bar-failure",
+      "--gtest_filter=R4WriterADTest.ManualDumperRetainsBorrowedBarAfterReturn"
+    ],
+    "exit": -6
+  },
+  {
+    "test": "ManualBarDirectoryFailureReportsAndCanRetry",
+    "argv": [
+      "/tmp/wt-i03-ad-init-review/bar-failure",
+      "--gtest_filter=R4WriterADTest.ManualBarDirectoryFailureReportsAndCanRetry"
+    ],
+    "exit": 1
+  }
+]

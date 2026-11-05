@@ -1,0 +1,39 @@
+exit=-6
+==================
+WARNING: ThreadSanitizer: data race (pid=32971)
+  Write of size 4 at 0x000104430010 by thread T2:
+    #0 TimeUtils::getTZOffset() TimeUtils.hpp:77 (green-tsan:arm64+0x10000903c)
+    #1 TimeUtils::getCurDate() TimeUtils.hpp:224 (green-tsan:arm64+0x100016468)
+    #2 StateMonitor::run()::$_0::operator()() const StateMonitor.cpp:598 (green-tsan:arm64+0x100016468)
+    #3 std::__1::__invoke_result_impl<void, StateMonitor::run()::$_0>::type std::__1::__invoke[abi:nqe220108]<StateMonitor::run()::$_0>(StateMonitor::run()::$_0&&) invoke.h:90 (green-tsan:arm64+0x100016468)
+    #4 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (green-tsan:arm64+0x100016468)
+    #5 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>>(void*) thread.h:169 (green-tsan:arm64+0x100016468)
+
+  Previous write of size 4 at 0x000104430010 by thread T1:
+    #0 TimeUtils::getTZOffset() TimeUtils.hpp:77 (green-tsan:arm64+0x10000903c)
+    #1 TimeUtils::getCurDate() TimeUtils.hpp:224 (green-tsan:arm64+0x100016468)
+    #2 StateMonitor::run()::$_0::operator()() const StateMonitor.cpp:598 (green-tsan:arm64+0x100016468)
+    #3 std::__1::__invoke_result_impl<void, StateMonitor::run()::$_0>::type std::__1::__invoke[abi:nqe220108]<StateMonitor::run()::$_0>(StateMonitor::run()::$_0&&) invoke.h:90 (green-tsan:arm64+0x100016468)
+    #4 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (green-tsan:arm64+0x100016468)
+    #5 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>>(void*) thread.h:169 (green-tsan:arm64+0x100016468)
+
+  Location is global 'TimeUtils::getTZOffset()::offset' at 0x000104430010 (green-tsan+0x100144010)
+
+  Thread T2 (tid=991588, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (green-tsan:arm64+0x1000070f0)
+    #2 std::__1::thread::thread[abi:nqe220108]<StateMonitor::run()::$_0, 0>(StateMonitor::run()::$_0&&) thread.h:218 (green-tsan:arm64+0x1000070f0)
+    #3 std::__1::thread::thread[abi:nqe220108]<StateMonitor::run()::$_0, 0>(StateMonitor::run()::$_0&&) thread.h:209 (green-tsan:arm64+0x1000070f0)
+    #4 StateMonitor::run() StateMonitor.cpp:572 (green-tsan:arm64+0x1000070f0)
+    #5 main probe.cpp:68 (green-tsan:arm64+0x1000172a8)
+
+  Thread T1 (tid=991587, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (green-tsan:arm64+0x1000070f0)
+    #2 std::__1::thread::thread[abi:nqe220108]<StateMonitor::run()::$_0, 0>(StateMonitor::run()::$_0&&) thread.h:218 (green-tsan:arm64+0x1000070f0)
+    #3 std::__1::thread::thread[abi:nqe220108]<StateMonitor::run()::$_0, 0>(StateMonitor::run()::$_0&&) thread.h:209 (green-tsan:arm64+0x1000070f0)
+    #4 StateMonitor::run() StateMonitor.cpp:572 (green-tsan:arm64+0x1000070f0)
+    #5 main probe.cpp:68 (green-tsan:arm64+0x1000172a0)
+
+SUMMARY: ThreadSanitizer: data race TimeUtils.hpp:77 in TimeUtils::getTZOffset()
+==================

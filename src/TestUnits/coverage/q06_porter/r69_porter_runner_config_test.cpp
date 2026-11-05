@@ -82,8 +82,9 @@ namespace {
 		"{\"TRADING\":{\"name\":\"Trading\",\"offset\":0,"
 		"\"sections\":[{\"from\":900,\"to\":1500}]}}";
 
+	// 卡1（DateMappingV1）：按品种映射交易日须有交易日历；品种缺 holiday 模板或未加载节假日文件即 MissingCalendar，K 线读取为空。
 	const char* kCommodityOne =
-		"{\"SHFE\":{\"au\":{\"name\":\"Gold\",\"session\":\"TRADING\","
+		"{\"SHFE\":{\"au\":{\"name\":\"Gold\",\"session\":\"TRADING\",\"holiday\":\"CHINA\","
 		"\"pricetick\":0.02,\"volscale\":1000,\"covermode\":0,\"pricemode\":0}}}";
 
 	const char* kCommodityTwo =
@@ -124,13 +125,15 @@ namespace {
 		write_text(dir + "/sessions.json", kSessions);
 		write_text(dir + "/commodity.json", kCommodityOne);
 		write_text(dir + "/contract.json", kContractOne);
+		write_text(dir + "/query_holidays.json", "{\"CHINA\":[]}");
 	}
 
 	std::string query_basefiles(const std::string& dir)
 	{
 		return "\"basefiles\":{\"session\":\"" + dir + "/sessions.json\","
 			"\"commodity\":\"" + dir + "/commodity.json\","
-			"\"contract\":\"" + dir + "/contract.json\"}";
+			"\"contract\":\"" + dir + "/contract.json\","
+			"\"holiday\":\"" + dir + "/query_holidays.json\"}";
 	}
 
 	std::string bin_dir()
@@ -283,8 +286,11 @@ TEST(R69PorterRunnerConfig, TraderAndExecuterFilesLoadWithRouterSections)
 
 	write_text(dir + "/traders.json",
 		"{\"traders\":[{\"active\":false,\"id\":\"r69_trd_off\"}]}");
+	// 迭代03（BUG-R134-003/WSN06-001）：router 规则加载结果现传播为配置失败，执行器管理器
+	// 只接受数组（N02ExecMgrTest.LoadRouterRulesRejectsNullAndNonArray）；原夹具用 {} 依赖旧的
+	// 忽略返回值行为，改为空数组仍到达两处 load_router_rules 入口（.before 见 s5-runners 证据）。
 	write_text(dir + "/executers.json",
-		"{\"executers\":[],\"routers\":{}}");
+		"{\"executers\":[],\"routers\":[]}");
 	write_text(dir + "/actions.json", kActions);
 
 	WtRtRunner* r = new_runner(dir);
@@ -294,7 +300,7 @@ TEST(R69PorterRunnerConfig, TraderAndExecuterFilesLoadWithRouterSections)
 		"{\"basefiles\":{},"
 		"\"traders\":\"" + dir + "/traders.json\","
 		"\"executers\":\"" + dir + "/executers.json\","
-		"\"routers\":{},"
+		"\"routers\":[],"
 		+ tail(dir, "cta") + "}";
 
 	ASSERT_TRUE(r->config(cfg.c_str(), false));
@@ -340,9 +346,20 @@ TEST(R69PorterRunnerConfig, MissingExecuterFileAndEmptyDataStillReturnTrue)
 	WtRtRunner* r = new_runner(dir);
 	ASSERT_NE(r, nullptr);
 
-	const std::string cfg =
+	// 卡8b=A（迭代03 s5-runners，BUG-R134-003/WSN06-001）：配置了却不存在的执行器
+	// 侧文件是配置错误，在任何副作用之前拒绝且 config 仍可重试；原用例在此处
+	// 断言成功，与已裁定的全表预检冲突（.before 见 s5-runners 证据）。空 data /
+	// no-store 可选模式的对照保留在随后的重试中。
+	const std::string missingExecFile =
 		"{" + query_basefiles(dir) + ","
 		"\"executers\":\"" + dir + "/r69_absent_executers.json\","
+		"\"notifier\":{\"active\":false},"
+		+ tail(dir, "cta") + "}";
+	EXPECT_FALSE(r->config(missingExecFile.c_str(), false));
+	EXPECT_EQ(nullptr, r->getEngine());
+
+	const std::string cfg =
+		"{" + query_basefiles(dir) + ","
 		"\"notifier\":{\"active\":false},"
 		+ tail(dir, "cta") + "}";
 

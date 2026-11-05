@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include "../Includes/WTSStruct.h"
 #include "../Share/BoostMappingFile.hpp"
+#include <mutex>
 
 NS_WTP_BEGIN
 class WTSVariant;
@@ -132,6 +133,10 @@ public:
 
 private:
 	/// @brief 共享内存映射文件路径
+	/// Decision K21 (2026-11-04): one producer at a time in this process; the
+	/// queue indices are plain shared-memory fields, so concurrent broadcasts
+	/// from several parser threads are serialized here.
+	std::mutex		_write_mtx;
 	std::string		_path;
 	/// @brief 内存映射文件智能指针类型别名
 	typedef std::shared_ptr<BoostMappingFile> MappedFilePtr;

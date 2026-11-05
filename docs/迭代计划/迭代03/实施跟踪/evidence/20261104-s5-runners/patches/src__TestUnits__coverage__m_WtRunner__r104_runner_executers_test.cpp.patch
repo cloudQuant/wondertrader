@@ -1,0 +1,51 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp	2026-11-04 08:57:49
++++ src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp	2026-11-04 17:46:26
+@@ -469,6 +469,48 @@
+ 	EXPECT_EQ(nullptr, runner._cta_engine.findExecuter("r104wt_exec_rollback_local"));
+ 	EXPECT_EQ(nullptr, runner._cta_engine.findExecuter("r104wt_exec_rollback_diff"));
+ 	runner.run(false);
++}
++
++/*
++ * BUG-R104-003（迭代03 s5-runners）：真实 TraderMocker 与 local/diff 绑定后，表内后一个
++ * diff 执行器在通过 eager 校验后于 init 读取损坏快照失败。期望：config 失败；延迟绑定未发生，
++ * 真实 adapter 上没有任何执行器 sink；trader API 已释放；随后 run 被拒绝、shutdown 完成，
++ * 运行器与已登记宿主可安全析构（执行器宿主未 quiesce 析构会 std::terminate）。
++ */
++TEST(r104_wtrunner_config, bound_executers_then_failed_diff_init_release_cleanly)
++{
++	RunnerTraderFixture fixtureEnv("r104_exec_fail_release");
++	ASSERT_TRUE(fixtureEnv.ready()) << fixtureEnv.error();
++	WtRunner& runner = fixtureEnv.runner();
++
++	const std::string snapshot = std::string(WtHelper::getExecDataDir()) + "r104wt_exec_rel_bad.json";
++	StdFile::write_file_content(snapshot.c_str(), "{not json");
++	const std::string cfg = basefiles_block() + env_block() + tail_block()
++		+ "traders:\n" + one_trader_block("r104wt_trader_rel", 104105)
++		+ "executers:\n"
++		+ "-   id: r104wt_exec_rel_local\n    active: true\n    name: local\n    trader: r104wt_trader_rel\n" + exec_valid_params()
++		+ "-   id: r104wt_exec_rel_diff\n    active: true\n    name: diff\n    trader: r104wt_trader_rel\n" + exec_valid_params()
++		+ "-   id: r104wt_exec_rel_bad\n    active: true\n    name: diff\n    trader: r104wt_trader_rel\n" + exec_valid_params();
++	write_fixture("exec_fail_release.yaml", cfg);
++
++	EXPECT_FALSE(runner.config(fixture("exec_fail_release.yaml")));
++	EXPECT_TRUE(runner_fs::exists(runner_fs::path(fixtureEnv.temp_path()) / "mocker_104105"))
++		<< "the real TraderMocker initialized before the executer failure";
++	TraderAdapterPtr trader = runner._traders.getAdapter("r104wt_trader_rel");
++	ASSERT_NE(nullptr, trader);
++	EXPECT_TRUE(trader->_api_released);
++	EXPECT_EQ(nullptr, trader->_trader_api);
++	for (const char* id : { "r104wt_exec_rel_local", "r104wt_exec_rel_diff", "r104wt_exec_rel_bad" })
++	{
++		ExecCmdPtr command = runner._cta_engine.findExecuter(id);
++		ITrdNotifySink* sink = dynamic_cast<ITrdNotifySink*>(command.get());
++		if (sink != nullptr)
++			EXPECT_FALSE(trader_has_registered_sink(*trader, sink)) << id;
++	}
++	runner.run(true); // refused: configuration failed
++	EXPECT_TRUE(runner.shutdown());
++	std::error_code ec;
++	runner_fs::remove(snapshot, ec);
+ }
+ 
+ TEST(r104_wtrunner_config, executer_name_defaults_to_local_and_missing_trader_paths)

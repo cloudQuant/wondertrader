@@ -8,7 +8,11 @@
 #include "../Share/StdUtils.hpp"
 #include "../Share/BoostMappingFile.hpp"
 
+#include <mutex>
 #include <queue>
+#include <atomic>
+#include <functional>
+#include <set>
 
 typedef std::shared_ptr<BoostMappingFile> BoostMFPtr;
 
@@ -94,6 +98,39 @@ public:
 	 */
 	virtual WTSTickData* getCurTick(const char* code, const char* exchg = "") override;
 
+	/**
+	 * @brief 卡13：tick 持久化（LMDB 提交）失败次数
+	 * @details 失败的 tick 不推进缓存、不广播；同步模式 writeTick 返回 false，异步模式经此计数与错误日志观察
+	 */
+	uint64_t tickPersistFailures() const { return _tick_persist_failures.load(std::memory_order_acquire); }
+
+	/**
+	 * @brief BUG-L04-004 写端子项：已接收（异步 writeTick 返回 true）但在处理时因身份或交易日
+	 * 复核失败而未进入缓存/数据库/广播的 tick 数。异步返回值只表示“已接收”，持久化结果经
+	 * tickPersistFailures()、本计数与错误日志观察；同步模式下这类失败直接返回 false。
+	 */
+	uint64_t tickRejectedAfterAcceptance() const { return _tick_rejected_after_accept.load(std::memory_order_acquire); }
+
+	/**
+	 * Writer lifecycle V1 (IDataWriter.h, card 9). requestStop closes admission (later
+	 * writeTick/getCurTick fail) and asks the async worker to finish its accepted queue; it
+	 * is nonblocking and may be called from sink/dumper callbacks and the worker itself.
+	 * canWaitDrain is false on the worker thread and inside this writer's own calls.
+	 * waitDrained returns DRAINED once no call is in flight and the worker has exited and
+	 * been joined; afterwards release() is a callback-free cleanup.
+	 */
+	void requestStop();
+	// Decision K20=B (lifecycle V1 minor 1): synchronized dumper registry. Writer paths
+	// call dumpers from snapshotDumpers() outside _dumper_mtx; add/remove go through
+	// the versioned table. The legacy inline IDataWriter::add_ext_dumper bypasses the
+	// lock and remains only for hosts without the minor-1 table.
+	WtDataWriterLifecycleV1Status addDumperV1(const char* id, IHisDataDumper* dumper);
+	WtDataWriterLifecycleV1Status removeDumperV1(const char* id);
+	ExtDumpers snapshotDumpers() const;
+	mutable std::mutex _dumper_mtx;
+	bool canWaitDrain();
+	WtDataWriterLifecycleV1Status waitDrained(uint32_t timeout_ms);
+
 private:
 	/**
 	 * @brief 基础数据管理器指针
@@ -177,6 +214,9 @@ private:
 		 */
 		RTBarCache*		_cache_block;
 
+		/// 卡13：本进程已扫描进 _idx 的缓存项数；其他 writer 新增项在发布锁内补扫
+		uint32_t		_scanned = 0;
+
 		/**
 		 * @brief 构造函数
 		 * @details 初始化缓存块和文件指针为NULL
@@ -243,6 +283,16 @@ private:
 	 * @details 标记是否启用异步任务处理模式
 	 */
 	bool					_async_task;
+
+	// Lifecycle V1 admission (card 9): in-flight public calls, stop request, worker exit.
+	friend class AdOperationGuard;
+	StdUniqueMutex			_ops_mtx;
+	StdCondVariable			_ops_cond;
+	uint32_t				_active_ops = 0;
+	bool					_stop_requested = false;
+	bool					_task_exited = false;	///< guarded by _ops_mtx
+	bool					_task_joined = false;	///< guarded by _ops_mtx
+	std::thread::id			_task_worker_id;		///< guarded by _task_mtx
 
 	/**
 	 * @brief 数据存储基础目录
@@ -344,6 +394,25 @@ private:
 	WtLMDBMap	_tick_dbs;
 
 	/**
+	 * @brief 卡13（13c=A）：键布局未知或含旧版零日期键而被隔离的数据库目录；不再写入、不再重复探测
+	 */
+	std::set<std::string>	_quarantined_dbs;
+
+	/// 卡13：tick 持久化失败计数
+	std::atomic<uint64_t>	_tick_persist_failures{0};
+
+	/// L04-004：已接收后复核失败（身份/交易日）而丢弃的 tick 计数
+	std::atomic<uint64_t>	_tick_rejected_after_accept{0};
+
+	/// 卡13：本进程已扫描进索引的 tick 缓存项数；其他 writer 新增项在发布锁内补扫
+	uint32_t	_tick_cache_scanned = 0;
+
+	/**
+	 * @brief 卡13（13c=A）：打开已有库后探测键布局；首/末键长度不等于当前键结构，或 tick 库首键日期为零时隔离
+	 */
+	bool	checkLmdbKeyLayout(WtLMDB& db, const std::string& path, std::size_t keySize, bool isTick);
+
+	/**
 	 * @brief 获取K线数据库
 	 * @param exchg 交易所代码
 	 * @param period K线周期类型（分钟、1分钟、5分钟等）
@@ -376,7 +445,8 @@ private:
 	 * @return bool 更新是否成功
 	 * @details 将新的Tick数据更新到内存缓存中，并根据处理标志进行不同的处理
 	 */
-	bool updateTickCache(WTSContractInfo* ct, WTSTickData* curTick, uint32_t procFlag);
+	bool updateTickCache(WTSContractInfo* ct, WTSTickData* curTick, uint32_t procFlag,
+		const std::function<bool()>& commitBeforePublish = std::function<bool()>());
 
 	/**
 	 * @brief 更新K线缓存
@@ -393,6 +463,11 @@ private:
 	 * @details 将Tick数据写入到LMDB数据库中进行持久化存储
 	 */
 	void pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick);
+
+	/**
+	 * @brief 卡13：在 tick 缓存发布前提交 LMDB；失败返回 false，调用方不得发布缓存/广播/调用外部 dumper
+	 */
+	bool commitTickToDb(WTSContractInfo* ct, WTSTickData* curTick);
 
 	/**
 	 * @brief 将日K线数据写入数据库

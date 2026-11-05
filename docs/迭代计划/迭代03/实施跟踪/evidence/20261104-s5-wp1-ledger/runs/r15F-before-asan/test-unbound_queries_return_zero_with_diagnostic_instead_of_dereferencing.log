@@ -1,0 +1,20 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R15CtxTest.unbound_queries_return_zero_with_diagnostic_instead_of_dereferencing
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R15CtxTest
+[ RUN      ] R15CtxTest.unbound_queries_return_zero_with_diagnostic_instead_of_dereferencing
+/tmp/wt-i03-s5-wp1-ledger-run/r15F-before-asan/overlay/src/WtCore/HftStraBaseCtx.cpp:792:19: runtime error: member call on null pointer of type 'wtp::TraderAdapter'
+    #0 0x000100eea6bc in wtp::HftStraBaseCtx::stra_get_position(char const*, bool, int)+0x65c (test:arm64+0x1000166bc)
+    #1 0x00010100047c in R15CtxTest_unbound_queries_return_zero_with_diagnostic_instead_of_dereferencing_Test::TestBody()+0x1c8 (test:arm64+0x10012c47c)
+    #2 0x00010104b820 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (test:arm64+0x100177820)
+    #3 0x00010104b768 in testing::Test::Run()+0xcc (test:arm64+0x100177768)
+    #4 0x00010104c348 in testing::TestInfo::Run()+0xd0 (test:arm64+0x100178348)
+    #5 0x00010104cdcc in testing::TestSuite::Run()+0x1c4 (test:arm64+0x100178dcc)
+    #6 0x0001010581f0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (test:arm64+0x1001841f0)
+    #7 0x000101057b9c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (test:arm64+0x100183b9c)
+    #8 0x000101057b00 in testing::UnitTest::Run()+0x78 (test:arm64+0x100183b00)
+    #9 0x000101038f00 in main+0x40 (test:arm64+0x100164f00)
+    #10 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-s5-wp1-ledger-run/r15F-before-asan/overlay/src/WtCore/HftStraBaseCtx.cpp:792:19 

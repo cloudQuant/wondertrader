@@ -132,8 +132,9 @@ public:
 				break;
 			}
 		}
-		return true;
+		return cancelByIdRet;
 	}
+	bool cancelByIdRet = true;
 	OrderIDs cancel(const char* c, bool isBuy, double = 0) override
 	{
 		bydirCancels.push_back({ c, isBuy });
@@ -1108,6 +1109,150 @@ TEST(r7_stkvw, invalid_action_time_does_not_poison_valid_tick)
 	unit.on_tick(mkSTick(kStk, 100100000, 10.50, 10.49, 10.51));
 	ASSERT_EQ(ctx.buys.size(), 1u);
 	EXPECT_GT(ctx.buys[0].qty, 0.0);
+	ctx.comm->release();
+}
+
+TEST(r7_stkvw, unrepresentable_session_date_does_not_advance_high_water_or_order)
+{
+	for (const uint32_t tradingDate : {0u, 99991231u})
+	{
+		SFakeCtx ctx;
+		WTSSessionInfo* night = WTSSessionInfo::create("NIGHT_DAY", "NIGHT_DAY", 360);
+		night->addTradingSection(2100, 2300);
+		night->addTradingSection(0, 230);
+		ctx.setSession(night);
+		SVwapV2File vf(*night, 60, 1000.0);
+		ctx.comm = mkSComm("STK");
+		WtStockVWapExeUnit unit;
+		WTSVariant* cfg = mkSCfg(5, 0, 0, 100.0, 1000.0, 0, 0, true, 2100, 2300);
+		unit.init(&ctx, kStk, cfg);
+		cfg->release();
+		ASSERT_TRUE(unit.initializationSucceeded());
+		unit.set_position(kStk, 1000);
+		unit.on_channel_ready();
+
+		// Offset +360 advances this natural date past year 9999.  This tick
+		// must neither latch a provider error nor make a valid later tick stale.
+		auto* invalid = mkSTick(kStk, 220000000, 10.50, 10.49, 10.51,
+			0, 0, 99991231, tradingDate);
+		unit.on_tick(invalid);
+		invalid->release();
+		EXPECT_TRUE(ctx.buys.empty());
+		EXPECT_TRUE(ctx.sells.empty());
+		EXPECT_EQ(unit._tick_time_high_water, 0u);
+		EXPECT_EQ(unit._high_water_action_date, 0u);
+		EXPECT_EQ(unit._high_water_action_time, 0u);
+		EXPECT_FALSE(unit._unsupported_date_contract);
+		EXPECT_TRUE(ctx.hasLog("session-adjusted date cannot be verified"));
+
+		auto* valid = mkSTick(kStk, 220000000, 10.50, 10.49, 10.51,
+			0, 0, 20240103, 20240104);
+		unit.on_tick(valid);
+		valid->release();
+		ASSERT_EQ(ctx.buys.size(), 1u);
+		EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 1000.0);
+		EXPECT_TRUE(ctx.sells.empty());
+		ctx.comm->release();
+	}
+}
+
+TEST(r7_stkvw, invalid_session_date_clears_stale_tick_without_changing_watermark)
+{
+	SFakeCtx ctx;
+	WTSSessionInfo* night = WTSSessionInfo::create("NIGHT_DAY", "NIGHT_DAY", 360);
+	night->addTradingSection(2100, 2300);
+	night->addTradingSection(0, 230);
+	ctx.setSession(night);
+	SVwapV2File vf(*night, 60, 1000.0);
+	ctx.comm = mkSComm("STK");
+	WtStockVWapExeUnit unit;
+	WTSVariant* cfg = mkSCfg(5, 0, 0, 100.0, 1000.0, 0, 0, true, 2100, 2300);
+	unit.init(&ctx, kStk, cfg);
+	cfg->release();
+	ASSERT_TRUE(unit.initializationSucceeded());
+	unit.set_position(kStk, 1000);
+	auto* first = mkSTick(kStk, 220000000, 10.50, 10.49, 10.51, 0, 0, 20240103, 20240104);
+	unit.on_tick(first);
+	first->release();
+	ASSERT_NE(unit._last_tick, nullptr);
+	const auto water = unit._tick_time_high_water;
+	const auto waterDate = unit._high_water_action_date;
+	const auto waterTime = unit._high_water_action_time;
+	const auto existingOrders = ctx.buys.size();
+
+	auto* invalid = mkSTick(kStk, 220000000, 10.50, 10.49, 10.51, 0, 0, 99991231, 0);
+	unit.on_tick(invalid);
+	invalid->release();
+	EXPECT_EQ(unit._last_tick, nullptr);
+	EXPECT_EQ(unit._tick_time_high_water, water);
+	EXPECT_EQ(unit._high_water_action_date, waterDate);
+	EXPECT_EQ(unit._high_water_action_time, waterTime);
+	unit.on_channel_ready();
+	EXPECT_EQ(ctx.buys.size(), existingOrders);
+	EXPECT_TRUE(ctx.sells.empty());
+
+	auto* next = mkSTick(kStk, 220100000, 10.50, 10.49, 10.51, 0, 0, 20240103, 20240104);
+	unit.on_tick(next);
+	next->release();
+	EXPECT_EQ(ctx.buys.size(), existingOrders + 1);
+	EXPECT_TRUE(ctx.sells.empty());
+	ctx.comm->release();
+}
+
+TEST(r7_stkvw, unverifiable_previous_offset_date_does_not_latch_rollover)
+{
+	SFakeCtx ctx;
+	WTSSessionInfo* night = WTSSessionInfo::create("NIGHT_DAY", "NIGHT_DAY", 360);
+	night->addTradingSection(2100, 2300);
+	night->addTradingSection(0, 230);
+	ctx.setSession(night);
+	SVwapV2File vf(*night, 60, 1000.0);
+	ctx.comm = mkSComm("STK");
+	WtStockVWapExeUnit unit;
+	WTSVariant* cfg = mkSCfg(5, 0, 0, 100.0, 1000.0, 0, 0, true, 2100, 2300);
+	unit.init(&ctx, kStk, cfg);
+	cfg->release();
+	ASSERT_TRUE(unit.initializationSucceeded());
+	unit.set_position(kStk, 1000);
+	// Model a prior watermark that cannot be mapped by the current session.
+	unit._high_water_action_date = 99991231;
+	unit._high_water_action_time = 220000000;
+	unit._tick_time_high_water = 99991231220000000ull;
+	auto* tick = mkSTick(kStk, 100000000, 10.50, 10.49, 10.51, 0, 0, 99991231, 0);
+	unit.on_tick(tick);
+	tick->release();
+	EXPECT_FALSE(unit._unsupported_date_contract);
+	EXPECT_EQ(unit._tick_time_high_water, 99991231220000000ull);
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_TRUE(ctx.hasLog("previous session-adjusted date cannot be verified"));
+	ctx.comm->release();
+}
+
+TEST(r7_stkvw, session_date_before_supported_year_is_not_used_for_orders)
+{
+	SFakeCtx ctx;
+	WTSSessionInfo* early = WTSSessionInfo::create("NIGHT_DAY", "NIGHT_DAY", -360);
+	early->addTradingSection(100, 500);
+	ctx.setSession(early);
+	SVwapV2File vf(*early, 60, 1000.0);
+	ctx.comm = mkSComm("STK");
+	WtStockVWapExeUnit unit;
+	WTSVariant* cfg = mkSCfg(5, 0, 0, 100.0, 1000.0, 0, 0, true, 100, 500);
+	unit.init(&ctx, kStk, cfg);
+	cfg->release();
+	ASSERT_TRUE(unit.initializationSucceeded());
+	unit.set_position(kStk, 1000);
+	unit.on_channel_ready();
+	// The input date is valid, but the session-adjusted date is 1899-12-31,
+	// outside this executor's existing >= 1900 supported date contract.
+	auto* tick = mkSTick(kStk, 20000000, 10.50, 10.49, 10.51, 0, 0, 19000101, 0);
+	unit.on_tick(tick);
+	tick->release();
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_EQ(unit._tick_time_high_water, 0u);
+	EXPECT_TRUE(ctx.hasLog("session-adjusted date cannot be verified"));
 	ctx.comm->release();
 }
 
@@ -2212,4 +2357,48 @@ TEST(r7_stkvw, startup_cancel_without_explicit_target_does_not_recalculate_defau
 		EXPECT_TRUE(ctx.sells.empty());
 	}
 	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 迭代03 WP1（卡5/N05-003，2026-11-04）：宿主通过保留配置键声明已按 owner 与不可复用
+// 身份核验撤单时，超时撤单经 ctx->cancel(localid) 发出且同一单只发一次；宿主拒绝核验
+// （cancel 返回 false）即转为持久隔离，不回退裸 ID、不重复撤单。未声明时保持原 fail-closed。
+//////////////////////////////////////////////////////////////////////////
+#include "Includes/IExecPluginV2.h"
+#ifndef WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY
+#define WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY "__wt_host_order_identity"
+#endif
+
+TEST(r7_stkvw, wp1_timeout_with_host_verified_identity_cancels_once_or_latches)
+{
+	for (int refuse = 0; refuse < 2; ++refuse)
+	{
+		SVwapFile vf(25.0);
+		SFakeCtx ctx;
+		ctx.comm = mkSComm("STK");
+		ctx.cancelByIdRet = refuse == 0;
+		{
+			WtStockVWapExeUnit unit;
+			WTSVariant* cfg = mkSCfg(5, 0, 0, 100.0, 1000.0, 1);
+			cfg->append(WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY, (uint32_t)1);
+			unit.init(&ctx, kStk, cfg);
+			cfg->release();
+			unit.set_position(kStk, 0);
+			const uint32_t id = 8161;
+			unit._orders_mon.push_order(&id, 1, ctx.curTime);
+			unit.on_tick(mkSTick(kStk, 100000000, 10.50, 10.49, 10.51));
+			ctx.curTime += 1000;
+			unit.on_tick(mkSTick(kStk, 100002000, 10.50, 10.49, 10.51));
+			ASSERT_EQ(1u, ctx.byidCancels.size()) << "refuse=" << refuse;
+			EXPECT_EQ(id, ctx.byidCancels[0]);
+			EXPECT_TRUE(unit._orders_mon.has_order(id));
+			EXPECT_EQ(refuse == 1, unit._orders_mon.has_unverified_timeout());
+			EXPECT_EQ(refuse == 0, ctx.countLog("canceled with host-verified identity") == 1u);
+			EXPECT_EQ(refuse == 1, ctx.countLog("host could not verify its identity") == 1u);
+			ctx.curTime += 2000;
+			unit.on_tick(mkSTick(kStk, 100004000, 10.50, 10.49, 10.51));
+			EXPECT_EQ(1u, ctx.byidCancels.size()) << "claimed or latched order is never re-cancelled";
+		}
+		ctx.comm->release();
+	}
 }

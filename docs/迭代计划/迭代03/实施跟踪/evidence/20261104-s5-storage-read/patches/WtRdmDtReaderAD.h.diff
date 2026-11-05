@@ -1,0 +1,20 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before/src/WtDataStorageAD/WtRdmDtReaderAD.h	2026-11-03 21:45:07
++++ src/WtDataStorageAD/WtRdmDtReaderAD.h	2026-11-04 13:33:02
+@@ -159,6 +159,8 @@
+ 		std::string		_code;          /**< 合约代码 */
+ 		WTSKlinePeriod	_period;        /**< K线周期 */
+ 		uint64_t		_last_bar_time;  /**< 最后K线时间 */
++		uint64_t		_snapshot_txnid;  /**< R21-BUG-07：缓存对应的 LMDB 已提交事务号 */
++		bool			_snapshot_valid;  /**< R21-BUG-07：扫描期间无提交时为 true */
+ 
+ 		WTSSharedBuffer<std::vector<WTSBarStruct>>	_bars;  /**< K线数据存储容器（卡11=B 写时复制，切片持有 owner） */
+ 
+@@ -166,7 +168,7 @@
+ 		 * @brief 构造函数
+ 		 * @details 初始化最后K线时间为0
+ 		 */
+-		_BarsList() :_last_bar_time(0){}
++		_BarsList() :_last_bar_time(0), _snapshot_txnid(0), _snapshot_valid(false){}
+ 	} BarsList;
+ 
+ 	/**

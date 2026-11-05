@@ -1,0 +1,45 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R60SessionIsolation.release_from_matcher_push_suppresses_rest_of_pass
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R60SessionIsolation
+[ RUN      ] R60SessionIsolation.release_from_matcher_push_suppresses_rest_of_pass
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:270: Failure
+Value of: wait_until([&]() { return sink_.late.load() != 0; }, 200)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:272: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  sink_.late.load()
+    Which is: 3
+callbacks were delivered after release() returned in onPushOrder
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:273: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  sink_.n_trade()
+    Which is: 2
+onPushTrade of the same fill was delivered after release
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:274: Failure
+Expected equality of these values:
+  3u
+    Which is: 3
+  sink_.n_push_order()
+    Which is: 4
+two queued pushes plus the single fill push
+
+[  FAILED  ] R60SessionIsolation.release_from_matcher_push_suppresses_rest_of_pass (352 ms)
+[----------] 1 test from R60SessionIsolation (352 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (352 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R60SessionIsolation.release_from_matcher_push_suppresses_rest_of_pass
+
+ 1 FAILED TEST

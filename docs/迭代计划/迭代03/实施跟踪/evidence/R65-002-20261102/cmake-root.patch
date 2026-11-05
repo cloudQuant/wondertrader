@@ -1,0 +1,12 @@
+--- /tmp/wt-i03-r65-002-20261102/original-root-cmake.txt	2026-11-02 11:17:05
++++ /tmp/wt-i03-r65-002-20261102/snapshot/src/CMakeLists.txt	2026-11-02 11:17:05
+@@ -10,7 +10,8 @@
+ ENDIF()
+ # 添加boost
+ find_package(Boost REQUIRED COMPONENTS system filesystem thread)
+-include_directories(${Boost_INCLUDE_DIRS})
++include_directories(${Boost_INCLUDE_DIRS})
++include_directories(BEFORE /opt/homebrew/Cellar/boost/1.88.0/include)
+ link_directories(${Boost_LIBRARY_DIRS})
+ # 添加rapidjson
+ find_package(RapidJSON REQUIRED)

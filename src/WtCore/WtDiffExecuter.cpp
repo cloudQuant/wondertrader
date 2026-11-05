@@ -11,6 +11,7 @@
  */
 #include "WtDiffExecuter.h"
 #include "WtExecuterSchedule.h"
+#include "ExecPolicyConfig.h"
 #include "TraderAdapter.h"
 #include "WtEngine.h"
 #include "WtHelper.h"
@@ -35,6 +36,8 @@
 #include <map>
 #include <vector>
 #include <cstdio>
+#include <locale>
+#include <sstream>
 #ifdef _WIN32
 #include <process.h>
 #include <windows.h>
@@ -47,6 +50,40 @@ USING_NS_WTP;
 
 namespace
 {
+
+bool readExecutionScale(WTSVariant* params, double& result)
+{
+	WTSVariant* value = params->get("scale");
+	if (value == NULL) return false;
+	switch (value->type())
+	{
+	case WTSVariant::VT_Int32:
+	case WTSVariant::VT_Uint32:
+	case WTSVariant::VT_Int64:
+	case WTSVariant::VT_Uint64:
+	case WTSVariant::VT_Real:
+		result = value->asDouble();
+		break;
+	case WTSVariant::VT_String:
+	{
+		std::istringstream input(value->asString());
+		input.imbue(std::locale::classic());
+		input >> result;
+		// libc++ may set failbit for a representable subnormal while still
+		// consuming the complete token and assigning the correct value.
+		const bool subnormal = input.fail() && input.eof() &&
+			std::fpclassify(result) == FP_SUBNORMAL;
+		if (input.bad() || (input.fail() && !subnormal)) return false;
+		if (subnormal) input.clear(input.rdstate() & ~std::ios::failbit);
+		input >> std::ws;
+		if (!input.eof()) return false;
+		break;
+	}
+	default:
+		return false;
+	}
+	return std::isfinite(result) && result > 0.0;
+}
 std::atomic<uint64_t> s_diff_save_serial(0);
 
 std::string makeDiffTempFilename(const std::string& filename)
@@ -179,6 +216,9 @@ WtDiffExecuter::WtDiffExecuter(WtExecuterFactory* factory, const char* name, IDa
 	, _factory(factory)
 	, _data_mgr(dataMgr)
 	, _bd_mgr(bdMgr)
+	// Must be NULL before init(): getUnit() and failed-init paths test it, and
+	// ASan's allocation fill exposed it as uninitialized (I03 eager validation).
+	, _config(NULL)
 , _scale(1.0)
 	, _channel_ready(false)
 	{
@@ -215,6 +255,14 @@ WtDiffExecuter::~WtDiffExecuter()
 		// reference it; fail closed before any member owner is released.
 		std::terminate();
 	}
+	account_net_limits::Registry::instance().release(this);
+	// I03-NEW-137: init() retains params as _config; return that reference once the
+	// executer is quiesced (no ingress can read _config any more).
+	if (_config != NULL)
+	{
+		_config->release();
+		_config = NULL;
+	}
 }
 
 WtDiffExecuter::QuiesceIngress::QuiesceIngress(WtDiffExecuter* owner)
@@ -225,6 +273,14 @@ WtDiffExecuter::QuiesceIngress::QuiesceIngress(WtDiffExecuter* owner)
 {
 	if (_owner != NULL)
 		_accepted = _owner->enterQuiesceIngress(_marker);
+}
+
+bool WtDiffExecuter::quiesceIncomplete() const
+{
+	if (_quiesce_incomplete.load(std::memory_order_acquire))
+		return true;
+	std::lock_guard<std::mutex> lock(_clean_failure_mutex);
+	return !_clean_failure_codes.empty();
 }
 
 WtDiffExecuter::QuiesceIngress::~QuiesceIngress()
@@ -403,7 +459,7 @@ bool WtDiffExecuter::canWaitQuiescedOnCurrentThread() const
 	std::unique_lock<std::mutex> lock(_quiesce_mutex, std::try_to_lock);
 	if (!lock.owns_lock())
 		return false;
-	if (_quiesced && !_quiesce_incomplete.load(std::memory_order_acquire))
+	if (_quiesced && !quiesceIncomplete())
 		return true;
 	lock.unlock();
 
@@ -438,12 +494,12 @@ bool WtDiffExecuter::drainHostQuiesced()
 		if (!_quiesce_requested.load(std::memory_order_acquire))
 			return false;
 		if (_quiesce_host_completed)
-			return !_quiesce_incomplete.load(std::memory_order_acquire);
+			return !quiesceIncomplete();
 		if (_quiesce_wait_in_progress)
 		{
 			_quiesce_condition.wait(lock, [this]() { return !_quiesce_wait_in_progress; });
 			return _quiesce_host_completed &&
-				!_quiesce_incomplete.load(std::memory_order_acquire);
+				!quiesceIncomplete();
 		}
 		_quiesce_wait_in_progress = true;
 		_quiesce_condition.wait(lock, [this]() {
@@ -476,7 +532,7 @@ bool WtDiffExecuter::drainHostQuiesced()
 		_quiesce_wait_in_progress = false;
 	}
 	_quiesce_condition.notify_all();
-	return poolWaitSucceeded && !_quiesce_incomplete.load(std::memory_order_acquire);
+	return poolWaitSucceeded && !quiesceIncomplete();
 }
 
 bool WtDiffExecuter::snapshotQuiescePluginOwners(
@@ -571,7 +627,7 @@ bool WtDiffExecuter::completeQuiesceAfterGlobalPluginWait()
 		_quiesce_active_ingress != 0 || _quiesce_active_drains != 0 ||
 		_quiesce_owner_generation.load(std::memory_order_acquire) !=
 			_quiesce_snapshot_generation ||
-		_quiesce_incomplete.load(std::memory_order_acquire))
+		quiesceIncomplete())
 		return false;
 
 	_quiesce_plugins_completed = true;
@@ -593,7 +649,7 @@ bool WtDiffExecuter::waitQuiesced()
 	{
 		std::lock_guard<std::mutex> lock(_quiesce_mutex);
 		if (_quiesced)
-			return !_quiesce_incomplete.load(std::memory_order_acquire);
+			return !quiesceIncomplete();
 	}
 	// Keep the legacy wait entry point safe from host callback reentry. Factory
 	// worker preflight belongs to the coordinator's deduplicated factory phase.
@@ -614,7 +670,7 @@ bool WtDiffExecuter::waitQuiesced()
 	}
 
 	const bool quiesced = hostDrained &&
-		!_quiesce_incomplete.load(std::memory_order_acquire);
+		!quiesceIncomplete();
 	{
 		std::lock_guard<std::mutex> lock(_quiesce_mutex);
 		_quiesce_plugins_completed = true;
@@ -633,6 +689,28 @@ bool WtDiffExecuter::waitQuiesced()
 void WtDiffExecuter::setTrader(TraderAdapter* adapter)
 {
 	_trader = adapter;
+	// I03-NEW-089: claims taken through a previous binding end with it.
+	_owner_claims.bind(_trader != NULL ? _trader->accountGate() : std::shared_ptr<AccountTradingGate>(),
+		ExecOwnerModes::ownerId(name()));
+	if (_trader != NULL)
+		_trader->declareOwnerSink(this, ExecOwnerModes::ownerId(name()));
+
+	// Card 8 / BUG-P02-005: targets restored by load_data() are already
+	// committed; publish them (unchecked) so the other executers of this
+	// account include them in the shared per-contract net-limit judgement.
+	const std::shared_ptr<const void> accountKeepalive = _trader ?
+		std::shared_ptr<const void>(_trader->accountGate()) : std::shared_ptr<const void>();
+	const void* accountKey = accountKeepalive ? accountKeepalive.get() : static_cast<const void*>(this);
+	std::lock_guard<std::mutex> updateLock(_position_update_mutex);
+	std::lock_guard<std::mutex> positionLock(_position_mutex);
+	account_net_limits::Positions accountTargets;
+	for (const auto& item : _target_pos)
+		if (item.second != 0.0) accountTargets[item.first] = item.second;
+	account_net_limits::Positions previousAccount;
+	const void* previousAccountKey = NULL;
+	std::string ignored;
+	(void)account_net_limits::Registry::instance().apply(accountKey, accountKeepalive, this, _name,
+		_account_limits, accountTargets, previousAccount, previousAccountKey, ignored, true);
 }
 
 /**
@@ -642,15 +720,74 @@ void WtDiffExecuter::setTrader(TraderAdapter* adapter)
  * @return bool 初始化是否成功
  * @details 设置缩放比例、创建线程池并加载数据
  */
+bool WtDiffExecuter::validateConfig(WTSVariant* params, std::string& error)
+{
+	if (params == NULL || params->type() != WTSVariant::VT_Object)
+	{
+		error = "executer configuration must be an object";
+		return false;
+	}
+	double scale = 0.0;
+	if (!readExecutionScale(params, scale))
+	{
+		error = "scale must be a finite positive number";
+		return false;
+	}
+	account_net_limits::Limits accountLimits;
+	if (!account_net_limits::parse(params, accountLimits, error))
+		return false;
+	return exec_policy_config::validatePolicy(params, error);
+}
+
 bool WtDiffExecuter::init(WTSVariant* params)
 {
+	// I03-NEW-070: a first init() that does not complete leaves the executor in a
+	// failed state; ingestion and snapshot saves are then refused.
+	const bool firstInit = (_config == NULL);
+	struct InitOutcome
+	{
+		WtDiffExecuter* owner;
+		bool firstInit;
+		bool succeeded = false;
+		~InitOutcome()
+		{
+			if (firstInit)
+				owner->_init_failed.store(!succeeded, std::memory_order_release);
+		}
+	} outcome{ this, firstInit };
+
 	if (params == NULL)
 		return false;
+
+	// Card 8b=A: validate the complete configuration before retaining it,
+	// creating the thread pool or reading the persisted snapshot.
+	std::string configError;
+	if (!validateConfig(params, configError))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid executer configuration: {}", configError);
+		return false;
+	}
+
+	double scale = 0.0;
+	if (!readExecutionScale(params, scale))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid execution scale");
+		return false;
+	}
+
+	account_net_limits::Limits accountLimits;
+	std::string accountError;
+	if (!account_net_limits::parse(params, accountLimits, accountError))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid account limits: {}", accountError);
+		return false;
+	}
+	_account_limits = accountLimits;
 
 	_config = params;
 	_config->retain();
 
-	_scale = params->getDouble("scale");
+	_scale = scale;
 
 	uint32_t poolsize = params->getUInt32("poolsize");
 	if(poolsize > 0)
@@ -668,6 +805,7 @@ bool WtDiffExecuter::init(WTSVariant* params)
 
 	WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[{}] Diff executer inited, scale: {}, thread poolsize: {}", _name, _scale, poolsize);
 
+	outcome.succeeded = true;
 	return true;
 }
 
@@ -882,6 +1020,12 @@ bool WtDiffExecuter::save_data_locked()
 	// and failure-state mutations use _position_update_mutex before this lock, so
 	// an older snapshot cannot commit after a newer failure transition.
 	std::lock_guard<std::mutex> saveLock(_save_mutex);
+	if (_init_failed.load(std::memory_order_acquire))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+			"[{}] Diff snapshot is not written because init failed; the rejected file is kept for review", _name);
+		return false;
+	}
 	struct BlockedUnitSnapshot
 	{
 		std::string code;
@@ -1038,6 +1182,43 @@ bool WtDiffExecuter::enqueueUnitCallback(const std::shared_ptr<UnitLifecycleStat
 	return false;
 }
 
+bool WtDiffExecuter::deferPendingUnitCallback(const std::string& code,
+	std::function<void(const ExecuteUnitPtr&)> callback)
+{
+	// I03-NEW-072 (card 9d=A): an adapter callback never waits for a creation in
+	// flight (on another thread, or re-entrantly on this one). The event joins
+	// that creation instead: before registration it is kept with the generation
+	// and queued behind the registration callbacks; after registration it joins
+	// the FIFO that the creator drains before publishing READY. Holding the unit
+	// registry and state locks keeps both the completion and the failure path
+	// from running in between. Returns false when no creation is pending, so the
+	// caller resolves the unit again.
+	if (!callback)
+		return false;
+	SpinLock lock(_mtx_units);
+	auto stateIt = _unit_states.find(code);
+	if (stateIt == _unit_states.end())
+		return false;
+	const std::shared_ptr<UnitLifecycleState> state = stateIt->second;
+	std::lock_guard<std::mutex> stateLock(state->mutex);
+	if (state->creation_complete)
+		return false;
+	if (state->callback_failed)
+	{
+		_quiesce_incomplete.store(true, std::memory_order_release);
+		return true;
+	}
+	auto unitIt = _unit_map.find(code);
+	if (unitIt == _unit_map.end())
+	{
+		state->deferred_events.push_back(std::move(callback));
+		return true;
+	}
+	ExecuteUnitPtr registered = unitIt->second;
+	state->callback_events.push_back([registered, callback]() { callback(registered); });
+	return true;
+}
+
 void WtDiffExecuter::scheduleUnitCallbackDrain(const ExecuteUnitPtr& unit,
 	const std::shared_ptr<UnitLifecycleState>& state, bool schedule)
 {
@@ -1095,6 +1276,20 @@ void WtDiffExecuter::markUnitFailed(const std::string& code,
 void WtDiffExecuter::markUnitFailedLocked(const std::string& code,
 	const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason)
 {
+	markUnitFailedInMemoryLocked(code, state, reason);
+	if (!save_data_locked())
+	{
+		_quiesce_incomplete.store(true, std::memory_order_release);
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+			"[{}] Failure tombstone for {} could not be persisted; in-memory order dispatch remains blocked",
+			_name, code);
+	}
+}
+
+void WtDiffExecuter::markUnitFailedInMemoryLocked(const std::string& code,
+	const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason)
+{
+	_pending_target_notification.erase(code);
 	std::shared_ptr<UnitLifecycleState> failedState = state;
 	{
 		SpinLock unitsLock(_mtx_units);
@@ -1133,13 +1328,6 @@ void WtDiffExecuter::markUnitFailedLocked(const std::string& code,
 	{
 		std::lock_guard<std::mutex> lock(_position_mutex);
 		++_position_revision;
-	}
-	if (!save_data_locked())
-	{
-		_quiesce_incomplete.store(true, std::memory_order_release);
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
-			"[{}] Failure tombstone for {} could not be persisted; in-memory order dispatch remains blocked",
-			_name, code);
 	}
 }
 
@@ -1209,6 +1397,8 @@ void WtDiffExecuter::recoverUnitPosition(const std::string& code, const ExecuteU
 	if (!hasDiff || !_channel_ready.load() || _channel_epoch.load() != channelEpoch ||
 		!isCurrentUnit(code, unit, state))
 		return;
+	if (_trader && !_trader->checkOrderLimits(code.c_str()))
+		return;
 
 	if (_channel_ready.load() && _channel_epoch.load() == channelEpoch &&
 		isCurrentUnit(code, unit, state) && unit->self() != NULL)
@@ -1217,6 +1407,61 @@ void WtDiffExecuter::recoverUnitPosition(const std::string& code, const ExecuteU
 			"[{}] Diff of {} recovered to {}", _name, code, diff);
 		unit->self()->set_position(code.c_str(), diff);
 	}
+}
+
+bool WtDiffExecuter::registerCreatedUnit(const std::string& code, const ExecuteUnitPtr& unit,
+	const std::shared_ptr<UnitLifecycleState>& state)
+{
+	std::lock_guard<std::mutex> updateLock(_position_update_mutex);
+	double recoveryDiff = 0.0;
+	bool hasRecoveryDiff = false;
+	{
+		std::lock_guard<std::mutex> positionLock(_position_mutex);
+		auto diffIt = _diff_pos.find(code);
+		if (diffIt != _diff_pos.end())
+		{
+			recoveryDiff = diffIt->second;
+			hasRecoveryDiff = true;
+		}
+	}
+	SpinLock unitsLock(_mtx_units);
+	auto stateIt = _unit_states.find(code);
+	{
+		std::lock_guard<std::mutex> stateLock(state->mutex);
+		if (stateIt == _unit_states.end() || stateIt->second != state || state->callback_failed)
+			return false;
+	}
+	_unit_map[code] = unit;
+	const bool pendingTarget = _pending_target_notification.erase(code) != 0;
+	if (_channel_ready.load())
+	{
+		const uint64_t channelEpoch = _channel_epoch.load();
+		enqueueUnitCallback(state, [unit]() { unit->self()->on_channel_ready(); });
+		enqueueUnitCallback(state, [this, code, unit, state, channelEpoch,
+			recoveryDiff, hasRecoveryDiff]() {
+			recoverUnitPosition(code, unit, state, channelEpoch, recoveryDiff, hasRecoveryDiff);
+		});
+	}
+	else if (pendingTarget && hasRecoveryDiff)
+	{
+		enqueueUnitCallback(state, [this, code, unit, recoveryDiff]() {
+			if (!_trader || _trader->checkOrderLimits(code.c_str()))
+				unit->self()->set_position(code.c_str(), recoveryDiff);
+		});
+	}
+	// I03-NEW-072: adapter callbacks that arrived during the creation follow the
+	// unit's own channel/recovery callbacks, in arrival order.
+	std::deque<std::function<void(const ExecuteUnitPtr&)>> deferred;
+	{
+		std::lock_guard<std::mutex> stateLock(state->mutex);
+		deferred.swap(state->deferred_events);
+	}
+	for (auto& event : deferred)
+	{
+		std::function<void(const ExecuteUnitPtr&)> deliver = std::move(event);
+		enqueueUnitCallback(state, [unit, deliver]() { deliver(unit); });
+	}
+	return true;
 }
 
 /**
@@ -1228,8 +1473,11 @@ void WtDiffExecuter::recoverUnitPosition(const std::string& code, const ExecuteU
  * @details 根据合约代码获取执行单元，如果不存在且bAutoCreate为true，
  *          则根据配置创建新的执行单元
  */
-ExecuteUnitPtr WtDiffExecuter::getUnit(const char* stdCode, bool bAutoCreate /* = true */)
+ExecuteUnitPtr WtDiffExecuter::getUnit(const char* stdCode, bool bAutoCreate /* = true */,
+	bool waitForCreation /* = true */, bool* creationPending /* = NULL */)
 {
+	if (creationPending != NULL)
+		*creationPending = false;
 	if (stdCode == NULL || stdCode[0] == '\0')
 	{
 		WTSLogger::error("Cannot get diff execution unit for an empty code");
@@ -1282,6 +1530,12 @@ ExecuteUnitPtr WtDiffExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 	if (!creator)
 	{
 		std::unique_lock<std::mutex> lock(state->mutex);
+		if (!state->creation_complete && !waitForCreation)
+		{
+			if (creationPending != NULL)
+				*creationPending = true;
+			return ExecuteUnitPtr();
+		}
 		const std::thread::id current = std::this_thread::get_id();
 		if (!state->creation_complete &&
 			(state->creation_owner == current || (state->callback_active && state->callback_owner == current)))
@@ -1311,8 +1565,8 @@ ExecuteUnitPtr WtDiffExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 	ExecuteUnitPtr unit;
 	auto failCreation = [&](const char* reason) -> ExecuteUnitPtr
 	{
-		_quiesce_incomplete.store(true, std::memory_order_release);
 		std::unique_lock<std::mutex> updateLock(_position_update_mutex);
+		_pending_target_notification.erase(code);
 		ExecuteUnitPtr mappedUnit;
 		{
 			SpinLock lock(_mtx_units);
@@ -1325,8 +1579,25 @@ ExecuteUnitPtr WtDiffExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 		}
 		std::string failureReason = reason ? reason : "unknown execution-unit initialization failure";
 		bool persistFailure = false;
+		size_t droppedCallbacks = 0;
+		// ABI 2.2 (IExecPluginV2.h): initialize returned failure normally and the
+		// host's immediate destroy_unit also returned normally, so no plugin-owned
+		// work or unit survives. Old-ABI and unproven failures stay fail-closed.
+		const bool failedInitCleanupProven = unit != NULL &&
+			unit->failedInitializationWasSafelyDestroyed();
 		{
 			std::lock_guard<std::mutex> lock(state->mutex);
+			// Targets and diffs are committed to the ledger before getUnit() runs
+			// (submitPositionTargets), and registerCreatedUnit() snapshots the
+			// latest diff under _position_update_mutex, which this failure path
+			// also holds. A retry generation therefore cannot observe a stale
+			// ledger. It is allowed only if this generation was never registered
+			// and accepted no host callback work that would be discarded here.
+			const bool acceptedHostWork = !state->callback_events.empty() ||
+				state->callback_active || state->callback_failed || state->result != NULL;
+			if (state->retry_blocked && failedInitCleanupProven && mappedUnit == NULL &&
+				!acceptedHostWork)
+				state->retry_blocked = false;
 			persistFailure = state->retry_blocked;
 			if (persistFailure)
 				failureReason += " (automatic retry disabled: plugin side effects may have occurred)";
@@ -1335,9 +1606,23 @@ ExecuteUnitPtr WtDiffExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 			state->init_error = failureReason;
 			state->creation_complete = true;
 			state->creation_owner = std::thread::id();
+			droppedCallbacks = state->deferred_events.size() + state->callback_events.size();
+			state->deferred_events.clear();
 			state->callback_events.clear();
 		}
 		state->condition.notify_all();
+		if (droppedCallbacks != 0)
+			_quiesce_incomplete.store(true, std::memory_order_release);
+		// K06=B: a failure that may have produced plugin side effects keeps quiesce
+		// incomplete for good; a provably side-effect-free one only until a later
+		// generation of the same code is created successfully.
+		if (persistFailure)
+			_quiesce_incomplete.store(true, std::memory_order_release);
+		else
+		{
+			std::lock_guard<std::mutex> cleanLock(_clean_failure_mutex);
+			_clean_failure_codes.insert(code);
+		}
 		if (persistFailure)
 		{
 			{
@@ -1359,6 +1644,10 @@ ExecuteUnitPtr WtDiffExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 		{
 			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
 				"Diff execution unit initialization for {} failed: {}", stdCode, failureReason);
+			if (droppedCallbacks != 0)
+				WTSLogger::log_dyn("executer", _name.c_str(), LL_WARN,
+					"[{}] {} deferred callback(s) for {} were dropped because its execution unit failed to initialize",
+					_name, droppedCallbacks, stdCode);
 		}
 		catch (...)
 		{
@@ -1391,42 +1680,26 @@ ExecuteUnitPtr WtDiffExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 			std::lock_guard<std::mutex> lock(state->mutex);
 			state->retry_blocked = true;
 		}
-		unit = _factory->createDiffExeUnit(name);
+		bool pluginEntered = true;
+		unit = _factory->createDiffExeUnit(name, pluginEntered);
 		if (unit == NULL)
+		{
+			// A host-side factory rejection ran no plugin code; keep it retryable.
+			if (!pluginEntered)
+			{
+				std::lock_guard<std::mutex> lock(state->mutex);
+				state->retry_blocked = false;
+			}
 			return failCreation("execution-unit creation failed");
+		}
 		std::string error;
-		if (!unit->initialize(this, stdCode, cfg, error) || unit->self() == NULL)
+		if (!unit->initialize(this, stdCode, cfg, error, true) || unit->self() == NULL)
 			return failCreation(error.empty() ? "plugin initialization failed" : error.c_str());
+		_owner_modes.setSharedCapable(stdCode, unit->hostOrderIdentitySupported());
 		retainQuiesceUnit(unit);
 
-	{
-		// Serialize registration with ready/lost transitions and position updates.
-		// Capture recovery data now, so trades queued later cannot change the diff
-		// consumed by this already-ordered recovery event.
-		std::lock_guard<std::mutex> updateLock(_position_update_mutex);
-		double recoveryDiff = 0.0;
-		bool hasRecoveryDiff = false;
-		{
-			std::lock_guard<std::mutex> positionLock(_position_mutex);
-			auto diffIt = _diff_pos.find(code);
-			if (diffIt != _diff_pos.end())
-			{
-				recoveryDiff = diffIt->second;
-				hasRecoveryDiff = true;
-			}
-		}
-		SpinLock unitsLock(_mtx_units);
-		_unit_map[code] = unit;
-		if (_channel_ready.load())
-		{
-			const uint64_t channelEpoch = _channel_epoch.load();
-			enqueueUnitCallback(state, [unit]() { unit->self()->on_channel_ready(); });
-			enqueueUnitCallback(state, [this, code, unit, state, channelEpoch,
-				recoveryDiff, hasRecoveryDiff]() {
-				recoverUnitPosition(code, unit, state, channelEpoch, recoveryDiff, hasRecoveryDiff);
-			});
-		}
-	}
+		if (!registerCreatedUnit(code, unit, state))
+			return failCreation("execution-unit registration blocked by a prior failure");
 
 		for (;;)
 		{
@@ -1446,6 +1719,12 @@ ExecuteUnitPtr WtDiffExecuter::getUnit(const char* stdCode, bool bAutoCreate /* 
 					state->creation_owner = std::thread::id();
 					completed = true;
 				}
+			}
+			if (completed)
+			{
+				// K06=B: a successful later generation clears an earlier clean failure.
+				std::lock_guard<std::mutex> cleanLock(_clean_failure_mutex);
+				_clean_failure_codes.erase(code);
 			}
 			if (failed)
 				return failCreation("channel callback threw during unit initialization");
@@ -1480,6 +1759,14 @@ ExecUnitInitStatus WtDiffExecuter::queryUnitInitStatus(const char* stdCode) cons
 	auto it = _unit_states.find(stdCode);
 	if (it == _unit_states.end())
 	{
+		// I03-NEW-070: an executer whose init failed rejects every target before a unit
+		// is created; report that as a failed initialization rather than "no attempt".
+		if (_init_failed.load(std::memory_order_acquire))
+		{
+			status.state = ExecUnitInitState::FAILED;
+			status.error = _config == NULL ? "executor configuration is missing" : "executer initialization failed";
+			return status;
+		}
 		status.error = "no initialization attempt is recorded for this code";
 		return status;
 	}
@@ -1682,6 +1969,8 @@ double WtDiffExecuter::getUndoneQty(const char* stdCode)
 	if (NULL == _trader)
 		return 0.0;
 
+	if (_trader->isOwnerRoutingEnabled())
+		return _trader->getUndoneQtyForOwner(stdCode, ExecOwnerModes::ownerId(name()));
 	return _trader->getUndoneQty(stdCode);
 }
 
@@ -1696,6 +1985,8 @@ OrderMap* WtDiffExecuter::getOrders(const char* stdCode)
 	if (NULL == _trader)
 		return NULL;
 
+	if (_trader->isOwnerRoutingEnabled())
+		return _trader->getOrdersForOwner(stdCode, ExecOwnerModes::ownerId(name()));
 	return _trader->getOrders(stdCode);
 }
 
@@ -1713,7 +2004,9 @@ OrderIDs WtDiffExecuter::buy(const char* stdCode, double price, double qty, bool
 	if (stdCode == NULL || _trader == NULL || !_channel_ready || isRetryBlockedUnit(stdCode))
 		return OrderIDs();
 
-	return _trader->buy(stdCode, price, qty, 0, bForceClose);
+	// Card 5c: the order belongs to this executer (owner-verified cancels/routing).
+	return _trader->buyAsOwner(ExecOwnerModes::ownerId(name()), _owner_modes.sharedCapable(stdCode),
+		stdCode, price, qty, 0, bForceClose);
 }
 
 /**
@@ -1730,7 +2023,8 @@ OrderIDs WtDiffExecuter::sell(const char* stdCode, double price, double qty, boo
 	if (stdCode == NULL || _trader == NULL || !_channel_ready || isRetryBlockedUnit(stdCode))
 		return OrderIDs();
 
-	return _trader->sell(stdCode, price, qty, 0, bForceClose);
+	return _trader->sellAsOwner(ExecOwnerModes::ownerId(name()), _owner_modes.sharedCapable(stdCode),
+		stdCode, price, qty, 0, bForceClose);
 }
 
 /**
@@ -1744,7 +2038,8 @@ bool WtDiffExecuter::cancel(uint32_t localid)
 	if (!_channel_ready)
 		return false;
 
-	return _trader->cancel(localid);
+	// Owner-verified: never another owner's order; while paused only verified identities.
+	return _trader->cancelForOwner(localid, ExecOwnerModes::ownerId(name()));
 }
 
 /**
@@ -1760,7 +2055,7 @@ OrderIDs WtDiffExecuter::cancel(const char* stdCode, bool isBuy, double qty)
 	if (!_channel_ready)
 		return OrderIDs();
 
-	return _trader->cancel(stdCode, isBuy, qty);
+	return _trader->cancelForOwner(stdCode, isBuy, qty, ExecOwnerModes::ownerId(name()));
 }
 
 /**
@@ -1830,278 +2125,260 @@ uint64_t WtDiffExecuter::getCurTime()
  * @details 当收到仓位变化通知时，更新目标仓位和差量仓位，
  *          并通知相应的执行单元进行处理
  */
+WtDiffExecuter::BatchRegistration::~BatchRegistration()
+{
+	if (ticket != 0)
+	{
+		std::lock_guard<std::mutex> lock(owner->_position_update_mutex);
+		owner->_active_batch_targets.erase(ticket);
+	}
+}
+
 void WtDiffExecuter::on_position_changed(const char* stdCode, double diffPos)
 {
 	QuiesceIngress ingress(this);
-	if (!ingress)
+	if (!ingress || stdCode == NULL || stdCode[0] == '\0' || diffPos == 0.0 ||
+		!std::isfinite(diffPos) || !std::isfinite(diffPos * _scale))
 		return;
-	if (stdCode == NULL || stdCode[0] == '\0')
-		return;
-	if (decimal::eq(diffPos, 0))
-		return;
-
-	diffPos = round(diffPos*_scale);
-	ExecuteUnitPtr unit = getUnit(stdCode, true);
-	std::shared_ptr<UnitLifecycleState> state = unit ? getUnitState(stdCode, unit) :
-		std::shared_ptr<UnitLifecycleState>();
-	const bool orderAllowed = !_trader || _trader->checkOrderLimits(stdCode);
-	const std::string code(stdCode);
-	double oldVol = 0.0;
-	double targetPos = 0.0;
-	double prevDiff = 0.0;
-	double thisDiff = 0.0;
-	bool scheduleDrain = false;
+	if (_init_failed.load(std::memory_order_acquire))
 	{
-		std::lock_guard<std::mutex> updateLock(_position_update_mutex);
-		{
-			std::lock_guard<std::mutex> lock(_position_mutex);
-			oldVol = _target_pos[code];
-			targetPos = oldVol + diffPos;
-			_target_pos[code] = targetPos;
-			_target_versions[code] = ++_target_update_generation;
-			prevDiff = _diff_pos[code];
-			thisDiff = prevDiff + diffPos;
-			_diff_pos[code] = thisDiff;
-			++_position_revision;
-		}
-		if (!save_data_locked())
-		{
-		markUnitFailedLocked(code, state,
-				"position snapshot persistence failed; automatic order dispatch disabled");
-			_quiesce_incomplete.store(true, std::memory_order_release);
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
-				"[{}] Position change for {} was recorded in memory but not dispatched because snapshot persistence failed",
-				_name, stdCode);
-		}
-		else if (orderAllowed && unit != NULL && state != NULL)
-			scheduleDrain = enqueueUnitCallback(state, [unit, code, thisDiff]() {
-				unit->self()->set_position(code.c_str(), thisDiff);
-			});
-	}
-
-	/*
-	 *	By Sunseeeeeker @ 2023.01.10
-	 *	更新差量
-	*/
-	WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[{}] Target position of {} changed additonally: {} -> {}, diff postion changed: {} -> {}", _name, stdCode, oldVol, targetPos, prevDiff, thisDiff);
-	if (unit == NULL || state == NULL)
-	{
-		_quiesce_incomplete.store(true, std::memory_order_release);
 		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
-			"[{}] Target position update for {} was recorded, but no execution unit is available; order not dispatched",
-			_name, stdCode);
+			"[{}] Position change of {} rejected: executer init failed", _name, stdCode);
+		return;
 	}
-	else if (!orderAllowed)
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[{}] {} is disabled", _name, stdCode);
-	scheduleUnitCallbackDrain(unit, state, scheduleDrain);
+	wt_hashmap<std::string, double> targets;
+	targets.emplace(stdCode, diffPos * _scale);
+	submitPositionTargets(targets, true);
 }
 
-/**
- * @brief 设置一组目标仓位
- *
- * @param targets 目标仓位映射表，键为合约代码，值为目标仓位量
- * @details 批量设置目标仓位，并计算差量。如果原目标仓位中的合约不在新的目标中，
- *          则自动将其设置为0。最后保存数据到文件。
- */
 void WtDiffExecuter::set_position(const wt_hashmap<std::string, double>& targets)
 {
 	QuiesceIngress ingress(this);
 	if (!ingress)
 		return;
-	uint64_t batchGeneration = 0;
-	uint64_t batchStartTargetGeneration = 0;
+	if (_init_failed.load(std::memory_order_acquire))
 	{
-		std::lock_guard<std::mutex> updateLock(_position_update_mutex);
-		batchGeneration = ++_position_batch_generation;
-		std::lock_guard<std::mutex> positionLock(_position_mutex);
-		batchStartTargetGeneration = _target_update_generation;
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+			"[{}] {} target(s) rejected: executer init failed", _name, targets.size());
+		return;
 	}
+	wt_hashmap<std::string, double> scaled;
 	for (const auto& target : targets)
 	{
-		const std::string code = target.first;
-		const char* stdCode = code.c_str();
-		double newVol = round(target.second*_scale);
-		ExecuteUnitPtr unit = getUnit(stdCode);
-		std::shared_ptr<UnitLifecycleState> state = unit ? getUnitState(stdCode, unit) :
-			std::shared_ptr<UnitLifecycleState>();
-
-		const bool orderAllowed = !_trader || _trader->checkOrderLimits(stdCode);
-		double oldVol = 0.0;
-		double prevDiff = 0.0;
-		double thisDiff = 0.0;
-		bool changed = false;
-		bool scheduleDrain = false;
-		bool supersededByIncrementalUpdate = false;
-		{
-			std::lock_guard<std::mutex> updateLock(_position_update_mutex);
-			if (batchGeneration != _position_batch_generation)
-				return;
-			{
-				std::lock_guard<std::mutex> lock(_position_mutex);
-				auto versionIt = _target_versions.find(code);
-				const uint64_t currentVersion = versionIt == _target_versions.end() ? 0 : versionIt->second;
-				// A post-start incremental target owns this code even if its entry in
-				// this batch has not been reached yet.
-				if (currentVersion > batchStartTargetGeneration)
-					supersededByIncrementalUpdate = true;
-				else
-				{
-					const bool targetExists = _target_pos.find(code) != _target_pos.end();
-					oldVol = _target_pos[code];
-					_target_pos[code] = newVol;
-					if (!targetExists || oldVol != newVol)
-						_target_versions[code] = ++_target_update_generation;
-					if (!decimal::eq(oldVol, newVol))
-					{
-						changed = true;
-						prevDiff = _diff_pos[code];
-						thisDiff = prevDiff + (newVol - oldVol);
-						_diff_pos[code] = thisDiff;
-						++_position_revision;
-					}
-					else if (!targetExists || oldVol != newVol)
-					{
-						++_position_revision;
-					}
-				}
-			}
-			if (!supersededByIncrementalUpdate)
-			{
-				const bool persisted = save_data_locked();
-				if (!persisted)
-				{
-					markUnitFailedLocked(code, state,
-						"position snapshot persistence failed; automatic order dispatch disabled");
-					_quiesce_incomplete.store(true, std::memory_order_release);
-					WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
-						"[{}] Target position for {} was recorded in memory but not dispatched because snapshot persistence failed",
-						_name, stdCode);
-				}
-				else if (changed && orderAllowed && unit != NULL && state != NULL)
-					scheduleDrain = enqueueUnitCallback(state, [unit, code, thisDiff]() {
-						unit->self()->set_position(code.c_str(), thisDiff);
-					});
-			}
-		}
-
-		if (supersededByIncrementalUpdate)
-			continue;
-		if (!unit || !state)
-		{
-			if (changed)
-				_quiesce_incomplete.store(true, std::memory_order_release);
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
-				"[{}] Target position for {} was recorded, but no execution unit is available; order not dispatched",
-				_name, stdCode);
-		}
-		if (!changed)
-			continue;
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[{}] Target position of {} changed: {} -> {}, diff postion changed: {} -> {}", _name, stdCode, oldVol, newVol, prevDiff, thisDiff);
-		if (unit && state && !orderAllowed)
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_WARN, "[{}] {} is disabled due to entrust limit control ", _name, stdCode);
-		scheduleUnitCallbackDrain(unit, state, scheduleDrain);
+		const double value = target.second * _scale;
+		if (target.first.empty() || !std::isfinite(target.second) || !std::isfinite(value))
+			return;
+		scaled.emplace(target.first, value);
 	}
+	submitPositionTargets(scaled, false);
+}
 
-	// Snapshot codes under the position lock; contract lookup and unit creation
-	// may call external code and therefore happen after releasing it.
-	struct OmittedTarget
-	{
-		std::string code;
-		uint64_t targetVersion;
-	};
-	std::vector<OmittedTarget> oldCodes;
+void WtDiffExecuter::submitPositionTargets(const wt_hashmap<std::string, double>& targets,
+	bool incremental)
+{
+	struct Change { std::string code; double diff; bool notify; };
+	struct Drain { ExecuteUnitPtr unit; std::shared_ptr<UnitLifecycleState> state; bool schedule; };
+	uint64_t ticket = 0;
+	uint64_t incrementalWatermark = 0;
+	std::set<std::string> omittedCandidates;
+	BatchRegistration registration(this);
+	if (!incremental)
 	{
 		std::lock_guard<std::mutex> updateLock(_position_update_mutex);
-		if (batchGeneration != _position_batch_generation)
-			return;
-		std::lock_guard<std::mutex> lock(_position_mutex);
-		oldCodes.reserve(_target_pos.size());
-		for (const auto& item : _target_pos)
+		ticket = _next_batch_ticket++;
+		incrementalWatermark = _incremental_generation;
+		auto inserted = _active_batch_targets.emplace(ticket, std::set<std::string>());
+		registration.ticket = ticket;
+		for (const auto& target : targets)
+			inserted.first->second.insert(target.first);
+		for (const auto& earlier : _active_batch_targets)
+			if (earlier.first < ticket)
+				omittedCandidates.insert(earlier.second.begin(), earlier.second.end());
+		std::lock_guard<std::mutex> positionLock(_position_mutex);
+		for (const auto& target : _target_pos)
+			omittedCandidates.insert(target.first);
+	}
+	if (!incremental && _batch_preflight_test_hook)
+		_batch_preflight_test_hook(ticket);
+
+	std::set<std::string> clearable;
+	for (const std::string& code : omittedCandidates)
+	{
+		if (targets.find(code) != targets.end()) continue;
+		if (_omitted_sweep_test_hook) _omitted_sweep_test_hook(code);
+		CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(code.c_str(), NULL);
+		WTSContractInfo* contract = _bd_mgr ? _bd_mgr->getContract(codeInfo._code, codeInfo._exchg) : NULL;
+		if (contract != NULL)
+			clearable.insert(code);
+		else
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+				"[{}] Omitted target for {} cannot be cleared because contract metadata is unavailable; existing target and diff are retained", _name, code);
+	}
+
+	std::vector<Change> changes;
+	std::vector<Change> process;
+	std::vector<Drain> drains;
+	std::vector<std::string> createCodes;
+	bool persisted = true;
+	const std::shared_ptr<const void> accountKeepalive = _trader ?
+		std::shared_ptr<const void>(_trader->accountGate()) : std::shared_ptr<const void>();
+	const void* accountKey = accountKeepalive ? accountKeepalive.get() : static_cast<const void*>(this);
+	{
+		std::lock_guard<std::mutex> updateLock(_position_update_mutex);
+		if (!incremental && _last_committed_batch_ticket > ticket) return;
 		{
-			if (targets.find(item.first) != targets.end() || decimal::eq(item.second, 0))
-				continue;
-			auto versionIt = _target_versions.find(item.first);
-			const uint64_t version = versionIt == _target_versions.end() ? 0 : versionIt->second;
-			// An incremental update that arrived after this batch began owns the
-			// target, even if it arrived before the omitted-code snapshot was taken.
-			if (version <= batchStartTargetGeneration)
-				oldCodes.push_back({ item.first, version });
+			std::lock_guard<std::mutex> positionLock(_position_mutex);
+			auto nextTargets = _target_pos;
+			auto nextDiffs = _diff_pos;
+			auto nextVersions = _target_versions;
+			auto nextIncrementalVersions = _incremental_versions;
+			uint64_t targetGeneration = _target_update_generation;
+			uint64_t incrementGeneration = _incremental_generation;
+			bool valid = true;
+			auto stage = [&](const std::string& code, double value) {
+				auto old = nextTargets.find(code);
+				const bool existed = old != nextTargets.end();
+				const double oldTarget = existed ? old->second : 0.0;
+				auto diff = nextDiffs.find(code);
+				const double oldDiff = diff == nextDiffs.end() ? 0.0 : diff->second;
+				const double newTarget = incremental ? oldTarget + value : value;
+				const double delta = incremental ? value : newTarget - oldTarget;
+				const double newDiff = oldDiff + delta;
+				if (!std::isfinite(newTarget) || !std::isfinite(delta) || !std::isfinite(newDiff))
+				{
+					valid = false;
+					return;
+				}
+				const bool changed = newTarget != oldTarget;
+				if (incremental || !existed || changed)
+				{
+					nextTargets[code] = newTarget;
+					nextVersions[code] = ++targetGeneration;
+					if (incremental) nextIncrementalVersions[code] = ++incrementGeneration;
+					if (changed || incremental) nextDiffs[code] = newDiff;
+					changes.push_back({code, newDiff, changed || incremental});
+				}
+				process.push_back({code, newDiff, changed || incremental});
+			};
+			for (const auto& target : targets)
+			{
+				if (!incremental)
+				{
+					auto version = _incremental_versions.find(target.first);
+					if (version != _incremental_versions.end() && version->second > incrementalWatermark) continue;
+				}
+				stage(target.first, target.second);
+				if (!valid) break;
+			}
+			if (valid && !incremental)
+				for (const std::string& code : clearable)
+				{
+					auto old = nextTargets.find(code);
+					if (old == nextTargets.end() || old->second == 0.0) continue;
+					auto version = _incremental_versions.find(code);
+					if (version != _incremental_versions.end() && version->second > incrementalWatermark) continue;
+					stage(code, 0.0);
+					if (!valid) break;
+				}
+			if (!valid) return;
+			// Card 8 / BUG-P02-005: the complete target set (already scaled to
+			// trader quantity) must keep every contract's account net position
+			// within the limit shared by all executers on this account.
+			account_net_limits::Positions accountTargets;
+			for (const auto& item : nextTargets)
+				if (item.second != 0.0) accountTargets[item.first] = item.second;
+			account_net_limits::Positions previousAccount;
+			const void* previousAccountKey = NULL;
+			std::string accountError;
+			if (!account_net_limits::Registry::instance().apply(accountKey, accountKeepalive, this, _name,
+				_account_limits, accountTargets, previousAccount, previousAccountKey, accountError))
+			{
+				WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "[{}] Target batch rejected: {}",
+					_name, accountError);
+				return;
+			}
+			_target_pos.swap(nextTargets);
+			_diff_pos.swap(nextDiffs);
+			_target_versions.swap(nextVersions);
+			_incremental_versions.swap(nextIncrementalVersions);
+			_target_update_generation = targetGeneration;
+			_incremental_generation = incrementGeneration;
+			if (!incremental)
+			{
+				_last_committed_batch_ticket = ticket;
+				_position_batch_generation = ticket;
+			}
+			if (!changes.empty()) ++_position_revision;
+		}
+		if (!changes.empty() && !save_data_locked())
+		{
+			persisted = false;
+			_quiesce_incomplete.store(true, std::memory_order_release);
+			for (const Change& change : process)
+				markUnitFailedInMemoryLocked(change.code, std::shared_ptr<UnitLifecycleState>(),
+					"position snapshot persistence failed; automatic order dispatch disabled");
+			if (!save_data_locked())
+				WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+					"[{}] Position failure tombstones could not be persisted", _name);
+		}
+		if (persisted)
+		{
+			SpinLock unitsLock(_mtx_units);
+			for (const Change& change : process)
+			{
+				auto unitIt = _unit_map.find(change.code);
+				auto stateIt = _unit_states.find(change.code);
+				if (unitIt != _unit_map.end() && stateIt != _unit_states.end())
+				{
+					if (!change.notify) continue;
+					const ExecuteUnitPtr unit = unitIt->second;
+					const std::shared_ptr<UnitLifecycleState> state = stateIt->second;
+					const std::string code = change.code;
+					const double diff = change.diff;
+					const bool schedule = enqueueUnitCallback(state, [this, unit, code, diff]() {
+						if (!_trader || _trader->checkOrderLimits(code.c_str()))
+							unit->self()->set_position(code.c_str(), diff);
+					});
+					drains.push_back({unit, state, schedule});
+				}
+				else
+				{
+					bool failed = false;
+					if (stateIt != _unit_states.end())
+					{
+						std::lock_guard<std::mutex> stateLock(stateIt->second->mutex);
+						failed = stateIt->second->creation_complete && stateIt->second->retry_blocked;
+					}
+					if (failed) continue;
+					if (change.notify) _pending_target_notification.insert(change.code);
+					createCodes.push_back(change.code);
+				}
+			}
 		}
 	}
-	for (const OmittedTarget& omitted : oldCodes)
+	if (!persisted) return;
+	for (const Drain& drain : drains)
+		scheduleUnitCallbackDrain(drain.unit, drain.state, drain.schedule);
+	for (const std::string& code : createCodes)
 	{
-		const std::string& code = omitted.code;
-		const char* stdCode = code.c_str();
-		if (_omitted_sweep_test_hook)
-			_omitted_sweep_test_hook(code);
-		CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, NULL);
-		WTSContractInfo* cInfo = _bd_mgr ? _bd_mgr->getContract(codeInfo._code, codeInfo._exchg) : NULL;
-		if (cInfo == NULL)
+		if (_trader && !_trader->checkOrderLimits(code.c_str())) continue;
+		if (_target_lookup_test_hook) _target_lookup_test_hook(code);
+		bool pending = false;
+		if (getUnit(code.c_str(), true, false, &pending) == NULL && !pending)
 		{
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
-				"[{}] Omitted target for {} cannot be cleared because contract metadata is unavailable; existing target and diff are retained",
-				_name, stdCode);
-			continue;
-		}
-
-		ExecuteUnitPtr unit = getUnit(stdCode);
-		std::shared_ptr<UnitLifecycleState> state = unit ? getUnitState(stdCode, unit) :
-			std::shared_ptr<UnitLifecycleState>();
-		const bool orderAllowed = unit != NULL && state != NULL && (!_trader || _trader->checkOrderLimits(stdCode));
-		double pos = 0.0;
-		double thisDiff = 0.0;
-		bool scheduleDrain = false;
-		{
-			std::lock_guard<std::mutex> updateLock(_position_update_mutex);
-			if (batchGeneration != _position_batch_generation)
-				return;
+			// K06=B: after a provably side-effect-free failure the code stays in
+			// _clean_failure_codes (quiesce incomplete) until a later generation
+			// succeeds; any other missing unit keeps quiesce incomplete for good.
+			bool cleanFailure = false;
 			{
-				std::lock_guard<std::mutex> lock(_position_mutex);
-				auto targetIt = _target_pos.find(code);
-				if (targetIt == _target_pos.end() || decimal::eq(targetIt->second, 0) ||
-					targets.find(code) != targets.end())
-					continue;
-				auto versionIt = _target_versions.find(code);
-				const uint64_t currentVersion = versionIt == _target_versions.end() ? 0 : versionIt->second;
-				if (currentVersion != omitted.targetVersion ||
-					currentVersion > batchStartTargetGeneration)
-					continue;
-
-				pos = targetIt->second;
-				targetIt->second = 0;
-				_target_versions[code] = ++_target_update_generation;
-				double& diff = _diff_pos[code];
-				// Applying target 0 is the same delta as every other target change:
-				// new target - old target == 0 - pos.
-				diff += -pos;
-				thisDiff = diff;
-				++_position_revision;
+				std::lock_guard<std::mutex> cleanLock(_clean_failure_mutex);
+				cleanFailure = _clean_failure_codes.count(code) != 0;
 			}
-			if (!save_data_locked())
-			{
-				markUnitFailedLocked(code, state,
-					"position snapshot persistence failed; automatic order dispatch disabled");
+			if (!cleanFailure)
 				_quiesce_incomplete.store(true, std::memory_order_release);
-				WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
-					"[{}] Expired target for {} was recorded in memory but not dispatched because snapshot persistence failed",
-					_name, stdCode);
-			}
-			else if (orderAllowed)
-				scheduleDrain = enqueueUnitCallback(state, [unit, code, thisDiff]() {
-					unit->self()->set_position(code.c_str(), thisDiff);
-				});
-		}
-
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[{}] {} is not in target, set to 0 automatically", _name, stdCode);
-		if (unit == NULL || state == NULL)
 			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
-				"[{}] Expired target for {} was recorded as zero, but no execution unit is available; order not dispatched",
-				_name, stdCode);
-		else if (!orderAllowed)
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_WARN, "[{}] {} is disabled due to entrust limit control ", _name, stdCode);
-		if (!unit || !state)
-			_quiesce_incomplete.store(true, std::memory_order_release);
-		scheduleUnitCallbackDrain(unit, state, scheduleDrain);
+				"[{}] Target for {} was recorded, but no execution unit is available", _name, code);
+		}
 	}
 }
 
@@ -2121,7 +2398,19 @@ void WtDiffExecuter::on_tick(const char* stdCode, WTSTickData* newTick)
 	const std::string code(stdCode);
 	if (!ownsCode(code))
 		return;
-	ExecuteUnitPtr unit = getUnit(stdCode, false);
+	bool creationPending = false;
+	ExecuteUnitPtr unit = getUnit(stdCode, false, false, &creationPending);
+	if (unit == NULL && creationPending)
+	{
+		// I03-NEW-072: do not block the adapter callback thread on the creation.
+		newTick->retain();
+		std::shared_ptr<WTSTickData> pendingTick(newTick, [](WTSTickData* value) { value->release(); });
+		if (deferPendingUnitCallback(code, [pendingTick](const ExecuteUnitPtr& target) {
+			target->self()->on_tick(pendingTick.get());
+		}))
+			return;
+		unit = getUnit(stdCode, false, false, &creationPending);
+	}
 	if (unit == NULL)
 	{
 		_quiesce_incomplete.store(true, std::memory_order_release);
@@ -2167,12 +2456,14 @@ void WtDiffExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy,
 	// attribution cannot be inferred here.
 	if (!ownsCode(code))
 		return;
-	ExecuteUnitPtr unit = getUnit(stdCode, false);
+	bool creationPending = false;
+	ExecuteUnitPtr unit = getUnit(stdCode, false, false, &creationPending);
 	if (_unit_lookup_test_hook)
 		_unit_lookup_test_hook(code);
 	std::shared_ptr<UnitLifecycleState> state = unit ? getUnitState(stdCode, unit) :
 		std::shared_ptr<UnitLifecycleState>();
-	const bool pluginAvailable = unit != NULL && state != NULL;
+	bool pluginAvailable = unit != NULL && state != NULL;
+	bool deferred = false;
 
 	double prevDiff = 0.0;
 	double curDiff = 0.0;
@@ -2204,10 +2495,28 @@ void WtDiffExecuter::on_trade(uint32_t localid, const char* stdCode, bool isBuy,
 			scheduleDrain = enqueueUnitCallback(state, [localid, unit, code, isBuy, vol, price]() {
 				unit->self()->on_trade(localid, code.c_str(), isBuy, vol, price);
 			});
+		else if (creationPending)
+		{
+			// I03-NEW-072: the diff is booked now; the plugin notification joins the
+			// creation in flight instead of blocking this callback thread.
+			deferred = deferPendingUnitCallback(code, [localid, code, isBuy, vol, price](const ExecuteUnitPtr& target) {
+				target->self()->on_trade(localid, code.c_str(), isBuy, vol, price);
+			});
+			if (!deferred)
+			{
+				unit = getUnit(stdCode, false, false, &creationPending);
+				state = unit ? getUnitState(stdCode, unit) : std::shared_ptr<UnitLifecycleState>();
+				pluginAvailable = unit != NULL && state != NULL;
+				if (pluginAvailable)
+					scheduleDrain = enqueueUnitCallback(state, [localid, unit, code, isBuy, vol, price]() {
+						unit->self()->on_trade(localid, code.c_str(), isBuy, vol, price);
+					});
+			}
+		}
 	}
 
 	WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "[{}] Diff of {} updated by trade: {} -> {}", _name, stdCode, prevDiff, curDiff);
-	if (!pluginAvailable)
+	if (!pluginAvailable && !deferred)
 	{
 		_quiesce_incomplete.store(true, std::memory_order_release);
 		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
@@ -2238,7 +2547,17 @@ void WtDiffExecuter::on_order(uint32_t localid, const char* stdCode, bool isBuy,
 	const std::string code(stdCode);
 	if (!ownsCode(code))
 		return;
-	ExecuteUnitPtr unit = getUnit(stdCode, false);
+	bool creationPending = false;
+	ExecuteUnitPtr unit = getUnit(stdCode, false, false, &creationPending);
+	if (unit == NULL && creationPending)
+	{
+		// I03-NEW-072: do not block the adapter callback thread on the creation.
+		if (deferPendingUnitCallback(code, [localid, code, isBuy, leftQty, price, isCanceled](const ExecuteUnitPtr& target) {
+			target->self()->on_order(localid, code.c_str(), isBuy, leftQty, price, isCanceled);
+		}))
+			return;
+		unit = getUnit(stdCode, false, false, &creationPending);
+	}
 	if (unit == NULL)
 	{
 		// Order updates are durable lifecycle information, unlike ticks. Losing
@@ -2278,7 +2597,19 @@ void WtDiffExecuter::on_entrust(uint32_t localid, const char* stdCode, bool bSuc
 	const std::string code(stdCode);
 	if (!ownsCode(code))
 		return;
-	ExecuteUnitPtr unit = getUnit(stdCode, false);
+	const bool hasMessage = message != NULL;
+	const std::string msg = hasMessage ? message : "";
+	bool creationPending = false;
+	ExecuteUnitPtr unit = getUnit(stdCode, false, false, &creationPending);
+	if (unit == NULL && creationPending)
+	{
+		// I03-NEW-072: do not block the adapter callback thread on the creation.
+		if (deferPendingUnitCallback(code, [localid, code, bSuccess, msg, hasMessage](const ExecuteUnitPtr& target) {
+			target->self()->on_entrust(localid, code.c_str(), bSuccess, hasMessage ? msg.c_str() : NULL);
+		}))
+			return;
+		unit = getUnit(stdCode, false, false, &creationPending);
+	}
 	if (unit == NULL)
 	{
 		// Entrust results must not disappear behind a successful drain result.
@@ -2293,8 +2624,6 @@ void WtDiffExecuter::on_entrust(uint32_t localid, const char* stdCode, bool bSuc
 		_quiesce_incomplete.store(true, std::memory_order_release);
 		return;
 	}
-	const bool hasMessage = message != NULL;
-	const std::string msg = hasMessage ? message : "";
 	const bool scheduleDrain = enqueueUnitCallback(state, [unit, localid, code, bSuccess, msg, hasMessage]() {
 		unit->self()->on_entrust(localid, code.c_str(), bSuccess, hasMessage ? msg.c_str() : NULL);
 	});
@@ -2358,10 +2687,16 @@ void WtDiffExecuter::on_channel_ready()
 		}
 	}
 	// A persisted diff may not have a unit yet. Creating it while the channel is
-	// ready queues its ready notification and recovery in that order.
+	// ready queues its ready notification and recovery in that order. Do not
+	// wait for another thread's in-flight creation: its ledger entry is already
+	// committed, and registerCreatedUnit() observes _channel_ready under the same
+	// update lock, so it queues ready + recovery itself. Waiting here would block
+	// the adapter callback thread behind plugin initialization (card 9d=A) and
+	// deadlocks when that initialization waits for this thread.
 	for (const std::string& code : diffCodes)
 	{
-		if (getUnit(code.c_str()) == NULL)
+		bool pending = false;
+		if (getUnit(code.c_str(), true, false, &pending) == NULL && !pending)
 			_quiesce_incomplete.store(true, std::memory_order_release);
 	}
 

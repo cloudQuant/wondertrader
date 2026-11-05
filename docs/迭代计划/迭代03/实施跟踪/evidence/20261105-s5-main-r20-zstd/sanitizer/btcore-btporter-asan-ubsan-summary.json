@@ -1,0 +1,78 @@
+{
+ "start": "2026-11-05T11:11:16+08:00",
+ "end": "2026-11-05T11:12:11+08:00",
+ "total": 836,
+ "by_status": {
+  "pass": 826,
+  "skipped": 5,
+  "fail": 3,
+  "signal-6": 2
+ },
+ "per_binary": {
+  "CoverageTests_btcore": {
+   "pass": 679,
+   "skipped": 1,
+   "fail": 3,
+   "signal-6": 1
+  },
+  "CoverageTests_btporter": {
+   "pass": 147,
+   "signal-6": 1,
+   "skipped": 4
+  }
+ },
+ "non_pass": [
+  [
+   "CoverageTests_btcore",
+   "P04ReplayCsvTest.failedBinaryRawBarsLoadCanBeRetriedSafely",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R111ExecMocker.FailedQuiesceRequestRetainsAllPluginOwnersUntilRetrySucceeds",
+   "fail"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R111ExecMocker.FailedWaitRetainsPluginOwnersAndRequiresFreshCanWaitBeforeRetry",
+   "fail"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R111ExecMocker.RejectsShortAndUnverifiablePluginTables",
+   "fail"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R121UftMocker.R135ProbeDirectFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btporter",
+   "Q06BtRunner.CtxEventsRouteByEngineType",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btporter",
+   "R66BtPorterNotifier.FailedConfigRetryAndDuplicateConfigOwnOneServer",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btporter",
+   "S5R20RunnerNotifierRelease.AsyncReplayReleaseJoinsThenDestroysOnce",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btporter",
+   "S5R20RunnerNotifierRelease.IdleReleaseDestroysServerOnceBeforeRunnerDestruction",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btporter",
+   "S5R20RunnerNotifierRelease.SyncReplayThenReleaseDestroysOnceAndStopsPublishing",
+   "skipped"
+  ]
+ ],
+ "disabled_total": 36,
+ "list_failures": []
+}

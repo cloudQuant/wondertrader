@@ -1,0 +1,66 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S3K27SelPeriodFire.*
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from S3K27SelPeriodFire
+[ RUN      ] S3K27SelPeriodFire.WeeklyTaskFiresOnTargetWeekdayOnceAtItsMinute
+[       OK ] S3K27SelPeriodFire.WeeklyTaskFiresOnTargetWeekdayOnceAtItsMinute (9 ms)
+[ RUN      ] S3K27SelPeriodFire.MonthlyTaskUsesTheDayOfMonth
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-red-src/src/TestUnits/coverage/q01_wtcore3/s3_k27_sel_period_fire_test.cpp:129: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  hit->schedule_fires
+    Which is: 0
+
+[  FAILED  ] S3K27SelPeriodFire.MonthlyTaskUsesTheDayOfMonth (0 ms)
+[ RUN      ] S3K27SelPeriodFire.MonthlyTargetDayInsideHolidaysIsCarriedForward
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-red-src/src/TestUnits/coverage/q01_wtcore3/s3_k27_sel_period_fire_test.cpp:153: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  carried->schedule_fires
+    Which is: 0
+
+[  FAILED  ] S3K27SelPeriodFire.MonthlyTargetDayInsideHolidaysIsCarriedForward (2 ms)
+[ RUN      ] S3K27SelPeriodFire.YearlyTaskUsesMonthAndDay
+[       OK ] S3K27SelPeriodFire.YearlyTaskUsesMonthAndDay (0 ms)
+[ RUN      ] S3K27SelPeriodFire.MinuteTaskFiresOnSessionMinuteMultiplesOfItsInterval
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-red-src/src/TestUnits/coverage/q01_wtcore3/s3_k27_sel_period_fire_test.cpp:201: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  every15->schedule_fires
+    Which is: 0
+09:15 and 09:30, the repeated 09:15 must not fire again
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-red-src/src/TestUnits/coverage/q01_wtcore3/s3_k27_sel_period_fire_test.cpp:202: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  every7->schedule_fires
+    Which is: 0
+only 09:14 (minute 14) is a multiple of 7
+
+[  FAILED  ] S3K27SelPeriodFire.MinuteTaskFiresOnSessionMinuteMultiplesOfItsInterval (0 ms)
+[ RUN      ] S3K27SelPeriodFire.MinuteTaskWithoutSessionNeverFires
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-red-src/src/TestUnits/coverage/q01_wtcore3/s3_k27_sel_period_fire_test.cpp:230: Failure
+Death test: std::exit(minuteTaskWithoutSession())
+    Result: died but not with expected exit code:
+            Terminated by signal 11
+Actual msg:
+[  DEATH   ] 
+
+[  FAILED  ] S3K27SelPeriodFire.MinuteTaskWithoutSessionNeverFires (18 ms)
+[----------] 6 tests from S3K27SelPeriodFire (32 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (43 ms total)
+[  PASSED  ] 2 tests.
+[  FAILED  ] 4 tests, listed below:
+[  FAILED  ] S3K27SelPeriodFire.MonthlyTaskUsesTheDayOfMonth
+[  FAILED  ] S3K27SelPeriodFire.MonthlyTargetDayInsideHolidaysIsCarriedForward
+[  FAILED  ] S3K27SelPeriodFire.MinuteTaskFiresOnSessionMinuteMultiplesOfItsInterval
+[  FAILED  ] S3K27SelPeriodFire.MinuteTaskWithoutSessionNeverFires
+
+ 4 FAILED TESTS

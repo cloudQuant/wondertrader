@@ -1,0 +1,17 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before/src/TestUnits/coverage/p11_wtcore_traderadapter/p11_push_notify_test.cpp	2026-11-04 08:42:30
++++ src/TestUnits/coverage/p11_wtcore_traderadapter/p11_push_notify_test.cpp	2026-11-04 20:20:32
+@@ -367,8 +367,12 @@
+ 
+     // 其他合约不受影响
+     EXPECT_FALSE(trader.isSelfMatched(kStdAu));
+-    EXPECT_EQ(3u, sink_.trades_.size());
+-    EXPECT_EQ(3u, api_.n_qaccount_);
++    // 迭代03 s5（NEW-154/卡5d、R3-008 重复回报幂等）：同成交号、同关联订单、同方向的
++    // 重复推送只生效一次（不再二次记持仓/统计、不再投递 sink、不再触发资金查询）；
++    // 自成交另一侧（同成交号、不同关联订单）照常处理。原断言为 3/3。
++    EXPECT_EQ(2u, sink_.trades_.size());
++    EXPECT_EQ(2u, api_.n_qaccount_);
++    EXPECT_DOUBLE_EQ(1.0, trader.getPosition(kStdCode, false, 1)) << "duplicate push does not double the long position";
+ }
+ 
+ TEST_F(P11PushNotify, entrust_error_updates_undone_once)

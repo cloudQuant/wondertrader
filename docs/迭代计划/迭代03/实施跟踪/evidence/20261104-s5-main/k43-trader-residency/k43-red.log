@@ -1,0 +1,69 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5MainK43TraderResidency.ReleasedModuleProviderAndModuleStayResident
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5MainK43TraderResidency
+[ RUN      ] S5MainK43TraderResidency.ReleasedModuleProviderAndModuleStayResident
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/s5_main_k43_trader_residency_test.cpp:78: Failure
+Expected equality of these values:
+  before + 1
+    Which is: 1
+  TraderResidency::providerCount()
+    Which is: 0
+the module-created API must be kept, not deleted
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/s5_main_k43_trader_residency_test.cpp:79: Failure
+Value of: loaded(installed)
+  Actual: false
+Expected: true
+the trader module must stay loaded after release
+
+[  FAILED  ] S5MainK43TraderResidency.ReleasedModuleProviderAndModuleStayResident (270 ms)
+[----------] 1 test from S5MainK43TraderResidency (270 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (271 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S5MainK43TraderResidency.ReleasedModuleProviderAndModuleStayResident
+
+ 1 FAILED TEST
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5MainK43TraderResidency.ProviderWithoutCallbackChannelIsStillDeletedAndUnloaded
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5MainK43TraderResidency
+[ RUN      ] S5MainK43TraderResidency.ProviderWithoutCallbackChannelIsStillDeletedAndUnloaded
+[       OK ] S5MainK43TraderResidency.ProviderWithoutCallbackChannelIsStillDeletedAndUnloaded (248 ms)
+[----------] 1 test from S5MainK43TraderResidency (249 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (249 ms total)
+[  PASSED  ] 1 test.
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5MainK43TraderResidency.ManagerKeepsReleasedModuleAdapterObjects
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5MainK43TraderResidency
+[ RUN      ] S5MainK43TraderResidency.ManagerKeepsReleasedModuleAdapterObjects
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/s5_main_k43_trader_residency_test.cpp:115: Failure
+Value of: watch.expired()
+  Actual: true
+Expected: false
+a released module adapter must stay resident until process exit
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/s5_main_k43_trader_residency_test.cpp:116: Failure
+Value of: loaded(installed)
+  Actual: false
+Expected: true
+
+[  FAILED  ] S5MainK43TraderResidency.ManagerKeepsReleasedModuleAdapterObjects (246 ms)
+[----------] 1 test from S5MainK43TraderResidency (246 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (246 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S5MainK43TraderResidency.ManagerKeepsReleasedModuleAdapterObjects
+
+ 1 FAILED TEST

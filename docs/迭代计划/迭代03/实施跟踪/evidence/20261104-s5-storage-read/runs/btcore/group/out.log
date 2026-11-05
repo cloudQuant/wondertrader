@@ -1,0 +1,60 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R180LoaderFixture.*:R180ReplayFixture.*:R210Fixture.*
+[==========] Running 15 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 8 tests from R180LoaderFixture
+[ RUN      ] R180LoaderFixture.R180Exec_InitRealExecuterAndHandleInit
+[       OK ] R180LoaderFixture.R180Exec_InitRealExecuterAndHandleInit (18 ms)
+[ RUN      ] R180LoaderFixture.R180Exec_ScheduleAndDirectCallbacks
+[       OK ] R180LoaderFixture.R180Exec_ScheduleAndDirectCallbacks (44 ms)
+[ RUN      ] R180LoaderFixture.R180Exec_CancelByCodeRunsCallback
+[       OK ] R180LoaderFixture.R180Exec_CancelByCodeRunsCallback (103 ms)
+[ RUN      ] R180LoaderFixture.R180Exec_ScheduleDirectionalVolumeModes
+[       OK ] R180LoaderFixture.R180Exec_ScheduleDirectionalVolumeModes (50 ms)
+[ DISABLED ] R180LoaderFixture.DISABLED_R180Exec_TwapSecondTickReleasesDanglingLastTick
+[ RUN      ] R180LoaderFixture.R180His_LoaderM5AutoTransThenDsbReuse
+[       OK ] R180LoaderFixture.R180His_LoaderM5AutoTransThenDsbReuse (34 ms)
+[ RUN      ] R180LoaderFixture.R180His_CorruptAutoTransDsbRebuiltFromLoader
+[       OK ] R180LoaderFixture.R180His_CorruptAutoTransDsbRebuiltFromLoader (45 ms)
+[ RUN      ] R180LoaderFixture.R180His_CheckUnbarsMinute5UsesUnbarsCache
+[       OK ] R180LoaderFixture.R180His_CheckUnbarsMinute5UsesUnbarsCache (47 ms)
+[ RUN      ] R180LoaderFixture.R180His_CacheClearJoinsMultipleCodes
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p03_btcore_mockers2/r180_btcore_mockers2_test.cpp:370: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  loader.calls[kExtraA]
+    Which is: 1
+
+[  FAILED  ] R180LoaderFixture.R180His_CacheClearJoinsMultipleCodes (23 ms)
+[----------] 8 tests from R180LoaderFixture (367 ms total)
+
+[----------] 1 test from R180ReplayFixture
+[ RUN      ] R180ReplayFixture.R180Hft_CancelLocalOrderZeroesLeft
+[       OK ] R180ReplayFixture.R180Hft_CancelLocalOrderZeroesLeft (43 ms)
+[----------] 1 test from R180ReplayFixture (43 ms total)
+
+[----------] 6 tests from R210Fixture
+[ RUN      ] R210Fixture.R210His_MinuteTaskNightSessionCrossesMidnight
+[       OK ] R210Fixture.R210His_MinuteTaskNightSessionCrossesMidnight (25 ms)
+[ RUN      ] R210Fixture.R210His_BarReplaySkipsEmptyL2Lists
+[       OK ] R210Fixture.R210His_BarReplaySkipsEmptyL2Lists (26 ms)
+[ RUN      ] R210Fixture.R210His_CorruptCompressedBarBlockIsCaught
+[       OK ] R210Fixture.R210His_CorruptCompressedBarBlockIsCaught (10 ms)
+[ RUN      ] R210Fixture.R210His_UncompressedV2BarBlockHeaderStripped
+[       OK ] R210Fixture.R210His_UncompressedV2BarBlockHeaderStripped (11 ms)
+[ RUN      ] R210Fixture.R210Hft_CancelPendingOrderViaTick
+[       OK ] R210Fixture.R210Hft_CancelPendingOrderViaTick (9 ms)
+[ RUN      ] R210Fixture.R210Cta_PublicContextAndReplayDone
+[       OK ] R210Fixture.R210Cta_PublicContextAndReplayDone (22 ms)
+[----------] 6 tests from R210Fixture (105 ms total)
+
+[----------] Global test environment tear-down
+[==========] 15 tests from 3 test suites ran. (516 ms total)
+[  PASSED  ] 14 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R180LoaderFixture.R180His_CacheClearJoinsMultipleCodes
+
+ 1 FAILED TEST
+  YOU HAVE 1 DISABLED TEST
+

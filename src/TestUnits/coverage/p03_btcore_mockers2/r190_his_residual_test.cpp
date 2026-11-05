@@ -169,7 +169,7 @@ TEST_F(R190Fixture, R190His_DailyCursorCatchesUpAfterTickRun)
 
 	WTSKlineSlice* catchup = rp.get_kline_slice(kCu, "d", 5, 1, false);
 	ASSERT_NE(nullptr, catchup);
-	EXPECT_EQ(5u, catchup->size());
+	EXPECT_EQ(5, catchup->size());
 	catchup->release();
 }
 

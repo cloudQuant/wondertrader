@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="2" failures="2" disabled="0" errors="0" time="0.009" timestamp="2026-11-04T22:13:13.333" name="AllTests">
+  <testsuite name="R15CtxTest" tests="2" failures="2" disabled="0" skipped="0" errors="0" time="0.009" timestamp="2026-11-04T22:13:13.333">
+    <testcase name="live_fees_come_from_the_engine_fee_schedule" file="/tmp/wt-i03-s5-wp1-ledger-run/r15fee-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp" line="1249" status="run" result="completed" time="0.007" timestamp="2026-11-04T22:13:13.333" classname="R15CtxTest">
+      <failure message="/tmp/wt-i03-s5-wp1-ledger-run/r15fee-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1268&#x0A;Expected: (std::string::npos) != (trades.find(&quot;,LONG,OPEN,7100,2,,3.00\n&quot;)), actual: 18446744073709551615 vs 18446744073709551615&#x0A;code,time,direct,action,price,qty,tag,fee&#x0A;SHFE.ag.2512,20250110093100045,LONG,OPEN,7100,2,,18.00&#x0A;SHFE.ag.2512,20250110093100045,LONG,CLOSE,7110,1,,9.00&#x0A;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-wp1-ledger-run/r15fee-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1268
+Expected: (std::string::npos) != (trades.find(",LONG,OPEN,7100,2,,3.00\n")), actual: 18446744073709551615 vs 18446744073709551615
+code,time,direct,action,price,qty,tag,fee
+SHFE.ag.2512,20250110093100045,LONG,OPEN,7100,2,,18.00
+SHFE.ag.2512,20250110093100045,LONG,CLOSE,7110,1,,9.00
+
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-wp1-ledger-run/r15fee-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1269&#x0A;Expected: (std::string::npos) != (trades.find(&quot;,LONG,CLOSE,7110,1,,2.00\n&quot;)), actual: 18446744073709551615 vs 18446744073709551615&#x0A;code,time,direct,action,price,qty,tag,fee&#x0A;SHFE.ag.2512,20250110093100045,LONG,OPEN,7100,2,,18.00&#x0A;SHFE.ag.2512,20250110093100045,LONG,CLOSE,7110,1,,9.00&#x0A;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-wp1-ledger-run/r15fee-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1269
+Expected: (std::string::npos) != (trades.find(",LONG,CLOSE,7110,1,,2.00\n")), actual: 18446744073709551615 vs 18446744073709551615
+code,time,direct,action,price,qty,tag,fee
+SHFE.ag.2512,20250110093100045,LONG,OPEN,7100,2,,18.00
+SHFE.ag.2512,20250110093100045,LONG,CLOSE,7110,1,,9.00
+
+]]></failure>
+    </testcase>
+    <testcase name="missing_live_fee_is_observable_and_the_fill_is_kept" file="/tmp/wt-i03-s5-wp1-ledger-run/r15fee-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp" line="1273" status="run" result="completed" time="0.002" timestamp="2026-11-04T22:13:13.340" classname="R15CtxTest">
+      <failure message="/tmp/wt-i03-s5-wp1-ledger-run/r15fee-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1292&#x0A;Expected: (_eng.fee_error_count()) &gt; (errorsBefore), actual: 0 vs 0&#x0A;a missing fee is an observable error&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-wp1-ledger-run/r15fee-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1292
+Expected: (_eng.fee_error_count()) > (errorsBefore), actual: 0 vs 0
+a missing fee is an observable error
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-wp1-ledger-run/r15fee-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1293&#x0A;Value of: _eng.last_fee_error().empty()&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-wp1-ledger-run/r15fee-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1293
+Value of: _eng.last_fee_error().empty()
+  Actual: true
+Expected: false
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

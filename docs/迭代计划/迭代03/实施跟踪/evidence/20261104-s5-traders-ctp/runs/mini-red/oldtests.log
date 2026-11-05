@@ -1,0 +1,159 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = -I03S5*
+[==========] Running 40 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 24 tests from ctpmini
+[ RUN      ] ctpmini.not_ready_channel_rejects_every_request
+[       OK ] ctpmini.not_ready_channel_rejects_every_request (0 ms)
+[ RUN      ] ctpmini.ready_state_still_rejects_without_api_pointer
+[       OK ] ctpmini.ready_state_still_rejects_without_api_pointer (0 ms)
+[ RUN      ] ctpmini.make_entrust_id_rejects_bad_buffer
+[       OK ] ctpmini.make_entrust_id_rejects_bad_buffer (0 ms)
+[ RUN      ] ctpmini.make_entrust_id_formats_front_session_ref_and_increments
+[       OK ] ctpmini.make_entrust_id_formats_front_session_ref_and_increments (0 ms)
+[ RUN      ] ctpmini.generate_and_extract_entrust_id_roundtrip
+[       OK ] ctpmini.generate_and_extract_entrust_id_roundtrip (0 ms)
+[ RUN      ] ctpmini.request_id_is_monotonic
+[       OK ] ctpmini.request_id_is_monotonic (0 ms)
+[ RUN      ] ctpmini.wrap_direction_and_offset_tables
+[       OK ] ctpmini.wrap_direction_and_offset_tables (0 ms)
+[ RUN      ] ctpmini.wrap_price_time_action_and_order_state
+[       OK ] ctpmini.wrap_price_time_action_and_order_state (0 ms)
+[ RUN      ] ctpmini.is_error_rsp_info_and_make_error
+[       OK ] ctpmini.is_error_rsp_info_and_make_error (0 ms)
+[ RUN      ] ctpmini.front_events_move_state_and_notify_sink
+[       OK ] ctpmini.front_events_move_state_and_notify_sink (0 ms)
+[ RUN      ] ctpmini.register_spi_caches_bd_mgr_pointer
+[       OK ] ctpmini.register_spi_caches_bd_mgr_pointer (0 ms)
+[ RUN      ] ctpmini.authenticate_failure_marks_login_failed_and_reports
+[       OK ] ctpmini.authenticate_failure_marks_login_failed_and_reports (0 ms)
+[ RUN      ] ctpmini.order_action_success_does_not_push_trader_error
+[       OK ] ctpmini.order_action_success_does_not_push_trader_error (0 ms)
+[ RUN      ] ctpmini.order_action_error_pushes_cancel_error_once
+[       OK ] ctpmini.order_action_error_pushes_cancel_error_once (0 ms)
+[ RUN      ] ctpmini.instrument_status_push_is_forwarded
+[       OK ] ctpmini.instrument_status_push_is_forwarded (0 ms)
+[ RUN      ] ctpmini.make_order_info_maps_fields_and_night_order_date
+[       OK ] ctpmini.make_order_info_maps_fields_and_night_order_date (0 ms)
+[ RUN      ] ctpmini.make_order_info_and_trade_return_null_for_unknown_contract
+[       OK ] ctpmini.make_order_info_and_trade_return_null_for_unknown_contract (0 ms)
+[ RUN      ] ctpmini.make_trade_record_computes_amount_and_night_trade_date
+[       OK ] ctpmini.make_trade_record_computes_amount_and_night_trade_date (0 ms)
+[ RUN      ] ctpmini.rtn_trade_and_order_reach_the_sink
+[       OK ] ctpmini.rtn_trade_and_order_reach_the_sink (0 ms)
+[ RUN      ] ctpmini.rsp_qry_trading_account_builds_balance_and_clears
+[       OK ] ctpmini.rsp_qry_trading_account_builds_balance_and_clears (0 ms)
+[ RUN      ] ctpmini.rsp_qry_position_cover_one_computes_available
+[       OK ] ctpmini.rsp_qry_position_cover_one_computes_available (0 ms)
+[ RUN      ] ctpmini.rsp_qry_orders_and_trades_forward_counts
+[       OK ] ctpmini.rsp_qry_orders_and_trades_forward_counts (0 ms)
+[ RUN      ] ctpmini.release_is_safe_before_any_api_was_created
+[       OK ] ctpmini.release_is_safe_before_any_api_was_created (0 ms)
+[ RUN      ] ctpmini.connect_without_initialized_creator_is_a_noop
+[       OK ] ctpmini.connect_without_initialized_creator_is_a_noop (0 ms)
+[ DISABLED ] ctpmini.DISABLED_disconnect_joins_worker_thread
+[ DISABLED ] ctpmini.DISABLED_order_insert_positive_path_needs_api
+[ DISABLED ] ctpmini.DISABLED_login_and_rsp_user_login_needs_api
+[ DISABLED ] ctpmini.DISABLED_qry_account_last_without_record_crashes
+[----------] 24 tests from ctpmini (1 ms total)
+
+[----------] 1 test from gate_placeholder_TraderCTPMini
+[ RUN      ] gate_placeholder_TraderCTPMini.compiles_with_module_flags
+[       OK ] gate_placeholder_TraderCTPMini.compiles_with_module_flags (0 ms)
+[----------] 1 test from gate_placeholder_TraderCTPMini (0 ms total)
+
+[----------] 9 tests from R61_TraderCTPMini
+[ RUN      ] R61_TraderCTPMini.str_to_time_strips_colons
+[       OK ] R61_TraderCTPMini.str_to_time_strips_colons (0 ms)
+[ RUN      ] R61_TraderCTPMini.init_reads_config_and_applies_defaults
+dlopen(/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/thosttraderapi.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/thosttraderapi.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/thosttraderapi.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/thosttraderapi.dylib' (no such file)
+dlopen(/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib' (no such file)
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp:474: Failure
+Value of: custom.init(cfg2)
+  Actual: false
+Expected: true
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp:479: Failure
+Value of: custom.quickStart()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R61_TraderCTPMini.init_reads_config_and_applies_defaults (0 ms)
+[ RUN      ] R61_TraderCTPMini.init_accepts_sdk_capacity_and_rejects_overlength_config_fields
+dlopen(/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib' (no such file)
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp:647: Failure
+Value of: exact.init(exactCfg)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R61_TraderCTPMini.init_accepts_sdk_capacity_and_rejects_overlength_config_fields (14 ms)
+[ RUN      ] R61_TraderCTPMini.connect_subscribes_topics_and_disconnect_releases_api
+[       OK ] R61_TraderCTPMini.connect_subscribes_topics_and_disconnect_releases_api (20 ms)
+[ RUN      ] R61_TraderCTPMini.login_authenticate_and_logout_assemble_requests
+[       OK ] R61_TraderCTPMini.login_authenticate_and_logout_assemble_requests (0 ms)
+[ RUN      ] R61_TraderCTPMini.login_accepts_sdk_capacity_and_rejects_overlength_before_api_call
+[       OK ] R61_TraderCTPMini.login_accepts_sdk_capacity_and_rejects_overlength_before_api_call (0 ms)
+[ RUN      ] R61_TraderCTPMini.user_login_success_initializes_caches_and_usertags
+[       OK ] R61_TraderCTPMini.user_login_success_initializes_caches_and_usertags (1 ms)
+[ RUN      ] R61_TraderCTPMini.order_flags_action_and_queries_are_driven_by_stub
+[       OK ] R61_TraderCTPMini.order_flags_action_and_queries_are_driven_by_stub (1 ms)
+[ RUN      ] R61_TraderCTPMini.position_query_covers_cover_today_combo_and_negative
+[       OK ] R61_TraderCTPMini.position_query_covers_cover_today_combo_and_negative (0 ms)
+[----------] 9 tests from R61_TraderCTPMini (38 ms total)
+
+[----------] 6 tests from T3_006_TraderCTPMini
+[ RUN      ] T3_006_TraderCTPMini.init_rejects_each_missing_required_config_key
+[       OK ] T3_006_TraderCTPMini.init_rejects_each_missing_required_config_key (0 ms)
+[ RUN      ] T3_006_TraderCTPMini.init_rejects_flowdir_only_configuration
+[       OK ] T3_006_TraderCTPMini.init_rejects_flowdir_only_configuration (0 ms)
+[ RUN      ] T3_006_TraderCTPMini.init_rejects_missing_module_and_creator_symbol
+dlopen(/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_missing_library_unique.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_missing_library_unique.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_missing_library_unique.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_missing_library_unique.dylib' (no such file)
+dlopen(/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_missing_symbol.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_missing_symbol.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_missing_symbol.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_missing_symbol.dylib' (no such file)
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp:540: Failure
+Value of: sink.hasLog(item.diagnostic)
+  Actual: false
+Expected: true
+wt_t3_006_ctpmini_missing_symbol
+
+[  FAILED  ] T3_006_TraderCTPMini.init_rejects_missing_module_and_creator_symbol (0 ms)
+[ RUN      ] T3_006_TraderCTPMini.connect_rejects_null_creator_result_without_starting_worker
+dlopen(/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_null_creator.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_null_creator.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_null_creator.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_null_creator.dylib' (no such file)
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp:559: Failure
+Value of: probe.init(cfg)
+  Actual: false
+Expected: true
+
+[  FAILED  ] T3_006_TraderCTPMini.connect_rejects_null_creator_result_without_starting_worker (0 ms)
+[ RUN      ] T3_006_TraderCTPMini.successful_fake_module_creates_and_releases_stub_api
+dlopen(/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib' (no such file)
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp:578: Failure
+Value of: probe.init(cfg)
+  Actual: false
+Expected: true
+
+[  FAILED  ] T3_006_TraderCTPMini.successful_fake_module_creates_and_releases_stub_api (0 ms)
+[ RUN      ] T3_006_TraderCTPMini.failed_module_init_can_retry_with_a_valid_module
+dlopen(/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_missing_symbol.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_missing_symbol.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_missing_symbol.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_missing_symbol.dylib' (no such file)
+dlopen(/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-ctp-before/mini-red/wt_t3_006_ctpmini_success.dylib' (no such file)
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp:624: Failure
+Value of: probe.init(goodCfg)
+  Actual: false
+Expected: true
+
+[  FAILED  ] T3_006_TraderCTPMini.failed_module_init_can_retry_with_a_valid_module (0 ms)
+[----------] 6 tests from T3_006_TraderCTPMini (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 40 tests from 4 test suites ran. (42 ms total)
+[  PASSED  ] 34 tests.
+[  FAILED  ] 6 tests, listed below:
+[  FAILED  ] R61_TraderCTPMini.init_reads_config_and_applies_defaults
+[  FAILED  ] R61_TraderCTPMini.init_accepts_sdk_capacity_and_rejects_overlength_config_fields
+[  FAILED  ] T3_006_TraderCTPMini.init_rejects_missing_module_and_creator_symbol
+[  FAILED  ] T3_006_TraderCTPMini.connect_rejects_null_creator_result_without_starting_worker
+[  FAILED  ] T3_006_TraderCTPMini.successful_fake_module_creates_and_releases_stub_api
+[  FAILED  ] T3_006_TraderCTPMini.failed_module_init_can_retry_with_a_valid_module
+
+ 6 FAILED TESTS
+  YOU HAVE 4 DISABLED TESTS
+

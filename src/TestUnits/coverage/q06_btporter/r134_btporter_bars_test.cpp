@@ -138,6 +138,7 @@ namespace
 			"\"stime\":202401030000,\"etime\":202401040000,\"tick\":false,"
 			"\"basefiles\":{"
 			"\"session\":\"" + dir + "/sessions.json\","
+			"\"holiday\":\"" + dir + "/holidays.json\","	// 卡1：日期映射须有交易日历（CHINA）
 			"\"commodity\":\"" + dir + "/commodities.json\","
 			"\"contract\":\"" + dir + "/contracts.json\"}},"
 			"\"env\":{\"mocker\":\"none\"}}";
@@ -154,6 +155,7 @@ namespace
 			if (dir.empty())
 				return false;
 			write_text(dir + "/sessions.json", kSessions);
+			write_text(dir + "/holidays.json", "{\"CHINA\":[]}");
 			write_text(dir + "/commodities.json", kCommodities);
 			write_text(dir + "/contracts.json", kContracts);
 

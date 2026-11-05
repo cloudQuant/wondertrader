@@ -1,0 +1,6 @@
+337,338c337,338
+< 	cfg->append("cache_clear_days", static_cast<uint32_t>(2));
+< 	ASSERT_EQ(2u, cfg->getUInt32("cache_clear_days"));
+---
+> 	cfg->append("cache_clear_days", static_cast<uint32_t>(1));	/* red: evicts at session start */
+> 	ASSERT_EQ(1u, cfg->getUInt32("cache_clear_days"));

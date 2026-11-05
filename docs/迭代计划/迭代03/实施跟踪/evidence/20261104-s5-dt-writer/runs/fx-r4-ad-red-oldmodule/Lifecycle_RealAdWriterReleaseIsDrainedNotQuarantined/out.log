@@ -1,0 +1,31 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Lifecycle.RealAdWriterReleaseIsDrainedNotQuarantined
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Lifecycle
+[ RUN      ] Lifecycle.RealAdWriterReleaseIsDrainedNotQuarantined
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_writer_lifecycle_20261104s5/lifecycle_test.cpp:391: Failure
+Expected equality of these values:
+  (dm).writerLifecycleState()
+    Which is: 6
+  DataManager::WLS_Released
+    Which is: 5
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_writer_lifecycle_20261104s5/lifecycle_test.cpp:394: Failure
+Expected equality of these values:
+  DataManager::quarantinedWriterCount()
+    Which is: 1
+  before
+    Which is: 0
+AD writer was quarantined instead of drained
+
+[  FAILED  ] Lifecycle.RealAdWriterReleaseIsDrainedNotQuarantined (479 ms)
+[----------] 1 test from Lifecycle (479 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (479 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Lifecycle.RealAdWriterReleaseIsDrainedNotQuarantined
+
+ 1 FAILED TEST

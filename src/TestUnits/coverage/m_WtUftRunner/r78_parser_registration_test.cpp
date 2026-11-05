@@ -88,7 +88,7 @@ TEST(R78UftRunnerParserRegistration, failedActiveParserIsNotRegistered)
 		"    offset: 0\n"
 		"    sections:\n"
 		"        - from: 0\n"
-		"          to: 2400\n"));
+		"          to: 0\n")); // 卡2 2b=A：全天交易时段为 0-0（迭代03 更新，原为 2400）
 	ASSERT_TRUE(writeText("action-policy.json",
 		"{\"default\":{\"order\":[{\"action\":\"open\",\"limit\":100}]}}"));
 	ASSERT_TRUE(writeText("runner.yaml",

@@ -17,6 +17,7 @@
 
 #include "../Includes/FasterDefs.h"
 #include "../Includes/CtaStrategyDefs.h"
+#include "../Includes/IStrategyPluginV2.h"
 
 #include "../Share/DLLHelper.hpp"
 
@@ -124,7 +125,8 @@ private:
 		DllHandle		_module_inst;		//!< 动态库实例句柄
 		ICtaStrategyFact*	_fact;			//!< 策略工厂接口指针
 		FuncCreateStraFact	_creator;		//!< 创建工厂函数指针
-		FuncDeleteStraFact	_remover;		//!< 删除工厂函数指针
+		FuncDeleteStraFact	_remover;		//!< 删除工厂函数指针（v1，宿主不再调用）
+		const WtStrategyPluginApiV2* _api;	//!< 已校验的版本化插件表（卡4b=A）
 	} StraFactInfo;
 
 	/** 

@@ -1,0 +1,35 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R11ParserAdapter.initExtReturnsFalseAndRetainsApiWhenApiInitFails
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R11ParserAdapter
+[ RUN      ] R11ParserAdapter.initExtReturnsFalseAndRetainsApiWhenApiInitFails
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/r11_parser_adapter_test.cpp:328: Failure
+Expected equality of these values:
+  (uint32_t)1
+    Which is: 1
+  st._initCnt
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/r11_parser_adapter_test.cpp:335: Failure
+Expected equality of these values:
+  &env._bd
+    Which is: 0x16d9365e8
+  adapter.getBaseDataMgr()
+    Which is: NULL
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/r11_parser_adapter_test.cpp:340: Failure
+Value of: adapter.hasApi()
+  Actual: true
+Expected: false
+
+[  FAILED  ] R11ParserAdapter.initExtReturnsFalseAndRetainsApiWhenApiInitFails (0 ms)
+[----------] 1 test from R11ParserAdapter (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R11ParserAdapter.initExtReturnsFalseAndRetainsApiWhenApiInitFails
+
+ 1 FAILED TEST

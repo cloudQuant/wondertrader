@@ -4,6 +4,7 @@
  * stra_set_position -> append_signal -> proc_tick -> do_set_position -> update_dyn_profit
  * 固定输入: 2024-01-02 交易日, SSE.600000 股票合约(T+1, volscale=1), 无滑点
  */
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <cstring>
@@ -38,16 +39,11 @@ namespace
 		cInfo->setPriceTick(pxTick);
 		cInfo->setTradingMode(mode);
 		rp._bd_mgr._fullpid_map->add(cInfo->getFullPid(), cInfo, true);
-	}
-
-	static void sel_set_fee(HisDataReplayer& rp, const char* fullPid, double dOpen, double dClose)
-	{
-		HisDataReplayer::FeeItem& f = rp._fee_map[fullPid];
-		f._by_volume = true;
-		f._open = dOpen;
-		f._close = dClose;
-		f._close_today = dClose;
-		f._min_fee = 0.0;
+		WTSContractInfo* contract = WTSContractInfo::create(pid, pid, exchg, pid);
+		contract->setCommInfo(cInfo);
+		contract->setVolScale(volScale);
+		contract->setDates(20200101, 20301231);
+		rp._bd_mgr._fullcode_map->add(contract->getFullCode(), contract, false);
 	}
 }
 
@@ -57,7 +53,7 @@ protected:
 	HisDataReplayer _rp;
 	void SetUp() override
 	{
-		auto dir = std::filesystem::temp_directory_path() / "p03_sel_trade_path";
+		auto dir = std::filesystem::temp_directory_path() / ("p03_sel_trade_path_" + std::to_string(static_cast<long>(::getpid())));
 		std::filesystem::create_directories(dir);
 		WtHelper::setOutputDir(dir.string().c_str());
 
@@ -69,15 +65,15 @@ protected:
 		sel_add_comm(_rp, "SSE", "600000", 1, 0.01, TM_LongT1);
 		// 双向可开合约用于覆盖反向路径
 		sel_add_comm(_rp, "SSE", "510050", 1, 0.001, TM_Both);
-		sel_set_fee(_rp, "SSE.600000", 0.5, 0.5);
-		sel_set_fee(_rp, "SSE.510050", 1.0, 1.0);
+		std::string feeError;
+		ASSERT_TRUE(_rp._fee_schedule.loadJson(R"({"SSE.600000":{"open":0.5,"close":0.5,"closetoday":0.5,"byvolume":true},"SSE.510050":{"open":1,"close":1,"closetoday":1,"byvolume":true}})", feeError)) << feeError;
 	}
 
 	void TearDown() override
 	{
 		WtHelper::setOutputDir("");
 		std::error_code ec;
-		std::filesystem::remove_all(std::filesystem::temp_directory_path() / "p03_sel_trade_path", ec);
+		std::filesystem::remove_all(std::filesystem::temp_directory_path() / ("p03_sel_trade_path_" + std::to_string(static_cast<long>(::getpid()))), ec);
 	}
 };
 

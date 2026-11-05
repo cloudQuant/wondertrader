@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <algorithm>
@@ -5,6 +6,7 @@
 #include <condition_variable>
 #include <cstdint>
 #include <deque>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -47,6 +49,7 @@
 #include "WtCore/SelStrategyMgr.h"
 #include "WtCore/WtCtaEngine.h"
 #include "WtCore/WtHftEngine.h"
+#include "WtCore/HftStraContext.h"
 #include "WtCore/WtSelEngine.h"
 #include "WtCore/WtDistExecuter.h"
 #include "WtCore/ParserAdapter.h"
@@ -81,6 +84,12 @@ WTSVariant* makeExecuterConfig(const char* name, const char* id)
 	config->append("id", id);
 	config->append("trader", "r220_ready_trader");
 	config->append("scale", 1.0);
+	// 卡8b=A（迭代03）：local/diff/arbi 须带含 default 的 policy，否则 eager 校验拒绝整表。
+	WTSVariant* policy = WTSVariant::createObject();
+	WTSVariant* def = WTSVariant::createObject();
+	def->append("name", "WtExeFact.WtMinImpactExeUnit");
+	policy->append("default", def, false);
+	config->append("policy", policy, false);
 	return config;
 }
 
@@ -121,5 +130,43 @@ TEST(r220_wtrt_runner_ready_owner_registration, ready_callback_leaves_each_sink_
 	EXPECT_TRUE(local->_channel_ready.load());
 	EXPECT_TRUE(diff->_channel_ready.load());
 	EXPECT_TRUE(arbi->_channel_ready.load());
+}
+
+TEST(r220_wtrt_runner_ready_owner_registration, hft_unknown_trader_preflight_has_no_partial_context)
+{
+	const auto dir = std::filesystem::temp_directory_path() /
+		("r42_hft_factory_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+	std::filesystem::create_directories(dir);
+	const auto plugin = dir / std::filesystem::path(WT_R6_HFT_FACTORY_PLUGIN).filename();
+	std::filesystem::copy_file(WT_R6_HFT_FACTORY_PLUGIN, plugin,
+		std::filesystem::copy_options::overwrite_existing);
+	WtRtRunner* runner = new WtRtRunner();
+	ASSERT_TRUE(runner->_hft_mgr.loadFactories(dir.string().c_str()));
+	TraderAdapterPtr trader(new TraderAdapter());
+	ASSERT_TRUE(runner->_traders.addAdapter("known", trader));
+
+	WTSVariant* config = WTSVariant::createObject();
+	WTSVariant* strategies = WTSVariant::createObject();
+	WTSVariant* hft = WTSVariant::createArray();
+	for (const auto& entry : {std::pair<const char*, const char*>("first", "known"),
+		std::pair<const char*, const char*>("second", "unknown")})
+	{
+		WTSVariant* unit = WTSVariant::createObject();
+		unit->append("active", true);
+		unit->append("id", entry.first);
+		unit->append("name", "WtHftStraFact.SimpleHft");
+		unit->append("trader", entry.second);
+		hft->append(unit, false);
+	}
+	strategies->append("hft", hft, false);
+	config->append("strategies", strategies, false);
+	runner->_config = config;
+	HftStraContext probe(nullptr, "r42_probe", false, 0);
+	const auto next = probe.id() + 1;
+	EXPECT_FALSE(runner->initHftStrategies());
+	EXPECT_EQ(nullptr, runner->_hft_engine.getContext(next).get());
+	EXPECT_EQ(nullptr, runner->_hft_mgr.getStrategy("first").get());
+	EXPECT_TRUE(trader->_sinks.empty());
+	std::filesystem::remove_all(dir);
 }
 }

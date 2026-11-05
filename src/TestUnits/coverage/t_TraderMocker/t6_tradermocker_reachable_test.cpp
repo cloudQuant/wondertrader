@@ -523,7 +523,9 @@ TEST(t6_init, missing_keys_fall_back_to_qty_defaults_and_zero_id)
 	EXPECT_NE(nullptr, strstr(eid, ".0."));
 }
 
-TEST(t6_init, init_is_repeatable_and_later_config_wins)
+/* BUG-T6-009 / 卡 9c（用户裁定）：重复 init 拒绝并保留原实例。
+ * 原断言“第二次 init 覆盖 _mocker_id”与裁定冲突，改为验证拒绝且首次配置仍生效。 */
+TEST(t6_init, repeated_init_is_rejected_and_first_config_kept)
 {
 	MockerDirGuard dirA(9312), dirB(9313);
 	TraderMocker api;
@@ -531,13 +533,13 @@ TEST(t6_init, init_is_repeatable_and_later_config_wins)
 	WTSVariant* c1 = make_cfg(9312, 5, 10, 1, 0, true);
 	WTSVariant* c2 = make_cfg(9313, 5, 10, 1, 0, true);
 	ASSERT_TRUE(api.init(c1));
-	ASSERT_TRUE(api.init(c2));
+	EXPECT_FALSE(api.init(c2));
 
 	char eid[64] = { 0 };
 	ASSERT_TRUE(api.makeEntrustID(eid, (int)sizeof(eid)));
-	// 第二次 init 覆盖了 _mocker_id：证明 init 不是「只读一次」的哑函数
-	EXPECT_NE(nullptr, strstr(eid, ".9313."));
-	EXPECT_TRUE(dirB.exists());
+	EXPECT_NE(nullptr, strstr(eid, ".9312."));
+	EXPECT_TRUE(dirA.exists());
+	EXPECT_FALSE(dirB.exists());
 
 	c1->release();
 	c2->release();
@@ -669,9 +671,8 @@ TEST(t6_deferred_submit, valid_insert_and_cancel_requests_are_deferred_not_repor
 /* 明确不进入的路径（整条 DISABLED_，见文件头口径说明）                    */
 /* ------------------------------------------------------------------ */
 
-// login() 会 new StdThread 跑 match_once 循环，循环体每轮 sleep 5ms（L725-733），
-// 且依赖 io_context 被 run；按「不起线程、不 sleep」整条禁用。
-TEST(DISABLED_t6_thread_paths, login_spawns_match_thread_and_sleeps)
+// 迭代03 最终验收复核后启用（原禁用：lane「不起线程/不 sleep」约束；本例只起本地撮合线程，无端口）。
+TEST(t6_thread_paths, login_spawns_match_thread_and_sleeps)
 {
 	TraderMocker api;
 	MockerSink sink;
@@ -701,10 +702,8 @@ TEST(DISABLED_t6_thread_paths, connect_binds_real_udp_socket_and_runs_io_context
 	api.release();
 }
 
-// splitVolume(minQty=0, maxQty=0) 时 length==1、curVol 恒为 0，
-// L64-76 的 while(left>0) 走 continue 死循环（挂死路径，只记录不执行）。
-// 生产里被 init 的 L531-535 兜底挡住（minqty 0→1），所以是潜在风险而非现网缺陷。
-TEST(DISABLED_t6_hang_paths, split_volume_with_zero_bounds_spins_forever)
+// 迭代03 最终验收复核后启用（原禁用：splitVolume 零区间死循环）。
+TEST(t6_hang_paths, split_volume_with_zero_bounds_spins_forever)
 {
 	volatile size_t n = splitVolume(10, 0, 0).size();
 	(void)n;

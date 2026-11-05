@@ -123,11 +123,8 @@ TEST_F(R203AdResidualTest, R203ReaderRtAppendPreservesRequestedCountAndBarFields
 // 三笔 tick 横跨两个 action_date；起点落在首日 10:00，lower_bound 会先比较
 // 次日的 action_date，从而进入日期比较分支。区间内三笔都应返回。
 //
-// BUG-R215-002（既有 BUG-R32-001 / BUG-R185 观察 2）：isEmpty 分支用
-// `WTSTickStruct& curTs = front(); curTs = back();` 把末笔整体覆写回首笔，
-// 载入后向量首元素变成末笔，起点定位跳过首日，三笔只剩两笔。该分支修复前
-// 保持原输入与原断言，只加 DISABLED_ 前缀。
-TEST_F(R203AdResidualTest, DISABLED_R203RdmCrossDateTickRangeKeepsAllTicks)
+// 迭代03 最终验收复核后启用（原禁用：BUG-R215-002 / BUG-R32-001）。
+TEST_F(R203AdResidualTest, R203RdmCrossDateTickRangeKeepsAllTicks)
 {
 	WtDataWriterAD* writer = make_writer();
 	ASSERT_TRUE(writer != NULL);

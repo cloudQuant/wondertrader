@@ -1,0 +1,108 @@
+[
+ {
+  "suite": "p04_cross_session_clock",
+  "class": "SUPERSEDED",
+  "root_cause": "不是产品回归。replayer.init 返回 false，原因是夹具自带新用例把 24h 会话写成 {\"from\":0,\"to\":2400}，而卡2（2026-11-03）规定交易时段只有 0–0 表示全天，其他相同起止拒绝（日志 Invalid section 0 for session P07_24H）。诊断：改成 0–0 后 init 通过，但 prepare() 以回放错误 5（DateMappingStatus 5）终止，因为会话表缺默认 TRADING 会话，而日期映射 V1 显式检查（BUG-R12-13）要求它存在（当前 p07 同类用例都已加上）。两项已知红也已失效：slice 红控对应的 P04-011 产品缺陷已修复；负 offset 红控已由 2026-11-05 用户裁定“维持 fail-closed”成为合同。",
+  "change": "源文件无改动（为诊断临时修改的 cross_session_test.cpp 已按字节还原，sha256 6c947051…）。README.md 追加“最终验收”节，说明已被取代。",
+  "final_verdict": "fail（在 F3 加夹具修改的树上复现原失败；不再维护，已被取代）",
+  "superseded_by": [
+   "CoverageTests_btcore::P07TickLoaderTest.p04011TickQueryUsesTheInstrumentsOwnTradingDayInMixedSessions",
+   "CoverageTests_btcore::P07TickLoaderTest.p04011NegativeOffsetMixedTickReplayFailsClosed",
+   "CoverageTests_btcore::R43ReplayerTickCsvTest.*（verify.py 正控列表 8 例）",
+   "CoverageTests_btcore::P07TickLoaderTest.*（verify.py 正控列表其余 9 例）"
+  ],
+  "items": [
+   "BUG-P04-011"
+  ],
+  "rerun_log": "SCRATCH/slice4-result-fxrun-p04/p04_cross_session_clock/（还原后的树）；0–0 诊断：SCRATCH/slice4-result-fxrun/p04_cross_session_clock/"
+ },
+ {
+  "suite": "i03_parser_event_contract_20261103",
+  "class": "STALE_FIXTURE",
+  "root_cause": "红控目标 i03_xele_oracle_head 编译失败：当前 coverage 用例 t_ParserXeleSkt/r76_xele_boundary_test.cpp（含两个红例）调用 extract_buffer(length, data, login_epoch)，而 baseline_head/ 的 HEAD 源码只有 extract_buffer(length)。一个目标失败使整次默认构建失败，绿控和 red-events-before 都未构建。与 IsErrorRspInfo 修复无关。",
+  "change": "CMakeLists.txt：i03_xele_oracle_head 标为 EXCLUDE_FROM_ALL 并加注释（该红控在当前树上不适用）；README.md 追加说明。未改任何期望。",
+  "final_verdict": "pass（绿 13/13；red-events-before 按记录 6/13 失败、为预期红；ASan 13/13；TSan 13/13；red-xele-oracle-head 不适用、不构建）",
+  "superseded_by": [],
+  "items": [
+   "R76-02",
+   "R76-03",
+   "R76-08",
+   "T2-XELE-02"
+  ],
+  "rerun_log": "SCRATCH/slice4-result-fxrun/i03_parser_event_contract_20261103/"
+ },
+ {
+  "suite": "i03_parser_lifecycle_v2",
+  "class": "STALE_FIXTURE",
+  "root_cause": "ParserV2.ExternalWithoutV2IsNotDestroyed 期望 initExt 外部 API 的 release() 调用 0 次；决策 K15=A（2026-11-04）要求显式释放时恰好通知停止一次（调用一次 release()），不视为静止，也不销毁。",
+  "change": "check.cpp：改为断言停止后 release()==1、再次请求停止仍为 1、hasApi() 为真且 API 从未被销毁（替身加析构计数）；README.md 追加说明。",
+  "final_verdict": "pass（9/9）",
+  "superseded_by": [],
+  "items": [
+   "BUG-R18-006",
+   "BUG-R8-006",
+   "BUG-I02-NEW-009"
+  ],
+  "rerun_log": "SCRATCH/slice4-result-fxrun/i03_parser_lifecycle_v2/"
+ },
+ {
+  "suite": "i03_uft_parser_lifecycle_20261104s5",
+  "class": "STALE_FIXTURE",
+  "root_cause": "ReleaseInsideCallbackIsDeferred 与 ConcurrentCallbacksNeverOverlapTeardown 把“remover 置空引用”当作排空证明（期望 remover 1 次、hasApi()=false）。决策 K18=否（2026-11-04，卡9a）把这类外部 API 隔离到进程退出，永不调用 remover，因此前者失败，后者循环到 120 秒 alarm。",
+  "change": "parser_test.cpp：两例改写为 K18 合同——回调内 release 只请求停止；安全点 release 进入 isResidentQuarantined()；hasApi() 为真；remover 0 次；外部对象未删除；回调准入关闭；三个 provider 线程下拆除后不再接纳回调；替身由测试回收。新增 README.md。",
+  "final_verdict": "pass（plain 7/7，TSan 7/7）",
+  "superseded_by": [],
+  "items": [
+   "BUG-R78-001"
+  ],
+  "rerun_log": "SCRATCH/slice4-result-fxrun/i03_uft_parser_lifecycle_20261104s5/"
+ },
+ {
+  "suite": "i03_date_mapping_20261103",
+  "class": "STALE_FIXTURE",
+  "root_cause": "共享会话表含 \"EMPTY\":{\"sections\":[]}；决策 K28=A（2026-11-04）对空 sections 整文件拒绝，5 例都在 SetUp 的 loadSessions 失败。",
+  "change": "check.cpp：从共享表去掉 EMPTY；MissingMetadataAndCalendar 保留未知 EMPTY 映射为 MissingSession 的断言，并新增“含 EMPTY 的文件被拒绝且不发布任何会话”；README.md 追加说明。",
+  "final_verdict": "pass（5/5）",
+  "superseded_by": [],
+  "items": [
+   "BUG-R12-13"
+  ],
+  "rerun_log": "SCRATCH/slice4-result-fxrun/i03_date_mapping_20261103/"
+ },
+ {
+  "suite": "i03_replayer_date_range_20261103",
+  "class": "STALE_FIXTURE",
+  "root_cause": "与上同因（EMPTY 会话，K28=A）。另有品种 EX.E 挂在该会话上；按 K28=A 与商品就绪合同（卡4a=A，品种的会话未加载则整文件拒绝），原 EX.E→status 5 这一行已无法通过加载器配置。20 例都在 SetUp 失败。",
+  "change": "check.cpp：从共享配置去掉 EMPTY 与 EX.E；EX.E 行改为新用例 EmptySessionAndCommodityWithoutSessionAreRejectedAtLoad（两种拒绝、不发布任何内容、订阅报 status 4），覆盖四类订阅；README.md 追加说明。",
+  "final_verdict": "pass（24/24）",
+  "superseded_by": [],
+  "items": [
+   "BUG-R12-13"
+  ],
+  "rerun_log": "SCRATCH/slice4-result-fxrun/i03_replayer_date_range_20261103/"
+ },
+ {
+  "suite": "r202_nextday",
+  "class": "STALE_FIXTURE",
+  "root_cause": "“已知红”脚本要求 R202NextDay.*、R202Reentry.* 失败；卡3 3a=A 与卡9 9d=A（2026-11-04）已修复这些缺陷，6 个探针当前全部通过，脚本按旧期望报错。coverage 目标中没有运行这些用例（只有卡3 夹具运行），找不到等价 coverage 覆盖，故改为修复而非退役。",
+  "change": "run.py：判定改为正向断言（12 例必须全部通过；TSan 变体须无竞争）；README.md 追加说明。运行器 s_r202_nextday 由 demo/已知红改为 primary 的 green 变体（run.py exit 0 即 pass），差异见证据 logs/run_fixtures.slice4.diff。",
+  "final_verdict": "pass（12/12）",
+  "superseded_by": [],
+  "items": [
+   "BUG-R202-001"
+  ],
+  "rerun_log": "SCRATCH/slice4-result-fxrun/r202_nextday/"
+ },
+ {
+  "suite": "l03_commodity_state",
+  "class": "STALE_FIXTURE",
+  "root_cause": "probe.cpp 是修复前的缺陷观测（exit 0 表示字段未初始化、0xa5 预填仍在）。BUG-L03-002 已按卡4a=A 实施（构造零初始化、未就绪、有效交易模式 TM_None），因此每项都报 DIFFERENT，exit 1。",
+  "change": "probe.cpp：沿用同一对象表示手法，改为对 4a=A 合同的正向断言——未配置时未就绪、TM_None、不可做空；每个 setter 写入的字节构造后已为 0；getter 与工厂正控通过。README.md 追加说明；run-init.sh、run-config.sh 未改。",
+  "final_verdict": "pass（probe normal+sanitizer 0、config 0、config-sanitize 0、init 信息项 0）",
+  "superseded_by": [],
+  "items": [
+   "BUG-L03-002"
+  ],
+  "rerun_log": "SCRATCH/slice4-result-fxrun/l03_commodity_state/"
+ }
+]

@@ -25,6 +25,7 @@
  */
 
 /* 必须最先包含：以相对路径命中 -> 用户头 -> inline 函数带覆盖映射 */
+// 迭代03 第五会话（I03-NEW-053/卡2）：品种须带 pricetick/volscale 才能整批发布；起止相同的非 0–0 时段（旧夹具 1–1）被拒，改为 1–2。仅改测试输入。
 #include "../../../WtDtCore/StateMonitor.h"
 
 #include <gtest/gtest.h>
@@ -67,13 +68,13 @@ void write_valid_config(const fs::path& dir)
 	write_file(dir / "sessions.json",
 		R"JSON({
 			"R213A": {"name": "连续", "offset": 0, "sections": [{"from": 1, "to": 2359}]},
-			"R213B": {"name": "缺口", "offset": 0, "sections": [{"from": 1, "to": 1}]}
+			"R213B": {"name": "缺口", "offset": 0, "sections": [{"from": 1, "to": 2}]}
 		})JSON");
 	write_file(dir / "commodities.json",
 		R"JSON({
 			"R213": {
-				"CA": {"name": "A", "session": "R213A", "holiday": "R213_NONE"},
-				"CB": {"name": "B", "session": "R213B", "holiday": "R213_NONE"}
+				"CA": {"name": "A", "session": "R213A", "holiday": "R213_NONE", "pricetick": 1, "volscale": 1},
+				"CB": {"name": "B", "session": "R213B", "holiday": "R213_NONE", "pricetick": 1, "volscale": 1}
 			}
 		})JSON");
 	write_file(dir / "holidays.json", R"JSON({"R213_NONE": [19990101]})JSON");

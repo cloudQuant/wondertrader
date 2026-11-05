@@ -1,0 +1,120 @@
+{
+ "start": "2026-11-05T08:19:53+08:00",
+ "end": "2026-11-05T08:20:08+08:00",
+ "total": 358,
+ "by_status": {
+  "pass": 339,
+  "fail": 18,
+  "signal-6": 1
+ },
+ "per_binary": {
+  "CoverageTests_m_WtUftRunner": {
+   "pass": 49,
+   "fail": 4,
+   "signal-6": 1
+  },
+  "CoverageTests_uftcore": {
+   "pass": 290,
+   "fail": 14
+  }
+ },
+ "non_pass": [
+  [
+   "CoverageTests_m_WtUftRunner",
+   "WtUftRunnerParserOwnership.duplicateRegistrationKeepsInitializedCandidateQuarantined",
+   "fail"
+  ],
+  [
+   "CoverageTests_m_WtUftRunner",
+   "WtUftRunnerParserShutdown.externalParserWithRemoverIsResidentAndShutdownCompletes",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_m_WtUftRunner",
+   "WtUftRunnerParserStart.parserCallbackShutdownDoesNotWaitForConnectThread",
+   "fail"
+  ],
+  [
+   "CoverageTests_m_WtUftRunner",
+   "WtUftRunnerParserStart.sameThreadShutdownReentryDoesNotWaitOnItself",
+   "fail"
+  ],
+  [
+   "CoverageTests_m_WtUftRunner",
+   "WtUftRunnerParserStart.shutdownWaitsForParserStartAndDoesNotHoldGateLockInPlugin",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R11ParserAdapter.adapterMgrRegisterAndLookup",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R11ParserAdapter.initExtReturnsFalseAndRetainsApiWhenApiInitFails",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R11ParserAdapter.initExtSubscribesAllContracts",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R11ParserAdapter.pendingStyleRemoverIsNeverCalled",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R11ParserAdapter.preApiFailureReleasesConfigAndAllowsAdapterReuse",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R11ParserAdapter.removerIsNeverCalledAndManagerKeepsAdapterResident",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R11ParserAdapter.replacingRemoverIsNeverCalled",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R11ParserAdapter.throwingReleaseIsNeverInvokedForExternalApi",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R54ParserGuard.release_stops_all_handlers",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R78UftParserAdapterInit.release_inside_callback_is_deferred_to_safe_point",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R78UftParserAdapterInit.release_waits_for_active_callback_before_teardown",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "n03_parser_adapter.init_ext_failure_retains_api_and_borrowed_context",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "n03_parser_adapter.init_ext_subscribes_and_pushes_quote",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "n03_parser_adapter.init_ext_transfers_api_with_null_base_manager_and_when_busy",
+   "fail"
+  ]
+ ],
+ "disabled_total": 15,
+ "list_failures": []
+}

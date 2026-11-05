@@ -5,6 +5,7 @@
  * stra_enter_* -> append_signal -> proc_tick -> do_set_position -> update_dyn_profit
  * 断言成交均价、滑点、T+1 冻结、平今/平昨费用归属、平仓盈亏与资金账户累计
  */
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -36,16 +37,23 @@ namespace
 		cInfo->setTradingMode(mode);
 		// getCommodity(exchg,pid) 走 fullpid "EXCHG.pid"
 		rp._bd_mgr._fullpid_map->add(cInfo->getFullPid(), cInfo, true);
+		const char* raw = std::strcmp(exchg, "SHFE") == 0 ? "rb2405" : pid;
+		WTSContractInfo* contract = WTSContractInfo::create(raw, raw, exchg, pid);
+		contract->setCommInfo(cInfo);
+		contract->setVolScale(volScale);
+		contract->setDates(20200101, 20301231);
+		rp._bd_mgr._fullcode_map->add(contract->getFullCode(), contract, false);
 	}
 
-	static void set_fee(HisDataReplayer& rp, const char* fullPid, double dOpen, double dClose, double dCloseToday)
+	// Only the existing disabled legacy calc_fee probe uses the old map.
+	static void set_fee(HisDataReplayer& rp, const char* fullPid, double open, double close, double closeToday)
 	{
-		HisDataReplayer::FeeItem& f = rp._fee_map[fullPid];
-		f._by_volume = true;
-		f._open = dOpen;
-		f._close = dClose;
-		f._close_today = dCloseToday;
-		f._min_fee = 0.0;
+		HisDataReplayer::FeeItem& fee = rp._fee_map[fullPid];
+		fee._by_volume = true;
+		fee._open = open;
+		fee._close = close;
+		fee._close_today = closeToday;
+		fee._min_fee = 0.0;
 	}
 }
 
@@ -55,7 +63,7 @@ protected:
 	HisDataReplayer _rp;
 	void SetUp() override
 	{
-		auto dir = std::filesystem::temp_directory_path() / "p03_cta_trade_path";
+		auto dir = std::filesystem::temp_directory_path() / ("p03_cta_trade_path_" + std::to_string(static_cast<long>(::getpid())));
 		std::filesystem::create_directories(dir);
 		WtHelper::setOutputDir(dir.string().c_str());
 
@@ -67,15 +75,15 @@ protected:
 
 		add_comm(_rp, "SHFE", "rb", 10, 1.0, TM_Both);
 		add_comm(_rp, "SSE", "600001", 1, 0.01, TM_LongT1);
-		set_fee(_rp, "SHFE.rb", 1.0, 2.0, 3.0);
-		set_fee(_rp, "SSE.600001", 0.5, 0.5, 0.5);
+		std::string feeError;
+		ASSERT_TRUE(_rp._fee_schedule.loadJson(R"({"SHFE.rb":{"open":1,"close":2,"closetoday":3,"byvolume":true},"SSE.600001":{"open":0.5,"close":0.5,"closetoday":0.5,"byvolume":true}})", feeError)) << feeError;
 	}
 
 	void TearDown() override
 	{
 		WtHelper::setOutputDir("");
 		std::error_code ec;
-		std::filesystem::remove_all(std::filesystem::temp_directory_path() / "p03_cta_trade_path", ec);
+		std::filesystem::remove_all(std::filesystem::temp_directory_path() / ("p03_cta_trade_path_" + std::to_string(static_cast<long>(::getpid()))), ec);
 	}
 };
 

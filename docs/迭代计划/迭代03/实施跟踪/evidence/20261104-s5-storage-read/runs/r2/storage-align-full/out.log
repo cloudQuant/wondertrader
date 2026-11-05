@@ -1,0 +1,125 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = -Q03RdmTickTest.his_tick_old_struct_versions_are_upgraded
+[==========] Running 44 tests from 7 test suites.
+[----------] Global test environment set-up.
+[----------] 4 tests from S5StorageReaderTest
+[ RUN      ] S5StorageReaderTest.RdmHistoryHftRecordsAreReadThroughAlignedStorage
+[       OK ] S5StorageReaderTest.RdmHistoryHftRecordsAreReadThroughAlignedStorage (19 ms)
+[ RUN      ] S5StorageReaderTest.RdmAndDataReaderHistoryTicksAreReadThroughAlignedStorage
+[       OK ] S5StorageReaderTest.RdmAndDataReaderHistoryTicksAreReadThroughAlignedStorage (8 ms)
+[ RUN      ] S5StorageReaderTest.RdmReaderUnknownCommodityIsRefusedWithoutDereference
+[       OK ] S5StorageReaderTest.RdmReaderUnknownCommodityIsRefusedWithoutDereference (1 ms)
+[ RUN      ] S5StorageReaderTest.DataReaderUnknownCommodityIsRefusedWithoutDereference
+[       OK ] S5StorageReaderTest.DataReaderUnknownCommodityIsRefusedWithoutDereference (6 ms)
+[ DISABLED ] S5StorageReaderTest.DISABLED_LongestLegalStdCodeHistoryTickKeyStaysExact
+[----------] 4 tests from S5StorageReaderTest (35 ms total)
+
+[----------] 4 tests from R162ReaderEdgeTest
+[ RUN      ] R162ReaderEdgeTest.R162ReaderContinuousCacheNonStdExceptionIsCaught
+[       OK ] R162ReaderEdgeTest.R162ReaderContinuousCacheNonStdExceptionIsCaught (6 ms)
+[ RUN      ] R162ReaderEdgeTest.R162ReaderAdjustedStockNonStdExceptionIsCaught
+[       OK ] R162ReaderEdgeTest.R162ReaderAdjustedStockNonStdExceptionIsCaught (4 ms)
+[ RUN      ] R162ReaderEdgeTest.R162RdmReaderAllSourcesMissingReturnsEmpty
+[       OK ] R162ReaderEdgeTest.R162RdmReaderAllSourcesMissingReturnsEmpty (3 ms)
+[ RUN      ] R162ReaderEdgeTest.R162RdmReaderHisTransBlocksWithMixedActionDates
+[       OK ] R162ReaderEdgeTest.R162RdmReaderHisTransBlocksWithMixedActionDates (0 ms)
+[ DISABLED ] R162ReaderEdgeTest.DISABLED_R162RdmReaderHisTransBlocksWithMixedActionDatesFromFile
+[----------] 4 tests from R162ReaderEdgeTest (15 ms total)
+
+[----------] 2 tests from R112ReaderResidualTest
+[ RUN      ] R112ReaderResidualTest.R112ReaderHisHftCrossDateAndHotRawCode
+[       OK ] R112ReaderResidualTest.R112ReaderHisHftCrossDateAndHotRawCode (14 ms)
+[ RUN      ] R112ReaderResidualTest.R112ReaderMissingAndShortHisFiles
+[       OK ] R112ReaderResidualTest.R112ReaderMissingAndShortHisFiles (9 ms)
+[ DISABLED ] R112ReaderResidualTest.DISABLED_R112ReaderQueueDetailTransCachesAreIndependent
+[----------] 2 tests from R112ReaderResidualTest (24 ms total)
+
+[----------] 16 tests from Q03RdmTickTest
+[ RUN      ] Q03RdmTickTest.his_tick_raw_v2_roundtrip_field_by_field
+[       OK ] Q03RdmTickTest.his_tick_raw_v2_roundtrip_field_by_field (40 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_compressed_v2_roundtrip
+[       OK ] Q03RdmTickTest.his_tick_compressed_v2_roundtrip (2 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_size_check_rejects_short_file
+[       OK ] Q03RdmTickTest.his_tick_size_check_rejects_short_file (1 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_tail_fragment_is_dropped
+[       OK ] Q03RdmTickTest.his_tick_tail_fragment_is_dropped (1 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_header_only_file_yields_zero_count
+[       OK ] Q03RdmTickTest.his_tick_header_only_file_yields_zero_count (2 ms)
+[ RUN      ] Q03RdmTickTest.rt_tick_block_read_back_when_no_his_file
+[       OK ] Q03RdmTickTest.rt_tick_block_read_back_when_no_his_file (1 ms)
+[ RUN      ] Q03RdmTickTest.rt_tick_block_missing_and_empty
+[       OK ] Q03RdmTickTest.rt_tick_block_missing_and_empty (1 ms)
+[ RUN      ] Q03RdmTickTest.rt_tick_capacity_larger_than_size_is_fully_mapped
+[       OK ] Q03RdmTickTest.rt_tick_capacity_larger_than_size_is_fully_mapped (118 ms)
+[ RUN      ] Q03RdmTickTest.range_splices_two_his_days_plus_rt_block
+[       OK ] Q03RdmTickTest.range_splices_two_his_days_plus_rt_block (29 ms)
+[ RUN      ] Q03RdmTickTest.range_clips_left_window_on_begin_trading_date
+[       OK ] Q03RdmTickTest.range_clips_left_window_on_begin_trading_date (3 ms)
+[ RUN      ] Q03RdmTickTest.range_clips_right_window_on_end_trading_date
+[       OK ] Q03RdmTickTest.range_clips_right_window_on_end_trading_date (5 ms)
+[ RUN      ] Q03RdmTickTest.range_returns_empty_object_when_no_data_at_all
+[       OK ] Q03RdmTickTest.range_returns_empty_object_when_no_data_at_all (0 ms)
+[ RUN      ] Q03RdmTickTest.range_skips_missing_middle_day
+[       OK ] Q03RdmTickTest.range_skips_missing_middle_day (18 ms)
+[ RUN      ] Q03RdmTickTest.trading_date_override_routes_to_his_branch
+[       OK ] Q03RdmTickTest.trading_date_override_routes_to_his_branch (9 ms)
+[ RUN      ] Q03RdmTickTest.his_kline_hot_rejects_fragmented_raw_and_cmp_blocks
+[       OK ] Q03RdmTickTest.his_kline_hot_rejects_fragmented_raw_and_cmp_blocks (107 ms)
+[ RUN      ] Q03RdmTickTest.adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp
+[       OK ] Q03RdmTickTest.adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp (12 ms)
+[----------] 16 tests from Q03RdmTickTest (358 ms total)
+
+[----------] 2 tests from R142ReaderHftHisTest
+[ RUN      ] R142ReaderHftHisTest.R142ReaderHisHftCountBacksOffPastLastItem
+[       OK ] R142ReaderHftHisTest.R142ReaderHisHftCountBacksOffPastLastItem (6 ms)
+[ RUN      ] R142ReaderHftHisTest.R142ReaderEmptyHisTickBlockSecondCall
+[       OK ] R142ReaderHftHisTest.R142ReaderEmptyHisTickBlockSecondCall (4 ms)
+[----------] 2 tests from R142ReaderHftHisTest (11 ms total)
+
+[----------] 12 tests from R132ReaderHisTest
+[ RUN      ] R132ReaderHisTest.R132ReaderHisTickCrossActionDate
+[       OK ] R132ReaderHisTest.R132ReaderHisTickCrossActionDate (2 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisHftCompressedRoundTrip
+[       OK ] R132ReaderHisTest.R132ReaderHisHftCompressedRoundTrip (4 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisCompressibleQueueExpansion
+[       OK ] R132ReaderHisTest.R132ReaderHisCompressibleQueueExpansion (3 ms)
+[ RUN      ] R132ReaderHisTest.R132AlignedHistoricalSlicesPreserveExclusiveEnd
+[       OK ] R132ReaderHisTest.R132AlignedHistoricalSlicesPreserveExclusiveEnd (4 ms)
+[ RUN      ] R132ReaderHisTest.R132AlignedSliceSurvivesOtherCacheInsertions
+[       OK ] R132ReaderHisTest.R132AlignedSliceSurvivesOtherCacheInsertions (260 ms)
+[ RUN      ] R132ReaderHisTest.R132HistoricalBadFilesCanBeReplacedAndRetried
+[       OK ] R132ReaderHisTest.R132HistoricalBadFilesCanBeReplacedAndRetried (4 ms)
+[ RUN      ] R132ReaderHisTest.R132AllocationFailureDoesNotPublishOrInvalidateHeldSlices
+[       OK ] R132ReaderHisTest.R132AllocationFailureDoesNotPublishOrInvalidateHeldSlices (11 ms)
+[ RUN      ] R132ReaderHisTest.R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape
+[       OK ] R132ReaderHisTest.R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape (14 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisOrderQueueDetailAndTransCachesAreIndependent
+[       OK ] R132ReaderHisTest.R132ReaderHisOrderQueueDetailAndTransCachesAreIndependent (17 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisEmptyBlockAndEmptyRecordSet
+[       OK ] R132ReaderHisTest.R132ReaderHisEmptyBlockAndEmptyRecordSet (9 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisMalformedCompressedRecordsAreRejected
+[       OK ] R132ReaderHisTest.R132ReaderHisMalformedCompressedRecordsAreRejected (11 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderIntegratedSectionsOverlapHotTail
+[       OK ] R132ReaderHisTest.R132ReaderIntegratedSectionsOverlapHotTail (11 ms)
+[----------] 12 tests from R132ReaderHisTest (356 ms total)
+
+[----------] 4 tests from R100RdmCrossDayTest
+[ RUN      ] R100RdmCrossDayTest.R100RdmRtHftCrossDateBackoff
+[       OK ] R100RdmCrossDayTest.R100RdmRtHftCrossDateBackoff (18 ms)
+[ RUN      ] R100RdmCrossDayTest.R100RdmHisHftMissingAndShortFileGuards
+[       OK ] R100RdmCrossDayTest.R100RdmHisHftMissingAndShortFileGuards (7 ms)
+[ DISABLED ] R100RdmCrossDayTest.DISABLED_R100RdmHisHftValidCrossDateFiles
+[ DISABLED ] R100RdmCrossDayTest.DISABLED_R100RdmHisHftEmptyCmpV2Payloads
+[ DISABLED ] R100RdmCrossDayTest.DISABLED_R100RdmQueueDetailTransCachesAreIndependent
+[ RUN      ] R100RdmCrossDayTest.R100RdmHisTickAndKlineBoundaries
+[       OK ] R100RdmCrossDayTest.R100RdmHisTickAndKlineBoundaries (6 ms)
+[ RUN      ] R100RdmCrossDayTest.R100RdmHisHftExclusiveEndBoundaries
+[       OK ] R100RdmCrossDayTest.R100RdmHisHftExclusiveEndBoundaries (94 ms)
+[----------] 4 tests from R100RdmCrossDayTest (127 ms total)
+
+[----------] Global test environment tear-down
+[==========] 44 tests from 7 test suites ran. (978 ms total)
+[  PASSED  ] 44 tests.
+
+  YOU HAVE 6 DISABLED TESTS
+

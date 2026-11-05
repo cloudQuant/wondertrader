@@ -104,6 +104,8 @@ public:
 	 * @return 基础数据管理器指针
 	 */
 	IBaseDataMgr*	get_bd_mgr() { return &_bd_mgr; }
+	/// K31=A：本运行器持有具体基础数据管理器，向读端注入其 DateMappingV1 表
+	wtp::DateMappingV1	get_date_mapping() { return _bd_mgr.getDateMappingV1(); }
 
 	/**
 	 * @brief 获取主力合约管理器

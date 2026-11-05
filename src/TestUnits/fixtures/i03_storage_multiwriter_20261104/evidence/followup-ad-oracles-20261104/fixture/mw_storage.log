@@ -1,0 +1,21 @@
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from MwStorage
+[ RUN      ] MwStorage.TwoProcessTransAppendNoLossNoTear
+[       OK ] MwStorage.TwoProcessTransAppendNoLossNoTear (2716 ms)
+[ RUN      ] MwStorage.TwoProcessTickCacheIndexAndSharedStream
+[       OK ] MwStorage.TwoProcessTickCacheIndexAndSharedStream (1159 ms)
+[ RUN      ] MwStorage.KillBetweenPrepareAndPublishLeavesSlotInvisible
+[       OK ] MwStorage.KillBetweenPrepareAndPublishLeavesSlotInvisible (367 ms)
+[ RUN      ] MwStorage.KillInsideExpansionIsRecoveredByNextWriter
+[       OK ] MwStorage.KillInsideExpansionIsRecoveredByNextWriter (438 ms)
+[ RUN      ] MwStorage.KillBeforeCacheEntryPublishDoesNotLeakIndex
+[       OK ] MwStorage.KillBeforeCacheEntryPublishDoesNotLeakIndex (398 ms)
+[ RUN      ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+checked=12000 bad=0 remaps=3
+[       OK ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords (1132 ms)
+[----------] 6 tests from MwStorage (6213 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (6213 ms total)
+[  PASSED  ] 6 tests.

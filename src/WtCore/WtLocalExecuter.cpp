@@ -10,6 +10,7 @@
  */
 #include "WtLocalExecuter.h"
 #include "WtExecuterSchedule.h"
+#include "ExecPolicyConfig.h"
 #include "TraderAdapter.h"
 #include "WtEngine.h"
 
@@ -17,11 +18,15 @@
 #include "../Includes/IDataManager.h"
 #include "../Includes/WTSVariant.hpp"
 #include "../Includes/IHotMgr.h"
+#include "../Includes/WTSContractInfo.hpp"
 #include "../Share/decimal.h"
 
 #include "../WTSTools/WTSLogger.h"
 
+#include <cmath>
 #include <cstdio>
+#include <locale>
+#include <sstream>
 #include <exception>
 #include <iterator>
 #include <utility>
@@ -31,6 +36,40 @@ USING_NS_WTP;
 
 namespace
 {
+
+bool readExecutionScale(WTSVariant* params, double& result)
+{
+	WTSVariant* value = params->get("scale");
+	if (value == NULL) return false;
+	switch (value->type())
+	{
+	case WTSVariant::VT_Int32:
+	case WTSVariant::VT_Uint32:
+	case WTSVariant::VT_Int64:
+	case WTSVariant::VT_Uint64:
+	case WTSVariant::VT_Real:
+		result = value->asDouble();
+		break;
+	case WTSVariant::VT_String:
+	{
+		std::istringstream input(value->asString());
+		input.imbue(std::locale::classic());
+		input >> result;
+		// libc++ may set failbit for a representable subnormal while still
+		// consuming the complete token and assigning the correct value.
+		const bool subnormal = input.fail() && input.eof() &&
+			std::fpclassify(result) == FP_SUBNORMAL;
+		if (input.bad() || (input.fail() && !subnormal)) return false;
+		if (subnormal) input.clear(input.rdstate() & ~std::ios::failbit);
+		input >> std::ws;
+		if (!input.eof()) return false;
+		break;
+	}
+	default:
+		return false;
+	}
+	return std::isfinite(result) && result > 0.0;
+}
 const std::size_t kLocalExecutorThreadContextDepth = 64;
 const uint64_t kLocalIngressClosedBit = uint64_t(1) << 63;
 const uint64_t kLocalIngressCountMask = ~kLocalIngressClosedBit;
@@ -347,8 +386,10 @@ WtLocalExecuter::WtLocalExecuter(WtExecuterFactory* factory, const char* name, I
 	, _trader(NULL)
 , _factory(factory)
 	, _data_mgr(dataMgr)
+	, _config(NULL)
 	, _scale(1.0)
 	, _auto_clear(true)
+	, _strict_sync(false)
 	, _channel_ready(false)
 	{
 }
@@ -360,9 +401,19 @@ WtLocalExecuter::WtLocalExecuter(WtExecuterFactory* factory, const char* name, I
  */
 WtLocalExecuter::~WtLocalExecuter()
 {
-	std::lock_guard<std::mutex> lock(_quiesce_mutex);
-	if (!_quiesced)
-		std::terminate();
+	{
+		std::lock_guard<std::mutex> lock(_quiesce_mutex);
+		if (!_quiesced)
+			std::terminate();
+	}
+	account_net_limits::Registry::instance().release(this);
+	// I03-NEW-137: init() retains params as _config; return that reference once the
+	// executer is quiesced (no ingress can read _config any more).
+	if (_config != NULL)
+	{
+		_config->release();
+		_config = NULL;
+	}
 }
 
 /**
@@ -376,6 +427,12 @@ void WtLocalExecuter::setTrader(TraderAdapter* adapter)
 	if (!ingress)
 		return;
 	_trader = adapter;
+	_owner_claims.bind(_trader != NULL ? _trader->accountGate() : std::shared_ptr<AccountTradingGate>(),
+		ExecOwnerModes::ownerId(name()));
+	// NEW-008: declare the owner before the runner adds this sink, so owner
+	// routing is in place before READY can trigger trading.
+	if (_trader != NULL)
+		_trader->declareOwnerSink(this, ExecOwnerModes::ownerId(name()));
 }
 
 void WtLocalExecuter::onUnitCreationReserved(const std::string& /*code*/)
@@ -394,6 +451,33 @@ void WtLocalExecuter::onUnitGenerationRetainedForQuiesce(const std::string& /*co
  * @details 根据配置参数初始化执行器，包括设置缩放比例、严格同步模式、创建线程池、
  * 读取自动清理策略和代码组等配置。这些配置将影响执行器的行为和性能。
  */
+bool WtLocalExecuter::validateConfig(WTSVariant* params, std::string& error)
+{
+	if (params == NULL || params->type() != WTSVariant::VT_Object)
+	{
+		error = "executer configuration must be an object";
+		return false;
+	}
+	double scale = 0.0;
+	if (!readExecutionScale(params, scale))
+	{
+		error = "scale must be a finite positive number";
+		return false;
+	}
+	execution_groups::Groups groupRules;
+	std::string groupError;
+	if (!execution_groups::parse(params, groupRules, groupError))
+	{
+		error = "invalid group configuration: " + groupError;
+		return false;
+	}
+	account_net_limits::Limits accountLimits;
+	if (!account_net_limits::parse(params, accountLimits, error))
+		return false;
+	return exec_policy_config::validateClear(params, error) &&
+		exec_policy_config::validatePolicy(params, error);
+}
+
 bool WtLocalExecuter::init(WTSVariant* params)
 {
 	IngressLease ingress(this);
@@ -402,11 +486,46 @@ bool WtLocalExecuter::init(WTSVariant* params)
 	if (params == NULL)
 		return false;
 
+	// Card 8b=A: validate the complete configuration (scale, groups, clear and
+	// every policy entry) before retaining it or creating the thread pool.
+	std::string configError;
+	if (!validateConfig(params, configError))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid executer configuration: {}", configError);
+		return false;
+	}
+
+	double scale = 0.0;
+	if (!readExecutionScale(params, scale))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid execution scale");
+		return false;
+	}
+
+	execution_groups::Groups groupRules;
+	std::string groupError;
+	if (!execution_groups::parse(params, groupRules, groupError))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid group configuration: {}", groupError);
+		return false;
+	}
+	_group_rules.swap(groupRules);
+	{
+		account_net_limits::Limits accountLimits;
+		std::string accountError;
+		if (!account_net_limits::parse(params, accountLimits, accountError))
+		{
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid account limits: {}", accountError);
+			return false;
+		}
+		_account_limits = accountLimits;
+	}
+
 	_config = params;
 	_config->retain();
 
 	// 设置缩放比例
-	_scale = params->getDouble("scale");
+	_scale = scale;
 	// 设置是否严格同步
 	_strict_sync  = params->getBoolean("strict_sync");
 
@@ -453,27 +572,16 @@ bool WtLocalExecuter::init(WTSVariant* params)
 		}
 	}
 
-	WTSVariant* cfgGroups = params->get("groups");
-	if (cfgGroups)
+	for (const execution_groups::Group& group : _group_rules)
 	{
-		auto names = cfgGroups->memberNames();
-		for(const std::string& gpname : names)
+		CodeGroupPtr gpInfo(new CodeGroup);
+		wt_strcpy(gpInfo->_name, group.name.c_str(), group.name.size());
+		for (const auto& item : group.items)
 		{
-			CodeGroupPtr& gpInfo = _groups[gpname];
-			if (gpInfo == NULL)
-			{
-				gpInfo.reset(new CodeGroup);
-				wt_strcpy(gpInfo->_name, gpname.c_str(), gpname.size());
-			}
-
-			WTSVariant* cfgGrp = cfgGroups->get(gpname.c_str());
-			auto codes = cfgGrp->memberNames();
-			for(const std::string& code : codes)
-			{
-				gpInfo->_items[code] = cfgGrp->getDouble(code.c_str());
-				_code_to_groups[code] = gpInfo;
-			}
+			gpInfo->_items[item.first] = item.second;
+			_code_to_groups[item.first] = gpInfo;
 		}
+		_groups[group.name] = gpInfo;
 	}
 
 	WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "Local executer inited, scale: {}, auto_clear: {}, strict_sync: {}, thread poolsize: {}, code_groups: {}",
@@ -639,9 +747,21 @@ bool WtLocalExecuter::getUnit(const char* stdCode, bool bAutoCreate /* = true */
 				_unit_map.erase(unitIt);
 			}
 			std::lock_guard<std::mutex> stateLock(state->mutex);
-			const bool acceptedHostCallbacksWillBeDiscarded =
-				!state->callback_events.empty() || state->callback_active ||
-				state->callback_drain_scheduled;
+			bool acceptedHostCallbacksWillBeDiscarded =
+				state->callback_active || state->callback_drain_scheduled;
+			for (const UnitCallbackEvent& event : state->callback_events)
+			{
+				// A host-side preflight failure ran no factory/plugin code. Target
+				// reconciliation and clear-position events are projections of the
+				// retained authoritative _target_pos/_pending_clear_position state
+				// and a later generation re-queues them at registration, so dropping
+				// them discards no accepted work. Every other event still counts.
+				if (!externalCodeEntered && unit == NULL &&
+					(event.is_target_reconciliation || event.is_clear_position))
+					continue;
+				acceptedHostCallbacksWillBeDiscarded = true;
+				break;
+			}
 			// _target_pos and _pending_clear_position are authoritative business
 			// state retained for a later retry. Only their accepted callback work
 			// in this generation is considered discarded here.
@@ -737,11 +857,21 @@ bool WtLocalExecuter::getUnit(const char* stdCode, bool bAutoCreate /* = true */
 		// plugin initialization has a no-side-effect contract. Any failure from
 		// this point is retained as fail-closed and cannot be retried in-process.
 		externalCodeEntered = true;
-		unit = _factory->createExeUnit(name);
+		bool pluginEntered = true;
+		unit = _factory->createExeUnit(name, pluginEntered);
 		if (unit == NULL)
+		{
+			// The factory rejected the request before handing control to any
+			// plugin entry (unknown factory, malformed name, closed admission):
+			// this is a host-side preflight failure with no external effect.
+			if (!pluginEntered)
+				externalCodeEntered = false;
 			return failCreation("execution-unit creation failed");
+		}
 		std::string error;
-		unitInitialized = unit->initialize(this, stdCode, cfg, error);
+		unitInitialized = unit->initialize(this, stdCode, cfg, error, true);
+		if (unitInitialized)
+			_owner_modes.setSharedCapable(stdCode, unit->hostOrderIdentitySupported());
 		if (!unitInitialized || unit->self() == NULL)
 			return failCreation(error.empty() ? "plugin initialization failed" : error.c_str());
 
@@ -925,7 +1055,7 @@ bool WtLocalExecuter::enqueueTargetReconciliationLocked(const std::string& code,
 		}
 		if (!allowed)
 			return;
-		targetUnit->set_position(code.c_str(), round(target * _scale));
+		targetUnit->set_position(code.c_str(), target * _scale);
 	};
 	state->callback_events.push_front(std::move(event));
 	state->target_reconcile_event_queued = true;
@@ -1298,117 +1428,185 @@ void WtLocalExecuter::drainUnitCallbacks(const std::string& code,
 	}
 }
 
-void WtLocalExecuter::queuePositionTarget(const std::string& code, double target, bool isIncrement,
-	bool bypassOrderLimits)
+void WtLocalExecuter::submitTargetBatch(const wt_hashmap<std::string, double>& targets, bool incremental)
 {
-	const bool allowed = bypassOrderLimits || !_trader || _trader->checkOrderLimits(code.c_str());
-	double oldVol = 0.0;
-	double newVol = target;
-	bool schedule = false;
-	std::shared_ptr<UnitLifecycleState> state;
-	bool createOrRetry = false;
-	bool reserved = false;
-	bool terminalTargetNotApplied = false;
-	uint64_t failedGeneration = 0;
+	struct Action
+	{
+		Action(const std::string& valueCode, double valueTarget, bool valueBypass = false)
+			: code(valueCode), target(valueTarget), bypass(valueBypass) {}
+		std::string code;
+		double target = 0.0;
+		bool allowed = true;
+		bool bypass = false;
+		bool create = false;
+		bool reserved = false;
+		bool schedule = false;
+		bool terminal = false;
+		std::shared_ptr<UnitLifecycleState> state;
+	};
+	wt_hashmap<std::string, double> previous;
+	std::vector<std::string> channelHolds;
+	uint64_t revision = 0;
+	{
+		std::lock_guard<std::mutex> lock(_position_state_mutex);
+		previous = _target_pos;
+		revision = _target_revision;
+		if (_strict_sync) channelHolds.assign(_channel_holds.begin(), _channel_holds.end());
+	}
+	wt_hashmap<std::string, double> proposed = incremental ? previous : targets;
+	if (incremental)
+	{
+		const auto& change = *targets.begin();
+		const auto it = previous.find(change.first);
+		const double oldTarget = it == previous.end() ? 0.0 : it->second;
+		const double value = oldTarget + change.second;
+		if (!std::isfinite(value)) return;
+		proposed[change.first] = value;
+	}
+	execution_groups::Positions realTargets, physical;
+	std::string error;
+	if (!execution_groups::calculate(_group_rules, proposed, _scale, realTargets, physical, error, !incremental))
+	{
+		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Target batch rejected: {}", error);
+		return;
+	}
+	for (const auto& item : physical)
+	{
+		if (item.second >= 0.0) continue;
+		WTSCommodityInfo* commodity = _stub ? _stub->get_comm_info(item.first.c_str()) : NULL;
+		if (!commodity || !commodity->canShort())
+		{
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+				"Target batch rejected: short permission unavailable for {}", item.first);
+			return;
+		}
+	}
+	std::vector<Action> actions;
+	if (incremental)
+	{
+		const std::string& code = targets.begin()->first;
+		actions.emplace_back(code, realTargets.at(code));
+	}
+	else
+	{
+		for (const auto& target : realTargets) actions.emplace_back(target.first, target.second);
+		for (const auto& target : previous)
+			if (!realTargets.count(target.first)) actions.emplace_back(target.first, 0.0, true);
+		for (const std::string& code : channelHolds)
+			if (!previous.count(code) && !realTargets.count(code)) actions.emplace_back(code, 0.0, true);
+	}
+	for (Action& action : actions)
+		if (!action.bypass) action.allowed = !_trader || _trader->checkOrderLimits(action.code.c_str());
+	// Card 8 / BUG-P02-005: the executer's complete physical targets, in trader
+	// quantity, are checked against the per-contract account net limit shared
+	// by every executer on the same account. Group limits were checked above;
+	// both must pass. The account identity is the trader's shared gate (WP1).
+	account_net_limits::Positions accountTargets;
+	for (const auto& item : physical)
+		if (item.second != 0.0) accountTargets[item.first] = item.second * _scale;
+	const std::shared_ptr<const void> accountKeepalive = _trader ?
+		std::shared_ptr<const void>(_trader->accountGate()) : std::shared_ptr<const void>();
+	const void* accountKey = accountKeepalive ? accountKeepalive.get() : static_cast<const void*>(this);
+	bool stale = false;
+	std::string accountError;
 	{
 		SpinLock unitsLock(_mtx_units);
-		auto stateIt = _unit_states.find(code);
-		if (stateIt != _unit_states.end())
 		{
-			state = stateIt->second;
-			std::lock_guard<std::mutex> stateLock(state->mutex);
+			std::lock_guard<std::mutex> positionLock(_position_state_mutex);
+			account_net_limits::Positions previousAccount;
+			const void* previousAccountKey = NULL;
+			if (_target_revision != revision)
+				stale = true;
+			else if (!account_net_limits::Registry::instance().apply(accountKey, accountKeepalive, this,
+				_name, _account_limits, accountTargets, previousAccount, previousAccountKey, accountError))
+				stale = true;
+			else
 			{
-				std::lock_guard<std::mutex> positionLock(_position_state_mutex);
-				auto it = _target_pos.find(code);
-				oldVol = it == _target_pos.end() ? 0.0 : it->second;
-				newVol = isIncrement ? oldVol + target : target;
-				_target_pos[code] = newVol;
-				_target_pos_allowed[code] = allowed;
-			}
-
-			if (state->init_status == ExecUnitInitState::FAILED || state->callback_failed)
-			{
-				createOrRetry = true;
-				if (state->runtime_failed)
+				auto newTargets = _target_pos;
+				auto newAllowed = _target_pos_allowed;
+				for (const Action& action : actions)
 				{
-					terminalTargetNotApplied = true;
-					failedGeneration = state->init_generation;
-					state->init_error = fmtutil::format(
-						"execution-unit callback threw; target {} retained but not applied after generation {} entered terminal FAILED",
-						newVol, failedGeneration);
+					newTargets[action.code] = action.target;
+					newAllowed[action.code] = action.allowed;
+				}
+				_target_pos.swap(newTargets);
+				_target_pos_allowed.swap(newAllowed);
+				++_target_revision;
+			}
+		}
+		if (!stale)
+		for (Action& action : actions)
+		{
+			auto stateIt = _unit_states.find(action.code);
+			if (stateIt != _unit_states.end())
+			{
+				action.state = stateIt->second;
+				std::lock_guard<std::mutex> stateLock(action.state->mutex);
+				if (action.state->init_status == ExecUnitInitState::FAILED || action.state->callback_failed)
+				{
+					action.create = true;
+					if (action.state->runtime_failed)
+					{
+						action.terminal = true;
+						action.state->init_error = fmtutil::format(
+							"execution-unit callback threw; target {} retained but not applied after generation {} entered terminal FAILED",
+							action.target, action.state->init_generation);
+					}
+				}
+				else if (!action.state->creation_complete)
+				{
+					auto unitIt = _unit_map.find(action.code);
+					const ExecuteUnitPtr unit = unitIt == _unit_map.end() ? ExecuteUnitPtr() : unitIt->second;
+					action.schedule = enqueueTargetReconciliationLocked(action.code, unit, action.state);
+					action.create = !action.state->creation_started;
+				}
+				else if (action.allowed)
+				{
+					auto unitIt = _unit_map.find(action.code);
+					const std::string code = action.code; const double target = action.target * _scale;
+					action.schedule = unitIt != _unit_map.end() && enqueueUnitCallbackLocked(action.state, unitIt->second,
+						[code, target](ExecuteUnit* unit) { unit->set_position(code.c_str(), target); });
 				}
 			}
-			else if (!state->creation_complete)
+			else
 			{
-				auto unitIt = _unit_map.find(code);
-				const ExecuteUnitPtr unit = unitIt == _unit_map.end() ? ExecuteUnitPtr() : unitIt->second;
-				// Keep target reconciliation at the head of the queue. It reads the
-				// latest authoritative map when dispatched, so coalesced updates cannot
-				// be overtaken by ticks or order callbacks queued during initialization.
-				schedule = enqueueTargetReconciliationLocked(code, unit, state);
-				createOrRetry = !state->creation_started;
-			}
-			else if (allowed)
-			{
-				auto unitIt = _unit_map.find(code);
-				const double traderTarget = round(newVol * _scale);
-				schedule = unitIt != _unit_map.end() && enqueueUnitCallbackLocked(state, unitIt->second,
-					[code, traderTarget](ExecuteUnit* targetUnit) {
-						targetUnit->set_position(code.c_str(), traderTarget);
-					});
+				action.state = std::make_shared<UnitLifecycleState>();
+				action.state->init_generation = _next_unit_init_generation++;
+				_unit_states.emplace(action.code, action.state);
+				if (_channel_ready.load())
+				{
+					std::lock_guard<std::mutex> stateLock(action.state->mutex);
+					const uint64_t epoch = _channel_epoch.load();
+					(void)enqueueUnitCallbackLocked(action.state, ExecuteUnitPtr(),
+						[](ExecuteUnit* unit) { unit->on_channel_ready(); }, true, epoch);
+				}
+				action.create = true;
+				action.reserved = true;
 			}
 		}
+	}
+	if (stale)
+	{
+		if (!accountError.empty())
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Target batch rejected: {}", accountError);
 		else
-		{
-			// Reserve the lifecycle in the same critical section that publishes the
-			// authoritative target. Ticks arriving before the creator starts now join
-			// this generation and are held behind its reconciliation barrier.
-			state = std::make_shared<UnitLifecycleState>();
-			state->init_generation = _next_unit_init_generation++;
-			_unit_states.emplace(code, state);
-			{
-				std::lock_guard<std::mutex> positionLock(_position_state_mutex);
-				auto it = _target_pos.find(code);
-				oldVol = it == _target_pos.end() ? 0.0 : it->second;
-				newVol = isIncrement ? oldVol + target : target;
-				_target_pos[code] = newVol;
-				_target_pos_allowed[code] = allowed;
-			}
-			if (_channel_ready.load())
-			{
-				std::lock_guard<std::mutex> stateLock(state->mutex);
-				const uint64_t epoch = _channel_epoch.load();
-				(void)enqueueUnitCallbackLocked(state, ExecuteUnitPtr(),
-					[](ExecuteUnit* targetUnit) { targetUnit->on_channel_ready(); }, true, epoch);
-			}
-			createOrRetry = true;
-			reserved = true;
-		}
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Target batch rejected: target state changed during validation");
+		return;
 	}
-
-	if (!decimal::eq(oldVol, newVol))
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO,
-			"Target position of {} changed: {} -> {} : {} with scale:{}",
-			code.c_str(), oldVol, newVol, round(newVol * _scale), _scale);
-	if (!allowed)
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO, "{} is disabled", code.c_str());
-	if (terminalTargetNotApplied)
+	for (Action& action : actions)
 	{
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
-			"Target position for {} is retained at {} but NOT APPLIED: execution-unit generation {} is terminal FAILED after third-party code; trading callbacks remain disabled",
-			code.c_str(), newVol, failedGeneration);
-	}
-	if (createOrRetry && !terminalTargetNotApplied)
-	{
-		if (reserved)
+		if (action.terminal)
+			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR,
+				"Target position for {} retained but not applied: execution unit is terminal FAILED", action.code);
+		if (action.create && !action.terminal)
 		{
-			try { onUnitCreationReserved(code); } catch (...) {}
+			if (action.reserved) { try { onUnitCreationReserved(action.code); } catch (...) {} }
+			(void)getUnit(action.code.c_str());
 		}
-		(void)getUnit(code.c_str());
+		if (action.schedule) scheduleUnitCallbackDrain(action.code, action.state);
 	}
-	if (schedule)
-		scheduleUnitCallbackDrain(code, state);
 }
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -1484,6 +1682,8 @@ double WtLocalExecuter::getUndoneQty(const char* stdCode)
 		return 0.0;
 
 	// 从交易适配器获取未完成委托数量
+	if (_trader->isOwnerRoutingEnabled())
+		return _trader->getUndoneQtyForOwner(stdCode, ExecOwnerModes::ownerId(name()));
 	return _trader->getUndoneQty(stdCode);
 }
 
@@ -1501,6 +1701,8 @@ OrderMap* WtLocalExecuter::getOrders(const char* stdCode)
 		return NULL;
 
 	// 从交易适配器获取订单列表
+	if (_trader->isOwnerRoutingEnabled())
+		return _trader->getOrdersForOwner(stdCode, ExecOwnerModes::ownerId(name()));
 	return _trader->getOrders(stdCode);
 }
 
@@ -1521,7 +1723,9 @@ OrderIDs WtLocalExecuter::buy(const char* stdCode, double price, double qty, boo
 		return OrderIDs();
 
 	// 通过交易适配器发送买入委托，偏移量设置为0
-	return _trader->buy(stdCode, price, qty, 0, bForceClose);
+	// Card 5c: the order belongs to this executer (owner-verified cancels/routing).
+	return _trader->buyAsOwner(ExecOwnerModes::ownerId(name()), _owner_modes.sharedCapable(stdCode),
+		stdCode, price, qty, 0, bForceClose);
 }
 
 /**
@@ -1541,7 +1745,8 @@ OrderIDs WtLocalExecuter::sell(const char* stdCode, double price, double qty, bo
 		return OrderIDs();
 
 	// 通过交易适配器发送卖出委托，偏移量设置为0
-	return _trader->sell(stdCode, price, qty, 0, bForceClose);
+	return _trader->sellAsOwner(ExecOwnerModes::ownerId(name()), _owner_modes.sharedCapable(stdCode),
+		stdCode, price, qty, 0, bForceClose);
 }
 
 /**
@@ -1558,7 +1763,8 @@ bool WtLocalExecuter::cancel(uint32_t localid)
 		return false;
 
 	// 通过交易适配器取消订单
-	return _trader->cancel(localid);
+	// Owner-verified: never another owner's order; while paused only verified identities.
+	return _trader->cancelForOwner(localid, ExecOwnerModes::ownerId(name()));
 }
 
 /**
@@ -1577,7 +1783,7 @@ OrderIDs WtLocalExecuter::cancel(const char* stdCode, bool isBuy, double qty)
 		return OrderIDs();
 
 	// 通过交易适配器批量取消委托
-	return _trader->cancel(stdCode, isBuy, qty);
+	return _trader->cancelForOwner(stdCode, isBuy, qty, ExecOwnerModes::ownerId(name()));
 }
 
 /**
@@ -1653,129 +1859,18 @@ uint64_t WtLocalExecuter::getCurTime()
 void WtLocalExecuter::on_position_changed(const char* stdCode, double diffPos)
 {
 	IngressLease ingress(this);
-	if (!ingress)
-		return;
-	if (stdCode == NULL || stdCode[0] == '\0')
-		return;
-	queuePositionTarget(stdCode, diffPos, true);
+	if (!ingress || stdCode == NULL || stdCode[0] == '\0' ||
+		!std::isfinite(diffPos) || !std::isfinite(diffPos * _scale)) return;
+	wt_hashmap<std::string, double> targets;
+	targets.emplace(stdCode, diffPos);
+	submitTargetBatch(targets, true);
 }
 
-/**
- * @brief 批量设置多个合约的目标仓位
- * @param targets 目标仓位哈希表，键为合约代码，值为目标仓位
- * @details 该函数会处理多个合约的目标仓位设置。
- * 首先处理组合合约情况，将组合合约转换为实际合约的目标仓位。
- * 然后对每个合约分别设置目标仓位，并处理旧目标中存在但新目标中不存在的合约。
- * 如果配置了线程池，将使用线程池并行处理仓位设置。
- */
 void WtLocalExecuter::set_position(const wt_hashmap<std::string, double>& targets)
 {
 	IngressLease ingress(this);
-	if (!ingress)
-		return;
-	/*
-	 *	先要把目标头寒进行组合匹配
-	 */
-	// 创建实际目标仓位的副本，用于处理组合合约
-	auto real_targets = targets;
-	// Only transform the currently defined, unambiguous integer case. Group
-	// direction, fractional quantities, and overlapping groups need an explicit
-	// contract; preserve the caller's targets for those inputs.
-	bool nonnegativeIntegerTargets = true;
-	for (const auto& target : targets)
-	{
-		if (!decimal::ge(target.second, 0.0) || !decimal::eq(target.second, round(target.second)))
-		{
-			nonnegativeIntegerTargets = false;
-			break;
-		}
-	}
-	if (_groups.size() == 1 && nonnegativeIntegerTargets)
-	{
-		const CodeGroupPtr& gpInfo = _groups.begin()->second;
-		if (gpInfo != nullptr && !gpInfo->_items.empty() &&
-			targets.find(gpInfo->_name) == targets.end() &&
-			gpInfo->_items.find(gpInfo->_name) == gpInfo->_items.end())
-		{
-			bool bHit = true;
-			double gpQty = DBL_MAX;
-			// Require non-negative integer targets and positive integer member
-			// quantities, so this path never invents fractional or signed lots.
-			for (const auto& item : gpInfo->_items)
-			{
-				const double unit = item.second;
-				auto target = targets.find(item.first);
-				if (target == targets.end() || !decimal::gt(unit, 0.0) ||
-					!decimal::eq(unit, round(unit)) || !decimal::ge(target->second, 0.0) ||
-					!decimal::eq(target->second, round(target->second)))
-				{
-					bHit = false;
-					break;
-				}
-				gpQty = std::min(gpQty, target->second / unit);
-			}
-
-			if (bHit && decimal::gt(gpQty, 0.0) && decimal::eq(gpQty, round(gpQty)))
-			{
-				bool integerResiduals = true;
-				for (const auto& item : gpInfo->_items)
-				{
-					const double residual = targets.find(item.first)->second - gpQty * item.second;
-					if (!decimal::ge(residual, 0.0) || !decimal::eq(residual, round(residual)))
-					{
-						integerResiduals = false;
-						break;
-					}
-				}
-
-				if (integerResiduals)
-				{
-					real_targets[gpInfo->_name] = gpQty;
-					for (const auto& item : gpInfo->_items)
-						real_targets[item.first] = targets.find(item.first)->second - gpQty * item.second;
-				}
-			}
-		}
-	}
-
-	// 目标更新按合约串行入队；目标映射更新本身由短时锁保护。
-	for (const auto& item : real_targets)
-		queuePositionTarget(item.first, item.second, false);
-
-	// 获取旧目标键的快照，再在锁外查询执行单元与入队。
-	std::vector<std::string> priorTargets;
-	{
-		std::lock_guard<std::mutex> lock(_position_state_mutex);
-		priorTargets.reserve(_target_pos.size());
-		for (const auto& item : _target_pos)
-			priorTargets.push_back(item.first);
-	}
-	for (const std::string& code : priorTargets)
-	{
-		if (real_targets.find(code) != real_targets.end())
-			continue;
-		WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO,
-			"{} is not in target, set to 0 automatically", code.c_str());
-		queuePositionTarget(code, 0.0, false, true);
-	}
-
-	// 如果开启严格同步，则复制通道持仓快照并清理未管理合约。
-	if (_strict_sync)
-	{
-		std::vector<std::string> unmanagedHolds;
-		{
-			std::lock_guard<std::mutex> lock(_position_state_mutex);
-			for (const std::string& code : _channel_holds)
-				if (_target_pos.find(code) == _target_pos.end())
-					unmanagedHolds.push_back(code);
-		}
-		for (const std::string& code : unmanagedHolds)
-		{
-			WTSLogger::log_dyn("executer", _name.c_str(), LL_INFO,
-				"{} is not in management, set to 0 due to strict sync mode", code.c_str());
-			queuePositionTarget(code, 0.0, false, true);
-		}
-	}
+	if (!ingress) return;
+	submitTargetBatch(targets, false);
 }
 
 /**
@@ -2025,7 +2120,7 @@ void WtLocalExecuter::on_position(const char* stdCode, bool /*isLong*/, double /
     // 将合约添加到通道持仓集合中
     {
         std::lock_guard<std::mutex> lock(_position_state_mutex);
-        _channel_holds.insert(stdCode);
+        if (_channel_holds.insert(stdCode).second) ++_target_revision;
     }
 
     /*

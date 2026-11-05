@@ -1,0 +1,36 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp	2026-11-03 15:04:20
++++ src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp	2026-11-04 18:11:11
+@@ -554,6 +554,33 @@
+ 	}
+ }
+ 
++// BUG-L03-010 (S5, decision card 2): 0-0 is the only full-day section; it
++// cannot be mixed with another section in either order, so the full-day
++// aggregate views never exceed one day.
++TEST(l03_session, full_day_section_is_not_mixed_with_other_sections)
++{
++	for (int32_t offset : {0, 300, -300})
++	{
++		WTSSessionInfo* s = WTSSessionInfo::create("L03_MIX", "mixed", offset);
++		ASSERT_TRUE(s->tryAddTradingSection(900, 1500));
++		EXPECT_FALSE(s->tryAddTradingSection(0, 0));
++		s->addTradingSection(0, 0);
++		EXPECT_EQ(1u, s->getSectionCount());
++		EXPECT_EQ(360u, s->getTradingMins());
++		s->release();
++
++		WTSSessionInfo* all = WTSSessionInfo::create("L03_ALL", "all", offset);
++		ASSERT_TRUE(all->tryAddTradingSection(0, 0));
++		EXPECT_FALSE(all->tryAddTradingSection(900, 1500));
++		EXPECT_FALSE(all->tryAddTradingSection(0, 0));
++		EXPECT_EQ(1u, all->getSectionCount());
++		EXPECT_EQ(1440u, all->getTradingMins());
++		ASSERT_EQ(1u, all->getSecMinList().size());
++		EXPECT_EQ(1440u, all->getSecMinList().back());
++		all->release();
++	}
++}
++
+ TEST(l03_session, non_midnight_zero_length_section_is_rejected)
+ {
+ 	auto* s = WTSSessionInfo::create("L03_ZERO", "zero width");

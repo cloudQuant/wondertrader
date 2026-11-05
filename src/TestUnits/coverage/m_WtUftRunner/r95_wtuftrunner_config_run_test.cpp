@@ -395,13 +395,15 @@ bool runReturnsBeforeSignal(WtUftRunner& runner, bool bAsync = false)
 
 /* WTSSessionInfo 的 0~2400 单段：任何 hhmm 都在交易时段内，ticker 线程不会落进 10s 休眠。
  * 2400 经 offsetTime(..., false) 仍是 2400，isLastOfSection 只在 24:00 边界命中。 */
+// 卡2 2b=A（用户裁定 2026-11-03）：交易时段全天只能写 0-0，0-2400 被会话加载器拒绝
+// （迭代03 s5-runners 更新，原为 to: 2400）。
 const char* kSessionsYaml =
 	"ALLDAY:\n"
 	"    name: AllDay\n"
 	"    offset: 0\n"
 	"    sections:\n"
 	"        - from: 0\n"
-	"          to: 2400\n";
+	"          to: 0\n";
 
 const char* kCommoditiesYaml =
 	"SHFE:\n"
@@ -1381,16 +1383,16 @@ TEST(r85_uft_runner, successful_fake_trader_config_registers_and_runs)
 		"api.connect"}), readLifecycleEvents(logPath));
 
 	ASSERT_TRUE(runner.shutdown());
+	// 决策 K43（2026-11-04 用户裁定）：provider 已获得回调通道（registerSpi）后无法证明回调已停，
+	// API 不删除、模块不卸载，常驻到进程退出；仍调用一次 release 让 provider 自行停止。
+	// 改前期望在 release 后还有 factory.delete.begin / api.destroy / factory.delete.end。
 	EXPECT_EQ((std::vector<std::string>{
 		"factory.create",
 		"api.init refs=2",
 		"api.registerSpi",
 		"api.connect",
 		"api.unregisterSpi",
-		"api.release refs=2",
-		"factory.delete.begin",
-		"api.destroy refs=2",
-		"factory.delete.end"}), readLifecycleEvents(logPath));
+		"api.release refs=2"}), readLifecycleEvents(logPath));
 }
 
 TEST(r95_uft_config, missing_default_action_policy_rejects_startup)

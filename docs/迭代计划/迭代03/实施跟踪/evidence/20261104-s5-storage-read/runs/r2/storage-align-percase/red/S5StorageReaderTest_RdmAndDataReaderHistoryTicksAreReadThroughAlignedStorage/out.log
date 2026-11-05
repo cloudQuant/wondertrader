@@ -1,0 +1,29 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5StorageReaderTest.RdmAndDataReaderHistoryTicksAreReadThroughAlignedStorage
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5StorageReaderTest
+[ RUN      ] S5StorageReaderTest.RdmAndDataReaderHistoryTicksAreReadThroughAlignedStorage
+/tmp/wt-i03-s5-storage-read-redsrc2/src/TestUnits/coverage/q03_storage3/s5_storage_reader_guards_test.cpp:179: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  (uintptr_t)byDate->at(0) % alignof(WTSTickStruct)
+    Which is: 4
+
+/tmp/wt-i03-s5-storage-read-redsrc2/src/TestUnits/coverage/q03_storage3/s5_storage_reader_guards_test.cpp:180:3: runtime error: member access within misaligned address 0x61b00000278c for type 'const WTSTickStruct', which requires 8 byte alignment
+0x61b00000278c: note: pointer points here
+  00 60 6a 40 53 53 45 00  00 00 00 00 00 00 00 00  00 00 00 00 36 30 30 30  30 33 00 00 00 00 00 00
+              ^ 
+    #0 0x0001045f647c in s5sg::S5StorageReaderTest_RdmAndDataReaderHistoryTicksAreReadThroughAlignedStorage_Test::TestBody()+0x16bc (s5_storage_align:arm64+0x10053247c)
+    #1 0x00010487ae1c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (s5_storage_align:arm64+0x1007b6e1c)
+    #2 0x00010487ad64 in testing::Test::Run()+0xcc (s5_storage_align:arm64+0x1007b6d64)
+    #3 0x00010487b944 in testing::TestInfo::Run()+0xd0 (s5_storage_align:arm64+0x1007b7944)
+    #4 0x00010487c3c8 in testing::TestSuite::Run()+0x1c4 (s5_storage_align:arm64+0x1007b83c8)
+    #5 0x0001048877f0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (s5_storage_align:arm64+0x1007c37f0)
+    #6 0x00010488719c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (s5_storage_align:arm64+0x1007c319c)
+    #7 0x000104887100 in testing::UnitTest::Run()+0x78 (s5_storage_align:arm64+0x1007c3100)
+    #8 0x000104868438 in main+0x40 (s5_storage_align:arm64+0x1007a4438)
+    #9 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-s5-storage-read-redsrc2/src/TestUnits/coverage/q03_storage3/s5_storage_reader_guards_test.cpp:180:3 

@@ -1,0 +1,18 @@
+argv=["/tmp/wt-r22-lifecycle-20261102/red-tsan-frozen", "self-external-join"]
+exit=-6
+ThreadSanitizer: CHECK failed: sanitizer_thread_registry.cpp:364 "((t)) != (0)" (0x0, 0x0) (tid=1047755)
+    #0 __tsan::CheckUnwind() <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x6d7e4)
+    #1 __tsan::CheckUnwind() <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x6d7f4)
+    #2 __sanitizer::CheckFailed(char const*, int, char const*, unsigned long long, unsigned long long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x187f0)
+    #3 __sanitizer::ThreadRegistry::ConsumeThreadUserId(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x175d4)
+    #4 pthread_join <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x32074)
+    #5 std::__1::thread::join() <null> (libc++.1.dylib:arm64e+0x27e20)
+    #6 StateMonitor::stop() <null> (red-tsan-frozen:arm64+0x10000ce74)
+    #7 CallbackWriter::transHisData(char const*) <null> (red-tsan-frozen:arm64+0x100023868)
+    #8 DataManager::transHisData(char const*) <null> (red-tsan-frozen:arm64+0x10001e950)
+    #9 StateMonitor::advanceOnce(unsigned int, unsigned int) <null> (red-tsan-frozen:arm64+0x10000a314)
+    #10 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>>(void*) <null> (red-tsan-frozen:arm64+0x10001c380)
+    #11 __tsan_thread_start_func <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31cf4)
+    #12 _pthread_start <null> (libsystem_pthread.dylib:arm64e+0x6c54)
+    #13 thread_start <null> (libsystem_pthread.dylib:arm64e+0x1c18)
+

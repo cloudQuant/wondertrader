@@ -1,0 +1,88 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-dt-parsers/before/src/ParserCTPMini/ParserCTPMini.cpp	2026-11-04 09:04:38
++++ src/ParserCTPMini/ParserCTPMini.cpp	2026-11-04 19:02:18
+@@ -27,8 +27,40 @@
+ #include <limits>
+ #include <system_error>
+ #include <vector>
++#include <set>
+ namespace fs = std::filesystem;
+ 
++namespace
++{
++	// I03-NEW-003: a vendor module whose load ended without a usable API
++	// (missing creator symbol or null creator result) stays resident with an
++	// unknown vendor state. Record it process-wide so that no other parser
++	// instance loads and re-enters the same module, by path or by handle (alias).
++	// The registry mutex also serializes the check, load and creation, so two
++	// instances cannot race past the check for the same module.
++	std::mutex& quarantinedModuleMutex()
++	{
++		static std::mutex* m = new std::mutex();
++		return *m;
++	}
++	std::set<std::string>& quarantinedModulePaths()
++	{
++		static std::set<std::string>* paths = new std::set<std::string>();
++		return *paths;
++	}
++	std::set<DllHandle>& quarantinedModuleHandles()
++	{
++		static std::set<DllHandle>* handles = new std::set<DllHandle>();
++		return *handles;
++	}
++	std::string moduleKey(const std::string& path)
++	{
++		std::error_code ec;
++		fs::path canonical = fs::weakly_canonical(fs::path(path), ec);
++		return ec ? fs::path(path).lexically_normal().string() : canonical.string();
++	}
++}
++
+  //By Wesley @ 2022.01.05
+ #include "../Share/fmtlib.h"
+ template<typename... Args>
+@@ -239,12 +271,27 @@
+ 
+ 	std::string dllpath = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + moduleFile;
+ 	const std::string logPath = dllpath.size() > 128 ? dllpath.substr(0, 128) + "..." : dllpath;
++	const std::string key = moduleKey(dllpath);
++	std::lock_guard<std::mutex> moduleLock(quarantinedModuleMutex());
++	if (quarantinedModulePaths().count(key) != 0)
++	{
++		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Market data API module was quarantined by an earlier failed initialization; initialization disabled: {}", logPath);
++		return false;
++	}
+ 	DllHandle library = DLLHelper::load_library(dllpath.c_str());
+ 	if (library == NULL)
+ 	{
+ 		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Failed to load market data API module: {}", logPath);
+ 		return false;
+ 	}
++	if (quarantinedModuleHandles().count(library) != 0)
++	{
++		// Another path aliases a quarantined image. Keep this extra reference
++		// (never unload vendor code with unknown state) and fail closed.
++		m_hInstCTP = library;
++		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Market data API module aliases a quarantined module; initialization disabled: {}", logPath);
++		return false;
++	}
+ 	// Loading a library can already run vendor initialization. Keep its loader
+ 	// reference even when symbol lookup or API creation fails: neither path has
+ 	// a documented callback/thread quiescence guarantee.
+@@ -262,12 +309,16 @@
+ 	CTPCreator creator = (CTPCreator)DLLHelper::get_symbol(library, creatorName);
+ 	if (creator == NULL)
+ 	{
++		quarantinedModulePaths().insert(key);
++		quarantinedModuleHandles().insert(library);
+ 		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Market data API creator symbol not found; module retained: {}", creatorName);
+ 		return false;
+ 	}
+ 	CThostFtdcMdApi* api = creator(path.c_str(), false, false);
+ 	if (api == NULL)
+ 	{
++		quarantinedModulePaths().insert(key);
++		quarantinedModuleHandles().insert(library);
+ 		write_log(m_sink, LL_ERROR, "[ParserCTPMini] Market data API creator returned null; module retained: {}", logPath);
+ 		return false;
+ 	}

@@ -1,0 +1,26 @@
+def fix(line, types):
+    a = types.split('<',1)[1]
+    first, second = [x.strip() for x in a.split(',')[:2]]
+    second = second.rstrip('>').strip()
+    # literal side unsigned, value side signed -> drop the u suffix on the literal
+    if first.startswith('unsigned') and second == 'int':
+        m = re.subn(r'\((\d+)u, ', r'(\1, ', line, count=1)
+        if m[1]: return m[0]
+        m = re.subn(r', (\d+)u\)', r', \1)', line, count=1)
+        if m[1]: return m[0]
+    if first == 'int' and (second.startswith('unsigned') or second.startswith('wtp::tag')):
+        m = re.subn(r'(->size\(\)|\.size\(\)), (\d+)u\)', r'\1, \2)', line, count=1)
+        if m[1]: return m[0]
+        # signed literal vs unsigned value (incl. enums with uint32_t underlying type)
+        m = re.subn(r'\((\d+), ', r'(\1u, ', line, count=1)
+        if m[1]: return m[0]
+    if first.startswith('wtp::tag') and second == 'int':
+        m = re.subn(r'\((W[A-Z]{2,3}_[A-Za-z_]+), ', r'(static_cast<int>(\1), ', line, count=1)
+        if m[1]: return m[0]
+    if first == 'unsigned long' and second == 'int' and 'MAX_INSTRUMENT_LENGTH' in line and 'static_cast' not in line:
+        return re.sub(r'(MAX_INSTRUMENT_LENGTH(?: - 1)?)\)', r'static_cast<std::size_t>(\1))', line, count=1)
+    if {first, second} == {'unsigned long long', 'long long'} and 'TimeUtils::makeTime(' in line and 'static_cast' not in line:
+        return re.sub(r'(TimeUtils::makeTime\([^()]*\))', r'static_cast<uint64_t>(\1)', line, count=1)
+    if first == 'unsigned long long' and second == 'long long' and ', timeBeforeQuote)' in line:
+        return line.replace(', timeBeforeQuote)', ', static_cast<uint64_t>(timeBeforeQuote))', 1)
+    return None

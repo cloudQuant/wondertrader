@@ -8,6 +8,7 @@
  * \brief 数据落地接口定义
  */
 #pragma once
+#include <stddef.h>
 #include <stdint.h>
 #include "WTSTypes.h"
 #include "FasterDefs.h"
@@ -107,3 +108,104 @@ NS_WTP_END
 //获取IDataWriter的函数指针类型
 typedef wtp::IDataWriter* (*FuncCreateWriter)();
 typedef void(*FuncDeleteWriter)(wtp::IDataWriter* &writer);
+
+/*
+ * Versioned writer lifecycle C ABI V1 (iteration 03, decision card 9: 9a=A+C,
+ * 9b=A, 9d=A). This block is additive: the IDataWriter/IDataWriterSink classes,
+ * their vtables, member layout and the createWriter/deleteWriter exports above
+ * are unchanged, so writers built against the old header still load.
+ *
+ * A writer module may export WT_DATA_WRITER_LIFECYCLE_V1_GETTER_SYMBOL. The getter
+ * returns a provider-owned static table (NULL for an unknown major). The opaque
+ * `writer` argument is exactly the IDataWriter* returned by that module's
+ * createWriter, converted to void*; providers must reject pointers they did not
+ * create. No callback may let a C++ exception cross this boundary.
+ *
+ *  - request_stop: nonblocking and idempotent. Callable from any thread, including
+ *    from inside IDataWriterSink/IHisDataDumper callbacks and from writer-owned
+ *    threads. Closes admission (later public calls fail) while accepted work keeps
+ *    draining. Valid for an uninitialized writer and after a failed init.
+ *  - can_wait: nonblocking probe for the calling thread. OK only when this thread
+ *    may block in wait_drained without waiting for itself (it is not a writer-owned
+ *    thread and is not inside an operation/callback of this writer); otherwise
+ *    WOULD_DEADLOCK. The host must not call wait_drained without a fresh OK.
+ *  - wait_drained: called after request_stop and a successful can_wait. timeout_ms
+ *    0 polls; 0xFFFFFFFF waits without limit. DRAINED means: no writer operation is
+ *    in flight, every accepted item has been processed, every writer-owned thread
+ *    has exited and been joined, and no IDataWriterSink/IHisDataDumper callback is
+ *    executing or can begin later. After DRAINED, IDataWriter::release() is a
+ *    synchronous, callback-free cleanup. PENDING may be retried; WOULD_DEADLOCK and
+ *    ERROR leave the writer live.
+ *
+ * Host contract: only DRAINED authorizes deleteWriter and unloading the module.
+ * A writer whose module does not export this getter cannot prove callback
+ * quiescence: the host calls release() from a safe (non-callback) context and then
+ * retains the writer, its module and its sink for the life of the process
+ * (quarantine). A getter that is present but invalid is rejected before
+ * createWriter is called.
+ */
+#define WT_DATA_WRITER_LIFECYCLE_V1_ABI_MAJOR 1u
+#define WT_DATA_WRITER_LIFECYCLE_V1_ABI_MINOR 1u
+#define WT_DATA_WRITER_LIFECYCLE_V1_ABI_VERSION \
+	((WT_DATA_WRITER_LIFECYCLE_V1_ABI_MAJOR << 16) | WT_DATA_WRITER_LIFECYCLE_V1_ABI_MINOR)
+#define WT_DATA_WRITER_LIFECYCLE_V1_GETTER_SYMBOL "getDataWriterLifecycleApiV1"
+#define WT_DATA_WRITER_LIFECYCLE_V1_WAIT_FOREVER 0xFFFFFFFFu
+
+typedef int32_t WtDataWriterLifecycleV1Status;
+enum
+{
+	WT_DATA_WRITER_LIFECYCLE_V1_OK = 0,
+	WT_DATA_WRITER_LIFECYCLE_V1_DRAINED = 1,
+	WT_DATA_WRITER_LIFECYCLE_V1_PENDING = 2,
+	WT_DATA_WRITER_LIFECYCLE_V1_WOULD_DEADLOCK = 3,
+	WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT = -1,
+	WT_DATA_WRITER_LIFECYCLE_V1_DUPLICATE = -2,	/* minor 1: add_dumper with an id already registered */
+	WT_DATA_WRITER_LIFECYCLE_V1_ERROR = -3
+};
+
+/* Required capability: the three callbacks below implement the drain contract. */
+#define WT_DATA_WRITER_LIFECYCLE_V1_CAP_DRAIN (UINT64_C(1) << 0)
+
+typedef WtDataWriterLifecycleV1Status (*WtDataWriterLifecycleV1RequestStopFn)(void* writer);
+typedef WtDataWriterLifecycleV1Status (*WtDataWriterLifecycleV1CanWaitFn)(void* writer);
+typedef WtDataWriterLifecycleV1Status (*WtDataWriterLifecycleV1WaitDrainedFn)(void* writer, uint32_t timeout_ms);
+
+/*
+ * Minor 1 (decision K20=B, 2026-11-04; BUG-P10-006): versioned history-dumper
+ * registration, appended to the table (struct_size grows; hosts still accept a
+ * minor-0 table of WT_DATA_WRITER_LIFECYCLE_V1_MINOR0_SIZE bytes and then use the
+ * legacy IDataWriter::add_ext_dumper). Offered only with CAP_DUMPERS.
+ *  - add_dumper(writer, id, dumper): `dumper` is an IHisDataDumper* passed as void*.
+ *    Registers it under the non-empty id; the registry is synchronized with every
+ *    writer path, which calls dumpers from a snapshot outside the registry lock, so
+ *    registration from any thread (including a dumper callback) never deadlocks.
+ *    An id that is already registered returns DUPLICATE and keeps the original.
+ *    After request_stop it returns ERROR.
+ *  - remove_dumper(writer, id): detaches the id (INVALID_ARGUMENT if unknown). A call
+ *    already in progress may still finish.
+ *  - Ownership: the host keeps every dumper it added alive until wait_drained has
+ *    returned DRAINED (or, for a quarantined writer, until process exit); removing an
+ *    id does not end that obligation.
+ */
+#define WT_DATA_WRITER_LIFECYCLE_V1_CAP_DUMPERS (UINT64_C(1) << 1)
+typedef WtDataWriterLifecycleV1Status (*WtDataWriterLifecycleV1AddDumperFn)(void* writer, const char* id, void* dumper);
+typedef WtDataWriterLifecycleV1Status (*WtDataWriterLifecycleV1RemoveDumperFn)(void* writer, const char* id);
+
+/* Minor versions of major 1 are append-only; hosts accept a larger struct_size. */
+typedef struct WtDataWriterLifecycleApiV1
+{
+	uint32_t struct_size;
+	uint32_t abi_version;
+	uint64_t capabilities;
+	WtDataWriterLifecycleV1RequestStopFn request_stop;
+	WtDataWriterLifecycleV1CanWaitFn can_wait;
+	WtDataWriterLifecycleV1WaitDrainedFn wait_drained;
+	/* minor 1 */
+	WtDataWriterLifecycleV1AddDumperFn add_dumper;
+	WtDataWriterLifecycleV1RemoveDumperFn remove_dumper;
+} WtDataWriterLifecycleApiV1;
+
+/* Size of a minor-0 table (before add_dumper); hosts must accept it. */
+#define WT_DATA_WRITER_LIFECYCLE_V1_MINOR0_SIZE offsetof(WtDataWriterLifecycleApiV1, add_dumper)
+
+typedef const WtDataWriterLifecycleApiV1* (*WtDataWriterLifecycleV1GetterFn)(uint32_t requested_major);

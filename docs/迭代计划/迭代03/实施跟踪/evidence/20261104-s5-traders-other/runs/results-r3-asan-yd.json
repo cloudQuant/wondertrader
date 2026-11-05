@@ -1,0 +1,60 @@
+[
+ {
+  "id": "r3-asan-yd-red",
+  "name": "YD-suites",
+  "argv": [
+   "perl",
+   "-e",
+   "alarm 900; exec @ARGV or exit 127",
+   "--",
+   "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan-r2/tests",
+   "--gtest_filter=R93YdTest.*:YdDestroyLifecycle.*:R60YdTest.*",
+   "--gtest_output=xml:/tmp/wt-i03-s5-traders-other-run/run/r3-asan-yd-red/YD-suites/result.xml"
+  ],
+  "cwd": "/tmp/wt-i03-s5-traders-other-run/run/r3-asan-yd-red/YD-suites",
+  "exit": 23,
+  "env_overrides": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "bin_exists": true,
+  "xml": {
+   "tests": "25",
+   "failures": "0",
+   "disabled": "0",
+   "errors": "0",
+   "skipped": null
+  },
+  "skipped_cases": 0
+ },
+ {
+  "id": "r3-asan-yd-green",
+  "name": "YD-suites",
+  "argv": [
+   "perl",
+   "-e",
+   "alarm 900; exec @ARGV or exit 127",
+   "--",
+   "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/tests",
+   "--gtest_filter=R93YdTest.*:YdDestroyLifecycle.*:R60YdTest.*",
+   "--gtest_output=xml:/tmp/wt-i03-s5-traders-other-run/run/r3-asan-yd-green/YD-suites/result.xml"
+  ],
+  "cwd": "/tmp/wt-i03-s5-traders-other-run/run/r3-asan-yd-green/YD-suites",
+  "exit": 0,
+  "env_overrides": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "bin_exists": true,
+  "xml": {
+   "tests": "25",
+   "failures": "0",
+   "disabled": "0",
+   "errors": "0",
+   "skipped": null
+  },
+  "skipped_cases": 0
+ }
+]

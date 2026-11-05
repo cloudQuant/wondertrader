@@ -1,0 +1,17 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03New124EngineRace.StrategyThreadsReadPricesWhileEngineThreadCachesNewCodes
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03New124EngineRace
+[ RUN      ] I03New124EngineRace.StrategyThreadsReadPricesWhileEngineThreadCachesNewCodes
+[I03-NEW-124] round 0: 25129 concurrent price reads
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new124_engine_sig_price_race_test.cpp:358: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  bad.load()
+    Which is: 2090
+a strategy thread read a wrong cached price
+Google Test trace:
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new124_engine_sig_price_race_test.cpp:311: round 0
+

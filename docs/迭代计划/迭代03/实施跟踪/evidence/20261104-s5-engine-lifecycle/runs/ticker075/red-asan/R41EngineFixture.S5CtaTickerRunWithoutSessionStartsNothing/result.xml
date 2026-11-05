@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="1" failures="1" disabled="0" errors="0" time="1.869" timestamp="2026-11-04T22:03:47.054" name="AllTests">
+  <testsuite name="R41EngineFixture" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="1.869" timestamp="2026-11-04T22:03:47.054">
+    <testcase name="S5CtaTickerRunWithoutSessionStartsNothing" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_ticker_null_session_test.cpp" line="47" status="run" result="completed" time="1.869" timestamp="2026-11-04T22:03:47.054" classname="R41EngineFixture">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_ticker_null_session_test.cpp:52&#x0A;Death test: std::exit((runWithoutSession&lt;WtCtaEngine, WtCtaRtTicker&gt;(cfg, _bd.get(), _dt.get(), _hot.get())))&#x0A;    Result: died but not with expected exit code:&#x0A;            Terminated by signal 6&#x0A;Actual msg:&#x0A;[  DEATH   ] /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtCtaTicker.cpp:234:76: runtime error: member call on null pointer of type &apos;wtp::WTSSessionInfo&apos;&#x0A;[  DEATH   ]     #0 0x000100f684f4 in wtp::WtCtaRtTicker::run()+0x2fc (red-asan:arm64+0x1006044f4)&#x0A;[  DEATH   ]     #1 0x00010096cef0 in int (anonymous namespace)::runWithoutSession&lt;wtp::WtCtaEngine, wtp::WtCtaRtTicker&gt;(wtp::WTSVariant*, wtp::IBaseDataMgr*, wtp::WtDtMgr*, wtp::IHotMgr*)+0x288 (red-asan:arm64+0x100008ef0)&#x0A;[  DEATH   ]     #2 0x00010096b34c in R41EngineFixture_S5CtaTickerRunWithoutSessionStartsNothing_Test::TestBody()+0xb58 (red-asan:arm64+0x10000734c)&#x0A;[  DEATH   ]     #3 0x000101495244 in void testing::internal::HandleExceptionsInMethodIfSupported&lt;testing::Test, void&gt;(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-asan:arm64+0x100b31244)&#x0A;[  DEATH   ]     #4 0x00010149518c in testing::Test::Run()+0xcc (red-asan:arm64+0x100b3118c)&#x0A;[  DEATH   ]     #5 0x000101495d6c in testing::TestInfo::Run()+0xd0 (red-asan:arm64+0x100b31d6c)&#x0A;[  DEATH   ]     #6 0x0001014967f0 in testing::TestSuite::Run()+0x1c4 (red-asan:arm64+0x100b327f0)&#x0A;[  DEATH   ]     #7 0x0001014a1c18 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-asan:arm64+0x100b3dc18)&#x0A;[  DEATH   ]     #8 0x0001014a15c4 in bool testing::internal::HandleExceptionsInMethodIfSupported&lt;testing::internal::UnitTestImpl, bool&gt;(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-asan:arm64+0x100b3d5c4)&#x0A;[  DEATH   ]     #9 0x0001014a1528 in testing::UnitTest::Run()+0x78 (red-asan:arm64+0x100b3d528)&#x0A;[  DEATH   ]     #10 0x00010148295c in main+0x40 (red-asan:arm64+0x100b1e95c)&#x0A;[  DEATH   ]     #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)&#x0A;[  DEATH   ] &#x0A;[  DEATH   ] SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtCtaTicker.cpp:234:76 &#x0A;[  DEATH   ] &#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_ticker_null_session_test.cpp:52
+Death test: std::exit((runWithoutSession<WtCtaEngine, WtCtaRtTicker>(cfg, _bd.get(), _dt.get(), _hot.get())))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtCtaTicker.cpp:234:76: runtime error: member call on null pointer of type 'wtp::WTSSessionInfo'
+[  DEATH   ]     #0 0x000100f684f4 in wtp::WtCtaRtTicker::run()+0x2fc (red-asan:arm64+0x1006044f4)
+[  DEATH   ]     #1 0x00010096cef0 in int (anonymous namespace)::runWithoutSession<wtp::WtCtaEngine, wtp::WtCtaRtTicker>(wtp::WTSVariant*, wtp::IBaseDataMgr*, wtp::WtDtMgr*, wtp::IHotMgr*)+0x288 (red-asan:arm64+0x100008ef0)
+[  DEATH   ]     #2 0x00010096b34c in R41EngineFixture_S5CtaTickerRunWithoutSessionStartsNothing_Test::TestBody()+0xb58 (red-asan:arm64+0x10000734c)
+[  DEATH   ]     #3 0x000101495244 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-asan:arm64+0x100b31244)
+[  DEATH   ]     #4 0x00010149518c in testing::Test::Run()+0xcc (red-asan:arm64+0x100b3118c)
+[  DEATH   ]     #5 0x000101495d6c in testing::TestInfo::Run()+0xd0 (red-asan:arm64+0x100b31d6c)
+[  DEATH   ]     #6 0x0001014967f0 in testing::TestSuite::Run()+0x1c4 (red-asan:arm64+0x100b327f0)
+[  DEATH   ]     #7 0x0001014a1c18 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-asan:arm64+0x100b3dc18)
+[  DEATH   ]     #8 0x0001014a15c4 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-asan:arm64+0x100b3d5c4)
+[  DEATH   ]     #9 0x0001014a1528 in testing::UnitTest::Run()+0x78 (red-asan:arm64+0x100b3d528)
+[  DEATH   ]     #10 0x00010148295c in main+0x40 (red-asan:arm64+0x100b1e95c)
+[  DEATH   ]     #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+[  DEATH   ] 
+[  DEATH   ] SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtCtaTicker.cpp:234:76 
+[  DEATH   ] 
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

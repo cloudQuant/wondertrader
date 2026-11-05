@@ -184,7 +184,7 @@ TEST_F(R73CtaCtxTest, ScheduleWaitsForMainBarCloseAndRespectsCloseTime)
     ctx->stra_sub_bar_events(kCode, "m1");
     WTSKlineSlice* bars = ctx->stra_get_bars(kCode, "m1", 3, true);
     ASSERT_NE(bars, nullptr);
-    EXPECT_EQ(bars->size(), 3u);
+    EXPECT_EQ(bars->size(), 3);
     bars->release();
     EXPECT_EQ(ctx->last_barno(), 3u);
 

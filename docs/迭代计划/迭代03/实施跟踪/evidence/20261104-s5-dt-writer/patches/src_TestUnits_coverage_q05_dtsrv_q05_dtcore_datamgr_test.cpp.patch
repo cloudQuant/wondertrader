@@ -1,0 +1,37 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-dt-writer/before/src/TestUnits/coverage/q05_dtsrv/q05_dtcore_datamgr_test.cpp.before	2026-10-27 18:55:10
++++ src/TestUnits/coverage/q05_dtsrv/q05_dtcore_datamgr_test.cpp	2026-11-04 20:56:12
+@@ -108,22 +108,24 @@
+ 	ASSERT_NE(params, nullptr);
+ 
+ 	DataManager dm;
+-	// libWriter 加载失败 -> return false；_bd_mgr/_state_mon 已在函数头部赋值
++	// 迭代03 卡9（dt-writer 包，2026-11-04）：init 失败（模块/工厂未就绪）回滚为未初始化态，
++	// 借用的基础数据/状态机不在失败态对外发布（9c 拒绝/保留原实例的对偶：失败不留部分状态，可重试；
++	// 同 WP2“失败对象不得进入运行态”、13a 先准备后发布）。旧断言“函数头部已赋值”来自迭代01覆盖计划
++	// 的旧实现，与该合同冲突，按 BUG-I02-NEW-056 归因更新；原文件见证据 before/*.before。
++	// 用例名保留历史 ID；失败后不再“保留 sink 目标”。
+ 	ASSERT_FALSE(dm.init(params, &_bdMgr, &_mon));
+ 
+-	// getBDMgr 返回的是 WTSBaseDataMgr 向上转的 IBaseDataMgr*
+-	EXPECT_EQ(dm.getBDMgr(), static_cast<IBaseDataMgr*>(&_bdMgr));
++	EXPECT_EQ(dm.writerLifecycleState(), DataManager::WLS_None);
++	EXPECT_EQ(dm.getBDMgr(), nullptr);
+ 
+-	// 状态机存在且 SSE 处于 SS_ORIGINAL -> 不可收数
+-	EXPECT_FALSE(dm.canSessionReceive("SSE"));
+-	EXPECT_FALSE(dm.canSessionReceive("UNKNOWN"));
++	// 未登记状态机 -> 全天候语义
++	EXPECT_TRUE(dm.canSessionReceive("SSE"));
++	EXPECT_TRUE(dm.canSessionReceive("UNKNOWN"));
+ 
+-	// 会话存在但从未 loadContracts，_session_to_pids 为空 -> NULL
++	// 未登记基础数据 -> 空集合 / 0（宿主对空依赖不解引用）
+ 	EXPECT_EQ(dm.getSessionComms("SSE"), nullptr);
++	EXPECT_EQ(dm.getTradingDate("a60"), 0u);
+ 
+-	// 委托性质：不比较具体值（墙钟相关），只断言与 bd_mgr 返回值一致
+-	EXPECT_EQ(dm.getTradingDate("a60"), _bdMgr.getTradingDate("a60"));
+-
+ 	dm.outputLog(LL_INFO, "q05 delegate outputLog");
+ 	dm.release();  // _writer==NULL，release 应为空操作且不崩
+ 

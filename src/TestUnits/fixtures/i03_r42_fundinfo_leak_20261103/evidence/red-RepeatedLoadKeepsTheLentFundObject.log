@@ -1,0 +1,62 @@
+Note: Google Test filter = R42FundOwner.RepeatedLoadKeepsTheLentFundObject
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R42FundOwner
+[ RUN      ] R42FundOwner.RepeatedLoadKeepsTheLentFundObject
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_r42_fundinfo_leak_20261103/fund_owner_test.cpp:111: Failure
+Expected equality of these values:
+  lent
+    Which is: 0x60d000000040
+  engine.fund()
+    Which is: 0x60d000000110
+
+[  FAILED  ] R42FundOwner.RepeatedLoadKeepsTheLentFundObject (3 ms)
+[----------] 1 test from R42FundOwner (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R42FundOwner.RepeatedLoadKeepsTheLentFundObject
+
+ 1 FAILED TEST
+
+=================================================================
+==28681==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 144 byte(s) in 1 object(s) allocated from:
+    #0 0x00010695d0e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x00010505e3dc in wtp::WTSPortFundInfo::create() WTSRiskDef.hpp:155
+    #2 0x0001050548c0 in wtp::WtEngine::load_datas() WtEngine.cpp:511
+    #3 0x000104e48c44 in (anonymous namespace)::ProbeEngine::reload() fund_owner_test.cpp:25
+    #4 0x000104e4821c in R42FundOwner_RepeatedLoadKeepsTheLentFundObject_Test::TestBody() fund_owner_test.cpp:110
+    #5 0x00010579c208 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-fund:arm64+0x100958208)
+    #6 0x00010579c150 in testing::Test::Run()+0xcc (red-fund:arm64+0x100958150)
+    #7 0x00010579cd30 in testing::TestInfo::Run()+0xd0 (red-fund:arm64+0x100958d30)
+    #8 0x00010579d7b4 in testing::TestSuite::Run()+0x1c4 (red-fund:arm64+0x1009597b4)
+    #9 0x0001057a8bdc in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-fund:arm64+0x100964bdc)
+    #10 0x0001057a8588 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-fund:arm64+0x100964588)
+    #11 0x0001057a84ec in testing::UnitTest::Run()+0x78 (red-fund:arm64+0x1009644ec)
+    #12 0x000104e4bda0 in RUN_ALL_TESTS() gtest.h:2334
+    #13 0x000104e4b39c in main fund_owner_test.cpp:153
+    #14 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Direct leak of 144 byte(s) in 1 object(s) allocated from:
+    #0 0x00010695d0e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x00010505e3dc in wtp::WTSPortFundInfo::create() WTSRiskDef.hpp:155
+    #2 0x0001050548c0 in wtp::WtEngine::load_datas() WtEngine.cpp:511
+    #3 0x00010504e7e4 in wtp::WtEngine::init(wtp::WTSVariant*, wtp::IBaseDataMgr*, wtp::WtDtMgr*, wtp::IHotMgr*, wtp::EventNotifier*) WtEngine.cpp:336
+    #4 0x0001053381b8 in wtp::WtSelEngine::init(wtp::WTSVariant*, wtp::IBaseDataMgr*, wtp::WtDtMgr*, wtp::IHotMgr*, wtp::EventNotifier*) WtSelEngine.cpp:407
+    #5 0x000104e47eec in R42FundOwner_RepeatedLoadKeepsTheLentFundObject_Test::TestBody() fund_owner_test.cpp:106
+    #6 0x00010579c208 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-fund:arm64+0x100958208)
+    #7 0x00010579c150 in testing::Test::Run()+0xcc (red-fund:arm64+0x100958150)
+    #8 0x00010579cd30 in testing::TestInfo::Run()+0xd0 (red-fund:arm64+0x100958d30)
+    #9 0x00010579d7b4 in testing::TestSuite::Run()+0x1c4 (red-fund:arm64+0x1009597b4)
+    #10 0x0001057a8bdc in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-fund:arm64+0x100964bdc)
+    #11 0x0001057a8588 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-fund:arm64+0x100964588)
+    #12 0x0001057a84ec in testing::UnitTest::Run()+0x78 (red-fund:arm64+0x1009644ec)
+    #13 0x000104e4bda0 in RUN_ALL_TESTS() gtest.h:2334
+    #14 0x000104e4b39c in main fund_owner_test.cpp:153
+    #15 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: 288 byte(s) leaked in 2 allocation(s).

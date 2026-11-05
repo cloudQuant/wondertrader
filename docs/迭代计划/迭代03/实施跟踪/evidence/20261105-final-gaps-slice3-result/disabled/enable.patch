@@ -1,0 +1,911 @@
+--- a/src/TestUnits/coverage/l02_wtstools_mq/r56_logger_test.cpp
++++ b/src/TestUnits/coverage/l02_wtstools_mq/r56_logger_test.cpp
+@@ -325,10 +325,9 @@
+ 	EXPECT_EQ(nullptr, spdlog::get("r56nolog").get());
+ }
+ 
+-// 产品缺陷占位：log_by_cat_prefix 完全忽略 format/args，只输出 "[catName]"，
+-// 格式化正文丢失。见 docs/迭代计划/迭代01/bugs/R56.md BUG-R56-002；默认不执行。
++// 迭代03 最终验收复核后启用（原禁用：BUG-R56-002）。
+ // WTSLogger.h:335-347
+-TEST_F(R56Logger, DISABLED_LogByCatPrefixKeepsFormattedPayload)
++TEST_F(R56Logger, LogByCatPrefixKeepsFormattedPayload)
+ {
+ 	const std::string log = root_file("prefix.log");
+ 	const std::string file = write_cfg("prefix.json", r56_cfg_root("debug", r56_basic_sink(log)));
+--- a/src/TestUnits/coverage/m_QuoteFactory/r104_quotefactory_init_test.cpp
++++ b/src/TestUnits/coverage/m_QuoteFactory/r104_quotefactory_init_test.cpp
+@@ -441,12 +441,10 @@
+  * 三、DISABLED_：确认会崩 / 会挂的分支
+  * ====================================================================== */
+ 
+-TEST(r104_quote_initialize, DISABLED_config_without_basefiles_derefs_null)
++TEST(r104_quote_initialize, config_without_basefiles_derefs_null)
+ {
+ 	/*
+-	 * D1 main.cpp:108 `cfgBF = config->get("basefiles")` 没有判空，
+-	 *    :109 直接 cfgBF->get("session") -> 空指针（同一份代码在 WtRunner.cpp:77~78 也是）。
+-	 *    同族缺陷已登记为 BUG-R104-001；本迭代不改产品代码，这里只留记录。
++	 * 迭代03 最终验收复核后启用（原禁用：D1 缺 basefiles 空指针，BUG-R104-001）。
+ 	 */
+ 	write_fixture("nobase.yaml",
+ 		"allday: true\n"
+--- a/src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp
++++ b/src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp
+@@ -1821,15 +1821,15 @@
+ 	EXPECT_EQ(result.code, 3) << "entry_in_child maps any nonzero main result to exit code 3";
+ }
+ 
+-TEST(r28_wtrunner_entry, DISABLED_unknown_long_option_segv)
++TEST(r28_wtrunner_entry, unknown_long_option_segv)
+ {
+-	// K2：实测 SIGSEGV(11)，不是返回非 0 错误码
++	// 迭代03 最终验收复核后启用（原禁用：K2 未知长选项 SIGSEGV）。
+ 	EXPECT_NE(call_entry({"wt_runner", "--r28-bogus-flag"}), 0);
+ }
+ 
+-TEST(r28_wtrunner_config, DISABLED_valid_config_without_basefiles_derefs_null_section)
++TEST(r28_wtrunner_config, valid_config_without_basefiles_derefs_null_section)
+ {
+-	// K3：WtRunner.cpp:77 cfgBF=NULL 后 :78 无条件 cfgBF->get("session")
++	// 迭代03 最终验收复核后启用（原禁用：K3 缺 basefiles 空指针）。
+ 	std::unique_ptr<WtRunner> runner = make_runner();
+ 	runner->init(fixture_path("logcfg.yaml"));
+ 	write_fixture("empty_obj_cfg.yaml", "{}\n");
+--- a/src/TestUnits/coverage/n02_wtcore_engines/r101_trader_report_gap_test.cpp
++++ b/src/TestUnits/coverage/n02_wtcore_engines/r101_trader_report_gap_test.cpp
+@@ -126,10 +126,9 @@
+ }
+ 
+ //////////////////////////////////////////////////////////////////
+-// 产品缺陷：净头寸平空超过昨仓时，今仓被扣了 left 而不是 maxVol
+-// src/WtCore/TraderAdapter.cpp:2287-2293（BUG-R101-001）
++// 迭代03 最终验收复核后启用（原禁用：BUG-R101-001）。
+ //////////////////////////////////////////////////////////////////
+-TEST_F(R101TraderReport, DISABLED_NetShortCloseOverDeductsNewPosition)
++TEST_F(R101TraderReport, NetShortCloseOverDeductsNewPosition)
+ {
+     wtp::TraderAdapter trader;
+     plain(trader);
+--- a/src/TestUnits/coverage/n02_wtcore_engines/r73_hft_ctx_test.cpp
++++ b/src/TestUnits/coverage/n02_wtcore_engines/r73_hft_ctx_test.cpp
+@@ -205,12 +205,8 @@
+     EXPECT_FALSE(std::filesystem::exists(hft_out_file("r73_hft_data", "funds.csv")));
+ }
+ 
+-/*
+- * DISABLED：stra_sell 在合约不存在时先解引用 commInfo。
+- * getCommodity("DCE","rr") 返回 NULL 后直接调用 canShort()，公开 API 必崩。
+- * 见 BUG-R73-002。
+- */
+-TEST_F(R73HftCtxTest, DISABLED_SellUnknownProductDereferencesNullCommodity)
++/* 迭代03 最终验收复核后启用（原禁用：BUG-R73-002）。 */
++TEST_F(R73HftCtxTest, SellUnknownProductDereferencesNullCommodity)
+ {
+     auto ctx = makeCtx("r73_hft_bad", false);
+     EXPECT_TRUE(ctx->stra_sell("DCE.rr.2509", 100.0, 1.0, "x").empty());
+--- a/src/TestUnits/coverage/n05_exec_factories/n05_riskmon_datamgr_test.cpp
++++ b/src/TestUnits/coverage/n05_exec_factories/n05_riskmon_datamgr_test.cpp
+@@ -125,9 +125,8 @@
+ 	EXPECT_EQ(mgr.grab_last_tick("SHFE.rb2401"), nullptr);
+ }
+ 
+-// BUG-N05-002：未配置有效 session 时，首笔行情会解引用空 _s_info。
+-// 本用例只记录独立的 session 生命周期缺陷；未初始化时钟字段已由上面的普通用例覆盖。
+-TEST(DISABLED_n05_simpdatamgr, push_quote_without_session_dereferences_null)
++// 迭代03 最终验收复核后启用（原禁用：BUG-N05-002，主记录 BUG-R17-004）。
++TEST(n05_simpdatamgr, push_quote_without_session_dereferences_null)
+ {
+ 	WtSimpDataMgr mgr;
+ 	WTSTickStruct ts;
+--- a/src/TestUnits/coverage/p05_datastorage2/r132_reader_ad_cache_test.cpp
++++ b/src/TestUnits/coverage/p05_datastorage2/r132_reader_ad_cache_test.cpp
+@@ -30,13 +30,8 @@
+ 
+ // WtDataReaderAD.cpp: L444-467（rtBar 时间超前 → 再读 LMDB，_last_from_cache=false）
+ //
+-// 2026-10-28 R144：本用例是产品缺陷 BUG-R144-002 的复现，不再是夹具问题。
+-// 首次 cacheBarsFromStorage 调 get_k_db 时 `return std::move(it->second)`
+-// 把 _exchg_m1_dbs 的槽位掏空（既有 BUG-R4-BUG-02）；随后
+-// update_cache_from_lmdb 里 `WtLMDBQuery query(*db)` 对空的 WtLMDBPtr
+-// 直接解引用（WtDataReaderAD.cpp:272-274，无 null 检查），必现 SIGSEGV。
+-// 该分支在公开 API 下不可达，保留契约断言并禁用，待生产代码修复后恢复。
+-TEST_F(R132ReaderADCacheTest, DISABLED_R132ReaderADRtBarAheadRechecksLmdb)
++// 迭代03 最终验收复核后启用（原禁用：BUG-R144-002）。
++TEST_F(R132ReaderADCacheTest, R132ReaderADRtBarAheadRechecksLmdb)
+ {
+ 	// CodeHelper 对两段式代码 EXQ.rb2301 解析出的品种就是 rb2301，
+ 	// 夹具必须按同一键注册品种，否则 getCommodity 返回 NULL（原夹具写成 rb）。
+--- a/src/TestUnits/coverage/p05_datastorage2/r162_ad_reader_lmdb_test.cpp
++++ b/src/TestUnits/coverage/p05_datastorage2/r162_ad_reader_lmdb_test.cpp
+@@ -416,9 +416,8 @@
+ 	EXPECT_NE(error_log.find("SSE failed"), string::npos);
+ }
+ 
+-// WtDataWriterAD.cpp:649-652：同一交易日第二笔 tick 合并日线时 vol/money 被累加两次。
+-// 产品缺陷 BUG-R162-002，按纪律整条 DISABLED_，断言保留正确口径（1+1=2）。
+-TEST_F(R162AdReaderTest, DISABLED_R162WriterADMergedDayBarVolumeIsDoubleCounted)
++// 迭代03 最终验收复核后启用（原禁用：BUG-R162-002 同日第二笔 tick 合并日线量额重复累加）。
++TEST_F(R162AdReaderTest, R162WriterADMergedDayBarVolumeIsDoubleCounted)
+ {
+ 	WtDataWriterAD* w = make_writer();
+ 	ASSERT_TRUE(w != NULL);
+--- a/src/TestUnits/coverage/p05_datastorage2/r172_ad_residual_test.cpp
++++ b/src/TestUnits/coverage/p05_datastorage2/r172_ad_residual_test.cpp
+@@ -198,13 +198,8 @@
+ 
+ // WtRdmDtReaderAD.cpp:236-247
+ //
+-// 2026-10-28 R185：本用例是产品缺陷 BUG-R32-001 的复现，不是夹具问题。
+-// 首次载入后 `WTSTickStruct& curTs = _ticks.front(); curTs = _ticks.back();`
+-// 把末笔整体覆写回 `_ticks[0]`（R32 已取证：3 笔 [09:30,09:31,09:32] 变成
+-// [09:32,09:31,09:32]），于是 `_ticks[0]` 恒为末笔、不再早于窗口起点，
+-// `:232` 的条件走 if 臂，`:236-247` 的第二次 lower_bound 永远不执行，
+-// 切片也只剩 0 条。保留原输入与断言并禁用，待产品修复后恢复。
+-TEST_F(R172AdTest, DISABLED_R172RdmADTickRangeStartsAtFirstTick)
++// 迭代03 最终验收复核后启用（原禁用：BUG-R32-001）。
++TEST_F(R172AdTest, R172RdmADTickRangeStartsAtFirstTick)
+ {
+ 	const uint32_t date = 20240110;
+ 	// 区间内至少放两笔，避免命中「单笔且时间等于 eTick」时 pTick-- 的既有下溢面
+@@ -231,15 +226,8 @@
+ 
+ // WtDataReaderAD.cpp:287-290 / 357-361；第二次读取时 LMDB 已追平 RT 缓存的时间戳
+ //
+-// 2026-10-28 R185：本用例是产品缺陷 BUG-R144-002 的复现，不是夹具问题。
+-// `cacheBarsFromStorage` 首次 `get_k_db` 后缓存槽仍有效；首读的
+-// `update_cache_from_lmdb` 是第 2 次取句柄（`std::move` 把槽位掏空但返回值可用）；
+-// 第二次读的 `update_cache_from_lmdb` 是第 3 次取句柄，得到空 `WtLMDBPtr`
+-// （既有 BUG-P05-001 / R4-BUG-02），`WtLMDBQuery query(*db)` 直接解引用空指针
+-// （WtDataReaderAD.cpp:272-274 无 null 检查），必现 SIGSEGV。
+-// :287-290 的「同时间戳且上次来自 RT 缓存」分支因此在公开 API 下不可达。
+-// 保留原输入与全部断言并禁用，待生产代码修复后恢复。
+-TEST_F(R172AdTest, DISABLED_R172ReaderADRtCacheBarPromotedToLmdb)
++// 迭代03 最终验收复核后启用（原禁用：BUG-R144-002）。
++TEST_F(R172AdTest, R172ReaderADRtCacheBarPromotedToLmdb)
+ {
+ 	const uint32_t date = 20240110;
+ 	const uint32_t t1 = min_time(date, 931);
+@@ -275,13 +263,8 @@
+ 
+ // WtDataReaderAD.cpp:444-456；LMDB 只到 09:30，RT 缓存的 09:32 大于截止 09:31
+ //
+-// 2026-10-28 R185：同 BUG-R144-002。本用例在首读内触发「RT bar 越过 etime →
+-// 二次回源 LMDB」，此时 `get_k_db` 已是第 3 次取句柄（首读的
+-// `cacheBarsFromStorage` 第 1 次、首次 `update_cache_from_lmdb` 第 2 次），
+-// 命中被 `std::move` 掏空的槽位返回空 `WtLMDBPtr`，`WtLMDBQuery query(*db)`
+-// 解引用空指针（既有 BUG-P05-001 / R4-BUG-02），必现 SIGSEGV。
+-// :444-456 分支因此在公开 API 下不可达；保留原输入与全部断言并禁用。
+-TEST_F(R172AdTest, DISABLED_R172ReaderADRtCacheBarAheadOfEtime)
++// 迭代03 最终验收复核后启用（原禁用：BUG-R144-002）。
++TEST_F(R172AdTest, R172ReaderADRtCacheBarAheadOfEtime)
+ {
+ 	const uint32_t date = 20240110;
+ 	const uint32_t t0 = min_time(date, 930);
+--- a/src/TestUnits/coverage/p05_datastorage2/r203_ad_residual_test.cpp
++++ b/src/TestUnits/coverage/p05_datastorage2/r203_ad_residual_test.cpp
+@@ -123,11 +123,8 @@
+ // 三笔 tick 横跨两个 action_date；起点落在首日 10:00，lower_bound 会先比较
+ // 次日的 action_date，从而进入日期比较分支。区间内三笔都应返回。
+ //
+-// BUG-R215-002（既有 BUG-R32-001 / BUG-R185 观察 2）：isEmpty 分支用
+-// `WTSTickStruct& curTs = front(); curTs = back();` 把末笔整体覆写回首笔，
+-// 载入后向量首元素变成末笔，起点定位跳过首日，三笔只剩两笔。该分支修复前
+-// 保持原输入与原断言，只加 DISABLED_ 前缀。
+-TEST_F(R203AdResidualTest, DISABLED_R203RdmCrossDateTickRangeKeepsAllTicks)
++// 迭代03 最终验收复核后启用（原禁用：BUG-R215-002 / BUG-R32-001）。
++TEST_F(R203AdResidualTest, R203RdmCrossDateTickRangeKeepsAllTicks)
+ {
+ 	WtDataWriterAD* writer = make_writer();
+ 	ASSERT_TRUE(writer != NULL);
+--- a/src/TestUnits/coverage/p05_datastorage2/r21_rdmbars_kline_test.cpp
++++ b/src/TestUnits/coverage/p05_datastorage2/r21_rdmbars_kline_test.cpp
+@@ -349,14 +349,8 @@
+ 	sb->release();
+ }
+ 
+-// ---------------------------------------------------------------------------
+-// 缺陷用例（禁用，见 bugs/R21_adstorage.md R21-BUG-06）：
+-// 库里没有该合约的 bar 时 :296 载入 0 根，:353 仍对空 vector 取 &v[0] 并把
+-// 上界写成 size()-1（0 → 下溢）→ 空指针解引用，崩在读路径上。
+-// 触发条件：{base}day/{exchg}/ 存在且可读，但里面没有目标合约的任何键，
+-//          然后 readKlineSliceByRange(该合约, KP_DAY, ...)。
+-// ---------------------------------------------------------------------------
+-TEST_F(R21ReaderADTest, DISABLED_KlineReadWithoutAnyBarCrashesOnEmptyVectorSubscript)
++// 迭代03 最终验收复核后启用（原禁用：R21-BUG-06 空库 K 线读取）。
++TEST_F(R21ReaderADTest, KlineReadWithoutAnyBarCrashesOnEmptyVectorSubscript)
+ {
+ 	init_reader();
+ 
+--- a/src/TestUnits/coverage/p05_datastorage2/r212_ad_reader_test.cpp
++++ b/src/TestUnits/coverage/p05_datastorage2/r212_ad_reader_test.cpp
+@@ -201,11 +201,8 @@
+ };
+ 
+ // WtDataReaderAD.cpp:444-456
+-// 产品缺陷（BUG-R212-001）：RT 缓存 bar 晚于 etime 时，444-455 会第二次调用
+-// update_cache_from_lmdb -> get_k_db。WtDataReaderAD::get_k_db 在缓存命中分支
+-// `return std::move(it->second)` 把 map 里的 shared_ptr 掏空，第二次命中返回空指针，
+-// update_cache_from_lmdb 随即 *db 解引用崩溃。故本用例保持 DISABLED_，不得以放宽断言换绿。
+-TEST_F(R212AdReaderTest, DISABLED_R212AdReaderRtBarAheadOfEtimeRefreshesLmdbOnly)
++// 迭代03 最终验收复核后启用（原禁用：BUG-R212-001）。
++TEST_F(R212AdReaderTest, R212AdReaderRtBarAheadOfEtimeRefreshesLmdbOnly)
+ {
+ 	seed_bars("rb2301", {
+ 		{min_bar_time(kDate, 931), make_min_bar(931, 3900.0)},
+--- a/src/TestUnits/coverage/p06_uftcore2/r54_uftctx_callback_gaps_test.cpp
++++ b/src/TestUnits/coverage/p06_uftcore2/r54_uftctx_callback_gaps_test.cpp
+@@ -424,12 +424,8 @@
+ 	EXPECT_EQ(nullptr, env.ctx.stra_get_last_tick(kAg));
+ }
+ 
+-// UftStraContext.cpp:71-84 只要本地有持仓就无条件
+-// newTick->getContractInfo()->getCommInfo(); 而 ParserAdapter::handleQuote
+-// (ParserAdapter.cpp:256-263) 解析出 cInfo 后只 setCode, 不回写 setContractInfo,
+-// 实盘 tick 的 ContractInfo 为 NULL -> 策略有持仓时首笔行情必崩。
+-// BUG-R54-002, 整条 DISABLED。
+-TEST(DISABLED_R54UftCtx, tick_without_contract_info_crashes_with_local_position)
++// 迭代03 最终验收复核后启用（原禁用：BUG-R54-002）。
++TEST(R54UftCtx, tick_without_contract_info_crashes_with_local_position)
+ {
+ 	CtxEnv env("ticknull");
+ 	env.ready(20240315);
+--- a/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp
++++ b/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp
+@@ -1743,14 +1743,8 @@
+ 	EXPECT_EQ(1u, sink.replayDoneCalls);
+ }
+ 
+-/*
+- * 崩溃/越界一类输入统一收进禁用用例（与 p04 同类，引用既有编号，不重复立案）：
+- * 分钟CSV只有表头、0 行时，cacheRawBarsFromCSV 仍然执行
+- *   stime = barsList->_bars[0].date / etime = _bars[_count - 1].date（_count == 0）
+- * —— 空 vector 下标访问是未定义行为（BUG-P04-004），
+- * 随后 locate_barindex 在空缓存上算出 UINT32_MAX 越界下标（BUG-P04-005）。
+- */
+-TEST_F(P07MinuteReplayTest, DISABLED_emptyMinuteCsvHitsUnsubscriptedBars)
++/* 迭代03 最终验收复核后启用（原禁用：BUG-P04-004 / BUG-P04-005 空分钟 CSV）。 */
++TEST_F(P07MinuteReplayTest, emptyMinuteCsvHitsUnsubscriptedBars)
+ {
+ 	ASSERT_TRUE(write_bars_csv(_base, "SSE.STK.600002_m1", kM1Bars, 0, false));
+ 	HisDataReplayer replayer;
+--- a/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp
++++ b/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp
+@@ -575,16 +575,12 @@
+ }
+ 
+ /*
+- * 崩溃/挂死一类输入统一收进这一个禁用用例，启用用例里零残留：
+- * 1) session 传不存在的模板（或依赖默认 "TRADING" 时底座里没有该模板）：
+- *    run_by_tasks 里 sInfo = _bd_mgr.getSession(DEF_SESS) 返回 NULL 后，
+- *    fired 分支直接 sInfo->offsetTime(...) 解引用（BUG-P04-007）。
++ * 迭代03 最终验收复核后启用（原禁用：BUG-P04-007 未知 session 模板）。
+  * 2) TPT_Minute 配 offset!=0 的会话（"TRADING" offset=300）时，
+  *    换日逻辑 L1173-L1194 不会推进 _cur_date，nextTime 永不大于 _end_time -> 死循环，
+  *    这正是 p04 把整个 run_by_tasks 放进 DISABLED_ 的原因，这里不重复开启。
+- * 只保留第 1 条（确定性崩溃），第 2 条以注释形式归档，避免启用后整轮空转。
+  */
+-TEST_F(P07TaskScheduleTest, DISABLED_unknownSessionTemplateCrashes)
++TEST_F(P07TaskScheduleTest, unknownSessionTemplateCrashes)
+ {
+ 	TaskSink sink;
+ 	// sInfo == NULL -> fired 分支解引用崩溃
+--- a/src/TestUnits/coverage/p08_btcore_mockers3/r191_mocker_residual_test.cpp
++++ b/src/TestUnits/coverage/p08_btcore_mockers3/r191_mocker_residual_test.cpp
+@@ -231,10 +231,8 @@
+ 	EXPECT_DOUBLE_EQ(0.0, m.stra_get_undone(kRb));
+ }
+ 
+-// BUG-R191-001 复现占位：插件工厂加载成功后，UftMocker 析构在 _StraFactInfo::~_StraFactInfo
+-// 调用 _remover(_fact) 时 SIGSEGV（R121 R135ProbeMinimalDtor 日志亦停在 leaving scope）。
+-// 启用即崩溃，故禁用；本轮启用用例改用 new 后不 delete 的写法规避。
+-TEST_F(R191MockerFixture, DISABLED_R191Uft_PluginFactoryDestructorCrashes)
++// 迭代03 最终验收复核后启用（原禁用：BUG-R191-001，主记录 BUG-R64-002）。
++TEST_F(R191MockerFixture, R191Uft_PluginFactoryDestructorCrashes)
+ {
+ 	UftMocker m(&_rp, "r191_uft_dtor");
+ 	WTSVariant* cfg = r191::make_uft_cfg(
+--- a/src/TestUnits/coverage/p09_storage_readers/p09_rdm_bars_cache_test.cpp
++++ b/src/TestUnits/coverage/p09_storage_readers/p09_rdm_bars_cache_test.cpp
+@@ -470,13 +470,8 @@
+ 	EXPECT_DOUBLE_EQ(_reader.getAdjFactorByDate("SSE.STK.600100", 19900101), 1.0);
+ }
+ 
+-// 崩溃/UB 类输入整类收进同一个 DISABLED_ 用例，常规用例零残留。
+-// 复现（--gtest_also_run_disabled_tests）：
+-//  1) indexBarFromCacheByRange / indexBarFromCacheByCount 的 eit-- 缺 eit==begin() 守卫
+-//     （同文件 readBarsFromCacheByRange 有），etime 早于首条 bar 时回绕/越界；
+-//  2) readBarsFromCacheByRange 缺 barsList._bars.empty() 守卫，未预热的 key 会算出
+-//     eIdx = 0 - 1 = SIZE_MAX，随后 resize 出天文数字并 memcpy。
+-TEST_F(P09RdmCacheTest, DISABLED_p09_underflow_inputs_from_range_indexers)
++// 迭代03 最终验收复核后启用（原禁用：range 索引器下溢，BUG-P09-005 / BUG-P05-007）。
++TEST_F(P09RdmCacheTest, p09_underflow_inputs_from_range_indexers)
+ {
+ 	const std::string key = "SSE.STK.600999#0";
+ 	WtRdmDtReader::BarsList& lst = _reader._bars_cache[key];
+--- a/src/TestUnits/coverage/p12_datafactory_datadef/p12_factory_extract_merge_test.cpp
++++ b/src/TestUnits/coverage/p12_datafactory_datadef/p12_factory_extract_merge_test.cpp
+@@ -532,12 +532,8 @@
+ 	EXPECT_DOUBLE_EQ(data->minprice(-2, -1), 8.0);
+ }
+ 
+-// Remaining disabled scenarios depend on separate unresolved defects:
+-// 1) extractKlineData(WTSTickSlice*, 0, ...) may divide by zero.
+-// 2) updateMin1Data(tick) with an out-of-session tick and empty klineData may dereference NULL
+-//    (see p12_factory_update_tick_test.cpp).
+-// 详见 docs/迭代计划/迭代01/bugs/p12_datafactory_datadef.md（BUG-P12-001 ~ BUG-P12-004）。
+-TEST_F(P12Extract, DISABLED_OutOfBoundsClass)
++// 迭代03 最终验收复核后启用（原禁用：extractKlineData seconds=0 除零，BUG-P12-002）。
++TEST_F(P12Extract, OutOfBoundsClass)
+ {
+ 	std::vector<WTSTickStruct> ticks;
+ 	ticks.push_back(mkTickStruct(3500.0, 1.0, 90012500));
+--- a/src/TestUnits/coverage/q01_wtcore3/r192_wtcore_ticker_residual_test.cpp
++++ b/src/TestUnits/coverage/q01_wtcore3/r192_wtcore_ticker_residual_test.cpp
+@@ -6,7 +6,7 @@
+  *     :245-268（错过最后一分钟的强制收盘）
+  *   - WtSelTicker.cpp:199-204（跨日 0 点）、:213-217（收盘分钟 + session_end）
+  *   - WtHftTicker.cpp:195-200（跨日 0 点）、:219-241（强制收盘）
+- * 以及一个 WtSelEngine 的公开面缺陷复现（DISABLED）。
++ * 以及一个 WtSelEngine 后复权标志位用例（迭代03 最终验收复核后启用）。
+  *
+  * 方法：ticker 只走公开 init/run/on_tick/stop。测试 stub 的 IDataReader
+  * onMinuteEnd 在计数后短暂 sleep（100ms），主线程看到计数后立即 stop()：
+@@ -482,12 +482,9 @@
+ }
+ 
+ //////////////////////////////////////////////////////////////////
+-// 公开面缺陷复现（BUG-R192-001）：
+-// WtEngine::get_adjusting_flag() 丢弃 _data_mgr->get_adjusting_flag() 的返回值，
+-// 恒返回 0，后复权 tick 的量/额/持仓复权分支（WtSelEngine.cpp:189-206）不可达。
++// 迭代03 最终验收复核后启用（原禁用：BUG-R192-001，WtEngine::get_adjusting_flag 丢弃返回值）。
+ // 期望：flag=7 时 total_volume/volume/open_interest 除以 factor，
+ //       total_turnover/turn_over 乘以 factor。
+-// 当前实际：量额持仓都不变，仅 OHLC 乘以 factor，故本用例 DISABLED。
+ //////////////////////////////////////////////////////////////////
+ class R192FlagDtMgr : public WtDtMgr
+ {
+@@ -534,7 +531,7 @@
+     void mark_ready() { _ready = true; }
+ };
+ 
+-TEST(R192SelEngine, DISABLED_HfqFlagBitsScaleVolumeTurnoverAndInterest)
++TEST(R192SelEngine, HfqFlagBitsScaleVolumeTurnoverAndInterest)
+ {
+     R192TempEnv tmp("sel_flag");
+     R192Market mkt(0, 2359);
+--- a/src/TestUnits/coverage/q01_wtcore3/r211_wtcore_rest_test.cpp
++++ b/src/TestUnits/coverage/q01_wtcore3/r211_wtcore_rest_test.cpp
+@@ -436,10 +436,9 @@
+ }
+ 
+ /* ------------------------------------------------------------------ *
+- * 6. BUG-R192-002/003 固化：到期任务创建局部 std::thread，析构即 abort；
+- *    即便不 abort，任务 id 与上下文 id 也是两套序列。DISABLED_，不参与覆盖率。
++ * 6. 迭代03 最终验收复核后启用（原禁用：BUG-R192-002/003 到期任务局部线程析构 abort、任务 id 序列）。
+  * ------------------------------------------------------------------ */
+-TEST(R211SelEngine, DISABLED_ExpiredTaskTerminatesBeforeSchedule)
++TEST(R211SelEngine, ExpiredTaskTerminatesBeforeSchedule)
+ {
+     R211Temp tmp("task");
+     q01sel::BaseDataMgr bd;
+@@ -457,10 +456,9 @@
+ }
+ 
+ /* ------------------------------------------------------------------ *
+- * 7. BUG-R31-002 固化：HFT 装载器与 CTA 插件共用 createStrategyFact，
+- *    类型双关后在登记路径 SIGSEGV。DISABLED_，不参与覆盖率。
++ * 7. 迭代03 最终验收复核后启用（原禁用：BUG-R31-002；现按卡4b=A 拒绝异族插件，装载返回 true）。
+  * ------------------------------------------------------------------ */
+-TEST(R211HftStrategyMgr, DISABLED_CtaPluginTypePunCrashesOnRegistration)
++TEST(R211HftStrategyMgr, CtaPluginTypePunCrashesOnRegistration)
+ {
+     const fs::path bin = binDir();
+     ASSERT_TRUE(fs::exists(bin / "libWtCtaStraFact.dylib")) << bin;
+--- a/src/TestUnits/coverage/q02_btcore3/q02_mocker_factory_cfg_test.cpp
++++ b/src/TestUnits/coverage/q02_btcore3/q02_mocker_factory_cfg_test.cpp
+@@ -210,15 +210,11 @@
+  *      get_symbol("createStrategyFact") -> _factory._fact->createStrategy(...) ->
+  *      _strategy->init(params)：需要仓库外编译产物，且不同 TU 下同名 wtp:: 类
+  *      有 ODR/惰性抽取择一风险（BUG-L00-005）。
+- *   2) SelMocker::handle_replay_done(L303-L314) 无条件计算
+- *      `_total_calc_time / _emit_times`，而 _emit_times 构造为 0（SelMocker.cpp:43）。
+- *      整数除零属于未定义行为，不能据此断言特定架构会返回什么值或触发什么信号。
+- *      CtaMocker 同一位置有 `if(_emit_times > 0)` 保护（CtaMocker.cpp:665），
+- *      SelMocker 没有 -> 已登记缺陷，修复前不进启用用例。
++ *   2) SelMocker::handle_replay_done 的 _emit_times 除零：迭代03 最终验收复核后启用。
+  *   3) CtaMocker/SelMocker/HftMocker 的 install_hook/enable_hook(true)/step_calc
+  *      走 _cond_calc 条件变量；EventNotifier::init 起 MQ server。
+  */
+-TEST_F(Q02FactoryTest, DISABLED_RealModuleLoadAndSelDivZeroFamily)
++TEST_F(Q02FactoryTest, RealModuleLoadAndSelDivZeroFamily)
+ {
+ 	SelMocker sel(NULL, "q02_fac_disabled_sel");
+ 	// _emit_times == 0 会触发未定义行为；不在测试注释中固定架构结果。
+--- a/src/TestUnits/coverage/q03_storage3/r100_rdm_crossday_test.cpp
++++ b/src/TestUnits/coverage/q03_storage3/r100_rdm_crossday_test.cpp
+@@ -162,11 +162,8 @@
+ 		20240109090000000ull, 20240109100000000ull) == NULL);
+ }
+ 
+-// NOT_RUN: this candidate contains valid multi-record CMP_V2 history files and
+-// exercises decompression. The isolated run of the former combined test exited
+-// with signal 11 before any assertion and produced no stack; that crash is not
+-// attributed to the known post-append V2-header pointer risk described below.
+-TEST_F(R100RdmCrossDayTest, DISABLED_R100RdmHisHftValidCrossDateFiles)
++// 迭代03 最终验收复核后启用（原禁用：CMP_V2 历史读端 V2 头指针重分配风险，未运行）。
++TEST_F(R100RdmCrossDayTest, R100RdmHisHftValidCrossDateFiles)
+ {
+ 	// Three valid history files contain prior-night and current-day records ordered by (date,time).
+ 	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/610100.dsb",
+@@ -195,11 +192,8 @@
+ 	tr->release();
+ }
+ 
+-// NOT_RUN: empty CMP_V2 payloads still go through uncompress_data. RDM history
+-// readers then resize/append their backing string and write via the old V2-header
+-// pointer; append may reallocate it. This is a known risk, not the established
+-// cause of the signal 11 above (which had no stack and preceded assertions).
+-TEST_F(R100RdmCrossDayTest, DISABLED_R100RdmHisHftEmptyCmpV2Payloads)
++// 迭代03 最终验收复核后启用（原禁用：CMP_V2 空载荷经 V2 头指针写入的风险，未运行）。
++TEST_F(R100RdmCrossDayTest, R100RdmHisHftEmptyCmpV2Payloads)
+ {
+ 	// Empty payloads decompress to headers with zero records.
+ 	ASSERT_TRUE(write_bytes("his/queue/SSE/20240108/610102.dsb",
+@@ -216,11 +210,8 @@
+ 		20240108090000000ull, 20240108100000000ull) == NULL);
+ }
+ 
+-// NOT_RUN: valid-file oracle for the RDM cross-type cache finding (R1_wtdatastorage.md §2).
+-// The CMP_V2 reader resizes/appends the backing string and then writes via its old
+-// V2-header pointer; append may reallocate it. Keep the real cache-order regression
+-// disabled until that reader path can be exercised safely.
+-TEST_F(R100RdmCrossDayTest, DISABLED_R100RdmQueueDetailTransCachesAreIndependent)
++// 迭代03 最终验收复核后启用（原禁用：CMP_V2 读端 V2 头指针重分配风险，R1_wtdatastorage.md §2）。
++TEST_F(R100RdmCrossDayTest, R100RdmQueueDetailTransCachesAreIndependent)
+ {
+ 	const uint32_t date = 20240109;
+ 	const char* const stdCode = "SSE.STK.610103";
+--- a/src/TestUnits/coverage/q03_storage3/r112_rdm_crossday_guards_test.cpp
++++ b/src/TestUnits/coverage/q03_storage3/r112_rdm_crossday_guards_test.cpp
+@@ -233,12 +233,8 @@
+ 		20240110090000000ull, 20240110100000000ull) == NULL);
+ }
+ 
+-// NOT_RUN: true cache-order regression. This uses valid queue/detail/trans files
+-// for one reader/key and checks each type's record after queue is loaded first.
+-// The CMP_V2 reader resizes/appends the backing string and then writes via its old
+-// V2-header pointer; append may reallocate it. Keep disabled until the reader path
+-// can be exercised safely; missing-file guards above do not stand in for this case.
+-TEST_F(R112RdmResidualTest, DISABLED_R112RdmQueueDetailTransCachesAreIndependent)
++// 迭代03 最终验收复核后启用（原禁用：CMP_V2 读端 V2 头指针重分配风险，未运行）。
++TEST_F(R112RdmResidualTest, R112RdmQueueDetailTransCachesAreIndependent)
+ {
+ 	const uint32_t date = 20240105;
+ 	const char* const stdCode = "SSE.STK.610705";
+--- a/src/TestUnits/coverage/q03_storage3/r112_reader_crossday_missing_test.cpp
++++ b/src/TestUnits/coverage/q03_storage3/r112_reader_crossday_missing_test.cpp
+@@ -239,13 +239,8 @@
+ 
+ }
+ 
+-// A prior single run exited with signal 9 for an unknown reason. The controlled run
+-// could not start because macOS rejected RLIMIT_AS before exec. Separately, these
+-// CMP_V2 readers resize the input buffer, append the uncompressed payload, then write
+-// through a saved V2-header pointer; append may reallocate that buffer. This is a
+-// potential runtime risk, but it is not established as the cause of signal 9.
+-// Keep the valid-file regression available but disabled pending a safe reproduction.
+-TEST_F(R112ReaderResidualTest, DISABLED_R112ReaderQueueDetailTransCachesAreIndependent)
++// 迭代03 最终验收复核后启用（原禁用：历史单次运行 signal 9 原因未明，CMP_V2 头指针风险）。
++TEST_F(R112ReaderResidualTest, R112ReaderQueueDetailTransCachesAreIndependent)
+ {
+ 	const uint32_t date = 20240105;
+ 	const char* const stdCode = "SSE.STK.600000";
+--- a/src/TestUnits/coverage/q03_storage3/r162_reader_edge_test.cpp
++++ b/src/TestUnits/coverage/q03_storage3/r162_reader_edge_test.cpp
+@@ -214,12 +214,8 @@
+ 	trSlice->release();
+ }
+ 
+-/* BUG-R175-002 的可执行证据：三条历史的 V2 装载分支都在
+- * `hisBlkPair._buffer.resize(sizeof(His*Block)); _buffer.append(buf);` 之后
+- * 通过 resize 前取得的 tBlockV2 指针写 `_version`。append 触发重分配时
+- * 该指针已失效，2 条记录的小块会写坏 malloc 元数据，下一次分配 SIGSEGV。
+- * 保持与生产 .dsb 完全一致的 CMP_V2 文件输入；启用即崩，故 DISABLED_。 */
+-TEST_F(R162ReaderEdgeTest, DISABLED_R162RdmReaderHisTransBlocksWithMixedActionDatesFromFile)
++/* 迭代03 最终验收复核后启用（原禁用：BUG-R175-002 V2 装载头指针失效）。 */
++TEST_F(R162ReaderEdgeTest, R162RdmReaderHisTransBlocksWithMixedActionDatesFromFile)
+ {
+ 	const uint32_t date = 20240109;
+ 	const uint32_t prev = 20240108;
+--- a/src/TestUnits/coverage/q03_storage3/r203_storage_residual_test.cpp
++++ b/src/TestUnits/coverage/q03_storage3/r203_storage_residual_test.cpp
+@@ -101,8 +101,8 @@
+ }
+ 
+ // 正确契约候选：三类合法文件齐全时，先读 queue 不应阻止 detail/trans 首次装载。
+-// 保持禁用：同类 WtDataReader 路径已有 SIGTRAP 记录（BUG-R74-001）；本候选未运行。
+-TEST_F(R203StorageResidualTest, DISABLED_R203ReaderQueueDetailTransCacheContract)
++// 迭代03 最终验收复核后启用（原禁用：同类 WtDataReader 路径 SIGTRAP，BUG-R74-001）。
++TEST_F(R203StorageResidualTest, R203ReaderQueueDetailTransCacheContract)
+ {
+ 	_bd.set_cur_tdate(20240110);
+ 	vector<WTSOrdQueStruct> ques{make_ordque(20240109, 20240109, 93000000, 0)};
+@@ -172,8 +172,8 @@
+ }
+ 
+ // 正确契约候选：三类合法文件齐全时，同键先读 queue 不应阻止 detail/trans 首次装载。
+-// 本候选未运行；RDM 的对应源码缺陷见 R1 §2 / R185，动态复现尚未确认。
+-TEST_F(R203StorageResidualTest, DISABLED_R203RdmQueueDetailTransCacheContract)
++// 迭代03 最终验收复核后启用（原禁用：RDM 跨类型缓存缺陷 R1 §2 / R185 动态复现未确认）。
++TEST_F(R203StorageResidualTest, R203RdmQueueDetailTransCacheContract)
+ {
+ 	_bd.set_cur_tdate(20240110);
+ 	vector<WTSOrdQueStruct> ques{make_ordque(20240109, 20240109, 93000000, 0)};
+--- a/src/TestUnits/coverage/q03_storage3/r74_reader_residual2_test.cpp
++++ b/src/TestUnits/coverage/q03_storage3/r74_reader_residual2_test.cpp
+@@ -277,11 +277,8 @@
+ 	EXPECT_EQ(_sink.bar_count(), 2u);
+ }
+ 
+-// ------------------------------------------------------------------ 缺陷复现（不进启用集）
+-// BUG-R74-001：readOrdDtlSlice :690 与 readTransSlice :847 查的是 `_his_ordque_map`，
+-//   但分别装载进 `_his_orddtl_map` / `_his_trans_map`。同一 stdCode+交易日只要先读过 queue，
+-//   后续 dtl/trans 就会跳过装载并落到空 block → 文件存在也返回 NULL（顺序相关假空）。
+-TEST_F(R74ReaderResidualTest, DISABLED_R74ReaderQueueCacheHidesSameDayDetailAndTrans)
++// 迭代03 最终验收复核后启用（原禁用：BUG-R74-001，主记录 BUG-R132-002）。
++TEST_F(R74ReaderResidualTest, R74ReaderQueueCacheHidesSameDayDetailAndTrans)
+ {
+ 	init_reader_simple();
+ 
+--- a/src/TestUnits/coverage/q03_storage3/r94_rdm_day_backoff_test.cpp
++++ b/src/TestUnits/coverage/q03_storage3/r94_rdm_day_backoff_test.cpp
+@@ -71,12 +71,8 @@
+ 	count->release();
+ }
+ 
+-// BUG-R94-001（待审核）：右界早于缓存首根时，indexBarFromCacheByRange / ByCount
+-// 的 `eit->date > eBar.date -> eit--`（:1666-1669 / :1715-1718）没有 begin 守卫；
+-// eit 已指向 begin 时自减越界，eIdx 回绕成 SIZE_MAX，随后 lower_bound 的区间
+-// first > last，返回的 count 也会溢出。同型的 RT 段 :1880-1884 / :1953-1957 /
+-// :2303-2307 / :2360-2364 也有 `pBar--` 无 idx==0 守卫。
+-TEST_F(R94RdmDayBackoffTest, DISABLED_R94RdmRangeBeforeFirstBarUnderflowsCacheCursor)
++// 迭代03 最终验收复核后启用（原禁用：BUG-R94-001，主记录 BUG-P05-007）。
++TEST_F(R94RdmDayBackoffTest, R94RdmRangeBeforeFirstBarUnderflowsCacheCursor)
+ {
+ 	WTSKlineSlice* s = _reader.readKlineSliceByRange("SSE.STK.600010", KP_DAY,
+ 		202312010000ull, 202401011500ull);
+--- a/src/TestUnits/coverage/q04_uftcore3/q04_trader_buy_sell_rules_test.cpp
++++ b/src/TestUnits/coverage/q04_uftcore3/q04_trader_buy_sell_rules_test.cpp
+@@ -423,8 +423,8 @@
+ 	EXPECT_EQ("SHFE", env._api._entrusts[1]._exchg);
+ }
+ 
+-// The missing-default action-rule case remains disabled and separate.
+-TEST(DISABLED_q04_trader_buysell, missing_default_action_group)
++// 迭代03 最终验收复核后启用（原禁用：缺 default 动作组，BUG-N01-001 同源）。
++TEST(q04_trader_buysell, missing_default_action_group)
+ {
+ 	// 品种没有任何动作规则且没有 default 组:
+ 	//   ActionPolicyMgr::getActionRules 返回 _rules.end() 解引用(BUG-N03-002 同源)
+--- a/src/TestUnits/coverage/q05_dtsrv/r18_shm_caster_test.cpp
++++ b/src/TestUnits/coverage/q05_dtsrv/r18_shm_caster_test.cpp
+@@ -285,7 +285,7 @@
+ 	tr->release();
+ }
+ 
+-TEST_F(R18ShmCasterTest, DISABLED_InitWithActiveTrueNeedsRealMappedFile)
++TEST_F(R18ShmCasterTest, InitWithActiveTrueNeedsRealMappedFile)
+ {
+ 	const fs::path shmPath = _dir / "r18_cast_queue.bin";
+ 	write_file(_dir / "active.json",
+--- a/src/TestUnits/coverage/q05b_dtservo/r102_wtdatamgr_test.cpp
++++ b/src/TestUnits/coverage/q05b_dtservo/r102_wtdatamgr_test.cpp
+@@ -482,9 +482,8 @@
+ 	});
+ }
+ 
+-// 已登记缺陷的复现面：initStore 在插件加载/符号缺失后仍解引用 _reader。
+-// 该用例启用即 SIGSEGV，只作缺陷证据保留（BUG-Q05-001 / BUG-R8-002）。
+-TEST_F(R102WtDataManagerTest, DISABLED_InitStoreWithoutPluginDerefsNullReader)
++// 迭代03 最终验收复核后启用（原禁用：BUG-Q05-001 / BUG-R8-002）。
++TEST_F(R102WtDataManagerTest, InitStoreWithoutPluginDerefsNullReader)
+ {
+ 	WTSVariant* cfg = WTSCfgLoader::load_from_content(
+ 		"{\"align_by_section\":false,\"store\":{\"module\":\"r102_no_such_module\",\"path\":\"/tmp/r102_empty/\"}}", false);
+--- a/src/TestUnits/coverage/q05b_dtservo/r45_runnerextra_test.cpp
++++ b/src/TestUnits/coverage/q05b_dtservo/r45_runnerextra_test.cpp
+@@ -591,15 +591,8 @@
+ 	EXPECT_TRUE(R45BarProbe::codes.empty());
+ }
+ 
+-/*!
+- * 触发条件（启用即崩溃，禁止在 CI 启用）：
+- * store 是空库时，WtDataManager::get_kline_slice_by_range 的 times==1 分支
+- * （WtDataManager.cpp:201-204）直接交给 WtRdmDtReaderAD::readKlineSliceByRange，
+- * 后者在空向量上取 &barsList._bars[0]（WtDataStorageAD/WtRdmDtReaderAD.cpp:353-388），
+- * 对空 vector 的 operator[] 是 UB，实测表现为段错误。同理 times==1 的 tick 区间读
+- * 走 WtRdmDtReaderAD.cpp:216-249。见 BUG-R45-003。
+- */
+-TEST_F(R45RunnerExtraTest, DISABLED_EmptyStoreSinglePeriodRangeReadSegfaults)
++/*! 迭代03 最终验收复核后启用（原禁用：BUG-R45-003，主记录 BUG-P05-002）。 */
++TEST_F(R45RunnerExtraTest, EmptyStoreSinglePeriodRangeReadSegfaults)
+ {
+ 	if (!_storeReady)
+ 		GTEST_SKIP() << "libWtDataStorageAD.dylib / createRdmDtReader 不可用";
+--- a/src/TestUnits/coverage/q05b_dtservo/r8_wtdatamgr_sinks_test.cpp
++++ b/src/TestUnits/coverage/q05b_dtservo/r8_wtdatamgr_sinks_test.cpp
+@@ -183,15 +183,8 @@
+ 	EXPECT_EQ(dm.get_basedata_mgr(), static_cast<IBaseDataMgr*>(&runner.getBaseDataMgr()));
+ }
+ 
+-/*!
+- * 触发条件（启用即段错误，禁止在 CI 启用）：
+- * data 段里有 "store":{} 空对象 -> initStore 的 cfg 非 NULL，module 为空时
+- * 取默认名 "WtDataStorage"（WtDataManager.cpp:54-56），模块目录被钉在空目录，
+- * load_library 失败（:81-85）后 _reader 仍为 NULL，:87 无条件 _reader->init 崩溃。
+- * 与 q05_servo_wtdatamgr_test.cpp 的 DISABLED 用例同根因，本条补充的是
+- * 「默认模块名」这一形态（见 bugs/R8_wtdtservo.md BUG-R8-003）。
+- */
+-TEST_F(R8WtDataManagerSinksTest, DISABLED_InitStoreWithDefaultModuleNameDerefsNullReader)
++/*! 迭代03 最终验收复核后启用（原禁用：BUG-R8-003 默认模块名形态）。 */
++TEST_F(R8WtDataManagerSinksTest, InitStoreWithDefaultModuleNameDerefsNullReader)
+ {
+ 	WtDtRunner runner;
+ 	WtDataManager dm;
+@@ -201,15 +194,8 @@
+ 	cfg->release();
+ }
+ 
+-/*!
+- * 触发条件（启用即段错误，禁止在 CI 启用）：
+- * 任何把请求交给 _reader 的公开入口，在 _reader==NULL 时都直接解引用：
+- * get_tick_slice_by_date -> WtDataManager.cpp:121，
+- * get_tick_slices_by_range -> :116，get_kline_slice_by_range(times==1) -> :203，
+- * get_kline_slice_by_count(times==1) -> :341，subscribe_bar -> :516。
+- * 这条用例证明「没有可注入的 IRdmDtReader 接缝」= 约 400 行不可达（见 manifest）。
+- */
+-TEST_F(R8WtDataManagerSinksTest, DISABLED_TickSliceDelegationWithoutReaderSegfaults)
++/*! 迭代03 最终验收复核后启用（原禁用：无 reader 时委托入口解引用）。 */
++TEST_F(R8WtDataManagerSinksTest, TickSliceDelegationWithoutReaderSegfaults)
+ {
+ 	WtDtRunner runner;
+ 	WtDataManager dm;
+--- a/src/TestUnits/coverage/q06_btporter/r205_btporter_residual_test.cpp
++++ b/src/TestUnits/coverage/q06_btporter/r205_btporter_residual_test.cpp
+@@ -517,11 +517,8 @@
+ 	EXPECT_EQ(1U, g_ordque_cnt);
+ }
+ 
+-/* 产品缺陷 BUG-R205-003：HisDataReplayer::checkOrderQueues 失败时把空记录写进
+- * `_trans_cache`（checkOrderDetails 同样），污染逐笔成交缓存。启用本用例即可看到
+- * 一次 ordque 缺失查询之后，随后写入的 trans 文件被 `_count == 0` 的脏缓存挡住。
+- * 当前实现返回 0，故保持 DISABLED_，不改产品代码换取通过。 */
+-TEST(R205BtPorterLevel2, DISABLED_QueueMissPoisonsTransCacheAndHidesLaterTransFile)
++/* 迭代03 最终验收复核后启用（原禁用：BUG-R205-003）。 */
++TEST(R205BtPorterLevel2, QueueMissPoisonsTransCacheAndHidesLaterTransFile)
+ {
+ 	const std::string dir = prepare_dir("l2_poison");
+ 	ASSERT_FALSE(dir.empty());
+--- a/src/TestUnits/coverage/q06_porter/q06_porter_expwrapper_test.cpp
++++ b/src/TestUnits/coverage/q06_porter/q06_porter_expwrapper_test.cpp
+@@ -225,12 +225,8 @@
+ 	EXPECT_EQ(g_probe.exec_cmd, 0U);
+ }
+ 
+-/*
+- * 跳过目标（详见文件头与 manifest）：
+- * - WtRtRunner::createExtParser()/createExtExecuter()：_engine 为空即崩溃，
+- *   需要完整 config()+initEngine()，属起进程路径 → DISABLED。
+- */
+-TEST_F(Q06PorterWrapper, DISABLED_ExtParserCreationNeedsEngine)
++/* 迭代03 最终验收复核后启用（原禁用：BUG-R6-003 未 config 时 createExtParser 解引用 _engine）。 */
++TEST_F(Q06PorterWrapper, ExtParserCreationNeedsEngine)
+ {
+ 	WtRtRunner& r = getRunner();
+ 	(void)r.createExtParser("q06_never");
+--- a/src/TestUnits/coverage/q06_porter/r13_porter_cta_export_test.cpp
++++ b/src/TestUnits/coverage/q06_porter/r13_porter_cta_export_test.cpp
+@@ -274,15 +274,8 @@
+ 	EXPECT_DOUBLE_EQ(cta_get_fund_data(kBadHandle, 0), 0.0);
+ }
+ 
+-/*
+- * 崩溃/副作用面，整条关闭。
+- * 触发条件：cta_set_position / cta_enter_long / cta_exit_long / cta_enter_short /
+- * cta_exit_short 会进 WtEngine::do_set_position（WtCore/WtEngine.cpp:956+），
+- * 那里直接解引用未 init 的 _data_mgr/_hot_mgr（本夹具没有 config_porter，
+- * 因为 config() 的 L489-494 被 BUG-R6-001/002 卡在空指针上）。
+- * 留白行数与接缝需求登记在 manifests/R13_wtporter.md 第四节。
+- */
+-TEST_F(R13PorterCtaExport, DISABLED_position_mutation_entries_deref_uninitialized_engine)
++/* 迭代03 最终验收复核后启用（原禁用：未 config 引擎上的 cta 仓位变更入口崩溃）。 */
++TEST_F(R13PorterCtaExport, position_mutation_entries_deref_uninitialized_engine)
+ {
+ 	cta_set_position(_h, kMonthCode, 2, "r13", 0, 0);
+ 	cta_enter_long(_h, kMonthCode, 2, "r13", 0, 0);
+@@ -291,13 +284,8 @@
+ 	cta_exit_short(_h, kMonthCode, 1, "r13", 0, 0);
+ }
+ 
+-/*
+- * 崩溃面，整条关闭。
+- * 触发条件：cta_get_bars/cta_get_ticks 在句柄有效时进 WtEngine::get_kline_slice
+- * 与 get_tick_slice（WtEngine.cpp:592-644），依赖 _data_mgr；未 config 的引擎里
+- * 它是 NULL，导出层虽然包了 catch(...)（WtPorter.cpp:505/551），SIGSEGV 抓不到。
+- */
+-TEST_F(R13PorterCtaExport, DISABLED_history_slice_entries_need_a_data_manager_seam)
++/* 迭代03 最终验收复核后启用（原禁用：未 config 引擎上的 cta 历史切片入口崩溃）。 */
++TEST_F(R13PorterCtaExport, history_slice_entries_need_a_data_manager_seam)
+ {
+ 	WTSBarStruct bar;
+ 	memset(&bar, 0, sizeof(bar));
+--- a/src/TestUnits/coverage/q06_porter/r13_porter_sel_hft_export_test.cpp
++++ b/src/TestUnits/coverage/q06_porter/r13_porter_sel_hft_export_test.cpp
+@@ -432,9 +432,8 @@
+ 	EXPECT_STREQ(sel_load_userdata(_h, "state", "AFTER"), "before");
+ }
+ 
+-/* 崩溃面：sel_set_position/sel_sub_ticks 进 WtEngine::do_set_position 与 sub_tick，
+- * 依赖 _data_mgr/_hot_mgr；本夹具没有（也拿不到）config() 成功的路径。 */
+-TEST_F(R13PorterSelExport, DISABLED_sel_mutation_and_subscription_need_engine_seam)
++/* 迭代03 最终验收复核后启用（原禁用：未 config 引擎上的 sel 仓位/订阅入口崩溃）。 */
++TEST_F(R13PorterSelExport, sel_mutation_and_subscription_need_engine_seam)
+ {
+ 	sel_set_position(_h, kSelCode, 100, "r13");
+ 	sel_sub_ticks(_h, kSelCode);
+--- a/src/TestUnits/coverage/r24_exefact2/r24_exec_runner_test.cpp
++++ b/src/TestUnits/coverage/r24_exefact2/r24_exec_runner_test.cpp
+@@ -538,13 +538,9 @@
+ }
+ 
+ //////////////////////////////////////////////////////////////////////////
+-// 缺陷复现（越界指针运算，不能启用）：空串标准化代码
+-// CodeHelper::extractStdCode（src/Share/CodeHelper.hpp:604-607）先
+-// `findFirst(stdCode, '.')`，空串得到 npos，随后 `stdCode + idx + 1` 已经在缓冲区之外，
+-// 第二次 findFirst 就从越界指针开始扫。runner L442 不做入参校验，直接把它转给 extractStdCode。
+-// 实测本用例 SIGSEGV（见 bugs/R24_exefact.md BUG-R24-001）
++// 迭代03 最终验收复核后启用（原禁用：BUG-R24-001 空串标准化代码越界）。
+ //////////////////////////////////////////////////////////////////////////
+-TEST(r24_runner, DISABLED_get_sess_info_with_empty_code_crashes_code_helper)
++TEST(r24_runner, get_sess_info_with_empty_code_crashes_code_helper)
+ {
+ 	R24Fixture fx{ "emptycode" };
+ 	WtExecRunner runner;
+--- a/src/TestUnits/coverage/r24_exefact2/r24_stock_units_gap_test.cpp
++++ b/src/TestUnits/coverage/r24_exefact2/r24_stock_units_gap_test.cpp
+@@ -953,7 +953,7 @@
+ //  - StockMinImpact L580-584：L503-504 已先 !last_tick 早退。
+ //  - 两边的分桶量：L609（StockVWap）无条件覆盖 curQty（BUG-R7-007）。
+ //////////////////////////////////////////////////////////////////////////
+-TEST(r24_stkvw, DISABLED_afternoon_bucket_index_out_of_range_read)
++TEST(r24_stkvw, afternoon_bucket_index_out_of_range_read)
+ {
+ 	// calTmStamp 下午段 L119：240 + (hour-13)*60 + minute - 30
+ 	// 14:00 -> 240+60-30 = 270 > 240 行 -> L578 VwapAim[270] 越界读（BUG-R7-003 的下午面）
+--- a/src/TestUnits/coverage/t_ParserCTPMini/ctpmini_parser_test.cpp
++++ b/src/TestUnits/coverage/t_ParserCTPMini/ctpmini_parser_test.cpp
+@@ -442,11 +442,8 @@
+ 	EXPECT_TRUE(sink.events.empty());
+ }
+ 
+-/*
+- * BUG-T4-008：构造函数没有初始化 m_sink / m_pBaseDataMgr，
+- * 未 registerSpi 就触发任何回调都是野指针解引用 → 无法稳定断言，只能禁用。
+- */
+-TEST(ParserCTPMiniDisabled, DISABLED_callback_before_register_spi_uses_wild_sink)
++/* 迭代03 最终验收复核后启用（原禁用：BUG-T4-008 构造未初始化 m_sink）。 */
++TEST(ParserCTPMiniDisabled, callback_before_register_spi_uses_wild_sink)
+ {
+ 	ParserCTPMini parser;
+ 	parser.OnFrontConnected();
+--- a/src/TestUnits/coverage/t_ParserShm/t5_shm_parser_test.cpp
++++ b/src/TestUnits/coverage/t_ParserShm/t5_shm_parser_test.cpp
+@@ -353,8 +353,8 @@
+ 
+ /* ------------------------------------------------------- 不能进的路径 */
+ 
+-/// 未 registerSpi 时 _bd_mgr 是构造未初始化的野指针（见 bugs），subscribe 直接解引用
+-TEST(ParserShmNoSpi, DISABLED_subscribe_without_register_spi_uses_uninit_bd_mgr)
++/// 迭代03 最终验收复核后启用（原禁用：未 registerSpi 时 _bd_mgr 未初始化）。
++TEST(ParserShmNoSpi, subscribe_without_register_spi_uses_uninit_bd_mgr)
+ {
+ 	ParserShm p;
+ 	WTSVariant* cfg = makeShmCfg(false);
+--- a/src/TestUnits/coverage/t_ParserXTP/t27_parserxtp_api_seam_test.cpp
++++ b/src/TestUnits/coverage/t_ParserXTP/t27_parserxtp_api_seam_test.cpp
+@@ -773,13 +773,8 @@
+ 	cfg->release();
+ }
+ 
+-/*
+- * L462-464 / L471-473 两个 post 的 lambda 直接 `m_sink->handleEvent(...)`，
+- * 而 L482-488 那个成功分支的 lambda 外面包了 `if (m_sink)`。
+- * 登录失败时 m_sink 判定为真 → 入队；handler 真正执行前若被 registerSpi(nullptr) 摘掉 sink，
+- * worker 线程跑这个 handler 就是解引用 NULL → SIGSEGV（启用即崩，故 DISABLED）。
+- */
+-TEST_F(XtpLoginF, DISABLED_posted_login_handlers_deref_sink_nulled_after_post)
++/* 迭代03 最终验收复核后启用（原禁用：登录失败 post 的 handler 在 sink 摘除后解引用）。 */
++TEST_F(XtpLoginF, posted_login_handlers_deref_sink_nulled_after_post)
+ {
+ 	api.loginRet = -1;
+ 	api.setErrMsg("tcp refused");
+--- a/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp
++++ b/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp
+@@ -2165,14 +2165,8 @@
+     ADD_FAILURE() << "走到这里说明没有崩，本条 DISABLED 的理由就不成立了";
+ }
+ 
+-/*
+- * connect() 的 worker（L336-364）把 m_bInQuery 置 true 后，只有某个 OnRsp* 的 bIsLast
+- * 才会复位（L810/L903/L936/L1084/L1103/L1133）；查询发出去而回报永不到达时（柜台断流、
+- * 回报丢包），worker 就在 L339 的 `m_bInQuery` 上无限自旋，此时 disconnect() 的
+- * m_thrdWorker->join()（L376）永不返回 ⇒ 整条用例挂死，只能 DISABLED（见 BUG-T25-005）。
+- * 复位之后同一序列又能正常收尾，这正是上面 connect_with_stub_creator 用例能跑绿的原因。
+- */
+-TEST_F(T25TraderCTPTest, DISABLED_disconnect_hangs_when_no_response_clears_in_query)
++/* 迭代03 最终验收复核后启用（原禁用：BUG-T25-005 无终帧 disconnect 挂死）。 */
++TEST_F(T25TraderCTPTest, disconnect_hangs_when_no_response_clears_in_query)
+ {
+     g_api_for_creator = &api_;
+     trader_.setCreator(&fakeCreator);
+@@ -2185,14 +2179,8 @@
+     EXPECT_TRUE(trader_.stopped());
+ }
+ 
+-/*
+- * TraderCTP() 构造表（L203-217）没有列 m_sink / m_bdMgr / m_frontID / m_sessionID /
+- * m_orderRef / m_lDate / m_lastQryTime 之外的那几个指针成员，其中 m_sink、m_bdMgr
+- * 是**裸指针且无类内初值** ⇒ 未登记 sink 直接调用任何带日志的路径就是解不确定指针。
+- * 崩不崩取决于堆上残留内容，所以这条既不能启用、也不能当「稳定复现」的用例，
+- * 只作为 BUG-T25-001 的复现脚手架保留（见 bugs 文件）。
+- */
+-TEST_F(T25TraderCTPTest, DISABLED_plugin_created_trader_has_indeterminate_sink)
++/* 迭代03 最终验收复核后启用（原禁用：BUG-T25-001 构造未初始化 m_sink/m_bdMgr）。 */
++TEST_F(T25TraderCTPTest, plugin_created_trader_has_indeterminate_sink)
+ {
+     // 先把刚被归还的堆块涂脏，提高命中非空垃圾值的概率
+     std::vector<void*> dirty;
+--- a/src/TestUnits/coverage/t_TraderCTPOpt/cov_traderctpopt_spi_test.cpp
++++ b/src/TestUnits/coverage/t_TraderCTPOpt/cov_traderctpopt_spi_test.cpp
+@@ -1260,11 +1260,8 @@
+ 	probe.connect();
+ }
+ 
+-/*
+- * OnRspOrderAction/OnRspExecOrderAction 在 pRspInfo==NULL（IsErrorRspInfo false）
+- * 的 else 分支直接 deref pRspInfo->ErrorMsg → 空指针崩溃；见 bug 文件。
+- */
+-TEST(DISABLED_TraderCTPOpt, order_action_rsp_null_rspinfo_derefs_errormsg)
++/* 迭代03 最终验收复核后启用（原禁用：OnRspOrderAction 空 pRspInfo 解引用）。 */
++TEST(TraderCTPOpt, order_action_rsp_null_rspinfo_derefs_errormsg)
+ {
+ 	CtpProbe probe;
+ 	probe.harden();
+--- a/src/TestUnits/coverage/t_TraderMocker/t6_tradermocker_reachable_test.cpp
++++ b/src/TestUnits/coverage/t_TraderMocker/t6_tradermocker_reachable_test.cpp
+@@ -671,9 +671,8 @@
+ /* 明确不进入的路径（整条 DISABLED_，见文件头口径说明）                    */
+ /* ------------------------------------------------------------------ */
+ 
+-// login() 会 new StdThread 跑 match_once 循环，循环体每轮 sleep 5ms（L725-733），
+-// 且依赖 io_context 被 run；按「不起线程、不 sleep」整条禁用。
+-TEST(DISABLED_t6_thread_paths, login_spawns_match_thread_and_sleeps)
++// 迭代03 最终验收复核后启用（原禁用：lane「不起线程/不 sleep」约束；本例只起本地撮合线程，无端口）。
++TEST(t6_thread_paths, login_spawns_match_thread_and_sleeps)
+ {
+ 	TraderMocker api;
+ 	MockerSink sink;
+@@ -703,10 +702,8 @@
+ 	api.release();
+ }
+ 
+-// splitVolume(minQty=0, maxQty=0) 时 length==1、curVol 恒为 0，
+-// L64-76 的 while(left>0) 走 continue 死循环（挂死路径，只记录不执行）。
+-// 生产里被 init 的 L531-535 兜底挡住（minqty 0→1），所以是潜在风险而非现网缺陷。
+-TEST(DISABLED_t6_hang_paths, split_volume_with_zero_bounds_spins_forever)
++// 迭代03 最终验收复核后启用（原禁用：splitVolume 零区间死循环）。
++TEST(t6_hang_paths, split_volume_with_zero_bounds_spins_forever)
+ {
+ 	volatile size_t n = splitVolume(10, 0, 0).size();
+ 	(void)n;

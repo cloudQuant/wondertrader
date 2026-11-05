@@ -21,10 +21,12 @@ namespace fs = std::filesystem;
 #include <unistd.h>
 #endif
 
-uint32_t WtHelper::_cur_date = 0;
-uint32_t WtHelper::_cur_time = 0;
-uint32_t WtHelper::_cur_secs = 0;
-uint32_t WtHelper::_cur_tdate = 0;
+// I03-NEW-124: lock-free so setTime()/getTime() may be used from any thread.
+static_assert(std::atomic<uint32_t>::is_always_lock_free, "WtHelper clock fields must be lock-free");
+std::atomic<uint32_t> WtHelper::_cur_date{0};
+std::atomic<uint32_t> WtHelper::_cur_time{0};
+std::atomic<uint32_t> WtHelper::_cur_secs{0};
+std::atomic<uint32_t> WtHelper::_cur_tdate{0};
 std::string WtHelper::_inst_dir;
 std::string WtHelper::_gen_dir = "./generated/";
 
@@ -34,12 +36,16 @@ std::string WtHelper::getCWD()
 	static std::string _cwd;
 	if(_cwd.empty())
 	{
-		char   buffer[256];
+		// I03-NEW-112: the old fixed 255-byte buffer ignored getcwd() failure (ERANGE once the
+		// path reaches 255 bytes) and then read the uninitialized buffer. Use a larger buffer,
+		// check the result, and fall back to "./" (the current directory) without caching it.
+		char   buffer[4096] = { 0 };
 #ifdef _MSC_VER
-		_getcwd(buffer, 255);
+		if (_getcwd(buffer, (int)sizeof(buffer)) == NULL)
 #else	//UNIX
-		getcwd(buffer, 255);
+		if (getcwd(buffer, sizeof(buffer)) == NULL)
 #endif
+			return "./";
 		_cwd = StrUtil::standardisePath(buffer);
 	}	
 	return _cwd;

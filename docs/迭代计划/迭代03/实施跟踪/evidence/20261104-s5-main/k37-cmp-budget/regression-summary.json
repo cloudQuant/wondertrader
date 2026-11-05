@@ -1,0 +1,107 @@
+{
+ "start": "2026-11-05T01:20:26+08:00",
+ "end": "2026-11-05T01:22:14+08:00",
+ "total": 3054,
+ "by_status": {
+  "pass": 3042,
+  "skipped": 10,
+  "fail": 2
+ },
+ "per_binary": {
+  "CoverageTests": {
+   "pass": 1314,
+   "skipped": 1
+  },
+  "CoverageTests_adstorage": {
+   "pass": 282
+  },
+  "CoverageTests_btcore": {
+   "pass": 680,
+   "skipped": 1
+  },
+  "CoverageTests_btporter": {
+   "pass": 147,
+   "fail": 1,
+   "skipped": 4
+  },
+  "CoverageTests_dtcore": {
+   "pass": 223,
+   "fail": 1,
+   "skipped": 1
+  },
+  "CoverageTests_dtservo": {
+   "pass": 120
+  },
+  "CoverageTests_porter": {
+   "pass": 259,
+   "skipped": 3
+  },
+  "TestUnits": {
+   "pass": 17
+  }
+ },
+ "non_pass": [
+  [
+   "CoverageTests",
+   "R22PorterCapiTest.ConfiguredStartChildChecksStateMonitor",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btcore",
+   "P04ReplayCsvTest.failedBinaryRawBarsLoadCanBeRetriedSafely",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btporter",
+   "R66BtPorterNotifier.FailedConfigRetryAndDuplicateConfigOwnOneServer",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btporter",
+   "S5R20RunnerNotifierRelease.AsyncReplayReleaseJoinsThenDestroysOnce",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btporter",
+   "S5R20RunnerNotifierRelease.IdleReleaseDestroysServerOnceBeforeRunnerDestruction",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btporter",
+   "S5R20RunnerNotifierRelease.SyncReplayThenReleaseDestroysOnceAndStopsPublishing",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btporter",
+   "WtBtRunnerShutdown.ImmediateStopWaitsForPrepareThenJoinsTheWorker",
+   "fail"
+  ],
+  [
+   "CoverageTests_dtcore",
+   "Q05ResampleTest.DayResampleOfTenDailyBarsPassesThrough",
+   "fail"
+  ],
+  [
+   "CoverageTests_dtcore",
+   "R44ParserAdapterEdgesTest.RepeatedInitExtNeedsContract",
+   "skipped"
+  ],
+  [
+   "CoverageTests_porter",
+   "R143PorterBars.cta_get_bars_returns_loaded_blocks",
+   "skipped"
+  ],
+  [
+   "CoverageTests_porter",
+   "R143PorterBars.hft_get_bars_returns_loaded_blocks",
+   "skipped"
+  ],
+  [
+   "CoverageTests_porter",
+   "R143PorterBars.sel_get_bars_returns_loaded_blocks",
+   "skipped"
+  ]
+ ],
+ "disabled_total": 111,
+ "list_failures": []
+}

@@ -72,6 +72,11 @@ TEST(R170EventNotifier, PublishesOnlyCompleteJsonForFiniteTradeAndOrderValues)
     EventNotifier notifier;
     notifier._mq_sid = 42;
     notifier._publisher = &capturePublish;
+    // K24：处理器只经堆上 core 发布（队列中的处理器与 worker 不再引用 EventNotifier 本体）。
+    notifier._core->sid = 42;
+    notifier._core->publisher = &capturePublish;
+    // 接收闸门：未经 init 的 notifier 默认不接收（与 R160 相同做法，只打开入队所需的闸门）。
+    notifier._accepting = true;
 
     const double nonFinite = std::numeric_limits<double>::quiet_NaN();
     std::unique_ptr<WTSTradeInfo, TradeReleaser> finiteTrade(WTSTradeInfo::create("ag2406", "SHFE"));
@@ -100,7 +105,7 @@ TEST(R170EventNotifier, PublishesOnlyCompleteJsonForFiniteTradeAndOrderValues)
     notifier.notify("r170", 2, "SHFE.ag2406", invalidTrade.get());
     notifier.notify("r170", 3, "SHFE.ag2406", finiteOrder.get());
     notifier.notify("r170", 4, "SHFE.ag2406", invalidOrder.get());
-    notifier._asyncio.poll();
+    notifier._core->io.poll();
 
     ASSERT_EQ(2u, g_published.size()) << "failed writer output must not reach the publisher";
     EXPECT_EQ("TRD_TRADE", g_published[0].topic);

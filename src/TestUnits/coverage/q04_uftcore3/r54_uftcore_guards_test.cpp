@@ -126,6 +126,16 @@ std::string findDylibWithoutEntry()
 	return std::string();
 }
 
+// Card 9 (BUG-R78-001): only a provider confirmation authorizes destroying an
+// external API; without a remover the adapter quarantines it. This quiescent
+// fake is released through a remover that confirms its destruction.
+void deleteR54ParserConfirmed(IParserApi*& api)
+{
+	IParserApi* original = api;
+	api = nullptr;
+	delete original;
+}
+
 }	// namespace
 
 // ParserAdapter.cpp:166-226 initExt 正常装配: registerSpi + 空 filter 全量订阅
@@ -155,7 +165,7 @@ TEST(R54ParserGuard, release_stops_all_handlers)
 
 	ParserAdapter adapter;
 	R54FakeParserApi* api = new R54FakeParserApi(&stats);
-	ASSERT_TRUE(adapter.initExt("r54parser", api, &stub, &bd));
+	ASSERT_TRUE(adapter.initExt("r54parser", api, &stub, &bd, deleteR54ParserConfirmed));
 	EXPECT_EQ(1u, stats._initCnt);
 	EXPECT_EQ(1u, stats._regSpiCnt);
 	EXPECT_EQ(1u, stats._subCnt);
@@ -164,7 +174,8 @@ TEST(R54ParserGuard, release_stops_all_handlers)
 	EXPECT_EQ(1u, stats._connectCnt);
 
 	adapter.release();
-	EXPECT_EQ(1u, stats._releaseCnt);
+	// 决策 K18=否（2026-11-04）：外部 API（含带 remover 的 initExt）不调用 release/remover、不删除，隔离到进程退出。
+	EXPECT_EQ(0u, stats._releaseCnt);
 
 	// release 已把 _stopped 置真, 这些调用必须第一行返回
 	adapter.handleOrderQueue(nullptr);

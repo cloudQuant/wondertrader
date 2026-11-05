@@ -1,0 +1,10 @@
+WARNING: fixture directories without handler: i03_trader_oes_query_s4
+suites to run: 7 (priority first), parallel=2, -j 2
+[18:22:44] i03_csv_block_type_20261103                   pass               21s  green[pass]: csv_block_check exit 0 (tests=10 failures=0 errors=0)；导出符号 _dump_bars,_dump_bars_v2,_dump_ticks,_dump_ticks_v2
+[18:26:03] i03_dt_parser_host_20261104s5                 pass              220s  plain[pass]: run.sh exit 0；6/6 exit 0；thread[pass]: run.sh thread exit 0；6/6 exit 0
+[18:29:34] l04_contract_import                           pass              211s  normal[pass]: run.sh exit 0；sanitize[pass]: run.sh L04_SANITIZE=1 exit 0
+[18:31:19] l05_csv_failure_signal                        pass              105s  green+known-red[pass]: run.sh exit 0（green 全部 + KnownRed 子集 exit=1，脚本要求 1）
+[18:38:43] r23_retry_wait                                pass              443s  green+baseline[pass]: run_tests.py exit 0（baseline shutdown 期望 5，其余 0）：tsan shutdown 0 expected 0 tsan normal 0 expected 0
+[18:39:24] i03_csv_status_20261103                       pass               41s  green[pass]: csv_status exit 0 (tests=14 failures=0 errors=0)；导出符号 _dump_bars,_dump_bars_v2,_dump_ticks,_dump_ticks_v2
+[18:46:43] i03_dt_writer_lifecycle_20261104s5            pass             1439s  normal[pass]: normal：18 例，异常 0；asan[pass]: asan：18 例，异常 0；tsan[pass]: tsan：18 例，异常 0
+exit=0

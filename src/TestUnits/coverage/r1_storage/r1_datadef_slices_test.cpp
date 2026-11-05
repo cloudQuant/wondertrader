@@ -286,4 +286,31 @@ TEST_F(R1DataDefTest, orddtl_ordque_trans_slice_core_access)
 	ts->release();
 }
 
+// I03-NEW-092：三类 HFT 切片 at() 越过末尾返回 NULL；负下标保持旧语义（从尾部倒数，过小钳到 0）。
+TEST_F(R1DataDefTest, hft_slices_return_null_past_end_and_keep_negative_index_semantics)
+{
+	vector<WTSOrdDtlStruct> dtls;
+	dtls.push_back(make_orddtl(20240108, 20240108, 93000000, 1));
+	dtls.push_back(make_orddtl(20240108, 20240108, 93001000, 2));
+	WTSOrdDtlSlice* ds = WTSOrdDtlSlice::create("SSE.600000", dtls.data(), (uint32_t)dtls.size());
+	EXPECT_EQ(ds->at(2), (const WTSOrdDtlStruct*)NULL);
+	EXPECT_EQ(ds->at(-1), ds->at(1));
+	EXPECT_EQ(ds->at(-9), ds->at(0));
+	ds->release();
+
+	vector<WTSOrdQueStruct> ques;
+	ques.push_back(make_ordque(20240108, 20240108, 93000000, 3));
+	WTSOrdQueSlice* qs = WTSOrdQueSlice::create("SSE.600000", ques.data(), 1);
+	EXPECT_EQ(qs->at(1), (const WTSOrdQueStruct*)NULL);
+	EXPECT_EQ(qs->at(-1), qs->at(0));
+	qs->release();
+
+	vector<WTSTransStruct> trans;
+	trans.push_back(make_trans(20240108, 20240108, 93000000, 4));
+	WTSTransSlice* ts = WTSTransSlice::create("SSE.600000", trans.data(), 1);
+	EXPECT_EQ(ts->at(1), (const WTSTransStruct*)NULL);
+	EXPECT_EQ(ts->at(100), (const WTSTransStruct*)NULL);
+	ts->release();
+}
+
 } // namespace r1

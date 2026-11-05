@@ -1,0 +1,37 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before-round3/src/TestUnits/coverage/t_TraderXTP/t5_xtp_api_test.cpp	2026-11-04 20:11:03
++++ src/TestUnits/coverage/t_TraderXTP/t5_xtp_api_test.cpp	2026-11-04 21:24:57
+@@ -12,6 +12,7 @@
+  */
+ #include <gtest/gtest.h>
+ 
++#include <cstdio>
+ #include <cstring>
+ #include <cstdlib>
+ #include <string>
+@@ -846,7 +847,9 @@
+ }
+ 
+ /// OnOrderEvent 错误分支：makeEntrust 返回 NULL 时产品侧仍然 entrust->release() → NULL 解引用
+-TEST_F(TraderXTPTest, DISABLED_order_event_error_branch_releases_null_entrust)
++/// I03-NEW-068（s5 第三轮）：启用为红绿对照。改前子进程内 SIGSEGV；改后不解引用 NULL，
++/// 错误仍以 onRspEntrust(NULL, error) 交给宿主（宿主自行拒绝无 tag 的回报）。
++TEST_F(TraderXTPTest, order_event_error_branch_releases_null_entrust)
+ {
+ 	XTPRI err;
+ 	memset(&err, 0, sizeof(err));
+@@ -856,7 +859,15 @@
+ 	memset(&ord, 0, sizeof(ord));
+ 	ord.market = XTP_MKT_SZ_A;                         // 未登记 → makeEntrust 返回 NULL
+ 	snprintf(ord.ticker, sizeof(ord.ticker), "%s", "999999");
++	EXPECT_EXIT({ api_.OnOrderEvent(&ord, &err, 1); std::fflush(stdout); std::_Exit(0); },
++		::testing::ExitedWithCode(0), "") << "NULL entrust released in the error branch";
++	if (::testing::Test::HasFailure())
++		return;	// red control: do not crash the whole binary in-process
+ 	api_.OnOrderEvent(&ord, &err, 1);
++	ASSERT_EQ(1u, sink_.n_rsp_entrust_);
++	EXPECT_TRUE(sink_.last_entrust_null_);
++	EXPECT_EQ(WEC_ORDERINSERT, sink_.last_err_code_);
++	EXPECT_EQ("bad order", sink_.last_err_msg_);
+ }
+ 
+ /* ---------------------------------------------------------------- 工厂 */

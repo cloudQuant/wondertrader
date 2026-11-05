@@ -1,0 +1,22 @@
+HEAD ccaad010e9169f610aded4d8dc0f5647f70a5cff; macOS arm64; all runs from scratch cwd under /tmp/wt-i03-oracle-20261104/run/*; perl alarm timeouts.
+O=/tmp/wt-i03-oracle-20261104 R=repo LLVM=/opt/homebrew/Cellar/llvm/22.1.8/bin
+# support libs (current src, WT_WARNINGS_AS_ERRORS=OFF only for these two libs, as card-3/13 fixtures do)
+cmake -S $R/src -B $O/core -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=$LLVM/clang++ "-DCMAKE_CXX_FLAGS=-include cstdlib" -DBoost_INCLUDE_DIR=/opt/homebrew/Cellar/boost/1.88.0/include -DWT_WARNINGS_AS_ERRORS=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+ninja -C $O/core -j2 WTSUtils WTSTools
+# Task 1 (card-3 / card-13 fixtures, product = working tree incl. current WtDataWriterAD.cpp 5b829a78...)
+cmake -S $R/src/TestUnits/fixtures/i03_card3_dayboundary_20261104 -B $O/c3 -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=$LLVM/clang++ -DCMAKE_C_COMPILER=$LLVM/clang -DWT_LIB_DIR=$O/core/build_x64/Debug/libs -DWT_SAN=none -DWT_GREEN=ON
+cmake -S $R/src/TestUnits/fixtures/i03_storage_multiwriter_20261104 -B $O/mw ...same...
+ninja -C $O/c3 -j4 c3_regress_ad c3_ad_daybar ; ninja -C $O/mw -j4 mw_regress_ad mw_ad mw_storage mw_reader   (before edit -> bin-before/, after edit -> rebuilt in place)
+bash $R/src/TestUnits/fixtures/i03_card3_dayboundary_20261104/run_cases.sh <bin> $O/run/<name>-{before,after} 120
+(cd $O/run/fixtures/<n> && perl -e 'alarm 600; exec @ARGV or exit 127' <bin> --gtest_output=xml:<n>.xml)
+# Task 2
+WT_I03_LEAKS_ROOT=$O/leaks bash $R/src/TestUnits/fixtures/i03_leaks_main_20261104/manual_build.sh fix normal mocker   (boost-include copied from /tmp/wt-i03-leaks-20261104/boost-include; before build kept as manual/mocker-fix-normal-before)
+WT_I03_LEAKS_ROOT=$O/leaks python3 -I $R/src/TestUnits/fixtures/i03_leaks_main_20261104/run_cases.py $O/leaks/cases-oracle-mocker-fix-normal.json $O/leaks/results-oracle-mocker-fix-normal.json
+# Tasks 3/4 (default WT_WARNINGS_AS_ERRORS=ON)
+cmake -S $R/src -B $O/cov -G Ninja -DCMAKE_BUILD_TYPE=Debug -DWT_ENABLE_COVERAGE=ON -DCMAKE_C_COMPILER=/usr/bin/cc -DCMAKE_CXX_COMPILER=/usr/bin/c++ -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DBoost_INCLUDE_DIR=$O/leaks/boost-include -DGTest_DIR=/opt/homebrew/lib/cmake/GTest
+cmake --build $O/cov --target CoverageTests CoverageTests_m_WtRunner TraderMocker WtDataStorage -j4   (build1 before edits, build2 after edits, build3 final after another agent's WtEngine.cpp edit)
+CoverageTests --gtest_filter='L05HelperBarTest.DumpBars*:L05HelperTickTest.DumpTicks*' --gtest_output=xml:...
+CoverageTests_m_WtRunner --gtest_filter='r104_wtrunner_config.*' --gtest_output=xml:...   (-staged: libWtDataStorage.dylib copied into cwd as exec-eager run.sh does)
+r104 diagnostic (scratch only, NOT committed): copy of the TU with fees -> valid "{}" template, compiled/linked with the target's own ninja commands -> CoverageTests_m_WtRunner_r104diag (linked against build2 objects)
+# Task 5
+bash $R/src/TestUnits/fixtures/t26_fees_atomic/run.sh $O/t26

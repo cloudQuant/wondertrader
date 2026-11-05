@@ -1,0 +1,15 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before/src/TestUnits/coverage/p05_datastorage2/r21_rdmbars_kline_test.cpp.before	2026-10-30 20:59:34
++++ src/TestUnits/coverage/p05_datastorage2/r21_rdmbars_kline_test.cpp	2026-11-04 17:47:33
+@@ -300,8 +300,10 @@
+ 	EXPECT_EQ(out[2].date, 20240104u);
+ 	second->release();
+ 
+-	// 两次「Reading back」日志 = 两次全量 get_range；开环只有 1 次
+-	EXPECT_EQ(sink()->count_containing("Reading back"), 2u);
++	// 迭代03 s5：本断言原为 2（记录 R21-BUG-07 缺陷：未变更环境也全量重扫）。按 R21-BUG-07
++	// 原验收条件「同窗口复读不扫全量」，LMDB 环境两次读取之间无新提交时复用快照、不再重扫；
++	// 有提交时仍全量重扫（修订可见性不变，见 s5_rdm_ad_snapshot_test.cpp）。原文件见证据 before/。
++	EXPECT_EQ(sink()->count_containing("Reading back"), 1u);
+ 	EXPECT_EQ(sink()->count_containing("day db of XEX opened"), 1u);
+ }
+ 

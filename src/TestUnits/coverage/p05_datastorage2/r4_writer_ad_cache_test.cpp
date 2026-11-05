@@ -34,7 +34,8 @@ void truncateCacheAfterPreflightForTest(const char* filename)
 }
 #endif
 
-// d1 缓存项的 time 字段被写成交易日本身（WtDataWriterAD.cpp:601/620）
+// 交易日常量。卡3 3c=C（用户裁定 2026-11-04，R4-BUG-13）：d1 缓存项 date=交易日、time=0；
+// 新建 cache_d1.dmb 头版本为 2（BLOCK_VERSION_DAY_T0），tick/m1/m5 缓存仍为版本 1。
 static const uint32_t R4_TD1 = 20230103;
 static const uint32_t R4_TD2 = 20230104;
 // 09:30 的 tick → minutes=30 → barMins=31 → minuteToTime(31)：540+31=571 分 = 09:31
@@ -81,7 +82,9 @@ TEST_F(R4WriterADTest, FreshInitBuildsFourBlockFilesWithValidADHeader)
 		// L146/187/228/269：strcpy(_blk_flag, BLK_FLAG) 拷 7 字符 + 结尾 0，共 FLAG_SIZE=8 字节
 		EXPECT_EQ(std::memcmp(head._blk_flag, BLK_FLAG, FLAG_SIZE), 0) << name;
 		EXPECT_EQ(head._type, (uint16_t)BT_RT_Cache) << name;
-		EXPECT_EQ(head._version, (uint16_t)1) << name;
+		// 卡3 3c=C：新建日线缓存写版本 2（全部条目 time=0 的版本标记），其余缓存保持版本 1
+		const uint16_t expect_version = (std::strcmp(name, "cache_d1.dmb") == 0) ? (uint16_t)2 : (uint16_t)1;
+		EXPECT_EQ(head._version, expect_version) << name;
 		EXPECT_EQ(head._size, 0u) << name;
 		EXPECT_EQ(head._capacity, R4_INIT_CAP) << name;
 	}
@@ -185,6 +188,7 @@ TEST_F(R4WriterADTest, RejectsMalformedCacheFilesWithoutModifyingAnyCache)
 		BadFlag,
 		BadType,
 		BadVersion,
+		DayVersionOnMinuteCache,
 		SizeExceedsCapacity,
 		PayloadShorterThanCapacity,
 		ExtremeCapacity
@@ -199,7 +203,10 @@ TEST_F(R4WriterADTest, RejectsMalformedCacheFilesWithoutModifyingAnyCache)
 		{"short_header", "cache_tick.dmb", Corruption::ShortHeader},
 		{"bad_flag", "cache_m1.dmb", Corruption::BadFlag},
 		{"bad_type", "cache_m5.dmb", Corruption::BadType},
+		// 卡3 3c=C：日线缓存只接受版本 1/2，未知版本（3）仍 fail-closed
 		{"bad_version", "cache_d1.dmb", Corruption::BadVersion},
+		// 版本 2 只对日线缓存有效：分钟缓存出现版本 2 仍按非法版本拒绝
+		{"day_version_on_minute_cache", "cache_m1.dmb", Corruption::DayVersionOnMinuteCache},
 		{"size_over_capacity", "cache_tick.dmb", Corruption::SizeExceedsCapacity},
 		{"payload_short", "cache_m1.dmb", Corruption::PayloadShorterThanCapacity},
 		{"extreme_capacity", "cache_m5.dmb", Corruption::ExtremeCapacity}
@@ -243,6 +250,9 @@ TEST_F(R4WriterADTest, RejectsMalformedCacheFilesWithoutModifyingAnyCache)
 				header._type = 0;
 				break;
 			case Corruption::BadVersion:
+				header._version = 3;
+				break;
+			case Corruption::DayVersionOnMinuteCache:
 				header._version = 2;
 				break;
 			case Corruption::SizeExceedsCapacity:
@@ -364,7 +374,7 @@ TEST_F(R4WriterADTest, TickCacheAtCapacityResizesFileAndKeepsOldItems)
 		sizeof(RTTickCache) + sizeof(TickCacheItem) * (2u + R4_STEP));
 
 	// 扩容后索引仍然有效（旧下标指向同一条目）
-	TickCacheItem it0;
+	R4TickItemView it0;	// I03-NEW-049: aligned view of the packed cache item
 	ASSERT_TRUE(read_tick_item(path_of("cache_tick.dmb"), 0, it0));
 	EXPECT_STREQ(it0._tick.code, "rb2301");
 	EXPECT_DOUBLE_EQ(it0._tick.price, 3901.0);
@@ -674,7 +684,7 @@ TEST_F(R4WriterADTest, ProcFlagOneOnNewTradingDateRebaselinesCache)
 	EXPECT_DOUBLE_EQ(cur->volume(), 5.0);
 	cur->release();
 
-	TickCacheItem item;
+	R4TickItemView item;	// I03-NEW-049: aligned view of the packed cache item
 	ASSERT_TRUE(read_tick_item(path_of("cache_tick.dmb"), 0, item));
 	EXPECT_EQ(item._date, R4_TD2);
 	EXPECT_EQ(item._tick.pre_interest, s2.pre_interest);
@@ -896,8 +906,9 @@ TEST_F(R4WriterADTest, BarCacheMergesTicksOfDayMinute5AndMinute1)
 	ASSERT_TRUE(read_bar_item(path_of("cache_m5.dmb"), "EXBC", "rb2301", m5));
 
 	EXPECT_EQ(d1._bar.date, R4_TD1);
-	// L601/620：day bar 的 time 被写成 barDate = tradingdate
-	EXPECT_EQ(d1._bar.time, (uint64_t)R4_TD1);
+	// 卡3 3c=C（R4-BUG-13）：新日线 time=0，交易日只在 date 中
+	EXPECT_EQ(d1._bar.time, (uint64_t)0);
+	EXPECT_EQ(read_head(path_of("cache_d1.dmb"))._version, (uint16_t)2);
 	EXPECT_DOUBLE_EQ(d1._bar.open, 3900.0);
 	EXPECT_DOUBLE_EQ(d1._bar.vol, 10.0);
 	EXPECT_EQ(m1._bar.time, (uint64_t)R4_M1_931);
@@ -1068,16 +1079,22 @@ TEST_F(R4WriterADTest, ReleaseWithoutTaskThreadIsInert)
 	write_or_fail(tick_of(ct, s1), 0);
 	ASSERT_EQ(_sink->bcast_tick(), 1u);
 
-	// async 未开启时没有 worker；同步写入保持既有行为。
+	// async 未开启时没有 worker；release 本身无线程可停（惰性）。卡9 写端生命周期 V1：release 后
+	// 公开写入口关闭，新 tick 被拒绝且无副作用（I03-NEW-085 归因；改前期望 release 后仍同步写入）。
 	_writer->release();
 	WTSTickStruct s2 = make_tick("EXRL", "rb2301", R4_TD1, R4_TD1, 93100000, 3910.0, 2, 20, 0, 0, 3, 30);
-	write_or_fail(tick_of(ct, s2), 0);
-	EXPECT_EQ(_sink->bcast_tick(), 2u);
+	WTSTickData* late = tick_of(ct, s2);
+	ASSERT_TRUE(late != NULL);
+	EXPECT_FALSE(_writer->writeTick(late, 0));
+	late->release();
+	EXPECT_EQ(_sink->bcast_tick(), 1u);
 
 	WTSTickData* cur = _writer->getCurTick("rb2301", "EXRL");
-	ASSERT_TRUE(cur != NULL);
-	EXPECT_DOUBLE_EQ(cur->price(), 3910.0);
-	cur->release();
+	if (cur != NULL)
+	{
+		EXPECT_DOUBLE_EQ(cur->price(), 3900.0);
+		cur->release();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

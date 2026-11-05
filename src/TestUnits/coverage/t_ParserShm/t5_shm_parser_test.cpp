@@ -181,12 +181,17 @@ TEST_F(ParserShmTest, init_accepts_full_and_partial_config)
 {
 	WTSVariant* full = makeShmCfg(true);
 	WTSVariant* partial = makeShmCfg(false);
+	// Card 9 (9c=A, iteration 03): the second init on the same parser is
+	// rejected; partial config acceptance is checked on a fresh parser.
 	EXPECT_TRUE(parser_.init(full));
-	EXPECT_TRUE(parser_.init(partial));
+	EXPECT_FALSE(parser_.init(partial));
+	ParserShm fresh;
+	EXPECT_TRUE(fresh.init(partial));
+	EXPECT_FALSE(fresh.isConnected());
 	full->release();
 	partial->release();
 
-	// init 不碰共享内存：状态仍是未连接，且没有任何事件/日志外发
+	// init 不碰共享内存：状态仍是未连接，且没有任何事件外发
 	EXPECT_FALSE(parser_.isConnected());
 	EXPECT_TRUE(sink_.events_.empty());
 	EXPECT_TRUE(sink_.logs_.empty());
@@ -348,8 +353,8 @@ TEST(shm_queue_layout, template_queue_honours_custom_capacity)
 
 /* ------------------------------------------------------- 不能进的路径 */
 
-/// 未 registerSpi 时 _bd_mgr 是构造未初始化的野指针（见 bugs），subscribe 直接解引用
-TEST(ParserShmNoSpi, DISABLED_subscribe_without_register_spi_uses_uninit_bd_mgr)
+/// 迭代03 最终验收复核后启用（原禁用：未 registerSpi 时 _bd_mgr 未初始化）。
+TEST(ParserShmNoSpi, subscribe_without_register_spi_uses_uninit_bd_mgr)
 {
 	ParserShm p;
 	WTSVariant* cfg = makeShmCfg(false);

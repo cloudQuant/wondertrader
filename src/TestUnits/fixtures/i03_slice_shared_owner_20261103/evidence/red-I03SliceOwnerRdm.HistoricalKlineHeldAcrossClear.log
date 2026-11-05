@@ -1,0 +1,105 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03SliceOwnerRdm.HistoricalKlineHeldAcrossClear
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03SliceOwnerRdm
+[ RUN      ] I03SliceOwnerRdm.HistoricalKlineHeldAcrossClear
+=================================================================
+==64535==ERROR: AddressSanitizer: heap-use-after-free on address 0x60f000000428 at pc 0x000102901dfc bp 0x00016d7d19d0 sp 0x00016d7d19c8
+READ of size 8 at 0x60f000000428 thread T0
+    #0 0x000102901df8 in q03::I03SliceOwnerRdm_HistoricalKlineHeldAcrossClear_Test::TestBody()+0x17b0 (i03_slice_rdm:arm64+0x1002d5df8)
+    #1 0x000102a3b7c0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm:arm64+0x10040f7c0)
+    #2 0x000102a3b708 in testing::Test::Run()+0xcc (i03_slice_rdm:arm64+0x10040f708)
+    #3 0x000102a3c2e8 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm:arm64+0x1004102e8)
+    #4 0x000102a3cd6c in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm:arm64+0x100410d6c)
+    #5 0x000102a48194 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm:arm64+0x10041c194)
+    #6 0x000102a47b40 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm:arm64+0x10041bb40)
+    #7 0x000102a47aa4 in testing::UnitTest::Run()+0x78 (i03_slice_rdm:arm64+0x10041baa4)
+    #8 0x000102a28ddc in main+0x40 (i03_slice_rdm:arm64+0x1003fcddc)
+    #9 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x60f000000428 is located 40 bytes inside of 176-byte region [0x60f000000400,0x60f0000004b0)
+freed by thread T0 here:
+    #0 0x0001036dd4d0 in _ZdlPv+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x654d0)
+    #1 0x000102726a1c in void std::__1::__libcpp_deallocate[abi:nqe220108]<wtp::WTSBarStruct>(std::__1::__type_identity<wtp::WTSBarStruct>::type*, std::__1::__element_count, unsigned long)+0x5c (i03_slice_rdm:arm64+0x1000faa1c)
+    #2 0x0001027269a8 in std::__1::allocator<wtp::WTSBarStruct>::deallocate[abi:nqe220108](wtp::WTSBarStruct*, unsigned long)+0x44 (i03_slice_rdm:arm64+0x1000fa9a8)
+    #3 0x00010272627c in std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>::deallocate[abi:nqe220108](std::__1::allocator<wtp::WTSBarStruct>&, wtp::WTSBarStruct*, unsigned long)+0x24 (i03_slice_rdm:arm64+0x1000fa27c)
+    #4 0x000102725f10 in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::__destroy_vector::operator()[abi:nqe220108]()+0x2b8 (i03_slice_rdm:arm64+0x1000f9f10)
+    #5 0x000102725b5c in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::~vector[abi:nqe220108]()+0x164 (i03_slice_rdm:arm64+0x1000f9b5c)
+    #6 0x00010266353c in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::~vector[abi:nqe220108]()+0x34 (i03_slice_rdm:arm64+0x10003753c)
+    #7 0x000102737bb4 in wtp::WtRdmDtReader::_BarsList::~_BarsList()+0x44 (i03_slice_rdm:arm64+0x10010bbb4)
+    #8 0x000102737b5c in wtp::WtRdmDtReader::_BarsList::~_BarsList()+0x34 (i03_slice_rdm:arm64+0x10010bb5c)
+    #9 0x000102737b0c in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>::~pair()+0x38 (i03_slice_rdm:arm64+0x10010bb0c)
+    #10 0x000102737ac0 in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>::~pair()+0x34 (i03_slice_rdm:arm64+0x10010bac0)
+    #11 0x000102737a7c in void std::__1::__destroy_at[abi:nqe220108]<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>>(std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>*)+0x34 (i03_slice_rdm:arm64+0x10010ba7c)
+    #12 0x000102737928 in void std::__1::allocator_traits<std::__1::allocator<std::__1::__hash_node<std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WtRdmDtReader::_BarsList>, void*>>>::destroy[abi:nqe220108]<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>, 0>(std::__1::allocator<std::__1::__hash_node<std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WtRdmDtReader::_BarsList>, void*>>&, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>*)+0x18 (i03_slice_rdm:arm64+0x10010b928)
+    #13 0x0001027377cc in std::__1::__hash_table<std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WtRdmDtReader::_BarsList>, std::__1::__unordered_map_hasher<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::__unordered_map_equal<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>>>::__deallocate_node[abi:nqe220108](std::__1::__hash_node<std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WtRdmDtReader::_BarsList>, void*>*)+0xb8 (i03_slice_rdm:arm64+0x10010b7cc)
+    #14 0x0001027376b0 in std::__1::__hash_table<std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WtRdmDtReader::_BarsList>, std::__1::__unordered_map_hasher<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::__unordered_map_equal<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>>>::__deallocate_node_list[abi:nqe220108](std::__1::__hash_node_base<std::__1::__hash_node<std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WtRdmDtReader::_BarsList>, void*>*>*)+0xf4 (i03_slice_rdm:arm64+0x10010b6b0)
+    #15 0x0001027adcec in std::__1::__hash_table<std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WtRdmDtReader::_BarsList>, std::__1::__unordered_map_hasher<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::__unordered_map_equal<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>>>::clear()+0x110 (i03_slice_rdm:arm64+0x100181cec)
+    #16 0x00010267b000 in std::__1::unordered_map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WtRdmDtReader::_BarsList, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, wtp::WtRdmDtReader::_BarsList>>>::clear[abi:nqe220108]()+0x50 (i03_slice_rdm:arm64+0x10004f000)
+    #17 0x00010267ae98 in wtp::WtRdmDtReader::clearCache()+0x58 (i03_slice_rdm:arm64+0x10004ee98)
+    #18 0x000102901d4c in q03::I03SliceOwnerRdm_HistoricalKlineHeldAcrossClear_Test::TestBody()+0x1704 (i03_slice_rdm:arm64+0x1002d5d4c)
+    #19 0x000102a3b7c0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm:arm64+0x10040f7c0)
+    #20 0x000102a3b708 in testing::Test::Run()+0xcc (i03_slice_rdm:arm64+0x10040f708)
+    #21 0x000102a3c2e8 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm:arm64+0x1004102e8)
+    #22 0x000102a3cd6c in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm:arm64+0x100410d6c)
+    #23 0x000102a48194 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm:arm64+0x10041c194)
+    #24 0x000102a47b40 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm:arm64+0x10041bb40)
+    #25 0x000102a47aa4 in testing::UnitTest::Run()+0x78 (i03_slice_rdm:arm64+0x10041baa4)
+    #26 0x000102a28ddc in main+0x40 (i03_slice_rdm:arm64+0x1003fcddc)
+    #27 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+previously allocated by thread T0 here:
+    #0 0x0001036dd0e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x00010272b2b0 in wtp::WTSBarStruct* std::__1::__libcpp_allocate[abi:nqe220108]<wtp::WTSBarStruct>(std::__1::__element_count, unsigned long)+0x54 (i03_slice_rdm:arm64+0x1000ff2b0)
+    #2 0x00010272b1ec in std::__1::allocator<wtp::WTSBarStruct>::allocate[abi:nqe220108](unsigned long)+0x9c (i03_slice_rdm:arm64+0x1000ff1ec)
+    #3 0x00010272ace4 in std::__1::__allocation_result<std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>::pointer, std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>::size_type> std::__1::__allocate_at_least[abi:nqe220108]<std::__1::allocator<wtp::WTSBarStruct>, std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>>(std::__1::allocator<wtp::WTSBarStruct>&, unsigned long)+0x114 (i03_slice_rdm:arm64+0x1000fece4)
+    #4 0x00010272a9a8 in std::__1::__split_buffer<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<wtp::WTSBarStruct>&)+0xc4 (i03_slice_rdm:arm64+0x1000fe9a8)
+    #5 0x00010272948c in std::__1::__split_buffer<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<wtp::WTSBarStruct>&)+0x4c (i03_slice_rdm:arm64+0x1000fd48c)
+    #6 0x000102662494 in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::resize(unsigned long)+0x1f4 (i03_slice_rdm:arm64+0x100036494)
+    #7 0x00010265e568 in wtp::WtRdmDtReader::cacheHisBarsFromFile(void*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, char const*, wtp::tagKlinePeriod)+0x6ad8 (i03_slice_rdm:arm64+0x100032568)
+    #8 0x000102669004 in wtp::WtRdmDtReader::readKlineSliceByRange(char const*, wtp::tagKlinePeriod, unsigned long long, unsigned long long)+0x9b0 (i03_slice_rdm:arm64+0x10003d004)
+    #9 0x0001029011cc in q03::I03SliceOwnerRdm_HistoricalKlineHeldAcrossClear_Test::TestBody()+0xb84 (i03_slice_rdm:arm64+0x1002d51cc)
+    #10 0x000102a3b7c0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm:arm64+0x10040f7c0)
+    #11 0x000102a3b708 in testing::Test::Run()+0xcc (i03_slice_rdm:arm64+0x10040f708)
+    #12 0x000102a3c2e8 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm:arm64+0x1004102e8)
+    #13 0x000102a3cd6c in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm:arm64+0x100410d6c)
+    #14 0x000102a48194 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm:arm64+0x10041c194)
+    #15 0x000102a47b40 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm:arm64+0x10041bb40)
+    #16 0x000102a47aa4 in testing::UnitTest::Run()+0x78 (i03_slice_rdm:arm64+0x10041baa4)
+    #17 0x000102a28ddc in main+0x40 (i03_slice_rdm:arm64+0x1003fcddc)
+    #18 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: heap-use-after-free (i03_slice_rdm:arm64+0x1002d5df8) in q03::I03SliceOwnerRdm_HistoricalKlineHeldAcrossClear_Test::TestBody()+0x17b0
+Shadow bytes around the buggy address:
+  0x60f000000180: 00 00 00 00 00 00 00 00 00 00 00 00 fa fa fa fa
+  0x60f000000200: fa fa fa fa fd fd fd fd fd fd fd fd fd fd fd fd
+  0x60f000000280: fd fd fd fd fd fd fd fd fd fd fa fa fa fa fa fa
+  0x60f000000300: fa fa fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x60f000000380: fd fd fd fd fd fd fd fd fa fa fa fa fa fa fa fa
+=>0x60f000000400: fd fd fd fd fd[fd]fd fd fd fd fd fd fd fd fd fd
+  0x60f000000480: fd fd fd fd fd fd fa fa fa fa fa fa fa fa fa fa
+  0x60f000000500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x60f000000580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x60f000000600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x60f000000680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==64535==ABORTING

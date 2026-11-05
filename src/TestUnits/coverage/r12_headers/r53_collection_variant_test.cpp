@@ -2,7 +2,7 @@
 // 覆盖：WTSArray resize/排序/迭代器/idxOf/grab、WTSMap 边界与 last()、
 //       WTSHashMap find/remove/clear、WTSQueue front/back 与迭代器、WTSStack 空栈路径；
 //       WTSVariant Int64/UInt64、容器与缺失键转换、嵌套子对象/数组、release 计数。
-// 说明：全部为内存容器，不读写外部资源；WTSMap::erase 不释放元素的缺陷用 DISABLED 记录。
+// 说明：全部为内存容器，不读写外部资源；WTSMap::erase 释放合同按迭代03 卡12 12a=A 启用断言。
 #include <gtest/gtest.h>
 
 #include <cstdint>
@@ -253,8 +253,13 @@ TEST(r53_containers, hashmap_queue_stack_lifecycle)
 	stack->push(a);
 	EXPECT_EQ(stack->size(), 1u);
 	EXPECT_EQ(stack->top(), a);
-	EXPECT_EQ(stack->pop(), a);
+	// 卡12 12b=C：pop 返回拥有引用（计数仍为 2），调用方须 release 一次；
+	// 旧 oracle 期待 pop 后为 1，即旧实现返回前 release 的行为（BUG-R12-14）。
+	WTSObject* popped = stack->pop();
+	EXPECT_EQ(popped, a);
 	EXPECT_TRUE(stack->empty());
+	EXPECT_EQ(a->retainCount(), 2u);
+	popped->release();
 	EXPECT_EQ(a->retainCount(), 1u);
 	stack->push(b);
 	stack->clear();
@@ -371,9 +376,9 @@ TEST(r53_variant, nested_children_and_member_names)
 	root->release();	// child/list 引用计数归零由父容器释放
 }
 
-// WTSCollection.hpp:494-510（BUG-R53-002）：erase(key) 只从 std::map 摘除，不 release。
-// 期望：erase 与 remove 一样把元素引用计数减一；实际：引用计数保持 2，元素泄漏。
-TEST(DISABLED_r53_map, erase_by_key_does_not_release_element)
+// BUG-R53-002 / 卡12 12a=A（2026-11-03 裁定）：erase(key) 与 remove 一样释放容器持有的引用。
+// 原用例因合同未定而 DISABLED，oracle 本身（2→1）与裁定一致，裁定后重新启用并改名。
+TEST(r53_map, erase_by_key_releases_container_reference)
 {
 	WTSMap<int>* map = WTSMap<int>::create();
 	ASSERT_NE(map, nullptr);

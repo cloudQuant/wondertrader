@@ -1,0 +1,93 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R111CtaMocker.*:R111ExecMocker.*:R111UftMocker.*:R111ReplayerEnv.*
+[==========] Running 33 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 7 tests from R111CtaMocker
+[ RUN      ] R111CtaMocker.FactoryCreateAndStrategyDispatch
+WtStraDualThrust::init begins
+WtStraDualThrust::init ends
+[       OK ] R111CtaMocker.FactoryCreateAndStrategyDispatch (15 ms)
+[ RUN      ] R111CtaMocker.FactoryDestructorUsesPluginByValueDeleteAbi
+WtStraDualThrust::init begins
+WtStraDualThrust::init ends
+[       OK ] R111CtaMocker.FactoryDestructorUsesPluginByValueDeleteAbi (6 ms)
+[ RUN      ] R111CtaMocker.FactoryRejectsMissingModuleAndCanRetry
+WtStraDualThrust::init begins
+WtStraDualThrust::init ends
+[       OK ] R111CtaMocker.FactoryRejectsMissingModuleAndCanRetry (5 ms)
+[ RUN      ] R111CtaMocker.FactoryRejectsMissingStrategyAndUnknownStrategy
+[       OK ] R111CtaMocker.FactoryRejectsMissingStrategyAndUnknownStrategy (6 ms)
+[ RUN      ] R111CtaMocker.FactoryRejectsStrategyInitializationFailure
+WtStraDualThrust::init begins
+[       OK ] R111CtaMocker.FactoryRejectsStrategyInitializationFailure (5 ms)
+[ RUN      ] R111CtaMocker.FailedStrategyDeletePinsPluginAndRejectsInitializationRetry
+[       OK ] R111CtaMocker.FailedStrategyDeletePinsPluginAndRejectsInitializationRetry (5 ms)
+[ RUN      ] R111CtaMocker.RatioSlippageOnSignalFill
+[       OK ] R111CtaMocker.RatioSlippageOnSignalFill (12 ms)
+[----------] 7 tests from R111CtaMocker (56 ms total)
+
+[----------] 16 tests from R111ExecMocker
+[ RUN      ] R111ExecMocker.RealPluginLifecycleUsesExportedDeleterAbi
+[       OK ] R111ExecMocker.RealPluginLifecycleUsesExportedDeleterAbi (7 ms)
+[ RUN      ] R111ExecMocker.SecondInitIsRejectedAndOriginalUnitRemainsUsable
+[       OK ] R111ExecMocker.SecondInitIsRejectedAndOriginalUnitRemainsUsable (5 ms)
+[ RUN      ] R111ExecMocker.UnknownExecuterNameFailsAndReleasesFactory
+[       OK ] R111ExecMocker.UnknownExecuterNameFailsAndReleasesFactory (5 ms)
+[ RUN      ] R111ExecMocker.PluginWithoutExecuterFactoryExportFailsSafely
+[       OK ] R111ExecMocker.PluginWithoutExecuterFactoryExportFailsSafely (5 ms)
+[ RUN      ] R111ExecMocker.MissingExecuterConfigurationFailsWithDiagnostic
+[       OK ] R111ExecMocker.MissingExecuterConfigurationFailsWithDiagnostic (12 ms)
+[ RUN      ] R111ExecMocker.InitWithRealExecuterAndInitSchedule
+[       OK ] R111ExecMocker.InitWithRealExecuterAndInitSchedule (7 ms)
+[ RUN      ] R111ExecMocker.BuiltInV2TwapRejectsZeroTotalTimesAndAcceptsPositiveControl
+[       OK ] R111ExecMocker.BuiltInV2TwapRejectsZeroTotalTimesAndAcceptsPositiveControl (9 ms)
+[ RUN      ] R111ExecMocker.EntrustOrderTradeAndReplayDump
+[       OK ] R111ExecMocker.EntrustOrderTradeAndReplayDump (6 ms)
+[ RUN      ] R111ExecMocker.ScheduleNegativeAndPositiveVolumeModes
+[       OK ] R111ExecMocker.ScheduleNegativeAndPositiveVolumeModes (5 ms)
+[ RUN      ] R111ExecMocker.RejectsShortAndUnverifiablePluginTables
+[       OK ] R111ExecMocker.RejectsShortAndUnverifiablePluginTables (5452 ms)
+[ RUN      ] R111ExecMocker.PluginQuiesceUsesFactoryPreflightRequestCanWaitWaitThenDestroy
+[       OK ] R111ExecMocker.PluginQuiesceUsesFactoryPreflightRequestCanWaitWaitThenDestroy (16 ms)
+[ RUN      ] R111ExecMocker.OtherThreadPluginCallbackDoesNotBlockControlThreadPreflight
+[       OK ] R111ExecMocker.OtherThreadPluginCallbackDoesNotBlockControlThreadPreflight (23 ms)
+[ RUN      ] R111ExecMocker.FailedQuiesceRequestRetainsAllPluginOwnersUntilRetrySucceeds
+[       OK ] R111ExecMocker.FailedQuiesceRequestRetainsAllPluginOwnersUntilRetrySucceeds (493 ms)
+[ RUN      ] R111ExecMocker.FailedWaitRetainsPluginOwnersAndRequiresFreshCanWaitBeforeRetry
+[       OK ] R111ExecMocker.FailedWaitRetainsPluginOwnersAndRequiresFreshCanWaitBeforeRetry (459 ms)
+[ RUN      ] R111ExecMocker.FailedFactoryPreflightSendsNoRequestAndCanBeRetried
+[       OK ] R111ExecMocker.FailedFactoryPreflightSendsNoRequestAndCanBeRetried (16 ms)
+[ RUN      ] R111ExecMocker.CanStopPreflightFailureDefersWithoutChangingRequestState
+[       OK ] R111ExecMocker.CanStopPreflightFailureDefersWithoutChangingRequestState (11 ms)
+[----------] 16 tests from R111ExecMocker (6538 ms total)
+
+[----------] 3 tests from R111ReplayerEnv
+[ RUN      ] R111ReplayerEnv.NotifierBarRunStateAndDump
+[       OK ] R111ReplayerEnv.NotifierBarRunStateAndDump (8 ms)
+[ RUN      ] R111ReplayerEnv.EmptyRunsNotifyBacktestEnd
+[       OK ] R111ReplayerEnv.EmptyRunsNotifyBacktestEnd (16 ms)
+[ RUN      ] R111ReplayerEnv.AdjustedSuffixSubscriptionsAndCheckUnbars
+[       OK ] R111ReplayerEnv.AdjustedSuffixSubscriptionsAndCheckUnbars (6 ms)
+[----------] 3 tests from R111ReplayerEnv (31 ms total)
+
+[----------] 7 tests from R111UftMocker
+[ RUN      ] R111UftMocker.FactoryCreateAndEventDispatch
+[       OK ] R111UftMocker.FactoryCreateAndEventDispatch (7 ms)
+[ RUN      ] R111UftMocker.FactoryRejectsMissingStrategyAndEmptyOrMissingName
+[       OK ] R111UftMocker.FactoryRejectsMissingStrategyAndEmptyOrMissingName (5 ms)
+[ RUN      ] R111UftMocker.FactoryRejectsUnknownStrategyAndCleansPlugin
+[       OK ] R111UftMocker.FactoryRejectsUnknownStrategyAndCleansPlugin (5 ms)
+[ RUN      ] R111UftMocker.RealSimpleUftRejectsMissingParamsWithoutCrash
+[uft] SimpleUft rejected params: params must be an object
+[       OK ] R111UftMocker.RealSimpleUftRejectsMissingParamsWithoutCrash (5 ms)
+[ RUN      ] R111UftMocker.FactoryRejectsStrategyInitFalseAndCleansInOrder
+[       OK ] R111UftMocker.FactoryRejectsStrategyInitFalseAndCleansInOrder (4 ms)
+[ RUN      ] R111UftMocker.ControlledSuccessfulInitDeletesStrategyBeforeFactory
+[       OK ] R111UftMocker.ControlledSuccessfulInitDeletesStrategyBeforeFactory (4 ms)
+[ RUN      ] R111UftMocker.SessionFreezeReleaseEnumAndUnknownCommodity
+[       OK ] R111UftMocker.SessionFreezeReleaseEnumAndUnknownCommodity (5 ms)
+[----------] 7 tests from R111UftMocker (38 ms total)
+
+[----------] Global test environment tear-down
+[==========] 33 tests from 4 test suites ran. (6664 ms total)
+[  PASSED  ] 33 tests.

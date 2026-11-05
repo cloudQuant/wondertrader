@@ -1,0 +1,10 @@
+--- /tmp/wt-i03-r93-006-20261102/root-baseline.txt	2026-11-02 12:16:42
++++ /tmp/wt-i03-r93-006-20261102/snapshot/src/CMakeLists.txt	2026-11-02 12:00:45
+@@ -11,6 +11,7 @@
+ # 添加boost
+ find_package(Boost REQUIRED COMPONENTS system filesystem thread)
+ include_directories(${Boost_INCLUDE_DIRS})
++include_directories(BEFORE /opt/homebrew/Cellar/boost/1.88.0/include)
+ link_directories(${Boost_LIBRARY_DIRS})
+ # 添加rapidjson
+ find_package(RapidJSON REQUIRED)

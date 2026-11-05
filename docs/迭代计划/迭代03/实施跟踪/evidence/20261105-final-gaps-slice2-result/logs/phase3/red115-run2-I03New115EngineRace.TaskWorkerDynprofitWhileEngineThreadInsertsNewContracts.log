@@ -1,0 +1,40 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03New115EngineRace.TaskWorkerDynprofitWhileEngineThreadInsertsNewContracts
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03New115EngineRace
+[ RUN      ] I03New115EngineRace.TaskWorkerDynprofitWhileEngineThreadInsertsNewContracts
+[I03-NEW-115] 8000 inserts in 786 ms, worker drained after 787 ms
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new115_engine_pos_race_test.cpp:318: Failure
+Failed
+SHFE.rb.7551 found=true volume=1 dynprofit=0 details=1
+Google Test trace:
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new115_engine_pos_race_test.cpp:379: round 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new115_engine_pos_race_test.cpp:323: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  badPositions
+    Which is: 1
+Google Test trace:
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new115_engine_pos_race_test.cpp:379: round 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new115_engine_pos_race_test.cpp:339: Failure
+Expected equality of these values:
+  (opened - closes) * kLotProfit
+    Which is: 360050
+  fund._dynprofit
+    Which is: 360000
+Google Test trace:
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new115_engine_pos_race_test.cpp:379: round 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new115_engine_pos_race_test.cpp:351: Failure
+Expected equality of these values:
+  (opened - closes) * kLotProfit
+    Which is: 360050
+  jFund->getDouble("dynprofit")
+    Which is: 360000
+Google Test trace:
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new115_engine_pos_race_test.cpp:379: round 0
+

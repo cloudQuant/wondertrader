@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="5" failures="1" disabled="0" errors="0" time="0.003" timestamp="2026-11-02T07:25:52.413" name="AllTests">
+  <testsuite name="r7_stkvw" tests="5" failures="1" disabled="0" skipped="0" errors="0" time="0.003" timestamp="2026-11-02T07:25:52.414">
+    <testcase name="unrepresentable_session_date_does_not_advance_high_water_or_order" file="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp" line="1114" status="run" result="completed" time="0.002" timestamp="2026-11-02T07:25:52.414" classname="r7_stkvw">
+      <failure message="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1139&#x0A;Value of: ctx.buys.empty()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1139
+Value of: ctx.buys.empty()
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1141&#x0A;Expected equality of these values:&#x0A;  unit._tick_time_high_water&#x0A;    Which is: 99991231220000000&#x0A;  0u&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1141
+Expected equality of these values:
+  unit._tick_time_high_water
+    Which is: 99991231220000000
+  0u
+    Which is: 0
+]]></failure>
+      <failure message="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1142&#x0A;Expected equality of these values:&#x0A;  unit._high_water_action_date&#x0A;    Which is: 99991231&#x0A;  0u&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1142
+Expected equality of these values:
+  unit._high_water_action_date
+    Which is: 99991231
+  0u
+    Which is: 0
+]]></failure>
+      <failure message="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1143&#x0A;Expected equality of these values:&#x0A;  unit._high_water_action_time&#x0A;    Which is: 220000000&#x0A;  0u&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1143
+Expected equality of these values:
+  unit._high_water_action_time
+    Which is: 220000000
+  0u
+    Which is: 0
+]]></failure>
+      <failure message="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1145&#x0A;Value of: ctx.hasLog(&quot;session-adjusted date cannot be verified&quot;)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1145
+Value of: ctx.hasLog("session-adjusted date cannot be verified")
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1144&#x0A;Value of: unit._unsupported_date_contract&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1144
+Value of: unit._unsupported_date_contract
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1145&#x0A;Value of: ctx.hasLog(&quot;session-adjusted date cannot be verified&quot;)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1145
+Value of: ctx.hasLog("session-adjusted date cannot be verified")
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1151&#x0A;Expected equality of these values:&#x0A;  ctx.buys.size()&#x0A;    Which is: 0&#x0A;  1u&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1151
+Expected equality of these values:
+  ctx.buys.size()
+    Which is: 0
+  1u
+    Which is: 1
+]]></failure>
+    </testcase>
+    <testcase name="v2_profile_selects_night_session_and_maps_tick" file="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp" line="1162" status="run" result="completed" time="0." timestamp="2026-11-02T07:25:52.416" classname="r7_stkvw" />
+    <testcase name="natural_action_date_increment_keeps_midnight_retry_fresh" file="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp" line="1187" status="run" result="completed" time="0." timestamp="2026-11-02T07:25:52.416" classname="r7_stkvw" />
+    <testcase name="unchanged_action_date_across_midnight_is_rejected_as_unsupported" file="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp" line="1217" status="run" result="completed" time="0." timestamp="2026-11-02T07:25:52.417" classname="r7_stkvw" />
+    <testcase name="trading_day_action_date_combo_from_unsupported_provider_is_rejected" file="src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp" line="1244" status="run" result="completed" time="0." timestamp="2026-11-02T07:25:52.417" classname="r7_stkvw" />
+  </testsuite>
+</testsuites>

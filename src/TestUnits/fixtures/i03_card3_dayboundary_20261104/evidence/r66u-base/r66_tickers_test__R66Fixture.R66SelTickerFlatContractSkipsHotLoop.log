@@ -1,0 +1,51 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R66Fixture.R66SelTickerFlatContractSkipsHotLoop
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R66Fixture
+[ RUN      ] R66Fixture.R66SelTickerFlatContractSkipsHotLoop
+/private/tmp/wt-i03-card3-20261104/r66u-base/snapshot/src/TestUnits/coverage/q01_wtcore3/r66_tickers_test.cpp:393: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  engine->count("SHFE.au.2212")
+    Which is: 0
+
+/private/tmp/wt-i03-card3-20261104/r66u-base/snapshot/src/TestUnits/coverage/q01_wtcore3/r66_tickers_test.cpp:395: Failure
+Expected equality of these values:
+  480.0
+    Which is: 480
+  engine->get_cur_price("SHFE.au.2212")
+    Which is: 0
+
+/private/tmp/wt-i03-card3-20261104/r66u-base/snapshot/src/TestUnits/coverage/q01_wtcore3/r66_tickers_test.cpp:397: Failure
+Expected equality of these values:
+  20991231u
+    Which is: 20991231
+  engine->get_date()
+    Which is: 20231010
+
+/private/tmp/wt-i03-card3-20261104/r66u-base/snapshot/src/TestUnits/coverage/q01_wtcore3/r66_tickers_test.cpp:398: Failure
+Expected equality of these values:
+  932u
+    Which is: 932
+  engine->get_min_time()
+    Which is: 900
+
+/private/tmp/wt-i03-card3-20261104/r66u-base/snapshot/src/TestUnits/coverage/q01_wtcore3/r66_tickers_test.cpp:410: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  engine->count("SHFE.au.2212")
+    Which is: 1
+
+[  FAILED  ] R66Fixture.R66SelTickerFlatContractSkipsHotLoop (3 ms)
+[----------] 1 test from R66Fixture (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R66Fixture.R66SelTickerFlatContractSkipsHotLoop
+
+ 1 FAILED TEST

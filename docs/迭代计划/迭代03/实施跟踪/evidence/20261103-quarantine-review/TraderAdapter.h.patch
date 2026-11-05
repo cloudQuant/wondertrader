@@ -1,0 +1,60 @@
+--- /tmp/i03_quarantine_baseline_20261103/TraderAdapter.h	2026-11-03 16:53:03
++++ src/WtCore/TraderAdapter.h	2026-11-03 17:02:09
+@@ -21,6 +21,7 @@
+ #include "../Share/SpinMutex.hpp"
+ #include "../Share/FrequencyWindow.hpp"
+ 
++#include <atomic>
+ #include <condition_variable>
+ #include <cstdint>
+ #include <deque>
+@@ -40,6 +41,7 @@
+ class WTSCommodityInfo;
+ class WtLocalExecuter;
+ class EventNotifier;
++class UnresolvedReportJournal;
+ 
+ class ITrdNotifySink;
+ 
+@@ -65,6 +67,18 @@
+ public:
+ 	friend struct N01TraderAdapterRiskTestAccess;
+ 
++	// A versioned WTS-visible snapshot, not a provider SDK payload.
++	struct UnresolvedTradeReport
++	{
++		std::string payload;
++		std::string diagnostic;
++		uint64_t journal_sequence = 0;
++		bool persisted = false;
++	};
++	bool isUnresolvedReportPaused() const noexcept;
++	std::vector<UnresolvedTradeReport> unresolvedTradeReports() const;
++	std::string unresolvedReportDiagnostic() const;
++
+ 	/*!
+ 	 * \brief 构造函数
+ 	 * \param caster 事件通知器指针，默认为NULL
+@@ -373,6 +387,9 @@
+ 	static bool isInAnySinkCallback();
+ 	bool sinkCallbacksDrainedLocked() const;
+ 
++	void configureUnresolvedJournal(const std::string& path);
++	void quarantineTrade(const WTSTradeInfo* trade, const char* reason);
++
+ 	uint32_t doEntrust(WTSEntrust* entrust);
+ 	bool	doCancel(WTSOrderInfo* ordInfo);
+ 
+@@ -682,6 +699,12 @@
+ 	bool	_sink_notifications_stopping = false;
+ 	std::condition_variable	_sink_notifications_idle;
+ 
++	std::atomic<bool> _unresolved_report_paused{false};
++	mutable std::mutex _unresolved_report_mutex;
++	std::shared_ptr<UnresolvedReportJournal> _unresolved_journal;
++	std::vector<UnresolvedTradeReport> _unresolved_reports;
++	std::string _unresolved_diagnostic{"journal not configured"};
++
+ 	IBaseDataMgr*		_bd_mgr;				///< 基础数据管理器
+ 	ActionPolicyMgr*	_policy_mgr;			///< 动作策略管理器
+ 

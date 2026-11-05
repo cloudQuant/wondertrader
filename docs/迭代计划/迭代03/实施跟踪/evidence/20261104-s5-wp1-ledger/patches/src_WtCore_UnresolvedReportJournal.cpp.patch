@@ -1,0 +1,35 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before/src/WtCore/UnresolvedReportJournal.cpp	2026-11-02 16:59:58
++++ src/WtCore/UnresolvedReportJournal.cpp	2026-11-04 20:21:45
+@@ -396,14 +396,26 @@
+ {
+ #if defined(__APPLE__)
+ 	(void)directory;
+-	errno = 0;
+-	acl_t acl = acl_get_fd_np(fd, ACL_TYPE_EXTENDED);
+-	if (acl != NULL)
++	// An existing ACL is always returned as an object. In a forked child the
++	// first lookup can fail spuriously with EINVAL (observed on macOS 26), so
++	// EINVAL/EINTR are retried a bounded number of times; any other error, or
++	// a persistent one, still fails closed.
++	for (int attempt = 0; attempt < 3; ++attempt)
+ 	{
+-		acl_free(acl);
+-		return false;
++		errno = 0;
++		acl_t acl = acl_get_fd_np(fd, ACL_TYPE_EXTENDED);
++		if (acl != NULL)
++		{
++			acl_free(acl);
++			return false;
++		}
++		const int error = errno;
++		if (error == ENOENT || error == ENODATA || error == ENOATTR)
++			return true;
++		if (error != EINVAL && error != EINTR)
++			return false;
+ 	}
+-	return errno == ENOENT || errno == ENODATA || errno == ENOATTR;
++	return false;
+ #elif defined(__linux__)
+ 	const char* names[] = { "system.posix_acl_access", "system.posix_acl_default" };
+ 	const size_t count = directory ? 2 : 1;

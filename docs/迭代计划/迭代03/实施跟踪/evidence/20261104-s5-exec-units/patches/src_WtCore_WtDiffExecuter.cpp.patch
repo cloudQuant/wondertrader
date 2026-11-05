@@ -1,0 +1,157 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/WtCore/WtDiffExecuter.cpp	2026-11-04 09:06:40
++++ src/WtCore/WtDiffExecuter.cpp	2026-11-04 17:51:28
+@@ -255,6 +255,7 @@
+ 		// reference it; fail closed before any member owner is released.
+ 		std::terminate();
+ 	}
++	account_net_limits::Registry::instance().release(this);
+ }
+ 
+ WtDiffExecuter::QuiesceIngress::QuiesceIngress(WtDiffExecuter* owner)
+@@ -675,6 +676,23 @@
+ 	_trader = adapter;
+ 	if (_trader != NULL)
+ 		_trader->declareOwnerSink(this, ExecOwnerModes::ownerId(name()));
++
++	// Card 8 / BUG-P02-005: targets restored by load_data() are already
++	// committed; publish them (unchecked) so the other executers of this
++	// account include them in the shared per-contract net-limit judgement.
++	const std::shared_ptr<const void> accountKeepalive = _trader ?
++		std::shared_ptr<const void>(_trader->accountGate()) : std::shared_ptr<const void>();
++	const void* accountKey = accountKeepalive ? accountKeepalive.get() : static_cast<const void*>(this);
++	std::lock_guard<std::mutex> updateLock(_position_update_mutex);
++	std::lock_guard<std::mutex> positionLock(_position_mutex);
++	account_net_limits::Positions accountTargets;
++	for (const auto& item : _target_pos)
++		if (item.second != 0.0) accountTargets[item.first] = item.second;
++	account_net_limits::Positions previousAccount;
++	const void* previousAccountKey = NULL;
++	std::string ignored;
++	(void)account_net_limits::Registry::instance().apply(accountKey, accountKeepalive, this, _name,
++		_account_limits, accountTargets, previousAccount, previousAccountKey, ignored, true);
+ }
+ 
+ /**
+@@ -697,6 +715,9 @@
+ 		error = "scale must be a finite positive number";
+ 		return false;
+ 	}
++	account_net_limits::Limits accountLimits;
++	if (!account_net_limits::parse(params, accountLimits, error))
++		return false;
+ 	return exec_policy_config::validatePolicy(params, error);
+ }
+ 
+@@ -721,6 +742,15 @@
+ 		return false;
+ 	}
+ 
++	account_net_limits::Limits accountLimits;
++	std::string accountError;
++	if (!account_net_limits::parse(params, accountLimits, accountError))
++	{
++		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid account limits: {}", accountError);
++		return false;
++	}
++	_account_limits = accountLimits;
++
+ 	_config = params;
+ 	_config->retain();
+ 
+@@ -1461,8 +1491,24 @@
+ 		}
+ 		std::string failureReason = reason ? reason : "unknown execution-unit initialization failure";
+ 		bool persistFailure = false;
++		// ABI 2.2 (IExecPluginV2.h): initialize returned failure normally and the
++		// host's immediate destroy_unit also returned normally, so no plugin-owned
++		// work or unit survives. Old-ABI and unproven failures stay fail-closed.
++		const bool failedInitCleanupProven = unit != NULL &&
++			unit->failedInitializationWasSafelyDestroyed();
+ 		{
+ 			std::lock_guard<std::mutex> lock(state->mutex);
++			// Targets and diffs are committed to the ledger before getUnit() runs
++			// (submitPositionTargets), and registerCreatedUnit() snapshots the
++			// latest diff under _position_update_mutex, which this failure path
++			// also holds. A retry generation therefore cannot observe a stale
++			// ledger. It is allowed only if this generation was never registered
++			// and accepted no host callback work that would be discarded here.
++			const bool acceptedHostWork = !state->callback_events.empty() ||
++				state->callback_active || state->callback_failed || state->result != NULL;
++			if (state->retry_blocked && failedInitCleanupProven && mappedUnit == NULL &&
++				!acceptedHostWork)
++				state->retry_blocked = false;
+ 			persistFailure = state->retry_blocked;
+ 			if (persistFailure)
+ 				failureReason += " (automatic retry disabled: plugin side effects may have occurred)";
+@@ -1527,9 +1573,18 @@
+ 			std::lock_guard<std::mutex> lock(state->mutex);
+ 			state->retry_blocked = true;
+ 		}
+-		unit = _factory->createDiffExeUnit(name);
++		bool pluginEntered = true;
++		unit = _factory->createDiffExeUnit(name, pluginEntered);
+ 		if (unit == NULL)
++		{
++			// A host-side factory rejection ran no plugin code; keep it retryable.
++			if (!pluginEntered)
++			{
++				std::lock_guard<std::mutex> lock(state->mutex);
++				state->retry_blocked = false;
++			}
+ 			return failCreation("execution-unit creation failed");
++		}
+ 		std::string error;
+ 		if (!unit->initialize(this, stdCode, cfg, error, true) || unit->self() == NULL)
+ 			return failCreation(error.empty() ? "plugin initialization failed" : error.c_str());
+@@ -2032,6 +2087,9 @@
+ 	std::vector<Drain> drains;
+ 	std::vector<std::string> createCodes;
+ 	bool persisted = true;
++	const std::shared_ptr<const void> accountKeepalive = _trader ?
++		std::shared_ptr<const void>(_trader->accountGate()) : std::shared_ptr<const void>();
++	const void* accountKey = accountKeepalive ? accountKeepalive.get() : static_cast<const void*>(this);
+ 	{
+ 		std::lock_guard<std::mutex> updateLock(_position_update_mutex);
+ 		if (!incremental && _last_committed_batch_ticket > ticket) return;
+@@ -2090,6 +2148,22 @@
+ 					if (!valid) break;
+ 				}
+ 			if (!valid) return;
++			// Card 8 / BUG-P02-005: the complete target set (already scaled to
++			// trader quantity) must keep every contract's account net position
++			// within the limit shared by all executers on this account.
++			account_net_limits::Positions accountTargets;
++			for (const auto& item : nextTargets)
++				if (item.second != 0.0) accountTargets[item.first] = item.second;
++			account_net_limits::Positions previousAccount;
++			const void* previousAccountKey = NULL;
++			std::string accountError;
++			if (!account_net_limits::Registry::instance().apply(accountKey, accountKeepalive, this, _name,
++				_account_limits, accountTargets, previousAccount, previousAccountKey, accountError))
++			{
++				WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "[{}] Target batch rejected: {}",
++					_name, accountError);
++				return;
++			}
+ 			_target_pos.swap(nextTargets);
+ 			_diff_pos.swap(nextDiffs);
+ 			_target_versions.swap(nextVersions);
+@@ -2419,10 +2493,16 @@
+ 		}
+ 	}
+ 	// A persisted diff may not have a unit yet. Creating it while the channel is
+-	// ready queues its ready notification and recovery in that order.
++	// ready queues its ready notification and recovery in that order. Do not
++	// wait for another thread's in-flight creation: its ledger entry is already
++	// committed, and registerCreatedUnit() observes _channel_ready under the same
++	// update lock, so it queues ready + recovery itself. Waiting here would block
++	// the adapter callback thread behind plugin initialization (card 9d=A) and
++	// deadlocks when that initialization waits for this thread.
+ 	for (const std::string& code : diffCodes)
+ 	{
+-		if (getUnit(code.c_str()) == NULL)
++		bool pending = false;
++		if (getUnit(code.c_str(), true, false, &pending) == NULL && !pending)
+ 			_quiesce_incomplete.store(true, std::memory_order_release);
+ 	}
+ 

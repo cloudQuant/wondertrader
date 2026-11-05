@@ -44,7 +44,18 @@ private:
 
 	uint32_t	makeTradeID();
 	uint32_t	makeOrderID();
-	ITraderSpi*	get_listener() const { return _listener.load(std::memory_order_acquire); }
+	// BUG-R60-001: once stop has been requested (release()/disconnect(), from any
+	// thread) this instance delivers nothing more to its listener. Every delivery
+	// re-reads the listener through this gate, and all deliveries are serialized
+	// by _mtx_awaits, so a stop requested inside one callback isolates every later
+	// callback of the same (still alive) instance from the host and from any new
+	// session object that reuses the same listener.
+	ITraderSpi*	get_listener() const
+	{
+		if (_delivery_closed.load(std::memory_order_acquire))
+			return NULL;
+		return _listener.load(std::memory_order_acquire);
+	}
 
 	void		load_positions();
 	void		save_positions();
@@ -58,6 +69,33 @@ private:
 	// ownership-safe generation boundary.
 	std::mutex		_request_mutex;
 	bool			_requests_closed = false;
+	// BUG-T6-009 / card 9c: a successfully initialized instance rejects init().
+	bool			_initialized = false;
+
+	// BUG-T6-009 / card 9b,9d: final stop/join is serialized by this mutex and
+	// only performed from a thread that is not one of this adapter's own
+	// workers. A release()/disconnect() issued from a callback on the io worker
+	// or the matcher closes admission and requests stop, and the join is
+	// completed later by an external release(), the destructor, or never (the
+	// factory remover quarantines an instance it cannot prove has stopped).
+	std::mutex		_release_mutex;
+	bool			_released = false;
+	std::atomic<bool>	_match_started{ false };
+	// BUG-R60-001: closed together with request admission; see get_listener().
+	std::atomic<bool>	_delivery_closed{ false };
+
+	bool		on_own_thread() const;
+	void		request_stop_from_callback();
+	void		join_matcher_locked();
+
+public:
+	// Factory-remover support (card 9a/9b): true when the caller runs on this
+	// instance's io worker or matcher thread.
+	bool		is_callback_thread() const { return on_own_thread(); }
+	// Quarantine support: detach this instance's threads (they exit on their own
+	// after the stop request) so nothing is left unjoined; the object is never freed.
+	void		detach_for_quarantine();
+private:
 
 	StdUniqueMutex		_mutex_api;
 

@@ -1,0 +1,61 @@
+[==========] Running 19 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 19 tests from Wp1Test
+[ RUN      ] Wp1Test.SharedAccountPauseClosesEverySiblingAdapter
+[       OK ] Wp1Test.SharedAccountPauseClosesEverySiblingAdapter (1152 ms)
+[ RUN      ] Wp1Test.AutomaticCancelIsBlockedWhileAccountPaused
+[       OK ] Wp1Test.AutomaticCancelIsBlockedWhileAccountPaused (866 ms)
+[ RUN      ] Wp1Test.MonthCodeContractKeepsThreeToSixDigitsAndRejectsOthers
+[       OK ] Wp1Test.MonthCodeContractKeepsThreeToSixDigitsAndRejectsOthers (1055 ms)
+[ RUN      ] Wp1Test.NonDigitMonthTradeIsQuarantinedAndLongMonthKeptIntact
+[       OK ] Wp1Test.NonDigitMonthTradeIsQuarantinedAndLongMonthKeptIntact (870 ms)
+[ RUN      ] Wp1Test.DirectOrderReservesAndDuplicateCancelReleasesOnce
+[       OK ] Wp1Test.DirectOrderReservesAndDuplicateCancelReleasesOnce (262 ms)
+[ RUN      ] Wp1Test.BuySplitDuplicateTradeLateTradeAndDuplicateCancelAreIdempotent
+[       OK ] Wp1Test.BuySplitDuplicateTradeLateTradeAndDuplicateCancelAreIdempotent (257 ms)
+[ RUN      ] Wp1Test.RejectionOfUnknownLocalIdDoesNotConsumeOtherOrders
+[       OK ] Wp1Test.RejectionOfUnknownLocalIdDoesNotConsumeOtherOrders (259 ms)
+[ RUN      ] Wp1Test.StaleSnapshotRowDoesNotResurrectNewerCancel
+[       OK ] Wp1Test.StaleSnapshotRowDoesNotResurrectNewerCancel (262 ms)
+[ RUN      ] Wp1Test.AbsentOrderBecomesRevivableTombstone
+[       OK ] Wp1Test.AbsentOrderBecomesRevivableTombstone (265 ms)
+[ RUN      ] Wp1Test.FailedSnapshotKeepsLedger
+[       OK ] Wp1Test.FailedSnapshotKeepsLedger (362 ms)
+[ RUN      ] Wp1Test.SnapshotLedgerStatesAndEpoch
+[       OK ] Wp1Test.SnapshotLedgerStatesAndEpoch (270 ms)
+[ RUN      ] Wp1Test.AuditedManualResumeContract
+[       OK ] Wp1Test.AuditedManualResumeContract (264 ms)
+[ RUN      ] Wp1Test.ResumeAcknowledgesUnresolvedJournal
+[       OK ] Wp1Test.ResumeAcknowledgesUnresolvedJournal (266 ms)
+[ RUN      ] Wp1Test.IdentityJournalReservesMonotonicIdsAndVerifiedCancel
+[       OK ] Wp1Test.IdentityJournalReservesMonotonicIdsAndVerifiedCancel (279 ms)
+[ RUN      ] Wp1Test.IdentityJournalWithoutFloorFailsClosed
+[       OK ] Wp1Test.IdentityJournalWithoutFloorFailsClosed (279 ms)
+[ RUN      ] Wp1Test.ChildScenario
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:482: Skipped
+only runs as a spawned child
+
+[  SKIPPED ] Wp1Test.ChildScenario (270 ms)
+[ RUN      ] Wp1Test.CrashDuringSendIsNeverResentAndPausesAccount
+Note: Google Test filter = Wp1Test.ChildScenario
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Wp1Test
+[ RUN      ] Wp1Test.ChildScenario
+[       OK ] Wp1Test.CrashDuringSendIsNeverResentAndPausesAccount (683 ms)
+[ RUN      ] Wp1Test.CrashAfterSendIsRecoveredFromSnapshot
+Note: Google Test filter = Wp1Test.ChildScenario
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Wp1Test
+[ RUN      ] Wp1Test.ChildScenario
+[       OK ] Wp1Test.CrashAfterSendIsRecoveredFromSnapshot (684 ms)
+[ RUN      ] Wp1Test.ConcurrentEntryReportsSnapshotsAndGate
+[       OK ] Wp1Test.ConcurrentEntryReportsSnapshotsAndGate (296 ms)
+[----------] 19 tests from Wp1Test (8909 ms total)
+
+[----------] Global test environment tear-down
+[==========] 19 tests from 1 test suite ran. (8910 ms total)
+[  PASSED  ] 18 tests.
+[  SKIPPED ] 1 test, listed below:
+[  SKIPPED ] Wp1Test.ChildScenario

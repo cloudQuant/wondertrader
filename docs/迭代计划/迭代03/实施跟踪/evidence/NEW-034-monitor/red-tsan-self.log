@@ -1,0 +1,18 @@
+command=['/tmp/wt-i03-new034/red/monitor-tsan', 'self']
+exit=-6
+ThreadSanitizer: CHECK failed: sanitizer_thread_registry.cpp:364 "((t)) != (0)" (0x0, 0x0) (tid=908934)
+    #0 __tsan::CheckUnwind() <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x6d7e4)
+    #1 __tsan::CheckUnwind() <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x6d7f4)
+    #2 __sanitizer::CheckFailed(char const*, int, char const*, unsigned long long, unsigned long long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x187f0)
+    #3 __sanitizer::ThreadRegistry::ConsumeThreadUserId(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x175d4)
+    #4 pthread_join <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x32074)
+    #5 std::__1::thread::join() <null> (libc++.1.dylib:arm64e+0x27e20)
+    #6 WtSimpleRiskMon::stop() WtSimpRiskMon.cpp:191 (monitor-tsan:arm64+0x100002f88)
+    #7 main::$_0::operator()() const monitor_lifecycle.cpp:65 (monitor-tsan:arm64+0x100001edc)
+    #8 std::__1::__invoke_result_impl<void, main::$_0>::type std::__1::__invoke[abi:nqe220108]<main::$_0>(main::$_0&&) invoke.h:90 (monitor-tsan:arm64+0x100001edc)
+    #9 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (monitor-tsan:arm64+0x100001edc)
+    #10 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>>(void*) thread.h:169 (monitor-tsan:arm64+0x100001edc)
+    #11 __tsan_thread_start_func <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31cf4)
+    #12 _pthread_start <null> (libsystem_pthread.dylib:arm64e+0x6c54)
+    #13 thread_start <null> (libsystem_pthread.dylib:arm64e+0x1c18)
+

@@ -1,0 +1,164 @@
+{
+ "suite": "i03_parser_event_contract_20261103",
+ "entry": "src/TestUnits/fixtures/i03_parser_event_contract_20261103/CMakeLists.txt",
+ "command": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build/i03_parser_events --gtest_output=xml:/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/xml/i03_parser_events.xml",
+ "exit": 0,
+ "seconds": 305.5,
+ "verdict": "pass",
+ "reason": "（自带红控无法与当前树组合构建，未形成红绿对照）green[pass]: i03_parser_events exit 0 (tests=13 failures=0 errors=0)；red-events-before[expected-red/red]: red-events-before exit 1 (tests=13 failures=6 errors=0)；失败：XeleEvents.ConnectThenLoginOnlyAfterFirstValidFrame,XeleEvents.InvalidFramesDoNotConfirm,XeleEvents.ReconnectStartsNewEventEpoch,UdpEvents.ConnectThenLoginOnlyAfterFirstValidMessage,UdpEvents.InvalidMessagesDoNotConfirm,UdpEvents.ReconnectStartsNewEventEpoch；red-xele-oracle-head[red-unbuildable/red]: i03_xele_oracle_head 未构建；asan[pass]: asan-i03_parser_events exit 0 (tests=13 failures=0 errors=0)；tsan[pass]: tsan-i03_parser_events exit 0 (tests=13 failures=0 errors=0)",
+ "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/logs/03-i03_parser_events.log",
+ "started": "2026-11-05T18:25:29",
+ "workdir": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103",
+ "runner_sha256": "04be339cb9e8c1bb195100f447e8fe2c2e3b6fbb86fee88e3f7e394ecdfc86a1",
+ "mirror": "",
+ "attribution": "",
+ "suggestion": "",
+ "notes": [],
+ "variants": [
+  {
+   "name": "green",
+   "role": "primary",
+   "verdict": "pass",
+   "reason": "i03_parser_events exit 0 (tests=13 failures=0 errors=0)",
+   "seconds": 113.1,
+   "commands": [
+    {
+     "label": "fixture-configure",
+     "command": "/opt/homebrew/bin/cmake -S /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxtree/src/TestUnits/fixtures/i03_parser_event_contract_20261103 -B /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build -G Ninja -DCMAKE_MAKE_PROGRAM=/opt/homebrew/bin/ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_BUILD_RPATH=/usr/local/lib -DWT_BUILD=/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103",
+     "env": {},
+     "exit": 0,
+     "seconds": 0.8,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/logs/01-fixture-configure.log"
+    },
+    {
+     "label": "fixture-build",
+     "command": "/opt/homebrew/bin/cmake --build /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build -j 2",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103",
+     "env": {},
+     "exit": 0,
+     "seconds": 108.2,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/logs/02-fixture-build.log"
+    },
+    {
+     "label": "i03_parser_events",
+     "command": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build/i03_parser_events --gtest_output=xml:/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/xml/i03_parser_events.xml",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build",
+     "env": {
+      "LLVM_PROFILE_FILE": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build/i03_parser_events-%p.profraw"
+     },
+     "exit": 0,
+     "seconds": 4.1,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/logs/03-i03_parser_events.log"
+    }
+   ]
+  },
+  {
+   "name": "red-events-before",
+   "role": "red",
+   "verdict": "expected-red",
+   "reason": "red-events-before exit 1 (tests=13 failures=6 errors=0)；失败：XeleEvents.ConnectThenLoginOnlyAfterFirstValidFrame,XeleEvents.InvalidFramesDoNotConfirm,XeleEvents.ReconnectStartsNewEventEpoch,UdpEvents.ConnectThenLoginOnlyAfterFirstValidMessage,UdpEvents.InvalidMessagesDoNotConfirm,UdpEvents.ReconnectStartsNewEventEpoch",
+   "seconds": 15.7,
+   "commands": [
+    {
+     "label": "red-events-before",
+     "command": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build/i03_parser_events_before --gtest_output=xml:/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/xml/red-events-before.xml",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build",
+     "env": {
+      "LLVM_PROFILE_FILE": "/dev/null"
+     },
+     "exit": 1,
+     "seconds": 15.7,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/logs/04-red-events-before.log"
+    }
+   ]
+  },
+  {
+   "name": "red-xele-oracle-head",
+   "role": "red",
+   "verdict": "red-unbuildable",
+   "reason": "i03_xele_oracle_head 未构建",
+   "seconds": 0.0,
+   "commands": []
+  },
+  {
+   "name": "asan",
+   "role": "primary",
+   "verdict": "pass",
+   "reason": "asan-i03_parser_events exit 0 (tests=13 failures=0 errors=0)",
+   "seconds": 94.1,
+   "commands": [
+    {
+     "label": "asan-configure",
+     "command": "/opt/homebrew/bin/cmake -S /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxtree/src/TestUnits/fixtures/i03_parser_event_contract_20261103 -B /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build-asan -G Ninja -DCMAKE_MAKE_PROGRAM=/opt/homebrew/bin/ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_BUILD_RPATH=/usr/local/lib -DWT_BUILD=/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build '-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer -include stdlib.h' -DCMAKE_SHARED_LINKER_FLAGS=-fsanitize=address,undefined -DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined -DCMAKE_CXX_COMPILER=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -DCMAKE_C_COMPILER=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103",
+     "env": {},
+     "exit": 0,
+     "seconds": 7.2,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/logs/05-asan-configure.log"
+    },
+    {
+     "label": "asan-build",
+     "command": "/opt/homebrew/bin/cmake --build /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build-asan -j 2 --target XeleCurrent UdpCurrent UdpCurrentFault i03_parser_events",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103",
+     "env": {},
+     "exit": 0,
+     "seconds": 81.8,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/logs/06-asan-build.log"
+    },
+    {
+     "label": "asan-i03_parser_events",
+     "command": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build-asan/i03_parser_events --gtest_output=xml:/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/xml/asan-i03_parser_events.xml",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build-asan",
+     "env": {
+      "ASAN_OPTIONS": "detect_leaks=0:abort_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1",
+      "LLVM_PROFILE_FILE": "/dev/null"
+     },
+     "exit": 0,
+     "seconds": 5.1,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/logs/07-asan-i03_parser_events.log"
+    }
+   ]
+  },
+  {
+   "name": "tsan",
+   "role": "primary",
+   "verdict": "pass",
+   "reason": "tsan-i03_parser_events exit 0 (tests=13 failures=0 errors=0)",
+   "seconds": 82.7,
+   "commands": [
+    {
+     "label": "tsan-configure",
+     "command": "/opt/homebrew/bin/cmake -S /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxtree/src/TestUnits/fixtures/i03_parser_event_contract_20261103 -B /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build-tsan -G Ninja -DCMAKE_MAKE_PROGRAM=/opt/homebrew/bin/ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_BUILD_RPATH=/usr/local/lib -DWT_BUILD=/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build '-DCMAKE_CXX_FLAGS=-fsanitize=thread -fno-omit-frame-pointer -include stdlib.h' -DCMAKE_SHARED_LINKER_FLAGS=-fsanitize=thread -DCMAKE_EXE_LINKER_FLAGS=-fsanitize=thread -DCMAKE_CXX_COMPILER=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -DCMAKE_C_COMPILER=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103",
+     "env": {},
+     "exit": 0,
+     "seconds": 8.8,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/logs/08-tsan-configure.log"
+    },
+    {
+     "label": "tsan-build",
+     "command": "/opt/homebrew/bin/cmake --build /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build-tsan -j 2 --target XeleCurrent UdpCurrent UdpCurrentFault i03_parser_events",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103",
+     "env": {},
+     "exit": 0,
+     "seconds": 66.7,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/logs/09-tsan-build.log"
+    },
+    {
+     "label": "tsan-i03_parser_events",
+     "command": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build-tsan/i03_parser_events --gtest_output=xml:/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/xml/tsan-i03_parser_events.xml",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/build-tsan",
+     "env": {
+      "TSAN_OPTIONS": "halt_on_error=1",
+      "LLVM_PROFILE_FILE": "/dev/null"
+     },
+     "exit": 0,
+     "seconds": 7.1,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/i03_parser_event_contract_20261103/logs/10-tsan-i03_parser_events.log"
+    }
+   ]
+  }
+ ]
+}

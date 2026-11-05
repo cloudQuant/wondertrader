@@ -157,7 +157,10 @@ protected:
 /* ------------------------------------------------------------------ 用例 */
 
 /// init 可重复应用，且永远不建段/不起线程（ParserShm.cpp:76-83）
-TEST_F(R76ParserShmTest, InitIsRepeatableAndNeverConnects)
+// Card 9 (9c=A, iteration 03): a second init on the same parser is rejected and
+// the first configuration is kept. The former oracle expected the second init
+// to overwrite the path; partial-config acceptance is checked on a fresh parser.
+TEST_F(R76ParserShmTest, SecondInitIsRejectedAndInitNeverConnects)
 {
 	WTSVariant* full = WTSVariant::createObject();
 	full->append("path", "/tmp/r76_shm_queue_a.dat");
@@ -169,11 +172,14 @@ TEST_F(R76ParserShmTest, InitIsRepeatableAndNeverConnects)
 	partial->append("path", "/tmp/r76_shm_queue_b.dat");
 
 	EXPECT_TRUE(parser_.init(full));
-	EXPECT_TRUE(parser_.init(partial)); // 第二次覆盖 path，仍只读配置
+	EXPECT_FALSE(parser_.init(partial)); // 9c：重复 init 拒绝并保留首次配置
+	ParserShm fresh;
+	EXPECT_TRUE(fresh.init(partial));    // 仅含 path 的配置在新实例上仍被接受
 	full->release();
 	partial->release();
 
 	EXPECT_FALSE(parser_.isConnected());
+	EXPECT_FALSE(fresh.isConnected());
 	EXPECT_TRUE(sink_.logs.empty());
 	EXPECT_EQ(0u, sink_.events);
 }

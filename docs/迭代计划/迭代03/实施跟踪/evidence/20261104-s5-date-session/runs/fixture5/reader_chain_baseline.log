@@ -1,0 +1,70 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from ReaderChain
+[ RUN      ] ReaderChain.RdmValidRangeMapsEndpointsAndManagerCurrentDate
+[       OK ] ReaderChain.RdmValidRangeMapsEndpointsAndManagerCurrentDate (51 ms)
+[ RUN      ] ReaderChain.RdmInvalidRangeEndpointsStopBeforeMappingAndSlicing
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:119: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  reader.readTickSliceByCount("EX.P.2406", 10, invalidDate)
+    Which is: 0x60d0000002b0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:120: Failure
+Value of: anyInvalidDate(mgr)
+  Actual: true
+Expected: false
+an invalid endpoint reached the legacy virtual
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:121: Failure
+Value of: sink.errors.empty()
+  Actual: true
+Expected: false
+
+[  FAILED  ] ReaderChain.RdmInvalidRangeEndpointsStopBeforeMappingAndSlicing (43 ms)
+[ RUN      ] ReaderChain.RdmMissingSessionAndClockFailureStopTheRead
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:134: Failure
+Value of: mgr.calcCalls.empty()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:149: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  byRange
+    Which is: 0x60d000000520
+
+[  FAILED  ] ReaderChain.RdmMissingSessionAndClockFailureStopTheRead (2 ms)
+[ RUN      ] ReaderChain.LiveReaderInvalidEndAndClockFailureStopTheRead
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:164: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  reader.readKlineSlice("EX.P.2406", KP_Minute1, 10, 202402301000ULL)
+    Which is: 0x60d000000790
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:165: Failure
+Value of: anyInvalidDate(mgr)
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:171: Failure
+Value of: anyInvalidDate(mgr)
+  Actual: true
+Expected: false
+
+[  FAILED  ] ReaderChain.LiveReaderInvalidEndAndClockFailureStopTheRead (12 ms)
+[----------] 4 tests from ReaderChain (121 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (121 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] ReaderChain.RdmInvalidRangeEndpointsStopBeforeMappingAndSlicing
+[  FAILED  ] ReaderChain.RdmMissingSessionAndClockFailureStopTheRead
+[  FAILED  ] ReaderChain.LiveReaderInvalidEndAndClockFailureStopTheRead
+
+ 3 FAILED TESTS

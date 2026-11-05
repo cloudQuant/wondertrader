@@ -1,0 +1,20 @@
+basefiles:
+    session: sessions.json
+    commodity: commodities.json
+    contract: contracts.json
+    holiday: holidays.json
+env:
+    name: cta
+    fees: fees.json
+    product:
+        session: ALLDAY
+data:
+    store:
+        path: ./data/
+bspolicy: actpolicy.yaml
+parsers:
+-   active: true
+    id: i03s5_uncertain
+    module: I03S5UncertainParser
+traders: []
+executers: []

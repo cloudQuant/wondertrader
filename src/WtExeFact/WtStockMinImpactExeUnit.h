@@ -284,6 +284,7 @@ private:
 
 		/** @brief 订单监控器，用于管理和跟踪订单状态 */
 	WtOrdMon	_orders_mon;
+	bool		_host_order_identity{ false };	///< host-verified order identity enabled for this unit (cards 5b/5c)
 	//uint32_t	_cancel_cnt;
 	/** @brief 撤单次数计数器，记录当前订单被撤销的次数 */
 	uint32_t	_cancel_times;

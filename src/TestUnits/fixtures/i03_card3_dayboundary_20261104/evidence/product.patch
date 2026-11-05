@@ -1,0 +1,2320 @@
+--- /dev/null
++++ b/src/WtCore/TickerDayBoundary.h
+@@ -0,0 +1,207 @@
++/*!
++ * \file TickerDayBoundary.h
++ * \project	WonderTrader
++ *
++ * \brief 实时 ticker 的日界辅助与事件串行化（迭代03）
++ *
++ * 卡3 3a=A（2026-11-04 用户裁定）：
++ * - 收盘分钟标签保留 2400（全天交易时段的最后一分钟闭合为旧日 2400）。
++ * - 行情 action_time 必须是合法的 HHMMSSmmm：HH<24、MM<60、SS<60。
++ *   23:59:60 等闰秒/越界时刻属于非法输入，ticker 拒绝，不推进任何时间状态。
++ * - 行情交易日新于引擎当前交易日时视为新交易日首 tick：先闭合旧日未发布的分钟，
++ *   再把分钟位置归零，以新日日期/时间推进引擎，并把该 tick 交给引擎（不丢首 tick）。
++ *
++ * 卡9 9d=A / R202-001 ticker 合同（2026-11-03 卡9 确认，2026-11-04 R202 明确同 9d=A）：
++ * - 每个 ticker（CTA/SEL/HFT）的 on_tick 与 worker 通过 EventStrand 串行执行：
++ *   任一时刻只有一个线程是 owner，ticker 状态只在 owner 内读写。
++ * - 在 owner 线程内（策略/引擎/数据回调中）同步重入 on_tick 不就地执行，而是按 FIFO 排队，
++ *   在当前事件返回后的安全点由同一 owner 依次投递，每个排队事件恰好投递一次。
++ * - 其他线程调用 on_tick 时等待当前 owner 完成（含排队事件）后再执行。
++ * - stop：先发停止请求并唤醒 worker；非 owner 调用方在有界超时内等待当前事件与队列排空，
++ *   再 join worker；worker 线程（回调内）调用 stop 只发请求，不自 join。
++ */
++#pragma once
++#include <stdint.h>
++#include <atomic>
++#include <chrono>
++#include <condition_variable>
++#include <deque>
++#include <mutex>
++#include <thread>
++
++#include "../Includes/WTSObject.hpp"
++
++namespace wt_ticker
++{
++	inline bool isValidTickTime(uint32_t uTime)
++	{
++		const uint32_t hhmmss = uTime / 1000;
++		const uint32_t hh = hhmmss / 10000;
++		const uint32_t mm = (hhmmss / 100) % 100;
++		const uint32_t ss = hhmmss % 100;
++		return hh < 24 && mm < 60 && ss < 60;
++	}
++
++	inline bool isNewTradingDate(uint32_t curPos, uint32_t tickTDate, uint32_t engineTDate)
++	{
++		return curPos != 0 && tickTDate != 0 && tickTDate > engineTDate;
++	}
++
++	//stop 等待当前事件与排队事件排空的上限
++	constexpr std::chrono::milliseconds STOP_DRAIN_TIMEOUT{ 5000 };
++
++	class EventStrand
++	{
++	public:
++		struct Item
++		{
++			wtp::WTSObject*	obj = nullptr;
++			uint32_t		flag = 0;
++		};
++
++		enum class Entry { Owner, Queued };
++
++		EventStrand() = default;
++		EventStrand(const EventStrand&) = delete;
++		EventStrand& operator=(const EventStrand&) = delete;
++
++		~EventStrand()
++		{
++			for (Item& item : _queue)
++				if (item.obj != nullptr)
++					item.obj->release();
++		}
++
++		//on_tick 入口：owner 线程同步重入时排队（持有引用），否则等待成为 owner
++		Entry enterEvent(wtp::WTSObject* obj, uint32_t flag)
++		{
++			std::unique_lock<std::mutex> lock(_mtx);
++			const std::thread::id self = std::this_thread::get_id();
++			if (_busy && _owner == self)
++			{
++				if (obj != nullptr)
++					obj->retain();
++				Item item;
++				item.obj = obj;
++				item.flag = flag;
++				_queue.push_back(item);
++				return Entry::Queued;
++			}
++			_cv.wait(lock, [this]() { return !_busy; });
++			_busy = true;
++			_owner = self;
++			return Entry::Owner;
++		}
++
++		//worker 入口：已请求停止时返回 false 且不成为 owner
++		bool enterWorker(const std::atomic<bool>& stopped)
++		{
++			std::unique_lock<std::mutex> lock(_mtx);
++			_cv.wait(lock, [this, &stopped]() { return !_busy || stopped.load(std::memory_order_acquire); });
++			if (stopped.load(std::memory_order_acquire))
++				return false;
++			_busy = true;
++			_owner = std::this_thread::get_id();
++			return true;
++		}
++
++		//owner 调用：取下一个排队事件；队列为空时原子地释放 owner 并返回 false
++		bool nextOrLeave(Item& out)
++		{
++			std::lock_guard<std::mutex> lock(_mtx);
++			if (!_queue.empty())
++			{
++				out = _queue.front();
++				_queue.pop_front();
++				return true;
++			}
++			_busy = false;
++			_owner = std::thread::id();
++			_cv.notify_all();
++			return false;
++		}
++
++		//异常路径：丢弃排队事件并释放 owner
++		void abandon()
++		{
++			std::deque<Item> dropped;
++			{
++				std::lock_guard<std::mutex> lock(_mtx);
++				dropped.swap(_queue);
++				_busy = false;
++				_owner = std::thread::id();
++				_cv.notify_all();
++			}
++			for (Item& item : dropped)
++				if (item.obj != nullptr)
++					item.obj->release();
++		}
++
++		bool isOwner() const
++		{
++			std::lock_guard<std::mutex> lock(_mtx);
++			return _busy && _owner == std::this_thread::get_id();
++		}
++
++		std::size_t queued() const
++		{
++			std::lock_guard<std::mutex> lock(_mtx);
++			return _queue.size();
++		}
++
++		void notifyAll()
++		{
++			std::lock_guard<std::mutex> lock(_mtx);
++			_cv.notify_all();
++		}
++
++		//等待没有 owner 且队列为空；超时返回 false
++		bool waitIdle(std::chrono::milliseconds timeout)
++		{
++			std::unique_lock<std::mutex> lock(_mtx);
++			return _cv.wait_for(lock, timeout, [this]() { return !_busy && _queue.empty(); });
++		}
++
++		//worker 休眠：停止请求可立即唤醒
++		void sleepFor(std::chrono::milliseconds duration, const std::atomic<bool>& stopped)
++		{
++			std::unique_lock<std::mutex> lock(_mtx);
++			_cv.wait_for(lock, duration, [&stopped]() { return stopped.load(std::memory_order_acquire); });
++		}
++
++	private:
++		mutable std::mutex		_mtx;
++		std::condition_variable	_cv;
++		bool					_busy = false;
++		std::thread::id			_owner;
++		std::deque<Item>		_queue;
++	};
++
++	/*
++	 *	调用方已是 owner：执行 body，然后按 FIFO 投递排队事件（handler(obj, flag)），最后释放 owner。
++	 *	body/handler 内的同步重入会继续排在队尾，由本循环投递。
++	 */
++	template<typename Body, typename Handler>
++	void runAndDrain(EventStrand& strand, Body&& body, Handler&& handler)
++	{
++		try
++		{
++			body();
++			EventStrand::Item item;
++			while (strand.nextOrLeave(item))
++			{
++				struct Releaser
++				{
++					wtp::WTSObject* obj;
++					~Releaser() { if (obj != nullptr) obj->release(); }
++				} releaser{ item.obj };
++				handler(item.obj, item.flag);
++			}
++		}
++		catch (...)
++		{
++			strand.abandon();
++			throw;
++		}
++	}
++}
+--- a/src/WtCore/WtCtaTicker.cpp
++++ b/src/WtCore/WtCtaTicker.cpp
+@@ -8,6 +8,7 @@
+  * \brief 
+  */
+ #include "WtCtaTicker.h"
++#include "TickerDayBoundary.h"
+ #include "WtCtaEngine.h"
+ #include "../Includes/IDataReader.h"
+ 
+@@ -44,7 +45,10 @@
+ 	else
+ 		WTSLogger::info("CtaTicker will drive engine with session {}", sessionID);
+ 
+-	TimeUtils::getDateTime(_date, _time);
++	uint32_t curDate = 0, curTime = 0;
++	TimeUtils::getDateTime(curDate, curTime);
++	_date = curDate;
++	_time = curTime;
+ }
+ 
+ void WtCtaRtTicker::trigger_price(WTSTickData* curTick)
+@@ -77,7 +81,20 @@
+ 
+ void WtCtaRtTicker::on_tick(WTSTickData* curTick)
+ {
+-	if (_thrd == NULL)
++	if (curTick == NULL)
++		return;
++
++	//卡9 9d=A：owner 线程内（策略/引擎/数据回调中）的同步重入排队，在当前事件返回后的安全点投递
++	if (_strand.enterEvent(curTick, 0) == wt_ticker::EventStrand::Entry::Queued)
++		return;
++
++	wt_ticker::runAndDrain(_strand, [this, curTick]() { handle_tick(curTick); },
++		[this](wtp::WTSObject* obj, uint32_t) { handle_tick(static_cast<WTSTickData*>(obj)); });
++}
++
++void WtCtaRtTicker::handle_tick(WTSTickData* curTick)
++{
++	if (!_running.load(std::memory_order_acquire))
+ 	{
+ 		trigger_price(curTick);
+ 		return;
+@@ -86,6 +103,13 @@
+ 	uint32_t uDate = curTick->actiondate();
+ 	uint32_t uTime = curTick->actiontime();
+ 
++	//卡3 3a=A：23:59:60 等非法时刻是非法输入，拒绝且不推进 ticker 状态
++	if (!wt_ticker::isValidTickTime(uTime))
++	{
++		WTSLogger::error("Tick of {} with invalid action time {}.{} rejected", curTick->code(), uDate, uTime);
++		return;
++	}
++
+ 	if (_date != 0 && (uDate < _date || (uDate == _date && uTime < _time)))
+ 	{
+ 		//WTSLogger::info("行情时间{}小于本地时间{}", uTime, _time);
+@@ -93,6 +117,28 @@
+ 		return;
+ 	}
+ 
++	//卡3 3a=A：新交易日首 tick，先闭合旧日未发布的分钟（标签保留 2400），再把分钟位置归零
++	const uint32_t tickTDate = curTick->tradingdate();
++	const bool bNewTDate = _engine != NULL && wt_ticker::isNewTradingDate(_cur_pos, tickTDate, _engine->getTradingDate());
++	if (bNewTDate)
++	{
++		if (_last_emit_pos < _cur_pos)
++		{
++			_last_emit_pos = _cur_pos;
++			uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
++			bool bEndingTDate = isSessionCloseTime(_s_info, thisMin);
++			WTSLogger::info("Minute Bar {}.{:04d} Closed by new tradingday data", _date.load(), thisMin);
++			if (_store)
++				_store->onMinuteEnd(_date, thisMin, bEndingTDate ? _engine->getTradingDate() : 0);
++			_engine->on_schedule(_date, thisMin);
++			if (bEndingTDate)
++				_engine->on_session_end();
++		}
++		WTSLogger::info("Tradingday {} -> {} by data at {}.{}, ticker position reset", _engine->getTradingDate(), tickTDate, uDate, uTime);
++		_cur_pos = 0;
++		_last_emit_pos = 0;
++	}
++
+ 	_date = uDate;
+ 	_time = uTime;
+ 
+@@ -103,7 +149,8 @@
+ 	// Keep the minute mapping local to this ticker/session. Function-static cache
+ 	// state can be reused by another ticker with a different session definition.
+ 	uint32_t minutes = _s_info->timeToMinutes(curMin);
+-	if (_s_info->isLastOfSection(curMin))
++	//卡3 3a=A：全天时段 00:00 同时等于收盘 2400 的取模值；位置 0 是新日开始，不能回退（防 uint 下溢）
++	if (_s_info->isLastOfSection(curMin) && minutes > 0)
+ 		minutes--;
+ 	minutes++;
+ 	uint32_t wrapMin = _s_info->minuteToTime(minutes);
+@@ -111,6 +158,14 @@
+ 	if (_cur_pos == 0)
+ 	{
+ 		//如果当前时间是0, 则直接赋值即可
++		//卡3 3a=A：首 tick（含新交易日首 tick）同样推进引擎时间并交给引擎，不丢弃
++		if (_engine)
++		{
++			_engine->set_date_time(_date, wrapMin, curSec, curMin);
++			if (tickTDate != 0 && tickTDate > _engine->getTradingDate())
++				_engine->set_trading_date(tickTDate);
++		}
++		trigger_price(curTick);
+ 		_cur_pos = minutes;
+ 	}
+ 	else if (_cur_pos < minutes)
+@@ -119,9 +174,7 @@
+ 		//这个时候要先触发闭合, 再修改平台时间和价格
+ 		if (_last_emit_pos < _cur_pos)
+ 		{
+-			//触发数据回放模块
+-			StdUniqueLock lock(_mtx);
+-
++			//触发数据回放模块（已在 _strand owner 内串行）
+ 			//优先修改时间标记
+ 			_last_emit_pos = _cur_pos;
+ 
+@@ -131,7 +184,7 @@
+ 			if (isSessionCloseTime(_s_info, thisMin))
+ 				bEndingTDate = true;
+ 
+-			WTSLogger::info("Minute Bar {}.{:04d} Closed by data", _date, thisMin);
++			WTSLogger::info("Minute Bar {}.{:04d} Closed by data", _date.load(), thisMin);
+ 			if (_store)
+ 				_store->onMinuteEnd(_date, thisMin, bEndingTDate ? _engine->getTradingDate() : 0);
+ 
+@@ -184,101 +237,117 @@
+ 	_engine->on_init();
+ 	_engine->on_session_begin();
+ 
+-	//先检查当前时间, 如果大于
+-
++	_running.store(true, std::memory_order_release);
+ 	_thrd.reset(new StdThread([this](){
+-		while(!_stopped)
++		while (!_stopped.load(std::memory_order_acquire))
+ 		{
+-			uint32_t offTime = _s_info->offsetTime(_engine->get_min_time(), true);
++			//卡9 9d=A：worker 与 on_tick 串行；worker 回调内的同步重入同样排队并在本轮结束前投递
++			if (!_strand.enterWorker(_stopped))
++				break;
+ 
+-			if (_time != UINT_MAX && _s_info->isInTradingTime(_time / 100000, true))
+-			{
+-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+-				uint64_t now = TimeUtils::getLocalTimeNow();
++			bool busyPolling = true;
++			wt_ticker::runAndDrain(_strand, [this, &busyPolling]() { busyPolling = worker_pass(); },
++				[this](wtp::WTSObject* obj, uint32_t) { handle_tick(static_cast<WTSTickData*>(obj)); });
+ 
+-				if (now >= _next_check_time && _last_emit_pos < _cur_pos)
+-				{
+-					//触发数据回放模块
+-					StdUniqueLock lock(_mtx);
++			_strand.sleepFor(busyPolling ? std::chrono::milliseconds(10) : std::chrono::milliseconds(10000), _stopped);
++		}
++	}));
++}
+ 
+-					//优先修改时间标记
+-					_last_emit_pos = _cur_pos;
++bool WtCtaRtTicker::worker_pass()
++{
++	uint32_t offTime = _s_info->offsetTime(_engine->get_min_time(), true);
+ 
+-					uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
+-					_time = thisMin*100000;//这里要还原成毫秒为单位
++	if (_time != UINT_MAX && _s_info->isInTradingTime(_time / 100000, true))
++	{
++		uint64_t now = TimeUtils::getLocalTimeNow();
+ 
+-					//如果thisMin是0, 说明换日了
+-					//这里是本地计时导致的换日, 说明日期其实还是老日期, 要自动+1
+-					//同时因为时间是235959xxx, 所以也要手动置为0
+-					if (thisMin == 0)
+-					{
+-						uint32_t lastDate = _date;
+-						_date = TimeUtils::getNextDate(_date);
+-						_time = 0;
+-						WTSLogger::info("Data automatically changed at time 00:00: {} -> {}", lastDate, _date);
+-					}
++		if (now >= _next_check_time && _last_emit_pos < _cur_pos)
++		{
++			//优先修改时间标记
++			_last_emit_pos = _cur_pos;
+ 
+-					bool bEndingTDate = false;
+-					if (isSessionCloseTime(_s_info, thisMin))
+-						bEndingTDate = true;
++			uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
++			_time = thisMin*100000;//这里要还原成毫秒为单位
+ 
+-					WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
+-					if (_store)
+-						_store->onMinuteEnd(_date, thisMin, bEndingTDate ? _engine->getTradingDate() : 0);
++			//如果thisMin是0, 说明换日了
++			//这里是本地计时导致的换日, 说明日期其实还是老日期, 要自动+1
++			//同时因为时间是235959xxx, 所以也要手动置为0
++			if (thisMin == 0)
++			{
++				uint32_t lastDate = _date;
++				_date = TimeUtils::getNextDate(lastDate);
++				_time = 0;
++				WTSLogger::info("Data automatically changed at time 00:00: {} -> {}", lastDate, _date.load());
++			}
+ 
+-					//任务调度
+-					_engine->on_schedule(_date, thisMin);
++			bool bEndingTDate = false;
++			if (isSessionCloseTime(_s_info, thisMin))
++				bEndingTDate = true;
+ 
+-					if (bEndingTDate)
+-						_engine->on_session_end();
++			WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date.load(), thisMin);
++			if (_store)
++				_store->onMinuteEnd(_date, thisMin, bEndingTDate ? _engine->getTradingDate() : 0);
+ 
+-					//145959000
+-					if (_engine)
+-						_engine->set_date_time(_date, thisMin, 0);
+-				}
+-			}
+-			else //if(offTime >= _s_info->getOpenTime(true) && offTime <= _s_info->getCloseTime(true))
+-			{
+-				//收盘以后，如果发现上次触发的位置不等于总的分钟数，说明少了最后一分钟的闭合逻辑
+-				uint32_t total_mins = _s_info->getTradingMins();
+-				if(_time != UINT_MAX && _last_emit_pos != 0 && _last_emit_pos < total_mins && offTime >= _s_info->getCloseTime(true))
+-				{
+-					WTSLogger::warn("Tradingday {} will be ended forcely, last_emit_pos: {}, time: {}", _engine->getTradingDate(), _last_emit_pos.fetch_add(0), _time);
++			//任务调度
++			_engine->on_schedule(_date, thisMin);
+ 
+-					//触发数据回放模块
+-					StdUniqueLock lock(_mtx);
++			if (bEndingTDate)
++				_engine->on_session_end();
+ 
+-					//优先修改时间标记
+-					_last_emit_pos = total_mins;
++			//145959000
++			if (_engine)
++				_engine->set_date_time(_date, thisMin, 0);
++		}
++		return true;
++	}
+ 
+-					[[maybe_unused]] bool bEndingTDate = true;
+-					uint32_t thisMin = _s_info->getCloseTime(false);
+-					[[maybe_unused]] uint32_t offMin = _s_info->getCloseTime(true);
++	//收盘以后，如果发现上次触发的位置不等于总的分钟数，说明少了最后一分钟的闭合逻辑
++	uint32_t total_mins = _s_info->getTradingMins();
++	if(_time != UINT_MAX && _last_emit_pos != 0 && _last_emit_pos < total_mins && offTime >= _s_info->getCloseTime(true))
++	{
++		WTSLogger::warn("Tradingday {} will be ended forcely, last_emit_pos: {}, time: {}", _engine->getTradingDate(), _last_emit_pos.load(), _time.load());
+ 
+-					WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
+-					if (_store)
+-						_store->onMinuteEnd(_date, thisMin, _engine->getTradingDate());
++		//优先修改时间标记
++		_last_emit_pos = total_mins;
+ 
+-					//任务调度
+-					_engine->on_schedule(_date, thisMin);
++		uint32_t thisMin = _s_info->getCloseTime(false);
+ 
+-					_engine->on_session_end();
++		WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date.load(), thisMin);
++		if (_store)
++			_store->onMinuteEnd(_date, thisMin, _engine->getTradingDate());
+ 
+-				}
+-				else
+-				{
+-					std::this_thread::sleep_for(std::chrono::seconds(10));
+-				}
+-			}
+-		}
+-	}));
++		//任务调度
++		_engine->on_schedule(_date, thisMin);
++
++		_engine->on_session_end();
++		return true;
++	}
++
++	return false;
+ }
+ 
+ void WtCtaRtTicker::stop()
+ {
+-	_stopped = true;
+-	if (_thrd)
+-		_thrd->join();
++	_stopped.store(true, std::memory_order_release);
++	_strand.notifyAll();
++
++	StdThreadPtr worker = _thrd;
++	if (!worker)
++		return;
++
++	//卡9 9d=A：worker（回调内）调用 stop 只发停止请求，不自 join；由 owner 之外的 stop/析构负责 join
++	if (worker->get_id() == std::this_thread::get_id())
++		return;
++
++	//非 owner 调用方：有界等待当前事件与排队事件排空
++	if (!_strand.isOwner() && !_strand.waitIdle(wt_ticker::STOP_DRAIN_TIMEOUT))
++		WTSLogger::warn("CtaTicker stop: in-flight event or queued ticks not drained within {} ms, joining worker",
++			(long long)wt_ticker::STOP_DRAIN_TIMEOUT.count());
++
++	StdUniqueLock lock(_stop_mtx);
++	if (worker->joinable())
++		worker->join();
+ }
+ 
+ bool WtCtaRtTicker::is_in_trading() const 
+--- a/src/WtCore/WtCtaTicker.h
++++ b/src/WtCore/WtCtaTicker.h
+@@ -17,6 +17,7 @@
+ 
+ #include "../Includes/WTSMarcos.h"
+ #include "../Share/StdUtils.hpp"
++#include "TickerDayBoundary.h"
+ 
+ NS_WTP_BEGIN
+ class WTSSessionInfo;
+@@ -53,7 +54,7 @@
+ 	 * @brief 析构函数
+ 	 * @details 清理定时器对象的资源
+ 	 */
+-	~WtCtaRtTicker(){}
++	~WtCtaRtTicker(){ stop(); }
+ 
+ public:
+ 	/**
+@@ -114,21 +115,34 @@
+ 	 */
+ 	void	trigger_price(WTSTickData* curTick);
+ 
++	/**
++	 * @brief 处理一笔行情（调用方必须是 _strand 的 owner）
++	 */
++	void	handle_tick(WTSTickData* curTick);
++
++	/**
++	 * @brief worker 的一轮检查（调用方必须是 _strand 的 owner）
++	 * @return 是否处于需要短间隔轮询的状态
++	 */
++	bool	worker_pass();
++
+ private:
+ 	WTSSessionInfo*	_s_info;    ///< 交易时间段信息对象
+ 	WtCtaEngine*	_engine;    ///< CTA策略引擎指针
+ 	IDataReader*	_store;     ///< 数据读取器指针
+ 
+-	uint32_t	_date;      ///< 当前日期，格式为YYYYMMDD
+-	uint32_t	_time;      ///< 当前时间，格式为HHMMSS
++	std::atomic<uint32_t>	_date;      ///< 当前日期，格式为YYYYMMDD
++	std::atomic<uint32_t>	_time;      ///< 当前时间，格式为HHMMSSmmm
+ 
+ 	uint32_t	_cur_pos;   ///< 当前定时器位置
+ 
+-	StdUniqueMutex	_mtx;       ///< 互斥锁，用于线程同步
++	wt_ticker::EventStrand	_strand;	///< 卡9 9d=A：on_tick 与 worker 的串行化/重入排队
+ 	std::atomic<uint64_t>	_next_check_time;  ///< 下次检查时间，原子变量
+ 	std::atomic<uint32_t>	_last_emit_pos;    ///< 上次发布位置，原子变量
+ 
+-	bool			_stopped;   ///< 停止标志，用于控制定时器线程
++	std::atomic<bool>	_stopped;   ///< 停止标志，用于控制定时器线程
++	std::atomic<bool>	_running{ false };	///< worker 已启动
++	StdUniqueMutex	_stop_mtx;	///< 串行化 stop 的 join
+ 	StdThreadPtr	_thrd;      ///< 定时器线程指针
+ 
+ };
+--- a/src/WtCore/WtSelTicker.cpp
++++ b/src/WtCore/WtSelTicker.cpp
+@@ -8,6 +8,7 @@
+ * \brief
+ */
+ #include "WtSelTicker.h"
++#include "TickerDayBoundary.h"
+ #include "WtSelEngine.h"
+ #include "../Includes/IDataReader.h"
+ 
+@@ -47,6 +48,7 @@
+ 
+ WtSelRtTicker::~WtSelRtTicker()
+ {
++	stop();
+ }
+ 
+ void WtSelRtTicker::init(IDataReader* store, const char* sessionID)
+@@ -54,7 +56,10 @@
+ 	_store = store;
+ 	_s_info = _engine->get_session_info(sessionID);
+ 
+-	TimeUtils::getDateTime(_date, _time);
++	uint32_t curDate = 0, curTime = 0;
++	TimeUtils::getDateTime(curDate, curTime);
++	_date = curDate;
++	_time = curTime;
+ }
+ 
+ void WtSelRtTicker::trigger_price(WTSTickData* curTick, uint32_t /*hotFlag*/ /* = 0 */)
+@@ -87,7 +92,20 @@
+ 
+ void WtSelRtTicker::on_tick(WTSTickData* curTick, uint32_t hotFlag /* = 0 */)
+ {
+-	if (_thrd == NULL)
++	if (curTick == NULL)
++		return;
++
++	//卡9 9d=A：owner 线程内（策略/引擎/数据回调中）的同步重入排队，在当前事件返回后的安全点投递
++	if (_strand.enterEvent(curTick, hotFlag) == wt_ticker::EventStrand::Entry::Queued)
++		return;
++
++	wt_ticker::runAndDrain(_strand, [this, curTick, hotFlag]() { handle_tick(curTick, hotFlag); },
++		[this](wtp::WTSObject* obj, uint32_t flag) { handle_tick(static_cast<WTSTickData*>(obj), flag); });
++}
++
++void WtSelRtTicker::handle_tick(WTSTickData* curTick, uint32_t hotFlag)
++{
++	if (!_running.load(std::memory_order_acquire))
+ 	{
+ 		trigger_price(curTick, hotFlag);
+ 		return;
+@@ -96,6 +114,13 @@
+ 	uint32_t uDate = curTick->actiondate();
+ 	uint32_t uTime = curTick->actiontime();
+ 
++	//卡3 3a=A：23:59:60 等非法时刻是非法输入，拒绝且不推进 ticker 状态
++	if (!wt_ticker::isValidTickTime(uTime))
++	{
++		WTSLogger::error("Tick of {} with invalid action time {}.{} rejected", curTick->code(), uDate, uTime);
++		return;
++	}
++
+ 	if (_date != 0 && (uDate < _date || (uDate == _date && uTime < _time)))
+ 	{
+ 		//WTSLogger::info("行情时间{}小于本地时间{}", uTime, _time);
+@@ -103,6 +128,27 @@
+ 		return;
+ 	}
+ 
++	//卡3 3a=A：新交易日首 tick，先闭合旧日未发布的分钟（标签保留 2400），再把分钟位置归零
++	const uint32_t tickTDate = curTick->tradingdate();
++	const bool bNewTDate = _engine != NULL && wt_ticker::isNewTradingDate(_cur_pos, tickTDate, _engine->getTradingDate());
++	if (bNewTDate)
++	{
++		if (_last_emit_pos < _cur_pos)
++		{
++			_last_emit_pos = _cur_pos;
++			uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
++			WTSLogger::info("Minute Bar {}.{:04d} Closed by new tradingday data", _date.load(), thisMin);
++			if (_store)
++				_store->onMinuteEnd(_date, thisMin);
++			_engine->on_minute_end(_date, thisMin);
++			if (isSessionCloseTime(_s_info, thisMin))
++				_engine->on_session_end();
++		}
++		WTSLogger::info("Tradingday {} -> {} by data at {}.{}, ticker position reset", _engine->getTradingDate(), tickTDate, uDate, uTime);
++		_cur_pos = 0;
++		_last_emit_pos = 0;
++	}
++
+ 	_date = uDate;
+ 	_time = uTime;
+ 
+@@ -110,7 +156,8 @@
+ 	uint32_t curSec = _time % 100000;
+ 	uint32_t minutes = _s_info->timeToMinutes(curMin);
+ 	bool isSecEnd = _s_info->isLastOfSection(curMin);
+-	if (isSecEnd)
++	//卡3 3a=A：全天时段 00:00 同时等于收盘 2400 的取模值；位置 0 是新日开始，不能回退（防 uint 下溢）
++	if (isSecEnd && minutes > 0)
+ 	{
+ 		minutes--;
+ 	}
+@@ -121,6 +168,15 @@
+ 	if (_cur_pos == 0)
+ 	{
+ 		//如果当前时间是0, 则直接赋值即可
++		//卡3 3a=A：首 tick（含新交易日首 tick）同样推进引擎时间并交给引擎，不丢弃
++		//新交易日首 tick 先推进引擎时间与交易日，再交给策略
++		if (_engine)
++		{
++			_engine->set_date_time(_date, curMin, curSec, rawMin);
++			if (tickTDate != 0 && tickTDate > _engine->getTradingDate())
++				_engine->set_trading_date(tickTDate);
++		}
++		trigger_price(curTick, hotFlag);
+ 		_cur_pos = minutes;
+ 	}
+ 	else if (_cur_pos < minutes)
+@@ -129,15 +185,13 @@
+ 		//这个时候要先触发闭合, 再修改平台时间和价格
+ 		if (_last_emit_pos < _cur_pos)
+ 		{
+-			//触发数据回放模块
+-			StdUniqueLock lock(_mtx);
+-
++			//触发数据回放模块（已在 _strand owner 内串行）
+ 			//优先修改时间标记
+ 			_last_emit_pos = _cur_pos;
+ 
+ 			uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
+ 
+-			WTSLogger::info("Minute Bar {}.{:04d} Closed by data", _date, thisMin);
++			WTSLogger::info("Minute Bar {}.{:04d} Closed by data", _date.load(), thisMin);
+ 			if (_store)
+ 				_store->onMinuteEnd(_date, thisMin);
+ 
+@@ -187,76 +241,100 @@
+ 	//先检查当前时间, 如果大于
+ 	//uint32_t offTime = _s_info->offsetTime(_engine->get_min_time());
+ 
++	_running.store(true, std::memory_order_release);
+ 	_thrd.reset(new StdThread([this](){
+-		while (!_stopped)
++		while (!_stopped.load(std::memory_order_acquire))
+ 		{
+-			if (_time != UINT_MAX && _s_info->isInTradingTime(_time / 100000, true))
+-			{
+-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+-				uint64_t now = TimeUtils::getLocalTimeNow();
++			//卡9 9d=A：worker 与 on_tick 串行；worker 回调内的同步重入同样排队并在本轮结束前投递
++			if (!_strand.enterWorker(_stopped))
++				break;
+ 
+-				if (now >= _next_check_time && _last_emit_pos < _cur_pos)
+-				{
+-					//触发数据回放模块
+-					StdUniqueLock lock(_mtx);
++			wt_ticker::runAndDrain(_strand, [this]() { worker_pass(); },
++				[this](wtp::WTSObject* obj, uint32_t flag) { handle_tick(static_cast<WTSTickData*>(obj), flag); });
+ 
+-					//优先修改时间标记
+-					_last_emit_pos = _cur_pos;
++			_strand.sleepFor(std::chrono::milliseconds(10), _stopped);
++		}
++	}));
++}
+ 
+-					uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
+-					//_time全链路约定为HHMMSSmmm格式(on_tick/getDateTime写入, isInTradingTime(_time/100000)读取),
+-					//此处必须换算, 直接写HHMM会使后续判定误入盘外分支并将交易日误滚动到次日
+-					_time = thisMin * 100000;
+-
+-					//如果thisMin是0, 说明换日了
+-					//这里是本地计时导致的换日, 说明日期其实还是老日期, 要自动+1
+-					//同时因为时间是235959xxx, 所以也要手动置为0
+-					if (thisMin == 0)
+-					{
+-						uint32_t lastDate = _date;
+-						_date = TimeUtils::getNextDate(_date);
+-						_time = 0;
+-						WTSLogger::info("Data automatically changed at time 00:00: {} -> {}", lastDate, _date);
+-					}
++void WtSelRtTicker::worker_pass()
++{
++	if (_time != UINT_MAX && _s_info->isInTradingTime(_time / 100000, true))
++	{
++		uint64_t now = TimeUtils::getLocalTimeNow();
+ 
+-					WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
+-					if (_store)
+-						_store->onMinuteEnd(_date, thisMin);
++		if (now >= _next_check_time && _last_emit_pos < _cur_pos)
++		{
++			//优先修改时间标记
++			_last_emit_pos = _cur_pos;
+ 
+-					_engine->on_minute_end(_date, thisMin);
++			uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
++			//_time全链路约定为HHMMSSmmm格式(on_tick/getDateTime写入, isInTradingTime(_time/100000)读取),
++			//此处必须换算, 直接写HHMM会使后续判定误入盘外分支并将交易日误滚动到次日
++			_time = thisMin * 100000;
+ 
+-					uint32_t offMin = _s_info->offsetTime(thisMin, true);
+-					if (offMin >= _s_info->getCloseTime(true) ||
+-						isSessionCloseTime(_s_info, thisMin))
+-					{
+-						_engine->on_session_end();
+-					}
++			//如果thisMin是0, 说明换日了
++			//这里是本地计时导致的换日, 说明日期其实还是老日期, 要自动+1
++			//同时因为时间是235959xxx, 所以也要手动置为0
++			if (thisMin == 0)
++			{
++				uint32_t lastDate = _date;
++				_date = TimeUtils::getNextDate(lastDate);
++				_time = 0;
++				WTSLogger::info("Data automatically changed at time 00:00: {} -> {}", lastDate, _date.load());
++			}
+ 
+-					//145959000
+-					if (_engine)
+-						_engine->set_date_time(_date, thisMin, 0);
+-				}
++			WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date.load(), thisMin);
++			if (_store)
++				_store->onMinuteEnd(_date, thisMin);
++
++			_engine->on_minute_end(_date, thisMin);
++
++			uint32_t offMin = _s_info->offsetTime(thisMin, true);
++			if (offMin >= _s_info->getCloseTime(true) ||
++				isSessionCloseTime(_s_info, thisMin))
++			{
++				_engine->on_session_end();
+ 			}
+-			else
+-			{//如果不在交易时间,则每隔10毫秒检查一次,如果分钟发生变化则触发
+-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+-				//getCurMin返回HHMMSS, 与_time的HHMMSSmmm约定差一个毫秒位, 不换算会导致跨日误判
+-				uint32_t curTime = TimeUtils::getCurMin() * 1000;
+-				if (_time != UINT_MAX && curTime != _time)
+-				{
+-					_engine->on_minute_end(_date, _time / 100000);
+-					if (curTime < _time)
+-						_date = TimeUtils::getNextDate(_date);
+-					_time = curTime;
+-				}
+-			}
++
++			//145959000
++			if (_engine)
++				_engine->set_date_time(_date, thisMin, 0);
+ 		}
+-	}));
++	}
++	else
++	{//如果不在交易时间,则每隔10毫秒检查一次,如果分钟发生变化则触发
++		//getCurMin返回HHMMSS, 与_time的HHMMSSmmm约定差一个毫秒位, 不换算会导致跨日误判
++		uint32_t curTime = TimeUtils::getCurMin() * 1000;
++		if (_time != UINT_MAX && curTime != _time)
++		{
++			_engine->on_minute_end(_date, _time / 100000);
++			if (curTime < _time)
++				_date = TimeUtils::getNextDate(_date);
++			_time = curTime;
++		}
++	}
+ }
+ 
+ void WtSelRtTicker::stop()
+ {
+-	_stopped = true;
+-	if (_thrd)
+-		_thrd->join();
++	_stopped.store(true, std::memory_order_release);
++	_strand.notifyAll();
++
++	StdThreadPtr worker = _thrd;
++	if (!worker)
++		return;
++
++	//卡9 9d=A：worker（回调内）调用 stop 只发停止请求，不自 join；由 owner 之外的 stop/析构负责 join
++	if (worker->get_id() == std::this_thread::get_id())
++		return;
++
++	//非 owner 调用方：有界等待当前事件与排队事件排空
++	if (!_strand.isOwner() && !_strand.waitIdle(wt_ticker::STOP_DRAIN_TIMEOUT))
++		WTSLogger::warn("SelTicker stop: in-flight event or queued ticks not drained within {} ms, joining worker",
++			(long long)wt_ticker::STOP_DRAIN_TIMEOUT.count());
++
++	StdUniqueLock lock(_stop_mtx);
++	if (worker->joinable())
++		worker->join();
+ }
+--- a/src/WtCore/WtSelTicker.h
++++ b/src/WtCore/WtSelTicker.h
+@@ -14,6 +14,7 @@
+ 
+ #include "../Includes/WTSMarcos.h"
+ #include "../Share/StdUtils.hpp"
++#include "TickerDayBoundary.h"
+ 
+ NS_WTP_BEGIN
+ class WTSSessionInfo;
+@@ -79,21 +80,33 @@
+ 	 */
+ 	void	trigger_price(WTSTickData* curTick, uint32_t hotFlag = 0);
+ 
++	/**
++	 * @brief 处理一笔行情（调用方必须是 _strand 的 owner）
++	 */
++	void	handle_tick(WTSTickData* curTick, uint32_t hotFlag);
++
++	/**
++	 * @brief worker 的一轮检查（调用方必须是 _strand 的 owner）
++	 */
++	void	worker_pass();
++
+ private:
+ 	WTSSessionInfo*	_s_info;     ///< 交易时段信息
+ 	WtSelEngine*	_engine;        ///< 选股策略引擎指针
+ 	IDataReader*		_store;      ///< 数据读取器指针
+ 
+-	uint32_t	_date;              ///< 当前日期
+-	uint32_t	_time;              ///< 当前时间
++	std::atomic<uint32_t>	_date;              ///< 当前日期
++	std::atomic<uint32_t>	_time;              ///< 当前时间
+ 
+ 	uint32_t	_cur_pos;           ///< 当前分钟位置
+ 
+-	StdUniqueMutex	_mtx;         ///< 互斥锁，用于线程同步
++	wt_ticker::EventStrand	_strand;	///< 卡9 9d=A：on_tick 与 worker 的串行化/重入排队
+ 	std::atomic<uint64_t>	_next_check_time;  ///< 下次检查时间，原子类型
+ 	std::atomic<uint32_t>	_last_emit_pos;    ///< 最后触发的分钟位置，原子类型
+ 
+-	bool			_stopped;           ///< 触发器是否已停止
++	std::atomic<bool>	_stopped;           ///< 触发器是否已停止
++	std::atomic<bool>	_running{ false };	///< worker 已启动
++	StdUniqueMutex	_stop_mtx;	///< 串行化 stop 的 join
+ 	StdThreadPtr	_thrd;           ///< 监控线程指针
+ };
+ 
+--- a/src/WtCore/WtHftTicker.cpp
++++ b/src/WtCore/WtHftTicker.cpp
+@@ -8,6 +8,7 @@
+  * \brief 
+  */
+ #include "WtHftTicker.h"
++#include "TickerDayBoundary.h"
+ #include "WtHftEngine.h"
+ #include "../Includes/IDataReader.h"
+ 
+@@ -72,7 +73,10 @@
+ 	_store = store;
+ 	_s_info = _engine->get_session_info(sessionID);
+ 
+-	TimeUtils::getDateTime(_date, _time);
++	uint32_t curDate = 0, curTime = 0;
++	TimeUtils::getDateTime(curDate, curTime);
++	_date = curDate;
++	_time = curTime;
+ }
+ 
+ void WtHftRtTicker::trigger_price(WTSTickData* curTick)
+@@ -102,6 +106,19 @@
+ 
+ void WtHftRtTicker::on_tick(WTSTickData* curTick)
+ {
++	if (curTick == NULL)
++		return;
++
++	//卡9 9d=A：owner 线程内（策略/引擎/数据回调中）的同步重入排队，在当前事件返回后的安全点投递
++	if (_strand.enterEvent(curTick, 0) == wt_ticker::EventStrand::Entry::Queued)
++		return;
++
++	wt_ticker::runAndDrain(_strand, [this, curTick]() { handle_tick(curTick); },
++		[this](wtp::WTSObject* obj, uint32_t) { handle_tick(static_cast<WTSTickData*>(obj)); });
++}
++
++void WtHftRtTicker::handle_tick(WTSTickData* curTick)
++{
+ 	bool hasWorkerThread = false;
+ 	{
+ 		std::lock_guard<std::mutex> lock(_lifecycle_mtx);
+@@ -116,6 +133,13 @@
+ 	uint32_t uDate = curTick->actiondate();
+ 	uint32_t uTime = curTick->actiontime();
+ 
++	//卡3 3a=A：23:59:60 等非法时刻是非法输入，拒绝且不推进 ticker 状态
++	if (!wt_ticker::isValidTickTime(uTime))
++	{
++		WTSLogger::error("Tick of {} with invalid action time {}.{} rejected", curTick->code(), uDate, uTime);
++		return;
++	}
++
+ 	if (_date != 0 && (uDate < _date || (uDate == _date && uTime < _time)))
+ 	{
+ 		//WTSLogger::info("行情时间{}小于本地时间{}", uTime, _time);
+@@ -123,6 +147,27 @@
+ 		return;
+ 	}
+ 
++	//卡3 3a=A：新交易日首 tick，先闭合旧日未发布的分钟（标签保留 2400），再把分钟位置归零
++	const uint32_t tickTDate = curTick->tradingdate();
++	const bool bNewTDate = _engine != NULL && wt_ticker::isNewTradingDate(_cur_pos, tickTDate, _engine->getTradingDate());
++	if (bNewTDate)
++	{
++		if (_last_emit_pos < _cur_pos)
++		{
++			_last_emit_pos = _cur_pos;
++			uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
++			WTSLogger::info("Minute Bar {}.{:04d} Closed by new tradingday data", _date.load(), thisMin);
++			if (_store)
++				_store->onMinuteEnd(_date, thisMin);
++			_engine->on_minute_end(_date, thisMin);
++			if (isSessionCloseTime(_s_info, thisMin))
++				_engine->on_session_end();
++		}
++		WTSLogger::info("Tradingday {} -> {} by data at {}.{}, ticker position reset", _engine->getTradingDate(), tickTDate, uDate, uTime);
++		_cur_pos = 0;
++		_last_emit_pos = 0;
++	}
++
+ 	_date = uDate;
+ 	_time = uTime;
+ 
+@@ -130,7 +175,8 @@
+ 	uint32_t curSec = _time % 100000;
+ 	uint32_t minutes = _s_info->timeToMinutes(curMin);
+ 	bool isSecEnd = _s_info->isLastOfSection(curMin);
+-	if (isSecEnd)
++	//卡3 3a=A：全天时段 00:00 同时等于收盘 2400 的取模值；位置 0 是新日开始，不能回退（防 uint 下溢）
++	if (isSecEnd && minutes > 0)
+ 	{
+ 		minutes--;
+ 	}
+@@ -141,6 +187,15 @@
+ 	if (_cur_pos == 0)
+ 	{
+ 		//如果当前时间是0, 则直接赋值即可
++		//卡3 3a=A：首 tick（含新交易日首 tick）同样推进引擎时间并交给引擎，不丢弃
++		//新交易日首 tick 先推进引擎时间与交易日，再交给策略
++		if (_engine)
++		{
++			_engine->set_date_time(_date, curMin, curSec, rawMin);
++			if (tickTDate != 0 && tickTDate > _engine->getTradingDate())
++				_engine->set_trading_date(tickTDate);
++		}
++		trigger_price(curTick);
+ 		_cur_pos = minutes;
+ 	}
+ 	else if (_cur_pos < minutes)
+@@ -149,15 +204,13 @@
+ 		//这个时候要先触发闭合, 再修改平台时间和价格
+ 		if (_last_emit_pos < _cur_pos)
+ 		{
+-			//触发数据回放模块
+-			StdUniqueLock lock(_mtx);
+-
++			//触发数据回放模块（已在 _strand owner 内串行）
+ 			//优先修改时间标记
+ 			_last_emit_pos = _cur_pos;
+ 
+ 			uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
+ 
+-			WTSLogger::info("Minute Bar {}.{:04d} Closed by data", _date, thisMin);
++			WTSLogger::info("Minute Bar {}.{:04d} Closed by data", _date.load(), thisMin);
+ 			if (_store)
+ 				_store->onMinuteEnd(_date, thisMin);
+ 
+@@ -249,73 +302,15 @@
+ 				s_hft_worker_ticker = this;
+ 				while (!_stopped.load(std::memory_order_acquire))
+ 				{
+-					if (_time != UINT_MAX && _s_info->isInTradingTime(_time / 100000, true))
+-					{
+-						uint8_t passCount = _in_session_pass_count.load(std::memory_order_relaxed);
+-						if (passCount < 2)
+-							_in_session_pass_count.store(passCount + 1, std::memory_order_release);
++					//卡9 9d=A：worker 与 on_tick 串行；worker 回调内的同步重入同样排队并在本轮结束前投递
++					if (!_strand.enterWorker(_stopped))
++						break;
+ 
+-						std::this_thread::sleep_for(std::chrono::milliseconds(10));
+-						uint64_t now = TimeUtils::getLocalTimeNow();
+-
+-						if (now >= _next_check_time && _last_emit_pos < _cur_pos)
+-						{
+-							StdUniqueLock dataLock(_mtx);
+-							_last_emit_pos = _cur_pos;
+-
+-							uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
+-							// _time uses HHMMSSmmm throughout the ticker. Keep the
+-							// auto-close value in the same unit used by on_tick() and
+-							// isInTradingTime(_time / 100000).
+-							_time = thisMin * 100000;
+-
+-							if (thisMin == 0)
+-							{
+-								uint32_t lastDate = _date;
+-								_date = TimeUtils::getNextDate(_date);
+-								_time = 0;
+-								WTSLogger::info("Data automatically changed at time 00:00: {} -> {}", lastDate, _date);
+-							}
+-
+-							WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
+-							if (_store)
+-								_store->onMinuteEnd(_date, thisMin);
++					bool busyPolling = true;
++					wt_ticker::runAndDrain(_strand, [this, offTime, &busyPolling]() { busyPolling = worker_pass(offTime); },
++						[this](wtp::WTSObject* obj, uint32_t) { handle_tick(static_cast<WTSTickData*>(obj)); });
+ 
+-							_engine->on_minute_end(_date, thisMin);
+-
+-							uint32_t offMin = _s_info->offsetTime(thisMin, true);
+-							if (offMin >= _s_info->getCloseTime(true) ||
+-								isSessionCloseTime(_s_info, thisMin))
+-								_engine->on_session_end();
+-
+-							if (_engine)
+-								_engine->set_date_time(_date, thisMin, 0);
+-						}
+-					}
+-					else
+-					{
+-						uint32_t total_mins = _s_info->getTradingMins();
+-						if (_time != UINT_MAX && _last_emit_pos != 0 && _last_emit_pos < total_mins && offTime >= _s_info->getCloseTime(true))
+-						{
+-							WTSLogger::warn("Tradingday {} will be ended forcely, last_emit_pos: {}, time: {}", _engine->getTradingDate(), _last_emit_pos.fetch_add(0), _time);
+-							StdUniqueLock dataLock(_mtx);
+-							_last_emit_pos = total_mins;
+-
+-							[[maybe_unused]] bool bEndingTDate = true;
+-							uint32_t thisMin = _s_info->getCloseTime(false);
+-							[[maybe_unused]] uint32_t offMin = _s_info->getCloseTime(true);
+-
+-							WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date, thisMin);
+-							if (_store)
+-								_store->onMinuteEnd(_date, thisMin, _engine->getTradingDate());
+-
+-							_engine->on_session_end();
+-						}
+-						else
+-						{
+-							std::this_thread::sleep_for(std::chrono::seconds(10));
+-						}
+-					}
++					_strand.sleepFor(busyPolling ? std::chrono::milliseconds(10) : std::chrono::milliseconds(10000), _stopped);
+ 				}
+ 				s_hft_worker_ticker = nullptr;
+ 			});
+@@ -337,9 +332,62 @@
+ 	}
+ }
+ 
++bool WtHftRtTicker::worker_pass(uint32_t offTime)
++{
++	if (_time != UINT_MAX && _s_info->isInTradingTime(_time / 100000, true))
++	{
++		uint8_t passCount = _in_session_pass_count.load(std::memory_order_relaxed);
++		if (passCount < 2)
++			_in_session_pass_count.store(passCount + 1, std::memory_order_release);
++		uint64_t now = TimeUtils::getLocalTimeNow();
++		if (now >= _next_check_time && _last_emit_pos < _cur_pos)
++		{
++			_last_emit_pos = _cur_pos;
++			uint32_t thisMin = _s_info->minuteToTime(_cur_pos);
++			// _time uses HHMMSSmmm throughout the ticker. Keep the
++			// auto-close value in the same unit used by on_tick() and
++			// isInTradingTime(_time / 100000).
++			_time = thisMin * 100000;
++			if (thisMin == 0)
++			{
++				uint32_t lastDate = _date;
++				_date = TimeUtils::getNextDate(lastDate);
++				_time = 0;
++				WTSLogger::info("Data automatically changed at time 00:00: {} -> {}", lastDate, _date.load());
++			}
++			WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date.load(), thisMin);
++			if (_store)
++				_store->onMinuteEnd(_date, thisMin);
++			_engine->on_minute_end(_date, thisMin);
++			uint32_t offMin = _s_info->offsetTime(thisMin, true);
++			if (offMin >= _s_info->getCloseTime(true) ||
++				isSessionCloseTime(_s_info, thisMin))
++				_engine->on_session_end();
++			if (_engine)
++				_engine->set_date_time(_date, thisMin, 0);
++		}
++		return true;
++	}
++
++	uint32_t total_mins = _s_info->getTradingMins();
++	if (_time != UINT_MAX && _last_emit_pos != 0 && _last_emit_pos < total_mins && offTime >= _s_info->getCloseTime(true))
++	{
++		WTSLogger::warn("Tradingday {} will be ended forcely, last_emit_pos: {}, time: {}", _engine->getTradingDate(), _last_emit_pos.load(), _time.load());
++		_last_emit_pos = total_mins;
++		uint32_t thisMin = _s_info->getCloseTime(false);
++		WTSLogger::info("Minute bar {}.{:04d} closed automatically", _date.load(), thisMin);
++		if (_store)
++			_store->onMinuteEnd(_date, thisMin, _engine->getTradingDate());
++		_engine->on_session_end();
++		return true;
++	}
++	return false;
++}
++
+ void WtHftRtTicker::stop()
+ {
+ 	_stopped.store(true, std::memory_order_release);
++	_strand.notifyAll();
+ 
+ 	if (s_hft_worker_ticker != nullptr)
+ 		return;
+@@ -383,6 +431,11 @@
+ 	StdThreadPtr worker = _thrd;
+ 	lock.unlock();
+ 
++	//卡9 9d=A：非 owner 调用方有界等待当前事件与排队事件排空，再 join
++	if (!_strand.isOwner() && !_strand.waitIdle(wt_ticker::STOP_DRAIN_TIMEOUT))
++		WTSLogger::warn("HftTicker stop: in-flight event or queued ticks not drained within {} ms, joining worker",
++			(long long)wt_ticker::STOP_DRAIN_TIMEOUT.count());
++
+ 	try
+ 	{
+ 		if (worker && worker->joinable())
+--- a/src/WtCore/WtHftTicker.h
++++ b/src/WtCore/WtHftTicker.h
+@@ -18,6 +18,7 @@
+ 
+ #include "../Includes/WTSMarcos.h"
+ #include "../Share/StdUtils.hpp"
++#include "TickerDayBoundary.h"
+ 
+ NS_WTP_BEGIN
+ class WTSSessionInfo;
+@@ -90,6 +91,18 @@
+ 	 */
+ 	void	trigger_price(WTSTickData* curTick);
+ 
++	/**
++	 * @brief 处理一笔行情（调用方必须是 _strand 的 owner）
++	 */
++	void	handle_tick(WTSTickData* curTick);
++
++	/**
++	 * @brief worker 的一轮检查（调用方必须是 _strand 的 owner）
++	 * @param offTime 启动时的偏移时间
++	 * @return 是否处于需要短间隔轮询的状态
++	 */
++	bool	worker_pass(uint32_t offTime);
++
+ private:
+ 	/**
+ 	 * @brief 交易时段信息指针
+@@ -109,12 +122,12 @@
+ 	/**
+ 	 * @brief 当前日期，格式YYYYMMDD
+ 	 */
+-	uint32_t	_date;
++	std::atomic<uint32_t>	_date;
+ 
+ 	/**
+ 	 * @brief 当前时间，格式HHMMSSmmm
+ 	 */
+-	uint32_t	_time;
++	std::atomic<uint32_t>	_time;
+ 
+ 	/**
+ 	 * @brief 当前分钟位置，以分钟序号表示
+@@ -124,7 +137,7 @@
+ 	/**
+ 	 * @brief 互斥锁，用于线程同步
+ 	 */
+-	StdUniqueMutex	_mtx;
++	wt_ticker::EventStrand	_strand;	///< 卡9 9d=A：on_tick 与 worker 的串行化/重入排队
+ 
+ 	/**
+ 	 * @brief 下次检查时间，原子变量
+--- /dev/null
++++ b/src/Share/ActionDayNormalizer.hpp
+@@ -0,0 +1,81 @@
++/*!
++ * \file ActionDayNormalizer.hpp
++ * \project	WonderTrader
++ *
++ * \brief 期货 parser 行情发生日（ActionDay）夜盘纠偏（迭代03 卡3 3b=C，默认 A；2026-11-04 用户裁定）
++ *
++ * 规则（仅当行情 ActionDay == TradingDay 时适用，此时夜盘的发生日不可信）：
++ * - 本地时间 03:00–08:59：视为早盘启动后收到的隔夜残留行情，丢弃（保留原过滤语义）。
++ * - 行情 20–23 时：以本地日期为发生日；行情 23 时而本地 00 时（行情慢于本地）取本地前一天。
++ * - 行情 00 时（如 00:30）：
++ *     模式 A（默认，NextLocalDay）：以本地日期为发生日；本地 23 时（本地慢于行情）取本地次日。
++ *     模式 B（Legacy）：保持旧实现，00 时不进入纠偏分支，直接保留 ActionDay。
++ * 日期推进是自然日（TimeUtils::getNextDate），不跳周末/节假日：周五夜盘 00:30 的发生日是周六。
++ *
++ * 真实 SDK（CTP/CTPMini/Femas）的 ActionDay/TradingDay 语义未经精确 SDK 证据验证（外部 X）。
++ */
++#pragma once
++#include <stdint.h>
++#include <cstring>
++#include "TimeUtils.hpp"
++
++namespace wt_actday
++{
++	enum class MidnightMode
++	{
++		NextLocalDay = 0,	//卡3 3b 默认 A
++		Legacy = 1			//卡3 3b 选项 B：保持旧行为
++	};
++
++	//只有进入纠偏分支的时段才需要读本地时钟（避免日盘每笔行情一次系统调用）
++	inline bool needsLocalClock(uint32_t actHour, MidnightMode mode = MidnightMode::NextLocalDay)
++	{
++		return actHour >= 20 || (mode == MidnightMode::NextLocalDay && actHour == 0);
++	}
++
++	/*
++	 *	@actDate	输入为行情 ActionDay，输出为纠偏后的发生日
++	 *	@return		false 表示该行情应丢弃
++	 */
++	inline bool normalize(uint32_t& actDate, uint32_t actHour, uint32_t tradingDate,
++		uint32_t curDate, uint32_t curHour, MidnightMode mode = MidnightMode::NextLocalDay)
++	{
++		if (actDate != tradingDate)
++			return true;
++
++		if (!needsLocalClock(actHour, mode))
++			return true;
++
++		//早上启动以后,会收到昨晚收盘前的行情,这个时候可能会有发生日期=交易日的情况出现,这笔数据直接丢掉
++		if (curHour >= 3 && curHour < 9)
++			return false;
++
++		actDate = curDate;
++		if (actHour == 23 && curHour == 0)
++			actDate = TimeUtils::getNextDate(curDate, -1);	//行情时间慢于系统时间
++		else if (actHour == 0 && curHour == 23)
++			actDate = TimeUtils::getNextDate(curDate, 1);	//系统时间慢于行情时间
++		return true;
++	}
++
++	inline MidnightMode parseMode(const char* value)
++	{
++		if (value != NULL && (std::strcmp(value, "legacy") == 0 || std::strcmp(value, "B") == 0 || std::strcmp(value, "keep") == 0))
++			return MidnightMode::Legacy;
++		return MidnightMode::NextLocalDay;
++	}
++
++#ifdef WT_ACTDAY_TEST_CLOCK
++	// 仅测试构建：由测试 TU 提供可控本地时钟
++	void testLocalDateTime(uint32_t& date, uint32_t& time);
++#endif
++
++	inline void localDateTime(uint32_t& date, uint32_t& time)
++	{
++#ifdef WT_ACTDAY_TEST_CLOCK
++		testLocalDateTime(date, time);
++#else
++		TimeUtils::getDateTime(date, time);
++#endif
++	}
++}
+--- a/src/ParserCTP/ParserCTP.cpp
++++ b/src/ParserCTP/ParserCTP.cpp
+@@ -17,9 +17,11 @@
+ 
+ #include "../Share/ModuleHelper.hpp"
+ #include "../Share/TimeUtils.hpp"
++#include "../Share/ActionDayNormalizer.hpp"
+ #include "../Share/StdUtils.hpp"
+ #include "../Share/Converter.hpp"
+ 
++#include <exception>
+ #include <filesystem>
+ namespace fs = std::filesystem;
+ 
+@@ -41,39 +43,45 @@
+ {
+ 	EXPORT_FLAG IParserApi* createParser()
+ 	{
+-		ParserCTP* parser = new ParserCTP();
+-		return parser;
++		try { return new ParserCTP(); } catch (...) { return NULL; }
+ 	}
+ 
++	/*
++	 *	卡9 9b：仅当没有回调/接口重入、且本实例从未创建过 SDK 对象时才删除；
++	 *	否则保留指针（不置空），由宿主隔离到进程退出。
++	 */
+ 	EXPORT_FLAG void deleteParser(IParserApi* &parser)
+ 	{
+ 		if (NULL != parser)
+ 		{
++			ParserCTP* ctp = dynamic_cast<ParserCTP*>(parser);
++			if (ctp == NULL || !ctp->removableLegacy())
++				return;
+ 			delete parser;
+ 			parser = NULL;
+ 		}
+ 	}
++
++	WT_PARSER_LIFECYCLE_V2_EXPORT const WtParserLifecycleApiV2* WT_PARSER_LIFECYCLE_V2_CALL getParserLifecycleApiV2(uint32_t major)
++	{
++		return wt_vendor_md_v2::Table<ParserCTP>::get(major);
++	}
+ };
+ 
+ 
+-static char tmp_timestr[10] = { 0 };
+-constexpr inline uint32_t strToTime(const char* strTime) noexcept
++// UpdateTime 为 HH:MM:SS；使用局部缓冲，避免多实例/多回调线程共享静态缓冲的数据竞争
++inline uint32_t strToTime(const char* strTime) noexcept
+ {
++	char digits[16] = { 0 };
+ 	int idx = 0;
+-	char* c = (char*)strTime;
+-	while (*c)
+-	{
++	for (const char* c = strTime; c != NULL && *c != '\0' && idx < 15; ++c)
++	{
+ 		if ('0' <= *c && *c <= '9')
+-		{
+-			tmp_timestr[idx] = *c;
+-			idx++;
+-		}
+-
+-		c = c + 1;
++			digits[idx++] = *c;
+ 	}
+-	tmp_timestr[idx] = '\0';
++	digits[idx] = '\0';
+ 
+-	return convert::to_uint32(tmp_timestr);
++	return convert::to_uint32(digits);
+ }
+ 
+ constexpr inline double checkValid(double val) noexcept
+@@ -85,18 +93,98 @@
+ 	:m_uTradingDate(0)
+     ,m_pUserAPI(NULL)
+ 	,m_bLocaltime(false)
+-,m_iRequestID(0)
++	,m_iRequestID(0)
++	,m_sink(NULL)
++	,m_pBaseDataMgr(NULL)
++	,m_hInstCTP(NULL)
++	,m_funcCreator(NULL)
+ 	{
+ }
+ 
+ 
+ ParserCTP::~ParserCTP()
+ {
++	// 在自身回调或接口调用内直接析构无法做到安全（栈上仍有本对象帧）：fail-stop。
++	if (wt_vendor_md_v2::Lifecycle::reentered(this))
++		std::terminate();
++	(void)shutdownLegacy();
++}
++
++/*
++ *	Parser lifecycle V2（卡9 9a=A+C）
++ *	CTP 头文件（API/CTP6.6.9/ThostFtdcMdApi.h:93-103、API/CTP6.3.15/ThostFtdcMdApi.h:90-100）
++ *	对 Release() 只写「删除接口对象本身」、对 Join() 只写「等待接口线程结束运行」，
++ *	未声明 Release 会 join 回调线程或返回后不再回调；RegisterSpi（6.6.9:127-129）也无注销语义。
++ *	因此一旦创建过 SDK 对象，排空状态不可证明：wait_drained 释放一次 SDK 后返回 ERROR，宿主隔离。
++ */
++WtParserLifecycleV2Status ParserCTP::requestStopV2() noexcept
++{
++	return _lc.requestStop();
++}
++
++WtParserLifecycleV2Status ParserCTP::canWaitV2() const noexcept
++{
++	return wt_vendor_md_v2::Lifecycle::reentered(this) ? WT_PARSER_LIFECYCLE_V2_WOULD_DEADLOCK : WT_PARSER_LIFECYCLE_V2_OK;
++}
++
++WtParserLifecycleV2Status ParserCTP::waitDrainedV2(uint32_t timeoutMs) noexcept
++{
++	return _lc.waitDrained(canWaitV2(), timeoutMs,
++		[this]() { return sdkSeen(); },
++		[this]() { releaseSdk(); },
++		[this]() {
++			std::lock_guard<std::mutex> lock(_sdk_mutex);
++			m_sink = NULL;
++			m_pBaseDataMgr = NULL;
++		});
++}
++
++bool ParserCTP::destroyableV2() const noexcept
++{
++	return _lc.destroyable(canWaitV2()) && !sdkSeen();
++}
++
++bool ParserCTP::removableLegacy() noexcept
++{
++	return shutdownLegacy() && !sdkSeen();
++}
++
++bool ParserCTP::sdkSeen() const noexcept
++{
++	return _lc.sdk_created.load(std::memory_order_acquire) || m_pUserAPI != NULL;
++}
++
++bool ParserCTP::shutdownLegacy() noexcept
++{
++	return _lc.shutdownLegacy(this, false, [this]() { releaseSdk(); });
++}
++
++void ParserCTP::releaseSdk() noexcept
++{
++	// 调用方保证：两道闸门已关闭且已排空，当前线程不在本实例回调/接口帧内
++	std::lock_guard<std::mutex> lock(_sdk_mutex);
++	CThostFtdcMdApi* api = m_pUserAPI;
+ 	m_pUserAPI = NULL;
++	if (api == NULL)
++		return;
++	_lc.sdk_created.store(true, std::memory_order_release);
++	try
++	{
++		api->RegisterSpi(NULL);
++		api->Release();
++	}
++	catch (...)
++	{
++	}
+ }
+ 
+ bool ParserCTP::init(WTSVariant* config)
+ {
++	auto call = _lc.call(this);
++	// 卡9 9c：重复初始化拒绝并保留原实例；停止后、回调内或无配置均拒绝
++	if (!call || config == NULL || _init_done || sdkSeen() || _lc.insideCallback(this))
++		return false;
++
+ 	m_strFrontAddr = config->getCString("front");
+ 	m_strBroker = config->getCString("broker");
+ 	m_strUserID = config->getCString("user");
+@@ -109,6 +197,7 @@
+      * 如果为true，就用本地时间戳，默认为false
+      */
+     m_bLocaltime = config->getBoolean("localtime");
++    m_iMidnightMode = (int)wt_actday::parseMode(config->getCString("midnight_actionday"));
+ 	m_strFlowDir = StrUtil::standardisePath(m_strFlowDir);
+ 
+ 	std::string path = fmtutil::format("{}{}/{}/", m_strFlowDir, m_strBroker, m_strUserID);
+@@ -133,22 +222,45 @@
+ #endif
+ 	m_funcCreator = (CTPCreator)DLLHelper::get_symbol(m_hInstCTP, creatorName);
+ #endif
+-	m_pUserAPI = m_funcCreator(path.c_str(), false, false);
++	if (m_funcCreator == NULL)
++	{
++		write_log(m_sink, LL_ERROR, "[ParserCTP] Market data API creator was not found");
++		return false;
++	}
++	CThostFtdcMdApi* api = m_funcCreator(path.c_str(), false, false);
++	if (api == NULL)
++	{
++		write_log(m_sink, LL_ERROR, "[ParserCTP] Market data API creator returned null");
++		return false;
++	}
++	// 从此刻起存在 SDK 对象：本实例的排空不再可证明（见 requestStopV2 上方说明）
++	_lc.sdk_created.store(true, std::memory_order_release);
++	m_pUserAPI = api;
+ 	m_pUserAPI->RegisterSpi(this);
+ 	m_pUserAPI->RegisterFront((char*)m_strFrontAddr.c_str());
++	_init_done = true;
+ 
+ 	return true;
+ }
+ 
+ void ParserCTP::release()
+ {
+-	disconnect();
++	(void)shutdownLegacy();
+ }
+ 
+ bool ParserCTP::connect()
+ {
++	auto call = _lc.call(this);
++	// 卡9 9d：回调内同步重入 connect 返回 busy(false)
++	if (!call || _lc.insideCallback(this))
++		return false;
++
+ 	if(m_pUserAPI)
+ 	{
++		// SDK 的 Init 只允许调用一次；重复 connect 不再触发
++		if (_connect_issued)
++			return false;
++		_connect_issued = true;
+ 		m_pUserAPI->Init();
+ 	}
+ 
+@@ -157,23 +269,23 @@
+ 
+ bool ParserCTP::disconnect()
+ {
+-	if(m_pUserAPI)
+-	{
+-		m_pUserAPI->RegisterSpi(NULL);
+-		m_pUserAPI->Release();
+-		m_pUserAPI = NULL;
+-	}
+-
+-	return true;
++	// 终止性关闭：回调/接口重入时只关闭准入并延后 SDK 释放，返回 false（卡9 9d）
++	return shutdownLegacy();
+ }
+ 
+ void ParserCTP::OnRspError( CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/ )
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	IsErrorRspInfo(pRspInfo);
+ }
+ 
+ void ParserCTP::OnFrontConnected()
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if(m_sink)
+ 	{
+ 		write_log(m_sink, LL_INFO, "[ParserCTP] Market data server connected");
+@@ -185,13 +297,20 @@
+ 
+ void ParserCTP::OnRspUserLogin( CThostFtdcRspUserLoginField */*pRspUserLogin*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast )
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if(bIsLast && !IsErrorRspInfo(pRspInfo))
+ 	{
+-		m_uTradingDate = convert::to_uint32(m_pUserAPI->GetTradingDay());
++		uint32_t tradingDate = convert::to_uint32(m_pUserAPI->GetTradingDay());
+         //By Wesley @ 2022.03.09
+         //这里加一个判断，但是这样的交易日不准确，在夜盘会出错
+-        if(m_uTradingDate == 0)
+-            m_uTradingDate = TimeUtils::getCurDate();
++        if(tradingDate == 0)
++            tradingDate = TimeUtils::getCurDate();
++		{
++			std::lock_guard<std::recursive_mutex> lock(_data_mutex);
++			m_uTradingDate = tradingDate;
++		}
+ 		
+ 		write_log(m_sink, LL_INFO, "[ParserCTP] Market data server logined, {}", m_uTradingDate);
+ 
+@@ -207,6 +326,9 @@
+ 
+ void ParserCTP::OnRspUserLogout(CThostFtdcUserLogoutField */*pUserLogout*/, CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if(m_sink)
+ 	{
+ 		m_sink->handleEvent(WPE_Logout, 0);
+@@ -215,6 +337,9 @@
+ 
+ void ParserCTP::OnFrontDisconnected( int nReason )
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if(m_sink)
+ 	{
+ 		write_log(m_sink, LL_ERROR, "[ParserCTP] Market data server disconnected: {}", nReason);
+@@ -224,11 +349,17 @@
+ 
+ void ParserCTP::OnRspUnSubMarketData( CThostFtdcSpecificInstrumentField */*pSpecificInstrument*/, CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/ )
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 
+ }
+ 
+ void ParserCTP::OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepthMarketData )
+ {	
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if(m_pBaseDataMgr == NULL)
+ 	{
+ 		return;
+@@ -251,27 +382,13 @@
+         actTime = strToTime(pDepthMarketData->UpdateTime) * 1000 + pDepthMarketData->UpdateMillisec;
+         actHour = actTime / 10000000;
+ 
+-        if (actDate == m_uTradingDate && actHour >= 20) {
+-            //这样的时间是有问题,因为夜盘时发生日期不可能等于交易日
+-            //这就需要手动设置一下
++        //夜盘时发生日期不可能等于交易日,需按本地时钟纠偏（卡3 3b=C，默认 A，见 ActionDayNormalizer.hpp）
++        if (actDate == m_uTradingDate && wt_actday::needsLocalClock(actHour, (wt_actday::MidnightMode)m_iMidnightMode)) {
+             uint32_t curDate, curTime;
+-            TimeUtils::getDateTime(curDate, curTime);
+-            uint32_t curHour = curTime / 10000000;
+-
+-            //早上启动以后,会收到昨晚12点以前收盘的行情,这个时候可能会有发生日期=交易日的情况出现
+-            //这笔数据直接丢掉
+-            if (curHour >= 3 && curHour < 9)
++            wt_actday::localDateTime(curDate, curTime);
++            if (!wt_actday::normalize(actDate, actHour, m_uTradingDate, curDate, curTime / 10000000,
++                (wt_actday::MidnightMode)m_iMidnightMode))
+                 return;
+-
+-            actDate = curDate;
+-
+-            if (actHour == 23 && curHour == 0) {
+-                //行情时间慢于系统时间
+-                actDate = TimeUtils::getNextDate(curDate, -1);
+-            } else if (actHour == 0 && curHour == 23) {
+-                //系统时间慢于行情时间
+-                actDate = TimeUtils::getNextDate(curDate, 1);
+-            }
+         }
+     }
+ 
+@@ -351,6 +468,9 @@
+ 
+ void ParserCTP::OnRspSubMarketData( CThostFtdcSpecificInstrumentField */*pSpecificInstrument*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/ )
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if(!IsErrorRspInfo(pRspInfo))
+ 	{
+ 
+@@ -363,6 +483,9 @@
+ 
+ void ParserCTP::OnHeartBeatWarning( int nTimeLapse )
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if(m_sink)
+ 		write_log(m_sink, LL_INFO, "[ParserCTP] Heartbeating, elapse: {}", nTimeLapse);
+ }
+@@ -390,6 +513,7 @@
+ 
+ void ParserCTP::DoSubscribeMD()
+ {
++	std::lock_guard<std::recursive_mutex> lock(_data_mutex);
+ 	CodeSet codeFilter = m_filterSubs;
+ 	if(codeFilter.empty())
+ 	{//如果订阅礼包只空的,则取出全部合约列表
+@@ -432,6 +556,10 @@
+ 
+ void ParserCTP::subscribe(const CodeSet &vecSymbols)
+ {
++	auto call = _lc.call(this);
++	if (!call)
++		return;
++	std::lock_guard<std::recursive_mutex> lock(_data_mutex);
+ 	if(m_uTradingDate == 0)
+ 	{
+ 		m_filterSubs = vecSymbols;
+@@ -449,11 +577,15 @@
+ 
+ bool ParserCTP::isConnected()
+ {
+-	return m_pUserAPI!=NULL;
++	auto call = _lc.call(this);
++	return call && m_pUserAPI!=NULL;
+ }
+ 
+ void ParserCTP::registerSpi(IParserSpi* listener)
+ {
++	auto call = _lc.call(this);
++	if (!call)
++		return;
+ 	m_sink = listener;
+ 
+ 	if(m_sink)
+--- a/src/ParserCTP/ParserCTP.h
++++ b/src/ParserCTP/ParserCTP.h
+@@ -10,12 +10,14 @@
+ #pragma once
+ #include "../Includes/IParserApi.h"
+ #include "../Share/DLLHelper.hpp"
++#include "VendorMdLifecycleV2.hpp"
+ #ifdef __APPLE__
+ #include <API/CTP6.6.9/ThostFtdcMdApi.h>
+ #else
+ #include <API/CTP6.3.15/ThostFtdcMdApi.h>
+ #endif
+ #include <map>
++#include <mutex>
+ 
+ NS_WTP_BEGIN
+ class WTSTickData;
+@@ -76,7 +78,24 @@
+ 
+ 	virtual void OnHeartBeatWarning( int nTimeLapse ) override;
+ 
++//Parser lifecycle V2（迭代03 卡9，见 VendorMdLifecycleV2.hpp）
++public:
++	WtParserLifecycleV2Status requestStopV2() noexcept;
++	WtParserLifecycleV2Status canWaitV2() const noexcept;
++	WtParserLifecycleV2Status waitDrainedV2(uint32_t timeoutMs) noexcept;
++	bool destroyableV2() const noexcept;
++	/*
++	 *	deleteParser 的移除判定（卡9 9b）：
++	 *	回调/接口重入时延后并保留；曾创建过 SDK 对象时也保留（无线程退出确认）
++	 */
++	bool removableLegacy() noexcept;
++
+ private:
++	bool shutdownLegacy() noexcept;
++	void releaseSdk() noexcept;
++	bool sdkSeen() const noexcept;
++
++private:
+ 	/*
+ 	 *	发送登录请求
+ 	 */
+@@ -93,6 +112,7 @@
+ 
+ private:
+ 	uint32_t			m_uTradingDate;
++	int					m_iMidnightMode = 0;	//卡3 3b：0=默认 A（00 时行情按本地次日纠偏），1=旧行为 B；配置项 midnight_actionday
+ 	CThostFtdcMdApi*	m_pUserAPI;
+ 
+ 	std::string			m_strFrontAddr;
+@@ -112,5 +132,11 @@
+ 	[[maybe_unused]] DllHandle		m_hInstCTP;
+ 	typedef CThostFtdcMdApi* (*CTPCreator)(const char *, const bool, const bool);
+ 	CTPCreator		m_funcCreator;
++
++	wt_vendor_md_v2::Lifecycle	_lc;
++	std::mutex					_sdk_mutex;		//串行化 SDK 释放
++	std::recursive_mutex		_data_mutex;	//m_filterSubs / m_uTradingDate（宿主线程与 SDK 回调线程共享）
++	bool						_init_done = false;
++	bool						_connect_issued = false;
+ };
+ 
+--- a/src/ParserCTPMini/ParserCTPMini.cpp
++++ b/src/ParserCTPMini/ParserCTPMini.cpp
+@@ -11,6 +11,7 @@
+ #include "../Share/StrUtil.hpp"
+ #include "../Share/StdUtils.hpp"
+ #include "../Share/TimeUtils.hpp"
++#include "../Share/ActionDayNormalizer.hpp"
+ #include "../Share/ModuleHelper.hpp"
+ #include "../Share/Converter.hpp"
+ 
+@@ -117,6 +118,7 @@
+ 	}
+ 
+ 	m_strFrontAddr = config->getCString("front");
++	m_iMidnightMode = (int)wt_actday::parseMode(config->getCString("midnight_actionday"));
+ 	m_strBroker = config->getCString("broker");
+ 	m_strUserID = config->getCString("user");
+ 	m_strPassword = config->getCString("pass");
+@@ -283,31 +285,14 @@
+ 	if (actDate == 0)
+ 		actDate = m_uTradingDate;
+ 
+-	if (actDate == m_uTradingDate && actHour >= 20)
++	//夜盘时发生日期不可能等于交易日,需按本地时钟纠偏（卡3 3b=C，默认 A，见 ActionDayNormalizer.hpp）
++	if (actDate == m_uTradingDate && wt_actday::needsLocalClock(actHour, (wt_actday::MidnightMode)m_iMidnightMode))
+ 	{
+-		//这样的时间是有问题,因为夜盘时发生日期不可能等于交易日
+-		//这就需要手动设置一下
+ 		uint32_t curDate, curTime;
+-		TimeUtils::getDateTime(curDate, curTime);
+-		uint32_t curHour = curTime / 10000000;
+-
+-		//早上启动以后,会收到昨晚12点以前收盘的行情,这个时候可能会有发生日期=交易日的情况出现
+-		//这笔数据直接丢掉
+-		if (curHour >= 3 && curHour < 9)
++		wt_actday::localDateTime(curDate, curTime);
++		if (!wt_actday::normalize(actDate, actHour, m_uTradingDate, curDate, curTime / 10000000,
++			(wt_actday::MidnightMode)m_iMidnightMode))
+ 			return;
+-
+-		actDate = curDate;
+-
+-		if (actHour == 23 && curHour == 0)
+-		{
+-			//行情时间慢于系统时间
+-			actDate = TimeUtils::getNextDate(curDate, -1);
+-		}
+-		else if (actHour == 0 && curHour == 23)
+-		{
+-			//系统时间慢于行情时间
+-			actDate = TimeUtils::getNextDate(curDate, 1);
+-		}
+ 	}
+ 
+ 	WTSContractInfo* contract = m_pBaseDataMgr->getContract(pDepthMarketData->InstrumentID, pDepthMarketData->ExchangeID);
+--- a/src/ParserCTPMini/ParserCTPMini.h
++++ b/src/ParserCTPMini/ParserCTPMini.h
+@@ -92,6 +92,7 @@
+ 
+ private:
+ 	uint32_t			m_uTradingDate;
++	int					m_iMidnightMode = 0;	//卡3 3b：0=默认 A（00 时行情按本地次日纠偏），1=旧行为 B；配置项 midnight_actionday
+ 	[[maybe_unused]] LoginStatus			m_loginState;
+ 	CThostFtdcMdApi*	m_pUserAPI;
+ 
+--- a/src/ParserFemas/ParserFemas.cpp
++++ b/src/ParserFemas/ParserFemas.cpp
+@@ -17,6 +17,7 @@
+ 
+ #include "../Share/StdUtils.hpp"
+ #include "../Share/TimeUtils.hpp"
++#include "../Share/ActionDayNormalizer.hpp"
+ #include "../Share/ModuleHelper.hpp"
+ #include "../Share/Converter.hpp"
+ 
+@@ -105,6 +106,7 @@
+ bool ParserFemas::init(WTSVariant* config)
+ {
+ 	m_strFrontAddr = config->getCString("front");
++	m_iMidnightMode = (int)wt_actday::parseMode(config->getCString("midnight_actionday"));
+ 	m_strBroker = config->getCString("broker");
+ 	m_strUserID = config->getCString("user");
+ 	m_strPassword = config->getCString("pass");
+@@ -306,31 +308,14 @@
+ 	uint32_t actTime = strToTime(pDepthMarketData->UpdateTime) * 1000 + pDepthMarketData->UpdateMillisec;
+ 	uint32_t actHour = actTime / 10000000;
+ 
+-	if (actDate == m_uTradingDate && actHour >= 20)
++	//夜盘时发生日期不可能等于交易日,需按本地时钟纠偏（卡3 3b=C，默认 A，见 ActionDayNormalizer.hpp）
++	if (actDate == m_uTradingDate && wt_actday::needsLocalClock(actHour, (wt_actday::MidnightMode)m_iMidnightMode))
+ 	{
+-		//这样的时间是有问题,因为夜盘时发生日期不可能等于交易日
+-		//这就需要手动设置一下
+ 		uint32_t curDate, curTime;
+-		TimeUtils::getDateTime(curDate, curTime);
+-		uint32_t curHour = curTime / 10000000;
+-
+-		//早上启动以后,会收到昨晚12点以前收盘的行情,这个时候可能会有发生日期=交易日的情况出现
+-		//这笔数据直接丢掉
+-		if (curHour >= 3 && curHour < 9)
++		wt_actday::localDateTime(curDate, curTime);
++		if (!wt_actday::normalize(actDate, actHour, m_uTradingDate, curDate, curTime / 10000000,
++			(wt_actday::MidnightMode)m_iMidnightMode))
+ 			return;
+-
+-		actDate = curDate;
+-
+-		if (actHour == 23 && curHour == 0)
+-		{
+-			//行情时间慢于系统时间
+-			actDate = TimeUtils::getNextDate(curDate, -1);
+-		}
+-		else if (actHour == 0 && curHour == 23)
+-		{
+-			//系统时间慢于行情时间
+-			actDate = TimeUtils::getNextDate(curDate, 1);
+-		}
+ 	}
+ 
+ 	WTSContractInfo* contract = m_pBaseDataMgr->getContract(pDepthMarketData->InstrumentID);
+--- a/src/ParserFemas/ParserFemas.h
++++ b/src/ParserFemas/ParserFemas.h
+@@ -93,6 +93,7 @@
+ 
+ private:
+ 	uint32_t			m_uTradingDate;
++	int					m_iMidnightMode = 0;	//卡3 3b：0=默认 A（00 时行情按本地次日纠偏），1=旧行为 B；配置项 midnight_actionday
+ 	[[maybe_unused]] LoginStatus			m_loginState;
+ 	mutable std::mutex	m_connectionMutex;
+ 	bool				m_connectionCallbacksEnabled;
+--- /dev/null
++++ b/src/WtDataStorageAD/DayBarContractAD.h
+@@ -0,0 +1,57 @@
++/*!
++ * \file DayBarContractAD.h
++ * \project	WonderTrader
++ *
++ * \brief AD 存储日线 time 字段对外合同（迭代03 卡3 3c=C，2026-11-04 用户裁定；R4-BUG-13）
++ *
++ * - 对外合同：日线 WTSBarStruct::time == 0，date 为交易日（与通用 WtDataWriter 一致）。
++ * - 新数据：WtDataWriterAD 新建日线 time 写 0；新建 cache_d1.dmb 的 RT 头 _version = 2。
++ * - 版本标记：cache_d1.dmb 头 _version
++ *     1 = 旧格式，日线 time 可能等于交易日（旧 AD writer 写法）；
++ *     2 = 全部条目 time = 0。
++ *   writer 打开已有版本 1 的日线缓存时，在该文件的跨进程发布锁与结构性日志内把全部条目 time
++ *   原地改写为 0，最后把头版本改为 2（卡13 多 writer 协议不变）。tick/m1/m5 缓存版本仍为 1。
++ * - 兼容读取：reader 接受日线缓存版本 1 与 2；从日线缓存或 LMDB day 库读出的日线一律把 time
++ *   归一为 0。LMDB 值没有逐条版本，旧 writer 写入的 day 记录（time=交易日）只能在读端归一。
++ * - 未知版本（非 1/2）仍按原规则拒绝（fail-closed）。旧二进制读者/写者遇到版本 2 的日线缓存会
++ *   以“unsupported version”拒绝，须先升级再混跑。
++ */
++#pragma once
++#include <stdint.h>
++#include <cstddef>
++#include <cstring>
++#include <string>
++#include <vector>
++#include "../Includes/WTSStruct.h"
++
++#define BLOCK_VERSION_DAY_T0	2	//日线 RT 缓存：time=0 合同
++
++namespace wt_ad_daybar
++{
++	inline bool isAcceptedRTCacheVersion(uint16_t version, bool isDayCache)
++	{
++		return version == 1 || (isDayCache && version == BLOCK_VERSION_DAY_T0);
++	}
++
++	inline void normalize(wtp::WTSBarStruct& bar)
++	{
++		bar.time = 0;
++	}
++
++	inline void normalize(std::vector<wtp::WTSBarStruct>& bars)
++	{
++		for (wtp::WTSBarStruct& bar : bars)
++			bar.time = 0;
++	}
++
++	//buffer 为连续的 WTSBarStruct 字节（WtBtDtReaderAD::read_raw_bars 的输出）
++	inline void normalizeRaw(std::string& buffer)
++	{
++		const std::size_t n = buffer.size() / sizeof(wtp::WTSBarStruct);
++		for (std::size_t i = 0; i < n; ++i)
++		{
++			const uint64_t zero = 0;
++			std::memcpy(&buffer[i * sizeof(wtp::WTSBarStruct) + offsetof(wtp::WTSBarStruct, time)], &zero, sizeof(zero));
++		}
++	}
++}
+--- a/src/WtDataStorageAD/WtDataWriterAD.cpp
++++ b/src/WtDataStorageAD/WtDataWriterAD.cpp
+@@ -1,5 +1,6 @@
+ ﻿#include "WtDataWriterAD.h"
+ #include "LMDBKeys.h"
++#include "DayBarContractAD.h"
+ #include "../WtDataStorage/RTBlockPublish.hpp"
+ 
+ #include "../Includes/WTSSessionInfo.hpp"
+@@ -142,7 +143,8 @@
+ 	}
+ 
+ 	// 卡13：持发布锁时创建 RT 缓存文件；其他 writer 已创建则改为打开已有文件（bNew=false）
+-	bool createRTCacheFileLocked(const std::string& path, std::size_t recordBytes, bool& bNew, std::string& err)
++	bool createRTCacheFileLocked(const std::string& path, std::size_t recordBytes, bool& bNew, std::string& err,
++		uint16_t version = 1)
+ 	{
+ 		if (!bNew)
+ 			return true;
+@@ -156,7 +158,7 @@
+ 		memset(&header, 0, sizeof(header));
+ 		memcpy(header._blk_flag, BLK_FLAG, FLAG_SIZE);
+ 		header._type = BT_RT_Cache;
+-		header._version = 1;
++		header._version = version;
+ 		header._size = 0;
+ 		header._capacity = CACHE_SIZE_STEP_AD;
+ 		return wt_rtpub::publishNewBlockFile(path, &header, sizeof(header),
+@@ -208,7 +210,8 @@
+ 				cacheName, filename, header._type);
+ 			return false;
+ 		}
+-		if (header._version != 1)
++		//卡3 3c=C：日线缓存接受旧版本 1 与 time=0 合同版本 2，其余缓存只接受版本 1
++		if (!wt_ad_daybar::isAcceptedRTCacheVersion(header._version, std::strcmp(cacheName, "day") == 0))
+ 		{
+ 			pipe_writer_log(sink, LL_ERROR, "Invalid {} cache file {}: unsupported version {}",
+ 				cacheName, filename, header._version);
+@@ -761,7 +764,7 @@
+ 		}
+ 		wt_rtpub::StructuralGuard d1Structural(d1Lock, CACHE_SIZE_STEP_AD);
+ 		std::string d1Err;
+-		if (!d1Structural.begun() || !createRTCacheFileLocked(d1Filename, sizeof(BarCacheItem), bNewD1, d1Err))
++		if (!d1Structural.begun() || !createRTCacheFileLocked(d1Filename, sizeof(BarCacheItem), bNewD1, d1Err, BLOCK_VERSION_DAY_T0))
+ 		{
+ 			pipe_writer_log(_sink, LL_ERROR, "Cannot create day cache file {} {}", d1Filename, d1Err);
+ 			return false;
+@@ -799,7 +802,7 @@
+ 			_d1_cache._cache_block->_capacity = CACHE_SIZE_STEP_AD;
+ 			_d1_cache._cache_block->_type = BT_RT_Cache;
+ 			_d1_cache._cache_block->_size = 0;
+-			_d1_cache._cache_block->_version = 1;
++			_d1_cache._cache_block->_version = BLOCK_VERSION_DAY_T0;
+ 			strcpy(_d1_cache._cache_block->_blk_flag, BLK_FLAG);
+ 		}
+ 		else
+@@ -810,13 +813,26 @@
+ 				_d1_cache._file_ptr.reset();
+ 				return false;
+ 			}
++			//卡3 3c=C：版本 1 的旧日线缓存在发布锁与结构性日志内原地迁移为 time=0，最后提升版本标记
++			const bool migrateDay = _d1_cache._cache_block->_version != BLOCK_VERSION_DAY_T0;
+ 			for (uint32_t i = 0; i < _d1_cache._cache_block->_size; i++)
+ 			{
+ 				AlignedBarCacheItem item;
+ 				loadBarCacheItem(_d1_cache._cache_block, i, item);
++				if (migrateDay && item._bar.time != 0)
++				{
++					wt_ad_daybar::normalize(item._bar);
++					storeBarCacheItem(_d1_cache._cache_block, i, item);
++				}
+ 				std::string key = fmtutil::format<64>("{}.{}", item._exchg, item._code);
+ 				_d1_cache._idx[key] = i;
+ 			}
++			if (migrateDay)
++			{
++				_d1_cache._cache_block->_version = BLOCK_VERSION_DAY_T0;
++				pipe_writer_log(_sink, LL_INFO, "Day cache {} migrated from version 1 to {} (day.time=0), {} items",
++					d1Filename, BLOCK_VERSION_DAY_T0, _d1_cache._cache_block->_size);
++			}
+ 		}
+ 		_d1_cache._scanned = wt_rtpub::publishedSize(_d1_cache._cache_block);
+ 	}
+@@ -1357,7 +1373,7 @@
+ 			}
+ 
+ 			newBar->date = curTick->tradingdate();
+-			newBar->time = barDate;
++			newBar->time = 0;	//卡3 3c=C：日线 time=0，date 为交易日
+ 			newBar->open = curTick->price();
+ 			newBar->high = curTick->price();
+ 			newBar->low = curTick->price();
+--- a/src/WtDataStorageAD/WtDataReaderAD.cpp
++++ b/src/WtDataStorageAD/WtDataReaderAD.cpp
+@@ -1,5 +1,6 @@
+ ﻿#include "WtDataReaderAD.h"
+ #include "LMDBKeys.h"
++#include "DayBarContractAD.h"
+ 
+ #include "../Includes/WTSVariant.hpp"
+ #include "../Share/TimeUtils.hpp"
+@@ -385,6 +386,8 @@
+ 			const uint64_t barTime = period == KP_DAY ? bar.date : bar.time;
+ 			if (barTime > cutoff)
+ 				continue;
++			if (period == KP_DAY)
++				wt_ad_daybar::normalize(bar);	//卡3 3c=C：旧 day 记录 time=交易日，读端归一为 0
+ 			loadedBars.push_back(bar);
+ 		}
+ 	});
+@@ -452,6 +455,8 @@
+ 				WTSBarStruct bar;
+ 				memcpy(&bar, item.data(), sizeof(bar));
+ 				const uint64_t barTime = isDay ? bar.date : bar.time;
++				if (isDay)
++					wt_ad_daybar::normalize(bar);	//卡3 3c=C
+ 				if (barTime <= cutoff)
+ 					newBars.push_back(bar);
+ 			}
+@@ -560,7 +565,7 @@
+ 	std::memcpy(&capacity, bytes + sizeof(BlockHeader) + sizeof(size), sizeof(capacity));
+ 	const size_t mappedRecords = (wrapper->_file_ptr->size() - sizeof(RTBarCache)) / sizeof(BarCacheItem);
+ 	if (std::memcmp(bytes, BLK_FLAG, FLAG_SIZE) != 0 || type != BT_RT_Cache ||
+-		version != BLOCK_VERSION_RAW || size > capacity || size > mappedRecords)
++		!wt_ad_daybar::isAcceptedRTCacheVersion(version, wrapper == &_d1_cache) || size > capacity || size > mappedRecords)
+ 		return rejectCache();
+ 
+ 	// Build new index entries only after every published record has passed its
+@@ -601,6 +606,8 @@
+ 		std::strcmp(actualExchg, exchg) != 0 || std::strcmp(actualCode, code) != 0)
+ 		return rejectCache();
+ 	std::memcpy(&result, entry + offsetof(BarCacheItem, _bar), sizeof(result));
++	if (period == KP_DAY)
++		wt_ad_daybar::normalize(result);	//卡3 3c=C：版本 1 旧日线缓存兼容读取
+ 	return RTBarRead::Found;
+ }
+ 
+--- a/src/WtDataStorageAD/WtRdmDtReaderAD.cpp
++++ b/src/WtDataStorageAD/WtRdmDtReaderAD.cpp
+@@ -1,5 +1,6 @@
+ ﻿#include "WtRdmDtReaderAD.h"
+ #include "LMDBKeys.h"
++#include "DayBarContractAD.h"
+ 
+ #include "../Includes/WTSVariant.hpp"
+ #include "../Share/TimeUtils.hpp"
+@@ -702,6 +703,8 @@
+ 			log_range_failure<WTSBarStruct>(_sink, "bar", cInfo._exchg, cInfo._code, *db, malformed);
+ 			return NULL;
+ 		}
++		if (period == KP_DAY)
++			wt_ad_daybar::normalize(loaded);	//卡3 3c=C：旧 day 记录兼容读取，time 归一为 0
+ 		if (loaded.empty())
+ 			return NULL;
+ 
+@@ -851,6 +854,8 @@
+ 			return NULL;
+ 		}
+ 	}
++	if (period == KP_DAY)
++		wt_ad_daybar::normalize(loaded);	//卡3 3c=C
+ 	if (!loaded.empty())
+ 		candidate._bars.swap(loaded);
+ 	if (!candidate._bars.empty())
+--- a/src/WtDataStorageAD/WtBtDtReaderAD.cpp
++++ b/src/WtDataStorageAD/WtBtDtReaderAD.cpp
+@@ -1,5 +1,6 @@
+ ﻿#include "WtBtDtReaderAD.h"
+ #include "LMDBKeys.h"
++#include "DayBarContractAD.h"
+ 
+ #include "../Includes/WTSStruct.h"
+ #include "../Includes/WTSVariant.hpp"
+@@ -324,6 +325,9 @@
+ 			sizeof(LMDBBarKey), sizeof(WTSBarStruct), sizeof(WTSBarStructPackedV2), sizeof(WTSBarStructOld));
+ 		return false;
+ 	}
++
++	if (period == KP_DAY)
++		wt_ad_daybar::normalizeRaw(buffer);	//卡3 3c=C：旧 day 记录 time=交易日，读端归一为 0
+ 
+ 	return true;
+ }
+--- a/src/WtBtCore/CtaMocker.cpp
++++ b/src/WtBtCore/CtaMocker.cpp
+@@ -299,6 +299,7 @@
+ 			pItem.AddMember("dynprofit", pInfo._dynprofit, allocator);
+ 			pItem.AddMember("lastentertime", pInfo._last_entertime, allocator);
+ 			pItem.AddMember("lastexittime", pInfo._last_exittime, allocator);
++			pItem.AddMember("frozen", pInfo._frozen, allocator);	//卡3 3d=C：保存冻结量，归属交易日为 fund.tdate
+ 
+ 			rj::Value details(rj::kArrayType);
+ 			for (auto dit = pInfo._details.begin(); dit != pInfo._details.end(); dit++)
+@@ -765,6 +766,7 @@
+ 	CondEntrustMap restoredConditions;
+ 	StraFundInfo restoredFundInfo = _fund_info;
+ 	uint64_t restoredLastCondMin = _last_cond_min;
++	uint32_t restoredFrozenTDate = _frozen_tdate;
+ 
+ 	// Parse and stage the complete JSON snapshot before appending any CSV rows or
+ 	// changing live state. A malformed snapshot must not leave a partial restore.
+@@ -836,6 +838,23 @@
+ 					pInfo._last_entertime = lastentertime->GetUint64();
+ 					pInfo._last_exittime = lastexittime->GetUint64();
+ 
++					//卡3 3d=C：frozen 可选；旧快照缺字段时冻结量为 0
++					pInfo._frozen = 0;
++					if (positionEntry.HasMember("frozen"))
++					{
++						const rj::Value* frozen = require_snapshot_member(positionEntry, "frozen", SnapshotJsonType::Number, positionPath, validationError);
++						if (frozen == nullptr)
++							return false;
++						const double frozenQty = frozen->GetDouble();
++						if (!std::isfinite(frozenQty) || decimal::lt(frozenQty, 0) ||
++							decimal::gt(frozenQty, std::max(pInfo._volume, 0.0)))
++						{
++							validationError = positionPath + ".frozen must be within [0, max(volume, 0)]";
++							return false;
++						}
++						pInfo._frozen = frozenQty;
++					}
++
+ 					if (positionEntry.HasMember("details"))
+ 					{
+ 						const rj::Value* details = require_snapshot_member(positionEntry, "details", SnapshotJsonType::Array, positionPath, validationError);
+@@ -900,6 +919,23 @@
+ 				restoredFundInfo._total_profit = totalProfit->GetDouble();
+ 				restoredFundInfo._total_dynprofit = totalDynprofit->GetDouble();
+ 				restoredFundInfo._total_fees = totalFees->GetDouble();
++				if (fund->HasMember("tdate"))
++				{
++					const rj::Value* tdate = require_snapshot_member(*fund, "tdate", SnapshotJsonType::Uint, "$.fund", validationError);
++					if (tdate == nullptr)
++						return false;
++					restoredFrozenTDate = tdate->GetUint();
++				}
++			}
++
++			//卡3 3d=C：冻结量必须能确定归属交易日，否则无法判定 session-begin 是否清零，拒绝快照
++			bool hasFrozen = false;
++			for (const auto& posItem : restoredPositions)
++				hasFrozen = hasFrozen || !decimal::eq(posItem.second._frozen, 0);
++			if (hasFrozen && (!d.HasMember("fund") || !d["fund"].IsObject() || !d["fund"].HasMember("tdate") || restoredFrozenTDate == 0))
++			{
++				validationError = "$.fund.tdate is required when any position has non-zero frozen";
++				return false;
+ 			}
+ 
+ 			if (d.HasMember("signals"))
+@@ -1085,6 +1121,7 @@
+ 		_condtions.swap(restoredConditions);
+ 		_fund_info = restoredFundInfo;
+ 		_last_cond_min = restoredLastCondMin;
++		_frozen_tdate = restoredFrozenTDate;
+ 	}
+ 	else if (!hasStrategyDump)
+ 	{
+@@ -1691,16 +1728,25 @@
+ 	_cur_tdate = curTDate;
+ 
+ 	//每个交易日开始，要把冻结持仓置零
+-	for (auto& it : _pos_map)
++	//卡3 3d=C：冻结量归属交易日（快照 fund.tdate 或上一个 session）与本交易日相同（同日续跑）时保留
++	if (_frozen_tdate != curTDate)
+ 	{
+-		const char* stdCode = it.first.c_str();
+-		PosInfo& pInfo = (PosInfo&)it.second;
+-		if (!decimal::eq(pInfo._frozen, 0))
++		for (auto& it : _pos_map)
+ 		{
+-			log_debug("{} of {} frozen released on {}", pInfo._frozen, stdCode, curTDate);
+-			pInfo._frozen = 0;
++			const char* stdCode = it.first.c_str();
++			PosInfo& pInfo = (PosInfo&)it.second;
++			if (!decimal::eq(pInfo._frozen, 0))
++			{
++				log_debug("{} of {} frozen released on {}", pInfo._frozen, stdCode, curTDate);
++				pInfo._frozen = 0;
++			}
+ 		}
+ 	}
++	else
++	{
++		log_debug("Frozen positions kept on same-tradingday resume {}", curTDate);
++	}
++	_frozen_tdate = curTDate;
+ 
+ 	/*
+ 	 *	By Wesley @ 2022.04.19
+--- a/src/WtBtCore/CtaMocker.h
++++ b/src/WtBtCore/CtaMocker.h
+@@ -1085,6 +1085,7 @@
+ 	bool			_persist_data;		///< 是否对回测结果持久化
+ 
+ 	uint32_t		_cur_tdate;			///< 当前交易日，格式为YYYYMMDD
++	uint32_t		_frozen_tdate = 0;	///< 冻结量所属交易日（卡3 3d=C：session-begin 仅在交易日不同时清零冻结量）
+ 	uint32_t		_cur_bartime;		///< 当前K线时间，格式为HHMMSS
+ 	uint64_t		_last_cond_min;		///< 最近条件检查时间，以分钟为单位
+ 

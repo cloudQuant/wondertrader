@@ -1,0 +1,24 @@
+argv=["/tmp/wt-r22-lifecycle-20261102/red-tsan-frozen", "self"]
+exit=-6
+==================
+WARNING: ThreadSanitizer: data race (pid=41246)
+  Read of size 8 at 0x00016dde2b40 by thread T1:
+    #0 StateMonitor::stop() <null> (red-tsan-frozen:arm64+0x10000ce58)
+    #1 CallbackWriter::transHisData(char const*) <null> (red-tsan-frozen:arm64+0x100023868)
+    #2 DataManager::transHisData(char const*) <null> (red-tsan-frozen:arm64+0x10001e950)
+    #3 StateMonitor::advanceOnce(unsigned int, unsigned int) <null> (red-tsan-frozen:arm64+0x10000a314)
+    #4 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>>(void*) <null> (red-tsan-frozen:arm64+0x10001c380)
+
+  Previous write of size 8 at 0x00016dde2b40 by main thread:
+    #0 StateMonitor::run() <null> (red-tsan-frozen:arm64+0x10000cd40)
+    #1 main <null> (red-tsan-frozen:arm64+0x100022580)
+
+  Location is stack of main thread.
+
+  Thread T1 (tid=1047734, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 StateMonitor::run() <null> (red-tsan-frozen:arm64+0x10000cc7c)
+    #2 main <null> (red-tsan-frozen:arm64+0x100022580)
+
+SUMMARY: ThreadSanitizer: data race (red-tsan-frozen:arm64+0x10000ce58) in StateMonitor::stop()+0x40
+==================

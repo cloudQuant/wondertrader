@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cstring>
 #include <filesystem>
+#include <functional>
 #include <fstream>
 #include <unistd.h>
 #include <memory>
@@ -169,7 +170,7 @@ class RecordingParserApi : public IParserApi
 {
 public:
     bool init(WTSVariant*) override { return true; }
-    bool connect() override { ++connect_calls; return connect_result; }
+    bool connect() override { ++connect_calls; if (on_connect) on_connect(); return connect_result; }
     void registerSpi(IParserSpi* spi) override { _spi = spi; }
     void subscribe(const CodeSet& contracts) override { subscribed_count = contracts.size(); }
     void publishQuote(WTSTickData* quote)
@@ -184,6 +185,7 @@ public:
     std::size_t subscribed_count = 0;
     bool connect_result = false;
     unsigned connect_calls = 0;
+    std::function<void()> on_connect;
 };
 
 /// 把 cfg 落到唯一临时目录并用 WTSCfgLoader 读回来，得到可用的 WTSVariant
@@ -292,8 +294,9 @@ TEST(N01ParserAdapter, init_ext_defaults_time_check_off_and_delivers_quote)
     EXPECT_EQ(stub.last_code.compare(0, 5, "SHFE."), 0);
     future->release();
 
+    // 卡9a=A+C、K15=A：initExt 注入的外部 API 归调用方所有；release() 只通知停止、不视为排空证明，宿主继续持有（改前期望 hasApi()==false）。
     adapter.release();
-    EXPECT_FALSE(adapter.hasApi());
+    EXPECT_TRUE(adapter.hasApi());
 }
 
 TEST(N01ParserAdapter, run_reports_connection_command_submission)
@@ -312,6 +315,36 @@ TEST(N01ParserAdapter, run_reports_connection_command_submission)
     EXPECT_EQ(api->connect_calls, 2u);
     adapter.release();
     EXPECT_FALSE(adapter.run());
+}
+
+TEST(N01ParserAdapter, manager_reports_partial_submission_and_keeps_owners)
+{
+    RecordingStub stub;
+    FakeBaseDataMgr bd;
+    ParserAdapterMgr mgr;
+    auto failed = std::make_shared<ParserAdapter>();
+    auto good = std::make_shared<ParserAdapter>();
+    auto* failedApi = new RecordingParserApi();
+    auto* goodApi = new RecordingParserApi();
+    goodApi->connect_result = true;
+    ASSERT_TRUE(failed->initExt("failed", failedApi, &stub, &bd));
+    ASSERT_TRUE(good->initExt("good", goodApi, &stub, &bd));
+    ASSERT_TRUE(mgr.addAdapter("failed", failed));
+    ASSERT_TRUE(mgr.addAdapter("good", good));
+
+    EXPECT_FALSE(mgr.runWithResult());
+    EXPECT_EQ(failedApi->connect_calls, 1u);
+    EXPECT_EQ(goodApi->connect_calls, 1u);
+    EXPECT_EQ(mgr.getAdapter("failed"), failed);
+    EXPECT_EQ(mgr.getAdapter("good"), good);
+    failedApi->connect_result = true;
+    EXPECT_TRUE(mgr.runWithResult());
+    EXPECT_EQ(failedApi->connect_calls, 2u);
+    EXPECT_EQ(goodApi->connect_calls, 2u);
+    mgr.run(); // Existing void entry point still fans out.
+    EXPECT_EQ(failedApi->connect_calls, 3u);
+    EXPECT_EQ(goodApi->connect_calls, 3u);
+    mgr.release();
 }
 
 // init 在加载模块前就 return false，但 _stub/_bd_mgr/_id 已经写入

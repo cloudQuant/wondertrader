@@ -138,8 +138,22 @@ typedef uint32_t WtExecPluginV2Capabilities;
  */
 enum {
 	WT_EXEC_PLUGIN_V2_CAP_QUIESCE = 1u << 0,
-	WT_EXEC_PLUGIN_V2_CAP_FACTORY_QUIESCE_PREFLIGHT = 1u << 1
+	WT_EXEC_PLUGIN_V2_CAP_FACTORY_QUIESCE_PREFLIGHT = 1u << 1,
+	/*
+	 * Additive capability (iteration 03, decision cards 5b/5c; ABI table and
+	 * version unchanged). The plugin's units understand host-verified order
+	 * identity: they issue automatic (e.g. timeout) cancels only through
+	 * ExecuteContext::cancel(localid) for ids returned by that context, and
+	 * treat a false return as "identity not verifiable" (fail closed, no
+	 * retry, no bare-id fallback). They enable automatic timeout cancels only
+	 * when the host sets the reserved configuration key
+	 * WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY to 1 for that unit; hosts
+	 * always overwrite that key. Plugins lacking this bit are treated as old
+	 * identity ABI: non-shared owner mode and no automatic timeout cancel.
+	 */
+	WT_EXEC_PLUGIN_V2_CAP_HOST_ORDER_IDENTITY = 1u << 2
 };
+#define WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY "__wt_host_order_identity"
 typedef WtExecPluginV2Status (WT_EXEC_PLUGIN_V2_CALL *WtExecPluginV2RequestQuiesceFn)(
 	void* factory, void* unit);
 /*

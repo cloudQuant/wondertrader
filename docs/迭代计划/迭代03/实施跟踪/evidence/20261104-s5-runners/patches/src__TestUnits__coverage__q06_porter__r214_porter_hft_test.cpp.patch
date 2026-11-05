@@ -1,0 +1,22 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/q06_porter/r214_porter_hft_test.cpp	2026-10-28 23:29:21
++++ src/TestUnits/coverage/q06_porter/r214_porter_hft_test.cpp	2026-11-04 17:48:36
+@@ -38,6 +38,9 @@
+ USING_NS_WTP;
+ 
+ extern WtRtRunner& getRunner();
++// BUG-R42-002 gate (迭代03): HFT contexts bind only a registered trader; the
++// fixtures below register a module-less local adapter (see i03_s5_test_trader_support.cpp).
++TraderAdapterPtr i03s5_register_test_trader(WtRtRunner& runner, const char* id);
+ 
+ namespace {
+ 
+@@ -189,7 +192,8 @@
+ 	register_hft_callbacks(NULL, tick_cb, NULL, NULL, NULL, trd_cb, NULL,
+ 		NULL, NULL, NULL, NULL, NULL);
+ 
+-	const uint32_t id = getRunner().createHftContext("r214_hft", "R214_TRADER_ABSENT", false, 0);
++	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "r214_test_trader") != nullptr);
++	const uint32_t id = getRunner().createHftContext("r214_hft", "r214_test_trader", false, 0);
+ 	ASSERT_NE(0U, id);
+ 	HftContextPtr base = getRunner().getHftContext(id);
+ 	ASSERT_TRUE(base != nullptr);

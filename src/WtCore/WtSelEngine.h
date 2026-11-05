@@ -6,6 +6,9 @@
 #include "../Includes/ISelStraCtx.h"
 
 #include <memory>
+#include <atomic>
+#include <mutex>
+#include <vector>
 
 NS_WTP_BEGIN
 
@@ -96,6 +99,21 @@ public:
 
 	void	on_minute_end(uint32_t uDate, uint32_t uTime);
 
+private:
+	/*
+	 *	I03-NEW-066: dispatch threads of fired tasks are owned by the engine.
+	 *	Finished ones are reaped on later dispatches; release() joins the
+	 *	rest. The threading model itself (R10-004, card A) is unchanged.
+	 */
+	struct ScheduleWorker
+	{
+		StdThreadPtr						_thread;
+		std::shared_ptr<std::atomic<bool>>	_done;
+	};
+	void	join_schedule_workers(bool onlyFinished);
+
+public:
+
 	void	handle_pos_change(const char* straName, const char* stdCode, double diffQty);
 
 private:
@@ -107,6 +125,9 @@ private:
 	WtExecuterMgr	_exec_mgr;
 
 	bool	_terminated;
+
+	std::mutex					_sched_mtx;
+	std::vector<ScheduleWorker>	_sched_workers;
 
 	WtSelRtTicker*	_tm_ticker;
 	WTSVariant*		_cfg;

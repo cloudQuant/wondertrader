@@ -1,0 +1,40 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.L03MissingOrInvalidActionDateIsRejected
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.L03MissingOrInvalidActionDateIsRejected
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:78: Failure
+Value of: _writer->writeTick(tick, 0)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:78: Failure
+Value of: _writer->writeTick(tick, 0)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:82: Failure
+Expected equality of these values:
+  _sink->bcast_tick()
+    Which is: 2
+  0u
+    Which is: 0
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:83: Failure
+Expected equality of these values:
+  read_head(path_of("cache_tick.dmb"))._size
+    Which is: 1
+  0u
+    Which is: 0
+
+[  FAILED  ] R4WriterADTest.L03MissingOrInvalidActionDateIsRejected (5 ms)
+[----------] 1 test from R4WriterADTest (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (5 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R4WriterADTest.L03MissingOrInvalidActionDateIsRejected
+
+ 1 FAILED TEST

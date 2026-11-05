@@ -1,0 +1,40 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5EngineUninitMetadata.IndeterminateStorageSelEngineReportsNoMetadata
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5EngineUninitMetadata
+[ RUN      ] S5EngineUninitMetadata.IndeterminateStorageSelEngineReportsNoMetadata
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_engine_uninit_metadata_test.cpp:74: Failure
+Death test: std::exit(probeUninitializedEngine<WtSelEngine>(0xA5))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtEngine.cpp:132:25: runtime error: member call on misaligned address 0xa5a5a5a5a5a5a5a5 for type 'wtp::IBaseDataMgr', which requires 8 byte alignment
+[  DEATH   ] 0xa5a5a5a5a5a5a5a5: note: pointer points here
+[  DEATH   ] <memory cannot be printed>
+[  DEATH   ]     #0 0x0001010f521c in wtp::WtEngine::get_commodity_info(char const*)+0x254 (red-s5_engine_uninit_metadata_test:arm64+0x10061921c)
+[  DEATH   ]     #1 0x000100ae5424 in int (anonymous namespace)::probeUninitializedEngine<wtp::WtSelEngine>(unsigned char)+0x2a0 (red-s5_engine_uninit_metadata_test:arm64+0x100009424)
+[  DEATH   ]     #2 0x000100ae6374 in S5EngineUninitMetadata_IndeterminateStorageSelEngineReportsNoMetadata_Test::TestBody()+0x5b8 (red-s5_engine_uninit_metadata_test:arm64+0x10000a374)
+[  DEATH   ]     #3 0x000101585434 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-s5_engine_uninit_metadata_test:arm64+0x100aa9434)
+[  DEATH   ]     #4 0x00010158537c in testing::Test::Run()+0xcc (red-s5_engine_uninit_metadata_test:arm64+0x100aa937c)
+[  DEATH   ]     #5 0x000101585f5c in testing::TestInfo::Run()+0xd0 (red-s5_engine_uninit_metadata_test:arm64+0x100aa9f5c)
+[  DEATH   ]     #6 0x0001015869e0 in testing::TestSuite::Run()+0x1c4 (red-s5_engine_uninit_metadata_test:arm64+0x100aaa9e0)
+[  DEATH   ]     #7 0x000101591e08 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-s5_engine_uninit_metadata_test:arm64+0x100ab5e08)
+[  DEATH   ]     #8 0x0001015917b4 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-s5_engine_uninit_metadata_test:arm64+0x100ab57b4)
+[  DEATH   ]     #9 0x000101591718 in testing::UnitTest::Run()+0x78 (red-s5_engine_uninit_metadata_test:arm64+0x100ab5718)
+[  DEATH   ]     #10 0x000101572790 in main+0x40 (red-s5_engine_uninit_metadata_test:arm64+0x100a96790)
+[  DEATH   ]     #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+[  DEATH   ] 
+[  DEATH   ] SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtEngine.cpp:132:25 
+[  DEATH   ] 
+
+[  FAILED  ] S5EngineUninitMetadata.IndeterminateStorageSelEngineReportsNoMetadata (5438 ms)
+[----------] 1 test from S5EngineUninitMetadata (5438 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (5438 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S5EngineUninitMetadata.IndeterminateStorageSelEngineReportsNoMetadata
+
+ 1 FAILED TEST

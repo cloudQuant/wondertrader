@@ -1,0 +1,22 @@
+--- tree/src/TestUnits/fixtures/ctpopt_time_snapshot/run.py
++++ mirror/src/TestUnits/fixtures/ctpopt_time_snapshot/run.py
+@@ -9,7 +9,7 @@
+ env = dict(os.environ, ASAN_OPTIONS='detect_leaks=0:halt_on_error=1',
+            UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1')
+ results = []
+-for variant in ('red', 'green'):
++for variant in ('green',):
+     if variant == 'red':
+         modes = ['clock', 'timezone', 'utc', 'local', 'mktime', 'callback-clock', 'callback-timezone',
+                  'callback-utc', 'callback-local', 'callback-mktime', 'success', 'boundary',
+--- tree/src/TestUnits/fixtures/ctpopt_time_snapshot/run.py
++++ mirror/src/TestUnits/fixtures/ctpopt_time_snapshot/run.py
+@@ -27,7 +27,7 @@
+                   'epoch-success', 'epoch-clock', 'epoch-local', 'epoch-overflow',
+                   'epoch-alias-date-time', 'epoch-alias-epoch']
+     for mode in modes:
+-        argv = ['/tmp/wt-i03-ctpopt-time-' + variant + '/confirm-probe', mode]
++        argv = [os.environ['WT_FX_OUT'] + '/' + variant + '/confirm-probe', mode]
+         try:
+             p = subprocess.run(argv, env=env, capture_output=True, text=True, timeout=15)
+             code, output = p.returncode, p.stdout + p.stderr

@@ -1,0 +1,96 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = L05HelperBarTest.DumpBarsReportsOneOutputFailureAndContinues:L05HelperBarTest.DumpBarsReportsShortWriteWithoutSuccess:L05HelperTickTest.DumpTicksReportsOneOutputFailureAndContinues:L05HelperTickTest.DumpTicksReportsShortWriteWithoutSuccess
+[==========] Running 4 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from L05HelperBarTest
+[ RUN      ] L05HelperBarTest.DumpBarsReportsOneOutputFailureAndContinues
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:780: Failure
+Expected: dump_bars(_root.string().c_str(), output.string().c_str(), "", log_cb) doesn't throw an exception.
+  Actual: it throws std::runtime_error with description "Failed to open file for writing".
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:784: Failure
+Value of: any_log_has("创建失败")
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:786: Failure
+Value of: any_log_has((good + "写入完成").c_str())
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:790: Failure
+Value of: std::getline(input, header)
+  Actual: false
+Expected: true
+
+[  FAILED  ] L05HelperBarTest.DumpBarsReportsOneOutputFailureAndContinues (2 ms)
+[ RUN      ] L05HelperBarTest.DumpBarsReportsShortWriteWithoutSuccess
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:807: Failure
+Value of: any_log_has("写入失败")
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:808: Failure
+Value of: any_log_has("写入完成")
+  Actual: true
+Expected: false
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:809: Failure
+Value of: any_log_has("全部导出完成")
+  Actual: true
+Expected: false
+
+[  FAILED  ] L05HelperBarTest.DumpBarsReportsShortWriteWithoutSuccess (1 ms)
+[----------] 2 tests from L05HelperBarTest (4 ms total)
+
+[----------] 2 tests from L05HelperTickTest
+[ RUN      ] L05HelperTickTest.DumpTicksReportsOneOutputFailureAndContinues
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:529: Failure
+Expected: dump_ticks(_root.string().c_str(), output.string().c_str(), "", t_log_cb) doesn't throw an exception.
+  Actual: it throws std::runtime_error with description "Failed to open file for writing".
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:533: Failure
+Value of: t_any_log_has("创建失败")
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:535: Failure
+Value of: t_any_log_has((good + "写入完成").c_str())
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:539: Failure
+Value of: std::getline(input, header)
+  Actual: false
+Expected: true
+
+[  FAILED  ] L05HelperTickTest.DumpTicksReportsOneOutputFailureAndContinues (2 ms)
+[ RUN      ] L05HelperTickTest.DumpTicksReportsShortWriteWithoutSuccess
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:556: Failure
+Value of: t_any_log_has("写入失败")
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:557: Failure
+Value of: t_any_log_has("写入完成")
+  Actual: true
+Expected: false
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:558: Failure
+Value of: t_any_log_has("全部导出完成")
+  Actual: true
+Expected: false
+
+[  FAILED  ] L05HelperTickTest.DumpTicksReportsShortWriteWithoutSuccess (1 ms)
+[----------] 2 tests from L05HelperTickTest (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 2 test suites ran. (7 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 4 tests, listed below:
+[  FAILED  ] L05HelperBarTest.DumpBarsReportsOneOutputFailureAndContinues
+[  FAILED  ] L05HelperBarTest.DumpBarsReportsShortWriteWithoutSuccess
+[  FAILED  ] L05HelperTickTest.DumpTicksReportsOneOutputFailureAndContinues
+[  FAILED  ] L05HelperTickTest.DumpTicksReportsShortWriteWithoutSuccess
+
+ 4 FAILED TESTS

@@ -22,11 +22,23 @@
 #include "../WTSTools/WTSLogger.h"
 #include "../WTSUtils/WTSCfgLoader.h"
 
+#include <cstring>
 #include <memory>
+#include <cstdio>
+#include <exception>
 #include <vector>
 
 namespace
 {
+	thread_local StateMonitor* currentMonitorWorker = nullptr;
+
+	// Reuse the checked session-date calculation for a calendar-day diagnostic.
+	struct PreviousCalendarDay : WTSSessionInfo
+	{
+		PreviousCalendarDay() : WTSSessionInfo(-1440) {}
+		~PreviousCalendarDay() override = default;
+	};
+
 	struct WTSVariantRelease
 	{
 		void operator()(WTSVariant* value) const noexcept
@@ -94,39 +106,65 @@ StateMonitor::~StateMonitor()
 
 bool StateMonitor::initialize(const char* filename, WTSBaseDataMgr* bdMgr, DataManager* dtMgr)
 {
-	_bd_mgr = bdMgr;
-	_dt_mgr = dtMgr;
-
-	if (!StdFile::exists(filename))
+	if (filename == NULL || *filename == '\0' || bdMgr == NULL || !StdFile::exists(filename))
 	{
-		WTSLogger::error("State config file {} not exists", filename);
+		WTSLogger::error("State config file is unavailable");
 		return false;
 	}
-
-	WTSVariant* config = WTSCfgLoader::load_from_file(filename);
-	if (config == NULL)
+	try
 	{
-		WTSLogger::error("Loading state config failed");
-		return false;
+		WTSVariant* config = WTSCfgLoader::load_from_file(filename);
+		if (config == NULL)
+		{
+			WTSLogger::error("Loading state config failed");
+			return false;
+		}
+		return initializeConfig(config, bdMgr, dtMgr);
 	}
-
-	return initializeConfig(config);
+	catch (const std::exception& e)
+	{
+		WTSLogger::error("State monitor initialization failed: {}", e.what());
+	}
+	catch (...)
+	{
+		WTSLogger::error("State monitor initialization failed");
+	}
+	return false;
 }
 
 bool StateMonitor::initializeConfig(WTSVariant* config)
 {
-	// The caller transfers one reference to this helper. The config owns each
-	// child returned by get(), so only the root reference is released here.
+	return initializeConfig(config, _bd_mgr, _dt_mgr);
+}
+
+bool StateMonitor::initializeConfig(WTSVariant* config, WTSBaseDataMgr* bdMgr, DataManager* dtMgr)
+{
+	// This helper takes ownership of one config reference on every path.
 	std::unique_ptr<WTSVariant, WTSVariantRelease> configOwner(config);
-	if (configOwner == nullptr)
+	if (!configOwner || !configOwner->isObject() || bdMgr == NULL)
 		return false;
 
-	auto keys = configOwner->memberNames();
-	for (const std::string& sid : keys)
+	uint32_t curDate = 0, clockTime = 0;
+	if (!TimeUtils::tryGetDateTime(curDate, clockTime))
+		return false;
+	const uint32_t curMin = clockTime / 100000;
+	auto mapping = bdMgr->getDateMappingV1();
+	if (mapping.size != sizeof(wtp::DateMappingV1) || mapping.version != 1 ||
+		mapping.context != bdMgr || !mapping.getTradingDate || !mapping.nextTradingDate)
+		return false;
+
+	StateMap staged;
+	{
+		std::lock_guard<std::mutex> lock(_state_mutex);
+		staged = _map;
+	}
+	std::vector<std::pair<std::string, uint32_t>> dates;
+	for (const std::string& sid : configOwner->memberNames())
 	{
 		WTSVariant* jItem = configOwner->get(sid.c_str());
-
-		WTSSessionInfo* ssInfo = _bd_mgr->getSession(sid.c_str());
+		if (jItem == NULL || !jItem->isObject() || sid.size() >= sizeof(StateInfo::_session))
+			return false;
+		WTSSessionInfo* ssInfo = bdMgr->getSession(sid.c_str());
 		if (ssInfo == NULL)
 		{
 			WTSLogger::error("Trading session template [{}] not exists,state control rule skipped", sid);
@@ -135,82 +173,120 @@ bool StateMonitor::initializeConfig(WTSVariant* config)
 
 		StatePtr stateInfo(new StateInfo);
 		stateInfo->_sInfo = ssInfo;
-		stateInfo->_init_time = jItem->getUInt32("inittime");	//初始化时间,初始化以后数据才开始接收
-		stateInfo->_close_time = jItem->getUInt32("closetime");	//收盘时间,收盘后数据不再接收了
-		stateInfo->_proc_time = jItem->getUInt32("proctime");	//盘后处理时间,主要把实时数据转到历史去
-
-		strcpy(stateInfo->_session, sid.c_str());
-
-		const auto& auctions = ssInfo->getAuctionSections();//这里面是偏移过的时间,要注意了!!!
-		for(const auto& secInfo : auctions)
-		{
-			uint32_t stime = secInfo.first;
-			uint32_t etime = secInfo.second;
-
-			stime = stime / 100 * 60 + stime % 100;//先将时间转成分钟数
-			etime = etime / 100 * 60 + etime % 100;
-
-			stime = stime / 60 * 100 + stime % 60;//再将分钟数转成时间
-			etime = etime / 60 * 100 + etime % 60;//先不考虑半夜12点的情况,目前看来,几乎没有
-			stateInfo->_sections.emplace_back(StateInfo::Section({ stime, etime }));
-		}
-
-		const auto& sections = ssInfo->getTradingSections();//这里面是偏移过的时间,要注意了!!!
-		for (const auto& secInfo : sections)
+		stateInfo->_init_time = jItem->getUInt32("inittime");
+		stateInfo->_close_time = jItem->getUInt32("closetime");
+		stateInfo->_proc_time = jItem->getUInt32("proctime");
+		std::memcpy(stateInfo->_session, sid.c_str(), sid.size() + 1);
+		for (const auto& secInfo : ssInfo->getAuctionSections())
+			stateInfo->_sections.emplace_back(StateInfo::Section({ secInfo.first, secInfo.second }));
+		for (const auto& secInfo : ssInfo->getTradingSections())
 		{
 			const auto expanded = makeTradingSections(secInfo.first, secInfo.second);
 			stateInfo->_sections.insert(stateInfo->_sections.end(), expanded.begin(), expanded.end());
 		}
+		staged[stateInfo->_session] = stateInfo;
 
-		_map[stateInfo->_session] = stateInfo;
+		CodeSet* commodities = bdMgr->getSessionComms(stateInfo->_session);
+		if (commodities == NULL)
+			continue;
+		uint32_t offDate = 0;
+		if (!ssInfo->tryGetOffsetDate(curDate, curMin, offDate))
+			return false;
+		const uint32_t offMin = ssInfo->offsetTime(curMin, true);
+		uint32_t weekday = 0;
+		if (!TimeUtils::tryGetWeekDay(offDate, weekday))
+			return false;
 
-		CodeSet* pCommSet =  _bd_mgr->getSessionComms(stateInfo->_session);
-		if (pCommSet)
+		uint32_t previousDate = 0;
+		if (ssInfo->getOffsetMins() > 0)
 		{
-			uint32_t curDate = TimeUtils::getCurDate();
-			uint32_t curMin = TimeUtils::getCurMin() / 100;
-			uint32_t offDate = ssInfo->getOffsetDate(curDate, curMin);
-			uint32_t offMin = ssInfo->offsetTime(curMin, true);
-
-			//先获取基准的交易日
-
-			for (auto it = pCommSet->begin(); it != pCommSet->end(); it++)
-			{
-				const char* pid = (*it).c_str();
-
-				 _bd_mgr->setTradingDate(pid,  _bd_mgr->getTradingDate(pid, offDate, offMin, false), false);
-				uint32_t prevDate = TimeUtils::getNextDate(curDate, -1);
-				if ((ssInfo->getOffsetMins() > 0 &&
-					(! _bd_mgr->isTradingDate(pid, curDate) &&
-					!(ssInfo->isInTradingTime(curMin) &&  _bd_mgr->isTradingDate(pid, prevDate)))) ||
-					(ssInfo->getOffsetMins() <= 0 && ! _bd_mgr->isTradingDate(pid, offDate))
-					)
-				{
-					WTSLogger::info("Instrument {} is in holiday", pid);
-				}
-			}
+			PreviousCalendarDay previous;
+			if (!previous.tryGetOffsetDate(curDate, curMin, previousDate))
+				return false;
 		}
+		for (const std::string& pid : *commodities)
+		{
+			// Explicit-date getTradingDate is side-effect-free on weekdays.
+			// On weekends it writes the shared calendar cache, so use the pure
+			// nextTradingDate operation with the same commodity/calendar mapping.
+			const auto result = (weekday == 0 || weekday == 6)
+				? mapping.nextTradingDate(&mapping, pid.c_str(), offDate, 1, 0)
+				: mapping.getTradingDate(&mapping, pid.c_str(), offDate, offMin, 0);
+			if (result.status != wtp::DateMappingStatus::Ok || result.value == 0)
+				return false;
+			dates.emplace_back(pid, result.value);
+			if ((ssInfo->getOffsetMins() > 0 &&
+				(!bdMgr->isTradingDate(pid.c_str(), curDate) &&
+				 !(ssInfo->isInTradingTime(curMin) && bdMgr->isTradingDate(pid.c_str(), previousDate)))) ||
+				(ssInfo->getOffsetMins() <= 0 && !bdMgr->isTradingDate(pid.c_str(), offDate)))
+				WTSLogger::info("Instrument {} is in holiday", pid);
+		}
+	}
+
+	// No date or state is published before all checks finish. The existing
+	// setter has no transactional/rollback contract: an exceptional commit can
+	// leave some valid dates written. Concurrent initialization is unsupported.
+	for (const auto& date : dates)
+		bdMgr->setTradingDate(date.first.c_str(), date.second, false);
+	{
+		std::lock_guard<std::mutex> lock(_state_mutex);
+		_map.swap(staged);
+		_bd_mgr = bdMgr;
+		_dt_mgr = dtMgr;
 	}
 	return true;
 }
 
+void StateMonitor::setState(StateInfo& state, SimpleState value)
+{
+	std::lock_guard<std::mutex> lock(_state_mutex);
+	state._state = value;
+}
+
 void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 {
-	// 遍历所有交易时间段，检查和更新状态
-	auto it = _map.begin();
-	for (; it != _map.end(); it++)
+	// Decision card 1 / I03-NEW-006: an invalid snapshot must not drive any
+	// state transition or writer event. Date 0 is rejected here because the
+	// checked date helpers would otherwise substitute a new clock reading.
+	uint32_t weekDay = 0;
+	uint32_t prevDate = 0; // 前一天日期
+	if (curDate == 0 || !TimeUtils::tryGetWeekDay(curDate, weekDay) ||
+		!WTSSessionInfo::isValidSessionTime(curMin) || !TimeUtils::tryGetNextDate(curDate, -1, prevDate))
 	{
-		StatePtr& stateInfo = (StatePtr&)it->second; // 获取当前交易时间段的状态信息
+		WTSLogger::error("State monitor skipped invalid date/time snapshot {}.{}", curDate, curMin);
+		return;
+	}
 
+	// Hold ownership of the current entries without retaining the lock across
+	// base-data or writer callbacks, which may query this monitor reentrantly.
+	std::vector<StatePtr> states;
+	{
+		std::lock_guard<std::mutex> lock(_state_mutex);
+		states.reserve(_map.size());
+		for (const auto& entry : _map)
+			states.push_back(entry.second);
+	}
+	for (const StatePtr& stateInfo : states)
+	{
 		WTSSessionInfo* sInfo = stateInfo->_sInfo; // 获取交易时间段信息
 
-		// 获取偏移后的日期和前一天日期，用于识别夜盘和节假日情况
-		uint32_t offDate = sInfo->getOffsetDate(curDate, curMin); // 计算偏移后的日期
-		uint32_t prevDate = TimeUtils::getNextDate(curDate, -1); // 前一天日期
+		// 获取偏移后的日期，用于识别夜盘和节假日情况；失败时该时段不做任何状态转换
+		uint32_t offDate = 0;
+		if (!sInfo->tryGetOffsetDate(curDate, curMin, offDate))
+		{
+			WTSLogger::error("State monitor skipped session {}: offset date of {}.{} is unavailable",
+				stateInfo->_session, curDate, curMin);
+			continue;
+		}
 
 		// 根据当前状态执行相应的状态转换逻辑
 		// 各个状态有不同的转换条件和目标状态
-		switch(stateInfo->_state)
+		SimpleState currentState;
+		{
+			std::lock_guard<std::mutex> lock(_state_mutex);
+			currentState = stateInfo->_state;
+		}
+		switch(currentState)
 		{
 		// 原始状态，初始化后的默认状态
 		case SS_ORIGINAL:
@@ -264,18 +340,18 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 				{
 					// 如果没有合约与当前交易时间段关联，等同于节假日
 					WTSLogger::info("No corresponding instrument of trading session {}[{}], changed into holiday state", sInfo->name(), stateInfo->_session);
-					stateInfo->_state = SS_Holiday;
+					setState(*stateInfo, SS_Holiday);
 				}
 
 				// 状态转换逻辑：根据合约状态和时间点确定下一个状态
 				if(isAllHoliday) // 全部合约都处于节假日状态
 				{
 					WTSLogger::info("All instruments of trading session {}[{}] are in holiday, changed into holiday state", sInfo->name(), stateInfo->_session);
-					stateInfo->_state = SS_Holiday; // 进入节假日状态
+					setState(*stateInfo, SS_Holiday); // 进入节假日状态
 				}
 				else if (offTime >= offCloseTime) // 当前时间已超过收盘时间
 				{
-					stateInfo->_state = SS_CLOSED; // 进入已收盘状态
+					setState(*stateInfo, SS_CLOSED); // 进入已收盘状态
 					WTSLogger::info("Trading session {}[{}] stopped receiving data", sInfo->name(), stateInfo->_session);
 				}
 				else if (aucStartTime != -1 && offTime >= (uint32_t)aucStartTime) // 集合竹已开始
@@ -286,7 +362,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 						//{
 						//	_dt_mgr->preloadRtCaches();
 						//}
-						stateInfo->_state = SS_RECEIVING; // 进入接收数据状态
+						setState(*stateInfo, SS_RECEIVING); // 进入接收数据状态
 						WTSLogger::info("Trading session {}[{}] started receiving data", sInfo->name(), stateInfo->_session);
 					}
 					else // 如果当前时间不在交易时间区间内
@@ -294,12 +370,12 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 						// 小于市场收盘时间且不在交易时间区间内，则为中途休盘时间
 						if(offTime < sInfo->getCloseTime(true))
 						{
-							stateInfo->_state = SS_PAUSED; // 进入休息中状态
+							setState(*stateInfo, SS_PAUSED); // 进入休息中状态
 							WTSLogger::info("Trading session {}[{}] paused receiving data", sInfo->name(), stateInfo->_session);
 						}
 						else
 						{// 大于市场收盘时间但小于收盘设定时间，继续接收数据(主要是接收结算价)
-							stateInfo->_state = SS_RECEIVING; // 进入接收数据状态
+							setState(*stateInfo, SS_RECEIVING); // 进入接收数据状态
 							WTSLogger::info("Trading session {}[{}] started receiving data", sInfo->name(), stateInfo->_session);
 						}
 
@@ -307,7 +383,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 				}
 				else if (offTime >= offInitTime) // 当前时间大于等于初始化时间
 				{
-					stateInfo->_state = SS_INITIALIZED; // 进入已初始化状态
+					setState(*stateInfo, SS_INITIALIZED); // 进入已初始化状态
 					WTSLogger::info("Trading session {}[{}] initialized", sInfo->name(), stateInfo->_session);
 				}
 
@@ -331,7 +407,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 						//{
 						//	_dt_mgr->preloadRtCaches();
 						//}
-						stateInfo->_state = SS_PAUSED; // 进入休息中状态
+						setState(*stateInfo, SS_PAUSED); // 进入休息中状态
 
 						WTSLogger::info("Trading session {}[{}] paused receiving data", sInfo->name(), stateInfo->_session);
 					}
@@ -342,7 +418,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 						//{
 						//	_dt_mgr->preloadRtCaches();
 						//}
-						stateInfo->_state = SS_RECEIVING; // 进入接收数据状态
+						setState(*stateInfo, SS_RECEIVING); // 进入接收数据状态
 						WTSLogger::info("Trading session {}[{}] started receiving data", sInfo->name(), stateInfo->_session);
 					}
 
@@ -359,7 +435,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 				// 当前时间已超过收盘时间，停止接收数据
 				if (offTime >= offCloseTime)
 				{
-					stateInfo->_state = SS_CLOSED; // 进入已收盘状态
+					setState(*stateInfo, SS_CLOSED); // 进入已收盘状态
 
 					WTSLogger::info("Trading session {}[{}] stopped receiving data", sInfo->name(), stateInfo->_session);
 				}
@@ -376,7 +452,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 							//{
 							//	_dt_mgr->preloadRtCaches();
 							//}
-							stateInfo->_state = SS_PAUSED; // 进入休息中状态
+							setState(*stateInfo, SS_PAUSED); // 进入休息中状态
 
 							WTSLogger::info("Trading session {}[{}] paused receiving data", sInfo->name(), stateInfo->_session);
 						}
@@ -431,7 +507,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 					// 检查当前时间是否在交易时间区间内
 					if (stateInfo->isInSections(offTime))
 					{
-						stateInfo->_state = SS_RECEIVING; // 重新进入交易状态
+						setState(*stateInfo, SS_RECEIVING); // 重新进入交易状态
 						WTSLogger::info("Trading session {}[{}] continued to receive data", sInfo->name(), stateInfo->_session);
 					}
 				}
@@ -439,7 +515,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 				{
 					// 所有合约都处于节假日状态，转入节假日状态
 					WTSLogger::info("All instruments of trading session {}[{}] are in holiday, changed into holiday state", sInfo->name(), stateInfo->_session);
-					stateInfo->_state = SS_Holiday; // 进入节假日状态
+					setState(*stateInfo, SS_Holiday); // 进入节假日状态
 				}
 			}
 			break;
@@ -456,7 +532,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 					// 检查当前交易时间段是否已完成收盘作业
 					if(!_dt_mgr->isSessionProceeded(stateInfo->_session))
 					{
-						stateInfo->_state = SS_PROCING; // 进入收盘作业中状态
+						setState(*stateInfo, SS_PROCING); // 进入收盘作业中状态
 
 						WTSLogger::info("Trading session {}[{}] started processing closing task", sInfo->name(), stateInfo->_session);
 						// 调用数据管理器处理历史数据，将实时数据转入历史数据
@@ -465,7 +541,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 					else
 					{
 						// 如果已处理过，直接进入盘后已处理状态
-						stateInfo->_state = SS_PROCED; // 进入盘后已处理状态
+						setState(*stateInfo, SS_PROCED); // 进入盘后已处理状态
 					}
 				}
 				// 当前时间在集合竹开始时间和市场收盘时间之间
@@ -474,7 +550,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 					// 如果当前时间不在交易时间区间内，进入休息中状态
 					if (!stateInfo->isInSections(offTime))
 					{
-						stateInfo->_state = SS_PAUSED; // 进入休息中状态
+						setState(*stateInfo, SS_PAUSED); // 进入休息中状态
 
 						WTSLogger::info("Trading session {}[{}] paused receiving data", sInfo->name(), stateInfo->_session);
 					}
@@ -483,7 +559,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 			break;
 		// 收盘作业中状态，正在处理收盘数据
 		case SS_PROCING:
-			stateInfo->_state = SS_PROCED; // 直接转为盘后已处理状态，因为实际处理是异步进行的
+			setState(*stateInfo, SS_PROCED); // 直接转为盘后已处理状态，因为实际处理是异步进行的
 			break;
 		// 盘后已处理状态或节假日状态
 		case SS_PROCED:
@@ -525,7 +601,7 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 					// 如果不是所有合约都处于节假日，重置状态准备新一天的交易
 					if(!isAllHoliday)
 					{
-						stateInfo->_state = SS_ORIGINAL; // 重置为原始状态，开始新一天的状态转换循环
+						setState(*stateInfo, SS_ORIGINAL); // 重置为原始状态，开始新一天的状态转换循环
 						WTSLogger::info("Trading session {}[{}] state reset", sInfo->name(), stateInfo->_session);
 					}
 				}
@@ -544,16 +620,28 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
  */
 void StateMonitor::run()
 {
-	if(_thrd == NULL)
+	std::lock_guard<std::mutex> lock(_thread_mutex);
+	if(_thrd == NULL && !_stopped.load(std::memory_order_relaxed))
 	{
 		// 创建监控线程
 		_thrd.reset(new StdThread([this](){
+			currentMonitorWorker = this;
+			uint64_t lastTime = 0;
+			bool clockFailed = false;
+			auto failWorker = [this](const char* message) {
+				{
+					std::lock_guard<std::mutex> stateLock(_state_mutex);
+					_worker_failed = true;
+				}
+				_stopped.store(true, std::memory_order_relaxed);
+				std::fprintf(stderr, "StateMonitor worker stopped after exception: %s\n", message);
+			};
 
 			// 主循环，直到收到停止信号
+			try
+			{
 			while (!_stopped.load(std::memory_order_relaxed))
 			{
-				static uint64_t lastTime = 0; // 上次检查时间戳
-
 				// 控制检查频率为每秒一次
 				while(true)
 				{
@@ -572,9 +660,22 @@ void StateMonitor::run()
 				if(_stopped.load(std::memory_order_relaxed))
 					break;
 
-				// 获取当前日期和分钟数
-				uint32_t curDate = TimeUtils::getCurDate(); // 当前日期，格式YYYYMMDD
-				uint32_t curMin = TimeUtils::getCurMin() / 100; // 当前分钟数，格式HHMM
+				// 获取当前日期和分钟数：一次校验过的时钟快照（I03-NEW-006）。
+				// 时钟或时区失败时不推进任何状态、不触发收盘作业或缓存清理，
+				// 保持现有状态并在下一秒重试；失败与恢复各记录一次。
+				uint32_t curDate = 0, clockTime = 0;
+				if (!TimeUtils::tryGetDateTime(curDate, clockTime))
+				{
+					if (!clockFailed)
+						WTSLogger::error("State monitor clock snapshot failed, state transitions suspended");
+					clockFailed = true;
+					lastTime = TimeUtils::getLocalTimeNow();
+					continue;
+				}
+				if (clockFailed)
+					WTSLogger::info("State monitor clock snapshot recovered at {}.{}", curDate, clockTime / 100000);
+				clockFailed = false;
+				const uint32_t curMin = clockTime / 100000; // 当前分钟数，格式HHMM
 
 				advanceOnce(curDate, curMin);
 				// 更新上次检查时间
@@ -587,6 +688,15 @@ void StateMonitor::run()
 					_dt_mgr->transHisData("CMD_CLEAR_CACHE");
 				}
 			} // 主循环结束
+			}
+			catch (const std::exception& ex)
+			{
+				failWorker(ex.what());
+			}
+			catch (...)
+			{
+				failWorker("unknown exception");
+			}
 		}));
 	}
 }
@@ -600,6 +710,11 @@ void StateMonitor::stop()
 {
 	_stopped.store(true, std::memory_order_relaxed);  // 仅通知循环退出；join 提供线程结束同步
 
-	if (_thrd)
+	// Do not wait on a mutex held by an external stop that is joining this
+	// callback's worker. The owner must later call stop from another thread.
+	if (currentMonitorWorker == this)
+		return;
+	std::lock_guard<std::mutex> lock(_thread_mutex);
+	if (_thrd && _thrd->joinable())
 		_thrd->join();  // 等待线程执行完成并安全退出
 }

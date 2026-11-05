@@ -1,0 +1,56 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = FemasContractFixture.isolated_query_push_same_user_order_id:FemasContractFixture.isolated_unterminated_user_order_id_is_bounded
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from FemasContractFixture
+[ RUN      ] FemasContractFixture.isolated_query_push_same_user_order_id
+[       OK ] FemasContractFixture.isolated_query_push_same_user_order_id (182 ms)
+[ RUN      ] FemasContractFixture.isolated_unterminated_user_order_id_is_bounded
+[       OK ] FemasContractFixture.isolated_unterminated_user_order_id_is_bounded (58 ms)
+[----------] 2 tests from FemasContractFixture (244 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (248 ms total)
+[  PASSED  ] 2 tests.
+
+=================================================================
+==52419==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 48 byte(s) in 1 object(s) allocated from:
+    #0 0x00010310d0e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000102947e88 in TraderFemas::OnRspQryOrder(CUstpFtdcOrderField*, CUstpFtdcRspInfoField*, int, bool)+0x170 (extra-asan:arm64+0x100017e88)
+    #2 0x0001029edbb4 in FemasContractFixture_isolated_query_push_same_user_order_id_Test::TestBody()+0x23c (extra-asan:arm64+0x1000bdbb4)
+    #3 0x000102a3f3b0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (extra-asan:arm64+0x10010f3b0)
+    #4 0x000102a3f2f8 in testing::Test::Run()+0xcc (extra-asan:arm64+0x10010f2f8)
+    #5 0x000102a3fed8 in testing::TestInfo::Run()+0xd0 (extra-asan:arm64+0x10010fed8)
+    #6 0x000102a4095c in testing::TestSuite::Run()+0x1c4 (extra-asan:arm64+0x10011095c)
+    #7 0x000102a4bd80 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (extra-asan:arm64+0x10011bd80)
+    #8 0x000102a4b72c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (extra-asan:arm64+0x10011b72c)
+    #9 0x000102a4b690 in testing::UnitTest::Run()+0x78 (extra-asan:arm64+0x10011b690)
+    #10 0x000102a2ca0c in main+0x40 (extra-asan:arm64+0x1000fca0c)
+    #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x604000001b50 (48 bytes)
+
+Indirect leak of 8 byte(s) in 1 object(s) allocated from:
+    #0 0x00010310d0e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x00010296cbb8 in std::__1::__split_buffer<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<wtp::WTSObject*>&)+0x4c (extra-asan:arm64+0x10003cbb8)
+    #2 0x00010296c560 in wtp::WTSObject** std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::__emplace_back_slow_path<wtp::WTSObject*&>(wtp::WTSObject*&)+0x158 (extra-asan:arm64+0x10003c560)
+    #3 0x00010296bfcc in void std::__1::__if_likely_else[abi:nqe220108]<wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda'(), wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda0'()>(bool, wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda'(), wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda0'())+0xec (extra-asan:arm64+0x10003bfcc)
+    #4 0x000102947fdc in TraderFemas::OnRspQryOrder(CUstpFtdcOrderField*, CUstpFtdcRspInfoField*, int, bool)+0x2c4 (extra-asan:arm64+0x100017fdc)
+    #5 0x0001029edbb4 in FemasContractFixture_isolated_query_push_same_user_order_id_Test::TestBody()+0x23c (extra-asan:arm64+0x1000bdbb4)
+    #6 0x000102a3f3b0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (extra-asan:arm64+0x10010f3b0)
+    #7 0x000102a3f2f8 in testing::Test::Run()+0xcc (extra-asan:arm64+0x10010f2f8)
+    #8 0x000102a3fed8 in testing::TestInfo::Run()+0xd0 (extra-asan:arm64+0x10010fed8)
+    #9 0x000102a4095c in testing::TestSuite::Run()+0x1c4 (extra-asan:arm64+0x10011095c)
+    #10 0x000102a4bd80 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (extra-asan:arm64+0x10011bd80)
+    #11 0x000102a4b72c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (extra-asan:arm64+0x10011b72c)
+    #12 0x000102a4b690 in testing::UnitTest::Run()+0x78 (extra-asan:arm64+0x10011b690)
+    #13 0x000102a2ca0c in main+0x40 (extra-asan:arm64+0x1000fca0c)
+    #14 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x6020000009d0 (8 bytes)
+
+SUMMARY: AddressSanitizer: 56 byte(s) leaked in 2 allocation(s).

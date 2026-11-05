@@ -1,0 +1,18 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5TraderCTPLifecycle.SynchronousQueryRejectReleasesGateForNextQuery
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03S5TraderCTPLifecycle
+[ RUN      ] I03S5TraderCTPLifecycle.SynchronousQueryRejectReleasesGateForNextQuery
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/i03s5_traderctp_lifecycle_test.cpp:444: Failure
+Value of: waitFor([this]() { return api_.n_qry_pos_.load() == 1; }, 4000)
+  Actual: false
+Expected: true
+query gate stayed closed after a synchronous rejection
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/i03s5_traderctp_lifecycle_test.cpp:446: Failure
+Value of: sink_.hasLog("Sending account query failed: -3")
+  Actual: false
+Expected: true
+
+WATCHDOG_TIMEOUT: disconnect after rejected query did not finish within 6000 ms

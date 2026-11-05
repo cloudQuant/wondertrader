@@ -1,0 +1,30 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from I03New112DtServoCwd
+[ RUN      ] I03New112DtServoCwd.LongWorkingDirectoryIsReturnedInFull
+src/TestUnits/coverage/q05b_dtservo/i03_new112_dtservo_cwd_test.cpp:5: Failure
+Expected equality of these values:
+  0
+  i03_new112::runInChild([] { return std::string(WtHelper::get_cwd()); }, false)
+    Which is: 20
+
+[  FAILED  ] I03New112DtServoCwd.LongWorkingDirectoryIsReturnedInFull (8 ms)
+[ RUN      ] I03New112DtServoCwd.RemovedWorkingDirectoryFallsBackToDot
+src/TestUnits/coverage/q05b_dtservo/i03_new112_dtservo_cwd_test.cpp:5: Failure
+Expected equality of these values:
+  0
+  i03_new112::runInChild([] { return std::string(WtHelper::get_cwd()); }, true)
+    Which is: 20
+
+[  FAILED  ] I03New112DtServoCwd.RemovedWorkingDirectoryFallsBackToDot (2 ms)
+[----------] 2 tests from I03New112DtServoCwd (11 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (13 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] I03New112DtServoCwd.LongWorkingDirectoryIsReturnedInFull
+[  FAILED  ] I03New112DtServoCwd.RemovedWorkingDirectoryFallsBackToDot
+
+ 2 FAILED TESTS

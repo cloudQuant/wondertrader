@@ -22,6 +22,7 @@
  *
  * 已登记缺陷见 docs/迭代计划/迭代01/bugs/R46.md。
  */
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <cstring>
@@ -37,13 +38,17 @@
 
 USING_NS_WTP;
 
+
+#define R46_EXEC_POLICY "\"scale\":1,\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\"}}"
+
 namespace {
 
 	const char* kGenLeaf = "wt_r46_porter_gen";
 
 	std::string prepare_gen_dir()
 	{
-		std::filesystem::path p = std::filesystem::temp_directory_path() / kGenLeaf;
+		// I03-NEW-098：按进程区分目录，并行逐例运行时互不覆盖夹具。
+		std::filesystem::path p = std::filesystem::temp_directory_path() / (std::string(kGenLeaf) + "_" + std::to_string(static_cast<long>(::getpid())));
 		std::error_code ec;
 		std::filesystem::create_directories(p, ec);
 		return p.string();
@@ -183,24 +188,30 @@ TEST(R46PorterConfig, TradersAndEveryExecuterKindAreInstantiated)
 		"\"bspolicy\":\"" + dir + "/actions.json\","
 		"\"traders\":[{\"active\":true,\"id\":\"r46_trd\","
 		"\"module\":\"TraderMocker\",\"mockerid\":46001,\"udp_port\":0}],"
+		// 卡8b=A（迭代03）：local/diff/arbi 条目须带有限正数 scale 与含 default 的 policy，
+		// 否则在任何副作用前整表拒绝（.before 见 s5-runners 证据）。
 		"\"executers\":["
-		"{\"active\":true,\"id\":\"r46_exe_local\",\"name\":\"local\",\"trader\":\"r46_trd\"},"
-		"{\"active\":true,\"id\":\"r46_exe_diff\",\"name\":\"diff\",\"trader\":\"r46_trd\"},"
-		"{\"active\":true,\"id\":\"r46_exe_arbi\",\"name\":\"arbi\",\"trader\":\"r46_trd\"},"
+		"{\"active\":true,\"id\":\"r46_exe_local\",\"name\":\"local\",\"trader\":\"r46_trd\"," R46_EXEC_POLICY "},"
+		"{\"active\":true,\"id\":\"r46_exe_diff\",\"name\":\"diff\",\"trader\":\"r46_trd\"," R46_EXEC_POLICY "},"
+		"{\"active\":true,\"id\":\"r46_exe_arbi\",\"name\":\"arbi\",\"trader\":\"r46_trd\"," R46_EXEC_POLICY "},"
 		"{\"active\":true,\"id\":\"r46_exe_dist\",\"name\":\"dist\"},"
-		"{\"active\":true,\"id\":\"r46_exe_orphan\",\"name\":\"local\",\"trader\":\"r46_absent_trd\"}"
+		"{\"active\":true,\"id\":\"r46_exe_orphan\",\"name\":\"local\",\"trader\":\"r46_absent_trd\"," R46_EXEC_POLICY "}"
 		"]}";
 
 	ASSERT_TRUE(r->config(cfg.c_str(), false));
 	ASSERT_NE(r->getEngine(), nullptr);
 
+	// I03-NEW-064（迭代03）：本 runner 配置的是 CTA 引擎，其 HFT 兄弟引擎从未初始化；即便 trader
+	// 已登记也拒绝创建 HFT 上下文（原断言为非 0，.before 见 s5-runners 证据）。已配置 HFT 引擎上
+	// 绑定已登记 trader 的正分支由 I03S5R42HftQuantity/R69PorterExtLifecycle 覆盖。
 	const uint32_t bound = r->createHftContext("r46_hft_bound", "r46_trd", false, 0);
-	EXPECT_NE(bound, 0u);
-	EXPECT_TRUE(r->getHftContext(bound) != nullptr);
+	EXPECT_EQ(bound, 0u);
+	EXPECT_TRUE(r->getHftContext(bound) == nullptr);
 
+	// BUG-R42-002 门禁（迭代03）：未知 trader 创建失败，返回 0 且不登记上下文。
 	const uint32_t unbound = r->createHftContext("r46_hft_unbound", "r46_absent_trd", false, 0);
-	EXPECT_NE(unbound, 0u);
-	EXPECT_TRUE(r->getHftContext(unbound) != nullptr);
+	EXPECT_EQ(unbound, 0u);
+	EXPECT_TRUE(r->getHftContext(unbound) == nullptr);
 
 	clean_dir(dir);
 }

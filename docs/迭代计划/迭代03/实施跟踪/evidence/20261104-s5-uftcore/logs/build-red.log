@@ -1,0 +1,15 @@
+compiled 76 fail 0
+Traceback (most recent call last):
+  File "/tmp/wt-i03-s5-uftcore-run/scripts/build-red.py", line 72, in <module>
+    link('uft',RED+'/CoverageTests_uftcore.red',drop=('build_x64/Debug/bin/WtDtPorter/libWtDtPorter.dylib','build_x64/Debug/bin/WtPorter/libWtPorter.dylib'))
+  File "/tmp/wt-i03-s5-uftcore-run/scripts/build-red.py", line 70, in link
+    r=subprocess.run(nc,cwd=BUILD,capture_output=True,text=True)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yunjinqi/opt/anaconda3/lib/python3.11/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yunjinqi/opt/anaconda3/lib/python3.11/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/Users/yunjinqi/opt/anaconda3/lib/python3.11/subprocess.py", line 1953, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: ':'

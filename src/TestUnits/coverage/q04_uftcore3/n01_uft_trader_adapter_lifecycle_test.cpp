@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <boost/noncopyable.hpp>
 #include <gtest/gtest.h>
 
@@ -261,7 +262,7 @@ class LifecycleTempRoot
 public:
 	LifecycleTempRoot()
 		: _path(std::filesystem::temp_directory_path() /
-			("uft_adapter_lifecycle_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count())))
+			("uft_adapter_lifecycle_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count())))
 	{
 		std::filesystem::create_directories(_path / "traders");
 	}

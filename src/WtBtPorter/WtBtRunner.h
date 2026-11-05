@@ -538,6 +538,7 @@ public:
 	 * @details 获取内部的历史数据回放器实例，可以用于直接控制数据回放的行为
 	 */
 	inline HisDataReplayer&	replayer() { return _replayer; }
+	WtReplayStatusV1 replay_status() const { return _replayer.replay_status(); }
 
 	/**
 	 * @brief 获取当前是否为异步模式
@@ -594,7 +595,7 @@ public:
 	/**
 	 * @brief 回测结束事件处理
 	 * @details 处理回测引擎的回测结束事件
-	 *          当回测引擎完成所有回测流程后调用此方法
+	 *          此事件仅通知回放终止；结果在 FINAL 标志置位后稳定。
 	 *          使用EVENT_BACKTEST_END事件类型通知外部注册的事件回调函数
 	 *          在此事件中可以进行回测结果的统计、分析和输出
 	 */

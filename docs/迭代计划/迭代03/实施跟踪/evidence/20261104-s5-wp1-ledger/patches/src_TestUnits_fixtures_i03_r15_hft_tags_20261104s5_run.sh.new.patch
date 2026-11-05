@@ -1,0 +1,76 @@
+--- /dev/null	2026-11-04 22:49:31
++++ src/TestUnits/fixtures/i03_r15_hft_tags_20261104s5/run.sh	2026-11-04 18:15:44
+@@ -0,0 +1,73 @@
++#!/bin/bash
++# R15-001 / I03-NEW-002 HFT tag fixture (iteration 03 s5).
++#   run.sh <lib-build-dir> <new-output-dir> <variant> [gtest filter]
++# variant: current-asan | current-tsan | before-asan
++#   before-* compiles HftStraBaseCtx.h/.cpp saved at the start of the s5 review
++#   (evidence/20261104-s5-wp1-ledger/before) through a copied overlay (no
++#   symlinks) with -DR15_S5_BASELINE (red control).
++# Compiles the q01 R15 lane test TU, HftStraBaseCtx, HftStraContext,
++# WtHftEngine and TraderAdapter with sanitizers; other objects come from the
++# non-sanitized lib build. Local fakes only; no broker connection.
++set -euo pipefail
++root=$(cd "$(dirname "$0")/../../../.." && pwd)
++build=${1:?lib build dir with WtCore WtDtCore WTSTools WTSUtils}
++out=${2:?new output directory}
++variant=${3:?current-asan|current-tsan|before-asan}
++filter=${4:-R15CtxTest.*}
++mkdir "$out"
++out=$(cd "$out" && pwd)
++cd "$root"
++compiler=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++
++case "$variant" in
++  *-asan) san=(-fsanitize=address,undefined -fno-sanitize-recover=all) ;;
++  *-tsan) san=(-fsanitize=thread) ;;
++  *) echo "bad variant" >&2; exit 2 ;;
++esac
++inc="$root/src"
++defs=()
++before="$root/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before/src/WtCore"
++if [[ "$variant" == before-* ]]; then
++  mkdir -p "$out/overlay/src"
++  cp -R "$root/src/WtCore" "$root/src/Share" "$root/src/Includes" "$root/src/WTSTools" "$root/src/WTSUtils" \
++    "$root/src/FasterLibs" "$root/src/TestUnits" "$out/overlay/src/"
++  cp "$before/HftStraBaseCtx.h" "$before/HftStraBaseCtx.cpp" "$out/overlay/src/WtCore/"
++  if find "$out/overlay" -type l | grep -q .; then echo "symlink in overlay" >&2; exit 3; fi
++  inc="$out/overlay/src"
++  defs=(-DR15_S5_BASELINE)
++fi
++shasum -a 256 src/WtCore/HftStraBaseCtx.h src/WtCore/HftStraBaseCtx.cpp src/WtCore/HftStraContext.cpp \
++  src/WtCore/WtHftEngine.cpp src/WtCore/TraderAdapter.cpp src/WtCore/TraderAdapter.h \
++  src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp "$before/HftStraBaseCtx.h" "$before/HftStraBaseCtx.cpp" \
++  > "$out/source.sha256"
++git -C "$root" rev-parse HEAD > "$out/head.txt"
++flags=(-std=c++17 -g -O1 -fno-omit-frame-pointer "${san[@]}" ${defs[@]+"${defs[@]}"}
++  -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -DBOOST_BIND_GLOBAL_PLACEHOLDERS
++  -I/opt/homebrew/Cellar/boost/1.88.0/include -I"$inc" -I"$inc/TestUnits/coverage"
++  -I/opt/homebrew/include -I/usr/local/include -include cstdlib -include "$root/src/Share/fmt_enum_compat.h")
++objs=()
++for item in "WtCore/HftStraBaseCtx.cpp:base" "WtCore/HftStraContext.cpp:ctx" "WtCore/WtHftEngine.cpp:engine" \
++  "WtCore/TraderAdapter.cpp:adapter" "TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:test"; do
++  source=${item%%:*}; name=${item#*:}
++  "$compiler" "${flags[@]}" -c "$inc/$source" -o "$out/$name.o" > "$out/$name-build.log" 2>&1
++  objs+=("$out/$name.o")
++done
++"$compiler" "${san[@]}" -Wl,-undefined,dynamic_lookup "${objs[@]}" \
++  /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a \
++  "$build/build_x64/Debug/libs/libWtCore.a" "$build/build_x64/Debug/libs/libWtDtCore.a" \
++  "$build/build_x64/Debug/libs/libWTSTools.a" "$build/build_x64/Debug/libs/libWTSUtils.a" \
++  -L/opt/homebrew/lib -L/usr/local/lib -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib \
++  -lboost_filesystem -lboost_thread -lnanomsg -liconv -ldl -lpthread -o "$out/test" > "$out/link.log" 2>&1
++shasum -a 256 -c "$out/source.sha256" > "$out/source-check.log"
++shasum -a 256 "$out/test" > "$out/binary.sha256"
++set +e
++mkdir -p "$out/cwd"
++(cd "$out/cwd" && ASAN_OPTIONS=detect_leaks=0:halt_on_error=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 \
++  TSAN_OPTIONS=halt_on_error=1:second_deadlock_stack=1 \
++  /usr/bin/perl -e 'alarm shift; exec @ARGV' 300 "$out/test" --gtest_filter="$filter" \
++  --gtest_output=xml:"$out/result.xml" > "$out/test.log" 2>&1)
++rc=$?
++set -e
++echo "$rc" > "$out/exit_code.txt"
++tail -30 "$out/test.log"
++echo "exit=$rc"
++exit $rc

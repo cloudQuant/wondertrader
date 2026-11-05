@@ -13,6 +13,7 @@
  * 注意 ParserAdapter::release() 在 _remover 为空时会 `delete _parser_api`,
  * 所以替身 new 到堆上、并把计数写回用例持有的 ApiStats, 释放后仍可断言。
  */
+#include <memory>
 #include <boost/noncopyable.hpp>
 
 #include "WtUftCore/ParserAdapter.h"
@@ -165,6 +166,17 @@ inline FakeParserApi* newApi(ApiStats* st, ParserAdapter* owner, FakeStub* stub)
 	return api;
 }
 
+// Card 9 (BUG-R78-001): an external API is destroyed only with a provider
+// confirmation. Without a remover the adapter quarantines it (never deletes).
+// Tests whose intent is "a quiescent fake is released and destroyed once"
+// therefore pass this remover, which confirms destruction after deleting.
+void deleteFakeParserConfirmed(IParserApi*& api)
+{
+	IParserApi* original = api;
+	api = nullptr;
+	delete original;
+}
+
 void deleteFakeParserThenThrow(IParserApi*& api)
 {
 	IParserApi* original = api;
@@ -235,6 +247,8 @@ TEST(R11ParserAdapter, initRejectsEmptyModule)
 
 TEST(R11ParserAdapter, preApiFailureReleasesConfigAndAllowsAdapterReuse)
 {
+	// 决策 K18=否（2026-11-04）：initExt 的 remover 不作为销毁确认；外部 API 与无 remover 时相同：不调用 release、
+	// 不删除，隔离到进程退出，管理器把它作为常驻对象移出表，关停可完成。改前期望见证据 k18-uft-initext-remover/before。
 	Env env;
 	WTSVariant* cfg = WTSVariant::createObject();
 	cfg->append("module", "");
@@ -248,10 +262,15 @@ TEST(R11ParserAdapter, preApiFailureReleasesConfigAndAllowsAdapterReuse)
 	// same adapter can accept a later external candidate.
 	ApiStats st;
 	FakeParserApi* api = newApi(&st, &adapter, &env._stub);
-	EXPECT_TRUE(adapter.initExt("p2-reuse", api, &env._stub, &env._bd));
+	EXPECT_TRUE(adapter.initExt("p2-reuse", api, &env._stub, &env._bd, deleteFakeParserConfirmed));
 	EXPECT_EQ(1u, cfg->retainCount());
 	adapter.release();
-	EXPECT_EQ((uint32_t)1, st._destroyCnt);
+	EXPECT_EQ((uint32_t)0, st._releaseCnt);
+	EXPECT_EQ((uint32_t)0, st._destroyCnt);
+	EXPECT_TRUE(adapter.hasApi());
+#ifdef WT_UFT_PARSER_K18_RESIDENT
+	EXPECT_TRUE(adapter.isResidentQuarantined());
+#endif
 	cfg->release();
 }
 
@@ -284,7 +303,7 @@ TEST(R11ParserAdapter, initExtSubscribesAllContracts)
 	ParserAdapter adapter;
 	ApiStats st;
 	FakeParserApi* api = newApi(&st, &adapter, &env._stub);
-	ASSERT_TRUE(adapter.initExt("p5", api, &env._stub, &env._bd));
+	ASSERT_TRUE(adapter.initExt("p5", api, &env._stub, &env._bd, deleteFakeParserConfirmed));
 	EXPECT_EQ((uint32_t)1, st._regSpiCnt);
 	EXPECT_TRUE(st._lastSpiIsAdapter);
 	EXPECT_EQ((uint32_t)1, st._initCnt);
@@ -298,9 +317,12 @@ TEST(R11ParserAdapter, initExtSubscribesAllContracts)
 	EXPECT_EQ((uint32_t)1, st._connectCnt);
 	EXPECT_EQ(&env._bd, adapter.getBaseDataMgr());
 
-	//release 内部会 delete _parser_api, 用例不再手工 delete
 	adapter.release();
-	EXPECT_EQ((uint32_t)1, st._releaseCnt);
+	// 决策 K18=否（2026-11-04）：外部 API（含带 remover 的 initExt）不调用 release/remover、不删除，隔离到进程退出。
+	EXPECT_EQ((uint32_t)0, st._releaseCnt);
+#ifdef WT_UFT_PARSER_K18_RESIDENT
+	EXPECT_TRUE(adapter.isResidentQuarantined());
+#endif
 }
 
 //api->init 失败: 返回 false, 不连接/订阅, API 仍由 adapter 持有
@@ -311,7 +333,7 @@ TEST(R11ParserAdapter, initExtReturnsFalseAndRetainsApiWhenApiInitFails)
 	ApiStats st;
 	FakeParserApi* api = new FakeParserApi(&st);
 	api->_initRet = false;
-	EXPECT_FALSE(adapter.initExt("p6", api, &env._stub, &env._bd));
+	EXPECT_FALSE(adapter.initExt("p6", api, &env._stub, &env._bd, deleteFakeParserConfirmed));
 	EXPECT_TRUE(adapter.hasApi());
 	EXPECT_FALSE(adapter.isInitialized());
 	EXPECT_EQ((uint32_t)1, st._initCnt);
@@ -323,18 +345,21 @@ TEST(R11ParserAdapter, initExtReturnsFalseAndRetainsApiWhenApiInitFails)
 	EXPECT_EQ((uint32_t)0, st._connectCnt);
 	EXPECT_EQ(&env._bd, adapter.getBaseDataMgr());
 
-	// The fake is quiescent; this explicit release verifies the transferred
-	// object is destroyed exactly once. release() is not a provider drain signal.
+	// 决策 K18=否（2026-11-04）：initExt 的 remover 不作为销毁确认；外部 API 与无 remover 时相同：不调用 release、
+	// 不删除，隔离到进程退出，管理器把它作为常驻对象移出表，关停可完成。改前期望见证据 k18-uft-initext-remover/before。
 	adapter.release();
-	EXPECT_FALSE(adapter.hasApi());
-	EXPECT_EQ((uint32_t)1, st._releaseCnt);
-	EXPECT_EQ((uint32_t)1, st._destroyCnt);
+	EXPECT_TRUE(adapter.hasApi());
+	EXPECT_EQ((uint32_t)0, st._releaseCnt);
+	EXPECT_EQ((uint32_t)0, st._destroyCnt);
 	EXPECT_EQ((uint32_t)0, st._subCnt);
 	EXPECT_EQ((uint32_t)0, st._connectCnt);
 }
 
-TEST(R11ParserAdapter, releaseExceptionIsStickyAndManagerRetainsAdapter)
+// 原用例 releaseExceptionIsStickyAndManagerRetainsAdapter（provider release 抛异常后粘滞）按 K18 改写：
+// 外部 API 的 release 不再被调用，抛异常的 provider 也不会进入不确定态。
+TEST(R11ParserAdapter, throwingReleaseIsNeverInvokedForExternalApi)
 {
+	// 决策 K18=否（2026-11-04）：外部 API（含带 remover 的 initExt）不调用 release/remover、不删除，隔离到进程退出。
 	Env env;
 	ApiStats st;
 	FakeParserApi* api = new FakeParserApi(&st);
@@ -342,59 +367,57 @@ TEST(R11ParserAdapter, releaseExceptionIsStickyAndManagerRetainsAdapter)
 	{
 		ParserAdapterMgr mgr;
 		ParserAdapterPtr adapter(new ParserAdapter());
-		ASSERT_TRUE(adapter->initExt("release-throw", api, &env._stub, &env._bd));
+		ASSERT_TRUE(adapter->initExt("release-throw", api, &env._stub, &env._bd, deleteFakeParserConfirmed));
 		ASSERT_TRUE(mgr.addAdapter("release-throw", adapter));
 
 		mgr.release();
 		EXPECT_TRUE(adapter->hasApi());
-		EXPECT_TRUE(adapter->isTeardownUncertain());
-		EXPECT_TRUE(mgr.hasRetainedAdapters());
-		EXPECT_EQ(adapter, mgr.getAdapter("release-throw"));
-		EXPECT_EQ(&env._bd, adapter->getBaseDataMgr());
-		EXPECT_EQ((uint32_t)1, st._releaseCnt);
-		EXPECT_EQ((uint32_t)0, st._destroyCnt);
-
-		mgr.release();
-		EXPECT_TRUE(mgr.hasRetainedAdapters());
-		EXPECT_EQ((uint32_t)1, st._releaseCnt);
+		EXPECT_FALSE(adapter->isTeardownUncertain());
+		EXPECT_FALSE(mgr.hasRetainedAdapters());
+		EXPECT_EQ((uint32_t)0, st._releaseCnt);
 		EXPECT_EQ((uint32_t)0, st._destroyCnt);
 	}
-
-	// This fake has no callbacks. Reclaim it after the retained test owner is
-	// gone so the test itself does not leak; production teardown stays sticky.
-	delete api;
-	EXPECT_EQ((uint32_t)1, st._destroyCnt);
 }
 
-TEST(R11ParserAdapter, throwingRemoverLeavesOpaqueTombstoneAndManagerRetainsAdapter)
+// 原用例 throwingRemoverLeavesOpaqueTombstoneAndManagerRetainsAdapter（remover 抛异常留下墓碑）按 K18 改写：remover 不再被调用。
+TEST(R11ParserAdapter, removerIsNeverCalledAndManagerKeepsAdapterResident)
 {
+	// 决策 K18=否（2026-11-04）：initExt 的 remover 不作为销毁确认；外部 API 与无 remover 时相同：不调用 release、
+	// 不删除，隔离到进程退出，管理器把它作为常驻对象移出表，关停可完成。改前期望见证据 k18-uft-initext-remover/before。
 	Env env;
 	ApiStats st;
 	FakeParserApi* api = new FakeParserApi(&st);
+	std::weak_ptr<ParserAdapter> watch;
 	{
 		ParserAdapterMgr mgr;
 		ParserAdapterPtr adapter(new ParserAdapter());
 		ASSERT_TRUE(adapter->initExt("remover-throw", api, &env._stub, &env._bd, deleteFakeParserThenThrow));
 		ASSERT_TRUE(mgr.addAdapter("remover-throw", adapter));
+		watch = adapter;
 
 		mgr.release();
 		EXPECT_TRUE(adapter->hasApi());
-		EXPECT_TRUE(adapter->isTeardownUncertain());
-		EXPECT_TRUE(mgr.hasRetainedAdapters());
-		EXPECT_EQ(adapter, mgr.getAdapter("remover-throw"));
-		EXPECT_EQ(&env._bd, adapter->getBaseDataMgr());
-		EXPECT_EQ((uint32_t)1, st._releaseCnt);
-		EXPECT_EQ((uint32_t)1, st._destroyCnt);
+		EXPECT_FALSE(adapter->isTeardownUncertain());
+#ifdef WT_UFT_PARSER_K18_RESIDENT
+		EXPECT_TRUE(adapter->isResidentQuarantined());
+#endif
+		EXPECT_FALSE(mgr.hasRetainedAdapters());
+		EXPECT_EQ(nullptr, mgr.getAdapter("remover-throw"));
+		EXPECT_EQ((uint32_t)0, st._releaseCnt);
+		EXPECT_EQ((uint32_t)0, st._destroyCnt);
 
 		mgr.release();
-		EXPECT_TRUE(mgr.hasRetainedAdapters());
-		EXPECT_EQ((uint32_t)1, st._releaseCnt);
-		EXPECT_EQ((uint32_t)1, st._destroyCnt);
+		EXPECT_EQ((uint32_t)0, st._releaseCnt);
+		EXPECT_EQ((uint32_t)0, st._destroyCnt);
 	}
+	EXPECT_FALSE(watch.expired()) << "a quarantined adapter stays resident until process exit";
 }
 
-TEST(R11ParserAdapter, nonNullRemoverResultRetainsPendingApiAndRetriesOnlyRemover)
+// 原用例 nonNullRemoverResultRetainsPendingApiAndRetriesOnlyRemover（remover 返回非空则重试）按 K18 改写。
+TEST(R11ParserAdapter, pendingStyleRemoverIsNeverCalled)
 {
+	// 决策 K18=否（2026-11-04）：initExt 的 remover 不作为销毁确认；外部 API 与无 remover 时相同：不调用 release、
+	// 不删除，隔离到进程退出，管理器把它作为常驻对象移出表，关停可完成。改前期望见证据 k18-uft-initext-remover/before。
 	g_pendingDeleteCalls = 0;
 	Env env;
 	ApiStats st;
@@ -406,30 +429,24 @@ TEST(R11ParserAdapter, nonNullRemoverResultRetainsPendingApiAndRetriesOnlyRemove
 
 	mgr.release();
 	EXPECT_TRUE(adapter->hasApi());
-	EXPECT_TRUE(adapter->isTeardownPending());
-	EXPECT_FALSE(adapter->isTeardownUncertain());
-	EXPECT_TRUE(mgr.hasRetainedAdapters());
-	EXPECT_EQ(adapter, mgr.getAdapter("remover-pending"));
-	EXPECT_EQ(&env._bd, adapter->getBaseDataMgr());
-	EXPECT_EQ((uint32_t)1, st._releaseCnt);
-	EXPECT_EQ((uint32_t)0, st._destroyCnt);
-	EXPECT_EQ((uint32_t)1, g_pendingDeleteCalls);
-
-	// The API was already released once. A later teardown attempt retries only
-	// the remover; its null pointer result completes ownership release.
-	mgr.release();
-	EXPECT_FALSE(adapter->hasApi());
 	EXPECT_FALSE(adapter->isTeardownPending());
+	EXPECT_FALSE(adapter->isTeardownUncertain());
 	EXPECT_FALSE(mgr.hasRetainedAdapters());
-	EXPECT_EQ(nullptr, mgr.getAdapter("remover-pending"));
-	EXPECT_EQ(nullptr, adapter->getBaseDataMgr());
-	EXPECT_EQ((uint32_t)1, st._releaseCnt);
-	EXPECT_EQ((uint32_t)1, st._destroyCnt);
-	EXPECT_EQ((uint32_t)2, g_pendingDeleteCalls);
+	EXPECT_EQ((uint32_t)0, st._releaseCnt);
+	EXPECT_EQ((uint32_t)0, st._destroyCnt);
+	EXPECT_EQ((uint32_t)0, g_pendingDeleteCalls);
+
+	mgr.release();
+	EXPECT_EQ((uint32_t)0, st._releaseCnt);
+	EXPECT_EQ((uint32_t)0, st._destroyCnt);
+	EXPECT_EQ((uint32_t)0, g_pendingDeleteCalls);
 }
 
-TEST(R11ParserAdapter, removerReplacementPointerIsStickyAndNeverAutoReleased)
+// 原用例 removerReplacementPointerIsStickyAndNeverAutoReleased（remover 替换指针）按 K18 改写：remover 不调用，不会出现替换指针。
+TEST(R11ParserAdapter, replacingRemoverIsNeverCalled)
 {
+	// 决策 K18=否（2026-11-04）：initExt 的 remover 不作为销毁确认；外部 API 与无 remover 时相同：不调用 release、
+	// 不删除，隔离到进程退出，管理器把它作为常驻对象移出表，关停可完成。改前期望见证据 k18-uft-initext-remover/before。
 	Env env;
 	ApiStats originalStats;
 	ApiStats replacementStats;
@@ -444,30 +461,18 @@ TEST(R11ParserAdapter, removerReplacementPointerIsStickyAndNeverAutoReleased)
 
 		mgr.release();
 		EXPECT_TRUE(adapter->hasApi());
-		EXPECT_TRUE(adapter->isTeardownUncertain());
-		EXPECT_FALSE(adapter->isTeardownPending());
-		EXPECT_TRUE(mgr.hasRetainedAdapters());
-		EXPECT_EQ(adapter, mgr.getAdapter("remover-replacement"));
-		EXPECT_EQ(&env._bd, adapter->getBaseDataMgr());
-		EXPECT_EQ((uint32_t)1, originalStats._releaseCnt);
-		EXPECT_EQ((uint32_t)0, replacementStats._releaseCnt);
-		EXPECT_EQ((uint32_t)0, originalStats._destroyCnt);
-		EXPECT_EQ((uint32_t)0, replacementStats._destroyCnt);
-
-		mgr.release();
-		EXPECT_EQ((uint32_t)1, originalStats._releaseCnt);
+		EXPECT_FALSE(adapter->isTeardownUncertain());
+		EXPECT_FALSE(mgr.hasRetainedAdapters());
+		EXPECT_EQ((uint32_t)0, originalStats._releaseCnt);
 		EXPECT_EQ((uint32_t)0, replacementStats._releaseCnt);
 		EXPECT_EQ((uint32_t)0, originalStats._destroyCnt);
 		EXPECT_EQ((uint32_t)0, replacementStats._destroyCnt);
 	}
 	g_replacementParserApi = nullptr;
-
-	// Both fakes are quiescent and the adapter owner is gone; reclaim the test
-	// objects without invoking any adapter teardown on the ambiguous pointers.
-	delete original;
+	// The replacement was never handed to the adapter; the original stays with the resident adapter.
 	delete replacement;
-	EXPECT_EQ((uint32_t)1, originalStats._destroyCnt);
 	EXPECT_EQ((uint32_t)1, replacementStats._destroyCnt);
+	EXPECT_EQ((uint32_t)0, originalStats._destroyCnt);
 }
 
 //release() 之后再 run(): api 已经不在, 但 _parser_api 仍是野指针 -> 本用例只覆盖 release 的空 api 分支
@@ -695,7 +700,7 @@ TEST(R11ParserAdapter, adapterMgrRegisterAndLookup)
 	ParserAdapterPtr first(new ParserAdapter());
 	ApiStats st;
 	FakeParserApi* api1 = newApi(&st, first.get(), &env._stub);
-	ASSERT_TRUE(first->initExt("m2", api1, &env._stub, &env._bd));
+	ASSERT_TRUE(first->initExt("m2", api1, &env._stub, &env._bd, deleteFakeParserConfirmed));
 	//空 id 会被 strlen(id)==0 拒绝
 	EXPECT_FALSE(mgr.addAdapter("", first));
 	EXPECT_TRUE(mgr.addAdapter("m2", first));
@@ -713,8 +718,9 @@ TEST(R11ParserAdapter, adapterMgrRegisterAndLookup)
 	mgr.release();
 	EXPECT_EQ((size_t)0, mgr._adapters.size());
 	EXPECT_FALSE(mgr.hasRetainedAdapters());
-	//mgr.release() 里的 adapter->release() 会 delete api1 并调用其 release()
-	EXPECT_EQ((uint32_t)1, st._releaseCnt);
+	// 决策 K18=否（2026-11-04）：外部 API（含带 remover 的 initExt）不调用 release/remover、不删除，隔离到进程退出。
+	// 管理器把隔离的适配器作为常驻对象移出表，关停可完成。
+	EXPECT_EQ((uint32_t)0, st._releaseCnt);
 	//api1 同样由 mgr.release() -> adapter->release() 释放
 }
 

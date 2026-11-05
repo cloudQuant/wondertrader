@@ -1,0 +1,38 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=77834)
+  Read of size 4 at 0x0001021fc030 by thread T2:
+    #0 mdb_txn_renew0 mdb.c:2733 (tsan-raw-test:arm64+0x1000126fc)
+    #1 mdb_txn_begin mdb.c:2932 (tsan-raw-test:arm64+0x100012d60)
+    #2 wt_ad_bar_migration::stageBatch(wt_ad_bar_migration::Bindings const&, wt_ad_bar_key_v2::LegacySourceHost, wt_ad_bar_key_v2::LegacyValueLayout, std::__1::function<bool (MDB_val const&, MDB_val const&, wt_ad_bar_migration::Evidence&)> const&, unsigned long) LMDBBarMigration.hpp:243 (tsan-raw-test:arm64+0x10000a644)
+    #3 (anonymous namespace)::batch(wt_ad_bar_migration::Bindings const&, std::__1::function<bool (MDB_val const&, MDB_val const&, wt_ad_bar_migration::Evidence&)> const&, unsigned long) migration_test.cpp:138 (tsan-raw-test:arm64+0x10000ff7c)
+    #4 main::$_12::operator()() const migration_test.cpp:239 (tsan-raw-test:arm64+0x10000ff7c)
+    #5 std::__1::__invoke_result_impl<void, main::$_12>::type std::__1::__invoke[abi:nqe220108]<main::$_12>(main::$_12&&) invoke.h:90 (tsan-raw-test:arm64+0x10000ff7c)
+    #6 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_12, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_12>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (tsan-raw-test:arm64+0x10000ff7c)
+    #7 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_12>>(void*) thread.h:169 (tsan-raw-test:arm64+0x10000ff7c)
+
+  Previous write of size 4 at 0x0001021fc030 by thread T1:
+    #0 mdb_txn_renew0 mdb.c:2752 (tsan-raw-test:arm64+0x100012918)
+    #1 mdb_txn_begin mdb.c:2932 (tsan-raw-test:arm64+0x100012d60)
+    #2 wt_ad_bar_migration::stageBatch(wt_ad_bar_migration::Bindings const&, wt_ad_bar_key_v2::LegacySourceHost, wt_ad_bar_key_v2::LegacyValueLayout, std::__1::function<bool (MDB_val const&, MDB_val const&, wt_ad_bar_migration::Evidence&)> const&, unsigned long) LMDBBarMigration.hpp:243 (tsan-raw-test:arm64+0x10000a644)
+    #3 (anonymous namespace)::batch(wt_ad_bar_migration::Bindings const&, std::__1::function<bool (MDB_val const&, MDB_val const&, wt_ad_bar_migration::Evidence&)> const&, unsigned long) migration_test.cpp:138 (tsan-raw-test:arm64+0x10000fda8)
+    #4 main::$_11::operator()() const migration_test.cpp:239 (tsan-raw-test:arm64+0x10000fda8)
+    #5 std::__1::__invoke_result_impl<void, main::$_11>::type std::__1::__invoke[abi:nqe220108]<main::$_11>(main::$_11&&) invoke.h:90 (tsan-raw-test:arm64+0x10000fda8)
+    #6 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_11, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_11>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (tsan-raw-test:arm64+0x10000fda8)
+    #7 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_11>>(void*) thread.h:169 (tsan-raw-test:arm64+0x10000fda8)
+
+  Thread T2 (tid=1247858, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (tsan-raw-test:arm64+0x100009594)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_12, 0>(main::$_12&&) thread.h:218 (tsan-raw-test:arm64+0x100009594)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_12, 0>(main::$_12&&) thread.h:209 (tsan-raw-test:arm64+0x100009594)
+    #4 main migration_test.cpp:239 (tsan-raw-test:arm64+0x100003634)
+
+  Thread T1 (tid=1247857, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (tsan-raw-test:arm64+0x100009468)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_11, 0>(main::$_11&&) thread.h:218 (tsan-raw-test:arm64+0x100009468)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_11, 0>(main::$_11&&) thread.h:209 (tsan-raw-test:arm64+0x100009468)
+    #4 main migration_test.cpp:239 (tsan-raw-test:arm64+0x100003618)
+
+SUMMARY: ThreadSanitizer: data race mdb.c:2733 in mdb_txn_renew0
+==================

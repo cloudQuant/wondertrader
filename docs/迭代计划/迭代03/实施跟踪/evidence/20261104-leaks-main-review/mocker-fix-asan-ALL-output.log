@@ -1,0 +1,231 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 71 tests from 20 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from gate_placeholder_TraderMocker
+[ RUN      ] gate_placeholder_TraderMocker.compiles_with_module_flags
+[       OK ] gate_placeholder_TraderMocker.compiles_with_module_flags (0 ms)
+[----------] 1 test from gate_placeholder_TraderMocker (0 ms total)
+
+[----------] 1 test from NEW020UdpAlignment
+[ RUN      ] NEW020UdpAlignment.CompleteTickAcceptedAndTruncatedOrWrongTypeIgnored
+[       OK ] NEW020UdpAlignment.CompleteTickAcceptedAndTruncatedOrWrongTypeIgnored (0 ms)
+[----------] 1 test from NEW020UdpAlignment (0 ms total)
+
+[----------] 4 tests from R103Mocker
+[ RUN      ] R103Mocker.R103Mocker_InitMalformedPositionsIgnored
+[       OK ] R103Mocker.R103Mocker_InitMalformedPositionsIgnored (5 ms)
+[ RUN      ] R103Mocker.R103Mocker_NullListenerOrderAndCancelGuard
+[       OK ] R103Mocker.R103Mocker_NullListenerOrderAndCancelGuard (58 ms)
+[ RUN      ] R103Mocker.R103Mocker_ShortCloseFreezeAndCancelRelease
+[       OK ] R103Mocker.R103Mocker_ShortCloseFreezeAndCancelRelease (15 ms)
+[ RUN      ] R103Mocker.R103Mocker_UdpUnknownTickAndEmptyDatagram
+[       OK ] R103Mocker.R103Mocker_UdpUnknownTickAndEmptyDatagram (296 ms)
+[----------] 4 tests from R103Mocker (376 ms total)
+
+[----------] 1 test from R103MockerUdpPacket
+[ RUN      ] R103MockerUdpPacket.ShortFramesDoNotReplaceTheLastCompleteTick
+[       OK ] R103MockerUdpPacket.ShortFramesDoNotReplaceTheLastCompleteTick (0 ms)
+[----------] 1 test from R103MockerUdpPacket (0 ms total)
+
+[----------] 2 tests from R113MockerMatchLong
+[ RUN      ] R113MockerMatchLong.R113Mocker_LongOpenAndCloseMatchedByUdpTick
+[       OK ] R113MockerMatchLong.R113Mocker_LongOpenAndCloseMatchedByUdpTick (81 ms)
+[ RUN      ] R113MockerMatchLong.R113SeedReplaysActualTradeSplitsAcrossInstances
+[       OK ] R113MockerMatchLong.R113SeedReplaysActualTradeSplitsAcrossInstances (50 ms)
+[----------] 2 tests from R113MockerMatchLong (134 ms total)
+
+[----------] 1 test from R113MockerMatchShort
+[ RUN      ] R113MockerMatchShort.R113Mocker_ShortOpenAndCloseMatchedByUdpTick
+[       OK ] R113MockerMatchShort.R113Mocker_ShortOpenAndCloseMatchedByUdpTick (89 ms)
+[----------] 1 test from R113MockerMatchShort (89 ms total)
+
+[----------] 3 tests from R113MockerPartialCancel
+[ RUN      ] R113MockerPartialCancel.R113Mocker_PartialFillThenCancelPushesCanceled
+[       OK ] R113MockerPartialCancel.R113Mocker_PartialFillThenCancelPushesCanceled (20 ms)
+[ RUN      ] R113MockerPartialCancel.R113Mocker_CancelCopiesOrderIdBeforeFinalActionRelease
+[       OK ] R113MockerPartialCancel.R113Mocker_CancelCopiesOrderIdBeforeFinalActionRelease (22 ms)
+[ RUN      ] R113MockerPartialCancel.TradedVolumeAccumulatesAcrossPushAndQuerySnapshots
+[       OK ] R113MockerPartialCancel.TradedVolumeAccumulatesAcrossPushAndQuerySnapshots (34 ms)
+[----------] 3 tests from R113MockerPartialCancel (78 ms total)
+
+[----------] 1 test from R113MockerUdp
+[ RUN      ] R113MockerUdp.R113Mocker_UnknownFullCodeTickIsIgnoredAndIoSurvives
+[       OK ] R113MockerUdp.R113Mocker_UnknownFullCodeTickIsIgnoredAndIoSurvives (5 ms)
+[----------] 1 test from R113MockerUdp (5 ms total)
+
+[----------] 6 tests from R214MockerBranches
+[ RUN      ] R214MockerBranches.UnregisteredOrderDoesNotTradeOnOtherContractTick
+[       OK ] R214MockerBranches.UnregisteredOrderDoesNotTradeOnOtherContractTick (21 ms)
+[ RUN      ] R214MockerBranches.SameRawCodeOrdersAreIsolatedByExchange
+[       OK ] R214MockerBranches.SameRawCodeOrdersAreIsolatedByExchange (21 ms)
+[ RUN      ] R214MockerBranches.ZeroVolumeOrderIsSkipped
+[       OK ] R214MockerBranches.ZeroVolumeOrderIsSkipped (26 ms)
+[ RUN      ] R214MockerBranches.ZeroBookAndMismatchedLimitDoNotTrade
+[       OK ] R214MockerBranches.ZeroBookAndMismatchedLimitDoNotTrade (152 ms)
+[ RUN      ] R214MockerBranches.CoverNoneTradesWithoutPositionBook
+[       OK ] R214MockerBranches.CoverNoneTradesWithoutPositionBook (15 ms)
+[ RUN      ] R214MockerBranches.DisconnectJoinsMatchThreadWithoutWorker
+[       OK ] R214MockerBranches.DisconnectJoinsMatchThreadWithoutWorker (0 ms)
+[----------] 6 tests from R214MockerBranches (239 ms total)
+
+[----------] 20 tests from R60MockerTest
+[ RUN      ] R60MockerTest.release_and_destructor_free_bound_udp_port
+[       OK ] R60MockerTest.release_and_destructor_free_bound_udp_port (5 ms)
+[ RUN      ] R60MockerTest.repeated_instance_lifecycle_does_not_grow_process_fds
+[       OK ] R60MockerTest.repeated_instance_lifecycle_does_not_grow_process_fds (83 ms)
+[ RUN      ] R60MockerTest.same_instance_reinitializes_and_delivers_each_connect
+src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:769: Failure
+Value of: initialized
+  Actual: false
+Expected: true
+
+[  FAILED  ] R60MockerTest.same_instance_reinitializes_and_delivers_each_connect (16 ms)
+[ RUN      ] R60MockerTest.released_instance_does_not_deliver_old_queued_query_after_reinit
+src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:571: Failure
+Value of: api_.init(cfg)
+  Actual: false
+Expected: true
+
+[TraderMocker] Cannot connect after release
+src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:798: Failure
+Value of: wait_until([this]() { return sink_.n_event() == 2; })
+  Actual: false
+Expected: true
+
+[  FAILED  ] R60MockerTest.released_instance_does_not_deliver_old_queued_query_after_reinit (3007 ms)
+[ RUN      ] R60MockerTest.release_reentered_from_connect_callback_does_not_terminate
+[       OK ] R60MockerTest.release_reentered_from_connect_callback_does_not_terminate (80 ms)
+[ RUN      ] R60MockerTest.ready_requests_remain_deferred_and_run_after_connect
+[       OK ] R60MockerTest.ready_requests_remain_deferred_and_run_after_connect (3 ms)
+[ RUN      ] R60MockerTest.stopped_requests_are_rejected_without_retaining
+[TraderMocker] Cannot connect after release
+[       OK ] R60MockerTest.stopped_requests_are_rejected_without_retaining (1 ms)
+[ RUN      ] R60MockerTest.unexecuted_order_requests_release_references_on_destruction
+[       OK ] R60MockerTest.unexecuted_order_requests_release_references_on_destruction (0 ms)
+[ RUN      ] R60MockerTest.stopping_closes_request_admission_before_join
+[       OK ] R60MockerTest.stopping_closes_request_admission_before_join (9 ms)
+[ RUN      ] R60MockerTest.duplicate_login_preserves_running_worker
+[       OK ] R60MockerTest.duplicate_login_preserves_running_worker (137 ms)
+[ RUN      ] R60MockerTest.duplicate_connect_preserves_running_worker
+[TraderMocker] Already connected
+[       OK ] R60MockerTest.duplicate_connect_preserves_running_worker (89 ms)
+[ RUN      ] R60MockerTest.connect_loads_positions_and_query_returns_long_short
+[       OK ] R60MockerTest.connect_loads_positions_and_query_returns_long_short (7 ms)
+[ RUN      ] R60MockerTest.empty_queries_dispatch_default_account_and_null_arrays
+[       OK ] R60MockerTest.empty_queries_dispatch_default_account_and_null_arrays (16 ms)
+[ RUN      ] R60MockerTest.insert_open_order_dispatches_and_persists_positions_file
+[       OK ] R60MockerTest.insert_open_order_dispatches_and_persists_positions_file (10 ms)
+[ RUN      ] R60MockerTest.insert_rejections_map_to_distinct_error_messages
+[       OK ] R60MockerTest.insert_rejections_map_to_distinct_error_messages (54 ms)
+[ RUN      ] R60MockerTest.close_order_freezes_position_and_cover_none_bypasses_check
+[       OK ] R60MockerTest.close_order_freezes_position_and_cover_none_bypasses_check (56 ms)
+[ RUN      ] R60MockerTest.cancel_unknown_order_before_any_insert_reports_error
+[       OK ] R60MockerTest.cancel_unknown_order_before_any_insert_reports_error (15 ms)
+[ RUN      ] R60MockerTest.cancel_open_order_and_unknown_cancel_reports_error
+[       OK ] R60MockerTest.cancel_open_order_and_unknown_cancel_reports_error (27 ms)
+[ RUN      ] R60MockerTest.cancel_close_order_releases_frozen_volume
+[       OK ] R60MockerTest.cancel_close_order_releases_frozen_volume (40 ms)
+[ RUN      ] R60MockerTest.udp_unknown_header_is_ignored_and_io_loop_survives
+[       OK ] R60MockerTest.udp_unknown_header_is_ignored_and_io_loop_survives (75 ms)
+[ DISABLED ] R60MockerTest.DISABLED_OpenOrderSuccessMessageContractUnproven
+[----------] 20 tests from R60MockerTest (3743 ms total)
+
+[----------] 2 tests from seam_tradermocker
+[ RUN      ] seam_tradermocker.constructed_object_answers_state_queries
+[       OK ] seam_tradermocker.constructed_object_answers_state_queries (0 ms)
+[ RUN      ] seam_tradermocker.entrust_id_buffer_is_written
+[       OK ] seam_tradermocker.entrust_id_buffer_is_written (0 ms)
+[----------] 2 tests from seam_tradermocker (0 ms total)
+
+[----------] 6 tests from T6009Mocker
+[ RUN      ] T6009Mocker.PendingAndCanceledOrderRefsReturnedExactlyOnce
+[       OK ] T6009Mocker.PendingAndCanceledOrderRefsReturnedExactlyOnce (34 ms)
+[ RUN      ] T6009Mocker.DestructorAloneReturnsPendingOrderRefs
+[       OK ] T6009Mocker.DestructorAloneReturnsPendingOrderRefs (20 ms)
+[ RUN      ] T6009Mocker.ReleaseFromWorkerCallbackDefersJoin
+[       OK ] T6009Mocker.ReleaseFromWorkerCallbackDefersJoin (10 ms)
+[ RUN      ] T6009Mocker.DeleteTraderFromWorkerCallbackQuarantines
+[TraderMocker] deleteTrader called on a callback thread; instance quarantined until process exit
+[       OK ] T6009Mocker.DeleteTraderFromWorkerCallbackQuarantines (3 ms)
+[ RUN      ] T6009Mocker.RepeatedInitRejected
+[TraderMocker] Repeated init rejected
+[       OK ] T6009Mocker.RepeatedInitRejected (6 ms)
+[ RUN      ] T6009Mocker.ConcurrentExternalReleaseAndRequests
+[       OK ] T6009Mocker.ConcurrentExternalReleaseAndRequests (19 ms)
+[----------] 6 tests from T6009Mocker (94 ms total)
+
+[----------] 1 test from t6_tradermocker_factory
+[ RUN      ] t6_tradermocker_factory.create_delete_roundtrip_clears_caller_pointer
+[       OK ] t6_tradermocker_factory.create_delete_roundtrip_clears_caller_pointer (0 ms)
+[----------] 1 test from t6_tradermocker_factory (0 ms total)
+
+[----------] 3 tests from t6_split_volume
+[ RUN      ] t6_split_volume.volume_at_or_below_min_returns_single_whole_part
+[       OK ] t6_split_volume.volume_at_or_below_min_returns_single_whole_part (0 ms)
+[ RUN      ] t6_split_volume.parts_sum_back_to_volume_and_stay_inside_bounds
+[       OK ] t6_split_volume.parts_sum_back_to_volume_and_stay_inside_bounds (0 ms)
+[ RUN      ] t6_split_volume.tail_part_is_clamped_and_uniform_when_max_equals_min
+[       OK ] t6_split_volume.tail_part_is_clamped_and_uniform_when_max_equals_min (0 ms)
+[----------] 3 tests from t6_split_volume (0 ms total)
+
+[----------] 2 tests from R113MockerSplitVolume
+[ RUN      ] R113MockerSplitVolume.ExplicitSeedReplaysAndInstancesStayIndependent
+[       OK ] R113MockerSplitVolume.ExplicitSeedReplaysAndInstancesStayIndependent (0 ms)
+[ RUN      ] R113MockerSplitVolume.ConservesQuantityAndDoesNotChangeHostCRandomState
+[       OK ] R113MockerSplitVolume.ConservesQuantityAndDoesNotChangeHostCRandomState (0 ms)
+[----------] 2 tests from R113MockerSplitVolume (0 ms total)
+
+[----------] 4 tests from I03MockerQuantity
+[ RUN      ] I03MockerQuantity.InvalidConfigurationFailsBeforeSideEffects
+[       OK ] I03MockerQuantity.InvalidConfigurationFailsBeforeSideEffects (0 ms)
+[ RUN      ] I03MockerQuantity.DefaultsAndConvertibleFractionsRemainValid
+[       OK ] I03MockerQuantity.DefaultsAndConvertibleFractionsRemainValid (0 ms)
+[ RUN      ] I03MockerQuantity.InvalidIntegerRangesReturnEmptyWithoutLoopingOrDividingByZero
+[       OK ] I03MockerQuantity.InvalidIntegerRangesReturnEmptyWithoutLoopingOrDividingByZero (0 ms)
+[ RUN      ] I03MockerQuantity.RejectedReinitDoesNotReseedExistingInstance
+[TraderMocker] Repeated init rejected
+[       OK ] I03MockerQuantity.RejectedReinitDoesNotReseedExistingInstance (0 ms)
+[----------] 4 tests from I03MockerQuantity (1 ms total)
+
+[----------] 2 tests from t6_make_entrust_id
+[ RUN      ] t6_make_entrust_id.rejects_null_buffer_and_zero_length
+[       OK ] t6_make_entrust_id.rejects_null_buffer_and_zero_length (0 ms)
+[ RUN      ] t6_make_entrust_id.writes_mocker_scoped_sequence_after_init
+[       OK ] t6_make_entrust_id.writes_mocker_scoped_sequence_after_init (0 ms)
+[----------] 2 tests from t6_make_entrust_id (0 ms total)
+
+[----------] 5 tests from t6_init
+[ RUN      ] t6_init.explicit_config_creates_mocker_dir_and_keeps_given_id
+[       OK ] t6_init.explicit_config_creates_mocker_dir_and_keeps_given_id (0 ms)
+[ RUN      ] t6_init.rejects_null_config_before_creating_mocker_state
+[       OK ] t6_init.rejects_null_config_before_creating_mocker_state (0 ms)
+[ RUN      ] t6_init.wtcore_init_ext_rejects_tradermocker_null_config
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==68906==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x000000000000 bp 0x00016b03a740 sp 0x00016b0384c0 T0)
+==68906==Hint: pc points to the zero page.
+==68906==The signal is caused by a READ memory access.
+==68906==Hint: address points to the zero page.
+    #0 0x000000000000  (<unknown module>)
+    #1 0x000104f5f328 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (tests:arm64+0x10019b328)
+    #2 0x000104f5f270 in testing::Test::Run()+0xcc (tests:arm64+0x10019b270)
+    #3 0x000104f5fe50 in testing::TestInfo::Run()+0xd0 (tests:arm64+0x10019be50)
+    #4 0x000104f608d4 in testing::TestSuite::Run()+0x1c4 (tests:arm64+0x10019c8d4)
+    #5 0x000104f6bcf8 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (tests:arm64+0x1001a7cf8)
+    #6 0x000104f6b6a4 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (tests:arm64+0x1001a76a4)
+    #7 0x000104f6b608 in testing::UnitTest::Run()+0x78 (tests:arm64+0x1001a7608)
+    #8 0x000104f4ca08 in main+0x40 (tests:arm64+0x100188a08)
+    #9 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+==68906==Register values:
+ x[0] = 0x0000bdd9459953c2   x[1] = 0x000000016b0384a0   x[2] = 0x000000016b0387d9   x[3] = 0x000000016b0387f0  
+ x[4] = 0x000000802d627380   x[5] = 0x0000000000000010   x[6] = 0x000000016a840000   x[7] = 0x0000000000000001  
+ x[8] = 0x0000000000032f64   x[9] = 0x00000000340c6bc2  x[10] = 0x000000003b9aca00  x[11] = 0x0000000000000000  
+x[12] = 0x0000000000000001  x[13] = 0x0000000000000000  x[14] = 0xf2f2000000000000  x[15] = 0x000010800001ffff  
+x[16] = 0x0000000000000000  x[17] = 0x00000001f5b8b690  x[18] = 0x0000000000000000  x[19] = 0x000000016b03a640  
+x[20] = 0xf2f2f2f8f2f2f2f8  x[21] = 0x000000802d627098  x[22] = 0x0000008000020000  x[23] = 0xf2f2f2f2f2f8f8f8  
+x[24] = 0xf2f2f2f2f2f2f2f2  x[25] = 0x0000000000000000  x[26] = 0x000000016b0384c0  x[27] = 0x000000016b03a900  
+x[28] = 0x0000000000000001     fp = 0x000000016b03a740     lr = 0x0000000104f372bc     sp = 0x000000016b0384c0  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (<unknown module>) 
+==68906==ABORTING

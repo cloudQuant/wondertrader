@@ -1,0 +1,23 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q03RdmTickTest.his_tick_tail_fragment_is_dropped
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q03RdmTickTest
+[ RUN      ] Q03RdmTickTest.his_tick_tail_fragment_is_dropped
+/tmp/wt-i03-s5-storage-read-redsrc2/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_file_test.cpp:81:19: runtime error: reference binding to misaligned address 0x61900000328c for type 'const value_type' (aka 'const wtp::WTSTickStruct'), which requires 8 byte alignment
+0x61900000328c: note: pointer points here
+  18 00 03 00 53 53 45 00  00 00 00 00 00 00 00 00  00 00 00 00 36 30 30 30  30 31 00 00 00 00 00 00
+              ^ 
+    #0 0x000100c5f140 in q03::Q03RdmTickTest::flatten(wtp::WTSTickSlice*)+0x2e8 (s5_storage_align:arm64+0x1005c3140)
+    #1 0x000100c6ee9c in q03::Q03RdmTickTest_his_tick_tail_fragment_is_dropped_Test::TestBody()+0x748 (s5_storage_align:arm64+0x1005d2e9c)
+    #2 0x000100e52e1c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (s5_storage_align:arm64+0x1007b6e1c)
+    #3 0x000100e52d64 in testing::Test::Run()+0xcc (s5_storage_align:arm64+0x1007b6d64)
+    #4 0x000100e53944 in testing::TestInfo::Run()+0xd0 (s5_storage_align:arm64+0x1007b7944)
+    #5 0x000100e543c8 in testing::TestSuite::Run()+0x1c4 (s5_storage_align:arm64+0x1007b83c8)
+    #6 0x000100e5f7f0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (s5_storage_align:arm64+0x1007c37f0)
+    #7 0x000100e5f19c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (s5_storage_align:arm64+0x1007c319c)
+    #8 0x000100e5f100 in testing::UnitTest::Run()+0x78 (s5_storage_align:arm64+0x1007c3100)
+    #9 0x000100e40438 in main+0x40 (s5_storage_align:arm64+0x1007a4438)
+    #10 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-s5-storage-read-redsrc2/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_file_test.cpp:81:19 

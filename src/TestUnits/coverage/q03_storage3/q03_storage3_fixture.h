@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -583,19 +584,36 @@ inline void expect_bar_eq(const WTSBarStruct& a, const WTSBarStruct& b)
 	EXPECT_DOUBLE_EQ(a.add, b.add);
 }
 
+// I03-NEW-084 (same class as I03-NEW-049): the legacy structs are #pragma pack(1)
+// and the callers pass elements of packed vectors/payloads, so their numeric
+// members sit at unaligned addresses. gtest comparison macros bind const
+// references to their operands, which is undefined for a misaligned member
+// (UBSan alignment aborts). Read every numeric legacy field by value through
+// memcpy at its offset instead; the asserted values are unchanged.
+template <typename T, typename Packed>
+inline T packed_field(const Packed& obj, std::size_t offset)
+{
+	T value;
+	memcpy(&value, reinterpret_cast<const char*>(&obj) + offset, sizeof(T));
+	return value;
+}
+
+#define Q03_OLD_FIELD(T, Type, obj, field) packed_field<T>(obj, offsetof(Type, field))
+#define Q03_OLD_ELEM(T, Type, obj, field, i) packed_field<T>(obj, offsetof(Type, field) + (i) * sizeof(T))
+
 inline void expect_bar_upgraded(const WTSBarStruct& a, const WTSBarStructOld& b)
 {
-	EXPECT_EQ(a.date, b.date);
-	EXPECT_EQ(a.time, (uint64_t)b.time);
-	EXPECT_DOUBLE_EQ(a.open, b.open);
-	EXPECT_DOUBLE_EQ(a.high, b.high);
-	EXPECT_DOUBLE_EQ(a.low, b.low);
-	EXPECT_DOUBLE_EQ(a.close, b.close);
-	EXPECT_DOUBLE_EQ(a.settle, b.settle);
-	EXPECT_DOUBLE_EQ(a.money, b.money);
-	EXPECT_DOUBLE_EQ(a.vol, (double)b.vol);
-	EXPECT_DOUBLE_EQ(a.hold, (double)b.hold);
-	EXPECT_DOUBLE_EQ(a.add, (double)b.add);
+	EXPECT_EQ(a.date, Q03_OLD_FIELD(uint32_t, WTSBarStructOld, b, date));
+	EXPECT_EQ(a.time, (uint64_t)Q03_OLD_FIELD(uint32_t, WTSBarStructOld, b, time));
+	EXPECT_DOUBLE_EQ(a.open, Q03_OLD_FIELD(double, WTSBarStructOld, b, open));
+	EXPECT_DOUBLE_EQ(a.high, Q03_OLD_FIELD(double, WTSBarStructOld, b, high));
+	EXPECT_DOUBLE_EQ(a.low, Q03_OLD_FIELD(double, WTSBarStructOld, b, low));
+	EXPECT_DOUBLE_EQ(a.close, Q03_OLD_FIELD(double, WTSBarStructOld, b, close));
+	EXPECT_DOUBLE_EQ(a.settle, Q03_OLD_FIELD(double, WTSBarStructOld, b, settle));
+	EXPECT_DOUBLE_EQ(a.money, Q03_OLD_FIELD(double, WTSBarStructOld, b, money));
+	EXPECT_DOUBLE_EQ(a.vol, (double)Q03_OLD_FIELD(uint32_t, WTSBarStructOld, b, vol));
+	EXPECT_DOUBLE_EQ(a.hold, (double)Q03_OLD_FIELD(uint32_t, WTSBarStructOld, b, hold));
+	EXPECT_DOUBLE_EQ(a.add, (double)Q03_OLD_FIELD(int32_t, WTSBarStructOld, b, add));
 }
 
 inline void expect_tick_eq(const WTSTickStruct& a, const WTSTickStruct& b)
@@ -634,32 +652,35 @@ inline void expect_tick_upgraded(const WTSTickStruct& a, const WTSTickStructOld&
 {
 	EXPECT_STREQ(a.exchg, b.exchg);
 	EXPECT_STREQ(a.code, b.code);
-	EXPECT_DOUBLE_EQ(a.price, b.price);
-	EXPECT_DOUBLE_EQ(a.open, b.open);
-	EXPECT_DOUBLE_EQ(a.high, b.high);
-	EXPECT_DOUBLE_EQ(a.low, b.low);
-	EXPECT_DOUBLE_EQ(a.settle_price, b.settle_price);
-	EXPECT_DOUBLE_EQ(a.upper_limit, b.upper_limit);
-	EXPECT_DOUBLE_EQ(a.lower_limit, b.lower_limit);
-	EXPECT_DOUBLE_EQ(a.total_volume, (double)b.total_volume);
-	EXPECT_DOUBLE_EQ(a.volume, (double)b.volume);
-	EXPECT_DOUBLE_EQ(a.total_turnover, b.total_turnover);
-	EXPECT_DOUBLE_EQ(a.turn_over, b.turn_over);
-	EXPECT_DOUBLE_EQ(a.open_interest, (double)b.open_interest);
-	EXPECT_DOUBLE_EQ(a.diff_interest, (double)b.diff_interest);
-	EXPECT_EQ(a.trading_date, b.trading_date);
-	EXPECT_EQ(a.action_date, b.action_date);
-	EXPECT_EQ(a.action_time, b.action_time);
-	EXPECT_DOUBLE_EQ(a.pre_close, b.pre_close);
-	EXPECT_DOUBLE_EQ(a.pre_settle, b.pre_settle);
-	EXPECT_DOUBLE_EQ(a.pre_interest, (double)b.pre_interest);
+	EXPECT_DOUBLE_EQ(a.price, Q03_OLD_FIELD(double, WTSTickStructOld, b, price));
+	EXPECT_DOUBLE_EQ(a.open, Q03_OLD_FIELD(double, WTSTickStructOld, b, open));
+	EXPECT_DOUBLE_EQ(a.high, Q03_OLD_FIELD(double, WTSTickStructOld, b, high));
+	EXPECT_DOUBLE_EQ(a.low, Q03_OLD_FIELD(double, WTSTickStructOld, b, low));
+	EXPECT_DOUBLE_EQ(a.settle_price, Q03_OLD_FIELD(double, WTSTickStructOld, b, settle_price));
+	EXPECT_DOUBLE_EQ(a.upper_limit, Q03_OLD_FIELD(double, WTSTickStructOld, b, upper_limit));
+	EXPECT_DOUBLE_EQ(a.lower_limit, Q03_OLD_FIELD(double, WTSTickStructOld, b, lower_limit));
+	EXPECT_DOUBLE_EQ(a.total_volume, (double)Q03_OLD_FIELD(uint32_t, WTSTickStructOld, b, total_volume));
+	EXPECT_DOUBLE_EQ(a.volume, (double)Q03_OLD_FIELD(uint32_t, WTSTickStructOld, b, volume));
+	EXPECT_DOUBLE_EQ(a.total_turnover, Q03_OLD_FIELD(double, WTSTickStructOld, b, total_turnover));
+	EXPECT_DOUBLE_EQ(a.turn_over, Q03_OLD_FIELD(double, WTSTickStructOld, b, turn_over));
+	EXPECT_DOUBLE_EQ(a.open_interest, (double)Q03_OLD_FIELD(uint32_t, WTSTickStructOld, b, open_interest));
+	EXPECT_DOUBLE_EQ(a.diff_interest, (double)Q03_OLD_FIELD(int32_t, WTSTickStructOld, b, diff_interest));
+	EXPECT_EQ(a.trading_date, Q03_OLD_FIELD(uint32_t, WTSTickStructOld, b, trading_date));
+	EXPECT_EQ(a.action_date, Q03_OLD_FIELD(uint32_t, WTSTickStructOld, b, action_date));
+	EXPECT_EQ(a.action_time, Q03_OLD_FIELD(uint32_t, WTSTickStructOld, b, action_time));
+	EXPECT_DOUBLE_EQ(a.pre_close, Q03_OLD_FIELD(double, WTSTickStructOld, b, pre_close));
+	EXPECT_DOUBLE_EQ(a.pre_settle, Q03_OLD_FIELD(double, WTSTickStructOld, b, pre_settle));
+	EXPECT_DOUBLE_EQ(a.pre_interest, (double)Q03_OLD_FIELD(int32_t, WTSTickStructOld, b, pre_interest));
 	for(int i = 0; i < 10; i++)
 	{
-		EXPECT_DOUBLE_EQ(a.bid_prices[i], b.bid_prices[i]);
-		EXPECT_DOUBLE_EQ(a.ask_prices[i], b.ask_prices[i]);
-		EXPECT_DOUBLE_EQ(a.bid_qty[i], (double)b.bid_qty[i]);
-		EXPECT_DOUBLE_EQ(a.ask_qty[i], (double)b.ask_qty[i]);
+		EXPECT_DOUBLE_EQ(a.bid_prices[i], Q03_OLD_ELEM(double, WTSTickStructOld, b, bid_prices, i));
+		EXPECT_DOUBLE_EQ(a.ask_prices[i], Q03_OLD_ELEM(double, WTSTickStructOld, b, ask_prices, i));
+		EXPECT_DOUBLE_EQ(a.bid_qty[i], (double)Q03_OLD_ELEM(uint32_t, WTSTickStructOld, b, bid_qty, i));
+		EXPECT_DOUBLE_EQ(a.ask_qty[i], (double)Q03_OLD_ELEM(uint32_t, WTSTickStructOld, b, ask_qty, i));
 	}
 }
+
+#undef Q03_OLD_ELEM
+#undef Q03_OLD_FIELD
 
 } // namespace q03

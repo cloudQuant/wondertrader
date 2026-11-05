@@ -191,14 +191,53 @@ TEST_F(Q03RdmKlineTest, day_tail_fragment_is_dropped)
 	payload.append(sizeof(WTSBarStruct) - 1, 'Q');	// 差 1 字节的残缺尾巴
 	write_his_bars("day", BLOCK_VERSION_RAW_V2, payload);
 
+	// K39（2026-11-04 用户裁定，BUG-I02-NEW-032/082）：普通日线历史块存在残缺尾碎片时与
+	// Q03-001 一致整块拒绝（fail-closed，不部分缓存）；原断言（保留完整前缀）见证据 before/。
 	WTSKlineSlice* slice = _reader.readKlineSliceByRange("SSE.STK.600000", KP_DAY,
 		202401010000ull, 209912310000ull);
-	ASSERT_TRUE(slice != NULL);
-	vector<WTSBarStruct> got = flatten(slice);
+	EXPECT_TRUE(slice == NULL);
+	if (slice != NULL)
+		slice->release();
+	EXPECT_GE(_sink.count_of(LL_ERROR), 1u);
+}
+
+// BUG-I02-NEW-082（K39，2026-11-05 补测）：被整块拒绝的损坏日线块不得在缓存中留下任何条目
+//（部分前缀或空结果）。不调用 clearCache 再读仍被拒绝并再次报错；文件修复后直接再读得到完整数据。
+TEST_F(Q03RdmKlineTest, day_damaged_block_leaves_no_cache_entry)
+{
+	vector<WTSBarStruct> bars = day_sample();
+	string damaged = pack_bars(bars);
+	damaged.append(sizeof(WTSBarStruct) - 1, 'Q');
+	write_his_bars("day", BLOCK_VERSION_RAW_V2, damaged);
+
+	WTSKlineSlice* first = _reader.readKlineSliceByRange("SSE.STK.600000", KP_DAY,
+		202401010000ull, 209912310000ull);
+	EXPECT_TRUE(first == NULL);
+	if (first != NULL)
+		first->release();
+	const uint32_t errorsAfterFirst = _sink.count_of(LL_ERROR);
+	EXPECT_GE(errorsAfterFirst, 1u);
+
+	WTSKlineSlice* second = _reader.readKlineSliceByRange("SSE.STK.600000", KP_DAY,
+		202401010000ull, 209912310000ull);
+	EXPECT_TRUE(second == NULL);
+	if (second != NULL)
+		second->release();
+	EXPECT_GT(_sink.count_of(LL_ERROR), errorsAfterFirst)
+		<< "the second read must re-read and reject the file, not hit a cached result";
+
+	write_his_bars("day", BLOCK_VERSION_RAW_V2, pack_bars(bars));
+	WTSKlineSlice* repaired = _reader.readKlineSliceByRange("SSE.STK.600000", KP_DAY,
+		202401010000ull, 209912310000ull);
+	ASSERT_TRUE(repaired != NULL) << "a repaired file is loaded without clearCache";
+	vector<WTSBarStruct> got = flatten(repaired);
 	ASSERT_EQ(got.size(), bars.size());
-	expect_bar_eq(got.front(), bars.front());
-	expect_bar_eq(got.back(), bars.back());
-	slice->release();
+	for (std::size_t i = 0; i < got.size(); i++)
+	{
+		EXPECT_EQ(got[i].date, bars[i].date);
+		EXPECT_DOUBLE_EQ(got[i].close, bars[i].close);
+	}
+	repaired->release();
 }
 
 TEST_F(Q03RdmKlineTest, day_size_check_failure_returns_null_and_logs_error)
@@ -433,7 +472,7 @@ TEST_F(Q03RdmKlineTest, empty_rt_blocks_fall_back_to_history_for_range_and_count
 		WTSKlineSlice* single_range = _reader.readKlineSliceByRange(
 			single_std_code.c_str(), test_case.period, kStart, kEnd);
 		ASSERT_NE(single_range, nullptr);
-		ASSERT_EQ(single_range->size(), 1u);
+		ASSERT_EQ(single_range->size(), 1);
 		ASSERT_NE(single_range->at(0), nullptr);
 		expect_bar_eq(*single_range->at(0), single_rt[0]);
 		single_range->release();
@@ -441,7 +480,7 @@ TEST_F(Q03RdmKlineTest, empty_rt_blocks_fall_back_to_history_for_range_and_count
 		WTSKlineSlice* single_count = _reader.readKlineSliceByCount(
 			single_std_code.c_str(), test_case.period, 1, kEnd);
 		ASSERT_NE(single_count, nullptr);
-		ASSERT_EQ(single_count->size(), 1u);
+		ASSERT_EQ(single_count->size(), 1);
 		ASSERT_NE(single_count->at(0), nullptr);
 		expect_bar_eq(*single_count->at(0), single_rt[0]);
 		single_count->release();

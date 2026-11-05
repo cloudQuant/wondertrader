@@ -1,0 +1,4208 @@
+{
+  "scope": "本机独立快照的局部定向测试；非最终树、非整体回归",
+  "groups": 76,
+  "executions": 655,
+  "failures": 0,
+  "skipped": 1,
+  "unique_ids": 82,
+  "results": [
+    {
+      "group": "session",
+      "ids": [
+        "BUG-L03-010"
+      ],
+      "filter": "S5MainK28Session.*:S5MainK30Session.*",
+      "tests": 4,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5MainK30Session",
+          "name": "InteriorOverlapIsRejectedAndTouchingEndpointsAreAccepted",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK30Session",
+          "name": "OverlapCheckIsIndependentOfOffset",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK30Session",
+          "name": "OverlappingSectionsRejectTheWholeFile",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK28Session",
+          "name": "EmptySectionsRejectTheWholeFile",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "decompression",
+      "ids": [
+        "BUG-R132-001"
+      ],
+      "filter": "S5MainK37CmpBudget.*:S5MainK37CmpBudgetConfig.*",
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5MainK37CmpBudget",
+          "name": "DefaultRatioBudgetRejectsHighlyCompressedFrame",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK37CmpBudget",
+          "name": "FrameWithoutDeclaredContentSizeIsRejected",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK37CmpBudget",
+          "name": "OrdinaryFrameWithinDefaultBudgetRoundTrips",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK37CmpBudgetConfig",
+          "name": "DefaultsAreOneGibAndThousandToOne",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK37CmpBudgetConfig",
+          "name": "AbsoluteBudgetBoundaryIsInclusive",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK37CmpBudgetConfig",
+          "name": "RatioBudgetIsConfigurableAndZeroDisablesIt",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "rt_visible",
+      "ids": [
+        "BUG-R100-004"
+      ],
+      "filter": "S5MainK36RdmRtVisible.*",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5MainK36RdmRtVisible",
+          "name": "LastPublishedRecordIsVisibleForAllHftCollections",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "damaged_day",
+      "ids": [
+        "BUG-I02-NEW-032",
+        "BUG-I02-NEW-082"
+      ],
+      "filter": "Q03RdmKlineTest.day_tail_fragment_is_dropped:Q03RdmKlineTest.day_dsb_raw_v2_full_range_roundtrip",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "Q03RdmKlineTest",
+          "name": "day_dsb_raw_v2_full_range_roundtrip",
+          "status": "passed"
+        },
+        {
+          "suite": "Q03RdmKlineTest",
+          "name": "day_tail_fragment_is_dropped",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "trader_residency",
+      "ids": [
+        "BUG-I02-NEW-052"
+      ],
+      "filter": "S5MainK43TraderResidency.*",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5MainK43TraderResidency",
+          "name": "ReleasedModuleProviderAndModuleStayResident",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK43TraderResidency",
+          "name": "ProviderWithoutCallbackChannelIsStillDeletedAndUnloaded",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK43TraderResidency",
+          "name": "ManagerKeepsReleasedModuleAdapterObjects",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "sel_schedule",
+      "ids": [
+        "BUG-R10-004"
+      ],
+      "filter": "S5MainK25Sel.*:S5SelScheduleThread.*",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5MainK25Sel",
+          "name": "FiredScheduleRunsSynchronouslyOnTheCallingStrand",
+          "status": "passed"
+        },
+        {
+          "suite": "S5SelScheduleThread",
+          "name": "FiredTaskRunsOnceOnItsContextAndIsJoined",
+          "status": "passed"
+        },
+        {
+          "suite": "S5SelScheduleThread",
+          "name": "TasksOnSeveralDaysAreAllJoinedByRelease",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "sel_targets",
+      "ids": [
+        "BUG-I02-NEW-155"
+      ],
+      "filter": "S5MainK26Sel.*",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5MainK26Sel",
+          "name": "SecondIncrementAccumulatesOntoPendingTarget",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "query_status",
+      "ids": [
+        "BUG-I02-NEW-154"
+      ],
+      "filter": "P11SyncReport.k42_*",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "P11SyncReport",
+          "name": "k42_complete_empty_snapshot_retires_absent_live_orders",
+          "status": "passed"
+        },
+        {
+          "suite": "P11SyncReport",
+          "name": "k42_partial_snapshot_never_retires_missing_orders",
+          "status": "passed"
+        },
+        {
+          "suite": "P11SyncReport",
+          "name": "k42_failed_query_changes_nothing",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "dumper_registration",
+      "ids": [
+        "BUG-P10-006"
+      ],
+      "filter": "S5MainK20DumperRegistration.*",
+      "tests": 4,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5MainK20DumperRegistration",
+          "name": "TableOffersVersionedDumperRegistration",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK20DumperRegistration",
+          "name": "DuplicateIdIsRejectedAndTheOriginalKeepsReceiving",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK20DumperRegistration",
+          "name": "RegisteringFromInsideADumperCallbackDoesNotDeadlock",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK20DumperRegistration",
+          "name": "RegistrationAfterStopRequestIsRejected",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "lmdb_keys",
+      "ids": [
+        "BUG-L04-004"
+      ],
+      "filter": "L04LmdbKeys.*",
+      "tests": 17,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "L04LmdbKeys",
+          "name": "ReverseEndian16KnownVectors",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "ReverseEndian32KnownVectors",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "ReverseEndianIsInvolution",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "ReverseEndianBytesMatchMemoryOrder",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "BarKeyPackedLayout",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "BarKeyTimeStoredBigEndian",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "BarKeyPaddingZeroed",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "BarKeyStringViewKeepsFullLength",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "HftKeyPackedLayout",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "HftKeyDateSplitRoundTrip",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "BarKeyLexicographicOrderMatchesTimeOrder",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "HftKeyLexicographicOrderMatchesDateThenTime",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "FullRangeSentinelsBracketEveryKey",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "SameCodeDifferentExchgSortsByExchg",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "ExchgPrefixDoesNotCollideAcrossContracts",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "MaxLengthFieldsFitExactly",
+          "status": "passed"
+        },
+        {
+          "suite": "L04LmdbKeys",
+          "name": "KeySizeMatchesStorageStringSize",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "lmdb_ad",
+      "ids": [
+        "BUG-L04-004"
+      ],
+      "filter": "S5LmdbKeyBounds.*:S5ReaderADTest.OverlongExchangeIsRejectedBeforeAnyStorageSideEffect:S5ReaderADTest.BtReaderRejectsOverlongCodeBeforeOpeningDatabases",
+      "tests": 5,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5LmdbKeyBounds",
+          "name": "LegalMaximumIdentityKeepsLayout",
+          "status": "passed"
+        },
+        {
+          "suite": "S5LmdbKeyBounds",
+          "name": "OverlongNullAndUnterminatedIdentityAreRejected",
+          "status": "passed"
+        },
+        {
+          "suite": "S5LmdbKeyBounds",
+          "name": "EmptyFieldsFitTheKeyButAreNotAStorageIdentity",
+          "status": "passed"
+        },
+        {
+          "suite": "S5ReaderADTest",
+          "name": "OverlongExchangeIsRejectedBeforeAnyStorageSideEffect",
+          "status": "passed"
+        },
+        {
+          "suite": "S5ReaderADTest",
+          "name": "BtReaderRejectsOverlongCodeBeforeOpeningDatabases",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "csv_export",
+      "ids": [
+        "BUG-L05-002"
+      ],
+      "filter": "L05HelperV2FilterTest.*:L05HelperBarTest.Dump*:L05HelperTickTest.Dump*",
+      "tests": 23,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "L05HelperBarTest",
+          "name": "DumpBarsMissingSourceFolder",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperBarTest",
+          "name": "DumpBarsWritesCsvAndSkipsOthers",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperBarTest",
+          "name": "DumpBarsValidOutputReportsBatchSuccess",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperBarTest",
+          "name": "DumpBarsReportsOneOutputFailureAndContinues",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperBarTest",
+          "name": "DumpBarsReportsShortWriteWithoutSuccess",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperBarTest",
+          "name": "DumpBarsReportsOutputDirectoryCreationFailure",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperBarTest",
+          "name": "DumpBarsReportsInputReadFailure",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperBarTest",
+          "name": "DumpBarsOverwritesWriteOnlyOutput",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperBarTest",
+          "name": "DumpBarsReportsUnenumerableSource",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperTickTest",
+          "name": "DumpTicksWritesCsvAndSkipsInvalid",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperTickTest",
+          "name": "DumpTicksValidOutputReportsBatchSuccess",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperTickTest",
+          "name": "DumpTicksReportsOneOutputFailureAndContinues",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperTickTest",
+          "name": "DumpTicksReportsShortWriteWithoutSuccess",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperTickTest",
+          "name": "DumpTicksReportsOutputDirectoryCreationFailure",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperTickTest",
+          "name": "DumpTicksReportsInputReadFailure",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperTickTest",
+          "name": "DumpTicksOverwritesWriteOnlyOutput",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperTickTest",
+          "name": "DumpTicksReportsUnenumerableSource",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperV2FilterTest",
+          "name": "BarFilterWildcardSelectsMatchingStemsOnly",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperV2FilterTest",
+          "name": "TickFilterWildcardSelectsMatchingStemsOnly",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperV2FilterTest",
+          "name": "EmptyOrNonDsbFolderIsNoInputNotSuccess",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperV2FilterTest",
+          "name": "UnknownBlockVersionIsRejectedOnItsOwn",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperV2FilterTest",
+          "name": "UnknownFileIdentifierIsRejectedOnItsOwn",
+          "status": "passed"
+        },
+        {
+          "suite": "L05HelperV2FilterTest",
+          "name": "TickUnknownVersionAndIdentifierAreRejectedIndependently",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "storage_queue",
+      "ids": [
+        "BUG-P10-007"
+      ],
+      "filter": "P10RtBlockTest.*:P10TaskQueueTest.*:P10DayDsbTest.*",
+      "tests": 41,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "P10DayDsbTest",
+          "name": "NewDayFileWritesRawV2HeaderAndFirstBar",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "AppendNewerDateKeepsOrderAndCount",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "SameDateDifferentValuesReplacesLastBar",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "SameDateIdenticalBarIsNoOp",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "OlderThanLastDateIsIgnored",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "OverOneHundredBarsSwitchesToCompressedV2",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "CompressedFileStaysCompressedAfterAppend",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "ExactlyOneHundredBarsStaysRaw",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "AltCodeFileRenamedBeforeWrite",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "UnwritableBaseDirRejected",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "DumpBarsToFileRejectsNullContract",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "HeaderOnlyDayFileDecodesToEmptyPayload",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "AppendingToHeaderOnlyDayFilePersistsFirstBar",
+          "status": "passed"
+        },
+        {
+          "suite": "P10DayDsbTest",
+          "name": "DamagedDayFileIsPreservedOnAppend",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "TickBlockCreatesDmbWithV2Header",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "PipeToTicksWritesBlockAndDiskRoundTrip",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "TickBlockDateSwitchClearsBlock",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "TickBlockCapacityRepairedFromRealFileSize",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "KlineBlocksUseTradingMinutesAsCapacity",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "HftBlocksCreateAndReportTypes",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "NullContractAndNoAutoCreateRejected",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "ReleaseBlockCancelsCachedPair",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "SixBlockMapsSnapshotCloseReopenAndShutdownAreSynchronized",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "ExpiredCheckerCloseWaitsForActiveBlockLease",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "RealCheckerClosesAndReopensAllSixExpiredMappings",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "ReleaseJoinsActiveCheckerBeforeClearingBlockMaps",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "SnapshotOwnsBlockPairAcrossMapClear",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "AsyncFirstOrderDetailInsertInterleavesWithRealCheckerSnapshot",
+          "status": "passed"
+        },
+        {
+          "suite": "P10RtBlockTest",
+          "name": "AsyncWorkerFirstCreatesAllSixBlocksBeforeRealCheckerSnapshot",
+          "status": "passed"
+        },
+        {
+          "suite": "P10TaskQueueTest",
+          "name": "PublicOperationsAreClosedBeforeInitialization",
+          "status": "passed"
+        },
+        {
+          "suite": "P10TaskQueueTest",
+          "name": "RealInitializationRejectsConcurrentAndRepeatedInitialization",
+          "status": "passed"
+        },
+        {
+          "suite": "P10TaskQueueTest",
+          "name": "RealInitializationAndReleaseRaceJoinsCreatedChecker",
+          "status": "passed"
+        },
+        {
+          "suite": "P10TaskQueueTest",
+          "name": "FailedRealInitializationCanBeReleasedRepeatedly",
+          "status": "passed"
+        },
+        {
+          "suite": "P10TaskQueueTest",
+          "name": "EnqueueAfterWorkerIsWaitingWakesItAndReleasesOwnership",
+          "status": "passed"
+        },
+        {
+          "suite": "P10TaskQueueTest",
+          "name": "ProcQueueUsesPredicateWaitAndDoesNotLoseNotification",
+          "status": "passed"
+        },
+        {
+          "suite": "P10TaskQueueTest",
+          "name": "ReleaseStopsIdleWorkersIdempotentlyAndRejectsProducers",
+          "status": "passed"
+        },
+        {
+          "suite": "P10TaskQueueTest",
+          "name": "ReleaseDrainsAcceptedTasksAndRejectsConcurrentProducer",
+          "status": "passed"
+        },
+        {
+          "suite": "P10TaskQueueTest",
+          "name": "ReleaseWaitsForSynchronousWriteLeaseAndRejectsLaterCalls",
+          "status": "passed"
+        },
+        {
+          "suite": "P10TaskQueueTest",
+          "name": "PreCloseWriteLeaseMayEnqueueAfterReleaseClosesAdmission",
+          "status": "passed"
+        },
+        {
+          "suite": "P10TaskQueueTest",
+          "name": "TransHisDataLeaseStartsBeforeSinkAccessAndDefersReentrantRelease",
+          "status": "passed"
+        },
+        {
+          "suite": "P10TaskQueueTest",
+          "name": "CallbackCanReenterWriterAndRequestShutdownWithoutSelfJoin",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "cta_snapshot",
+      "ids": [
+        "BUG-P01-004"
+      ],
+      "filter": "R42CtaPersistTest.*",
+      "tests": 16,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "OnInitLoadsPersistedStateAndPreparesOutputs",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "SaveDataRoundTripAcrossContexts",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "ExpiredPositionCodesHaveBoundedLogDisplay",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "ExpiredSignalCodesHaveBoundedLogDisplay",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "LongRecoveredPositionCodesKeepTheirFullIdentity",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "LongRecoveredSignalCodesKeepTheirFullIdentity",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "LongDirectTickSubscriptionsKeepTheirFullIdentity",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "MaximumSupportedDetailAndSignalTagsRestoreAndExecute",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "LookupFailureWhilePreparingSnapshotDoesNotPublishCandidate",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "ScheduleEmitsCalculateAndChartWrites",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "ChartApisRejectUseOutsideScheduleAndUnknownNames",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "SessionBeginReleasesFrozenAndPersistsUserData",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "PositionAccountingQueriesReactToTicks",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "LogsSubscriptionsAndMetadataAccessors",
+          "status": "passed"
+        },
+        {
+          "suite": "R42CtaPersistTest",
+          "name": "K45UnknownMembersRejectTheWholeSnapshot",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "notifier",
+      "ids": [
+        "BUG-R41-003"
+      ],
+      "filter": "R41EventNotifierTest.*:R160EventNotifier.*:R120Notifier.*:R101EventNotifierLoader.*",
+      "tests": 21,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R101EventNotifierLoader",
+          "name": "IncompatibleModuleRejected",
+          "status": "passed"
+        },
+        {
+          "suite": "R120Notifier",
+          "name": "BurstPublishesEveryPayload",
+          "status": "passed"
+        },
+        {
+          "suite": "R120Notifier",
+          "name": "NullTradeAndOrderGuardsPlusLatePost",
+          "status": "passed"
+        },
+        {
+          "suite": "R160EventNotifier",
+          "name": "FakeModuleObservesExactServerAndPublishAbi",
+          "status": "passed"
+        },
+        {
+          "suite": "R160EventNotifier",
+          "name": "WorkGuardKeepsWorkerAliveForEveryPublishLambda",
+          "status": "passed"
+        },
+        {
+          "suite": "R160EventNotifier",
+          "name": "DiscardedOrderHandlerReleasesRetainedReference",
+          "status": "passed"
+        },
+        {
+          "suite": "R160EventNotifier",
+          "name": "AsyncOrderHandlerDestroysObjectOnceAfterPublisherReturns",
+          "status": "passed"
+        },
+        {
+          "suite": "R160EventNotifier",
+          "name": "DiscardedOrderHandlerDestroysLastReferenceOnce",
+          "status": "passed"
+        },
+        {
+          "suite": "R160EventNotifier",
+          "name": "ThrowingOrderPublisherDestroysLastReferenceOnce",
+          "status": "passed"
+        },
+        {
+          "suite": "R160EventNotifier",
+          "name": "WorkerFinishesPendingOrderBeforeDestructorReturns",
+          "status": "passed"
+        },
+        {
+          "suite": "R160EventNotifier",
+          "name": "DiscardedTradeHandlerReleasesRetainedReference",
+          "status": "passed"
+        },
+        {
+          "suite": "R160EventNotifier",
+          "name": "ThrowingTradePublisherReleasesRetainedReference",
+          "status": "passed"
+        },
+        {
+          "suite": "R160EventNotifier",
+          "name": "DeliversAfterIdleWithoutExternalWorkGuard",
+          "status": "passed"
+        },
+        {
+          "suite": "R160EventNotifier",
+          "name": "ThrowingPublisherIsReportedAndLaterItemRuns",
+          "status": "passed"
+        },
+        {
+          "suite": "R160EventNotifier",
+          "name": "ConcurrentStopDrainsAcceptedItemsAndRejectsLaterItems",
+          "status": "passed"
+        },
+        {
+          "suite": "R41EventNotifierTest",
+          "name": "DefaultConstructorInitializesMqHooksToNull",
+          "status": "passed"
+        },
+        {
+          "suite": "R41EventNotifierTest",
+          "name": "InactiveNotifierShortCircuitsEveryNotify",
+          "status": "passed"
+        },
+        {
+          "suite": "R41EventNotifierTest",
+          "name": "MissingMqModuleFailsInit",
+          "status": "passed"
+        },
+        {
+          "suite": "R41EventNotifierTest",
+          "name": "ActiveNotifierPublishesAllJsonPayloads",
+          "status": "passed"
+        },
+        {
+          "suite": "R41EventNotifierTest",
+          "name": "InactiveNotifierRejectsNonNullTradeAndOrder",
+          "status": "passed"
+        },
+        {
+          "suite": "R41EventNotifierTest",
+          "name": "ActiveNotifierSkipsNullTradeAndOrder",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "parser_adapter",
+      "ids": [
+        "BUG-R42-003"
+      ],
+      "filter": "R42ParserAdapterTest.*",
+      "tests": 11,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R42ParserAdapterTest",
+          "name": "InitRejectsNullOrMissingModule",
+          "status": "passed"
+        },
+        {
+          "suite": "R42ParserAdapterTest",
+          "name": "InitExtHandlesApiStates",
+          "status": "passed"
+        },
+        {
+          "suite": "R42ParserAdapterTest",
+          "name": "BusyInitExtRetainsAndDeduplicatesTransferredApis",
+          "status": "passed"
+        },
+        {
+          "suite": "R42ParserAdapterTest",
+          "name": "ReleaseExceptionFailsClosedWithoutRetry",
+          "status": "passed"
+        },
+        {
+          "suite": "R42ParserAdapterTest",
+          "name": "RemoverExceptionPreservesOwnerAndFailsClosed",
+          "status": "passed"
+        },
+        {
+          "suite": "R42ParserAdapterTest",
+          "name": "ParserAdapterMgrRetainsFailedOwner",
+          "status": "passed"
+        },
+        {
+          "suite": "R42ParserAdapterTest",
+          "name": "ParserAdapterMgrRetriesDeferredRemoverWithoutLosingOwner",
+          "status": "passed"
+        },
+        {
+          "suite": "R42ParserAdapterTest",
+          "name": "ManagerReleaseStopsRetainedSuccessfulAdapter",
+          "status": "passed"
+        },
+        {
+          "suite": "R42ParserAdapterTest",
+          "name": "HandleQuoteConvertsMonthlyCodeAndFiltersInvalid",
+          "status": "passed"
+        },
+        {
+          "suite": "R42ParserAdapterTest",
+          "name": "OrderAndTradeDataForwarding",
+          "status": "passed"
+        },
+        {
+          "suite": "R42ParserAdapterTest",
+          "name": "AdapterManagerAddGetRunRelease",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "date_binding_retry",
+      "ids": [
+        "BUG-R12-13"
+      ],
+      "filter": "S5MainK31DateBinding.*:S5MainK31HostChain.*:S5MainR1213TickerDate.*",
+      "tests": 5,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5MainK31DateBinding",
+          "name": "BindingHolderValidatesOnceAndFallsBackToLegacy",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK31DateBinding",
+          "name": "StorageAndXeleModulesExportVersionedBinders",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK31HostChain",
+          "name": "InjectedTableDrivesTheReaderDateMapping",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK31HostChain",
+          "name": "WithoutHostTableTheReaderKeepsTheLegacyPath",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainR1213TickerDate",
+          "name": "CtaTickerRefusesToStartWhenTradingDateCannotBeMapped",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "hft_tags",
+      "ids": [
+        "BUG-R15-001"
+      ],
+      "filter": "R15CtxTest.*",
+      "tests": 44,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R15CtxTest",
+          "name": "strategy_pointer_roundtrip",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "null_strategy_events_only_touch_base",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "on_init_and_session_callbacks_forward_to_strategy",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "session_end_forwards_date_then_base_writes_fund_line",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "on_tick_without_subscription_skips_strategy",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "on_tick_subscribed_forwards_same_pointer",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "on_bar_forwards_code_period_times_and_bar",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "ordque_orddtl_trans_forward_when_strategy_set",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "on_trade_forwards_inner_code_and_order_tag",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "on_order_and_entrust_forward_tag_and_cancel_flag",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "on_position_forwards_only_to_strategy",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "channel_events_forward_and_flush_userdata_only_when_dirty",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "order_tag_default_capacity_preserves_registered_tag",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "order_tag_set_get_erase_with_default_context",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "order_tag_lookup_miss_does_not_match_or_erase_neighbor",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "order_tags_keep_unordered_ids_and_replace_exact_duplicate",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "order_tags_do_not_silently_evict_or_truncate",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "registered_order_tag_reaches_callbacks_and_remains_after_terminal_order",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "order_tags_survive_open_close_and_reverse_without_truncation",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "unbound_trader_actions_fail_before_engine_or_mapping_side_effects",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "fresh_context_starts_without_a_trader",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "unbound_trader_reentrant_diagnostic_cannot_submit_actions",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "bound_trader_still_handles_queries_and_unknown_cancel",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "bound_trader_sends_order_only_to_fake_api",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "unbinding_a_previously_bound_trader_rejects_actions",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "reentrant_bind_during_unbound_diagnostic_does_not_submit_outer_order",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "trader_unbound_during_rule_callback_rejects_outer_order",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "trader_replaced_during_rule_callback_rejects_outer_order",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "trader_unbound_then_rebound_during_rule_callback_rejects_outer_order",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "each_entry_and_exit_rejects_reentrant_unbind_from_rule_lookup",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "trader_unbound_during_custom_code_lookup_rejects_outer_order",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "trader_unbound_during_contract_lookup_rejects_outer_buy",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "trader_unbound_during_commodity_lookup_rejects_outer_sell",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "trader_unbound_during_sell_position_lookup_rejects_outer_sell",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "bound_long_only_sell_uses_existing_position_semantics",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "bound_long_only_sell_keeps_custom_position_mapping",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "synchronous_report_sees_tag_registered_before_provider_call",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "rejected_reservation_does_not_keep_a_tag",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "terminal_tags_retire_in_a_bounded_window_and_live_tags_never_evict",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "tag_pointer_survives_reentrant_erase_and_replacement",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "concurrent_tag_writes_and_reads_are_synchronized",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "unbound_queries_return_zero_with_diagnostic_instead_of_dereferencing",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "live_fees_come_from_the_engine_fee_schedule",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "missing_live_fee_is_observable_and_the_fill_is_kept",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "unbound_hft",
+      "ids": [
+        "BUG-R42-002"
+      ],
+      "filter": "R15CtxTest.unbound_queries_return_zero_with_diagnostic_instead_of_dereferencing:R15CtxTest.unbound_trader_actions_fail_before_engine_or_mapping_side_effects:R15CtxTest.bound_trader_still_handles_queries_and_unknown_cancel",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R15CtxTest",
+          "name": "unbound_trader_actions_fail_before_engine_or_mapping_side_effects",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "bound_trader_still_handles_queries_and_unknown_cancel",
+          "status": "passed"
+        },
+        {
+          "suite": "R15CtxTest",
+          "name": "unbound_queries_return_zero_with_diagnostic_instead_of_dereferencing",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "notifier_lifetime",
+      "ids": [
+        "BUG-R10-005"
+      ],
+      "filter": "R10EventNotifier.*",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R10EventNotifier",
+          "name": "MissingRegisterExportUnloadsCandidateAndPreservesActiveNotifier",
+          "status": "passed"
+        },
+        {
+          "suite": "R10EventNotifier",
+          "name": "MissingCreateServerExportUnloadsWithoutStartingWorker",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "strategy_plugin",
+      "ids": [
+        "BUG-R31-002"
+      ],
+      "filter": "r31_stra_mgr.hft_refuses_cta_plugin_before_creator:r31_stra_mgr.cta_load_reaches_creator_and_registers_real_factory:r31_stra_mgr.sel_manager_loads_real_sel_plugin_and_creates_strategy",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "r31_stra_mgr",
+          "name": "sel_manager_loads_real_sel_plugin_and_creates_strategy",
+          "status": "passed"
+        },
+        {
+          "suite": "r31_stra_mgr",
+          "name": "cta_load_reaches_creator_and_registers_real_factory",
+          "status": "passed"
+        },
+        {
+          "suite": "r31_stra_mgr",
+          "name": "hft_refuses_cta_plugin_before_creator",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "engine_metadata",
+      "ids": [
+        "BUG-I02-NEW-130"
+      ],
+      "filter": "S5EngineUninitMetadata.*",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5EngineUninitMetadata",
+          "name": "ZeroInitializedSelEngineReportsNoMetadata",
+          "status": "passed"
+        },
+        {
+          "suite": "S5EngineUninitMetadata",
+          "name": "IndeterminateStorageSelEngineReportsNoMetadata",
+          "status": "passed"
+        },
+        {
+          "suite": "S5EngineUninitMetadata",
+          "name": "ZeroInitializedCtaAndHftEnginesReportNoMetadata",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "risk_window",
+      "ids": [
+        "BUG-R202-003"
+      ],
+      "filter": "R170TraderRisk.OrderWindowRejectsAtBoundaryAndRecovers:R170TraderRisk.CancelWindowRejectsAtBoundaryAndRecovers:R202TraderAdapter.PublicTradeSwitchIsExternallyCallable",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R170TraderRisk",
+          "name": "OrderWindowRejectsAtBoundaryAndRecovers",
+          "status": "passed"
+        },
+        {
+          "suite": "R170TraderRisk",
+          "name": "CancelWindowRejectsAtBoundaryAndRecovers",
+          "status": "passed"
+        },
+        {
+          "suite": "R202TraderAdapter",
+          "name": "PublicTradeSwitchIsExternallyCallable",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "account_limit",
+      "ids": [
+        "BUG-P02-005"
+      ],
+      "filter": "S5MainK05EntryLimit.*",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5MainK05EntryLimit",
+          "name": "EntryAboveTheAccountLimitIsRejectedAndReductionsStayAllowed",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK05EntryLimit",
+          "name": "WithoutADeclaredLimitEntriesAreNotRestricted",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "owner_routing",
+      "ids": [
+        "BUG-I02-NEW-008"
+      ],
+      "filter": "DiffOwnerSinkRegistry.*:DiffOwnerSinkDelivery.*",
+      "tests": 4,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "DiffOwnerSinkRegistry",
+          "name": "DisabledByDefaultAndRoutesOnlyMatchingOwner",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOwnerSinkRegistry",
+          "name": "ConcurrentRemoveWaitsForOwnerCallback",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOwnerSinkRegistry",
+          "name": "ReentrantUnregisterAndRemoveDoNotHoldRoutingLocks",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOwnerSinkDelivery",
+          "name": "CallbackExceptionPropagatesAndReleasesReservation",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "owner_journal",
+      "ids": [
+        "BUG-N05-003"
+      ],
+      "filter": "DiffOrderOwnershipJournalV1.*",
+      "tests": 12,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "DiffOrderOwnershipJournalV1",
+          "name": "PersistsOwnerLedgerAndActiveOrdersAcrossRestart",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOrderOwnershipJournalV1",
+          "name": "TargetBaselineAndTradeReplayInOneSequence",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOrderOwnershipJournalV1",
+          "name": "LocalOrderHighWaterAndUnresolvedIntentSurviveRestart",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOrderOwnershipJournalV1",
+          "name": "RequiresDurableLegacyLocalIdFloorBeforeReservingOrder",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOrderOwnershipJournalV1",
+          "name": "RepeatedRejectAndPartialCancelProgressStayIdempotentAfterReplay",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOrderOwnershipJournalV1",
+          "name": "LateTradeAdvancesSameTerminalProgressOnceAcrossReplay",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOrderOwnershipJournalV1",
+          "name": "UInt32LocalOrderIdExhaustionFailsWithoutWrapping",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOrderOwnershipJournalV1",
+          "name": "RejectsUnknownOrdersAndConflictingTradeKeysFailClosed",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOrderOwnershipJournalV1",
+          "name": "TruncatedAndChecksumDamagedWalFailClosed",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOrderOwnershipJournalV1",
+          "name": "FailingIntentWriteBlocksFurtherMutations",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOrderOwnershipJournalV1",
+          "name": "FlushFailureReturnsBeforeSendCommitAndBlocksJournal",
+          "status": "passed"
+        },
+        {
+          "suite": "DiffOrderOwnershipJournalV1",
+          "name": "ExclusiveOpenAndConcurrentIntentsAreSerialized",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "resume_inbox",
+      "ids": [
+        "BUG-R54-001"
+      ],
+      "filter": "S5MainL01014ResumeInbox.*",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5MainL01014ResumeInbox",
+          "name": "EachRequestIsTakenExactlyOnceAndArchivedByOutcome",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainL01014ResumeInbox",
+          "name": "RealGateResumesOnlyWithTheReviewedGenerationAndAudits",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "storage_block",
+      "ids": [
+        "BUG-P10-001"
+      ],
+      "filter": "P10ProcBlockTest.*",
+      "tests": 15,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "RawV2BarBlockKeepsHeadUntouched",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "RawV2BarBlockStripsHead",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "CmpV2BarBlockDecompresses",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "CmpV2DecompressKeepHeadRewritesRawV2Header",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "CmpV2LengthMismatchesRejectedInChildren",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "OldBarBlockTransferredToNewStruct",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "OldTickBlockTransferredToNewStruct",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "UnknownVersionPassesThrough",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "BlockFlagMismatchRejectsWithoutMutatingContent",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "OldCompressedBarBlockDecompressesAndUpgradesStruct",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "IsSessionProceededUsesReadyWriterDateState",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "EmptyInputRejectedInChild",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "FourByteInputRejectedInChild",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "OtherIncompleteBaseHeadersRejectedInChildren",
+          "status": "passed"
+        },
+        {
+          "suite": "P10ProcBlockTest",
+          "name": "TruncatedCompressedHeadersRejectedInChildren",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "minute_key",
+      "ids": [
+        "BUG-R100-003",
+        "BUG-R32-003"
+      ],
+      "filter": "S5ReaderADTest.MinuteCutoffBeyondUint32KeyIsRefusedNotWrapped:S5ReaderADTest.MinuteEndBeyondUint32KeyDoesNotWrapOrSignalAllUpdated:S5ReaderADTest.DayBarsIn2033UseDateKeysAndRemainReadable",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5ReaderADTest",
+          "name": "MinuteCutoffBeyondUint32KeyIsRefusedNotWrapped",
+          "status": "passed"
+        },
+        {
+          "suite": "S5ReaderADTest",
+          "name": "MinuteEndBeyondUint32KeyDoesNotWrapOrSignalAllUpdated",
+          "status": "passed"
+        },
+        {
+          "suite": "S5ReaderADTest",
+          "name": "DayBarsIn2033UseDateKeysAndRemainReadable",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "parser_lifecycle",
+      "ids": [
+        "BUG-R18-006",
+        "BUG-R18-012"
+      ],
+      "filter": "R18ParserAdapterTest.*",
+      "tests": 24,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "FreshAdapterIsIdleAndExposesBaseDataMgr",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "InitExtReturnsFalseWhenApiInitFails",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "InitExtRetainsApiWhenProviderInitThrows",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "InitExtRetainsApiWhenRegisterSpiThrows",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "InitExtRetainsApiWhenSubscribeThrows",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "ProviderReleaseThrowRetainsOwnerAndIsNotRetried",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "InitExtTransfersNonNullApiBeforeArgumentValidation",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "QuarantineOwnerKeepsFailedAdapterAndApiAlive",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "RepeatedInitExtDoesNotLoseTransferredApis",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "InitExtSubscribesEveryContractFullCode",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "RunReportsConnectionCommandSubmission",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "InitReleasesRetainedConfigWhenNoApiWasCreated",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "ReleaseReturnsRetainedConfigWhenModuleLoadFails",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "InitRejectsNullCfgEmptyModuleAndMissingModule",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "StoppedAdapterNeverFillsContractInfo",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "HandleQuoteRejectedWhenDatesZeroOrContractUnknown",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "HandleQuoteKeepsPresetContractInsteadOfLookingUp",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "ThreeLevel2HandlersRejectBeforeDataManager",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "ThreeLevel2HandlersResolveContractAndDelegateWrite",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "MgrAddAndGetGuards",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "MgrRunAndReleaseDriveEveryAdapter",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "DISABLED_HandleQuoteCrashesWhenDataManagerIsNull",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "ReleaseIsIdempotent",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ParserAdapterTest",
+          "name": "MgrRejectsEmptyIdAndAcceptsUniqueId",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "writer_lifecycle",
+      "ids": [
+        "BUG-R18-002"
+      ],
+      "filter": "R18WriterPluginTest.*",
+      "tests": 5,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R18WriterPluginTest",
+          "name": "SuccessfulDynamicWriterIsReleasedAndDestroyedOnce",
+          "status": "passed"
+        },
+        {
+          "suite": "R18WriterPluginTest",
+          "name": "MissingCreateSymbolRejectsLoadedModule",
+          "status": "passed"
+        },
+        {
+          "suite": "R18WriterPluginTest",
+          "name": "MissingDeleteSymbolRejectsBeforeCallingFactory",
+          "status": "passed"
+        },
+        {
+          "suite": "R18WriterPluginTest",
+          "name": "NullFactoryResultIsRejected",
+          "status": "passed"
+        },
+        {
+          "suite": "R18WriterPluginTest",
+          "name": "InitFalseReleasesAndDeletesWriter",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "shm_caster",
+      "ids": [
+        "BUG-R18-011"
+      ],
+      "filter": "R18ShmCasterTest.*",
+      "tests": 8,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R18ShmCasterTest",
+          "name": "DataItemLaysOutTypeWordThenUnionOfFourPayloads",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ShmCasterTest",
+          "name": "QueueTemplateDefaultsCapacityReadableWritablePid",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ShmCasterTest",
+          "name": "RingIndexModuloWrapsWithinSmallQueue",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ShmCasterTest",
+          "name": "CastQueueIsTheFixed8192SlotInstantiation",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ShmCasterTest",
+          "name": "InitRejectsNullConfig",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ShmCasterTest",
+          "name": "InitRejectsInactiveAndTouchesNoFile",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ShmCasterTest",
+          "name": "FreshCasterRejectsAllFourBroadcastOverloads",
+          "status": "passed"
+        },
+        {
+          "suite": "R18ShmCasterTest",
+          "name": "DISABLED_InitWithActiveTrueNeedsRealMappedFile",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "runner_time",
+      "ids": [
+        "BUG-R22-002"
+      ],
+      "filter": "R22RunnerInitTest.*:R22PorterCapiTest.*",
+      "tests": 31,
+      "failures": 0,
+      "skipped": 1,
+      "tests_list": [
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "VersionStringIsPlatformPrefixedAndBuiltOnce",
+          "status": "passed"
+        },
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "WriteLogKeepsCallerBuffersUnchanged",
+          "status": "passed"
+        },
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "WriteLogBelowLoggerThresholdIsDropped",
+          "status": "passed"
+        },
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "RegisterExtendedDumperStoresBothBarAndTickSlots",
+          "status": "passed"
+        },
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "ExpParserEventsReachGlobalRunnerNotTheOwningRunner",
+          "status": "passed"
+        },
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "ExpDumperAlwaysForwardsToGlobalRunnerNotOwningRunner",
+          "status": "passed"
+        },
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "CapiInitializeWithAbsentLogFileKeepsLoggerUninited",
+          "status": "passed"
+        },
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "CreateExtDumpersWithUniqueIdsAndDirectDumperCallback",
+          "status": "passed"
+        },
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "WriteLogWritesRawMessagesLiterally",
+          "status": "passed"
+        },
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "DISABLED_write_log_with_null_category_hits_strlen_null",
+          "status": "passed"
+        },
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "DISABLED_capi_start_without_initialization_spawns_lifetime_monitor",
+          "status": "passed"
+        },
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "ConfiguredStartChildChecksStateMonitor",
+          "status": "skipped"
+        },
+        {
+          "suite": "R22PorterCapiTest",
+          "name": "CapiStartHonorsConfiguredAlldayModeInIsolatedProcesses",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "AlldayModeWithScalarBasefilesLoadsContractsAndSkipsParsers",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "NonAlldayModeInitializesStateMonitorAndStillLoadsBasefiles",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "HolidayHotSecondAndCustomRulesSectionsAreLoadedWithoutBreakingBasefiles",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "BasefilesCommodityAndContractAsArraysWalkBothBranches",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "ConfigFileLoadedFromDiskPathWhenCfgFileFlagIsTrue",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "UnparseableContentReturnsBeforeLoadingBasefiles",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "MissingConfigFileReturnsBeforeLoadingBasefiles",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "ActiveShmCasterFailureBlocksInitializationAndStart",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "ActiveShmCasterSuccessDoesNotBlockStart",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "InactiveShmCasterDoesNotBlockStart",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "IndexSectionWithAbsentFileIsReportedAndDoesNotBreakBasefiles",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "ActiveParserModuleFailureBlocksStartup",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "ExistingParserFileActiveModuleFailureBlocksStartup",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "ParsersAsStringPathToMissingFileIsSkipped",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "MissingOrWrongRequiredConfigurationBlocksStart",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "StructurallyValidConfigWithUnavailableWriterStillAllowsParserStart",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "DISABLED_start_sync_branch_never_returns",
+          "status": "passed"
+        },
+        {
+          "suite": "R22RunnerInitTest",
+          "name": "DISABLED_start_async_branch_spawns_state_monitor_thread",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "monitor_stop",
+      "ids": [
+        "BUG-R22-002"
+      ],
+      "filter": "R22StateMonitorStop.*",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R22StateMonitorStop",
+          "name": "RunningWorkerObservesStopAcrossThreads",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "monitor_sessions",
+      "ids": [
+        "BUG-I02-NEW-026"
+      ],
+      "filter": "R145StateMonitorRunTest.*",
+      "tests": 9,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R145StateMonitorRunTest",
+          "name": "HolidaySessionWithoutCommoditiesTransitionsToHoliday",
+          "status": "passed"
+        },
+        {
+          "suite": "R145StateMonitorRunTest",
+          "name": "CommodityMarkedHolidayDrivesHolidayBranchOfOriginal",
+          "status": "passed"
+        },
+        {
+          "suite": "R145StateMonitorRunTest",
+          "name": "ClosedSessionAfterConfiguredCloseTime",
+          "status": "passed"
+        },
+        {
+          "suite": "R145StateMonitorRunTest",
+          "name": "SessionWithoutAuctionReachesInitialized",
+          "status": "passed"
+        },
+        {
+          "suite": "R145StateMonitorRunTest",
+          "name": "AuctionStartedInsideSectionsReachesReceiving",
+          "status": "passed"
+        },
+        {
+          "suite": "R145StateMonitorRunTest",
+          "name": "AuctionStartedOutsideSectionsReachesPaused",
+          "status": "passed"
+        },
+        {
+          "suite": "R145StateMonitorRunTest",
+          "name": "OutsideSectionsPastMarketCloseStillReceivesSettlement",
+          "status": "passed"
+        },
+        {
+          "suite": "R145StateMonitorRunTest",
+          "name": "EmptyMapRunThenStopJoinsWithoutWriter",
+          "status": "passed"
+        },
+        {
+          "suite": "R145StateMonitorRunTest",
+          "name": "DISABLED_SecondStopAfterRunThrows",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "history_tick_retry",
+      "ids": [
+        "BUG-R103-002"
+      ],
+      "filter": "S5R103LastTickInterval.*:R103LastTickBoundaryTest.*",
+      "tests": 23,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "EmptyTickListReturnsNull",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "BeforeFirstTickReturnsNull",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "ExactCurrentTickIsReturned",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "BetweenTicksReturnsPreviousTick",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "EmptyHistoricalSliceDoesNotHideCurrentTick",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "SameTimestampQueriesFollowDispatchedOrder",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "SubscribedTickIsUnavailableUntilDispatched",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "ReturnedSnapshotSurvivesLaterTicksAndReset",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "ConcurrentSnapshotReadDuringNextDispatch",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "NewTradingDayAndPrepareDoNotReuseDispatchedTick",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "PrepareRerunResubscribesWithoutReusingOldSnapshot",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "AdjustedQueryPreservesSeparateHistorySource",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "SyntheticFallbackIsTheCurrentDispatchedSnapshot",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "AdjustedSyntheticBarIsNotUsedAsRawTick",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "ReplayDoesNotUseStaleHistorySnapshot",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "FilteredTickIsNotVisibleDuringOtherStreamCallback",
+          "status": "passed"
+        },
+        {
+          "suite": "R103LastTickBoundaryTest",
+          "name": "AfterTailReturnsTheDocumentedEmptyValue",
+          "status": "passed"
+        },
+        {
+          "suite": "S5R103LastTickInterval",
+          "name": "ExactSameTimestampReturnsLastInsertedRecord",
+          "status": "passed"
+        },
+        {
+          "suite": "S5R103LastTickInterval",
+          "name": "ExactTailSameTimestampReturnsLastInsertedRecord",
+          "status": "passed"
+        },
+        {
+          "suite": "S5R103LastTickInterval",
+          "name": "BetweenGroupsReturnsLastRecordOfPreviousGroup",
+          "status": "passed"
+        },
+        {
+          "suite": "S5R103LastTickInterval",
+          "name": "AfterTailReturnsNull",
+          "status": "passed"
+        },
+        {
+          "suite": "S5R103LastTickInterval",
+          "name": "BeforeFirstReturnsNull",
+          "status": "passed"
+        },
+        {
+          "suite": "S5R103LastTickInterval",
+          "name": "SingleRecordExactAndAfterTail",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "session_streams_retry",
+      "ids": [
+        "BUG-I02-NEW-029"
+      ],
+      "filter": "S5New029OutOfSession.*",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5New029OutOfSession",
+          "name": "EachStreamDispatchesOnlyInSessionRecords",
+          "status": "passed"
+        },
+        {
+          "suite": "S5New029OutOfSession",
+          "name": "EachStreamCountsSkippedRecords",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "freeze_day_retry",
+      "ids": [
+        "BUG-Q02-003"
+      ],
+      "filter": "S5Q02FrozenTDate.*",
+      "tests": 5,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "S5Q02FrozenTDate",
+          "name": "SelSameTradingDaySessionBeginKeepsFrozen",
+          "status": "passed"
+        },
+        {
+          "suite": "S5Q02FrozenTDate",
+          "name": "SelDumpPersistsFrozenAndTradingDate",
+          "status": "passed"
+        },
+        {
+          "suite": "S5Q02FrozenTDate",
+          "name": "SelFrozenWithoutOwningSessionIsClearedByFirstSessionBegin",
+          "status": "passed"
+        },
+        {
+          "suite": "S5Q02FrozenTDate",
+          "name": "HftSameTradingDaySessionBeginKeepsFrozen",
+          "status": "passed"
+        },
+        {
+          "suite": "S5Q02FrozenTDate",
+          "name": "HftFrozenWithoutOwningSessionIsClearedByFirstSessionBegin",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "uft_ledger",
+      "ids": [
+        "BUG-Q04-002"
+      ],
+      "filter": "q04_trader_push.*:q04_trader_reply.*:q04_trader_entrust.*",
+      "tests": 41,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "q04_trader_entrust",
+          "name": "four_direction_actions_are_assembled_correctly",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "price_type_and_order_flag_mapping",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "malformed_standard_codes_fail_before_vendor_calls",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "insert_failure_returns_uint_max_without_counting_undone",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "rejection_without_this_adapters_usertag_does_not_change_undone",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "duplicate_rejection_does_not_consume_another_live_order",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "reentrant_rejection_and_negative_return_leave_other_order_unchanged",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "duplicate_trade_does_not_reduce_undone_twice",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "duplicate_cancellation_does_not_reduce_undone_twice",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "older_order_snapshot_does_not_undo_live_trade",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "fill_reported_by_order_and_trade_is_counted_once",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "late_live_report_after_cancel_does_not_reopen_order",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "unattributable_trades_do_not_change_undone",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "duplicate_trade_is_notified_and_positioned_once",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "accepted_report_during_insert_keeps_order_despite_negative_return",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "snapshot_absent_orders_use_the_query_epoch",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "usertag_pattern_is_scoped_per_channel",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "cancel_single_order_goes_through_doCancel",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "cancel_single_order_fails_closed_without_manager_or_contract",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "cancel_all_filters_alive_orders_by_full_code",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "cancel_all_with_lookup_only_contract_info",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_entrust",
+          "name": "cancel_all_skips_unknown_contract_and_cancels_known_orders",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_push",
+          "name": "order_push_reduces_available_position_on_first_notice",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_push",
+          "name": "closetoday_and_short_side_offsets_are_handled",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_push",
+          "name": "foreign_and_unknown_channel_reports_are_dropped",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_push",
+          "name": "canceled_push_updates_cancel_stats_and_undone",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_push",
+          "name": "trade_push_updates_position_volumes_for_both_sides",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_push",
+          "name": "t1_commodity_does_not_freeze_new_available_position",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_push",
+          "name": "unknown_instrument_trade_returns_early",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_push",
+          "name": "k07c_own_trade_without_trade_id_is_not_booked",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_reply",
+          "name": "initext_run_release_wire_the_channel",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_reply",
+          "name": "login_result_drives_state_and_position_query",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_reply",
+          "name": "onRspPosition_fills_positions_and_notifies_sinks",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_reply",
+          "name": "onRspOrders_counts_stats_and_registers_alive_orders",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_reply",
+          "name": "adapter_destruction_releases_owned_order_map_reference",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_reply",
+          "name": "getOrders_snapshot_is_safe_while_release_waits",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_reply",
+          "name": "getOrders_supports_raw_and_full_codes_without_cross_contract_matches",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_reply",
+          "name": "onRspTrades_accumulates_stats_then_channel_ready",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_reply",
+          "name": "onRspEntrust_error_only_counts_the_first_time",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_reply",
+          "name": "handleEvent_and_error_channels_forward_to_sinks",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_reply",
+          "name": "failed_config_init_rolls_back_before_external_api_init",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "servo_parser",
+      "ids": [
+        "BUG-R8-006"
+      ],
+      "filter": "R8ParserAdapterTest.*:R45ParserAdapterFakeTest.*",
+      "tests": 38,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "InitExtRegistersSpiAndSubscribesAllContracts",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "RunReportsConnectionCommandSubmission",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "InitExtApiInitFailureSkipsSubscribe",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "InitExtApiInitExceptionSkipsSubscribeAndConnect",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "RunnerStartsInitializedFakeParser",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "RunnerReportsConnectSubmissionFailureAndRetainsOwner",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "ExportedStatusReportsConnectSubmissionFailure",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "ExportedStatusReportsSuccessfulConnectSubmission",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "ExportedInitializationStateRemainsVisibleDuringConnect",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "ExportedConnectStatusCanBeReadDuringStartup",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "ExportedIsolationStopsBlockedChild",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "RunnerQuarantinesFalseAndThrowingParserCandidates",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "InitExtTransfersNonNullApiEvenWhenIdIsInvalid",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "BusyInitExtRetainsEachUniqueTransferredApi",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "InitExtWithoutBaseDataManagerRetainsApi",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "ReleaseCallsApiReleaseThenDeletesIt",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "ReleaseRetainsModuleContextWhileV2DrainIsPending",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "NonconformingV2DestroyQuarantinesOwnerPermanently",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "ManagerRetainsAdapterWhenV2DestroyFails",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "HandleQuoteForwardsTickToRunnerCallback",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "DetailHandlersPassContractLookup",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "ManagerRunsAndReleasesLiveAdapters",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "ManagerReportsPartialConnectSubmission",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "DISABLED_ReleaseTwiceContractPending",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "InitWithNullCfgRejectsAndKeepsIdEmpty",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "FailedEmptyModuleInitCanRetryAfterCleanup",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "BusyInitExtRejectsWithoutChangingFirstId",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "InitWithUnloadableModuleReturnsFalse",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "InitExtWithNullApiIsRejected",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "RunOnFreshAdapterIsFalseAndReleaseIsSafe",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "HandleQuoteIgnoresNullAndZeroDateTicks",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "HandleQuoteAfterReleaseStopsForwarding",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "HandleParserLogAliveBranchIsSafe",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "DetailHandlersReturnOnZeroDates",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "DetailHandlersReturnOnUnknownContract",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "AddAdapterRejectsNullPtrAndEmptyId",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "AddAdapterKeepsFirstOnDuplicateId",
+          "status": "passed"
+        },
+        {
+          "suite": "R8ParserAdapterTest",
+          "name": "ManagerReleaseOnEmptyMapIsSafe",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "index_factory",
+      "ids": [
+        "BUG-R68-003"
+      ],
+      "filter": "R68IndexWorkerFactoryTest.*",
+      "tests": 8,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R68IndexWorkerFactoryTest",
+          "name": "LoadFactoriesRegistersPluginAndUnknownWorkerSkips",
+          "status": "passed"
+        },
+        {
+          "suite": "R68IndexWorkerFactoryTest",
+          "name": "InitCreatesBuiltinWorkerAndInitializesIt",
+          "status": "passed"
+        },
+        {
+          "suite": "R68IndexWorkerFactoryTest",
+          "name": "RepeatedLoadKeepsFactoryUsable",
+          "status": "passed"
+        },
+        {
+          "suite": "R68IndexWorkerFactoryTest",
+          "name": "RepeatedSameModuleDoesNotRecreateFactoryOrInvalidateWorker",
+          "status": "passed"
+        },
+        {
+          "suite": "R68IndexWorkerFactoryTest",
+          "name": "DifferentModulesWithSameFactoryNameSealWithoutReplacingOwner",
+          "status": "passed"
+        },
+        {
+          "suite": "R68IndexWorkerFactoryTest",
+          "name": "BadFactoryNamesAndThrowingCreatorAreQuarantined",
+          "status": "passed"
+        },
+        {
+          "suite": "R68IndexWorkerFactoryTest",
+          "name": "CreatorReentryCannotStartAnotherScan",
+          "status": "passed"
+        },
+        {
+          "suite": "R68IndexWorkerFactoryTest",
+          "name": "ReleaseDrainsPoolThenDeletesWorkersAndPinsFactoryModule",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "servo_quarantine",
+      "ids": [
+        "BUG-I02-NEW-009"
+      ],
+      "filter": "R45ParserAdapterFakeTest.RunnerQuarantinesFalseAndThrowingParserCandidates:R45ParserAdapterFakeTest.ReleaseRetainsModuleContextWhileV2DrainIsPending",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "RunnerQuarantinesFalseAndThrowingParserCandidates",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "ReleaseRetainsModuleContextWhileV2DrainIsPending",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "uft_parser",
+      "ids": [
+        "BUG-R78-001"
+      ],
+      "filter": "R78UftParserAdapterInit.*",
+      "tests": 7,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R78UftParserAdapterInit",
+          "name": "missing_parser_factory_releases_config_and_module_reference",
+          "status": "passed"
+        },
+        {
+          "suite": "R78UftParserAdapterInit",
+          "name": "loads_udp_plugin_with_filter",
+          "status": "passed"
+        },
+        {
+          "suite": "R78UftParserAdapterInit",
+          "name": "loads_udp_plugin_without_filter",
+          "status": "passed"
+        },
+        {
+          "suite": "R78UftParserAdapterInit",
+          "name": "precreate_failures_retry_and_quiescent_init_failure_can_be_released",
+          "status": "passed"
+        },
+        {
+          "suite": "R78UftParserAdapterInit",
+          "name": "release_does_not_register_a_null_spi",
+          "status": "passed"
+        },
+        {
+          "suite": "R78UftParserAdapterInit",
+          "name": "release_waits_for_active_callback_before_teardown",
+          "status": "passed"
+        },
+        {
+          "suite": "R78UftParserAdapterInit",
+          "name": "release_inside_callback_is_deferred_to_safe_point",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "external_api",
+      "ids": [
+        "BUG-I02-NEW-123"
+      ],
+      "filter": "R45ParserAdapterFakeTest.InitExtTransfersNonNullApiEvenWhenIdIsInvalid:R45ParserAdapterFakeTest.BusyInitExtRetainsEachUniqueTransferredApi",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "InitExtTransfersNonNullApiEvenWhenIdIsInvalid",
+          "status": "passed"
+        },
+        {
+          "suite": "R45ParserAdapterFakeTest",
+          "name": "BusyInitExtRetainsEachUniqueTransferredApi",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "strategy_preflight",
+      "ids": [
+        "BUG-R134-003",
+        "BUG-I02-NEW-025",
+        "BUG-WSN06-001"
+      ],
+      "filter": "I03S5RtRunnerPreflight.*:I03S5RtRunnerSel.*",
+      "tests": 10,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "I03S5RtRunnerPreflight",
+          "name": "InvalidExecuterInMiddleRejectsBeforeMutationAndConfigIsRetryable",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerPreflight",
+          "name": "UnknownExecuterKindIsRejectedInsteadOfBecomingDist",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerPreflight",
+          "name": "MissingExecuterSidecarFailsConfig",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerPreflight",
+          "name": "SidecarExecutersAndRoutersAreValidatedAndLoaded",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerPreflight",
+          "name": "InvalidRouterRuleFailsConfig",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerPreflight",
+          "name": "DiffInitFailureAfterValidationFailsConfigAndRetainsHostForQuiesce",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerSel",
+          "name": "ValidSelConfigPublishesSelContextAndExecutersWithoutReadingCta",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerSel",
+          "name": "UnknownSelFactoryFailsWithoutPartialContext",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerSel",
+          "name": "SelInitFalseFailsWholeBatchBeforePublication",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerSel",
+          "name": "InvalidSelPeriodIsRejectedByPreflight",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "strategy_init",
+      "ids": [
+        "BUG-WSN06-001",
+        "BUG-WSN06-002"
+      ],
+      "filter": "I03S5HftDemoParams.*:I03S5RtRunnerStrategies.*:I03S5RtRunnerStartup.*",
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "I03S5HftDemoParams",
+          "name": "ShippedAndJsonFormsAreAccepted",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5HftDemoParams",
+          "name": "MissingOrMalformedParamsAreRejected",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerStrategies",
+          "name": "CtaInitFalseFailsConfigAndPublishesNoContext",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerStrategies",
+          "name": "HftInitFalseFailsBatchWithoutContextOrTraderSink",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerStartup",
+          "name": "StrategyOnInitExceptionReleasesPartiallyStartedRuntime",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5RtRunnerStartup",
+          "name": "SecondRunIsRejectedAfterSuccessfulStart",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "sel_period",
+      "ids": [
+        "BUG-R13-004"
+      ],
+      "filter": "I03S5RtRunnerSel.InvalidSelPeriodIsRejectedByPreflight:R13PorterSelExport.*",
+      "tests": 8,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "I03S5RtRunnerSel",
+          "name": "InvalidSelPeriodIsRejectedByPreflight",
+          "status": "passed"
+        },
+        {
+          "suite": "R13PorterSelExport",
+          "name": "create_sel_context_registers_contexts_for_supported_period_tokens",
+          "status": "passed"
+        },
+        {
+          "suite": "R13PorterSelExport",
+          "name": "create_sel_context_rejects_schedules_that_can_never_fire",
+          "status": "passed"
+        },
+        {
+          "suite": "R13PorterSelExport",
+          "name": "sel_userdata_roundtrips_exact_value_and_default",
+          "status": "passed"
+        },
+        {
+          "suite": "R13PorterSelExport",
+          "name": "sel_virgin_position_getters_are_exactly_zero",
+          "status": "passed"
+        },
+        {
+          "suite": "R13PorterSelExport",
+          "name": "sel_all_position_emits_only_the_terminator_for_an_empty_context",
+          "status": "passed"
+        },
+        {
+          "suite": "R13PorterSelExport",
+          "name": "sel_log_text_passes_all_levels_without_touching_state",
+          "status": "passed"
+        },
+        {
+          "suite": "R13PorterSelExport",
+          "name": "DISABLED_sel_mutation_and_subscription_need_engine_seam",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "mocker_factory_retry2",
+      "ids": [
+        "BUG-R111-001",
+        "BUG-R7-002",
+        "BUG-R190-001"
+      ],
+      "filter": "R111CtaMocker.*:R111ExecMocker.*:R111UftMocker.*:R111ReplayerEnv.*",
+      "tests": 33,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R111CtaMocker",
+          "name": "FactoryCreateAndStrategyDispatch",
+          "status": "passed"
+        },
+        {
+          "suite": "R111CtaMocker",
+          "name": "FactoryDestructorUsesPluginByValueDeleteAbi",
+          "status": "passed"
+        },
+        {
+          "suite": "R111CtaMocker",
+          "name": "FactoryRejectsMissingModuleAndCanRetry",
+          "status": "passed"
+        },
+        {
+          "suite": "R111CtaMocker",
+          "name": "FactoryRejectsMissingStrategyAndUnknownStrategy",
+          "status": "passed"
+        },
+        {
+          "suite": "R111CtaMocker",
+          "name": "FactoryRejectsStrategyInitializationFailure",
+          "status": "passed"
+        },
+        {
+          "suite": "R111CtaMocker",
+          "name": "FailedStrategyDeletePinsPluginAndRejectsInitializationRetry",
+          "status": "passed"
+        },
+        {
+          "suite": "R111CtaMocker",
+          "name": "RatioSlippageOnSignalFill",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "RealPluginLifecycleUsesExportedDeleterAbi",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "SecondInitIsRejectedAndOriginalUnitRemainsUsable",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "UnknownExecuterNameFailsAndReleasesFactory",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "PluginWithoutExecuterFactoryExportFailsSafely",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "MissingExecuterConfigurationFailsWithDiagnostic",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "InitWithRealExecuterAndInitSchedule",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "BuiltInV2TwapRejectsZeroTotalTimesAndAcceptsPositiveControl",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "EntrustOrderTradeAndReplayDump",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "ScheduleNegativeAndPositiveVolumeModes",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "RejectsShortAndUnverifiablePluginTables",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "PluginQuiesceUsesFactoryPreflightRequestCanWaitWaitThenDestroy",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "OtherThreadPluginCallbackDoesNotBlockControlThreadPreflight",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "FailedQuiesceRequestRetainsAllPluginOwnersUntilRetrySucceeds",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "FailedWaitRetainsPluginOwnersAndRequiresFreshCanWaitBeforeRetry",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "FailedFactoryPreflightSendsNoRequestAndCanBeRetried",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ExecMocker",
+          "name": "CanStopPreflightFailureDefersWithoutChangingRequestState",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ReplayerEnv",
+          "name": "NotifierBarRunStateAndDump",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ReplayerEnv",
+          "name": "EmptyRunsNotifyBacktestEnd",
+          "status": "passed"
+        },
+        {
+          "suite": "R111ReplayerEnv",
+          "name": "AdjustedSuffixSubscriptionsAndCheckUnbars",
+          "status": "passed"
+        },
+        {
+          "suite": "R111UftMocker",
+          "name": "FactoryCreateAndEventDispatch",
+          "status": "passed"
+        },
+        {
+          "suite": "R111UftMocker",
+          "name": "FactoryRejectsMissingStrategyAndEmptyOrMissingName",
+          "status": "passed"
+        },
+        {
+          "suite": "R111UftMocker",
+          "name": "FactoryRejectsUnknownStrategyAndCleansPlugin",
+          "status": "passed"
+        },
+        {
+          "suite": "R111UftMocker",
+          "name": "RealSimpleUftRejectsMissingParamsWithoutCrash",
+          "status": "passed"
+        },
+        {
+          "suite": "R111UftMocker",
+          "name": "FactoryRejectsStrategyInitFalseAndCleansInOrder",
+          "status": "passed"
+        },
+        {
+          "suite": "R111UftMocker",
+          "name": "ControlledSuccessfulInitDeletesStrategyBeforeFactory",
+          "status": "passed"
+        },
+        {
+          "suite": "R111UftMocker",
+          "name": "SessionFreezeReleaseEnumAndUnknownCommodity",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "runner_config",
+      "ids": [
+        "BUG-R9-001"
+      ],
+      "filter": "R205BtRunnerConfig.*:Z15BtRunnerConfigLock.*",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R205BtRunnerConfig",
+          "name": "SuccessfulConfigRejectsASecondConfig",
+          "status": "passed"
+        },
+        {
+          "suite": "R205BtRunnerConfig",
+          "name": "PreflightFailureCanBeRetriedWithAValidConfig",
+          "status": "passed"
+        },
+        {
+          "suite": "Z15BtRunnerConfigLock",
+          "name": "FactoryFailureAfterReplayerInitRejectsLaterConfigExplicitly",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "notifier_backtest",
+      "ids": [
+        "R20_wtbtcore#3"
+      ],
+      "filter": "R20EventNotifier.*",
+      "tests": 8,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R20EventNotifier",
+          "name": "AutomaticStorageNotifierCanNotifyAndDestructBeforeInit",
+          "status": "passed"
+        },
+        {
+          "suite": "R20EventNotifier",
+          "name": "NotifyDataDoesNotTouchBufferWithoutPublisher",
+          "status": "passed"
+        },
+        {
+          "suite": "R20EventNotifier",
+          "name": "NotifyFundBuildsJsonAndNoopsWithoutPublisher",
+          "status": "passed"
+        },
+        {
+          "suite": "R20EventNotifier",
+          "name": "InitReturnsFalseWhenInactive",
+          "status": "passed"
+        },
+        {
+          "suite": "R20EventNotifier",
+          "name": "InactiveInitIsSideEffectFreeOnFreshInstance",
+          "status": "passed"
+        },
+        {
+          "suite": "R20EventNotifier",
+          "name": "FailedInitLeavesServerIdZero",
+          "status": "passed"
+        },
+        {
+          "suite": "R20EventNotifier",
+          "name": "DISABLED_InitActiveLoadsMqModuleAndOpensServer",
+          "status": "passed"
+        },
+        {
+          "suite": "R20EventNotifier",
+          "name": "DISABLED_InitNullConfigDerefsAndCrashes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "day_price_retry",
+      "ids": [
+        "BUG-I02-NEW-109"
+      ],
+      "filter": "R80SliceUnsub.DayPriceReadsSimulatedDayCache",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R80SliceUnsub",
+          "name": "DayPriceReadsSimulatedDayCache",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "udp_shutdown",
+      "ids": [
+        "BUG-T6-010"
+      ],
+      "filter": "ParserUDPShutdownTest.*",
+      "tests": 13,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "CurrentSendErrorRecoversPairOnceAndIgnoresStaleOrAbortedCompletions",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "ReceiveOperationsOwnDistinctBuffersAndPartialReconnectIsRejected",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "ExternalReleaseWaitsForActiveSpiCallbackAndBlocksLaterDispatch",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "SelfReleaseAndDeleteRetainOwnerForExternalRetry",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "ActiveUdpDisconnectEmitsOneCloseAndReconnectStartsNewEventEpoch",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "AutomaticReconnectStartsANewCloseEventCycle",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "ExpectedOperationAbortedDoesNotReportOrReconnect",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "ReentrantRecoveryLogDisconnectPreventsReconnectAndAllowsControlThreadRestart",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "PersistentSendErrorsStopAfterBoundedRecoveryAttempts",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "PersistentReadErrorsStopAfterBoundedRecoveryAttempts",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "SuccessfulCurrentSendResetsItsRecoveryBudget",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "OldTwoChannelReadCompletionsBelongToOneReconnectEpoch",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserUDPShutdownTest",
+          "name": "BroadcastOnlyRecoveryStartsOneNewCloseCycle",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "mocker_lifecycle",
+      "ids": [
+        "BUG-T6-009"
+      ],
+      "filter": "T6009Mocker.*",
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "T6009Mocker",
+          "name": "PendingAndCanceledOrderRefsReturnedExactlyOnce",
+          "status": "passed"
+        },
+        {
+          "suite": "T6009Mocker",
+          "name": "DestructorAloneReturnsPendingOrderRefs",
+          "status": "passed"
+        },
+        {
+          "suite": "T6009Mocker",
+          "name": "ReleaseFromWorkerCallbackDefersJoin",
+          "status": "passed"
+        },
+        {
+          "suite": "T6009Mocker",
+          "name": "DeleteTraderFromWorkerCallbackQuarantines",
+          "status": "passed"
+        },
+        {
+          "suite": "T6009Mocker",
+          "name": "RepeatedInitRejected",
+          "status": "passed"
+        },
+        {
+          "suite": "T6009Mocker",
+          "name": "ConcurrentExternalReleaseAndRequests",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "commodity",
+      "ids": [
+        "BUG-L03-002"
+      ],
+      "filter": "l03_commodity.create_initializes_identity_buffers:l03_commodity.trading_mode_predicates:l03_contract.storage_width_contract_limits_preserve_valid_edges_and_reject_before_rules_registration",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "l03_commodity",
+          "name": "create_initializes_identity_buffers",
+          "status": "passed"
+        },
+        {
+          "suite": "l03_commodity",
+          "name": "trading_mode_predicates",
+          "status": "passed"
+        },
+        {
+          "suite": "l03_contract",
+          "name": "storage_width_contract_limits_preserve_valid_edges_and_reject_before_rules_registration",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "empty_match",
+      "ids": [
+        "BUG-R43-002"
+      ],
+      "filter": "R43MatchEngineFlowTest.emptyBookRejectsWithoutSideEffectsAndLaterQuoteAllowsOrders:R43MatchEngineFlowTest.bookIsRebuiltFromEachTickSnapshotAndEmptyQuoteClearsOldLevels",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R43MatchEngineFlowTest",
+          "name": "emptyBookRejectsWithoutSideEffectsAndLaterQuoteAllowsOrders",
+          "status": "passed"
+        },
+        {
+          "suite": "R43MatchEngineFlowTest",
+          "name": "bookIsRebuiltFromEachTickSnapshotAndEmptyQuoteClearsOldLevels",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "mocker_isolation",
+      "ids": [
+        "BUG-R60-001"
+      ],
+      "filter": "R60SessionIsolation.*",
+      "tests": 4,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R60SessionIsolation",
+          "name": "async_connect_login_then_immediate_release_delivers_nothing_afterwards",
+          "status": "passed"
+        },
+        {
+          "suite": "R60SessionIsolation",
+          "name": "release_from_rsp_entrust_suppresses_rest_of_handler",
+          "status": "passed"
+        },
+        {
+          "suite": "R60SessionIsolation",
+          "name": "release_from_matcher_push_suppresses_rest_of_pass",
+          "status": "passed"
+        },
+        {
+          "suite": "R60SessionIsolation",
+          "name": "disconnect_ends_session_like_release_and_does_not_grow_fds",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "mocker_requests",
+      "ids": [
+        "BUG-R60-003"
+      ],
+      "filter": "R60MockerTest.*",
+      "tests": 21,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R60MockerTest",
+          "name": "release_and_destructor_free_bound_udp_port",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "repeated_instance_lifecycle_does_not_grow_process_fds",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "same_instance_rejects_reinit_and_fresh_instances_deliver_each_connect",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "released_instance_rejects_reinit_and_old_query_never_reaches_new_lifecycle",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "release_reentered_from_connect_callback_does_not_terminate",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "ready_requests_remain_deferred_and_run_after_connect",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "stopped_requests_are_rejected_without_retaining",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "unexecuted_order_requests_release_references_on_destruction",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "stopping_closes_request_admission_before_join",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "duplicate_login_preserves_running_worker",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "duplicate_connect_preserves_running_worker",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "connect_loads_positions_and_query_returns_long_short",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "empty_queries_dispatch_default_account_and_null_arrays",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "insert_open_order_dispatches_and_persists_positions_file",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "insert_rejections_map_to_distinct_error_messages",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "close_order_freezes_position_and_cover_none_bypasses_check",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "cancel_unknown_order_before_any_insert_reports_error",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "cancel_open_order_and_unknown_cancel_reports_error",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "cancel_close_order_releases_frozen_volume",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "udp_unknown_header_is_ignored_and_io_loop_survives",
+          "status": "passed"
+        },
+        {
+          "suite": "R60MockerTest",
+          "name": "DISABLED_OpenOrderSuccessMessageContractUnproven",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "manual_positions",
+      "ids": [
+        "BUG-Q04-007"
+      ],
+      "filter": "q04_uftctx_local.manual_positions_are_imported_then_file_is_renamed:q04_uftctx_local.manual_file_with_unknown_contract_is_rejected_as_a_whole:q04_uftctx_local.manual_file_with_invalid_entries_is_rejected_as_a_whole:q04_uftctx_local.manual_file_is_not_applied_when_it_cannot_be_archived:q04_uftctx_local.manual_file_at_day_switch_replaces_positions",
+      "tests": 5,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "q04_uftctx_local",
+          "name": "manual_positions_are_imported_then_file_is_renamed",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_uftctx_local",
+          "name": "manual_file_with_unknown_contract_is_rejected_as_a_whole",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_uftctx_local",
+          "name": "manual_file_with_invalid_entries_is_rejected_as_a_whole",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_uftctx_local",
+          "name": "manual_file_is_not_applied_when_it_cannot_be_archived",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_uftctx_local",
+          "name": "manual_file_at_day_switch_replaces_positions",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "router_rules",
+      "ids": [
+        "BUG-R28-005"
+      ],
+      "filter": "N02ExecMgrTest.LoadRouterRulesRejectsNullAndNonArray:N02ExecMgrTest.LoadRouterRulesAcceptsStringAndArrayExecuters:N02ExecMgrTest.RouterRuleWithoutExecuterNodeIsRejected:N02ExecMgrTest.MalformedRouterRulesDoNotPartiallyReplaceExistingRoutes:N02ExecMgrTest.RouterRuleWithoutStrategyIsRejected",
+      "tests": 5,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "N02ExecMgrTest",
+          "name": "LoadRouterRulesRejectsNullAndNonArray",
+          "status": "passed"
+        },
+        {
+          "suite": "N02ExecMgrTest",
+          "name": "LoadRouterRulesAcceptsStringAndArrayExecuters",
+          "status": "passed"
+        },
+        {
+          "suite": "N02ExecMgrTest",
+          "name": "RouterRuleWithoutExecuterNodeIsRejected",
+          "status": "passed"
+        },
+        {
+          "suite": "N02ExecMgrTest",
+          "name": "MalformedRouterRulesDoNotPartiallyReplaceExistingRoutes",
+          "status": "passed"
+        },
+        {
+          "suite": "N02ExecMgrTest",
+          "name": "RouterRuleWithoutStrategyIsRejected",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "writer_missing",
+      "ids": [
+        "BUG-I02-NEW-056"
+      ],
+      "filter": "Q05DataManagerTest.InitFailsOnMissingModuleButKeepsSinkTargets:Q05DataManagerTest.WriterGuardsReturnDefaults",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "Q05DataManagerTest",
+          "name": "InitFailsOnMissingModuleButKeepsSinkTargets",
+          "status": "passed"
+        },
+        {
+          "suite": "Q05DataManagerTest",
+          "name": "WriterGuardsReturnDefaults",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "match_engine",
+      "ids": [
+        "BUG-I02-NEW-093"
+      ],
+      "filter": "Z15MatchEngineUnsinked.*",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "Z15MatchEngineUnsinked",
+          "name": "TickWithoutSinkKeepsPendingOrdersAndDoesNotCrash",
+          "status": "passed"
+        },
+        {
+          "suite": "Z15MatchEngineUnsinked",
+          "name": "UninitializedExecMockerTickBuyTickDoesNotCrash",
+          "status": "passed"
+        },
+        {
+          "suite": "Z15MatchEngineUnsinked",
+          "name": "RegisteredSinkStillAcceptsAndFiresOrders",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "hft_forwarding",
+      "ids": [
+        "BUG-I02-NEW-111"
+      ],
+      "filter": "R124PorterExpHft.SubscribedTickAndTradeAreForwarded",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R124PorterExpHft",
+          "name": "SubscribedTickAndTradeAreForwarded",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "duplicate_trade",
+      "ids": [
+        "BUG-I02-NEW-030"
+      ],
+      "filter": "q04_trader_entrust.duplicate_trade_is_notified_and_positioned_once:q04_trader_push.k07c_own_trade_without_trade_id_is_not_booked",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "q04_trader_entrust",
+          "name": "duplicate_trade_is_notified_and_positioned_once",
+          "status": "passed"
+        },
+        {
+          "suite": "q04_trader_push",
+          "name": "k07c_own_trade_without_trade_id_is_not_booked",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "order_identity",
+      "ids": [
+        "BUG-R17-001"
+      ],
+      "filter": "r17_order_identity.*",
+      "tests": 4,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "r17_order_identity",
+          "name": "duplicate_cancel_ack_with_two_pending_cancels_is_applied_once",
+          "status": "passed"
+        },
+        {
+          "suite": "r17_order_identity",
+          "name": "duplicate_fill_ack_and_multiple_orders_keep_independent_state",
+          "status": "passed"
+        },
+        {
+          "suite": "r17_order_identity",
+          "name": "reused_localid_starts_a_new_live_order",
+          "status": "passed"
+        },
+        {
+          "suite": "r17_order_identity",
+          "name": "reconnect_reclaims_terminal_records_only_without_live_orders",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "twap_lots",
+      "ids": [
+        "BUG-R7-012"
+      ],
+      "filter": "r7_twap_legal_lot.*",
+      "tests": 5,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "r7_twap_legal_lot",
+          "name": "sell_rounds_down_to_legal_unit_and_keeps_odd_remainder",
+          "status": "passed"
+        },
+        {
+          "suite": "r7_twap_legal_lot",
+          "name": "t1_sell_is_capped_by_available_then_legal_unit",
+          "status": "passed"
+        },
+        {
+          "suite": "r7_twap_legal_lot",
+          "name": "buy_and_target_change_use_legal_units_only",
+          "status": "passed"
+        },
+        {
+          "suite": "r7_twap_legal_lot",
+          "name": "whole_lot_future_control_and_fractional_target_remainder",
+          "status": "passed"
+        },
+        {
+          "suite": "r7_twap_legal_lot",
+          "name": "unavailable_lot_rules_hold_every_order",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "shm_subscription",
+      "ids": [
+        "BUG-I02-NEW-116"
+      ],
+      "filter": "ParserShmTest.subscribe_splits_std_code_into_raw_code_and_exchange:ParserShmTest.subscribe_and_unsubscribe_preserve_multisegment_standard_code:ParserShmTest.unsubscribe_splits_the_same_way",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "ParserShmTest",
+          "name": "subscribe_splits_std_code_into_raw_code_and_exchange",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserShmTest",
+          "name": "subscribe_and_unsubscribe_preserve_multisegment_standard_code",
+          "status": "passed"
+        },
+        {
+          "suite": "ParserShmTest",
+          "name": "unsubscribe_splits_the_same_way",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "quote_factory",
+      "ids": [
+        "BUG-R104-002"
+      ],
+      "filter": "r104_quote_initparsers.failed_active_entries_are_not_registered:r104_quote_initparsers.k13_optional_failed_parser_does_not_fail_startup:r104_quote_initialize.k13_required_failed_parser_fails_startup",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "r104_quote_initialize",
+          "name": "k13_required_failed_parser_fails_startup",
+          "status": "passed"
+        },
+        {
+          "suite": "r104_quote_initparsers",
+          "name": "failed_active_entries_are_not_registered",
+          "status": "passed"
+        },
+        {
+          "suite": "r104_quote_initparsers",
+          "name": "k13_optional_failed_parser_does_not_fail_startup",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "xtp_login",
+      "ids": [
+        "BUG-T27-004"
+      ],
+      "filter": "XtpLoginF.pending_login_failure_rechecks_unregistered_sink",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "XtpLoginF",
+          "name": "pending_login_failure_rechecks_unregistered_sink",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "xtp_lifecycle",
+      "ids": [
+        "T1-XTP-02"
+      ],
+      "filter": "XtpSeamF.connect_disconnect_joins_the_worker_and_release_is_idempotent:XtpSeamF.worker_thread_shutdown_fails_closed_until_owner_joins",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "XtpSeamF",
+          "name": "connect_disconnect_joins_the_worker_and_release_is_idempotent",
+          "status": "passed"
+        },
+        {
+          "suite": "XtpSeamF",
+          "name": "worker_thread_shutdown_fails_closed_until_owner_joins",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "uft_runner",
+      "ids": [
+        "BUG-R14-010"
+      ],
+      "filter": "WtUftRunnerParserStart.*:WtUftRunnerSinkShutdown.*:r95_uft_run.*",
+      "tests": 9,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "WtUftRunnerSinkShutdown",
+          "name": "drainsReadyCallbackBeforeReleasingTraderAndContext",
+          "status": "passed"
+        },
+        {
+          "suite": "WtUftRunnerParserStart",
+          "name": "shutdownWaitsForParserStartAndDoesNotHoldGateLockInPlugin",
+          "status": "passed"
+        },
+        {
+          "suite": "WtUftRunnerParserStart",
+          "name": "sameThreadShutdownReentryDoesNotWaitOnItself",
+          "status": "passed"
+        },
+        {
+          "suite": "WtUftRunnerParserStart",
+          "name": "parserCallbackShutdownDoesNotWaitForConnectThread",
+          "status": "passed"
+        },
+        {
+          "suite": "r95_uft_run",
+          "name": "signal_flag_makes_run_return_immediately",
+          "status": "passed"
+        },
+        {
+          "suite": "r95_uft_run",
+          "name": "async_mode_returns_after_startup_and_owner_can_shutdown",
+          "status": "passed"
+        },
+        {
+          "suite": "r95_uft_run",
+          "name": "synchronous_mode_waits_for_exit_signal",
+          "status": "passed"
+        },
+        {
+          "suite": "r95_uft_run",
+          "name": "unknown_session_returns_before_starting_runner_loop",
+          "status": "passed"
+        },
+        {
+          "suite": "r95_uft_run",
+          "name": "unconfigured_runner_returns_without_entering_loop",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctploader_worker",
+      "ids": [
+        "BUG-T6-002"
+      ],
+      "filter": "t6_ctp_loader_spi.*:t26_ctploader_flow.stopping_worker_drops_pending_queries_and_joins_active_call",
+      "tests": 7,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "t26_ctploader_flow",
+          "name": "stopping_worker_drops_pending_queries_and_joins_active_call",
+          "status": "passed"
+        },
+        {
+          "suite": "t6_ctp_loader_spi",
+          "name": "front_disconnected_is_reported_on_stderr",
+          "status": "passed"
+        },
+        {
+          "suite": "t6_ctp_loader_spi",
+          "name": "rsp_error_prints_detail_only_for_real_errors",
+          "status": "passed"
+        },
+        {
+          "suite": "t6_ctp_loader_spi",
+          "name": "authenticate_responses_never_reach_login_when_guarded",
+          "status": "passed"
+        },
+        {
+          "suite": "t6_ctp_loader_spi",
+          "name": "login_failure_response_is_not_treated_as_success",
+          "status": "passed"
+        },
+        {
+          "suite": "t6_ctp_loader_spi",
+          "name": "instrument_responses_skip_body_and_never_reach_exit",
+          "status": "passed"
+        },
+        {
+          "suite": "t6_ctp_loader_spi",
+          "name": "fee_and_margin_error_responses_are_skipped_before_deref",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "replay_public",
+      "ids": [
+        "BUG-I02-NEW-101",
+        "BUG-I02-NEW-102"
+      ],
+      "filter": "R2PublicTest.stopBeforeRunQuitsReplayEarly:R2PublicTest.metadataAndTimelineQueries",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R2PublicTest",
+          "name": "stopBeforeRunQuitsReplayEarly",
+          "status": "passed"
+        },
+        {
+          "suite": "R2PublicTest",
+          "name": "metadataAndTimelineQueries",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "replay_cache",
+      "ids": [
+        "BUG-I02-NEW-095",
+        "BUG-I02-NEW-096"
+      ],
+      "filter": "R180LoaderFixture.R180His_LoaderM5AutoTransThenDsbReuse:R180LoaderFixture.R180His_CorruptAutoTransDsbRebuiltFromLoader:R180LoaderFixture.R180His_CheckUnbarsMinute5UsesUnbarsCache:R180LoaderFixture.R180His_CacheClearJoinsMultipleCodes:R210Fixture.R210His_BarReplaySkipsEmptyL2Lists:R210Fixture.R210His_UncompressedV2BarBlockHeaderStripped",
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R180LoaderFixture",
+          "name": "R180His_LoaderM5AutoTransThenDsbReuse",
+          "status": "passed"
+        },
+        {
+          "suite": "R180LoaderFixture",
+          "name": "R180His_CorruptAutoTransDsbRebuiltFromLoader",
+          "status": "passed"
+        },
+        {
+          "suite": "R180LoaderFixture",
+          "name": "R180His_CheckUnbarsMinute5UsesUnbarsCache",
+          "status": "passed"
+        },
+        {
+          "suite": "R180LoaderFixture",
+          "name": "R180His_CacheClearJoinsMultipleCodes",
+          "status": "passed"
+        },
+        {
+          "suite": "R210Fixture",
+          "name": "R210His_BarReplaySkipsEmptyL2Lists",
+          "status": "passed"
+        },
+        {
+          "suite": "R210Fixture",
+          "name": "R210His_UncompressedV2BarBlockHeaderStripped",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "diff_retry",
+      "ids": [
+        "BUG-I02-NEW-035"
+      ],
+      "filter": "R71ExecTest.K06DiffCleanFailureFollowedBySuccessfulRetryLetsQuiesceComplete:R71ExecTest.K06DiffCleanFailureWithoutSuccessfulRetryKeepsQuiesceIncomplete",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "R71ExecTest",
+          "name": "K06DiffCleanFailureFollowedBySuccessfulRetryLetsQuiesceComplete",
+          "status": "passed"
+        },
+        {
+          "suite": "R71ExecTest",
+          "name": "K06DiffCleanFailureWithoutSuccessfulRetryKeepsQuiesceIncomplete",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "p07_loader",
+      "ids": [
+        "BUG-I02-NEW-074"
+      ],
+      "filter": "P07TickLoaderTest.singleItemHftStreamsReplayFinalRecord",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "P07TickLoaderTest",
+          "name": "singleItemHftStreamsReplayFinalRecord",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "replay_completion",
+      "ids": [
+        "BUG-I02-NEW-101",
+        "BUG-I02-NEW-074"
+      ],
+      "filter": "P04ReplayTermTest.invertedTimeRangeIsRejectedBeforePrepare:P07MinuteReplayTest.simulatedTickCallbackExceptionAllowsReplayRetry:P07MinuteReplayTest.unsubscribedTickCallbackExceptionReloadsBarsOnRetry:P07TickLoaderTest.hftTickCallbackExceptionAllowsReplayByDayRetry:P07TickLoaderTest.emptyNullTickLoaderCallbackIsAValidEmptyBucket:P07TickLoaderTest.emptyReplayBucketsStayBoundedAcrossLongNoDataRange",
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "tests_list": [
+        {
+          "suite": "P04ReplayTermTest",
+          "name": "invertedTimeRangeIsRejectedBeforePrepare",
+          "status": "passed"
+        },
+        {
+          "suite": "P07MinuteReplayTest",
+          "name": "simulatedTickCallbackExceptionAllowsReplayRetry",
+          "status": "passed"
+        },
+        {
+          "suite": "P07MinuteReplayTest",
+          "name": "unsubscribedTickCallbackExceptionReloadsBarsOnRetry",
+          "status": "passed"
+        },
+        {
+          "suite": "P07TickLoaderTest",
+          "name": "emptyNullTickLoaderCallbackIsAValidEmptyBucket",
+          "status": "passed"
+        },
+        {
+          "suite": "P07TickLoaderTest",
+          "name": "emptyReplayBucketsStayBoundedAcrossLongNoDataRange",
+          "status": "passed"
+        },
+        {
+          "suite": "P07TickLoaderTest",
+          "name": "hftTickCallbackExceptionAllowsReplayByDayRetry",
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

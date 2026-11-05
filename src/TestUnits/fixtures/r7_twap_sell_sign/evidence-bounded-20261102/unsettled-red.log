@@ -1,0 +1,37 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r7_twap_unsettled_red.*
+[==========] Running 3 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 3 tests from r7_twap_unsettled_red
+[ RUN      ] r7_twap_unsettled_red.later_tick_can_submit_while_prior_fill_is_not_in_position
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1316: Failure
+Expected: (ctx.buys.size()) <= (2u), actual: 3 vs 2
+
+[  FAILED  ] r7_twap_unsettled_red.later_tick_can_submit_while_prior_fill_is_not_in_position (0 ms)
+[ RUN      ] r7_twap_unsettled_red.frozen_t1_position_must_not_reverse_reduction_target
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1337: Failure
+Value of: ctx.buys.empty()
+  Actual: false
+Expected: true
+
+[  FAILED  ] r7_twap_unsettled_red.frozen_t1_position_must_not_reverse_reduction_target (0 ms)
+[ RUN      ] r7_twap_unsettled_red.two_canceled_orders_need_both_remaining_quantities
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1361: Failure
+Expected equality of these values:
+  ctx.buys[1].qty
+    Which is: 4
+  12.0
+    Which is: 12
+
+[  FAILED  ] r7_twap_unsettled_red.two_canceled_orders_need_both_remaining_quantities (0 ms)
+[----------] 3 tests from r7_twap_unsettled_red (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 1 test suite ran. (1 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] r7_twap_unsettled_red.later_tick_can_submit_while_prior_fill_is_not_in_position
+[  FAILED  ] r7_twap_unsettled_red.frozen_t1_position_must_not_reverse_reduction_target
+[  FAILED  ] r7_twap_unsettled_red.two_canceled_orders_need_both_remaining_quantities
+
+ 3 FAILED TESTS

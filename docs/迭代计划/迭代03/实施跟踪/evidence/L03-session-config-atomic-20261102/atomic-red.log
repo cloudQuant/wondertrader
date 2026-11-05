@@ -1,0 +1,5 @@
+17 FAILED: !load(m,R"({"OLD":{"name":"replacement","offset":300,"sections":[{"from":2100,"to":2300}]},"BROKEN":{"name":"missing sections"},"NEW":{"offset":0,"sections":[{"from":900,"to":1500}]}})")
+18 FAILED: m.getSession("OLD")==old
+18 FAILED: m.getSession("NEW")==nullptr
+/tmp/wt-i03-session-atomic-20261102/red/src/WTSTools/../Includes/WTSVariant.hpp:358:37: runtime error: 2.14748e+09 is outside the range of representable values of type 'int'
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-session-atomic-20261102/red/src/WTSTools/../Includes/WTSVariant.hpp:358:37 

@@ -1,0 +1,664 @@
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/n04_btcore_mockers/r43_sel_mocker_dump_test.cpp	2026-10-31 13:29:53
++++ src/TestUnits/coverage/n04_btcore_mockers/r43_sel_mocker_dump_test.cpp	2026-11-04 21:45:13
+@@ -208,6 +208,8 @@
+ 		WTSVariant* basefiles = WTSVariant::createObject();
+ 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
+ 		basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
++		// 卡1 A+C：prepare 起点 checked 映射需日历（同 I03-NEW-018）
++		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
+ 		cfg->append("basefiles", basefiles);
+ 		basefiles->release();
+ 
+@@ -504,6 +506,8 @@
+ 	WTSVariant* basefiles = WTSVariant::createObject();
+ 	basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
+ 	basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
++	// 卡1 A+C：prepare 起点 checked 映射需日历（同 I03-NEW-018）
++	basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
+ 	cfg->append("basefiles", basefiles);
+ 	basefiles->release();
+ 
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp	2026-10-31 17:20:27
++++ src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp	2026-11-04 21:09:02
+@@ -77,6 +77,7 @@
+ 		cfg->append("fees", "");
+ 		WTSVariant* basefiles = WTSVariant::createObject();
+ 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
++		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());	// 卡1 A+C：prepare 起点 checked 映射需日历（同 I03-NEW-018）
+ 		basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
+ 		cfg->append("basefiles", basefiles);
+ 		basefiles->release();
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp	2026-10-29 12:44:55
++++ src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp	2026-11-04 21:16:28
+@@ -15,9 +15,11 @@
+  */
+ #include <gtest/gtest.h>
+ 
++#include <cmath>
+ #include <cstdint>
+ #include <cstdlib>
+ #include <filesystem>
++#include <fstream>
+ #include <string>
+ #include <system_error>
+ #include <sys/resource.h>
+@@ -125,9 +127,21 @@
+ 	{
+ 		WTSVariant* basefiles = WTSVariant::createObject();
+ 		if (withSession)
++		{
+ 			basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
++			// 卡1 A+C：prepare 起点 checked 映射需日历（同 I03-NEW-018）
++			basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
++		}
+ 		if (withCommodity)
++		{
+ 			basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
++			// 卡13d：费用按可核验的实际合约计算，夹具提供 SSE.000001 合约元数据
++			const std::filesystem::path contracts = std::filesystem::temp_directory_path() /
++				("p04_replayer_contracts_" + std::to_string(::getpid()) + ".json");
++			std::ofstream(contracts) << "{\"SSE\":{\"000001\":{\"name\":\"p04\",\"code\":\"000001\",\"exchg\":\"SSE\","
++				"\"product\":\"STK\",\"opendate\":20000101,\"expiredate\":20991231}}}";
++			basefiles->append("contract", contracts.string().c_str());
++		}
+ 		cfg->append("basefiles", basefiles);
+ 		basefiles->release();
+ 	}
+@@ -301,8 +315,9 @@
+ 
+ 	// 没有品种数据 -> 品种查询为 NULL
+ 	EXPECT_EQ(nullptr, replayer.get_commodity_info("SSE.STK.000001"));
+-	// 没有手续费配置 -> 费用恒为 0
+-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("SSE.STK.000001", 10.0, 100.0, 0));
++	// 没有手续费配置：卡13d“缺费报错”，费用查询返回可观察错误（NaN），不再静默为 0
++	// （旧断言期望 0.0，与已裁定卡13d冲突，改写；原文件见证据 before/）
++	EXPECT_TRUE(std::isnan(replayer.calc_fee("SSE.STK.000001", 10.0, 100.0, 0)));
+ 	EXPECT_EQ(std::string(""), replayer.get_rawcode("SSE.STK.000001"));
+ }
+ 
+@@ -338,10 +353,11 @@
+ 	cfg->append("fees", "/tmp/p04_definitely_missing_fee_file.json");
+ 
+ 	HisDataReplayer replayer;
+-	// loadFees 读不到文件只打日志，不影响 init 返回值
+-	EXPECT_TRUE(replayer.init(cfg));
++	// 卡13d“缺费报错”：配置了却读不到的费用模板使 init 显式失败，费用查询不静默为 0
++	// （旧断言期望 init 成功且费用 0.0，与已裁定卡13d冲突，改写；原文件见证据 before/）
++	EXPECT_FALSE(replayer.init(cfg));
+ 	cfg->release();
+-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("SSE.STK.000001", 1.0, 100.0, 0));
++	EXPECT_TRUE(std::isnan(replayer.calc_fee("SSE.STK.000001", 1.0, 100.0, 0)));
+ }
+ 
+ TEST_F(P04ReplayerConfigTest, clearCacheWipesPriceMap)
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp	2026-10-31 17:25:19
++++ src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp	2026-11-04 21:09:02
+@@ -200,6 +200,7 @@
+ 		cfg->append("fees", "");
+ 		WTSVariant* basefiles = WTSVariant::createObject();
+ 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
++		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());	// 卡1 A+C：prepare 起点 checked 映射需日历（同 I03-NEW-018）
+ 		basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
+ 		cfg->append("basefiles", basefiles);
+ 		basefiles->release();
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp	2026-10-31 17:13:32
++++ src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp	2026-11-04 21:09:02
+@@ -67,6 +67,7 @@
+ 		cfg->append("fees", "");
+ 		WTSVariant* basefiles = WTSVariant::createObject();
+ 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
++		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());	// 卡1 A+C：prepare 起点 checked 映射需日历（同 I03-NEW-018）
+ 		if (includeFutures)
+ 		{
+ 			WTSVariant* commodities = WTSVariant::createArray();
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp	2026-11-01 21:10:39
++++ src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp	2026-11-04 21:19:23
+@@ -18,6 +18,7 @@
+ #include <atomic>
+ #include <cstdint>
+ #include <cstring>
++#include <cmath>
+ #include <filesystem>
+ #include <fstream>
+ #include <functional>
+@@ -1218,7 +1219,7 @@
+ 	{
+ 		std::ofstream out(sessions);
+ 		ASSERT_TRUE(out.is_open());
+-		out << R"({"P07_24H":{"name":"continuous","offset":0,"sections":[{"from":0,"to":2400}]}})";
++		out << R"({"TRADING":{"name":"default","offset":0,"sections":[{"from":0,"to":0}]},"P07_24H":{"name":"continuous","offset":0,"sections":[{"from":0,"to":0}]}})";
+ 	}
+ 	{
+ 		std::ofstream out(commodities);
+@@ -1274,7 +1275,7 @@
+ 	{
+ 		std::ofstream out(sessions);
+ 		ASSERT_TRUE(out.is_open());
+-		out << R"({"P07_24H_POS":{"name":"continuous-offset","offset":300,"sections":[{"from":0,"to":2400}]}})";
++		out << R"({"TRADING":{"name":"default","offset":0,"sections":[{"from":0,"to":0}]},"P07_24H_POS":{"name":"continuous-offset","offset":300,"sections":[{"from":0,"to":0}]}})";
+ 	}
+ 	{
+ 		std::ofstream out(commodities);
+@@ -1329,7 +1330,7 @@
+ 	{
+ 		std::ofstream out(sessions);
+ 		ASSERT_TRUE(out.is_open());
+-		out << R"({"P07_24H_NEG":{"name":"continuous-negative-offset","offset":-300,"sections":[{"from":0,"to":2400}]}})";
++		out << R"({"TRADING":{"name":"default","offset":0,"sections":[{"from":0,"to":0}]},"P07_24H_NEG":{"name":"continuous-negative-offset","offset":-300,"sections":[{"from":0,"to":0}]}})";
+ 	}
+ 	{
+ 		std::ofstream out(commodities);
+@@ -1786,7 +1787,7 @@
+ 	{
+ 		std::ofstream out(sessions);
+ 		ASSERT_TRUE(out.is_open());
+-		out << R"({"P07_24H":{"name":"continuous","offset":0,"sections":[{"from":0,"to":2400}]}})";
++		out << R"({"TRADING":{"name":"default","offset":0,"sections":[{"from":0,"to":0}]},"P07_24H":{"name":"continuous","offset":0,"sections":[{"from":0,"to":0}]}})";
+ 	}
+ 	{
+ 		std::ofstream out(commodities);
+@@ -1854,7 +1855,8 @@
+ 		std::ofstream out(sessions);
+ 		ASSERT_TRUE(out.is_open());
+ 		out << R"({
+-			"P07_24H": {"name":"continuous","offset":0,"sections":[{"from":0,"to":2400}]},
++			"TRADING": {"name":"default","offset":0,"sections":[{"from":0,"to":0}]},
++			"P07_24H": {"name":"continuous","offset":0,"sections":[{"from":0,"to":0}]},
+ 			"P07_NEG": {"name":"offset-negative","offset":-300,"sections":[{"from":0,"to":200}]}
+ 		})";
+ 	}
+@@ -3165,6 +3167,15 @@
+ 	std::string fees;
+ 	ASSERT_TRUE(write_fee_template(_base, fees));
+ 	WTSVariant* cfg = loader_cfg(_root, _base, 202001020930ull, 202001031500ull, false, fees);
++	// 卡13d：费用按可核验的实际合约计算，夹具提供三只合约元数据
++	const std::filesystem::path contracts = _base / "p07_fee_contracts.json";
++	std::ofstream(contracts) << "{\"SSE\":{\"600000\":{\"name\":\"pf\",\"code\":\"600000\",\"exchg\":\"SSE\",\"product\":\"STK\","
++		"\"opendate\":20000101,\"expiredate\":20991231},"
++		"\"000001\":{\"name\":\"idx\",\"code\":\"000001\",\"exchg\":\"SSE\",\"product\":\"IDX\","
++		"\"opendate\":20000101,\"expiredate\":20991231}},"
++		"\"SZSE\":{\"000001\":{\"name\":\"pa\",\"code\":\"000001\",\"exchg\":\"SZSE\",\"product\":\"STK\","
++		"\"opendate\":20000101,\"expiredate\":20991231}}}";
++	cfg->get("basefiles")->append("contract", contracts.string().c_str());
+ 	ASSERT_TRUE(replayer.init(cfg, NULL, &loader));
+ 	cfg->release();
+ 
+@@ -3181,10 +3192,10 @@
+ 	EXPECT_DOUBLE_EQ(6.0, replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 0));
+ 	EXPECT_DOUBLE_EQ(9.0, replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 1));
+ 	EXPECT_DOUBLE_EQ(3.0, replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 2));
+-	// offset 非法 -> 0
+-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 9));
+-	// 费率表里没有的品种 -> 0
+-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("DCE.IDX.999999", 10.0, 3.0, 0));
++	// 卡13d“缺费报错”：offset 非法与费率表里没有的品种均返回可观察错误（NaN）
++	// （两条旧断言期望 0.0，与已裁定卡13d冲突，改写；原文件见证据 before/）
++	EXPECT_TRUE(std::isnan(replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 9)));
++	EXPECT_TRUE(std::isnan(replayer.calc_fee("DCE.IDX.999999", 10.0, 3.0, 0)));
+ }
+ 
+ /*
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp	2026-11-02 22:16:42
++++ src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp	2026-11-04 21:26:58
+@@ -574,8 +574,9 @@
+ 	WTSTickStruct invalid = r91::mk_tick(kDate, 931u, 99.0, 100.0);
+ 	invalid.action_time = 93160000u; // invalid second 60, rejected by replay
+ 	loader.ticks = {invalid, r91::mk_tick(kDate, 933u, 12.0, 200.0)};
+-	WTSOrdDtlStruct detail = r91::mk_orddtl(kDate, 931u, 10.0, 1u);
+-	detail.action_time = invalid.action_time;
++	// BUG-I02-NEW-029（卡E）后，同一非法时刻的逐笔委托同样被过滤、不会回调；
++	// 改用紧随其后的合法时刻 09:32:00，验证其回调中仍看不到被过滤的非法 tick（断言不变）。
++	WTSOrdDtlStruct detail = r91::mk_orddtl(kDate, 932u, 10.0, 1u);
+ 	ASSERT_TRUE(r91::write_orddtl(_base, "SSE", "000001", kDate, {detail}));
+ 	r91::CfgOpts opts;
+ 	opts.mode = "bin";
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp	2026-11-01 07:18:09
++++ src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp	2026-11-04 21:16:54
+@@ -91,10 +91,18 @@
+ 		cfg->append("align_by_section", false);
+ 		cfg->append("dont_simtick_if_notrade", false);
+ 		cfg->append("cache_clear_days", static_cast<uint32_t>(10));
+-		cfg->append("fees", "");
++		// 卡13d：成交须有可核验的实际合约与费率（缺费即错误，零费率合法）；
++		// 本组验证信号成交语义而非费用，夹具提供合约元数据与零费率模板。
++		const std::filesystem::path fees = base / "r2_zero_fees.json";
++		std::ofstream(fees) << "{\"SSE.STK\":{\"open\":0.0,\"close\":0.0,\"closetoday\":0.0,\"byvolume\":false}}";
++		const std::filesystem::path contracts = base / "r2_contracts.json";
++		std::ofstream(contracts) << "{\"SSE\":{\"000001\":{\"name\":\"r2\",\"code\":\"000001\",\"exchg\":\"SSE\","
++			"\"product\":\"STK\",\"opendate\":20000101,\"expiredate\":20991231}}}";
++		cfg->append("fees", fees.string().c_str());
+ 		WTSVariant* basefiles = WTSVariant::createObject();
+ 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
+ 		basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
++		basefiles->append("contract", contracts.string().c_str());
+ 		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
+ 		cfg->append("basefiles", basefiles);
+ 		basefiles->release();
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp	2026-11-01 21:19:12
++++ src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp	2026-11-04 21:19:23
+@@ -19,6 +19,7 @@
+ #include <cstdint>
+ #include <cstring>
+ #include <filesystem>
++#include <cmath>
+ #include <fstream>
+ #include <sstream>
+ #include <string>
+@@ -101,6 +102,13 @@
+ 		basefiles->append("commodity", comms);
+ 		comms->release();
+ 		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
++		// 卡13d：费用按可核验的实际合约计算，夹具提供两只合约元数据
++		const std::filesystem::path contracts = base / "r2_pub_contracts.json";
++		std::ofstream(contracts) << "{\"DCE\":{\"a2105\":{\"name\":\"a2105\",\"code\":\"a2105\",\"exchg\":\"DCE\",\"product\":\"a\","
++			"\"opendate\":20200101,\"expiredate\":20210531}},"
++			"\"SSE\":{\"000001\":{\"name\":\"r2\",\"code\":\"000001\",\"exchg\":\"SSE\",\"product\":\"STK\","
++			"\"opendate\":20000101,\"expiredate\":20991231}}}";
++		basefiles->append("contract", contracts.string().c_str());
+ 		cfg->append("basefiles", basefiles);
+ 		basefiles->release();
+ 		return cfg;
+@@ -239,10 +247,10 @@
+ 	EXPECT_DOUBLE_EQ(5.0, replayer.calc_fee(kFut, 5000.0, 2, 1));
+ 	// closetoday=0 时 rate==0，minfee 不生效
+ 	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee(kFut, 5000.0, 10, 2));
+-	// offset 越界 -> default 分支
+-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee(kFut, 5000.0, 10, 9));
+-	// 未登记费率的合约 -> 0
+-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("CFFEX.IF2103", 5000.0, 1, 0));
++	// 卡13d“缺费报错”：offset 越界与未登记费率的合约均返回可观察错误（NaN），
++	// 不再静默为 0（两条旧断言期望 0.0，与已裁定卡13d冲突，改写；原文件见证据 before/）
++	EXPECT_TRUE(std::isnan(replayer.calc_fee(kFut, 5000.0, 10, 9)));
++	EXPECT_TRUE(std::isnan(replayer.calc_fee("CFFEX.IF2103", 5000.0, 1, 0)));
+ 
+ 	// 按额：1:2:3 的严格比例（金额相同，只有 rate 在变）
+ 	double fOpen = replayer.calc_fee(kStk, 10.0, 100, 0);
+@@ -254,11 +262,13 @@
+ 	// 金额翻倍 -> 费用翻倍（四舍五入到分）
+ 	EXPECT_DOUBLE_EQ(2 * fClose, replayer.calc_fee(kStk, 20.0, 100, 1));
+ 
+-	// 不存在的模板文件
++	// 不存在的模板文件：卡13d 下配置了却读不到的费用模板使 init 显式失败
++	// （旧版经 setup 断言 init 成功并期望费用 0.0，与已裁定卡13d冲突，改写）
+ 	HisDataReplayer r2;
+-	CountSink s2;
+-	setup(r2, s2, (_base / "no_such_fees.json").string().c_str());
+-	EXPECT_DOUBLE_EQ(0.0, r2.calc_fee(kFut, 5000.0, 10, 0));
++	WTSVariant* missingCfg = pub_cfg(_root, _base, (_base / "no_such_fees.json").string().c_str());
++	EXPECT_FALSE(r2.init(missingCfg, NULL, NULL));
++	missingCfg->release();
++	EXPECT_TRUE(std::isnan(r2.calc_fee(kFut, 5000.0, 10, 0)));
+ 
+ 	// 坏文件（解析失败）
+ 	const std::filesystem::path bad = _base / "bad_fees.json";
+@@ -266,10 +276,13 @@
+ 		std::ofstream out(bad);
+ 		out << "{ this is not a json at all ]]]";
+ 	}
++	// 卡13d：无法解析的费用模板使 init 显式失败、费用查询返回错误
++	// （旧版经 setup 断言 init 成功并期望费用 0.0，与已裁定卡13d冲突，改写）
+ 	HisDataReplayer r3;
+-	CountSink s3;
+-	setup(r3, s3, bad.string().c_str());
+-	EXPECT_DOUBLE_EQ(0.0, r3.calc_fee(kStk, 10.0, 100, 0));
++	WTSVariant* badCfg = pub_cfg(_root, _base, bad.string().c_str());
++	EXPECT_FALSE(r3.init(badCfg, NULL, NULL));
++	badCfg->release();
++	EXPECT_TRUE(std::isnan(r3.calc_fee(kStk, 10.0, 100, 0)));
+ }
+ 
+ /*
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/q02_btcore3/r80_replayer_config_tick_test.cpp	2026-11-01 10:32:29
++++ src/TestUnits/coverage/q02_btcore3/r80_replayer_config_tick_test.cpp	2026-11-04 21:16:54
+@@ -94,6 +94,17 @@
+ 	opts.contracts.push_back((_root / "dist/common/contracts.json").string());
+ 	opts.contracts.push_back((_root / "dist/common/stocks.json").string());
+ 
++	// 卡13d“缺费/坏费报错”：配置了却无法解析的费用模板使 init 显式失败
++	// （旧断言期望 init 成功，与已裁定卡13d冲突，改写；原文件见证据 before/）
++	{
++		HisDataReplayer bad;
++		WTSVariant* badCfg = r80::make_cfg(_root, _base, 202001010930ull, 202001071500ull, opts);
++		EXPECT_FALSE(bad.init(badCfg));
++		badCfg->release();
++	}
++
++	// 合约数组与部分损坏的复权因子仍按原目标验证（不配置费用模板）
++	opts.fees = "";
+ 	HisDataReplayer rp;
+ 	WTSVariant* cfg = r80::make_cfg(_root, _base, 202001010930ull, 202001071500ull, opts);
+ 	ASSERT_TRUE(rp.init(cfg));
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/q02_btcore3/r91_common.h	2026-10-28 16:20:15
++++ src/TestUnits/coverage/q02_btcore3/r91_common.h	2026-11-04 21:17:14
+@@ -421,6 +421,7 @@
+ 		std::string adjfactor;
+ 		std::vector<std::string> commodities;
+ 		std::vector<std::pair<std::string, std::string>> rules;
++		std::string contracts;	// optional basefiles.contract (fee calculation needs verified contracts, card 13d)
+ 	};
+ 
+ 	inline WTSVariant* make_cfg(const std::filesystem::path& repo, const std::filesystem::path& base,
+@@ -443,6 +444,8 @@
+ 		WTSVariant* basefiles = WTSVariant::createObject();
+ 		basefiles->append("session", (repo / "dist/common/sessions.json").string().c_str());
+ 		basefiles->append("holiday", (repo / "dist/common/holidays.json").string().c_str());
++		if (!opts.contracts.empty())
++			basefiles->append("contract", opts.contracts.c_str());
+ 
+ 		std::vector<std::string> commodities = opts.commodities;
+ 		if (commodities.empty())
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp	2026-10-28 16:27:52
++++ src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp	2026-11-04 21:26:58
+@@ -13,6 +13,8 @@
+  */
+ #include "r91_common.h"
+ 
++#include <cmath>
++
+ using R91Fixture = r91::Fixture;
+ 
+ namespace
+@@ -138,10 +140,19 @@
+ 		"\"SSE.STK\":{\"byvolume\":false,\"open\":0.0001,\"close\":0.0002,"
+ 		"\"closetoday\":0.0003,\"minfee\":5.0}}"));
+ 
++	// 卡13d：费用按可核验的实际合约计算，夹具提供两只合约的元数据
++	const std::string contracts = _base.string() + "/contracts.json";
++	ASSERT_TRUE(r91::write_text(contracts,
++		"{\"CFFEX\":{\"IF2001\":{\"name\":\"IF2001\",\"code\":\"IF2001\",\"exchg\":\"CFFEX\",\"product\":\"IF\","
++		"\"opendate\":20190101,\"expiredate\":20200117}},"
++		"\"SSE\":{\"600000\":{\"name\":\"pf\",\"code\":\"600000\",\"exchg\":\"SSE\",\"product\":\"STK\","
++		"\"opendate\":20000101,\"expiredate\":20991231}}}"));
++
+ 	r91::CfgOpts opts;
+ 	opts.mode = "csv";
+ 	opts.tick = false;
+ 	opts.fees = fees;
++	opts.contracts = contracts;
+ 	opts.rules.push_back(std::make_pair(std::string("HOT"), rules));
+ 	opts.commodities.push_back((_root / "dist/common/stk_comms.json").string());
+ 	opts.commodities.push_back((_root / "dist/common/commodities.json").string());
+@@ -187,9 +198,10 @@
+ 	EXPECT_DOUBLE_EQ(4.0, replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 0));
+ 	EXPECT_DOUBLE_EQ(6.0, replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 1));
+ 	EXPECT_DOUBLE_EQ(8.0, replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 2));
+-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 3));
++	// 卡13d：非法 offset 返回可观察错误（NaN），旧断言 0.0 与裁定冲突，改写
++	EXPECT_TRUE(std::isnan(replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 3)));
+ 	EXPECT_DOUBLE_EQ(5.0, replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 0));
+ 	EXPECT_DOUBLE_EQ(5.0, replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 1));
+ 	EXPECT_DOUBLE_EQ(5.0, replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 2));
+-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 3));
++	EXPECT_TRUE(std::isnan(replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 3)));
+ }
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp	2026-10-31 08:55:09
++++ src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp	2026-11-04 18:15:17
+@@ -105,10 +105,26 @@
+ 		cfg->append("align_by_section", false);
+ 		cfg->append("dont_simtick_if_notrade", false);
+ 		cfg->append("cache_clear_days", static_cast<uint32_t>(10));
+-		cfg->append("fees", "");
++		// Card 13d: a fill needs a verified physical contract and a fee rate
++		// (missing rate is an error, a legal zero rate is valid). These cases
++		// test signal/condition restore, not fees, so the fixture provides the
++		// contract metadata and an explicit zero-rate schedule for SSE.STK.
++		const std::filesystem::path fees = base / "q02_zero_fees.json";
++		{
++			std::ofstream out(fees);
++			out << "{\"SSE.STK\":{\"open\":0.0,\"close\":0.0,\"closetoday\":0.0,\"byvolume\":false}}";
++		}
++		const std::filesystem::path contracts = base / "q02_contracts.json";
++		{
++			std::ofstream out(contracts);
++			out << "{\"SSE\":{\"000001\":{\"name\":\"q02\",\"code\":\"000001\",\"exchg\":\"SSE\",\"product\":\"STK\","
++				"\"opendate\":20000101,\"expiredate\":20991231}}}";
++		}
++		cfg->append("fees", fees.string().c_str());
+ 		WTSVariant* basefiles = WTSVariant::createObject();
+ 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
+ 		basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
++		basefiles->append("contract", contracts.string().c_str());
+ 		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
+ 		cfg->append("basefiles", basefiles);
+ 		basefiles->release();
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/q02_btcore3/r80_replayer_slice_unsub_test.cpp	2026-11-01 07:46:13
++++ src/TestUnits/coverage/q02_btcore3/r80_replayer_slice_unsub_test.cpp	2026-11-04 17:44:27
+@@ -211,6 +211,9 @@
+ /*
+  * tick 关闭时日线回放：get_day_price 越过 tick 分支直接读 _day_cache，
+  * 四个 flag + default 与 get_cur_price 都必须返回当日累计值。
++ * 夹具：Jan01 日线作为回放前已完成的历史（与 HotRuleFutureCsvUsesRuleDsbName
++ * 的修正相同，回放起点为 Jan02 09:30；Jan01 09:30 起点时该日线尚未完成，
++ * 按“首根当日未收盘不可见”规则 onInit 取不到历史切片），回放 Jan02/Jan03 两根。
+  */
+ TEST_F(R80SliceUnsub, DayPriceReadsSimulatedDayCache)
+ {
+@@ -219,7 +222,7 @@
+ 
+ 	HisDataReplayer rp;
+ 	r80::CfgOpts opts;
+-	WTSVariant* cfg = r80::make_cfg(_root, _base, 202001010930ull, 202001031500ull, opts);
++	WTSVariant* cfg = r80::make_cfg(_root, _base, 202001020930ull, 202001031500ull, opts);
+ 	ASSERT_TRUE(rp.init(cfg));
+ 	cfg->release();
+ 
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/q06_btporter/r222_bt_runner_shutdown_test.cpp	2026-10-31 09:40:41
++++ src/TestUnits/coverage/q06_btporter/r222_bt_runner_shutdown_test.cpp	2026-11-04 20:06:47
+@@ -138,9 +138,12 @@
+ 		write_text(root / "sessions.json",
+ 			R"({"TRADING":{"name":"Trading","offset":0,"sections":[{"from":0,"to":2359}]}})");
+ 		write_text(root / "commodities.json",
+-			R"({"SHFE":{"rb":{"name":"Rebar","session":"TRADING","pricetick":1,"volscale":10,"covermode":0,"pricemode":0,"trademode":0,"category":1}}})");
++			R"({"SHFE":{"rb":{"name":"Rebar","session":"TRADING","holiday":"CHINA","pricetick":1,"volscale":10,"covermode":0,"pricemode":0,"trademode":0,"category":1}}})");
+ 		write_text(root / "contracts.json",
+ 			R"({"SHFE":{"rb2510":{"name":"rb2510","product":"rb","exchg":"SHFE"}}})");
++		// prepare() maps the initial trading date with checked mapping (card 1
++		// A+C), which requires the default calendar; same fixture fix as I03-NEW-018.
++		write_text(root / "holidays.json", R"({"CHINA":[]})");
+ 	}
+ 
+ 	std::string no_mocker_config(const fs::path& root)
+@@ -155,7 +158,8 @@
+ 			<< "\"stime\":20240102000000,\"etime\":20240103000000,\"tick\":false,"
+ 			<< "\"basefiles\":{\"session\":\"" << sessionsPath
+ 			<< "\",\"commodity\":\"" << commoditiesPath
+-			<< "\",\"contract\":\"" << contractsPath << "\"}},"
++			<< "\",\"contract\":\"" << contractsPath
++			<< "\",\"holiday\":\"" << json_escape((root / "holidays.json").string()) << "\"}},"
+ 			<< "\"env\":{\"mocker\":\"none\"}}";
+ 		return cfg.str();
+ 	}
+@@ -175,7 +179,8 @@
+ 			<< ",\"tick\":" << (csvReplay ? "true" : "false") << ","
+ 			<< "\"basefiles\":{\"session\":\"" << sessionsPath
+ 			<< "\",\"commodity\":\"" << commoditiesPath
+-			<< "\",\"contract\":\"" << contractsPath << "\"}},"
++			<< "\",\"contract\":\"" << contractsPath
++			<< "\",\"holiday\":\"" << json_escape((root / "holidays.json").string()) << "\"}},"
+ 			<< "\"env\":{\"mocker\":\"exec\"},"
+ 			<< "\"exec\":{\"name\":\"r222_exec\",\"module\":\"" << json_escape(module)
+ 			<< "\",\"code\":\"SHFE.rb.2510\",\"period\":\"m1\","
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp	2026-11-01 21:40:14
++++ src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp	2026-11-04 13:24:28
+@@ -1,14 +1,28 @@
+ // Compile with OMIT_CREATE, OMIT_DESTROY, OMIT_REGISTER, OMIT_PUBLISH or
+ // FAIL_CREATE to exercise each ABI edge without starting a real MQ server.
++// WT_R20_MQ_SLOW_PUBLISH_US (environment) makes publish_message sleep so a
++// concurrent release can be observed while publications are in flight; the
++// fake records protocol violations (publish into or destroy while a
++// publication is still in flight / after destroy) as separate log lines.
+ #include "WtMsgQue/WtMsgQue.h"
++#include <atomic>
++#include <chrono>
+ #include <cstdlib>
+ #include <fstream>
++#include <mutex>
++#include <thread>
+ 
+ namespace {
++std::mutex g_log_mutex;
++std::atomic<int> g_inflight{0};
++std::atomic<bool> g_destroyed{false};
++
+ void record(const char* event, WtUInt32 id = 0, WtUInt32 len = 0)
+ {
+     const char* path = std::getenv("WT_R20_MQ_LOG");
+-    if (path) std::ofstream(path, std::ios::app) << event << ' ' << id << ' ' << len << '\n';
++    if (!path) return;
++    std::lock_guard<std::mutex> lock(g_log_mutex);
++    std::ofstream(path, std::ios::app) << event << ' ' << id << ' ' << len << '\n';
+ }
+ }
+ #ifndef OMIT_REGISTER
+@@ -25,16 +39,31 @@
+ #ifdef FAIL_CREATE
+     return 0;
+ #else
++    g_destroyed.store(false);
+     return 0xf1234567u;
+ #endif
+ }
+ #endif
+ #ifndef OMIT_DESTROY
+-extern "C" void destroy_server(WtUInt32 id) { record("destroy", id); }
++extern "C" void destroy_server(WtUInt32 id)
++{
++    if (g_inflight.load() != 0) record("destroy-while-publishing", id);
++    g_destroyed.store(true);
++    record("destroy", id);
++}
+ #endif
+ #ifndef OMIT_PUBLISH
+ extern "C" void publish_message(WtUInt32 id, const char*, const char*, WtUInt32 len)
+ {
+-    record("publish", id, len);
++    g_inflight.fetch_add(1);
++    if (g_destroyed.load()) record("publish-after-destroy", id, len);
++    const char* slow = std::getenv("WT_R20_MQ_SLOW_PUBLISH_US");
++    if (slow && *slow)
++        std::this_thread::sleep_for(std::chrono::microseconds(std::atoi(slow)));
++    if (g_destroyed.load()) record("publish-ended-after-destroy", id, len);
++    g_inflight.fetch_sub(1);
++    // Concurrent publishers are summarised by the checker; only the
++    // single-threaded modes need one line per publication.
++    if (!std::getenv("WT_R20_MQ_QUIET_PUBLISH")) record("publish", id, len);
+ }
+ #endif
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/notifier_check.cpp	2026-11-01 21:43:11
++++ src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/notifier_check.cpp	2026-11-04 13:26:57
+@@ -2,11 +2,15 @@
+ #include "WtBtCore/EventNotifier.h"
+ #include "WtBtCore/WtHelper.h"
+ #include "Includes/WTSVariant.hpp"
++#include <atomic>
++#include <chrono>
+ #include <cstdlib>
+ #include <fstream>
+ #include <iostream>
+ #include <iterator>
+ #include <string>
++#include <thread>
++#include <vector>
+ 
+ static bool check(bool result, const char* message)
+ {
+@@ -39,6 +43,46 @@
+                 notifier.notifyEvent("12345");
+             }
+         }
++        else if (mode == "release")
++        {
++            // R20_wtbtcore#3 / card 9: explicit idempotent release destroys the
++            // server exactly once; later notifications and init are rejected
++            // and the destructor does not destroy again.
++            ok &= check(notifier.init(cfg), "valid module must initialize");
++            notifier.notifyEvent("12345");
++            notifier.release();
++            notifier.notifyEvent("after");
++            notifier.notifyData("X", nullptr, 0);
++            notifier.release();
++            ok &= check(!notifier.init(cfg), "init after release must be rejected");
++        }
++        else if (mode == "release-before-init")
++        {
++            notifier.release();
++            ok &= check(!notifier.init(cfg), "init after release must be rejected");
++            notifier.notifyEvent("after");
++        }
++        else if (mode == "concurrent-release")
++        {
++            // Publications are in flight (the fake sleeps inside publish) while
++            // another thread releases; release must drain them before destroy.
++            ok &= check(notifier.init(cfg), "valid module must initialize");
++            std::atomic<bool> stop{false};
++            std::atomic<unsigned> started{0};
++            std::vector<std::thread> publishers;
++            for (int i = 0; i < 4; ++i)
++                publishers.emplace_back([&notifier, &stop, &started]() {
++                    started.fetch_add(1);
++                    while (!stop.load())
++                        notifier.notifyEvent("12345");
++                });
++            while (started.load() < 4) std::this_thread::yield();
++            std::this_thread::sleep_for(std::chrono::milliseconds(30));
++            notifier.release();
++            std::this_thread::sleep_for(std::chrono::milliseconds(10));
++            stop.store(true);
++            for (std::thread& t : publishers) t.join();
++        }
+         else
+         {
+             ok &= check(notifier.init(cfg), "valid module must initialize");
+@@ -60,7 +104,29 @@
+             "destroy 4045620583 0\n";
+     else if (mode == "no-publish" || mode == "no-publish-single")
+         expected = "register 0 0\ncreate 0 0\ndestroy 4045620583 0\n";
+-    ok &= check(log == expected, ("unexpected call log: " + log).c_str());
++    else if (mode == "release")
++        expected = "register 0 0\ncreate 0 0\npublish 4045620583 5\ndestroy 4045620583 0\n";
++    if (mode == "concurrent-release")
++    {
++        // register, create, >=1 publish, exactly one destroy as the last line,
++        // and no protocol-violation lines from the fake.
++        const std::string head = "register 0 0\ncreate 0 0\n";
++        const std::string tail = "destroy 4045620583 0\n";
++        std::size_t publishes = 0, destroys = 0, pos = 0;
++        while ((pos = log.find("publish 4045620583 5\n", pos)) != std::string::npos) { ++publishes; ++pos; }
++        pos = 0;
++        while ((pos = log.find("destroy", pos)) != std::string::npos) { ++destroys; ++pos; }
++        ok &= check(log.compare(0, head.size(), head) == 0, ("unexpected head: " + log).c_str());
++        ok &= check(publishes >= 1, "no publication observed before release");
++        ok &= check(destroys == 1, ("destroy count must be exactly one: " + log).c_str());
++        ok &= check(log.size() >= tail.size() && log.compare(log.size() - tail.size(), tail.size(), tail) == 0,
++            "destroy must be the last call");
++        ok &= check(log.find("after-destroy") == std::string::npos && log.find("while-publishing") == std::string::npos,
++            ("publication overlapped destroy: " + log).c_str());
++        if (ok) std::cout << "publications=" << publishes << '\n';
++    }
++    else
++        ok &= check(log == expected, ("unexpected call log: " + log).c_str());
+     if (ok) std::cout << "PASS " << mode << '\n';
+     return ok ? 0 : 1;
+ }
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/CMakeLists.txt	2026-11-01 21:43:58
++++ src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/CMakeLists.txt	2026-11-04 13:33:26
+@@ -64,3 +64,11 @@
+ add_check(retry_after_zero_id retry-zero zero "$<TARGET_FILE_DIR:fake_full>")
+ add_check(full_plugin_single full-single full)
+ add_check(optional_publisher_single no-publish-single missing_publish)
++# R20_wtbtcore#3 (card 9): explicit release, release before init, and release
++# while publications are in flight (the fake sleeps inside publish).
++add_check(release_destroys_once release full)
++add_check(release_before_init release-before-init full)
++add_check(concurrent_release concurrent-release full)
++set_tests_properties(concurrent_release PROPERTIES ENVIRONMENT
++    "WT_R20_MQ_LOG=${CMAKE_CURRENT_BINARY_DIR}/logs/concurrent_release.log;WT_R20_MQ_SLOW_PUBLISH_US=2000;LLVM_PROFILE_FILE=${CMAKE_CURRENT_BINARY_DIR}/logs/concurrent_release.profraw")
++
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-btcore/before/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/README.md	2026-11-01 21:44:07
++++ src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/README.md	2026-11-04 20:11:55
+@@ -18,3 +18,5 @@
+ 使用带有编译器覆盖率插桩的静态库时，还需根据工具链提供相应的编译和链接参数。测试在构建目录的隔离工作目录运行，分别将 fake 调用记录写入 `logs/`；每次测试会清空自己的记录。夹具不创建符号链接。本独立入口目前仅为类 Unix 平台准备，实际跨平台行为需要另行验证。
+ 
+ 这些测试仅证明受控 fake 模块的加载及调用行为，并不证明真实 MQ 的线程排空、回放停止屏障、模块安全卸载或整个项目回归通过。
++
++2026-11-04（R20_wtbtcore#3，卡9）新增 3 项：`release_destroys_once`（显式 `release()` 恰好一次 destroy、释放后通知与 init 被拒绝、析构不重复 destroy）、`release_before_init`（未初始化即释放后 init 拒绝、无插件调用）、`concurrent_release`（fake `publish_message` 由 `WT_R20_MQ_SLOW_PUBLISH_US` 放慢，4 个线程持续发布期间另一线程 `release()`；断言 destroy 恰好一次且为最后一次插件调用、fake 未记录 destroy 与在途发布重叠或 destroy 之后的发布）。fake 只记录调用，不起真实服务。Runner 级释放顺序见 `q06_btporter/s5_r20_runner_notifier_release_test.cpp`（R160 fake）。

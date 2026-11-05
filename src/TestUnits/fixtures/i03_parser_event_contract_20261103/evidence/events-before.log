@@ -1,0 +1,79 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 13 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 7 tests from XeleEvents
+[ RUN      ] XeleEvents.ConnectThenLoginOnlyAfterFirstValidFrame
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:106: Failure
+Value of: x.sink.waitCount('C', 1)
+  Actual: false
+Expected: true
+transport event after snapshot + join
+
+[  FAILED  ] XeleEvents.ConnectThenLoginOnlyAfterFirstValidFrame (2464 ms)
+[ RUN      ] XeleEvents.SnapshotFailureEmitsNoSuccessEvent
+[       OK ] XeleEvents.SnapshotFailureEmitsNoSuccessEvent (55 ms)
+[ RUN      ] XeleEvents.InvalidFramesDoNotConfirm
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:125: Failure
+Value of: x.sink.waitCount('C', 1)
+  Actual: false
+Expected: true
+
+[  FAILED  ] XeleEvents.InvalidFramesDoNotConfirm (2008 ms)
+[ RUN      ] XeleEvents.ReconnectStartsNewEventEpoch
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:142: Failure
+Value of: x.sink.waitCount('C', epoch)
+  Actual: false
+Expected: true
+
+[  FAILED  ] XeleEvents.ReconnectStartsNewEventEpoch (2002 ms)
+[ RUN      ] XeleEvents.ReleaseFromAnotherThreadDuringConnectEmitsNothing
+[       OK ] XeleEvents.ReleaseFromAnotherThreadDuringConnectEmitsNothing (370 ms)
+[ RUN      ] XeleEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing
+[       OK ] XeleEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing (52 ms)
+[ RUN      ] XeleEvents.V2StopDuringConnectDrainsWithoutEvents
+[       OK ] XeleEvents.V2StopDuringConnectDrainsWithoutEvents (319 ms)
+[----------] 7 tests from XeleEvents (7277 ms total)
+
+[----------] 6 tests from UdpEvents
+[ RUN      ] UdpEvents.ConnectThenLoginOnlyAfterFirstValidMessage
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:231: Failure
+Value of: u.sink.waitCount('C', 1)
+  Actual: false
+Expected: true
+transport event after both channels are armed
+
+[  FAILED  ] UdpEvents.ConnectThenLoginOnlyAfterFirstValidMessage (2475 ms)
+[ RUN      ] UdpEvents.PartialConnectFailureEmitsNoSuccessEvent
+[       OK ] UdpEvents.PartialConnectFailureEmitsNoSuccessEvent (522 ms)
+[ RUN      ] UdpEvents.InvalidMessagesDoNotConfirm
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:253: Failure
+Value of: u.sink.waitCount('C', 1)
+  Actual: false
+Expected: true
+
+[  FAILED  ] UdpEvents.InvalidMessagesDoNotConfirm (2006 ms)
+[ RUN      ] UdpEvents.ReconnectStartsNewEventEpoch
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:270: Failure
+Value of: u.sink.waitCount('C', epoch)
+  Actual: false
+Expected: true
+
+[  FAILED  ] UdpEvents.ReconnectStartsNewEventEpoch (2002 ms)
+[ RUN      ] UdpEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing
+[       OK ] UdpEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing (54 ms)
+[ RUN      ] UdpEvents.V2StopFromLogCallbackDuringConnectDrainsWithoutEvents
+[       OK ] UdpEvents.V2StopFromLogCallbackDuringConnectDrainsWithoutEvents (12 ms)
+[----------] 6 tests from UdpEvents (7073 ms total)
+
+[----------] Global test environment tear-down
+[==========] 13 tests from 2 test suites ran. (14350 ms total)
+[  PASSED  ] 7 tests.
+[  FAILED  ] 6 tests, listed below:
+[  FAILED  ] XeleEvents.ConnectThenLoginOnlyAfterFirstValidFrame
+[  FAILED  ] XeleEvents.InvalidFramesDoNotConfirm
+[  FAILED  ] XeleEvents.ReconnectStartsNewEventEpoch
+[  FAILED  ] UdpEvents.ConnectThenLoginOnlyAfterFirstValidMessage
+[  FAILED  ] UdpEvents.InvalidMessagesDoNotConfirm
+[  FAILED  ] UdpEvents.ReconnectStartsNewEventEpoch
+
+ 6 FAILED TESTS

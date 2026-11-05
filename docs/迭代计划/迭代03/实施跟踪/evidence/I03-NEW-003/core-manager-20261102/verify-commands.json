@@ -1,0 +1,42 @@
+[
+  {
+    "name": "core",
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "argv": [
+      "/tmp/wt-i03-core-propagation/core-tests",
+      "--gtest_filter=N01ParserAdapter.manager_reports_partial_submission_and_keeps_owners:N01ParserAdapter.run_reports_connection_command_submission",
+      "--gtest_output=xml:/tmp/wt-i03-core-propagation/core.xml"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "runner",
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "argv": [
+      "/tmp/wt-i03-core-propagation/runner-tests",
+      "--gtest_filter=R28ParserCommands.*",
+      "--gtest_output=xml:/tmp/wt-i03-core-propagation/runner.xml"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "dt-partial",
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "argv": [
+      "/tmp/wt-i03-core-propagation/dtporter-tests",
+      "--gtest_filter=I03DtPorterStart.partial_submission_does_not_release_owners",
+      "--gtest_output=xml:/tmp/wt-i03-core-propagation/dt-partial.xml"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "dt-capi",
+    "cwd": "/Users/yunjinqi/Documents/new_projects/wondertrader",
+    "argv": [
+      "/tmp/wt-i03-core-propagation/dtporter-tests",
+      "--gtest_filter=I03DtPorterStart.capi_reports_initial_snapshot_not_later_connections",
+      "--gtest_output=xml:/tmp/wt-i03-core-propagation/dt-capi.xml"
+    ],
+    "exit": 0
+  }
+]

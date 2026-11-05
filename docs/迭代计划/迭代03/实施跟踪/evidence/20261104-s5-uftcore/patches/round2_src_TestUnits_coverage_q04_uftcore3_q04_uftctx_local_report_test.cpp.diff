@@ -1,0 +1,175 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-uftcore/before2/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp	2026-11-04 17:58:13
++++ src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp	2026-11-04 21:59:42
+@@ -414,4 +414,172 @@
+ 	ctx._ctx.read_param("k", 1.0);
+ 	ctx._ctx.sync_param("k", 1.0);
+ 	ctx._ctx.commit_param_watcher();
++}
++
++//////////////////////////////////////////////////////////////////////////
++// I03-NEW-056 / I03-NEW-059 (2026-11-04).
++namespace {
++uint32_t blockHeaderField(const std::string& file, std::size_t offset)
++{
++	// BlockHeader (packed): flag[8], type, date, capacity, size
++	std::ifstream in(file, std::ios::binary);
++	char header[24] = { 0 };
++	in.read(header, sizeof(header));
++	uint32_t value = 0;
++	std::memcpy(&value, header + offset, sizeof(value));
++	return value;
++}
++uint32_t blockCapacity(const std::string& file) { return blockHeaderField(file, 16); }
++uint32_t blockSize(const std::string& file) { return blockHeaderField(file, 20); }
++
++// A provider that reports the order live and filled from inside orderInsert,
++// before the adapter returns the local id to the caller.
++class SyncFillApi : public q04::FakeTraderApi
++{
++public:
++	bool fill = true;
++	int orderInsert(WTSEntrust* entrust) override
++	{
++		const int ret = q04::FakeTraderApi::orderInsert(entrust);
++		if (!fill || _spi == nullptr)
++			return ret;
++		WTSOrderInfo* order = WTSOrderInfo::create(entrust);
++		order->setOrderID("sync-order");
++		order->setVolLeft(0);
++		order->setVolTraded(entrust->getVolume());
++		order->setOrderState(WOS_AllTraded);
++		_spi->onPushOrder(order);
++		order->release();
++		WTSTradeInfo* trade = WTSTradeInfo::create(entrust->getCode(), entrust->getExchg());
++		trade->setTradeID((std::string("sync-trade-") + entrust->getUserTag()).c_str());
++		trade->setUserTag(entrust->getUserTag());
++		trade->setDirection(entrust->getDirection());
++		trade->setOffsetType(entrust->getOffsetType());
++		trade->setVolume(entrust->getVolume());
++		trade->setPrice(entrust->getPrice());
++		_spi->onPushTrade(trade);
++		trade->release();
++		return ret;
++	}
++};
++
++struct SyncCtxEnv
++{
++	q04::TempRoot			_tmp{ "ctx_sync" };
++	SyncFillApi				_api;
++	q04::FakeBaseDataMgr	_bd;
++	ActionPolicyMgr			_policy;
++	TraderAdapter			_adapter;
++	WtUftDtMgr				_dtMgr;
++	WtUftEngine				_engine;
++	UftStraContext			_ctx;
++	std::string				_name;
++
++	explicit SyncCtxEnv(const char* name) : _ctx(&_engine, name)
++	{
++		_name = name;
++		ctxRoot();
++		_bd.add("SHFE", "ag", "ag2406", 0, 0, CM_OpenCover, TM_Both, 1);
++		const std::string path = _tmp.file("policy.json");
++		_tmp.write(path, q04::policyJsonOpenCloseLimited());
++		EXPECT_TRUE(_policy.init(path.c_str()));
++		_engine.init(nullptr, &_bd, nullptr, nullptr);
++		EXPECT_TRUE(_adapter.initExt(name, &_api, &_bd, &_policy));
++		_adapter.run();
++		_adapter.onLoginResult(true, "ok", 20240315);
++		_adapter.addSink(&_ctx);
++		_ctx.setTrader(&_adapter);
++	}
++	std::string straFile(const char* suffix) { return ctxRoot() + "outputs/" + _name + "/" + suffix; }
++	void removeOwnFolder()
++	{
++		std::error_code ec;
++		std::filesystem::remove_all(ctxRoot() + "outputs/" + _name, ec);
++	}
++};
++}
++
++// I03-NEW-059: reports delivered synchronously from orderInsert belong to the
++// context that submitted the order; they are not dropped as foreign.
++TEST(q04_uftctx_local, synchronous_fill_during_insert_is_attributed_to_the_context)
++{
++	SyncCtxEnv env("q04ctx_sync_fill");
++	env.removeOwnFolder();
++	env._ctx.on_channel_ready(20240315);
++
++	const uint32_t id = env._ctx.stra_enter_long(kAg, 5000.0, 2.0, 0);
++	ASSERT_NE(UINT_MAX, id);
++	EXPECT_DOUBLE_EQ(2.0, env._ctx.stra_get_local_position(kAg));
++	EXPECT_EQ(1u, blockSize(env.straFile("order.membin")));
++	// A later report of the same order does not create a second order record.
++	env._ctx.on_order(id, kAg, true, 0, 2.0, 0.0, 5000.0, false);
++	EXPECT_EQ(1u, blockSize(env.straFile("order.membin")));
++	env.removeOwnFolder();
+ }
++
++// I03-NEW-056: more than one block of records in a day extends the local
++// blocks in place instead of writing past their mapping; all records persist.
++TEST(q04_uftctx_local, local_blocks_grow_beyond_one_day_of_capacity)
++{
++	CtxEnv ctx("q04ctx_capacity");
++	ctx.removeOwnFolder();
++	ctx._ctx.on_channel_ready(20240315);
++	const uint32_t id = ctx._ctx.stra_enter_long(kAg, 5000.0, 1.0, 0);
++	ASSERT_NE(UINT_MAX, id);
++	const uint32_t initialCapacity = blockCapacity(ctx.straFile("position.membin"));
++	ASSERT_GT(initialCapacity, 0u);
++	const uint32_t total = initialCapacity + 100;
++	for (uint32_t i = 0; i < total; i++)
++		ctx._ctx.on_trade(id, kAg, true, 0, 1.0, 5000.0);
++	EXPECT_DOUBLE_EQ((double)total, ctx._ctx.stra_get_local_position(kAg));
++	EXPECT_EQ(total, blockSize(ctx.straFile("position.membin")));
++	EXPECT_GE(blockCapacity(ctx.straFile("position.membin")), total);
++	EXPECT_EQ(total, blockSize(ctx.straFile("trade.membin")));
++	EXPECT_GE(blockCapacity(ctx.straFile("trade.membin")), total);
++
++	// Every detail is persisted: a cold start of the same day sees all of them.
++	UftStraContext cold(&ctx._engine, "q04ctx_capacity");
++	cold.on_channel_ready(20240315);
++	EXPECT_DOUBLE_EQ((double)total, cold.stra_get_local_position(kAg));
++	ctx.removeOwnFolder();
++}
++
++// I03-NEW-056: when a block cannot be extended the event is neither written
++// past the mapping nor dropped: it is retained in order, new orders are
++// refused, and it is applied once the block can grow again.
++TEST(q04_uftctx_local, unextendable_block_retains_events_and_refuses_new_orders)
++{
++	CtxEnv ctx("q04ctx_capacity_blocked");
++	ctx.removeOwnFolder();
++	ctx._ctx.on_channel_ready(20240315);
++	const uint32_t id = ctx._ctx.stra_enter_long(kAg, 5000.0, 1.0, 0);
++	ASSERT_NE(UINT_MAX, id);
++	const std::string posFile = ctx.straFile("position.membin");
++	const uint32_t capacity = blockCapacity(posFile);
++	for (uint32_t i = 0; i < capacity; i++)
++		ctx._ctx.on_trade(id, kAg, true, 0, 1.0, 5000.0);
++	ASSERT_DOUBLE_EQ((double)capacity, ctx._ctx.stra_get_local_position(kAg));
++
++	std::filesystem::permissions(posFile, std::filesystem::perms::none);
++	ctx._ctx.on_trade(id, kAg, true, 0, 1.0, 5000.0);
++	// Restore access only to inspect the file; the context has not seen another event.
++	std::filesystem::permissions(posFile, std::filesystem::perms::owner_read | std::filesystem::perms::owner_write);
++	EXPECT_DOUBLE_EQ((double)capacity, ctx._ctx.stra_get_local_position(kAg));
++	EXPECT_EQ(capacity, blockSize(posFile));
++#ifdef WT_UFT_LOCAL_LEDGER_BACKLOG	// absent from the pre-change header (red control)
++	EXPECT_TRUE(ctx._ctx.local_ledger_blocked());
++	EXPECT_EQ(1u, ctx._ctx.local_backlog_size());
++#endif
++	const std::size_t sent = ctx._api._entrusts.size();
++	EXPECT_EQ(UINT_MAX, ctx._ctx.stra_enter_long(kAg, 5000.0, 1.0, 0));
++	EXPECT_EQ(sent, ctx._api._entrusts.size()) << "a blocked local ledger must refuse new orders";
++
++	ctx._ctx.on_trade(id, kAg, true, 0, 1.0, 5000.0);
++	EXPECT_DOUBLE_EQ((double)capacity + 2, ctx._ctx.stra_get_local_position(kAg));
++	EXPECT_EQ(capacity + 2, blockSize(posFile));
++#ifdef WT_UFT_LOCAL_LEDGER_BACKLOG
++	EXPECT_FALSE(ctx._ctx.local_ledger_blocked());
++#endif
++	EXPECT_NE(UINT_MAX, ctx._ctx.stra_enter_long(kAg, 5000.0, 1.0, 0));
++	ctx.removeOwnFolder();
++}

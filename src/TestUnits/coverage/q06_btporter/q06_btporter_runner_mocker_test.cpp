@@ -347,7 +347,7 @@ TEST_F(Q06BtRunner, CtxEventsRouteByEngineType)
 	r.ctx_on_init(11, ET_CTA);
 	r.ctx_on_init(12, ET_HFT);
 	r.ctx_on_init(13, ET_SEL);
-	r.ctx_on_init(14, (EngineType)4242);
+	r.ctx_on_init(14, (EngineType)777);	// I03-NEW-102: in-range non-enumerator; 4242 was outside the enum range (UBSan)
 	EXPECT_EQ(g.cta_init, 1U);
 	EXPECT_EQ(g.hft_init, 1U);
 	EXPECT_EQ(g.sel_init, 1U);

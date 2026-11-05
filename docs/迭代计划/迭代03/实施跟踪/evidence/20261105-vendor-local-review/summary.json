@@ -1,0 +1,792 @@
+{
+  "scope": "本机 fake SDK 与宿主局部测试",
+  "groups": 28,
+  "executions": 89,
+  "failures": 0,
+  "skipped": 0,
+  "unique_ids": 18,
+  "results": [
+    {
+      "group": "ctp_shutdown",
+      "ids": [
+        "BUG-T25-005"
+      ],
+      "filter": "I03S5TraderCTPLifecycle.NoFinalFrameDisconnectIsBoundedJoinsAndReleasesOnce:I03S5TraderCTPLifecycle.FinalFrameThenDisconnectReleasesOnce:I03S5TraderCTPLifecycle.ErrorFinalFrameThenLateErrorCallbackIsIgnored",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "I03S5TraderCTPLifecycle",
+          "name": "NoFinalFrameDisconnectIsBoundedJoinsAndReleasesOnce",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5TraderCTPLifecycle",
+          "name": "FinalFrameThenDisconnectReleasesOnce",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5TraderCTPLifecycle",
+          "name": "ErrorFinalFrameThenLateErrorCallbackIsIgnored",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctp_connect",
+      "ids": [
+        "T2-CTP-02"
+      ],
+      "filter": "I03S5TraderCTPLifecycle.ConnectFailuresAreObservableEvents",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "I03S5TraderCTPLifecycle",
+          "name": "ConnectFailuresAreObservableEvents",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctp_lifecycle",
+      "ids": [
+        "T2-CTP-03"
+      ],
+      "filter": "I03S5TraderCTPLifecycle.RepeatedConnectKeepsApiAndConnectAfterReleaseIsRejected:I03S5TraderCTPLifecycle.NoFinalFrameDisconnectIsBoundedJoinsAndReleasesOnce",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "I03S5TraderCTPLifecycle",
+          "name": "NoFinalFrameDisconnectIsBoundedJoinsAndReleasesOnce",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5TraderCTPLifecycle",
+          "name": "RepeatedConnectKeepsApiAndConnectAfterReleaseIsRejected",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctp_orderstate",
+      "ids": [
+        "T2-CTP-07"
+      ],
+      "filter": "I03S5TraderCTPOrderState.*:T2TraderCTPTest.rtn_order_untouched_and_known_states_keep_wts_meaning:T2TraderCTPTest.queried_order_untouched_and_known_states_keep_wts_meaning",
+      "tests": 4,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "I03S5TraderCTPOrderState",
+          "name": "KnownCtpStatusesKeepWtsMeaning",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5TraderCTPOrderState",
+          "name": "T2CTP07_TouchedIsReportedAsSubmitting",
+          "status": "passed"
+        },
+        {
+          "suite": "T2TraderCTPTest",
+          "name": "rtn_order_untouched_and_known_states_keep_wts_meaning",
+          "status": "passed"
+        },
+        {
+          "suite": "T2TraderCTPTest",
+          "name": "queried_order_untouched_and_known_states_keep_wts_meaning",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctp_identity",
+      "ids": [
+        "T2-CTP-08"
+      ],
+      "filter": "T25TraderCTPTest.order_insert_without_usertag_allocates_identity_and_cache",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "T25TraderCTPTest",
+          "name": "order_insert_without_usertag_allocates_identity_and_cache",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctpm_identity",
+      "ids": [
+        "T2-CTP-08"
+      ],
+      "filter": "I03S5TraderCTPMini.MissingIdentityIsAllocatedUniqueAndPreallocatedIdKept",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "I03S5TraderCTPMini",
+          "name": "MissingIdentityIsAllocatedUniqueAndPreallocatedIdKept",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctpo_identity",
+      "ids": [
+        "T2-CTP-08"
+      ],
+      "filter": "I03S5TraderCTPOptLifecycle.MissingIdentityIsAllocatedUniqueAndPreallocatedIdKept",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "I03S5TraderCTPOptLifecycle",
+          "name": "MissingIdentityIsAllocatedUniqueAndPreallocatedIdKept",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctpm_init",
+      "ids": [
+        "T3-006"
+      ],
+      "filter": "T3_006_TraderCTPMini.*:I03S5TraderCTPMini.ConnectFailuresAreObservableEvents",
+      "tests": 7,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "I03S5TraderCTPMini",
+          "name": "ConnectFailuresAreObservableEvents",
+          "status": "passed"
+        },
+        {
+          "suite": "T3_006_TraderCTPMini",
+          "name": "init_rejects_each_missing_required_config_key",
+          "status": "passed"
+        },
+        {
+          "suite": "T3_006_TraderCTPMini",
+          "name": "init_rejects_flowdir_only_configuration",
+          "status": "passed"
+        },
+        {
+          "suite": "T3_006_TraderCTPMini",
+          "name": "init_rejects_missing_module_and_creator_symbol",
+          "status": "passed"
+        },
+        {
+          "suite": "T3_006_TraderCTPMini",
+          "name": "connect_rejects_null_creator_result_without_starting_worker",
+          "status": "passed"
+        },
+        {
+          "suite": "T3_006_TraderCTPMini",
+          "name": "successful_fake_module_creates_and_releases_stub_api",
+          "status": "passed"
+        },
+        {
+          "suite": "T3_006_TraderCTPMini",
+          "name": "failed_module_init_can_retry_with_a_valid_module",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctpm_date",
+      "ids": [
+        "T3-015"
+      ],
+      "filter": "I03S5TraderCTPMini.ValidTradingDayLoginAndNightDatesStayCorrect:I03S5TraderCTPMini.InvalidTradingDayFailsClosed:I03S5TraderCTPMini.InvalidTradingDayMatrixIsRejected",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "I03S5TraderCTPMini",
+          "name": "ValidTradingDayLoginAndNightDatesStayCorrect",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5TraderCTPMini",
+          "name": "InvalidTradingDayFailsClosed",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5TraderCTPMini",
+          "name": "InvalidTradingDayMatrixIsRejected",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctpo_array",
+      "ids": [
+        "T1-CTPOpt-01"
+      ],
+      "filter": "TraderCTPOpt.exec_order_query_uses_constructor_initialized_array_and_starts_fresh_batches:I03S5TraderCTPOptLifecycle.DestructorReturnsQueryArrayOwnership",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "TraderCTPOpt",
+          "name": "exec_order_query_uses_constructor_initialized_array_and_starts_fresh_batches",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5TraderCTPOptLifecycle",
+          "name": "DestructorReturnsQueryArrayOwnership",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctpo_lifecycle",
+      "ids": [
+        "T1-CTPOpt-02"
+      ],
+      "filter": "I03S5TraderCTPOptLifecycle.ConcurrentCancelAndReleaseNeverOverlap:I03S5TraderCTPOptLifecycle.SynchronousCallbackReentryDefersReleaseWithoutDeadlock:R61_TraderCTPOpt.synchronous_cancel_callback_reentry_finishes_within_timeout",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "I03S5TraderCTPOptLifecycle",
+          "name": "ConcurrentCancelAndReleaseNeverOverlap",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5TraderCTPOptLifecycle",
+          "name": "SynchronousCallbackReentryDefersReleaseWithoutDeadlock",
+          "status": "passed"
+        },
+        {
+          "suite": "R61_TraderCTPOpt",
+          "name": "synchronous_cancel_callback_reentry_finishes_within_timeout",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "femas_positions",
+      "ids": [
+        "BUG-T4-002"
+      ],
+      "filter": "FemasContractFixture.position_query_response_appends_the_reported_item:FemasContractFixture.position_query_unknown_contract_returns_empty_final_array",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "FemasContractFixture",
+          "name": "position_query_response_appends_the_reported_item",
+          "status": "passed"
+        },
+        {
+          "suite": "FemasContractFixture",
+          "name": "position_query_unknown_contract_returns_empty_final_array",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "femas_lifecycle",
+      "ids": [
+        "BUG-T4-003"
+      ],
+      "filter": "R93FemasTest.connect_init_sync_success_can_reenter_query_account:R93FemasTest.connect_init_sync_failed_login_does_not_reenter_query:R93FemasTest.connect_init_without_callback_allows_post_init_async_query:R93FemasTest.connect_init_exception_does_not_start_a_waiting_worker:T4003FemasLifecycle.*",
+      "tests": 13,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "R93FemasTest",
+          "name": "connect_init_sync_success_can_reenter_query_account",
+          "status": "passed"
+        },
+        {
+          "suite": "R93FemasTest",
+          "name": "connect_init_sync_failed_login_does_not_reenter_query",
+          "status": "passed"
+        },
+        {
+          "suite": "R93FemasTest",
+          "name": "connect_init_without_callback_allows_post_init_async_query",
+          "status": "passed"
+        },
+        {
+          "suite": "R93FemasTest",
+          "name": "connect_init_exception_does_not_start_a_waiting_worker",
+          "status": "passed"
+        },
+        {
+          "suite": "T4003FemasLifecycle",
+          "name": "release_joins_worker_and_delete_does_not_terminate",
+          "status": "passed"
+        },
+        {
+          "suite": "T4003FemasLifecycle",
+          "name": "idle_worker_still_executes_later_query",
+          "status": "passed"
+        },
+        {
+          "suite": "T4003FemasLifecycle",
+          "name": "release_waits_for_inflight_request_before_api_release",
+          "status": "passed"
+        },
+        {
+          "suite": "T4003FemasLifecycle",
+          "name": "release_waits_for_inflight_order_insert_before_api_release",
+          "status": "passed"
+        },
+        {
+          "suite": "T4003FemasLifecycle",
+          "name": "release_from_callback_defers_and_external_release_completes",
+          "status": "passed"
+        },
+        {
+          "suite": "T4003FemasLifecycle",
+          "name": "delete_trader_from_callback_quarantines",
+          "status": "passed"
+        },
+        {
+          "suite": "T4003FemasLifecycle",
+          "name": "admission_closed_after_release_and_repeated_connect_rejected",
+          "status": "passed"
+        },
+        {
+          "suite": "T4003FemasLifecycle",
+          "name": "late_callback_after_release_is_not_delivered",
+          "status": "passed"
+        },
+        {
+          "suite": "T4003FemasLifecycle",
+          "name": "callback_drain_timeout_reports_unquiesced_and_remover_quarantines",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "optloader",
+      "ids": [
+        "BUG-T4-015"
+      ],
+      "filter": "R114OptFixture.dump_to_json_writes_two_files_and_exits_zero:R114OptFixture.error_final_packet_reports_failure_and_publishes_nothing",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "R114OptFixture",
+          "name": "dump_to_json_writes_two_files_and_exits_zero",
+          "status": "passed"
+        },
+        {
+          "suite": "R114OptFixture",
+          "name": "error_final_packet_reports_failure_and_publishes_nothing",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "dumper_lifecycle",
+      "ids": [
+        "T3-012"
+      ],
+      "filter": "I03S5DumperLifecycle.*:I03S5DumperExitRetention.*",
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "I03S5DumperLifecycle",
+          "name": "RepeatedRunIsRejectedAndRepeatedReleaseIsIdempotent",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5DumperLifecycle",
+          "name": "ReleaseOnWorkerThreadIsDeferredThenCompleted",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5DumperLifecycle",
+          "name": "ReleaseInsideUserCallbackCutsOffLaterCallbacks",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5DumperLifecycle",
+          "name": "RunOnceReturnsPromptlyAfterRelease",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5DumperExitRetention",
+          "name": "AdapterManagerHasNoExitTimeDestructor",
+          "status": "passed"
+        },
+        {
+          "suite": "I03S5DumperExitRetention",
+          "name": "ProviderCallbackAfterExitTimeDestructionStillSeesManagerState",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctp_raw",
+      "ids": [
+        "BUG-L01-014"
+      ],
+      "filter": "T2TraderCTPTest.l01014_*",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "T2TraderCTPTest",
+          "name": "l01014_unconvertible_trade_is_forwarded_raw_only_to_a_host_that_keeps_it",
+          "status": "passed"
+        },
+        {
+          "suite": "T2TraderCTPTest",
+          "name": "l01014_unconvertible_position_and_trade_query_rows_are_forwarded_raw",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctpm_raw",
+      "ids": [
+        "BUG-L01-014"
+      ],
+      "filter": "I03S5TraderCTPMini.L01014UnconvertibleReportsAreForwardedRawWhenHostSupportsIt",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "I03S5TraderCTPMini",
+          "name": "L01014UnconvertibleReportsAreForwardedRawWhenHostSupportsIt",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctpo_raw",
+      "ids": [
+        "BUG-L01-014"
+      ],
+      "filter": "R61_TraderCTPOpt.l01014_unconvertible_trade_is_forwarded_raw_when_host_supports_it",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "R61_TraderCTPOpt",
+          "name": "l01014_unconvertible_trade_is_forwarded_raw_when_host_supports_it",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "femas_raw",
+      "ids": [
+        "BUG-L01-014"
+      ],
+      "filter": "FemasContractFixture.l01014_*",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "FemasContractFixture",
+          "name": "l01014_unconvertible_trade_is_forwarded_raw_when_host_supports_it",
+          "status": "passed"
+        },
+        {
+          "suite": "FemasContractFixture",
+          "name": "l01014_unconvertible_query_rows_are_forwarded_raw_when_host_supports_it",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "host_raw",
+      "ids": [
+        "BUG-L01-014"
+      ],
+      "filter": "P11SyncReport.l01014_raw_provider_report_is_kept_and_pauses_the_account",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "P11SyncReport",
+          "name": "l01014_raw_provider_report_is_kept_and_pauses_the_account",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "instrument_status",
+      "ids": [
+        "T2-CTP-07"
+      ],
+      "filter": "T2TraderCTPTest.instrument_statuses_keep_existing_0_to_6_mapping",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "T2TraderCTPTest",
+          "name": "instrument_statuses_keep_existing_0_to_6_mapping",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctp_identity_extra",
+      "ids": [
+        "T2-CTP-08"
+      ],
+      "filter": "T25TraderCTPTest.order_insert_rejects_malformed_entrust_id_when_usertag_set:T25TraderCTPTest.usertag_round_trips_from_eid_cache_into_order_then_trade",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "T25TraderCTPTest",
+          "name": "order_insert_rejects_malformed_entrust_id_when_usertag_set",
+          "status": "passed"
+        },
+        {
+          "suite": "T25TraderCTPTest",
+          "name": "usertag_round_trips_from_eid_cache_into_order_then_trade",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "dumper_config",
+      "ids": [
+        "T3-012"
+      ],
+      "filter": "R114DumperFixture.dumper_config_rejects_zero_refresh_span_before_initializing_adapter:R114DumperFixture.dumper_run_once_returns_immediately_and_worker_joins:TempCwd.dumper_config_rejects_invalid_refresh_span_and_accepts_numeric_yaml_string",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "TempCwd",
+          "name": "dumper_config_rejects_invalid_refresh_span_and_accepts_numeric_yaml_string",
+          "status": "passed"
+        },
+        {
+          "suite": "R114DumperFixture",
+          "name": "dumper_config_rejects_zero_refresh_span_before_initializing_adapter",
+          "status": "passed"
+        },
+        {
+          "suite": "R114DumperFixture",
+          "name": "dumper_run_once_returns_immediately_and_worker_joins",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ctpo_exercise",
+      "ids": [
+        "T1-CTPOpt-02"
+      ],
+      "filter": "R61_TraderCTPOpt.exec_order_action_success_rsp_does_not_emit_trader_error:R61_TraderCTPOpt.exec_order_action_error_rsp_is_reported_as_exec_cancel:R61_TraderCTPOpt.order_actions_reject_missing_api",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "R61_TraderCTPOpt",
+          "name": "order_actions_reject_missing_api",
+          "status": "passed"
+        },
+        {
+          "suite": "R61_TraderCTPOpt",
+          "name": "exec_order_action_success_rsp_does_not_emit_trader_error",
+          "status": "passed"
+        },
+        {
+          "suite": "R61_TraderCTPOpt",
+          "name": "exec_order_action_error_rsp_is_reported_as_exec_cancel",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "ad_hot_segments",
+      "ids": [
+        "BUG-R122-002"
+      ],
+      "filter": "S5MainK34aPhysicalSegments.*:R100ADReaderTest.R100ReaderADHotReloadDayAndRtCacheGrowth",
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "R100ADReaderTest",
+          "name": "R100ReaderADHotReloadDayAndRtCacheGrowth",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK34aPhysicalSegments",
+          "name": "HotBarsAreStitchedFromPhysicalSectionsOnly",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK34aPhysicalSegments",
+          "name": "ForwardAdjustedHotScalesOlderSectionsByTheirFactor",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK34aPhysicalSegments",
+          "name": "HotTicksAreStitchedByTradingDate",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK34aPhysicalSegments",
+          "name": "CacheFollowsTheRuleSwitchAtMinuteEnd",
+          "status": "passed"
+        },
+        {
+          "suite": "S5MainK34aPhysicalSegments",
+          "name": "UnusableSectionBoundariesFailClosed",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "runner_traders",
+      "ids": [
+        "BUG-R104-003"
+      ],
+      "filter": "r104_wtrunner_config.active_trader_mocker_initializes_and_is_registered:r104_wtrunner_config.active_trader_missing_module_fails_without_registration:r104_wtrunner_config.inactive_missing_trader_module_is_skipped:r104_wtrunner_config.later_trader_failure_removes_prior_adapter_from_registry:r104_wtrunner_config.bound_executers_then_failed_diff_init_release_cleanly",
+      "tests": 5,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "r104_wtrunner_config",
+          "name": "active_trader_mocker_initializes_and_is_registered",
+          "status": "passed"
+        },
+        {
+          "suite": "r104_wtrunner_config",
+          "name": "active_trader_missing_module_fails_without_registration",
+          "status": "passed"
+        },
+        {
+          "suite": "r104_wtrunner_config",
+          "name": "inactive_missing_trader_module_is_skipped",
+          "status": "passed"
+        },
+        {
+          "suite": "r104_wtrunner_config",
+          "name": "later_trader_failure_removes_prior_adapter_from_registry",
+          "status": "passed"
+        },
+        {
+          "suite": "r104_wtrunner_config",
+          "name": "bound_executers_then_failed_diff_init_release_cleanly",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "exec_lifecycle",
+      "ids": [
+        "BUG-I02-NEW-053"
+      ],
+      "filter": "R59Exec.*:P11TraderTest.init_rejects_overlong_ids_and_keeps_empty_id_accepted",
+      "tests": 8,
+      "failures": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "suite": "P11TraderTest",
+          "name": "init_rejects_overlong_ids_and_keeps_empty_id_accepted",
+          "status": "passed"
+        },
+        {
+          "suite": "R59Exec",
+          "name": "local_auto_clear_checks_hot_code_and_filters",
+          "status": "passed"
+        },
+        {
+          "suite": "R59Exec",
+          "name": "arbi_auto_clear_checks_hot_code_and_filters",
+          "status": "passed"
+        },
+        {
+          "suite": "R59Exec",
+          "name": "null_data_manager_and_pool_lifecycle",
+          "status": "passed"
+        },
+        {
+          "suite": "R59Exec",
+          "name": "diff_loads_valid_targets_and_recovers_on_channel_ready",
+          "status": "passed"
+        },
+        {
+          "suite": "R59Exec",
+          "name": "set_trader_forwards_orders_only_while_channel_ready",
+          "status": "passed"
+        },
+        {
+          "suite": "R59Exec",
+          "name": "diff_stale_target_uses_raw_code_lookup_and_clears_with_real_unit",
+          "status": "passed"
+        },
+        {
+          "suite": "R59Exec",
+          "name": "diff_stale_target_clears_with_raw_code_only_contract_lookup",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "group": "riskmon_quiesce",
+      "ids": [
+        "BUG-I02-NEW-034"
+      ],
+      "filter": "S5RiskMonQuiesce selected cases",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0,
+      "scope": "ASan/UBSan；不可证明 drain 的隔离用例关闭 LSan，其余两例启用 LSan",
+      "cases": [
+        {
+          "suite": "S5RiskMonQuiesce",
+          "name": "ProvenMonitorIsStoppedThenFundAndMonitorReleased",
+          "status": "passed"
+        },
+        {
+          "suite": "S5RiskMonQuiesce",
+          "name": "RepeatedRiskMonitorInitIsRejected",
+          "status": "passed"
+        },
+        {
+          "suite": "S5RiskMonQuiesce",
+          "name": "UnprovenMonitorIsQuarantinedAndOutlivesEngineSafely",
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

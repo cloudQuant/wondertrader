@@ -13,6 +13,7 @@
 #include "WTSSessionInfo.hpp"
 #include "FasterDefs.h"
 #include <string>
+#include <cmath>
 
 NS_WTP_BEGIN
 
@@ -50,10 +51,65 @@ public:
 	constexpr inline void	setCategory(ContractCategory cat) noexcept { m_ccCategory = cat; }
 	constexpr inline void	setCoverMode(CoverMode cm) noexcept { m_coverMode = cm; }
 	constexpr inline void	setPriceMode(PriceMode pm) noexcept { m_priceMode = pm; }
-	constexpr inline void	setTradingMode(TradingMode tm) noexcept { m_tradeMode = tm; }
+	constexpr inline void	setTradingMode(TradingMode tm) noexcept
+	{
+		m_tradeMode = tm;
+		m_uConfigState = static_cast<uint8_t>(m_uConfigState | kTradingModeConfigured);
+	}
 
-	constexpr inline bool canShort() const  noexcept { return m_tradeMode == TM_Both; }
-	constexpr inline bool isT1() const  noexcept { return m_tradeMode == TM_LongT1; }
+	/*
+	 *	Unconfigured-state contract (BUG-L03-002, decision 4a=A):
+	 *	- The constructor zero-fills every numeric/enum field and the identity
+	 *	  buffers; the object starts NOT ready.
+	 *	- Until setTradingMode() is called, the effective trading mode is TM_None
+	 *	  (cannot trade): the raw zero value would otherwise mean TM_Both and grant
+	 *	  short selling. getTradingMode()/canShort()/isT1() use the effective mode.
+	 *	- markReady() publishes readiness only if every required field holds a
+	 *	  supported value and a session is bound. isReady() re-checks the values,
+	 *	  so a later invalid setter revokes readiness.
+	 *	ABI: the state byte occupies the former alignment padding after
+	 *	m_nFeeAlg; sizeof and the offsets of all pre-existing members are
+	 *	unchanged, and no virtual function was added. Binaries compiled against
+	 *	the old header keep their old inline getters (no ready/TM_None gating) and
+	 *	must be rebuilt to obtain the new semantics.
+	 */
+	constexpr inline bool isTradingModeConfigured() const noexcept
+	{
+		return (m_uConfigState & kTradingModeConfigured) != 0;
+	}
+
+	// Checks field values only; markReady()/isReady() add the explicit state.
+	inline bool hasValidConfiguration() const noexcept
+	{
+		const auto category = static_cast<uint32_t>(m_ccCategory);
+		const auto cover = static_cast<uint32_t>(m_coverMode);
+		const auto price = static_cast<uint32_t>(m_priceMode);
+		const auto trade = static_cast<uint32_t>(m_tradeMode);
+		return m_strName[0] && m_strExchg[0] && m_strProduct[0] && m_strCurrency[0] && m_strSession[0] &&
+			m_uVolScale > 0 && std::isfinite(m_dPriceTick) && m_dPriceTick > 0 &&
+			std::isfinite(m_dLotTick) && m_dLotTick > 0 && std::isfinite(m_dMinLots) && m_dMinLots > 0 &&
+			(category <= CC_ETFOption || (category >= CC_DC_Spot && category <= CC_DC_Option) || category == CC_UserIndex) &&
+			cover <= CM_None && (price <= PM_Market || price == PM_None) &&
+			isTradingModeConfigured() && (trade <= TM_LongT1 || trade == TM_None);
+	}
+
+	inline bool markReady() noexcept
+	{
+		const bool ready = hasValidConfiguration() && m_pSession != nullptr;
+		if (ready)
+			m_uConfigState = static_cast<uint8_t>(m_uConfigState | kReadyMarked);
+		else
+			m_uConfigState = static_cast<uint8_t>(m_uConfigState & ~kReadyMarked);
+		return ready;
+	}
+
+	inline bool isReady() const noexcept
+	{
+		return (m_uConfigState & kReadyMarked) != 0 && hasValidConfiguration() && m_pSession != nullptr;
+	}
+
+	constexpr inline bool canShort() const noexcept { return getTradingMode() == TM_Both; }
+	constexpr inline bool isT1() const noexcept { return getTradingMode() == TM_LongT1; }
 
 	constexpr inline const char* getName()	const noexcept { return m_strName; }
 	constexpr inline const char* getExchg()	const noexcept { return m_strExchg; }
@@ -70,7 +126,10 @@ public:
 	constexpr inline ContractCategory		getCategoty() const noexcept { return m_ccCategory; }
 	constexpr inline CoverMode			getCoverMode() const noexcept { return m_coverMode; }
 	constexpr inline PriceMode			getPriceMode() const noexcept { return m_priceMode; }
-	constexpr inline TradingMode			getTradingMode() const  noexcept { return m_tradeMode; }
+	constexpr inline TradingMode			getTradingMode() const  noexcept
+	{
+		return isTradingModeConfigured() ? m_tradeMode : TM_None;
+	}
 
 	inline void		addCode(const char* code) noexcept { m_setCodes.insert(code); }
 	inline const CodeSet& getCodes() const noexcept { return m_setCodes; }
@@ -160,7 +219,11 @@ public:
 
 protected:
 	WTSCommodityInfo(): m_strName{}, m_strExchg{}, m_strProduct{}, m_strCurrency{},
-		m_strSession{}, m_strTrdTpl{}, m_strFullPid{}, m_pSession(nullptr), m_nFeeAlg(-1) {}
+		m_strSession{}, m_strTrdTpl{}, m_strFullPid{}, m_uVolScale(0), m_dPriceTick(0),
+		m_dLotTick(0), m_dMinLots(0), m_ccCategory(static_cast<ContractCategory>(0)),
+		m_coverMode(static_cast<CoverMode>(0)), m_priceMode(static_cast<PriceMode>(0)),
+		m_tradeMode(static_cast<TradingMode>(0)), m_pSession(nullptr), m_dOpenFee(0),
+		m_dCloseFee(0), m_dCloseTFee(0), m_nFeeAlg(-1), m_uConfigState(0), m_dMarginRate(0) {}
 	virtual ~WTSCommodityInfo()
 	{
 		if (m_pSession)
@@ -200,6 +263,11 @@ private:
 	double	m_dCloseFee		= 0.0;	//平仓手续费
 	double	m_dCloseTFee	= 0.0;	//平今手续费
 	int		m_nFeeAlg		= -1;	//手续费算法，默认为-1，不计算,0是按成交量，1为按成交额
+	// Placed in the alignment padding between m_nFeeAlg and m_dMarginRate so
+	// that sizeof and existing member offsets stay unchanged (see above).
+	static constexpr uint8_t kTradingModeConfigured = 0x01;
+	static constexpr uint8_t kReadyMarked = 0x02;
+	uint8_t	m_uConfigState	= 0;	//配置状态位：交易模式已显式设置、已标记就绪
 	double	m_dMarginRate	= 0.0;	//保证金率
 };
 

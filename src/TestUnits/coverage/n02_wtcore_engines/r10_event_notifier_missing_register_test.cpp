@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <atomic>
@@ -37,7 +38,7 @@ public:
 		static std::atomic<uint64_t> sequence{ 0 };
 		_path = fs::temp_directory_path() /
 			("wt_r10_mq_missing_register_" +
-				std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) +
+				std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) +
 				"_" + std::to_string(++sequence));
 		std::error_code ec;
 		fs::remove_all(_path, ec);
@@ -184,7 +185,7 @@ TEST(R10EventNotifier, MissingRegisterExportUnloadsCandidateAndPreservesActiveNo
 
 	{
 		EventNotifier notifier;
-		auto work = boost::asio::make_work_guard(notifier._asyncio);
+		auto work = boost::asio::make_work_guard(notifier._core->io);
 		ASSERT_TRUE(notifier.init(goodCfg.get()));
 		ASSERT_EQ(expectedId, notifier._mq_sid);
 		ASSERT_EQ(1u, createCount());
@@ -194,7 +195,7 @@ TEST(R10EventNotifier, MissingRegisterExportUnloadsCandidateAndPreservesActiveNo
 		const auto originalRemover = notifier._remover;
 		const auto originalPublisher = notifier._publisher;
 		const auto originalRegister = notifier._register;
-		const auto originalWorker = notifier._worker.get();
+		const auto originalWorker = notifier._core->worker.get();
 
 		instDir.set(badDir + "/");
 		VariantPtr badCfg = active_config("fake://missing_register");
@@ -207,7 +208,7 @@ TEST(R10EventNotifier, MissingRegisterExportUnloadsCandidateAndPreservesActiveNo
 		EXPECT_EQ(originalRemover, notifier._remover);
 		EXPECT_EQ(originalPublisher, notifier._publisher);
 		EXPECT_EQ(originalRegister, notifier._register);
-		EXPECT_EQ(originalWorker, notifier._worker.get());
+		EXPECT_EQ(originalWorker, notifier._core->worker.get());
 		EXPECT_EQ(0u, destroyCount());
 		EXPECT_TRUE(fs::exists(unloadedMarker));
 		EXPECT_FALSE(fs::exists(createdMarker));
@@ -259,7 +260,7 @@ TEST(R10EventNotifier, MissingCreateServerExportUnloadsWithoutStartingWorker)
 		EXPECT_EQ(0u, notifier._mq_sid);
 		EXPECT_EQ(nullptr, notifier._creator);
 		EXPECT_EQ(nullptr, notifier._register);
-		EXPECT_EQ(nullptr, notifier._worker.get()) << "missing required export must not start a worker";
+		EXPECT_EQ(nullptr, notifier._core->worker.get()) << "missing required export must not start a worker";
 		EXPECT_TRUE(fs::exists(loadedMarker)) << "the controlled module must have loaded before rejection";
 		EXPECT_TRUE(fs::exists(unloadedMarker)) << "the rejected candidate module must be released";
 		EXPECT_FALSE(fs::exists(callbackMarker)) << "no plugin function may run before ABI validation";
@@ -292,7 +293,7 @@ TEST(R10EventNotifier, MissingCreateServerExportUnloadsWithoutStartingWorker)
 		EventNotifier notifier;
 		ASSERT_TRUE(notifier.init(goodCfg.get()));
 		EXPECT_EQ(expectedId, notifier._mq_sid);
-		ASSERT_NE(nullptr, notifier._worker.get());
+		ASSERT_NE(nullptr, notifier._core->worker.get());
 		EXPECT_EQ(1u, createCount());
 		EXPECT_EQ(1u, registerCount());
 		EXPECT_EQ(expectedId, serverId());

@@ -1,0 +1,55 @@
+{
+  "groups": [
+    {
+      "group": "writer_lifecycle",
+      "ids": [
+        "BUG-R23-001",
+        "BUG-P10-008",
+        "BUG-I02-NEW-038"
+      ],
+      "xml_files": 18,
+      "executions": 18,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "group": "parser_host",
+      "ids": [
+        "BUG-R123-003",
+        "BUG-R5-007"
+      ],
+      "xml_files": 3,
+      "executions": 24,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "group": "strategy_abi",
+      "ids": [
+        "BUG-I02-NEW-002",
+        "BUG-I02-NEW-033"
+      ],
+      "xml_files": 16,
+      "executions": 16,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "group": "replay_status",
+      "ids": [
+        "BUG-I02-NEW-101"
+      ],
+      "xml_files": 1,
+      "executions": 16,
+      "failures": 0,
+      "skipped": 0,
+      "scope": "Replayer/BaseDataMgr/test 局部 ASan+UBSan；其余静态依赖未全插桩，LSan 关闭"
+    }
+  ],
+  "standalone_probes": {
+    "self": 0,
+    "self-external-join": 0,
+    "exception": 0
+  },
+  "scope": "本机局部普通构建，未对本轮自行运行 sanitizer"
+}

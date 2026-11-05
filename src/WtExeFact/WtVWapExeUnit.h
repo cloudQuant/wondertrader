@@ -184,6 +184,7 @@ private:
 	 * @{ */
 	/** @brief 订单监控器，管理所有发出的订单状态 */
 	WtOrdMon		_orders_mon;
+	bool		_host_order_identity{ false };	///< host-verified order identity enabled for this unit (cards 5b/5c)
 	/** @brief 撤单计数器，记录当前执行周期内的撤单次数 */
 	uint32_t		_cancel_cnt;
 	/** @brief VWAP目标数组，按分钟记录的目标VWAP预测总报单量 */

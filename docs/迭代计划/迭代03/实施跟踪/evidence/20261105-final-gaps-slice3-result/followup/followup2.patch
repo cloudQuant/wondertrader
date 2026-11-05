@@ -1,0 +1,587 @@
+--- a/src/ParserCTP/ParserCTP.cpp
++++ b/src/ParserCTP/ParserCTP.cpp
+@@ -549,9 +549,16 @@
+ 	delete[] subscribe;
+ }
+ 
+-bool ParserCTP::IsErrorRspInfo(CThostFtdcRspInfoField */*pRspInfo*/)
++bool ParserCTP::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)
+ {
+-	return false;
++	// I03-NEW-132 (BUG-R105-004): same predicate as ParserCTPOpt/ParserFemas/ParserCTPMini;
++	// a response is an error only when it carries info with a non-zero ErrorID.
++	if (pRspInfo == NULL || pRspInfo->ErrorID == 0)
++		return false;
++
++	if (m_sink)
++		write_log(m_sink, LL_ERROR, "[ParserCTP] API response failed with error id {}", pRspInfo->ErrorID);
++	return true;
+ }
+ 
+ void ParserCTP::subscribe(const CodeSet &vecSymbols)
+--- a/src/TraderCTPOpt/TraderCTPOpt.cpp
++++ b/src/TraderCTPOpt/TraderCTPOpt.cpp
+@@ -32,6 +32,61 @@
+ const char* ENTRUST_SECTION = "entrusts";
+ const char* ORDER_SECTION = "orders";
+ 
++#include <mutex>
++#include <unordered_map>
++
++namespace
++{
++	// I03-NEW-133: per-instance settlement query dates (same meaning as TraderCTP's
++	// m_uSettleDate/m_uSettleQryDate). TraderCTPOpt.h is held by another work package,
++	// so the state lives here; entries are dropped when a query ends and on destruction.
++	struct SettleQueryDates
++	{
++		uint32_t rowDate = 0;	// date of the latest cached row
++		uint32_t qryDate = 0;	// date of the outstanding request, 0 when none
++	};
++
++	std::mutex& settleDatesMutex()
++	{
++		static std::mutex* m = new std::mutex();	// never destroyed: usable during exit
++		return *m;
++	}
++
++	std::unordered_map<const void*, SettleQueryDates>& settleDatesTable()
++	{
++		static auto* t = new std::unordered_map<const void*, SettleQueryDates>();
++		return *t;
++	}
++
++	void settleBegin(const void* owner, uint32_t uDate)
++	{
++		std::lock_guard<std::mutex> lock(settleDatesMutex());
++		SettleQueryDates& d = settleDatesTable()[owner];
++		d.rowDate = 0;
++		d.qryDate = uDate;
++	}
++
++	void settleRow(const void* owner, uint32_t rowDate)
++	{
++		if (rowDate == 0)
++			return;
++		std::lock_guard<std::mutex> lock(settleDatesMutex());
++		settleDatesTable()[owner].rowDate = rowDate;
++	}
++
++	SettleQueryDates settleEnd(const void* owner)
++	{
++		std::lock_guard<std::mutex> lock(settleDatesMutex());
++		auto& table = settleDatesTable();
++		auto it = table.find(owner);
++		if (it == table.end())
++			return SettleQueryDates();
++		SettleQueryDates d = it->second;
++		table.erase(it);
++		return d;
++	}
++}
++
+ //By Wesley @ 2022.01.05
+ #include "../Share/fmtlib.h"
+ template<typename... Args>
+@@ -306,6 +361,7 @@
+ 	if (m_ayExecOrds) { m_ayExecOrds->release(); m_ayExecOrds = NULL; }
+ 	if (m_ayPosDetail) { m_ayPosDetail->release(); m_ayPosDetail = NULL; }
+ 	if (m_mapPosition) { m_mapPosition->release(); m_mapPosition = NULL; }
++	settleEnd(this);	// I03-NEW-133
+ }
+ 
+ bool TraderCTPOpt::removableByFactory() const
+@@ -1239,6 +1295,7 @@
+ 	}
+ 
+ 	m_strSettleInfo.clear();
++	settleBegin(this, uDate);	// I03-NEW-133
+ 	StdUniqueLock lock(m_mtxQuery);
+ 	m_queQuery.push([this, uDate]() {
+ 		CThostFtdcQrySettlementInfoField req;
+@@ -1608,15 +1665,47 @@
+ 		//triggerQuery();
+ 	}
+ 
+-	if (!IsErrorRspInfo(pRspInfo) && pSettlementInfo)
++	const bool isError = IsErrorRspInfo(pRspInfo);
++	if (!isError && pSettlementInfo)
+ 	{
+ 		m_strSettleInfo += pSettlementInfo->Content;
++		settleRow(this, (uint32_t)atoi(pSettlementInfo->TradingDay));
+ 	}
+ 
+-	if (bIsLast && !m_strSettleInfo.empty())
++	if (!bIsLast)
++		return;
++
++	// I03-NEW-133 (same contract as TraderCTP I03-NEW-131, card 14c): the terminal frame
++	// ends this settlement query and is never dereferenced without payload. Cached rows
++	// are reported once with the latest row date; an outstanding request without any
++	// content (no payload, or an empty-content payload) gets an explicit empty result;
++	// an error terminal frame with nothing cached still reports nothing.
++	const SettleQueryDates dates = settleEnd(this);
++	bool report = !m_strSettleInfo.empty();
++	uint32_t uDate = 0;
++	if (pSettlementInfo != NULL)
++	{
++		uDate = (uint32_t)atoi(pSettlementInfo->TradingDay);
++	}
++	else
++	{
++		uDate = (dates.rowDate != 0) ? dates.rowDate : dates.qryDate;
++		write_log(currentSink(), LL_WARN, "[TraderCTPOpt] Settlement query ended without payload, {} bytes cached", m_strSettleInfo.size());
++	}
++	if (!report && !isError && dates.qryDate != 0)
++	{
++		report = true;
++		if (uDate == 0)
++			uDate = dates.qryDate;
++	}
++
++	std::string content;
++	content.swap(m_strSettleInfo);
++
++	if (report)
+ 	{
+ 		if (ITraderSpi* sink = currentSink())
+-			sink->onRspSettlementInfo(atoi(pSettlementInfo->TradingDay), m_strSettleInfo.c_str());
++			sink->onRspSettlementInfo(uDate, content.c_str());
+ 	}
+ }
+ 
+--- a/src/TraderCTP/TraderCTP.cpp
++++ b/src/TraderCTP/TraderCTP.cpp
+@@ -1489,22 +1489,32 @@
+ 
+ 	if (bIsLast && !IsErrorRspInfo(pRspInfo))
+ 	{
+-		WTSAccountInfo* accountInfo = WTSAccountInfo::create();
+-		accountInfo->setPreBalance(pTradingAccount->PreBalance);
+-		accountInfo->setCloseProfit(pTradingAccount->CloseProfit);
+-		accountInfo->setDynProfit(pTradingAccount->PositionProfit);
+-		accountInfo->setMargin(pTradingAccount->CurrMargin);
+-		accountInfo->setAvailable(pTradingAccount->Available);
+-		accountInfo->setCommission(pTradingAccount->Commission);
+-		accountInfo->setFrozenMargin(pTradingAccount->FrozenMargin);
+-		accountInfo->setFrozenCommission(pTradingAccount->FrozenCommission);
+-		accountInfo->setDeposit(pTradingAccount->Deposit);
+-		accountInfo->setWithdraw(pTradingAccount->Withdraw);
+-		accountInfo->setBalance(accountInfo->getPreBalance() + accountInfo->getCloseProfit() - accountInfo->getCommission() + accountInfo->getDeposit() - accountInfo->getWithdraw());
+-		accountInfo->setCurrency("CNY");
+-
+ 		WTSArray * ay = WTSArray::create();
+-		ay->append(accountInfo, false);
++		if (pTradingAccount != NULL)
++		{
++			WTSAccountInfo* accountInfo = WTSAccountInfo::create();
++			accountInfo->setPreBalance(pTradingAccount->PreBalance);
++			accountInfo->setCloseProfit(pTradingAccount->CloseProfit);
++			accountInfo->setDynProfit(pTradingAccount->PositionProfit);
++			accountInfo->setMargin(pTradingAccount->CurrMargin);
++			accountInfo->setAvailable(pTradingAccount->Available);
++			accountInfo->setCommission(pTradingAccount->Commission);
++			accountInfo->setFrozenMargin(pTradingAccount->FrozenMargin);
++			accountInfo->setFrozenCommission(pTradingAccount->FrozenCommission);
++			accountInfo->setDeposit(pTradingAccount->Deposit);
++			accountInfo->setWithdraw(pTradingAccount->Withdraw);
++			accountInfo->setBalance(accountInfo->getPreBalance() + accountInfo->getCloseProfit() - accountInfo->getCommission() + accountInfo->getDeposit() - accountInfo->getWithdraw());
++			accountInfo->setCurrency("CNY");
++			ay->append(accountInfo, false);
++		}
++		else
++		{
++			// I03-NEW-134 (card 14c): a terminal frame without payload has no SDK-defined meaning.
++			// End the query with an explicit empty account list (the same shape as the empty
++			// position/order/trade results of this file) and never invent fund values.
++			write_log(currentSink(), LL_WARN, "[TraderCTP] Account query ended without payload, reporting an empty account list");
++		}
++
+ 		if (ITraderSpi* sink = currentSink())
+ 			sink->onRspAccount(ay);
+ 
+@@ -1694,8 +1704,9 @@
+ 	// I03-NEW-131 (BUG-T25-003, card 14c): the terminal frame ends this settlement query.
+ 	// The SDK defines no meaning for a terminal frame without payload, so it is never
+ 	// dereferenced: cached rows are reported once with the latest row date, and an
+-	// outstanding request without any row gets an explicit empty result. An error
+-	// terminal frame with nothing cached still reports nothing (existing contract).
++	// outstanding request without any content (no payload, or an empty-content payload)
++	// gets an explicit empty result. An error terminal frame with nothing cached still
++	// reports nothing (existing contract).
+ 	bool report = !m_strSettleInfo.empty();
+ 	uint32_t uDate = 0;
+ 	if (pSettlementInfo != NULL)
+@@ -1705,10 +1716,14 @@
+ 	else
+ 	{
+ 		uDate = (m_uSettleDate != 0) ? m_uSettleDate : m_uSettleQryDate;
+-		if (!isError && m_uSettleQryDate != 0)
+-			report = true;
+ 		write_log(currentSink(), LL_WARN, "[TraderCTP] Settlement query ended without payload, {} bytes cached", m_strSettleInfo.size());
+ 	}
++	if (!report && !isError && m_uSettleQryDate != 0)
++	{
++		report = true;
++		if (uDate == 0)
++			uDate = m_uSettleQryDate;
++	}
+ 
+ 	std::string content;
+ 	content.swap(m_strSettleInfo);
+--- a/src/TestUnits/coverage/t_ParserCTP/r105_parserctp_api_test.cpp
++++ b/src/TestUnits/coverage/t_ParserCTP/r105_parserctp_api_test.cpp
+@@ -431,4 +431,119 @@
+ 	parser_.OnFrontDisconnected(7);
+ 	parser_.OnRspUserLogout(NULL, NULL, 4, true);
+ 	SUCCEED();
++}
++
++/* ------------------------------------------------------------------ *
++ * I03-NEW-132（BUG-R105-004 的 ParserCTP 一处）：IsErrorRspInfo 与同族
++ * ParserCTPOpt/ParserFemas/ParserCTPMini 一致——pRspInfo 非空且 ErrorID != 0
++ * 才是错误。前置为合法会话：本 lane 的 init（工厂指向 stub）→ connect →
++ * OnFrontConnected 发出登录请求，再投递应答；不调用真实 SDK。
++ * ------------------------------------------------------------------ */
++namespace {
++
++CThostFtdcRspInfoField s3n132Rsp(int id, const char* msg)
++{
++	CThostFtdcRspInfoField info;
++	std::memset(&info, 0, sizeof(info));
++	info.ErrorID = id;
++	std::strncpy(info.ErrorMsg, msg, sizeof(info.ErrorMsg) - 1);
++	return info;
+ }
++
++size_t s3n132Count(const R105CtpSink& sink, WTSParserEvent e)
++{
++	size_t n = 0;
++	for (const auto& ev : sink.events)
++		if (ev.e == (int)e)
++			++n;
++	return n;
++}
++
++bool s3n132ErrorLog(const R105CtpSink& sink, const char* needle)
++{
++	for (const auto& lg : sink.logs)
++		if (lg.ll == (int)LL_ERROR && lg.msg.find(needle) != std::string::npos)
++			return true;
++	return false;
++}
++
++}	// namespace
++
++#define S3N132_LOGIN_REQUESTED(tmpdir)                                  \
++	R105CtpTempDir tmpdir;                                              \
++	ASSERT_FALSE(tmpdir.path.empty());                                  \
++	{                                                                   \
++		WTSVariant* cfg = makeCfg(tmpdir.path + "/flows");              \
++		ASSERT_NE(nullptr, cfg);                                        \
++		ASSERT_TRUE(parser_.init(cfg));                                 \
++		cfg->release();                                                 \
++	}                                                                   \
++	ASSERT_TRUE(parser_.connect());                                     \
++	{                                                                   \
++		CodeSet codes;                                                  \
++		codes.insert("SHFE.ag2512");                                    \
++		parser_.subscribe(codes);                                       \
++	}                                                                   \
++	ASSERT_EQ(0, api_.sub_calls);                                       \
++	parser_.OnFrontConnected();                                         \
++	ASSERT_EQ(1, api_.login_calls);                                     \
++	api_.trading_day = "20260301"
++
++TEST_F(R105CtpTest, s3new132_error_login_last_packet_does_not_enter_success_branch)
++{
++	S3N132_LOGIN_REQUESTED(tmp);
++	CThostFtdcRspUserLoginField login;
++	std::memset(&login, 0, sizeof(login));
++	CThostFtdcRspInfoField err = s3n132Rsp(3, "invalid login");
++	parser_.OnRspUserLogin(&login, &err, api_.last_reqid, true);
++
++	EXPECT_EQ(0u, s3n132Count(sink_, WPE_Login));
++	EXPECT_EQ(0, api_.sub_calls);
++	EXPECT_FALSE(sink_.hasLog("Market data server logined"));
++	EXPECT_TRUE(s3n132ErrorLog(sink_, "error id 3"));
++}
++
++TEST_F(R105CtpTest, s3new132_zero_error_id_login_still_succeeds)
++{
++	S3N132_LOGIN_REQUESTED(tmp);
++	CThostFtdcRspUserLoginField login;
++	std::memset(&login, 0, sizeof(login));
++	CThostFtdcRspInfoField ok = s3n132Rsp(0, "CTP:no error");
++	parser_.OnRspUserLogin(&login, &ok, api_.last_reqid, true);
++
++	EXPECT_EQ(1u, s3n132Count(sink_, WPE_Login));
++	EXPECT_TRUE(sink_.hasLog("Market data server logined, 20260301"));
++	EXPECT_EQ(1, api_.sub_calls);
++	EXPECT_FALSE(s3n132ErrorLog(sink_, "error id"));
++}
++
++TEST_F(R105CtpTest, s3new132_rejected_login_does_not_block_a_later_successful_login)
++{
++	S3N132_LOGIN_REQUESTED(tmp);
++	CThostFtdcRspUserLoginField login;
++	std::memset(&login, 0, sizeof(login));
++	CThostFtdcRspInfoField err = s3n132Rsp(75, "too many sessions");
++	parser_.OnRspUserLogin(&login, &err, api_.last_reqid, true);
++	ASSERT_EQ(0u, s3n132Count(sink_, WPE_Login));
++
++	parser_.OnFrontDisconnected(0x1001);
++	parser_.OnFrontConnected();
++	ASSERT_EQ(2, api_.login_calls);
++	parser_.OnRspUserLogin(&login, NULL, api_.last_reqid, true);
++	EXPECT_EQ(1u, s3n132Count(sink_, WPE_Login));
++	EXPECT_EQ(1, api_.sub_calls);
++}
++
++TEST_F(R105CtpTest, s3new132_rsp_error_is_logged_only_for_nonzero_error_id)
++{
++	S3N132_LOGIN_REQUESTED(tmp);
++	parser_.OnRspError(NULL, 9, true);
++	CThostFtdcRspInfoField ok = s3n132Rsp(0, "");
++	parser_.OnRspError(&ok, 10, true);
++	EXPECT_FALSE(s3n132ErrorLog(sink_, "error id"));
++
++	CThostFtdcRspInfoField err = s3n132Rsp(90, "request rejected");
++	parser_.OnRspError(&err, 11, true);
++	EXPECT_TRUE(s3n132ErrorLog(sink_, "error id 90"));
++	EXPECT_EQ(0u, s3n132Count(sink_, WPE_Login));
++}
+--- a/src/TestUnits/coverage/t_ParserCTP/t5_ctp_parser_test.cpp
++++ b/src/TestUnits/coverage/t_ParserCTP/t5_ctp_parser_test.cpp
+@@ -307,9 +307,13 @@
+ 	info.ErrorID = 5;
+ 	parser_.OnRspSubMarketData(&spec, &info, 9, true);
+ 	parser_.OnRspUnSubMarketData(&spec, &info, 9, true);
+-	// 两个订阅回调在产品侧是空实现：不得新增任何事件/日志
++	// 两个订阅回调不产生事件。I03-NEW-132：订阅应答经 IsErrorRspInfo 识别 ErrorID=5 并写一条
++	// 错误日志（与 ParserCTPOpt/ParserFemas/ParserCTPMini 同族合同一致；原断言 logs_.size()==1
++	// 固化的是谓词恒 false、错误应答无声的缺陷行为）；退订应答不经谓词，不写日志。
+ 	EXPECT_EQ(1u, sink_.events_.size());
+-	EXPECT_EQ(1u, sink_.logs_.size());
++	ASSERT_EQ(2u, sink_.logs_.size());
++	EXPECT_EQ((int)LL_ERROR, sink_.logs_[1].ll);
++	EXPECT_NE(std::string::npos, sink_.logs_[1].msg.find("error id 5"));
+ }
+ 
+ /* ------------------------------------------------------------ 行情映射 */
+--- a/src/TestUnits/coverage/t_TraderCTPOpt/i03s5_traderctpopt_lifecycle_test.cpp
++++ b/src/TestUnits/coverage/t_TraderCTPOpt/i03s5_traderctpopt_lifecycle_test.cpp
+@@ -610,4 +610,120 @@
+     o.OrderStatus = THOST_FTDC_OST_Touched;
+     trader_.OnRtnOrder(&o);
+     EXPECT_EQ((int)WOS_Submitting, s.state);
++}
++
++/* ------------------------------------------------------------------ *
++ * I03-NEW-133（与 TraderCTP 的 I03-NEW-131 同一合同，卡14c）：结算单查询末帧
++ * 不得解引用 NULL 载荷；末帧结束本次查询，一次查询只给一次结果：
++ *   - 已缓存内容按最近一行的 TradingDay 推送；
++ *   - 有未完成请求而无内容（无载荷或空内容末帧）时推送请求日的空结果；
++ *   - 错误末帧且无缓存不推送。
++ * ------------------------------------------------------------------ */
++namespace i03s5opt {
++
++class SettleSink : public Sink
++{
++public:
++    uint32_t n = 0;
++    uint32_t date = 0;
++    std::string content;
++    void onRspSettlementInfo(uint32_t uDate, const char* c) override
++    {
++        ++n;
++        date = uDate;
++        content = (c == NULL) ? "<null>" : c;
++    }
++};
++
++static CThostFtdcSettlementInfoField settleRow(const char* day, const char* content)
++{
++    CThostFtdcSettlementInfoField f;
++    std::memset(&f, 0, sizeof(f));
++    std::strncpy(f.TradingDay, day, sizeof(f.TradingDay) - 1);
++    std::strncpy(f.Content, content, sizeof(f.Content) - 1);
++    return f;
++}
++
++/// 局部 sink 先于 fixture 的 trader_ 析构：结束时（含 ASSERT 早退）恢复 fixture sink 并摘掉 stub API。
++struct SettleScope
++{
++    Probe& trader;
++    Sink& fixtureSink;
++    ~SettleScope() { trader.setApi(NULL); trader.registerSpi(&fixtureSink); }
++};
++
++}// namespace i03s5opt
++
++TEST_F(I03S5TraderCTPOptLifecycle, S3New133NullLastRowEndsQueryWithCachedContent)
++{
++    SettleSink s;
++    SettleScope scope{ trader_, sink_ };
++    trader_.registerSpi(&s);
++    trader_.setApi(&api_);
++    trader_.setReady(5, 6, 0);
++    CThostFtdcRspInfoField ok;
++    std::memset(&ok, 0, sizeof(ok));
++
++    ASSERT_EQ(0, trader_.querySettlement(20240116));
++    CThostFtdcSettlementInfoField r1 = settleRow("20240115", "line-A");
++    trader_.OnRspQrySettlementInfo(&r1, &ok, 1, false);
++    EXPECT_EQ(0u, s.n);
++    trader_.OnRspQrySettlementInfo(NULL, &ok, 1, true);
++    EXPECT_FALSE(trader_.inQuery());
++    ASSERT_EQ(1u, s.n);
++    EXPECT_EQ(20240115u, s.date);
++    EXPECT_EQ("line-A", s.content);
++
++    trader_.OnRspQrySettlementInfo(NULL, &ok, 1, true);   // 迟到的重复末帧
++    EXPECT_EQ(1u, s.n);
++
++    ASSERT_EQ(0, trader_.querySettlement(20240117));
++    CThostFtdcSettlementInfoField r2 = settleRow("20240117", "line-B");
++    trader_.OnRspQrySettlementInfo(&r2, &ok, 2, true);
++    EXPECT_EQ(2u, s.n);
++    EXPECT_EQ(20240117u, s.date);
++    EXPECT_EQ("line-B", s.content);
+ }
++
++TEST_F(I03S5TraderCTPOptLifecycle, S3New133EmptyResponseReportsEmptyResultOnce)
++{
++    SettleSink s;
++    SettleScope scope{ trader_, sink_ };
++    trader_.registerSpi(&s);
++    trader_.setApi(&api_);
++    trader_.setReady(5, 6, 0);
++    CThostFtdcRspInfoField ok;
++    std::memset(&ok, 0, sizeof(ok));
++
++    ASSERT_EQ(0, trader_.querySettlement(20240116));
++    trader_.OnRspQrySettlementInfo(NULL, &ok, 1, true);
++    ASSERT_EQ(1u, s.n);
++    EXPECT_EQ(20240116u, s.date);
++    EXPECT_EQ("", s.content);
++    trader_.OnRspQrySettlementInfo(NULL, NULL, 1, true);
++    EXPECT_EQ(1u, s.n);
++
++    ASSERT_EQ(0, trader_.querySettlement(20240117));
++    CThostFtdcSettlementInfoField blank = settleRow("", "");
++    trader_.OnRspQrySettlementInfo(&blank, &ok, 2, true);  // 空内容载荷末帧
++    ASSERT_EQ(2u, s.n);
++    EXPECT_EQ(20240117u, s.date);
++    EXPECT_EQ("", s.content);
++}
++
++TEST_F(I03S5TraderCTPOptLifecycle, S3New133ErrorLastFrameWithoutPayloadReportsNothing)
++{
++    SettleSink s;
++    SettleScope scope{ trader_, sink_ };
++    trader_.registerSpi(&s);
++    trader_.setApi(&api_);
++    trader_.setReady(5, 6, 0);
++    CThostFtdcRspInfoField err;
++    std::memset(&err, 0, sizeof(err));
++    err.ErrorID = 3;
++
++    ASSERT_EQ(0, trader_.querySettlement(20240116));
++    trader_.OnRspQrySettlementInfo(NULL, &err, 1, true);
++    EXPECT_FALSE(trader_.inQuery());
++    EXPECT_EQ(0u, s.n);
++}
+--- a/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp
++++ b/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp
+@@ -142,6 +142,7 @@
+     std::string act_code_, act_exchg_, act_eid_, act_oid_, act_usertag_;
+ 
+     uint32_t    n_rsp_account_ = 0, account_size_ = 0;
++    bool        last_account_null_ = false;
+     double      account_balance_ = 0, account_available_ = 0;
+ 
+     uint32_t    n_rsp_position_ = 0;
+@@ -237,6 +238,7 @@
+     virtual void onRspAccount(WTSArray* ayAccounts) override
+     {
+         ++n_rsp_account_;
++        last_account_null_ = (ayAccounts == NULL);
+         account_size_ = ayAccounts == NULL ? 0 : ayAccounts->size();
+         if (account_size_ > 0)
+         {
+@@ -2215,6 +2217,74 @@
+     trader_.OnRspQrySettlementInfo(NULL, &err, 1, true);
+     EXPECT_FALSE(trader_.inQuery());
+     EXPECT_EQ(0u, sink_.n_settlement_);
++}
++
++/*
++ * I03-NEW-131 残余：末帧带载荷但 Content 为空、且没有缓存时，与无载荷末帧一样给本次请求
++ * 一个明确的空结果。日期取末帧 TradingDay，末帧未带日期时取请求日。
++ */
++TEST_F(T25TraderCTPTest, settlement_info_empty_content_last_row_reports_empty_result)
++{
++    bringToReady();
++    EXPECT_EQ(0, trader_.querySettlement(20240116));
++    EXPECT_EQ(1u, trader_.drainQueries());
++    trader_.setInQuery(true);
++
++    CThostFtdcSettlementInfoField empty;
++    memset(&empty, 0, sizeof(empty));                  // TradingDay 与 Content 均为空
++    trader_.OnRspQrySettlementInfo(&empty, &ok_, 1, true);
++    EXPECT_FALSE(trader_.inQuery());
++    EXPECT_EQ(1u, sink_.n_settlement_);
++    EXPECT_EQ(20240116u, sink_.settle_date_);
++    EXPECT_EQ("", sink_.settle_content_);
++
++    // 第二次请求：末帧带交易日但无内容 ⇒ 日期取末帧交易日
++    EXPECT_EQ(0, trader_.querySettlement(20240117));
++    EXPECT_EQ(1u, trader_.drainQueries());
++    strcpy(empty.TradingDay, "20240115");
++    trader_.OnRspQrySettlementInfo(&empty, &ok_, 2, true);
++    EXPECT_EQ(2u, sink_.n_settlement_);
++    EXPECT_EQ(20240115u, sink_.settle_date_);
++    EXPECT_EQ("", sink_.settle_content_);
++
++    // 没有未完成请求时的空内容末帧不产生结果（与 t2 无请求直推内容的既有用例互补）
++    trader_.OnRspQrySettlementInfo(&empty, &ok_, 3, true);
++    EXPECT_EQ(2u, sink_.n_settlement_);
++}
++
++/*
++ * I03-NEW-134（卡14c）：资金查询的非错误末帧不带载荷（pTradingAccount == NULL）时不得解引用；
++ * 查询结束并按本文件的查询回报约定（末帧总推送数组，持仓/订单/成交无数据时推空数组）
++ * 推送明确的空资金数组，不伪造任何资金字段。错误末帧仍不推送（既有合同）。
++ */
++TEST_F(T25TraderCTPTest, account_null_last_frame_reports_empty_account_list)
++{
++    bringToReady();
++    trader_.setInQuery(true);
++    trader_.OnRspQryTradingAccount(NULL, &ok_, 1, true);
++    EXPECT_FALSE(trader_.inQuery());
++    ASSERT_EQ(1u, sink_.n_rsp_account_);
++    EXPECT_FALSE(sink_.last_account_null_);
++    EXPECT_EQ(0u, sink_.account_size_);
++
++    trader_.setInQuery(true);
++    trader_.OnRspQryTradingAccount(NULL, NULL, 2, true);
++    EXPECT_FALSE(trader_.inQuery());
++    EXPECT_EQ(2u, sink_.n_rsp_account_);
++    EXPECT_EQ(0u, sink_.account_size_);
++
++    CThostFtdcRspInfoField err;
++    fillErr(err, 42, "fake query error");
++    trader_.setInQuery(true);
++    trader_.OnRspQryTradingAccount(NULL, &err, 3, true);
++    EXPECT_FALSE(trader_.inQuery());
++    EXPECT_EQ(2u, sink_.n_rsp_account_);              // 错误末帧不推送
++
++    // 非末帧的 NULL 载荷不推送，也不结束查询
++    trader_.setInQuery(true);
++    trader_.OnRspQryTradingAccount(NULL, &ok_, 4, false);
++    EXPECT_TRUE(trader_.inQuery());
++    EXPECT_EQ(2u, sink_.n_rsp_account_);
+ }
+ 
+ /*

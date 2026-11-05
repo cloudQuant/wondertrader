@@ -1,0 +1,25 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = UnresolvedReportJournal.MarkerAppearingAfterBootstrapPreflightHasImmediateEvidence:UnresolvedReportJournal.BootstrapProcessExitLeavesRecoveryEvidenceAndNeverRecreates
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from UnresolvedReportJournal
+[ RUN      ] UnresolvedReportJournal.MarkerAppearingAfterBootstrapPreflightHasImmediateEvidence
+src/TestUnits/coverage/n02_wtcore_engines/unresolved_report_journal_test.cpp:154: Failure
+Expected equality of these values:
+  Journal::Status::RecoveryRequired
+    Which is: 4-byte object <08-00 00-00>
+  journal.recoveryInspection(inspection)
+    Which is: 4-byte object <02-00 00-00>
+
+[  FAILED  ] UnresolvedReportJournal.MarkerAppearingAfterBootstrapPreflightHasImmediateEvidence (1 ms)
+[ RUN      ] UnresolvedReportJournal.BootstrapProcessExitLeavesRecoveryEvidenceAndNeverRecreates
+[       OK ] UnresolvedReportJournal.BootstrapProcessExitLeavesRecoveryEvidenceAndNeverRecreates (151 ms)
+[----------] 2 tests from UnresolvedReportJournal (153 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (153 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] UnresolvedReportJournal.MarkerAppearingAfterBootstrapPreflightHasImmediateEvidence
+
+ 1 FAILED TEST

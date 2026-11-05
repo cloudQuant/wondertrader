@@ -1,0 +1,14 @@
+mode=wrapper source_nonnull=1 source_size=88 dest_capacity=151 zstd=10404
+/tmp/wt-i03-r20-20261102/snapshot/src/WTSUtils/zstdlib/zstd_compress.c:1326:46: runtime error: applying non-zero offset 1 to null pointer
+    #0 0x00010062b1c4 in ZSTD_reset_matchState zstd_compress.c:1326
+    #1 0x000100628998 in ZSTD_resetCCtx_internal zstd_compress.c:1527
+    #2 0x0001006167d4 in ZSTD_compressBegin_internal zstd_compress.c:2946
+    #3 0x0001006190c4 in ZSTD_compress_advanced_internal zstd_compress.c:3120
+    #4 0x00010061941c in ZSTD_compress_usingDict zstd_compress.c:3135
+    #5 0x00010061955c in ZSTD_compressCCtx zstd_compress.c:3145
+    #6 0x000100619748 in ZSTD_compress zstd_compress.c:3155
+    #7 0x00010058503c in WTSCmpHelper::compress_data(void const*, unsigned long, unsigned int) WTSCmpHelper.hpp:44
+    #8 0x000100584c34 in main probe.cpp:31
+    #9 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-r20-20261102/snapshot/src/WTSUtils/zstdlib/zstd_compress.c:1326:46 

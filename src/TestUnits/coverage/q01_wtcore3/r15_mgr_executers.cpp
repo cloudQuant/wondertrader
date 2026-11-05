@@ -23,6 +23,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
 
 #include <Includes/ILogHandler.h>
 #include <Includes/WTSVariant.hpp>
@@ -41,9 +44,31 @@ namespace {
 
 USING_NS_WTP;
 
-/** 「能加载但没有工厂导出」的真实 dylib；build-cov 里现成产物 */
-static const char* kNoFactDylib =
-    "/Users/yunjinqi/Documents/new_projects/wondertrader/build-cov/build_x64/Debug/bin/libWtIndexFactory.dylib";
+/** 「能加载但没有工厂导出」的真实 dylib（构建产物 libWtIndexFactory.dylib）。
+ *  I03-NEW-105：不再写死仓库 build-cov 路径；依次取 WT_COV_PLUGIN_BIN、本测试二进制所在构建的 bin/。 */
+std::string noFactDylibPath()
+{
+    const char* const name = "libWtIndexFactory.dylib";
+    std::error_code ec;
+    if (const char* pluginBin = std::getenv("WT_COV_PLUGIN_BIN"))
+    {
+        const std::filesystem::path candidate = std::filesystem::path(pluginBin) / name;
+        if (pluginBin[0] != '\0' && std::filesystem::exists(candidate, ec))
+            return candidate.string();
+    }
+#ifndef _WIN32
+    Dl_info info;
+    if (dladdr(reinterpret_cast<void*>(&noFactDylibPath), &info) != 0 && info.dli_fname != nullptr)
+    {
+        // <build>/bin/TestUnits/<test binary>  ->  <build>/bin/libWtIndexFactory.dylib
+        const std::filesystem::path candidate =
+            std::filesystem::path(info.dli_fname).parent_path().parent_path() / name;
+        if (std::filesystem::exists(candidate, ec))
+            return candidate.string();
+    }
+#endif
+    return std::string();
+}
 
 class R15MgrTest : public ::testing::Test
 {
@@ -74,9 +99,10 @@ protected:
     bool copyDylib(const std::string& name)
     {
         std::error_code ec;
-        if (!std::filesystem::exists(kNoFactDylib, ec))
+        const std::string source = noFactDylibPath();
+        if (source.empty())
             return false;
-        std::filesystem::copy_file(kNoFactDylib, _dir / name,
+        std::filesystem::copy_file(source, _dir / name,
             std::filesystem::copy_options::overwrite_existing, ec);
         return !ec;
     }
@@ -214,7 +240,7 @@ TEST_F(R15MgrTest, executer_factory_scan_skips_dirs_text_and_unloadable_libs)
 TEST_F(R15MgrTest, executer_factory_free_library_when_creator_symbol_absent)
 {
     if (!copyDylib("libNoExecFact.dylib"))
-        GTEST_SKIP() << "libWtIndexFactory.dylib not present on this machine";
+        GTEST_SKIP() << "libWtIndexFactory.dylib not found via WT_COV_PLUGIN_BIN or this build's bin directory";
     WtExecuterFactory factory;
     EXPECT_TRUE(factory.loadFactories(_dir.string().c_str()));
     // dlopen 成功但 createExecFact 缺失 ⇒ L52 free_library+continue；
@@ -241,7 +267,7 @@ TEST_F(R15MgrTest, cta_strategy_mgr_scan_free_library_path)
     touch("notes.txt", "plain text");
     touch("broken.dylib", "not mach-o");
     if (!copyDylib("libNoStraFact.dylib"))
-        GTEST_SKIP() << "libWtIndexFactory.dylib not present on this machine";
+        GTEST_SKIP() << "libWtIndexFactory.dylib not found via WT_COV_PLUGIN_BIN or this build's bin directory";
 
     CtaStrategyMgr mgr;
     EXPECT_TRUE(mgr.loadFactories(_dir.string().c_str()));     // L39 fs::path + 循环三段
@@ -256,7 +282,7 @@ TEST_F(R15MgrTest, hft_strategy_mgr_scan_free_library_path)
     touch("notes.txt", "plain text");
     touch("broken.dylib", "not mach-o");
     if (!copyDylib("libNoHftFact.dylib"))
-        GTEST_SKIP() << "libWtIndexFactory.dylib not present on this machine";
+        GTEST_SKIP() << "libWtIndexFactory.dylib not found via WT_COV_PLUGIN_BIN or this build's bin directory";
 
     HftStrategyMgr mgr;
     EXPECT_FALSE(mgr.loadFactories("/r15_nonexistent_dir_xyz"));
@@ -368,12 +394,15 @@ TEST_F(R15MgrTest, local_executer_on_tick_is_safe_with_empty_unit_state_map)
 {
     // on_tick only queues callbacks for existing _unit_states; an empty state map
     // returns without entering unit creation. The empty factory probes confirm no unit was created.
+    // 卡8b=A（eager 全量校验）：scale 必须为有限正数、policy name 严格为 "<factory>.<unit>"；
+    // 原夹具缺 scale 且 name 无工厂段，按新合同补齐（工厂仍未加载）。
     WTSVariant* root = WTSVariant::createObject();
     WTSVariant* policy = WTSVariant::createObject();
     WTSVariant* def = WTSVariant::createObject();
-    def->append("name", "R15NoSuchUnit");
+    def->append("name", "R15NoSuchFact.R15NoSuchUnit");
     policy->append("default", def);
     root->append("policy", policy);
+    root->append("scale", 1.0);
 
     WtExecuterFactory factory;
     WtExecuterMgr manager;

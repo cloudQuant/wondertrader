@@ -1,0 +1,69 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R2TickTest.marketSignalFilledByTickAndDumpsTrade
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R2TickTest
+[ RUN      ] R2TickTest.marketSignalFilledByTickAndDumpsTrade
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:215: Failure
+Expected equality of these values:
+  11.0
+    Which is: 11
+  mocker.stra_get_position_avgpx(kCode)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:216: Failure
+Expected: (0ull) != (mocker.stra_get_last_entertime(kCode)), actual: 0 vs 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:217: Failure
+Expected equality of these values:
+  11.0
+    Which is: 11
+  mocker.stra_get_last_enterprice(kCode)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:218: Failure
+Expected equality of these values:
+  std::string("tagA")
+    Which is: "tagA"
+  std::string(mocker.stra_get_last_entertag(kCode))
+    Which is: ""
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:219: Failure
+Expected: (0ull) != (mocker.stra_get_first_entertime(kCode)), actual: 0 vs 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:220: Failure
+Expected: (0ull) != (mocker.stra_get_detail_entertime(kCode, "tagA")), actual: 0 vs 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:228: Failure
+Expected: (mocker.stra_get_position_profit(kCode)) > (0.0), actual: 0 vs 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:229: Failure
+Expected: (mocker.stra_get_detail_profit(kCode, "tagA", 1)) > (0.0), actual: 0 vs 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:237: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  count_lines(folder / "trades.csv")
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:238: Failure
+Expected: (std::string::npos) != (read_file(folder / "trades.csv").find("tagA")), actual: 18446744073709551615 vs 18446744073709551615
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:240: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  count_lines(folder / "positions.csv")
+    Which is: 1
+
+[  FAILED  ] R2TickTest.marketSignalFilledByTickAndDumpsTrade (24 ms)
+[----------] 1 test from R2TickTest (24 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (28 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R2TickTest.marketSignalFilledByTickAndDumpsTrade
+
+ 1 FAILED TEST

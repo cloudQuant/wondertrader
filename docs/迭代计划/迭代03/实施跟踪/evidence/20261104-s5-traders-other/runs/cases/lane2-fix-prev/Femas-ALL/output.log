@@ -1,0 +1,177 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 73 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 28 tests from TraderFemasTest
+[ RUN      ] TraderFemasTest.fresh_instance_reports_disconnected_and_refuses_every_business_call
+[       OK ] TraderFemasTest.fresh_instance_reports_disconnected_and_refuses_every_business_call (1 ms)
+[ RUN      ] TraderFemasTest.login_without_api_handles_credentials_but_still_fails
+[       OK ] TraderFemasTest.login_without_api_handles_credentials_but_still_fails (2 ms)
+[ RUN      ] TraderFemasTest.ready_state_flips_connectivity_flag
+[       OK ] TraderFemasTest.ready_state_flips_connectivity_flag (0 ms)
+[ RUN      ] TraderFemasTest.release_marks_stopped_and_is_repeatable
+[       OK ] TraderFemasTest.release_marks_stopped_and_is_repeatable (0 ms)
+[ RUN      ] TraderFemasTest.register_spi_binds_sink_and_base_data_manager
+[       OK ] TraderFemasTest.register_spi_binds_sink_and_base_data_manager (0 ms)
+[ RUN      ] TraderFemasTest.front_disconnected_resets_state_and_publishes_close_event
+[       OK ] TraderFemasTest.front_disconnected_resets_state_and_publishes_close_event (0 ms)
+[ RUN      ] TraderFemasTest.qry_front_disconnected_only_clears_query_flag
+[       OK ] TraderFemasTest.qry_front_disconnected_only_clears_query_flag (0 ms)
+[ RUN      ] TraderFemasTest.heartbeat_warning_is_routed_to_sink_log
+[       OK ] TraderFemasTest.heartbeat_warning_is_routed_to_sink_log (0 ms)
+[ RUN      ] TraderFemasTest.make_entrust_id_rejects_null_and_zero_length_buffer
+[       OK ] TraderFemasTest.make_entrust_id_rejects_null_and_zero_length_buffer (0 ms)
+[ RUN      ] TraderFemasTest.make_entrust_id_pads_local_order_id_to_twelve_digits
+[       OK ] TraderFemasTest.make_entrust_id_pads_local_order_id_to_twelve_digits (0 ms)
+[ RUN      ] TraderFemasTest.make_entrust_id_prefixes_session_id
+[       OK ] TraderFemasTest.make_entrust_id_prefixes_session_id (0 ms)
+[ RUN      ] TraderFemasTest.make_entrust_id_accepts_exact_capacity_and_preserves_canaries
+[       OK ] TraderFemasTest.make_entrust_id_accepts_exact_capacity_and_preserves_canaries (0 ms)
+[ RUN      ] TraderFemasTest.wrap_wts_enums_into_femas_codes
+[       OK ] TraderFemasTest.wrap_wts_enums_into_femas_codes (0 ms)
+[ RUN      ] TraderFemasTest.wrap_femas_codes_back_into_wts_enums
+[       OK ] TraderFemasTest.wrap_femas_codes_back_into_wts_enums (0 ms)
+[ RUN      ] TraderFemasTest.wrap_order_state_maps_accepted_no_reply_and_canceled
+[       OK ] TraderFemasTest.wrap_order_state_maps_accepted_no_reply_and_canceled (0 ms)
+[ RUN      ] TraderFemasTest.is_error_rsp_info_and_make_error
+[       OK ] TraderFemasTest.is_error_rsp_info_and_make_error (0 ms)
+[ RUN      ] TraderFemasTest.certification_rejection_fails_login_without_touching_api
+[       OK ] TraderFemasTest.certification_rejection_fails_login_without_touching_api (0 ms)
+[ RUN      ] TraderFemasTest.login_rejection_fails_login_without_touching_api
+[       OK ] TraderFemasTest.login_rejection_fails_login_without_touching_api (0 ms)
+[ RUN      ] TraderFemasTest.qry_login_completes_initialization_when_already_logined
+[       OK ] TraderFemasTest.qry_login_completes_initialization_when_already_logined (0 ms)
+[ RUN      ] TraderFemasTest.qry_login_before_user_login_does_not_open_channel
+[       OK ] TraderFemasTest.qry_login_before_user_login_does_not_open_channel (0 ms)
+[ RUN      ] TraderFemasTest.logout_rsp_returns_channel_to_not_login
+[       OK ] TraderFemasTest.logout_rsp_returns_channel_to_not_login (0 ms)
+[ RUN      ] TraderFemasTest.order_action_rejection_pushes_cancel_error
+[       OK ] TraderFemasTest.order_action_rejection_pushes_cancel_error (0 ms)
+[ RUN      ] TraderFemasTest.queries_are_enqueued_only_after_channel_is_ready
+[       OK ] TraderFemasTest.queries_are_enqueued_only_after_channel_is_ready (0 ms)
+[ RUN      ] TraderFemasTest.order_insert_reaches_contract_lookup_before_using_api
+[       OK ] TraderFemasTest.order_insert_reaches_contract_lookup_before_using_api (0 ms)
+[ RUN      ] TraderFemasTest.instrument_status_push_casts_vendor_status
+[       OK ] TraderFemasTest.instrument_status_push_casts_vendor_status (0 ms)
+[ RUN      ] TraderFemasTest.error_rsp_is_written_to_log_with_request_id
+[       OK ] TraderFemasTest.error_rsp_is_written_to_log_with_request_id (0 ms)
+[ RUN      ] TraderFemasTest.set_and_get_tag
+[       OK ] TraderFemasTest.set_and_get_tag (0 ms)
+[ DISABLED ] TraderFemasTest.DISABLED_user_login_success_branch_needs_vendor_api
+[ RUN      ] TraderFemasTest.make_entrust_id_rejects_insufficient_logical_capacity
+[       OK ] TraderFemasTest.make_entrust_id_rejects_insufficient_logical_capacity (0 ms)
+[----------] 28 tests from TraderFemasTest (8 ms total)
+
+[----------] 11 tests from FemasContractFixture
+[ RUN      ] FemasContractFixture.make_order_info_maps_vendor_order_fields
+[       OK ] FemasContractFixture.make_order_info_maps_vendor_order_fields (30 ms)
+[ RUN      ] FemasContractFixture.make_order_info_falls_back_to_local_id_and_maps_fok
+[       OK ] FemasContractFixture.make_order_info_falls_back_to_local_id_and_maps_fok (0 ms)
+[ RUN      ] FemasContractFixture.make_entrust_maps_vendor_input_order
+[       OK ] FemasContractFixture.make_entrust_maps_vendor_input_order (0 ms)
+[ RUN      ] FemasContractFixture.make_trade_record_scales_amount_by_contract_volume_scale
+[       OK ] FemasContractFixture.make_trade_record_scales_amount_by_contract_volume_scale (8 ms)
+[ RUN      ] FemasContractFixture.order_insert_response_carries_error_and_entrust
+[       OK ] FemasContractFixture.order_insert_response_carries_error_and_entrust (0 ms)
+[ RUN      ] FemasContractFixture.account_query_response_computes_balance
+[       OK ] FemasContractFixture.account_query_response_computes_balance (2 ms)
+[ RUN      ] FemasContractFixture.position_query_response_appends_the_reported_item
+[       OK ] FemasContractFixture.position_query_response_appends_the_reported_item (6 ms)
+[ RUN      ] FemasContractFixture.position_query_unknown_contract_returns_empty_final_array
+[       OK ] FemasContractFixture.position_query_unknown_contract_returns_empty_final_array (0 ms)
+[ RUN      ] FemasContractFixture.trade_query_response_reports_appended_records
+[       OK ] FemasContractFixture.trade_query_response_reports_appended_records (1 ms)
+[ RUN      ] FemasContractFixture.order_query_and_push_callbacks
+[       OK ] FemasContractFixture.order_query_and_push_callbacks (0 ms)
+[ RUN      ] FemasContractFixture.i03_new016_destructor_returns_query_container_ownership_once
+[       OK ] FemasContractFixture.i03_new016_destructor_returns_query_container_ownership_once (0 ms)
+[----------] 11 tests from FemasContractFixture (58 ms total)
+
+[----------] 1 test from gate_placeholder_TraderFemas
+[ RUN      ] gate_placeholder_TraderFemas.compiles_with_module_flags
+[       OK ] gate_placeholder_TraderFemas.compiles_with_module_flags (0 ms)
+[----------] 1 test from gate_placeholder_TraderFemas (0 ms total)
+
+[----------] 24 tests from R93FemasTest
+[ RUN      ] R93FemasTest.connect_and_release_drive_stub_lifecycle
+[       OK ] R93FemasTest.connect_and_release_drive_stub_lifecycle (18 ms)
+[ RUN      ] R93FemasTest.connect_init_sync_success_can_reenter_query_account
+[       OK ] R93FemasTest.connect_init_sync_success_can_reenter_query_account (2 ms)
+[ RUN      ] R93FemasTest.connect_init_sync_failed_login_does_not_reenter_query
+[       OK ] R93FemasTest.connect_init_sync_failed_login_does_not_reenter_query (5 ms)
+[ RUN      ] R93FemasTest.connect_init_without_callback_allows_post_init_async_query
+[       OK ] R93FemasTest.connect_init_without_callback_allows_post_init_async_query (0 ms)
+[ RUN      ] R93FemasTest.connect_init_exception_does_not_start_a_waiting_worker
+[       OK ] R93FemasTest.connect_init_exception_does_not_start_a_waiting_worker (17 ms)
+[ RUN      ] R93FemasTest.init_missing_module_fails_and_void_connect_stops_with_diagnostic
+dlopen(/private/tmp/wt-i03-s5-traders-other-bin/fix/wt_t4_femas_module_absent.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-other-bin/fix/wt_t4_femas_module_absent.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-other-bin/fix/wt_t4_femas_module_absent.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-other-bin/fix/wt_t4_femas_module_absent.dylib' (no such file)
+[       OK ] R93FemasTest.init_missing_module_fails_and_void_connect_stops_with_diagnostic (1 ms)
+[ RUN      ] R93FemasTest.init_missing_creator_symbol_fails_and_connect_does_not_call_api
+[       OK ] R93FemasTest.init_missing_creator_symbol_fails_and_connect_does_not_call_api (11 ms)
+[ RUN      ] R93FemasTest.connect_creator_returning_null_fails_closed_with_diagnostic
+[       OK ] R93FemasTest.connect_creator_returning_null_fails_closed_with_diagnostic (61 ms)
+[ RUN      ] R93FemasTest.repeated_init_is_rejected_without_replacing_loaded_creator
+[       OK ] R93FemasTest.repeated_init_is_rejected_without_replacing_loaded_creator (17 ms)
+[ RUN      ] R93FemasTest.failed_init_can_be_retried_with_valid_module
+dlopen(/private/tmp/wt-i03-s5-traders-other-bin/fix/wt_t4_femas_module_absent.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-other-bin/fix/wt_t4_femas_module_absent.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-other-bin/fix/wt_t4_femas_module_absent.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-other-bin/fix/wt_t4_femas_module_absent.dylib' (no such file)
+[       OK ] R93FemasTest.failed_init_can_be_retried_with_valid_module (6 ms)
+[ RUN      ] R93FemasTest.dynamic_creator_success_connects_fake_api_as_positive_control
+[       OK ] R93FemasTest.dynamic_creator_success_connects_fake_api_as_positive_control (4 ms)
+[ RUN      ] R93FemasTest.quick_connect_subscribes_quick_topics
+[       OK ] R93FemasTest.quick_connect_subscribes_quick_topics (17 ms)
+[ RUN      ] R93FemasTest.authenticate_login_and_query_front_reach_ready
+[       OK ] R93FemasTest.authenticate_login_and_query_front_reach_ready (0 ms)
+[ RUN      ] R93FemasTest.order_insert_encodes_price_and_time_conditions
+[       OK ] R93FemasTest.order_insert_encodes_price_and_time_conditions (1 ms)
+[ RUN      ] R93FemasTest.order_action_logout_and_failure_logs
+[       OK ] R93FemasTest.order_action_logout_and_failure_logs (0 ms)
+[ RUN      ] R93FemasTest.order_insert_accepts_maximum_sdk_tag_and_rejects_overlong_without_api_call
+[       OK ] R93FemasTest.order_insert_accepts_maximum_sdk_tag_and_rejects_overlong_without_api_call (4 ms)
+[ RUN      ] R93FemasTest.order_insert_checks_generated_session_and_local_id_capacity
+[       OK ] R93FemasTest.order_insert_checks_generated_session_and_local_id_capacity (16 ms)
+[ RUN      ] R93FemasTest.order_action_accepts_maximum_identifiers_and_rejects_overlong_without_api_call
+[       OK ] R93FemasTest.order_action_accepts_maximum_identifiers_and_rejects_overlong_without_api_call (0 ms)
+[ RUN      ] R93FemasTest.query_account_is_scheduled_and_request_is_assembled
+[       OK ] R93FemasTest.query_account_is_scheduled_and_request_is_assembled (0 ms)
+[ RUN      ] R93FemasTest.position_order_trade_requests_assemble_after_manual_test_drain
+[       OK ] R93FemasTest.position_order_trade_requests_assemble_after_manual_test_drain (0 ms)
+[ RUN      ] R93FemasTest.standalone_position_query_is_scheduled_and_sent
+[       OK ] R93FemasTest.standalone_position_query_is_scheduled_and_sent (0 ms)
+[ RUN      ] R93FemasTest.standalone_order_query_is_scheduled_and_sent
+[       OK ] R93FemasTest.standalone_order_query_is_scheduled_and_sent (0 ms)
+[ RUN      ] R93FemasTest.standalone_trade_query_is_scheduled_and_sent
+[       OK ] R93FemasTest.standalone_trade_query_is_scheduled_and_sent (0 ms)
+[ RUN      ] R93FemasTest.queued_queries_are_serial_and_final_error_callbacks_advance
+[       OK ] R93FemasTest.queued_queries_are_serial_and_final_error_callbacks_advance (0 ms)
+[----------] 24 tests from R93FemasTest (212 ms total)
+
+[----------] 9 tests from T4003FemasLifecycle
+[ RUN      ] T4003FemasLifecycle.release_joins_worker_and_delete_does_not_terminate
+[       OK ] T4003FemasLifecycle.release_joins_worker_and_delete_does_not_terminate (72 ms)
+[ RUN      ] T4003FemasLifecycle.idle_worker_still_executes_later_query
+[       OK ] T4003FemasLifecycle.idle_worker_still_executes_later_query (196 ms)
+[ RUN      ] T4003FemasLifecycle.release_waits_for_inflight_request_before_api_release
+[       OK ] T4003FemasLifecycle.release_waits_for_inflight_request_before_api_release (221 ms)
+[ RUN      ] T4003FemasLifecycle.release_waits_for_inflight_order_insert_before_api_release
+[       OK ] T4003FemasLifecycle.release_waits_for_inflight_order_insert_before_api_release (215 ms)
+[ RUN      ] T4003FemasLifecycle.release_from_callback_defers_and_external_release_completes
+[       OK ] T4003FemasLifecycle.release_from_callback_defers_and_external_release_completes (16 ms)
+[ RUN      ] T4003FemasLifecycle.delete_trader_from_callback_quarantines
+[TraderFemas] deleteTrader: instance quarantined until process exit (called from a worker or SPI callback thread)
+[       OK ] T4003FemasLifecycle.delete_trader_from_callback_quarantines (128 ms)
+[ RUN      ] T4003FemasLifecycle.admission_closed_after_release_and_repeated_connect_rejected
+[       OK ] T4003FemasLifecycle.admission_closed_after_release_and_repeated_connect_rejected (26 ms)
+[ RUN      ] T4003FemasLifecycle.late_callback_after_release_is_not_delivered
+[       OK ] T4003FemasLifecycle.late_callback_after_release_is_not_delivered (15 ms)
+[ RUN      ] T4003FemasLifecycle.callback_drain_timeout_reports_unquiesced_and_remover_quarantines
+[TraderFemas] release: worker, API calls or callbacks did not drain within 200 ms; instance kept
+[TraderFemas] release: worker, API calls or callbacks did not drain within 200 ms; instance kept
+[TraderFemas] deleteTrader: instance quarantined until process exit (worker, API calls or callbacks did not drain)
+[       OK ] T4003FemasLifecycle.callback_drain_timeout_reports_unquiesced_and_remover_quarantines (592 ms)
+[----------] 9 tests from T4003FemasLifecycle (1486 ms total)
+
+[----------] Global test environment tear-down
+[==========] 73 tests from 5 test suites ran. (1767 ms total)
+[  PASSED  ] 73 tests.
+
+  YOU HAVE 3 DISABLED TESTS
+

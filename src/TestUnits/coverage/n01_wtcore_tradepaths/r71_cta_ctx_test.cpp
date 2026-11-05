@@ -350,7 +350,7 @@ TEST_F(R71CtaTest, BarsTicksPricesAndChartDump)
 
     WTSKlineSlice* m5 = ctx->stra_get_bars("SHFE.rb.2510", "m5", 2);
     ASSERT_NE(m5, nullptr);
-    EXPECT_EQ(m5->size(), 3u);
+    EXPECT_EQ(m5->size(), 3);
     m5->release();
     EXPECT_EQ(dm.kline_calls, 1u);
 

@@ -287,7 +287,7 @@ const char* kSessionsYaml =
 	"    offset: 0\n"
 	"    sections:\n"
 	"        - from: 0\n"
-	"          to: 2400\n";
+	"          to: 0\n";	// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；迭代03 第五会话 int2 归因更新。
 
 const char* kCommoditiesYaml =
 	"SHFE:\n"

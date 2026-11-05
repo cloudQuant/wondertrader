@@ -1,0 +1,31 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = *.KnownRedNullLoggerFailureNotObservable/*
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from BarAndTick/CsvSignal
+[ RUN      ] BarAndTick/CsvSignal.KnownRedNullLoggerFailureNotObservable/Bar
+src/TestUnits/fixtures/l05_csv_failure_signal/probe.cpp:103: Failure
+Value of: normal_stderr != failure_stderr || normal_csv != failure_csv
+  Actual: false
+Expected: true
+void API returned normally and same file and stderr under injected close failure
+
+[  FAILED  ] BarAndTick/CsvSignal.KnownRedNullLoggerFailureNotObservable/Bar, where GetParam() = false (1 ms)
+[ RUN      ] BarAndTick/CsvSignal.KnownRedNullLoggerFailureNotObservable/Tick
+src/TestUnits/fixtures/l05_csv_failure_signal/probe.cpp:103: Failure
+Value of: normal_stderr != failure_stderr || normal_csv != failure_csv
+  Actual: false
+Expected: true
+void API returned normally and same file and stderr under injected close failure
+
+[  FAILED  ] BarAndTick/CsvSignal.KnownRedNullLoggerFailureNotObservable/Tick, where GetParam() = true (1 ms)
+[----------] 2 tests from BarAndTick/CsvSignal (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (2 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] BarAndTick/CsvSignal.KnownRedNullLoggerFailureNotObservable/Bar, where GetParam() = false
+[  FAILED  ] BarAndTick/CsvSignal.KnownRedNullLoggerFailureNotObservable/Tick, where GetParam() = true
+
+ 2 FAILED TESTS

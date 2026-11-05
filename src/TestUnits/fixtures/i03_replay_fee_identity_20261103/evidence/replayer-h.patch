@@ -1,0 +1,62 @@
+--- /tmp/i03-replay-fee-identity-baseline-20261103/HisDataReplayer.h	2026-11-03 16:07:59
++++ src/WtBtCore/HisDataReplayer.h	2026-11-03 16:21:36
+@@ -26,6 +26,7 @@
+ 
+ #include "../WTSTools/WTSHotMgr.h"
+ #include "../WTSTools/WTSBaseDataMgr.h"
++#include "../Share/FeeSchedule.hpp"
+ 
+ NS_WTP_BEGIN
+ class WTSTickData;
+@@ -37,6 +38,7 @@
+ class WTSTransSlice;
+ class WTSSessionInfo;
+ class WTSCommodityInfo;
++class WTSContractInfo;
+ 
+ class WTSOrdDtlData;
+ class WTSOrdQueData;
+@@ -963,13 +965,22 @@
+ 	 */
+ 	uint32_t get_trading_date() const{ return _cur_tdate; }
+ 
++	// A running replay rejects reload without changing its schedule. Once a
++	// reload starts, failure invalidates the previous schedule.
++	bool loadFeesChecked(const char* filename);
++	// On failure, out is unchanged. Continuous subscriptions require the actual
++	// verified fill contract; context is an owning value snapshot.
++	bool prepare_fee_context(const char* stdCode, const WTSContractInfo* fillContract, wt_fee::Context& out, std::string& error);
++	void report_fee_error(const std::string& message);
++	std::string fee_error() const;
++
+ 	/**
+ 	 * @brief 计算交易费用
+ 	 * @param stdCode 标准合约代码
+ 	 * @param price 交易价格
+ 	 * @param qty 交易数量
+ 	 * @param offset 开平仓标记（0-开仓，1-平仓，2-平今）
+-	 * @return 计算出的交易费用
++	 * @return 计算出的交易费用；缺失来源、费率或无效计算返回 NaN
+ 	 * @details 根据交易品种、价格、数量和开平仓标志计算交易费用
+ 	 */
+ 	double calc_fee(const char* stdCode, double price, double qty, uint32_t offset);
+@@ -1213,6 +1224,10 @@
+ 	 */
+ 	typedef wt_hashmap<std::string, FeeItem>	FeeMap;
+ 	FeeMap		_fee_map;		///< 品种手续费设置映射表
++	wt_fee::Schedule _fee_schedule;
++	mutable std::mutex _fee_error_mutex;
++	std::string _fee_error;
++	WTSContractInfo* resolve_fee_contract(const char* stdCode, const char* rawCode, const char* exchange, uint32_t tradingDate);
+ 
+ 	//////////////////////////////////////////////////////////////////////////
+ 	//
+@@ -1279,6 +1294,8 @@
+ 		uint32_t tradingDate;
+ 		WTSTickStruct tick;
+ 		bool adjustedSource;
++		std::string physicalCode;
++		std::string exchange;
+ 	};
+ 	std::mutex _dispatched_ticks_mutex;
+ 	std::set<std::string> _dispatched_tick_subscriptions;

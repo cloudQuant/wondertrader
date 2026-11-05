@@ -1,0 +1,457 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-uftcore/before2/src/WtUftCore/UftStraContext.cpp	2026-11-04 19:08:11
++++ src/WtUftCore/UftStraContext.cpp	2026-11-04 21:22:38
+@@ -69,6 +69,9 @@
+ 
+ void UftStraContext::on_tick(const char* stdCode, WTSTickData* newTick)
+ {
++	{
++	// Q04-007: position marking reads details owned by the published mapping.
++	std::lock_guard<std::mutex> localLock(_local_mutex);
+ 	auto it = _positions.find(stdCode);
+ 	if(it != _positions.end())
+ 	{
+@@ -97,6 +100,7 @@
+ 				pInfo._dynprofit = 0;
+ 		}
+ 	}
++	}
+ 
+ 	if (_strategy)
+ 		_strategy->on_tick(this, stdCode, newTick);
+@@ -129,17 +133,41 @@
+ void UftStraContext::on_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price)
+ {
+ 	{
+-	// Q04-007: local bookkeeping is serialized with day switches and readers;
+-	// the strategy callback runs after the lock is released.
+-	std::lock_guard<std::mutex> localLock(_local_mutex);
+-	if (!is_my_order(localid))
+-		return;
++		// Q04-007: local bookkeeping is serialized with day switches and readers;
++		// the strategy callback runs after the lock is released.
++		std::lock_guard<std::mutex> localLock(_local_mutex);
++		if (!is_my_order(localid))
++			return;
++
++		// I03-NEW-056: an event that cannot be written to the local blocks is
++		// retained in order (never dropped) and applied once capacity exists.
++		LocalEvent ev{ true, localid, stdCode, isLong, offset, vol, 0, price, false };
++		if (!drain_local_backlog_locked() || !apply_trade_locked(localid, stdCode, isLong, offset, vol, price))
++			retain_local_event_locked(ev);
++	}
++
++	if (_strategy)
++		_strategy->on_trade(this, localid, stdCode, isLong, offset, vol, price);
++}
+ 
++bool UftStraContext::apply_trade_locked(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price)
++{
++	(void)localid;
+ 	WTSContractInfo* cInfo = _engine->get_contract_info(stdCode);
+ 
+ 	uint32_t volscale = cInfo->getCommInfo()->getVolScale();
+ 
+ 	PosInfo& pItem = _positions[stdCode];
++
++	{
++		// Upper bound of new records: every detail after _valid_idx may be
++		// closed (one round and one trade record each), plus one opening
++		// detail and one opening trade record.
++		const std::size_t validIdx = (std::min)((std::size_t)pItem._valid_idx, pItem._details.size());
++		const uint32_t closable = (uint32_t)(pItem._details.size() - validIdx);
++		if (!ensure_local_capacity_locked(1, closable + 1, closable, 0))
++			return false;
++	}
+ 
+ 	uint64_t now = TimeUtils::getLocalTimeNow();
+ 
+@@ -598,24 +626,37 @@
+ 		}
+ 	}
+ 	*/
++	return true;
++}
++
++void UftStraContext::on_order(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled /* = false */)
++{
++	{
++		std::lock_guard<std::mutex> localLock(_local_mutex);
++		if (!is_my_order(localid))
++			return;
++
++		LocalEvent ev{ false, localid, stdCode, isLong, offset, totalQty, leftQty, price, isCanceled };
++		if (!drain_local_backlog_locked() || !apply_order_locked(localid, stdCode, offset, totalQty, leftQty, price, isCanceled))
++			retain_local_event_locked(ev);
+ 	}
+ 
+ 	if (_strategy)
+-		_strategy->on_trade(this, localid, stdCode, isLong, offset, vol, price);
++		_strategy->on_order(this, localid, stdCode, isLong, offset, totalQty, leftQty, price, isCanceled);
+ }
+ 
+-void UftStraContext::on_order(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled /* = false */)
++bool UftStraContext::apply_order_locked(uint32_t localid, const char* stdCode, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled)
+ {
+-	{
+-	std::lock_guard<std::mutex> localLock(_local_mutex);
+ 	auto it = _order_ids.find(localid);
+ 	if (it == _order_ids.end())
+-		return;
++		return true;
+ 
+ 	WTSContractInfo* cInfo = _engine->get_contract_info(stdCode);
+-	uft::OrderStruct*& curOrd = it->second;
+-	if(curOrd == NULL)
++	if(it->second == NULL)
+ 	{
++		if (!ensure_local_capacity_locked(0, 0, 0, 1))
++			return false;
++		uft::OrderStruct*& curOrd = _order_ids[localid];
+ 		SpinLock lock(_ord_blk._mutex);
+ 		uint32_t idx = _ord_blk._block->_size;
+ 		_ord_blk._block->_size++;
+@@ -636,10 +677,7 @@
+ 
+ 		curOrd = &os;
+ 	}
+-	}
+-
+-	if (_strategy)
+-		_strategy->on_order(this, localid, stdCode, isLong, offset, totalQty, leftQty, price, isCanceled);
++	return true;
+ }
+ 
+ void UftStraContext::on_channel_ready(uint32_t tradingday)
+@@ -658,6 +696,9 @@
+ 				return;
+ 			}
+ 		}
++		// I03-NEW-056: events retained while the blocks were unavailable are
++		// applied in order as soon as the local state can take them.
++		drain_local_backlog_locked();
+ 
+ 		if (_strategy)
+ 		{
+@@ -920,63 +961,116 @@
+ 
+ OrderIDs UftStraContext::stra_buy(const char* stdCode, double price, double qty, int flag /* = 0 */)
+ {
++	if (local_ledger_blocked())
++	{
++		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Order of {} refused: local ledger has unrecorded events", stdCode);
++		return OrderIDs();
++	}
++	// I03-NEW-059: ids are registered before the provider call.
++	TraderAdapter::LocalOrderRegistrar registrar(_trader, &UftStraContext::register_local_order, this);
+ 	auto ids = _trader->buy(stdCode, price, qty, flag, false);
+ 
+ 	std::lock_guard<std::mutex> localLock(_local_mutex);
+ 	for(uint32_t localid : ids)
+ 	{
+-		_order_ids[localid] = NULL;
++		if (localid != UINT_MAX)
++			_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
+ 	}
+ 	return ids;
+ }
+ 
+ OrderIDs UftStraContext::stra_sell(const char* stdCode, double price, double qty, int flag /* = 0 */)
+ {
++	if (local_ledger_blocked())
++	{
++		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Order of {} refused: local ledger has unrecorded events", stdCode);
++		return OrderIDs();
++	}
++	// I03-NEW-059: ids are registered before the provider call.
++	TraderAdapter::LocalOrderRegistrar registrar(_trader, &UftStraContext::register_local_order, this);
+ 	auto ids = _trader->sell(stdCode, price, qty, flag, false);
++
+ 	std::lock_guard<std::mutex> localLock(_local_mutex);
+-	for (uint32_t localid : ids)
++	for(uint32_t localid : ids)
+ 	{
+-		_order_ids[localid] = NULL;
++		if (localid != UINT_MAX)
++			_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
+ 	}
+ 	return ids;
+ }
+ 
+ uint32_t UftStraContext::stra_enter_long(const char* stdCode, double price, double qty, int flag /* = 0 */)
+ {
++	if (local_ledger_blocked())
++	{
++		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Order of {} refused: local ledger has unrecorded events", stdCode);
++		return UINT_MAX;
++	}
++	// I03-NEW-059: the id is registered before the provider call, so reports
++	// delivered synchronously from orderInsert are attributed to this context.
++	TraderAdapter::LocalOrderRegistrar registrar(_trader, &UftStraContext::register_local_order, this);
+ 	uint32_t localid = _trader->openLong(stdCode, price, qty, flag);
++	if (localid != UINT_MAX)
+ 	{
+ 		std::lock_guard<std::mutex> localLock(_local_mutex);
+-		_order_ids[localid] = NULL;
++		_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
+ 	}
+ 	return localid;
+ }
+ 
+ uint32_t UftStraContext::stra_exit_long(const char* stdCode, double price, double qty, bool isToday /* = false */, int flag /* = 0 */)
+ {
++	if (local_ledger_blocked())
++	{
++		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Order of {} refused: local ledger has unrecorded events", stdCode);
++		return UINT_MAX;
++	}
++	// I03-NEW-059: the id is registered before the provider call, so reports
++	// delivered synchronously from orderInsert are attributed to this context.
++	TraderAdapter::LocalOrderRegistrar registrar(_trader, &UftStraContext::register_local_order, this);
+ 	uint32_t localid = _trader->closeLong(stdCode, price, qty, isToday, flag);
++	if (localid != UINT_MAX)
+ 	{
+ 		std::lock_guard<std::mutex> localLock(_local_mutex);
+-		_order_ids[localid] = NULL;
++		_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
+ 	}
+ 	return localid;
+ }
+ 
+ uint32_t UftStraContext::stra_enter_short(const char* stdCode, double price, double qty, int flag /* = 0 */)
+ {
++	if (local_ledger_blocked())
++	{
++		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Order of {} refused: local ledger has unrecorded events", stdCode);
++		return UINT_MAX;
++	}
++	// I03-NEW-059: the id is registered before the provider call, so reports
++	// delivered synchronously from orderInsert are attributed to this context.
++	TraderAdapter::LocalOrderRegistrar registrar(_trader, &UftStraContext::register_local_order, this);
+ 	uint32_t localid = _trader->openShort(stdCode, price, qty, flag);
++	if (localid != UINT_MAX)
+ 	{
+ 		std::lock_guard<std::mutex> localLock(_local_mutex);
+-		_order_ids[localid] = NULL;
++		_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
+ 	}
+ 	return localid;
+ }
+ 
+ uint32_t UftStraContext::stra_exit_short(const char* stdCode, double price, double qty, bool isToday /* = false */, int flag /* = 0 */)
+ {
++	if (local_ledger_blocked())
++	{
++		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Order of {} refused: local ledger has unrecorded events", stdCode);
++		return UINT_MAX;
++	}
++	// I03-NEW-059: the id is registered before the provider call, so reports
++	// delivered synchronously from orderInsert are attributed to this context.
++	TraderAdapter::LocalOrderRegistrar registrar(_trader, &UftStraContext::register_local_order, this);
+ 	uint32_t localid = _trader->closeShort(stdCode, price, qty, isToday, flag);
++	if (localid != UINT_MAX)
+ 	{
+ 		std::lock_guard<std::mutex> localLock(_local_mutex);
+-		_order_ids[localid] = NULL;
++		_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
+ 	}
+ 	return localid;
+ }
+@@ -1082,10 +1176,198 @@
+ void UftStraContext::stra_log_error(const char* message)
+ {
+ 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message);
++}
++
++void UftStraContext::register_local_order(void* owner, uint32_t localid)
++{
++	UftStraContext* self = static_cast<UftStraContext*>(owner);
++	std::lock_guard<std::mutex> localLock(self->_local_mutex);
++	self->_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
++}
++
++bool UftStraContext::local_ledger_blocked() const
++{
++	std::lock_guard<std::mutex> localLock(_local_mutex);
++	return !_local_backlog.empty();
++}
++
++std::size_t UftStraContext::local_backlog_size() const
++{
++	std::lock_guard<std::mutex> localLock(_local_mutex);
++	return _local_backlog.size();
++}
++
++bool UftStraContext::apply_local_event_locked(const LocalEvent& ev)
++{
++	if (ev._is_trade)
++		return apply_trade_locked(ev._localid, ev._code.c_str(), ev._is_long, ev._offset, ev._qty, ev._price);
++	return apply_order_locked(ev._localid, ev._code.c_str(), ev._offset, ev._qty, ev._left, ev._price, ev._canceled);
+ }
+ 
++bool UftStraContext::drain_local_backlog_locked()
++{
++	while (!_local_backlog.empty())
++	{
++		if (!apply_local_event_locked(_local_backlog.front()))
++			return false;
++		_local_backlog.pop_front();
++		if (_local_backlog.empty())
++			WTSLogger::log_dyn("strategy", _name.c_str(), LL_WARN, "Local ledger backlog applied; new orders are accepted again");
++	}
++	return true;
++}
++
++void UftStraContext::retain_local_event_locked(const LocalEvent& ev)
++{
++	_local_backlog.push_back(ev);
++	WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR,
++		"Local {} event of order {} on {} could not be recorded (local block capacity); retained in order, {} pending, new orders refused",
++		ev._is_trade ? "trade" : "order", ev._localid, ev._code, _local_backlog.size());
++}
++
+ namespace
+ {
++	// I03-NEW-056: extends a mapped local block in place (file grows, records
++	// are kept) and maps it again; the caller rebases pointers and publishes.
++	template<typename BlockT>
++	bool grow_local_block(BoostMFPtr& file, BlockT* block, std::size_t itemSize, uint32_t needed,
++		BoostMFPtr& newFile, BlockT*& newBlock, std::string& error)
++	{
++		newFile.reset();
++		newBlock = NULL;
++		if (!file || block == NULL)
++		{
++			error = "local block is not loaded";
++			return false;
++		}
++		const uint64_t required = (uint64_t)block->_size + needed;
++		uint64_t capacity = (uint64_t)block->_capacity + DATA_SIZE_STEP;
++		while (capacity < required)
++			capacity += DATA_SIZE_STEP;
++		if (capacity > UINT32_MAX)
++		{
++			error = "local block capacity overflow";
++			return false;
++		}
++		const std::size_t bytes = sizeof(BlockT) + itemSize * (std::size_t)capacity;
++		const std::string filename = file->filename();
++		try
++		{
++			BoostFile bf;
++			if (!bf.open_existing_file(filename.c_str()) || !bf.truncate_file(bytes))
++			{
++				error = fmtutil::format("extending {} to {} bytes failed", filename, bytes);
++				return false;
++			}
++			bf.close_file();
++			BoostMFPtr mapped(new BoostMappingFile);
++			if (!mapped->map(filename.c_str()) || mapped->addr() == NULL || mapped->size() < bytes)
++			{
++				error = fmtutil::format("remapping {} failed", filename);
++				return false;
++			}
++			newBlock = (BlockT*)mapped->addr();
++			newBlock->_capacity = (uint32_t)capacity;
++			newFile = mapped;
++			return true;
++		}
++		catch (const std::exception& e)
++		{
++			error = fmtutil::format("extending {} failed: {}", filename, e.what());
++		}
++		catch (...)
++		{
++			error = fmtutil::format("extending {} failed with an unknown exception", filename);
++		}
++		newFile.reset();
++		newBlock = NULL;
++		return false;
++	}
++
++	template<typename T, typename BlockT>
++	T* rebase_local_pointer(T* ptr, const BlockT* oldBlock, BlockT* newBlock)
++	{
++		if (ptr == NULL)
++			return NULL;
++		return (T*)((char*)newBlock + ((const char*)ptr - (const char*)oldBlock));
++	}
++}
++
++bool UftStraContext::ensure_local_capacity_locked(uint32_t posNeeded, uint32_t trdNeeded, uint32_t rndNeeded, uint32_t ordNeeded)
++{
++	std::string error;
++	if (posNeeded > 0 && (_pos_blk._block == NULL || (uint64_t)_pos_blk._block->_size + posNeeded > _pos_blk._block->_capacity))
++	{
++		BoostMFPtr newFile;
++		uft::PositionBlock* newBlock = NULL;
++		if (!grow_local_block(_pos_blk._file, _pos_blk._block, sizeof(uft::DetailStruct), posNeeded, newFile, newBlock, error))
++		{
++			WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Local position block cannot take new records: {}", error);
++			return false;
++		}
++		uft::PositionBlock* oldBlock = _pos_blk._block;
++		for (auto& item : _positions)
++			for (auto& detail : item.second._details)
++				detail = rebase_local_pointer(detail, oldBlock, newBlock);
++		BoostMFPtr oldFile = _pos_blk._file;
++		{
++			SpinLock lock(_pos_blk._mutex);
++			_pos_blk._file = newFile;
++			_pos_blk._block = newBlock;
++		}
++		oldFile.reset();
++	}
++	if (trdNeeded > 0 && (_trd_blk._block == NULL || (uint64_t)_trd_blk._block->_size + trdNeeded > _trd_blk._block->_capacity))
++	{
++		BoostMFPtr newFile;
++		uft::TradeBlock* newBlock = NULL;
++		if (!grow_local_block(_trd_blk._file, _trd_blk._block, sizeof(uft::TradeStruct), trdNeeded, newFile, newBlock, error))
++		{
++			WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Local trade block cannot take new records: {}", error);
++			return false;
++		}
++		SpinLock lock(_trd_blk._mutex);
++		_trd_blk._file = newFile;
++		_trd_blk._block = newBlock;
++	}
++	if (rndNeeded > 0 && (_rnd_blk._block == NULL || (uint64_t)_rnd_blk._block->_size + rndNeeded > _rnd_blk._block->_capacity))
++	{
++		BoostMFPtr newFile;
++		uft::RoundBlock* newBlock = NULL;
++		if (!grow_local_block(_rnd_blk._file, _rnd_blk._block, sizeof(uft::RoundStruct), rndNeeded, newFile, newBlock, error))
++		{
++			WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Local round block cannot take new records: {}", error);
++			return false;
++		}
++		SpinLock lock(_rnd_blk._mutex);
++		_rnd_blk._file = newFile;
++		_rnd_blk._block = newBlock;
++	}
++	if (ordNeeded > 0 && (_ord_blk._block == NULL || (uint64_t)_ord_blk._block->_size + ordNeeded > _ord_blk._block->_capacity))
++	{
++		BoostMFPtr newFile;
++		uft::OrderBlock* newBlock = NULL;
++		if (!grow_local_block(_ord_blk._file, _ord_blk._block, sizeof(uft::OrderStruct), ordNeeded, newFile, newBlock, error))
++		{
++			WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Local order block cannot take new records: {}", error);
++			return false;
++		}
++		uft::OrderBlock* oldBlock = _ord_blk._block;
++		for (auto& item : _order_ids)
++			item.second = rebase_local_pointer(item.second, oldBlock, newBlock);
++		BoostMFPtr oldFile = _ord_blk._file;
++		{
++			SpinLock lock(_ord_blk._mutex);
++			_ord_blk._file = newFile;
++			_ord_blk._block = newBlock;
++		}
++		oldFile.reset();
++	}
++	return true;
++}
++
++namespace
++{
+ 	// Maps one local block file and validates its header without modifying any
+ 	// existing record. A missing file is created with an empty header first; an
+ 	// all-zero header (an interrupted creation) is initialized as empty.

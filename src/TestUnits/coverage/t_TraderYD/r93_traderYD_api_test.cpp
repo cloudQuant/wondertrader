@@ -11,6 +11,8 @@
  */
 #include <gtest/gtest.h>
 
+#include <cmath>
+
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
@@ -158,6 +160,13 @@ namespace
 		{
 			logs.push_back(message ? message : "");
 		}
+		// BUG-L01-014
+		std::vector<std::string> unresolvedRaw;
+		void onUnresolvedProviderReport(const char* kind, const char* reason, const char* raw) override
+		{
+			(void)reason;
+			unresolvedRaw.push_back(std::string(kind ? kind : "") + "|" + (raw ? raw : ""));
+		}
 		void onLoginResult(bool succ, const char* msg, uint32_t date) override
 		{
 			logins.push_back({ succ, msg ? msg : "", date });
@@ -274,6 +283,15 @@ namespace
 			pushedTrades.push_back(r);
 		}
 
+		// BUG-I02-NEW-154 / K42: versioned order-query callback, recorded separately.
+		void onRspOrdersWithStatus(const WTSArray* ay, uint32_t status) override
+		{
+			queryStatuses.push_back(status);
+			queryStatusSizes.push_back(ay ? ay->size() : 0);
+		}
+		std::vector<uint32_t> queryStatuses;
+		std::vector<std::size_t> queryStatusSizes;
+
 		R93YdBdMgr bd_;
 		std::vector<std::pair<int, int32_t>> events;
 		std::vector<std::string> logs;
@@ -297,6 +315,7 @@ namespace
 		void setApi(YDApi* api) { m_pUserAPI = api; }
 		void setFactory(YDApi* (*factory)(const char*)) { m_funcCreator = factory; }
 		void setState(WrapperState state) { m_wrapperState = state; }
+		void setUpdateCache(bool on) { m_bUpdateCache = on; }
 		void presetWorker()
 		{
 			// 产品 connect() 只在 m_thrdWorker==NULL 时起查询线程；预置一个未启动的
@@ -362,6 +381,9 @@ namespace
 			stub_.account_.Withdraw = 1000.0;
 
 			api_.setApi(&stub_);
+			// The stub plays an API that start()ed this listener: release() calls
+			// startDestroy() and waits for notifyAfterApiDestroy() (ydApi.h).
+			stub_.listener_ = &api_;
 		}
 
 		void TearDown() override
@@ -447,6 +469,10 @@ namespace
 		g_r93_yd_stub = &stub_;
 		api_.setFactory(&r93_yd_create);
 		api_.presetWorker();
+		// Card 9c (s5): connect() keeps an existing API and rejects a repeated
+		// connect. SetUp injected stub_ for the other cases; this case drives the
+		// creator path, so it starts without an injected API.
+		api_.setApi(NULL);
 
 		api_.connect();
 		EXPECT_EQ(1, stub_.n_start_);
@@ -764,5 +790,247 @@ namespace
 		ASSERT_TRUE(sink_.orderArrays[0].valid);
 		EXPECT_EQ("6101", sink_.orderArrays[0].orderID);
 		EXPECT_EQ((int)WOS_Canceled, sink_.orderArrays[0].state);
+	}
+	/* ------------------------------------------------------------------ */
+	/* BUG-R93-006：逐单冻结来源（迭代03 s5）                               */
+	/* ------------------------------------------------------------------ */
+
+	/// 混合昨/今：昨 2、今 3（经 fake 开仓成交），卖平 4 按昨仓优先冻结昨 2、今 2
+	/// （可用 0/1）；零成交撤单恢复本单冻结来源（可用 2/3）。只依赖本地冻结算式，
+	/// 不涉及 TradeVolume 累计语义（零成交）或厂商回报时序（单笔排队→撤单）。
+	/// 来源：evidence/R93-006-20261102/mixed-test.patch（迭代03 定向反例）。
+	TEST_F(R93YdTest, r93_mixed_yesterday_today_zero_fill_cancel_restores_origin)
+	{
+		comm_->setCoverMode(CM_OpenCover);
+		add_pre_position(YD_PD_Long, 2, 7000.0);
+		login_and_finish();
+		YDTrade open{};
+		open.Direction = YD_D_Buy;
+		open.OffsetFlag = YD_OF_Open;
+		open.Price = 7000.0;
+		open.Volume = 3;
+		open.TradeID = 7201;
+		open.OrderSysID = 7202;
+		api_.notifyTrade(&open, &stub_.instrument_, nullptr);
+		ASSERT_EQ(0, api_.queryPositions());
+		ASSERT_TRUE(api_.runNextQuery());
+		ASSERT_EQ(1u, sink_.positions.size());
+		ASSERT_DOUBLE_EQ(2.0, sink_.positions.back().pre);
+		ASSERT_DOUBLE_EQ(3.0, sink_.positions.back().newPos);
+		ASSERT_DOUBLE_EQ(2.0, sink_.positions.back().availPre);
+		ASSERT_DOUBLE_EQ(3.0, sink_.positions.back().availNew);
+		YDOrder pending = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 4,
+			YD_OS_Queuing, 7203, 7204);
+		api_.notifyOrder(&pending, &stub_.instrument_, nullptr);
+		ASSERT_EQ(0, api_.queryPositions());
+		ASSERT_TRUE(api_.runNextQuery());
+		ASSERT_EQ(2u, sink_.positions.size());
+		EXPECT_DOUBLE_EQ(0.0, sink_.positions.back().availPre);
+		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().availNew);
+		YDOrder canceled = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 4,
+			YD_OS_Canceled, 7203, 7204);
+		canceled.TradeVolume = 0;
+		api_.notifyOrder(&canceled, &stub_.instrument_, nullptr);
+		ASSERT_EQ(0, api_.queryPositions());
+		ASSERT_TRUE(api_.runNextQuery());
+		ASSERT_EQ(3u, sink_.positions.size());
+		EXPECT_DOUBLE_EQ(2.0, sink_.positions.back().availPre);
+		EXPECT_DOUBLE_EQ(3.0, sink_.positions.back().availNew);
+	}
+
+	/// 两笔平仓单各自冻结不同来源：A 平 1（昨 1）、B 平 3（昨 1 今 2）；先撤 A 只恢复
+	/// A 的昨 1（可用 1/1），再撤 B 恢复昨 1 今 2（可用 2/3）。按持仓总量反推来源的
+	/// 旧算式会把 A 的撤单错记到今仓。均为零成交撤单，不依赖 TradeVolume 语义。
+	TEST_F(R93YdTest, r93_two_orders_zero_fill_cancels_restore_their_own_sources)
+	{
+		comm_->setCoverMode(CM_OpenCover);
+		add_pre_position(YD_PD_Long, 2, 7000.0);
+		login_and_finish();
+		YDTrade open{};
+		open.Direction = YD_D_Buy;
+		open.OffsetFlag = YD_OF_Open;
+		open.Price = 7000.0;
+		open.Volume = 3;
+		open.TradeID = 7301;
+		open.OrderSysID = 7302;
+		api_.notifyTrade(&open, &stub_.instrument_, nullptr);
+
+		YDOrder a = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 1, YD_OS_Queuing, 7303, 7304);
+		YDOrder b = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 3, YD_OS_Queuing, 7305, 7306);
+		api_.notifyOrder(&a, &stub_.instrument_, nullptr);
+		api_.notifyOrder(&b, &stub_.instrument_, nullptr);
+		ASSERT_EQ(0, api_.queryPositions());
+		ASSERT_TRUE(api_.runNextQuery());
+		ASSERT_EQ(1u, sink_.positions.size());
+		EXPECT_DOUBLE_EQ(0.0, sink_.positions.back().availPre);
+		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().availNew);
+
+		YDOrder aCanceled = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 1, YD_OS_Canceled, 7303, 7304);
+		aCanceled.TradeVolume = 0;
+		api_.notifyOrder(&aCanceled, &stub_.instrument_, nullptr);
+		ASSERT_EQ(0, api_.queryPositions());
+		ASSERT_TRUE(api_.runNextQuery());
+		ASSERT_EQ(2u, sink_.positions.size());
+		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().availPre);
+		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().availNew);
+
+		// A duplicate cancel report of A restores nothing more.
+		api_.notifyOrder(&aCanceled, &stub_.instrument_, nullptr);
+		YDOrder bCanceled = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 3, YD_OS_Canceled, 7305, 7306);
+		bCanceled.TradeVolume = 0;
+		api_.notifyOrder(&bCanceled, &stub_.instrument_, nullptr);
+		ASSERT_EQ(0, api_.queryPositions());
+		ASSERT_TRUE(api_.runNextQuery());
+		ASSERT_EQ(3u, sink_.positions.size());
+		EXPECT_DOUBLE_EQ(2.0, sink_.positions.back().availPre);
+		EXPECT_DOUBLE_EQ(3.0, sink_.positions.back().availNew);
+	}
+	/// 非平今品种平仓成交：先减昨仓、超出部分减今仓（与冻结路径同序，代码注释
+	/// “先减掉昨仓，在调整今仓”）。昨 2、今 3 平 4 成交后应为昨 0/今 1；可用量在
+	/// 冻结时已扣（0/1），成交不再改变。只用单笔成交 Volume，不涉及 TradeVolume。
+	TEST_F(R93YdTest, r93_mixed_close_trade_reduces_yesterday_then_today)
+	{
+		comm_->setCoverMode(CM_OpenCover);
+		add_pre_position(YD_PD_Long, 2, 7000.0);
+		login_and_finish();
+		YDTrade open{};
+		open.Direction = YD_D_Buy;
+		open.OffsetFlag = YD_OF_Open;
+		open.Price = 7000.0;
+		open.Volume = 3;
+		open.TradeID = 7401;
+		open.OrderSysID = 7402;
+		api_.notifyTrade(&open, &stub_.instrument_, nullptr);
+
+		YDOrder pending = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 4,
+			YD_OS_Queuing, 7403, 7404);
+		api_.notifyOrder(&pending, &stub_.instrument_, nullptr);
+
+		YDTrade close{};
+		close.Direction = YD_D_Sell;
+		close.OffsetFlag = YD_OF_Close;
+		close.Price = 7050.0;
+		close.Volume = 4;
+		close.TradeID = 7405;
+		close.OrderSysID = 7403;
+		api_.notifyTrade(&close, &stub_.instrument_, nullptr);
+
+		ASSERT_EQ(0, api_.queryPositions());
+		ASSERT_TRUE(api_.runNextQuery());
+		ASSERT_EQ(1u, sink_.positions.size());
+		EXPECT_DOUBLE_EQ(0.0, sink_.positions.back().pre);
+		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().newPos);
+		EXPECT_DOUBLE_EQ(0.0, sink_.positions.back().availPre);
+		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().availNew);
+	}
+	// 迭代03 第五会话主线程：BUG-L01-014——YD 推送回报的合约不在基础数据中时，宿主声明能力则上送原始结构与合约代码，否则仅记日志。
+	TEST_F(R93YdTest, l01014_unknown_instrument_reports_are_forwarded_raw_when_host_supports_it)
+	{
+		login_and_finish();
+		YDInstrument unknown = stub_.instrument_;
+		memset(unknown.InstrumentID, 0, sizeof(unknown.InstrumentID));
+		strncpy(unknown.InstrumentID, "zz9999", sizeof(unknown.InstrumentID) - 1);
+		YDTrade trd;
+		memset(&trd, 0, sizeof(trd));
+		trd.Direction = YD_D_Buy;
+		trd.OffsetFlag = YD_OF_Open;
+		trd.Price = 7000.0;
+		trd.Volume = 2;
+		trd.TradeID = 5099;
+		trd.OrderSysID = 9099;
+
+		const size_t logsBefore = sink_.logs.size();
+		api_.notifyTrade(&trd, &unknown, NULL);
+		EXPECT_TRUE(sink_.unresolvedRaw.empty());
+		EXPECT_GT(sink_.logs.size(), logsBefore);
+
+		api_.setSpiFeatures(WT_TRADER_SPI_FEATURE_RAW_UNRESOLVED);
+		api_.notifyTrade(&trd, &unknown, NULL);
+		YDOrder order = make_order(YD_D_Buy, YD_OF_Open, YD_ODT_Limit, 7000.0, 2, YD_OS_Queuing, 9099, 199);
+		api_.notifyOrder(&order, &unknown, NULL);
+		ASSERT_EQ(2u, sink_.unresolvedRaw.size());
+		EXPECT_EQ(0u, sink_.unresolvedRaw[0].rfind("trade|struct=YDTrade;size=", 0)) << sink_.unresolvedRaw[0];
+		EXPECT_NE(std::string::npos, sink_.unresolvedRaw[0].find(";InstrumentID=zz9999"));
+		EXPECT_EQ(0u, sink_.unresolvedRaw[1].rfind("order|struct=YDOrder;size=", 0)) << sink_.unresolvedRaw[1];
+		EXPECT_TRUE(sink_.pushedTrades.empty());
+	}
+	/// BUG-I02-NEW-154 / K42（slice4 final gaps）：YD 没有订单查询，查询结果来自推送建的本地缓存。
+	/// 宿主声明 QUERY_STATUS 后改走带状态回调：缓存随实时回报更新（update_cache）且本会话没有
+	/// 丢弃过订单回报时为 COMPLETE；有订单回报转换失败（缓存缺单）则之后的快照都是 PARTIAL。
+	TEST_F(R93YdTest, k42_cached_order_query_reports_completeness_when_host_supports_it)
+	{
+		login_and_finish();
+		YDOrder order = make_order(YD_D_Buy, YD_OF_Open, YD_ODT_Limit, 7000.0, 2, YD_OS_Queuing, 9001, 107);
+		api_.notifyOrder(&order, &stub_.instrument_, NULL);
+
+		// Legacy host: unchanged callback.
+		ASSERT_EQ(0, api_.queryOrders());
+		ASSERT_TRUE(api_.runNextQuery());
+		EXPECT_EQ(1u, sink_.orderArrays.size());
+		EXPECT_TRUE(sink_.queryStatuses.empty());
+
+		api_.setSpiFeatures(WT_TRADER_SPI_FEATURE_QUERY_STATUS);
+		ASSERT_EQ(0, api_.queryOrders());
+		ASSERT_TRUE(api_.runNextQuery());
+		ASSERT_EQ(1u, sink_.queryStatuses.size()) << "a host that understands status gets the versioned callback";
+		EXPECT_EQ(WT_QUERY_STATUS_COMPLETE, sink_.queryStatuses[0]);
+		EXPECT_EQ(1u, sink_.queryStatusSizes[0]);
+		EXPECT_EQ(1u, sink_.orderArrays.size()) << "and only that one";
+
+		YDInstrument unknown = stub_.instrument_;
+		memset(unknown.InstrumentID, 0, sizeof(unknown.InstrumentID));
+		strncpy(unknown.InstrumentID, "zz9999", sizeof(unknown.InstrumentID) - 1);
+		YDOrder lost = make_order(YD_D_Buy, YD_OF_Open, YD_ODT_Limit, 7000.0, 1, YD_OS_Queuing, 9002, 108);
+		api_.notifyOrder(&lost, &unknown, NULL);
+		for (int i = 0; i < 2; ++i)
+		{
+			ASSERT_EQ(0, api_.queryOrders());
+			ASSERT_TRUE(api_.runNextQuery());
+		}
+		ASSERT_EQ(3u, sink_.queryStatuses.size());
+		EXPECT_EQ(WT_QUERY_STATUS_PARTIAL, sink_.queryStatuses[1]) << "the cache is missing a dropped order";
+		EXPECT_EQ(WT_QUERY_STATUS_PARTIAL, sink_.queryStatuses[2]) << "and stays incomplete for the session";
+		EXPECT_EQ(1u, sink_.queryStatusSizes[2]);
+	}
+
+	/// update_cache=false：追上后缓存不再随回报更新，快照只代表追上时刻，绝不报 COMPLETE。
+	TEST_F(R93YdTest, k42_cache_frozen_after_catch_up_is_never_reported_complete)
+	{
+		api_.setUpdateCache(false);
+		login_and_finish();
+		YDOrder order = make_order(YD_D_Buy, YD_OF_Open, YD_ODT_Limit, 7000.0, 2, YD_OS_Queuing, 9003, 109);
+		api_.notifyOrder(&order, &stub_.instrument_, NULL);
+		ASSERT_EQ(1u, sink_.pushedOrders.size());
+		EXPECT_EQ((WTSOrderInfo*)NULL, api_.cachedOrder("9003")) << "fixture: the frozen cache does not follow reports";
+
+		api_.setSpiFeatures(WT_TRADER_SPI_FEATURE_QUERY_STATUS);
+		ASSERT_EQ(0, api_.queryOrders());
+		ASSERT_TRUE(api_.runNextQuery());
+		ASSERT_EQ(1u, sink_.queryStatuses.size());
+		EXPECT_EQ(WT_QUERY_STATUS_PARTIAL, sink_.queryStatuses[0]);
+		EXPECT_EQ(0u, sink_.queryStatusSizes[0]);
+		EXPECT_TRUE(sink_.orderArrays.empty());
+	}
+
+	/// 卡8（BUG-P02-005，slice1 final gaps）：YD 只支持整手。小数、非有限、非正或超出 int 的数量
+	/// 在下单入口明确拒绝，不到 SDK（不经 (int) 静默截断）；整数量照常提交。
+	TEST_F(R93YdTest, card8_non_whole_lot_quantity_is_rejected_before_the_sdk)
+	{
+		login_and_finish();
+		for (double bad : { 1.5, 0.5, 0.0, -1.0, std::nan(""), 1e12 })
+		{
+			WTSEntrust* ent = make_entrust("", NULL, 7000.0, bad,
+				WDT_LONG, WOT_OPEN, WPT_LIMITPRICE, WOF_NOR);
+			EXPECT_EQ(-1, api_.orderInsert(ent)) << bad;
+			ent->release();
+		}
+		EXPECT_EQ(0, stub_.n_insert_);
+
+		WTSEntrust* whole = make_entrust("", NULL, 7000.0, 2,
+			WDT_LONG, WOT_OPEN, WPT_LIMITPRICE, WOF_NOR);
+		ASSERT_EQ(0, api_.orderInsert(whole));
+		EXPECT_EQ(1, stub_.n_insert_);
+		EXPECT_EQ(2, stub_.last_order_.OrderVolume);
+		whole->release();
 	}
 } // namespace

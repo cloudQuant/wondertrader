@@ -1,0 +1,16 @@
+--- current
++++ instrumented
+@@ -1,3 +1,4 @@
++extern "C" bool wt_r23_fail_truncate_once() noexcept;
+ #include "WtDataWriter.h"
+ 
+ #include "../Includes/WTSSessionInfo.hpp"
+@@ -722,7 +723,7 @@
+ 				}
+ 				if ((uint64_t)currentSize == originalFileSize)
+ 					return true;
+-				if (!f.truncate_file((std::size_t)originalFileSize))
++				if (wt_r23_fail_truncate_once() || !f.truncate_file((std::size_t)originalFileSize))
+ 				{
+ 					pipe_writer_log(_sink, LL_ERROR,
+ 						"Failed to roll back partial RT cache extension for {}; capacity remains unpublished", filename);

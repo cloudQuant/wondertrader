@@ -66,13 +66,14 @@ run_case "$run_dir/current" missing-creator missing-creator current-missing-crea
 run_case "$run_dir/current" exception-recovery name-throw current-exception-recovery
 run_case "$run_dir/current" long-invalid-path good current-long-invalid-path
 run_case "$run_dir/current" long-path-valid good current-long-path-valid "$deep_folder"
-for mode in owner-outlives-manager owner-null-strategy legacy-raw-wrapper allocation-wrapper-failure allocation-control-failure allocation-registry-failure; do
+for mode in owner-outlives-manager owner-no-preload owner-null-strategy legacy-raw-wrapper allocation-wrapper-failure allocation-control-failure allocation-registry-failure; do
  run_case "$run_dir/current" "$mode" "$mode" "current-$mode"
 done
 run_case "$run_dir/current" owner-without-remover owner-without-remover current-owner-without-remover no-remover
 if [ -n "$baseline" ]; then
  if [ "${WT_HFT_BASELINE_KIND:-initial}" = owner ]; then
   run_case "$run_dir/head-baseline" owner-outlives-manager owner-outlives-manager head-red-owner-outlives-manager
+  run_case "$run_dir/head-baseline" owner-no-preload owner-no-preload head-red-owner-no-preload
   run_case "$run_dir/head-baseline" single-name single-name head-positive
  else
   for mode in creator-throw name-throw empty null duplicate single-name; do

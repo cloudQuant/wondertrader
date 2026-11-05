@@ -1,0 +1,997 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="281" failures="56" disabled="5" errors="0" time="4.444" timestamp="2026-11-04T20:24:52.398" name="AllTests">
+  <testsuite name="HisDataReplayerRuntimeTest" tests="12" failures="0" disabled="0" skipped="0" errors="0" time="0.054" timestamp="2026-11-04T20:24:52.398">
+    <testcase name="defaultsAfterInit" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp" line="107" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:52.398" classname="HisDataReplayerRuntimeTest" />
+    <testcase name="priceMapRoundTrip" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp" line="119" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.402" classname="HisDataReplayerRuntimeTest" />
+    <testcase name="dayPriceWithEmptyCache" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp" line="130" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:52.403" classname="HisDataReplayerRuntimeTest" />
+    <testcase name="sessionInfoLookup" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp" line="139" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:52.404" classname="HisDataReplayerRuntimeTest" />
+    <testcase name="rawcodeWithoutRuleIsEmpty" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp" line="154" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.405" classname="HisDataReplayerRuntimeTest" />
+    <testcase name="calcFeeForUnconfiguredCode" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp" line="160" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:52.406" classname="HisDataReplayerRuntimeTest" />
+    <testcase name="amountBasedFeeRequiresCommodityAtInit" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp" line="175" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.409" classname="HisDataReplayerRuntimeTest" />
+    <testcase name="amountBasedFeeUsesPhysicalContractVolumeScale" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp" line="183" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.410" classname="HisDataReplayerRuntimeTest" />
+    <testcase name="volumeBasedFeeInitAllowsMissingCommodityButFillRequiresMetadata" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp" line="194" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.412" classname="HisDataReplayerRuntimeTest" />
+    <testcase name="volumeBasedFeeUsesVerifiedPhysicalContract" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp" line="213" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.413" classname="HisDataReplayerRuntimeTest" />
+    <testcase name="stopAndClearCacheAreSafeWhenIdle" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp" line="239" status="run" result="completed" time="0.036" timestamp="2026-11-04T20:24:52.415" classname="HisDataReplayerRuntimeTest" />
+    <testcase name="lastTickMissingReturnsNull" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp" line="248" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.451" classname="HisDataReplayerRuntimeTest" />
+  </testsuite>
+  <testsuite name="P04ReplayTermTest" tests="6" failures="5" disabled="1" skipped="0" errors="0" time="0.024" timestamp="2026-11-04T20:24:52.453">
+    <testcase name="tickModeWithoutTickDataStillTerminates" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp" line="166" status="run" result="completed" time="0.009" timestamp="2026-11-04T20:24:52.453" classname="P04ReplayTermTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:176&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:176
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="invertedTimeRangeIsRejectedBeforePrepare" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp" line="190" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.462" classname="P04ReplayTermTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:210&#x0A;Expected equality of these values:&#x0A;  0u&#x0A;    Which is: 0&#x0A;  sink.replayDoneCalls&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:210
+Expected equality of these values:
+  0u
+    Which is: 0
+  sink.replayDoneCalls
+    Which is: 1
+]]></failure>
+    </testcase>
+    <testcase name="orderedRangeBeforeFirstBarStopsWithoutBars" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp" line="214" status="run" result="completed" time="0.006" timestamp="2026-11-04T20:24:52.464" classname="P04ReplayTermTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:227&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:227
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="secondCodeReplaysItsOwnBars" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp" line="247" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:52.471" classname="P04ReplayTermTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:259&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:259
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="emptyCacheQueryApisAreStable" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp" line="275" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:52.475" classname="P04ReplayTermTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:284&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:284
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="DISABLED_taskFrequencyAndOutOfRangeReplayCrash" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp" line="322" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="P04ReplayTermTest" />
+  </testsuite>
+  <testsuite name="P04ReplayerConfigTest" tests="12" failures="6" disabled="0" skipped="0" errors="0" time="0.041" timestamp="2026-11-04T20:24:52.478">
+    <testcase name="initReadsEveryScalarSwitch" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp" line="160" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.478" classname="P04ReplayerConfigTest" />
+    <testcase name="cfgTimeRangeIsUsedOnlyWhenUnset" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp" line="182" status="run" result="completed" time="0.018" timestamp="2026-11-04T20:24:52.479" classname="P04ReplayerConfigTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:199&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:199
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="prepareAdvancesDateAndTradingDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp" line="207" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:52.502" classname="P04ReplayerConfigTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:224&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:224
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="runWithoutAnyDataEndsReplay" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp" line="246" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.504" classname="P04ReplayerConfigTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:259&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:259
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="stopBeforePrepareIsNoop" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp" line="273" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.506" classname="P04ReplayerConfigTest" />
+    <testcase name="missingBasefilesEntriesStillInit" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp" line="292" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:52.508" classname="P04ReplayerConfigTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:305&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  replayer.calc_fee(&quot;SSE.STK.000001&quot;, 10.0, 100.0, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:305
+Expected equality of these values:
+  0.0
+    Which is: 0
+  replayer.calc_fee("SSE.STK.000001", 10.0, 100.0, 0)
+    Which is: nan
+]]></failure>
+    </testcase>
+    <testcase name="loadedBasefilesGiveCommodityAndSession" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp" line="309" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.508" classname="P04ReplayerConfigTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:331&#x0A;Expected equality of these values:&#x0A;  5.0&#x0A;    Which is: 5&#x0A;  replayer.calc_fee(&quot;SSE.STK.000001&quot;, 1.0, 100.0, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:331
+Expected equality of these values:
+  5.0
+    Which is: 5
+  replayer.calc_fee("SSE.STK.000001", 1.0, 100.0, 0)
+    Which is: nan
+]]></failure>
+    </testcase>
+    <testcase name="missingFeesFileLeavesEmptyFeeMap" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp" line="334" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.510" classname="P04ReplayerConfigTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:342&#x0A;Value of: replayer.init(cfg)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:342
+Value of: replayer.init(cfg)
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:344&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  replayer.calc_fee(&quot;SSE.STK.000001&quot;, 1.0, 100.0, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:344
+Expected equality of these values:
+  0.0
+    Which is: 0
+  replayer.calc_fee("SSE.STK.000001", 1.0, 100.0, 0)
+    Which is: nan
+]]></failure>
+    </testcase>
+    <testcase name="clearCacheWipesPriceMap" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp" line="347" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:52.511" classname="P04ReplayerConfigTest" />
+    <testcase name="registerTaskAcceptsEveryPeriodTag" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp" line="365" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.512" classname="P04ReplayerConfigTest" />
+    <testcase name="initWithValidBasefilesStillLoadsBaseData" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp" line="390" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.513" classname="P04ReplayerConfigTest" />
+    <testcase name="initWithoutBasefilesReportsFailure" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp" line="406" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:52.515" classname="P04ReplayerConfigTest" />
+  </testsuite>
+  <testsuite name="P04ReplayCsvTest" tests="7" failures="6" disabled="0" skipped="1" errors="0" time="0.027" timestamp="2026-11-04T20:24:52.519">
+    <testcase name="dailyBarsReplayFullTradingDayCycle" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp" line="306" status="run" result="completed" time="0.007" timestamp="2026-11-04T20:24:52.519" classname="P04ReplayCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:320&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:320
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="prepareAfterRunResetsClock" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp" line="369" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.527" classname="P04ReplayCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:382&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:382
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="csvBarsTransferedToDsbAndReRead" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp" line="417" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:52.528" classname="P04ReplayCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:428&#x0A;Value of: first.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:428
+Value of: first.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="missingCsvFileYieldsNullSlice" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp" line="482" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.531" classname="P04ReplayCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:492&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:492
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="failedMainBarsLoadDoesNotPoisonReplayAndCanRetry" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp" line="505" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:52.532" classname="P04ReplayCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:552&#x0A;Death test: { struct rlimit noCoreDumps{}; if (::setrlimit(4, &amp;noCoreDumps) != 0) std::_Exit(90); HisDataReplayer* replayer = new HisDataReplayer(); WTSVariant* cfg = replay_cfg(_root, _base); if (cfg == nullptr) std::_Exit(91); const bool initialized = replayer-&gt;init(cfg); cfg-&gt;release(); if (!initialized) std::_Exit(92); RecordingSink sink; replayer-&gt;register_sink(&amp;sink, &quot;p04_missing_main&quot;); if (!replayer-&gt;prepare()) std::_Exit(93); if (replayer-&gt;get_kline_slice(&quot;SSE.STK.000004&quot;, &quot;d&quot;, 1, 1, true) != nullptr) std::_Exit(1); replayer-&gt;run(false); if (sink.replayDoneCalls != 1 || !sink.closedDates.empty()) std::_Exit(2); if (!write_daily_csv(_base, &quot;SSE.STK.000004&quot;, true)) std::_Exit(3); if (!replayer-&gt;prepare()) std::_Exit(4); WTSKlineSlice* slice = replayer-&gt;get_kline_slice(&quot;SSE.STK.000004&quot;, &quot;d&quot;, 1, 1, true); if (slice != nullptr) slice-&gt;release(); replayer-&gt;run(false); if (sink.replayDoneCalls != 2 || sink.closedDates.size() != kBarCnt) std::_Exit(5); std::_Exit(0); }&#x0A;    Result: died but not with expected exit code:&#x0A;            Exited with exit status 93&#x0A;Actual msg:&#x0A;[  DEATH   ] &#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:552
+Death test: { struct rlimit noCoreDumps{}; if (::setrlimit(4, &noCoreDumps) != 0) std::_Exit(90); HisDataReplayer* replayer = new HisDataReplayer(); WTSVariant* cfg = replay_cfg(_root, _base); if (cfg == nullptr) std::_Exit(91); const bool initialized = replayer->init(cfg); cfg->release(); if (!initialized) std::_Exit(92); RecordingSink sink; replayer->register_sink(&sink, "p04_missing_main"); if (!replayer->prepare()) std::_Exit(93); if (replayer->get_kline_slice("SSE.STK.000004", "d", 1, 1, true) != nullptr) std::_Exit(1); replayer->run(false); if (sink.replayDoneCalls != 1 || !sink.closedDates.empty()) std::_Exit(2); if (!write_daily_csv(_base, "SSE.STK.000004", true)) std::_Exit(3); if (!replayer->prepare()) std::_Exit(4); WTSKlineSlice* slice = replayer->get_kline_slice("SSE.STK.000004", "d", 1, 1, true); if (slice != nullptr) slice->release(); replayer->run(false); if (sink.replayDoneCalls != 2 || sink.closedDates.size() != kBarCnt) std::_Exit(5); std::_Exit(0); }
+    Result: died but not with expected exit code:
+            Exited with exit status 93
+Actual msg:
+[  DEATH   ] 
+]]></failure>
+    </testcase>
+    <testcase name="failedBinaryRawBarsLoadCanBeRetriedSafely" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp" line="555" status="run" result="skipped" time="0." timestamp="2026-11-04T20:24:52.538" classname="P04ReplayCsvTest">
+      <skipped message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:559&#x0A;requires libWtDataStorage.dylib in build-cov/build_x64/{Debug,Release}/bin or build_x64/{Debug,Release}/bin&#x0A;"><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:559
+requires libWtDataStorage.dylib in build-cov/build_x64/{Debug,Release}/bin or build_x64/{Debug,Release}/bin
+]]></skipped>
+    </testcase>
+    <testcase name="emptyCsvReturnsNullAndReplayCompletesInChild" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp" line="622" status="run" result="completed" time="0.007" timestamp="2026-11-04T20:24:52.539" classname="P04ReplayCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:672&#x0A;Death test: { struct rlimit noCoreDumps{}; if (::setrlimit(4, &amp;noCoreDumps) != 0) std::_Exit(90); auto writeStage = [](const char* marker, std::size_t length) { const auto written = ::write(2, marker, length); (void)written; }; HisDataReplayer* replayer = new HisDataReplayer(); WTSVariant* cfg = replay_cfg(_root, _base); if (cfg == nullptr) std::_Exit(91); writeStage(&quot;INIT_START\n&quot;, sizeof(&quot;INIT_START\n&quot;) - 1); const bool initialized = replayer-&gt;init(cfg); cfg-&gt;release(); if (!initialized) std::_Exit(92); writeStage(&quot;INIT_OK\n&quot;, sizeof(&quot;INIT_OK\n&quot;) - 1); RecordingSink sink; replayer-&gt;register_sink(&amp;sink, &quot;p04_emptycsv&quot;); writeStage(&quot;PREPARE_START\n&quot;, sizeof(&quot;PREPARE_START\n&quot;) - 1); if (!replayer-&gt;prepare()) std::_Exit(93); writeStage(&quot;PREPARE_OK\n&quot;, sizeof(&quot;PREPARE_OK\n&quot;) - 1); writeStage(&quot;BEFORE_READ\n&quot;, sizeof(&quot;BEFORE_READ\n&quot;) - 1); WTSKlineSlice* headerOnlySlice = replayer-&gt;get_kline_slice(&quot;SSE.STK.000002&quot;, &quot;d&quot;, 1, 1, false); WTSKlineSlice* zeroByteSlice = replayer-&gt;get_kline_slice(&quot;SSE.STK.000003&quot;, &quot;d&quot;, 1, 1, false); writeStage(&quot;AFTER_READ\n&quot;, sizeof(&quot;AFTER_READ\n&quot;) - 1); if (headerOnlySlice != nullptr || zeroByteSlice != nullptr) std::_Exit(1); writeStage(&quot;NULL_SLICE_OK\n&quot;, sizeof(&quot;NULL_SLICE_OK\n&quot;) - 1); if (std::filesystem::exists(_base / &quot;his/day/SSE/000002.dsb&quot;) || std::filesystem::exists(_base / &quot;his/day/SSE/000003.dsb&quot;)) std::_Exit(3); writeStage(&quot;BEFORE_RUN\n&quot;, sizeof(&quot;BEFORE_RUN\n&quot;) - 1); replayer-&gt;run(false); writeStage(&quot;AFTER_RUN\n&quot;, sizeof(&quot;AFTER_RUN\n&quot;) - 1); std::_Exit(sink.replayDoneCalls == 1 &amp;&amp; sink.closedDates.empty() ? 0 : 2); }&#x0A;    Result: died but not with expected exit code:&#x0A;            Exited with exit status 93&#x0A;Actual msg:&#x0A;[  DEATH   ] INIT_START&#x0A;[  DEATH   ] INIT_OK&#x0A;[  DEATH   ] PREPARE_START&#x0A;[  DEATH   ] &#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:672
+Death test: { struct rlimit noCoreDumps{}; if (::setrlimit(4, &noCoreDumps) != 0) std::_Exit(90); auto writeStage = [](const char* marker, std::size_t length) { const auto written = ::write(2, marker, length); (void)written; }; HisDataReplayer* replayer = new HisDataReplayer(); WTSVariant* cfg = replay_cfg(_root, _base); if (cfg == nullptr) std::_Exit(91); writeStage("INIT_START\n", sizeof("INIT_START\n") - 1); const bool initialized = replayer->init(cfg); cfg->release(); if (!initialized) std::_Exit(92); writeStage("INIT_OK\n", sizeof("INIT_OK\n") - 1); RecordingSink sink; replayer->register_sink(&sink, "p04_emptycsv"); writeStage("PREPARE_START\n", sizeof("PREPARE_START\n") - 1); if (!replayer->prepare()) std::_Exit(93); writeStage("PREPARE_OK\n", sizeof("PREPARE_OK\n") - 1); writeStage("BEFORE_READ\n", sizeof("BEFORE_READ\n") - 1); WTSKlineSlice* headerOnlySlice = replayer->get_kline_slice("SSE.STK.000002", "d", 1, 1, false); WTSKlineSlice* zeroByteSlice = replayer->get_kline_slice("SSE.STK.000003", "d", 1, 1, false); writeStage("AFTER_READ\n", sizeof("AFTER_READ\n") - 1); if (headerOnlySlice != nullptr || zeroByteSlice != nullptr) std::_Exit(1); writeStage("NULL_SLICE_OK\n", sizeof("NULL_SLICE_OK\n") - 1); if (std::filesystem::exists(_base / "his/day/SSE/000002.dsb") || std::filesystem::exists(_base / "his/day/SSE/000003.dsb")) std::_Exit(3); writeStage("BEFORE_RUN\n", sizeof("BEFORE_RUN\n") - 1); replayer->run(false); writeStage("AFTER_RUN\n", sizeof("AFTER_RUN\n") - 1); std::_Exit(sink.replayDoneCalls == 1 && sink.closedDates.empty() ? 0 : 2); }
+    Result: died but not with expected exit code:
+            Exited with exit status 93
+Actual msg:
+[  DEATH   ] INIT_START
+[  DEATH   ] INIT_OK
+[  DEATH   ] PREPARE_START
+[  DEATH   ] 
+]]></failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="R43ReplayerInitBasefilesTest" tests="8" failures="0" disabled="0" skipped="0" errors="0" time="1.231" timestamp="2026-11-04T20:24:52.546">
+    <testcase name="optionalBasefilesAllLoaded" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_init_basefiles_test.cpp" line="157" status="run" result="completed" time="0.396" timestamp="2026-11-04T20:24:52.546" classname="R43ReplayerInitBasefilesTest" />
+    <testcase name="storePathOverridesRootPath" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_init_basefiles_test.cpp" line="196" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:52.943" classname="R43ReplayerInitBasefilesTest" />
+    <testcase name="configuredSessionLoadFailuresFailInit" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_init_basefiles_test.cpp" line="235" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.947" classname="R43ReplayerInitBasefilesTest" />
+    <testcase name="configuredCommodityLoadFailuresFailInit" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_init_basefiles_test.cpp" line="252" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:52.948" classname="R43ReplayerInitBasefilesTest" />
+    <testcase name="configuredCommodityArrayLoadFailuresFailInit" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_init_basefiles_test.cpp" line="268" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:52.950" classname="R43ReplayerInitBasefilesTest" />
+    <testcase name="requiredAndOptionalFailureDiagnosticsContainPaths" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_init_basefiles_test.cpp" line="295" status="run" result="completed" time="0.818" timestamp="2026-11-04T20:24:52.954" classname="R43ReplayerInitBasefilesTest" />
+    <testcase name="adjFactorFileParsed" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_init_basefiles_test.cpp" line="387" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:53.773" classname="R43ReplayerInitBasefilesTest" />
+    <testcase name="badAdjFactorFileDoesNotBreakInit" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_init_basefiles_test.cpp" line="410" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:53.776" classname="R43ReplayerInitBasefilesTest" />
+  </testsuite>
+  <testsuite name="R43ReplayerTickCsvTest" tests="19" failures="19" disabled="0" skipped="0" errors="0" time="0.07" timestamp="2026-11-04T20:24:53.778">
+    <testcase name="csvTickDsbReplaysWholeDay" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="372" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:53.778" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:395&#x0A;Value of: query.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:395
+Value of: query.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="pureTickRangeIncludesEveryMillisecondOfFourteenDigitEndSecond" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="470" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:53.783" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:496&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:496
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="sessionBeginClockUsesRangeStartThenNextNaturalSessionOpen" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="509" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:53.785" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:530&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:530
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="twelveDigitBoundsIncludeWholeStartAndEndMinutes" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="541" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:53.787" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:560&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:560
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="mixedPrecisionUsesMinuteStartAndSecondInclusiveEnd" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="567" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:53.789" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:588&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:588
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="mainBarsWithoutAClosedBarStillReplayInRangeTicksOnly" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="598" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:53.791" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:623&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:623
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="overnightTickRangeLoadsByTradingDateAndFiltersByActionDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="634" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:53.792" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:658&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:658
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="nightSessionBeginClockUsesNaturalOpenAcrossTradingDates" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="669" status="run" result="completed" time="0.008" timestamp="2026-11-04T20:24:53.797" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:690&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:690
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="mainBarsUseReplayableHftSessionForMixedNaturalDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="701" status="run" result="completed" time="0.008" timestamp="2026-11-04T20:24:53.805" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:759&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:759
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="replayableHftEventsKeepLaterSessionBoundary" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="792" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:53.813" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:829&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:829
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="missingInRangeHftEventsKeepLaterSessionBoundary" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="852" status="run" result="completed" time="0.007" timestamp="2026-11-04T20:24:53.819" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:886&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:886
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="mainBarWithoutInRangeHftEventsKeepsLaterSessionBoundary" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="904" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:53.827" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:939&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:939
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="mainBarAndNightSessionBucketsReplayInNaturalTimeOrder" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="957" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:53.832" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1035&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1035
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="shortTickDsbRejected" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="1080" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:53.837" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1092&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1092
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="emptyTickDsbRejected" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="1105" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:53.839" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1117&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1117
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="trailingSuffixSubscriptionsStripFlag" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="1130" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:53.840" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1141&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1141
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="barsWithTicksUseHftReplayPath" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="1169" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:53.841" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1207&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1207
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="finalMainBarFlushesOnlyInRangeTicksWithoutAnotherBar" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="1250" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:53.843" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1280&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1280
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="stopDuringBarReplayTerminatesCleanly" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp" line="1295" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:53.847" classname="R43ReplayerTickCsvTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1315&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1315
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="P07MinuteReplayTest" tests="23" failures="2" disabled="1" skipped="0" errors="0" time="0.43" timestamp="2026-11-04T20:24:53.848">
+    <testcase name="minuteBarsReplaySimulatesOhlcTicks" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="308" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:53.848" classname="P07MinuteReplayTest" />
+    <testcase name="minuteSliceCursorAdvancesDuringReplay" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="445" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:53.852" classname="P07MinuteReplayTest" />
+    <testcase name="sameTimeCloseCallbacksReadCrossPeriodAndDrainAllDueBars" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="504" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:53.857" classname="P07MinuteReplayTest" />
+    <testcase name="simulatedTickCallbackQueriesAndAddsSeriesWithoutDroppingCloses" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="609" status="run" result="completed" time="0.016" timestamp="2026-11-04T20:24:53.861" classname="P07MinuteReplayTest" />
+    <testcase name="tickCallbackSubscriptionsStartAtNextCompleteBar" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="727" status="run" result="completed" time="0.058" timestamp="2026-11-04T20:24:53.877" classname="P07MinuteReplayTest" />
+    <testcase name="m15RequestDoesNotEmitCloseForInternalRawM5" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="863" status="run" result="completed" time="0.044" timestamp="2026-11-04T20:24:53.936" classname="P07MinuteReplayTest" />
+    <testcase name="simulatedTickCallbackExceptionAllowsReplayRetry" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="942" status="run" result="completed" time="0.011" timestamp="2026-11-04T20:24:53.980" classname="P07MinuteReplayTest" />
+    <testcase name="unsubscribedTickCallbackExceptionReloadsBarsOnRetry" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="987" status="run" result="completed" time="0.017" timestamp="2026-11-04T20:24:53.991" classname="P07MinuteReplayTest" />
+    <testcase name="unsubscribedTickCallbackQueriesDoNotConsumeCurrentOrLaterCloses" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1061" status="run" result="completed" time="0.024" timestamp="2026-11-04T20:24:54.009" classname="P07MinuteReplayTest" />
+    <testcase name="callbackActivatingCachedRawM5SeriesKeepsFutureCloses" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1162" status="run" result="completed" time="0.012" timestamp="2026-11-04T20:24:54.033" classname="P07MinuteReplayTest" />
+    <testcase name="throwingBarCloseCallbackAbortsAndClearsRunningState" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1227" status="run" result="completed" time="0.011" timestamp="2026-11-04T20:24:54.046" classname="P07MinuteReplayTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp:1246&#x0A;Expected equality of these values:&#x0A;  0u&#x0A;    Which is: 0&#x0A;  sink.replayDoneCalls&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp:1246
+Expected equality of these values:
+  0u
+    Which is: 0
+  sink.replayDoneCalls
+    Which is: 1
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp:1269&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  sink.replayDoneCalls&#x0A;    Which is: 2&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp:1269
+Expected equality of these values:
+  1u
+    Which is: 1
+  sink.replayDoneCalls
+    Which is: 2
+]]></failure>
+    </testcase>
+    <testcase name="throwingInitCallbackLeavesReplayerRetryable" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1273" status="run" result="completed" time="0.02" timestamp="2026-11-04T20:24:54.057" classname="P07MinuteReplayTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp:1299&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  sink.replayDoneCalls&#x0A;    Which is: 2&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp:1299
+Expected equality of these values:
+  1u
+    Which is: 1
+  sink.replayDoneCalls
+    Which is: 2
+]]></failure>
+    </testcase>
+    <testcase name="closeCallbackCanAddSeriesWithoutInvalidatingReplay" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1302" status="run" result="completed" time="0.033" timestamp="2026-11-04T20:24:54.078" classname="P07MinuteReplayTest" />
+    <testcase name="m15SliceResamplesFromM5Bars" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1431" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:54.112" classname="P07MinuteReplayTest" />
+    <testcase name="unsubscribedTickCodeFeedsSimTicks" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1478" status="run" result="completed" time="0.022" timestamp="2026-11-04T20:24:54.117" classname="P07MinuteReplayTest" />
+    <testcase name="secondPrecisionRangeRoundsBarBoundsAndKeepsMinuteEndInclusive" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1558" status="run" result="completed" time="0.006" timestamp="2026-11-04T20:24:54.140" classname="P07MinuteReplayTest" />
+    <testcase name="explicitRangeUsesSameSecondPrecisionBarBounds" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1581" status="run" result="completed" time="0.016" timestamp="2026-11-04T20:24:54.146" classname="P07MinuteReplayTest" />
+    <testcase name="secondOnlyRangeHasNoWholeMinuteBars" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1605" status="run" result="completed" time="0.006" timestamp="2026-11-04T20:24:54.163" classname="P07MinuteReplayTest" />
+    <testcase name="secondPrecisionStartRoundsAcrossCalendarDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1628" status="run" result="completed" time="0.012" timestamp="2026-11-04T20:24:54.170" classname="P07MinuteReplayTest" />
+    <testcase name="dailyBarsMustCloseInsideTheRequestedMinuteBounds" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1651" status="run" result="completed" time="0.015" timestamp="2026-11-04T20:24:54.182" classname="P07MinuteReplayTest" />
+    <testcase name="dailyBarsStartingAfterCloseBeginOnTheNextNaturalDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1685" status="run" result="completed" time="0.018" timestamp="2026-11-04T20:24:54.198" classname="P07MinuteReplayTest" />
+    <testcase name="nightSessionDailyBarUsesItsTradingDateClose" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1716" status="run" result="completed" time="0.062" timestamp="2026-11-04T20:24:54.216" classname="P07MinuteReplayTest" />
+    <testcase name="DISABLED_emptyMinuteCsvHitsUnsubscriptedBars" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp" line="1750" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="P07MinuteReplayTest" />
+  </testsuite>
+  <testsuite name="P07TaskScheduleTest" tests="26" failures="0" disabled="1" skipped="0" errors="0" time="0.172" timestamp="2026-11-04T20:24:54.279">
+    <testcase name="taskParametersAreBoundedAndInvalidReregistrationPreservesTask" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="184" status="run" result="completed" time="0.025" timestamp="2026-11-04T20:24:54.279" classname="P07TaskScheduleTest" />
+    <testcase name="dailyTaskFiresOncePerTradingDay" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="227" status="run" result="completed" time="0.016" timestamp="2026-11-04T20:24:54.304" classname="P07TaskScheduleTest" />
+    <testcase name="weeklyTaskFiresOnlyOnTargetWeekday" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="253" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:54.321" classname="P07TaskScheduleTest" />
+    <testcase name="monthlyTaskUsesDayOfMonthContract" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="278" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:54.324" classname="P07TaskScheduleTest" />
+    <testcase name="dailyTaskDoesNotDispatchAfterRangeEnd" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="292" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:54.329" classname="P07TaskScheduleTest" />
+    <testcase name="dailyTaskSkipsCloseBeforeRangeStartAndFiresNextDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="303" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.334" classname="P07TaskScheduleTest" />
+    <testcase name="nightSessionDailyTaskDoesNotDispatchPastNaturalDateEnd" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="314" status="run" result="completed" time="0.012" timestamp="2026-11-04T20:24:54.336" classname="P07TaskScheduleTest" />
+    <testcase name="minuteStepAlignedBeyondRangeEndDoesNotDispatch" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="327" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:54.349" classname="P07TaskScheduleTest" />
+    <testcase name="minuteTaskCeilsOffGridStartAndAdvancesByStep" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="338" status="run" result="completed" time="0.02" timestamp="2026-11-04T20:24:54.353" classname="P07TaskScheduleTest" />
+    <testcase name="minuteTaskStartingOnBoundaryDispatchesThatBoundary" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="348" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.374" classname="P07TaskScheduleTest" />
+    <testcase name="minuteTaskSkipsLunchGapAndResumesOnSessionLinearGrid" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="358" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.376" classname="P07TaskScheduleTest" />
+    <testcase name="minuteTaskStartingInsideLunchMovesToNextSection" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="368" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.377" classname="P07TaskScheduleTest" />
+    <testcase name="minuteTaskStepGridContinuesAcrossOffsetMidnight" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="378" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.379" classname="P07TaskScheduleTest" />
+    <testcase name="minuteTaskOffGridStartBeforeEndDoesNotRepeatEarlierTime" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="398" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.380" classname="P07TaskScheduleTest" />
+    <testcase name="minuteTaskNearCloseDoesNotDispatchAfterRangeEnd" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="409" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.382" classname="P07TaskScheduleTest" />
+    <testcase name="minuteTaskWithZeroStepFailsClosed" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="420" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.383" classname="P07TaskScheduleTest" />
+    <testcase name="yearlyJanFirstTaskFiresOncePerYearAfterHoliday" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="436" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:54.384" classname="P07TaskScheduleTest" />
+    <testcase name="yearlyTaskDoesNotFireBeforeNewYearTarget" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="450" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.388" classname="P07TaskScheduleTest" />
+    <testcase name="yearlyTaskFiresAtLastCalendarDay" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="461" status="run" result="completed" time="0.032" timestamp="2026-11-04T20:24:54.389" classname="P07TaskScheduleTest" />
+    <testcase name="yearlyLeapDayFiresWhenTheCalendarDateExists" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="473" status="run" result="completed" time="0.012" timestamp="2026-11-04T20:24:54.423" classname="P07TaskScheduleTest" />
+    <testcase name="unknownPeriodNeverFiresButTerminates" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="489" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.435" classname="P07TaskScheduleTest" />
+    <testcase name="minuteTaskStepsThroughBothSections" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="509" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.437" classname="P07TaskScheduleTest" />
+    <testcase name="secondPrecisionRangeRoundsTaskStartAndIncludesEndMinute" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="539" status="run" result="completed" time="0.01" timestamp="2026-11-04T20:24:54.438" classname="P07TaskScheduleTest" />
+    <testcase name="secondOnlyRangeDoesNotDispatchMinuteTasks" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="549" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:54.448" classname="P07TaskScheduleTest" />
+    <testcase name="invalidConfigAndExplicitRangesFailClosed" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="560" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:54.451" classname="P07TaskScheduleTest" />
+    <testcase name="DISABLED_unknownSessionTemplateCrashes" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_task_schedule_test.cpp" line="586" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="P07TaskScheduleTest" />
+  </testsuite>
+  <testsuite name="P07TickLoaderTest" tests="42" failures="9" disabled="1" skipped="0" errors="0" time="0.873" timestamp="2026-11-04T20:24:54.451">
+    <testcase name="tickOnlyReplayDrivesHftLoopPerDay" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="820" status="run" result="completed" time="0.014" timestamp="2026-11-04T20:24:54.451" classname="P07TickLoaderTest" />
+    <testcase name="externalTickLoaderAccumulatesSynchronousConcurrentChunks" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="865" status="run" result="completed" time="0.063" timestamp="2026-11-04T20:24:54.466" classname="P07TickLoaderTest" />
+    <testcase name="externalTickLoaderCopiesEachExpiringCallbackChunk" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="889" status="run" result="completed" time="0.015" timestamp="2026-11-04T20:24:54.529" classname="P07TickLoaderTest" />
+    <testcase name="externalTickLoaderChunksAreAvailableInHistoricalSlice" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="919" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:54.545" classname="P07TickLoaderTest" />
+    <testcase name="singleItemHftStreamsReplayFinalRecord" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="949" status="run" result="completed" time="0.009" timestamp="2026-11-04T20:24:54.548" classname="P07TickLoaderTest" />
+    <testcase name="invalidNonemptyTickLoaderCallbackFailsBeforeSessionBegin" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1038" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.557" classname="P07TickLoaderTest" />
+    <testcase name="invalidTickLoaderChunkAfterValidChunkFailsClosed" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1062" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.559" classname="P07TickLoaderTest" />
+    <testcase name="emptyNullTickLoaderCallbackIsAValidEmptyBucket" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1083" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.560" classname="P07TickLoaderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1100&#x0A;Value of: HisDataReplayerTestAccess::replay_terminated(replayer)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1100
+Value of: HisDataReplayerTestAccess::replay_terminated(replayer)
+  Actual: true
+Expected: false
+]]></failure>
+    </testcase>
+    <testcase name="failedTickLoaderResultFailsClosedWithoutDispatchingPartialChunk" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1107" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.561" classname="P07TickLoaderTest" />
+    <testcase name="emptyReplayBucketsStayBoundedAcrossLongNoDataRange" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1133" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:54.563" classname="P07TickLoaderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1149&#x0A;Value of: HisDataReplayerTestAccess::replay_terminated(replayer)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1149
+Value of: HisDataReplayerTestAccess::replay_terminated(replayer)
+  Actual: true
+Expected: false
+]]></failure>
+    </testcase>
+    <testcase name="overnightTickBucketAcrossWeekendUsesTradingCalendarAndResets" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1156" status="run" result="completed" time="0.444" timestamp="2026-11-04T20:24:54.565" classname="P07TickLoaderTest" />
+    <testcase name="continuous24HourReplayReadsFullSaturdayNaturalDateBucket" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1211" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.009" classname="P07TickLoaderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1249&#x0A;Value of: replayer.init(cfg)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1249
+Value of: replayer.init(cfg)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="continuous24HourPositiveOffsetUsesNaturalDateCut" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1267" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.012" classname="P07TickLoaderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1303&#x0A;Value of: replayer.init(cfg)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1303
+Value of: replayer.init(cfg)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="continuous24HourNegativeOffsetUsesNaturalDateCut" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1322" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.014" classname="P07TickLoaderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1374&#x0A;Value of: replayer.init(cfg)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1374
+Value of: replayer.init(cfg)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="missingHftDateIsSkippedBeforeLaterValidDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1396" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.018" classname="P07TickLoaderTest" />
+    <testcase name="corruptHftFileStopsBeforeLaterValidDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1422" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:55.021" classname="P07TickLoaderTest" />
+    <testcase name="adjacentReplayWindowsDispatchOrdinaryCloseTickExactlyOnce" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1463" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.026" classname="P07TickLoaderTest" />
+    <testcase name="completedNaturalDateRangeRejectsBackwardScheduling" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1516" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:55.029" classname="P07TickLoaderTest" />
+    <testcase name="fatalLevel2ReadStopsBeforeSessionCallbacks" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1555" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:55.033" classname="P07TickLoaderTest" />
+    <testcase name="asynchronousOvernightBucketDrainsAfterMainBarAcrossWeekend" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1601" status="run" result="completed" time="0.012" timestamp="2026-11-04T20:24:55.038" classname="P07TickLoaderTest" />
+    <testcase name="fourHftStreamsHonorInclusiveSecondRangeAndStableOrder" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1694" status="run" result="completed" time="0.008" timestamp="2026-11-04T20:24:55.051" classname="P07TickLoaderTest" />
+    <testcase name="minuteEndIncludesLastSecondAndEndsFinalTradingDateOnce" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1779" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:55.060" classname="P07TickLoaderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1825&#x0A;Value of: replayer.init(cfg)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1825
+Value of: replayer.init(cfg)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="sameTimestampOrdersRoundsAcrossCodesAndTradingDateBuckets" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1846" status="run" result="completed" time="0.019" timestamp="2026-11-04T20:24:55.065" classname="P07TickLoaderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1937&#x0A;Value of: replayer.init(cfg)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1937
+Value of: replayer.init(cfg)
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1953&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1953
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1937&#x0A;Value of: replayer.init(cfg)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1937
+Value of: replayer.init(cfg)
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1953&#x0A;Value of: replayer.prepare()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1953
+Value of: replayer.prepare()
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1960&#x0A;Expected equality of these values:&#x0A;  16u&#x0A;    Which is: 16&#x0A;  forward.first.size()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1960
+Expected equality of these values:
+  16u
+    Which is: 16
+  forward.first.size()
+    Which is: 0
+]]></failure>
+    </testcase>
+    <testcase name="level2OnlyReplayPreservesTransactionsAfterMissingOtherStreams" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="1974" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:55.085" classname="P07TickLoaderTest" />
+    <testcase name="unmappedReplayableLevel2SessionFailsClosed" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2020" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.090" classname="P07TickLoaderTest" />
+    <testcase name="finalBarHftDrainKeepsPreloadedTransactionsWhenOtherStreamsAreMissing" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2053" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:55.093" classname="P07TickLoaderTest" />
+    <testcase name="historyQueriesDoNotMoveTickReplayCursor" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2103" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.098" classname="P07TickLoaderTest" />
+    <testcase name="replayPresenceProbesDoNotReplaceBorrowedHistorySlice" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2152" status="run" result="completed" time="0.013" timestamp="2026-11-04T20:24:55.101" classname="P07TickLoaderTest" />
+    <testcase name="level2CallbackExceptionsReleaseDataInBothReplayPaths" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2202" status="run" result="completed" time="0.022" timestamp="2026-11-04T20:24:55.115" classname="P07TickLoaderTest" />
+    <testcase name="hftTickCallbackExceptionAllowsReplayByDayRetry" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2284" status="run" result="completed" time="0.006" timestamp="2026-11-04T20:24:55.137" classname="P07TickLoaderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:2333&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  sink.replayDoneCalls&#x0A;    Which is: 2&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:2333
+Expected equality of these values:
+  1u
+    Which is: 1
+  sink.replayDoneCalls
+    Which is: 2
+]]></failure>
+    </testcase>
+    <testcase name="hftTickCallbackExceptionAllowsBarReplayRetry" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2336" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:55.143" classname="P07TickLoaderTest" />
+    <testcase name="realHftTickSubscriptionStartsAtNextCompleteBar" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2409" status="run" result="completed" time="0.137" timestamp="2026-11-04T20:24:55.149" classname="P07TickLoaderTest" />
+    <testcase name="level2AndOutOfRangeTicksDoNotSuppressOhlcFallback" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2562" status="run" result="completed" time="0.006" timestamp="2026-11-04T20:24:55.286" classname="P07TickLoaderTest" />
+    <testcase name="level2StopDoesNotSynthesizeInterruptedBar" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2667" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.293" classname="P07TickLoaderTest" />
+    <testcase name="rawTickSuppressesQfqAndHfqBarsForSameBaseCode" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2718" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:55.296" classname="P07TickLoaderTest" />
+    <testcase name="tickInSessionGapIsSkippedUntilNextSession" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2803" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.302" classname="P07TickLoaderTest" />
+    <testcase name="emptyLevel2StreamsDoNotBlockTickReplay" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2846" status="run" result="completed" time="0.007" timestamp="2026-11-04T20:24:55.305" classname="P07TickLoaderTest" />
+    <testcase name="lastTickAndDayPriceMatchCurrentCallbackTick" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="2903" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.313" classname="P07TickLoaderTest" />
+    <testcase name="loaderBarsDumpDsbAndReRead" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="3000" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:55.315" classname="P07TickLoaderTest" />
+    <testcase name="loaderWithoutDataYieldsNullSlice" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="3124" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.320" classname="P07TickLoaderTest" />
+    <testcase name="calcFeeUsesLoadedFeeTemplate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="3161" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:55.322" classname="P07TickLoaderTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3172&#x0A;Expected equality of these values:&#x0A;  5.0&#x0A;    Which is: 5&#x0A;  replayer.calc_fee(&quot;SSE.STK.600000&quot;, 10.0, 100.0, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3172
+Expected equality of these values:
+  5.0
+    Which is: 5
+  replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 0)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3174&#x0A;Expected equality of these values:&#x0A;  5.0&#x0A;    Which is: 5&#x0A;  replayer.calc_fee(&quot;SSE.STK.600000&quot;, 10.0, 100.0, 1)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3174
+Expected equality of these values:
+  5.0
+    Which is: 5
+  replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 1)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3175&#x0A;Expected equality of these values:&#x0A;  5.0&#x0A;    Which is: 5&#x0A;  replayer.calc_fee(&quot;SSE.STK.600000&quot;, 10.0, 100.0, 2)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3175
+Expected equality of these values:
+  5.0
+    Which is: 5
+  replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 2)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3177&#x0A;Expected equality of these values:&#x0A;  60.0&#x0A;    Which is: 60&#x0A;  replayer.calc_fee(&quot;SSE.STK.600000&quot;, 20.0, 10000.0, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3177
+Expected equality of these values:
+  60.0
+    Which is: 60
+  replayer.calc_fee("SSE.STK.600000", 20.0, 10000.0, 0)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3179&#x0A;Expected equality of these values:&#x0A;  2.5&#x0A;  replayer.calc_fee(&quot;SZSE.STK.000001&quot;, 20.0, 500.0, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3179
+Expected equality of these values:
+  2.5
+  replayer.calc_fee("SZSE.STK.000001", 20.0, 500.0, 0)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3181&#x0A;Expected equality of these values:&#x0A;  6.0&#x0A;    Which is: 6&#x0A;  replayer.calc_fee(&quot;SSE.IDX.000001&quot;, 10.0, 3.0, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3181
+Expected equality of these values:
+  6.0
+    Which is: 6
+  replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 0)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3182&#x0A;Expected equality of these values:&#x0A;  9.0&#x0A;    Which is: 9&#x0A;  replayer.calc_fee(&quot;SSE.IDX.000001&quot;, 10.0, 3.0, 1)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3182
+Expected equality of these values:
+  9.0
+    Which is: 9
+  replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 1)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3183&#x0A;Expected equality of these values:&#x0A;  3.0&#x0A;    Which is: 3&#x0A;  replayer.calc_fee(&quot;SSE.IDX.000001&quot;, 10.0, 3.0, 2)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3183
+Expected equality of these values:
+  3.0
+    Which is: 3
+  replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 2)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3185&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  replayer.calc_fee(&quot;SSE.IDX.000001&quot;, 10.0, 3.0, 9)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3185
+Expected equality of these values:
+  0.0
+    Which is: 0
+  replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 9)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3187&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  replayer.calc_fee(&quot;DCE.IDX.999999&quot;, 10.0, 3.0, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3187
+Expected equality of these values:
+  0.0
+    Which is: 0
+  replayer.calc_fee("DCE.IDX.999999", 10.0, 3.0, 0)
+    Which is: nan
+]]></failure>
+    </testcase>
+    <testcase name="DISABLED_mismatchedTickDateHangsReplayHftDatas" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp" line="3198" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="P07TickLoaderTest" />
+  </testsuite>
+  <testsuite name="R67CsvBars" tests="11" failures="0" disabled="0" skipped="0" errors="0" time="0.284" timestamp="2026-11-04T20:24:55.324">
+    <testcase name="HourAndHalfHourResampleFromM5Csv" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp" line="153" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:55.324" classname="R67CsvBars" />
+    <testcase name="MinutePeriodQueriesDoNotExposeBarsBeforeTheirFirstClose" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp" line="236" status="run" result="completed" time="0.118" timestamp="2026-11-04T20:24:55.328" classname="R67CsvBars" />
+    <testcase name="HalfHourBarsReplayEmitsHalfHourCloses" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp" line="313" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.447" classname="R67CsvBars" />
+    <testcase name="HalfHourReplayStartsAtRequestedBarBoundary" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp" line="375" status="run" result="completed" time="0.007" timestamp="2026-11-04T20:24:55.451" classname="R67CsvBars" />
+    <testcase name="MinuteRequestsNarrowTickerKeyAndReuseRawCache" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp" line="446" status="run" result="completed" time="0.007" timestamp="2026-11-04T20:24:55.459" classname="R67CsvBars" />
+    <testcase name="HourBarsReplayEmitsHourCloses" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp" line="491" status="run" result="completed" time="0.054" timestamp="2026-11-04T20:24:55.466" classname="R67CsvBars" />
+    <testcase name="ShortBarDsbRejectedBeforeCsv" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp" line="533" status="run" result="completed" time="0.024" timestamp="2026-11-04T20:24:55.521" classname="R67CsvBars" />
+    <testcase name="AutoMainPicksShortestPeriodAndDumpsState" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp" line="552" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:55.545" classname="R67CsvBars" />
+    <testcase name="ZeroVolumeBarsSkippedWithNoSimFlag" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp" line="599" status="run" result="completed" time="0.021" timestamp="2026-11-04T20:24:55.549" classname="R67CsvBars" />
+    <testcase name="AdjustedDailyBarsSimulateStrippedTicks" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp" line="642" status="run" result="completed" time="0.021" timestamp="2026-11-04T20:24:55.571" classname="R67CsvBars" />
+    <testcase name="UnsubBarsWithoutCommodityOrSessionAreSkippedSafely" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/r67_replayer_bars_gap_test.cpp" line="674" status="run" result="completed" time="0.016" timestamp="2026-11-04T20:24:55.592" classname="R67CsvBars" />
+  </testsuite>
+  <testsuite name="ReplayTimeRangeTest" tests="18" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2026-11-04T20:24:55.609">
+    <testcase name="acceptsMinuteAndSecondPrecisionAndPreservesInputs" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="15" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="numericOverloadAcceptsBothSupportedWidths" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="33" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="twelveDigitEndIncludesTheWholeMinute" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="43" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="fourteenDigitEndIncludesTheWholeSecond" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="51" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="barsRoundNonzeroStartSecondsUpAndEndSecondsDown" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="59" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="aSecondOnlyIntervalCanContainNoWholeMinute" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="70" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="minuteBoundaryStartAndEndRetainThatMinute" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="78" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="crossingMidnightUsesContinuousCalendarSeconds" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="87" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="crossingMonthAndYearBoundaryIsCorrect" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="95" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="leapDayAndLeapYearBoundariesAreCorrect" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="103" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="rejectsInvalidLengths" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="113" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="rejectsNonDigits" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="120" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="rejectsInvalidGregorianDates" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="127" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="rejectsInvalidClockFields" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="141" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="rejectsReversedRangeWithoutChangingOutput" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="152" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="equalInstantWithMixedPrecisionIsValid" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="166" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="secondPrecisionStartInsideMinutePrecisionEndIsValid" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="174" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+    <testcase name="startAtEndExclusiveIsRejected" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/replay_time_range_test.cpp" line="184" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:55.609" classname="ReplayTimeRangeTest" />
+  </testsuite>
+  <testsuite name="R103Fixture" tests="8" failures="0" disabled="0" skipped="0" errors="0" time="0.118" timestamp="2026-11-04T20:24:55.609">
+    <testcase name="R103Replayer_StoreConfigAndMissingAdjFile" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_cfg_store_test.cpp" line="19" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.609" classname="R103Fixture" />
+    <testcase name="R103Replayer_DayMultiPeriodCursorAndDump" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_day_period_test.cpp" line="46" status="run" result="completed" time="0.006" timestamp="2026-11-04T20:24:55.611" classname="R103Fixture" />
+    <testcase name="R103Replayer_IntegratedMinuteHotBars" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_integrated_min_test.cpp" line="49" status="run" result="completed" time="0.006" timestamp="2026-11-04T20:24:55.617" classname="R103Fixture" />
+    <testcase name="R103Replayer_LoaderAutoTransDsbAndRuleFileName" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_loader_dsb_test.cpp" line="38" status="run" result="completed" time="0.085" timestamp="2026-11-04T20:24:55.624" classname="R103Fixture" />
+    <testcase name="R103Replayer_LoaderThrowsAndRawAdjustedBars" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_loader_raw_test.cpp" line="34" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.710" classname="R103Fixture" />
+    <testcase name="R103Replayer_MinuteSliceCursorAndDayPrice" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_minute_slice_test.cpp" line="27" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.714" classname="R103Fixture" />
+    <testcase name="R103Replayer_TaskCalendarBranches" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_task_branch_test.cpp" line="59" status="run" result="completed" time="0.006" timestamp="2026-11-04T20:24:55.716" classname="R103Fixture" />
+    <testcase name="R103Replayer_CsvTickDsbAndSliceFallback" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_tick_csv_test.cpp" line="28" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:55.723" classname="R103Fixture" />
+  </testsuite>
+  <testsuite name="R103LastTickBoundaryTest" tests="17" failures="0" disabled="0" skipped="0" errors="0" time="0.075" timestamp="2026-11-04T20:24:55.727">
+    <testcase name="EmptyTickListReturnsNull" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="264" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:55.727" classname="R103LastTickBoundaryTest" />
+    <testcase name="BeforeFirstTickReturnsNull" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="275" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:55.729" classname="R103LastTickBoundaryTest" />
+    <testcase name="ExactCurrentTickIsReturned" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="287" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.731" classname="R103LastTickBoundaryTest" />
+    <testcase name="BetweenTicksReturnsPreviousTick" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="304" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:55.734" classname="R103LastTickBoundaryTest" />
+    <testcase name="EmptyHistoricalSliceDoesNotHideCurrentTick" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="322" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:55.736" classname="R103LastTickBoundaryTest" />
+    <testcase name="SameTimestampQueriesFollowDispatchedOrder" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="341" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.738" classname="R103LastTickBoundaryTest" />
+    <testcase name="SubscribedTickIsUnavailableUntilDispatched" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="361" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.740" classname="R103LastTickBoundaryTest" />
+    <testcase name="ReturnedSnapshotSurvivesLaterTicksAndReset" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="382" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.743" classname="R103LastTickBoundaryTest" />
+    <testcase name="ConcurrentSnapshotReadDuringNextDispatch" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="402" status="run" result="completed" time="0.031" timestamp="2026-11-04T20:24:55.746" classname="R103LastTickBoundaryTest" />
+    <testcase name="NewTradingDayAndPrepareDoNotReuseDispatchedTick" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="419" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.777" classname="R103LastTickBoundaryTest" />
+    <testcase name="PrepareRerunResubscribesWithoutReusingOldSnapshot" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="447" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.781" classname="R103LastTickBoundaryTest" />
+    <testcase name="AdjustedQueryPreservesSeparateHistorySource" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="470" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.784" classname="R103LastTickBoundaryTest" />
+    <testcase name="SyntheticFallbackIsTheCurrentDispatchedSnapshot" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="488" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.786" classname="R103LastTickBoundaryTest" />
+    <testcase name="AdjustedSyntheticBarIsNotUsedAsRawTick" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="519" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:55.789" classname="R103LastTickBoundaryTest" />
+    <testcase name="ReplayDoesNotUseStaleHistorySnapshot" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="555" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.794" classname="R103LastTickBoundaryTest" />
+    <testcase name="FilteredTickIsNotVisibleDuringOtherStreamCallback" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="571" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.797" classname="R103LastTickBoundaryTest" />
+    <testcase name="AfterTailReturnsTheDocumentedEmptyValue" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp" line="599" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.800" classname="R103LastTickBoundaryTest" />
+  </testsuite>
+  <testsuite name="R2TickTest" tests="4" failures="3" disabled="0" skipped="0" errors="0" time="0.022" timestamp="2026-11-04T20:24:55.803">
+    <testcase name="marketSignalFilledByTickAndDumpsTrade" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp" line="182" status="run" result="completed" time="0.009" timestamp="2026-11-04T20:24:55.803" classname="R2TickTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:215&#x0A;Expected equality of these values:&#x0A;  11.0&#x0A;    Which is: 11&#x0A;  mocker.stra_get_position_avgpx(kCode)&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:215
+Expected equality of these values:
+  11.0
+    Which is: 11
+  mocker.stra_get_position_avgpx(kCode)
+    Which is: 0
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:216&#x0A;Expected: (0ull) != (mocker.stra_get_last_entertime(kCode)), actual: 0 vs 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:216
+Expected: (0ull) != (mocker.stra_get_last_entertime(kCode)), actual: 0 vs 0
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:217&#x0A;Expected equality of these values:&#x0A;  11.0&#x0A;    Which is: 11&#x0A;  mocker.stra_get_last_enterprice(kCode)&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:217
+Expected equality of these values:
+  11.0
+    Which is: 11
+  mocker.stra_get_last_enterprice(kCode)
+    Which is: 0
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:218&#x0A;Expected equality of these values:&#x0A;  std::string(&quot;tagA&quot;)&#x0A;    Which is: &quot;tagA&quot;&#x0A;  std::string(mocker.stra_get_last_entertag(kCode))&#x0A;    Which is: &quot;&quot;&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:218
+Expected equality of these values:
+  std::string("tagA")
+    Which is: "tagA"
+  std::string(mocker.stra_get_last_entertag(kCode))
+    Which is: ""
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:219&#x0A;Expected: (0ull) != (mocker.stra_get_first_entertime(kCode)), actual: 0 vs 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:219
+Expected: (0ull) != (mocker.stra_get_first_entertime(kCode)), actual: 0 vs 0
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:220&#x0A;Expected: (0ull) != (mocker.stra_get_detail_entertime(kCode, &quot;tagA&quot;)), actual: 0 vs 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:220
+Expected: (0ull) != (mocker.stra_get_detail_entertime(kCode, "tagA")), actual: 0 vs 0
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:228&#x0A;Expected: (mocker.stra_get_position_profit(kCode)) &gt; (0.0), actual: 0 vs 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:228
+Expected: (mocker.stra_get_position_profit(kCode)) > (0.0), actual: 0 vs 0
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:229&#x0A;Expected: (mocker.stra_get_detail_profit(kCode, &quot;tagA&quot;, 1)) &gt; (0.0), actual: 0 vs 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:229
+Expected: (mocker.stra_get_detail_profit(kCode, "tagA", 1)) > (0.0), actual: 0 vs 0
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:237&#x0A;Expected equality of these values:&#x0A;  2u&#x0A;    Which is: 2&#x0A;  count_lines(folder / &quot;trades.csv&quot;)&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:237
+Expected equality of these values:
+  2u
+    Which is: 2
+  count_lines(folder / "trades.csv")
+    Which is: 1
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:238&#x0A;Expected: (std::string::npos) != (read_file(folder / &quot;trades.csv&quot;).find(&quot;tagA&quot;)), actual: 18446744073709551615 vs 18446744073709551615&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:238
+Expected: (std::string::npos) != (read_file(folder / "trades.csv").find("tagA")), actual: 18446744073709551615 vs 18446744073709551615
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:240&#x0A;Expected equality of these values:&#x0A;  2u&#x0A;    Which is: 2&#x0A;  count_lines(folder / &quot;positions.csv&quot;)&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:240
+Expected equality of these values:
+  2u
+    Which is: 2
+  count_lines(folder / "positions.csv")
+    Which is: 1
+]]></failure>
+    </testcase>
+    <testcase name="signalWithDespriceFillsAtTargetNotLastPrice" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp" line="250" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:55.812" classname="R2TickTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:272&#x0A;Expected equality of these values:&#x0A;  10.8&#x0A;    Which is: 10.800000000000001&#x0A;  mocker.stra_get_position_avgpx(kCode)&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:272
+Expected equality of these values:
+  10.8
+    Which is: 10.800000000000001
+  mocker.stra_get_position_avgpx(kCode)
+    Which is: 0
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:275&#x0A;Expected: (mocker.stra_get_position_profit(kCode)) &gt; (0.0), actual: 0 vs 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:275
+Expected: (mocker.stra_get_position_profit(kCode)) > (0.0), actual: 0 vs 0
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:280&#x0A;Expected: (std::string::npos) != (trades.find(&quot;tagL&quot;)), actual: 18446744073709551615 vs 18446744073709551615&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:280
+Expected: (std::string::npos) != (trades.find("tagL")), actual: 18446744073709551615 vs 18446744073709551615
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:281&#x0A;Expected: (std::string::npos) != (trades.find(&quot;10.8&quot;)), actual: 18446744073709551615 vs 18446744073709551615&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:281
+Expected: (std::string::npos) != (trades.find("10.8")), actual: 18446744073709551615 vs 18446744073709551615
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:282&#x0A;Expected equality of these values:&#x0A;  2u&#x0A;    Which is: 2&#x0A;  count_lines(folder / &quot;trades.csv&quot;)&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:282
+Expected equality of these values:
+  2u
+    Which is: 2
+  count_lines(folder / "trades.csv")
+    Which is: 1
+]]></failure>
+    </testcase>
+    <testcase name="exitLongSignalClosesPartOfPosition" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp" line="289" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.817" classname="R2TickTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:311&#x0A;Expected: (0ull) != (openTime), actual: 0 vs 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:311
+Expected: (0ull) != (openTime), actual: 0 vs 0
+]]></failure>
+    </testcase>
+    <testcase name="selHftUftTickUpdatesPriceMapWithoutStrategy" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp" line="344" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:55.820" classname="R2TickTest" />
+  </testsuite>
+  <testsuite name="R2LoaderTest" tests="7" failures="0" disabled="0" skipped="0" errors="0" time="0.143" timestamp="2026-11-04T20:24:55.825">
+    <testcase name="finalBarsFromLoaderCachedOnce" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_loader_test.cpp" line="367" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.825" classname="R2LoaderTest" />
+    <testcase name="autoTransDumpsDsbAndSecondReplayerHitsDsb" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_loader_test.cpp" line="411" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.829" classname="R2LoaderTest" />
+    <testcase name="loaderBackedDailyReplayEmitsBarsAndDumpsState" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_loader_test.cpp" line="464" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.832" classname="R2LoaderTest" />
+    <testcase name="ticksFromLoaderFeedTickSliceAndLastTick" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_loader_test.cpp" line="514" status="run" result="completed" time="0.056" timestamp="2026-11-04T20:24:55.835" classname="R2LoaderTest" />
+    <testcase name="adjFactorsPreferLoaderThenFile" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_loader_test.cpp" line="575" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:55.958" classname="R2LoaderTest" />
+    <testcase name="binModeWithLoaderCachesBarsViaRawInterface" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_loader_test.cpp" line="603" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:55.962" classname="R2LoaderTest" />
+    <testcase name="binModeWithoutLoaderOrDsbYieldsNoSlice" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_loader_test.cpp" line="641" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:55.966" classname="R2LoaderTest" />
+  </testsuite>
+  <testsuite name="R2PublicTest" tests="7" failures="3" disabled="0" skipped="0" errors="0" time="0.226" timestamp="2026-11-04T20:24:55.969">
+    <testcase name="PrepareWithoutSinkFailsBeforeStateChangesAndAllowsRetry" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp" line="187" status="run" result="completed" time="0.072" timestamp="2026-11-04T20:24:55.969" classname="R2PublicTest" />
+    <testcase name="feeTemplateAndCalcFeeMatrix" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp" line="221" status="run" result="completed" time="0.059" timestamp="2026-11-04T20:24:56.042" classname="R2PublicTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:237&#x0A;Expected equality of these values:&#x0A;  20.0&#x0A;    Which is: 20&#x0A;  replayer.calc_fee(kFut, 5000.0, 10, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:237
+Expected equality of these values:
+  20.0
+    Which is: 20
+  replayer.calc_fee(kFut, 5000.0, 10, 0)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:239&#x0A;Expected equality of these values:&#x0A;  5.0&#x0A;    Which is: 5&#x0A;  replayer.calc_fee(kFut, 5000.0, 2, 1)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:239
+Expected equality of these values:
+  5.0
+    Which is: 5
+  replayer.calc_fee(kFut, 5000.0, 2, 1)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:241&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  replayer.calc_fee(kFut, 5000.0, 10, 2)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:241
+Expected equality of these values:
+  0.0
+    Which is: 0
+  replayer.calc_fee(kFut, 5000.0, 10, 2)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:243&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  replayer.calc_fee(kFut, 5000.0, 10, 9)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:243
+Expected equality of these values:
+  0.0
+    Which is: 0
+  replayer.calc_fee(kFut, 5000.0, 10, 9)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:245&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  replayer.calc_fee(&quot;CFFEX.IF2103&quot;, 5000.0, 1, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:245
+Expected equality of these values:
+  0.0
+    Which is: 0
+  replayer.calc_fee("CFFEX.IF2103", 5000.0, 1, 0)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:251&#x0A;Expected: (fOpen) &gt; (0.0), actual: nan vs 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:251
+Expected: (fOpen) > (0.0), actual: nan vs 0
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:252&#x0A;Expected equality of these values:&#x0A;  2 * fOpen&#x0A;    Which is: nan&#x0A;  fClose&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:252
+Expected equality of these values:
+  2 * fOpen
+    Which is: nan
+  fClose
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:253&#x0A;Expected equality of these values:&#x0A;  3 * fOpen&#x0A;    Which is: nan&#x0A;  fCToday&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:253
+Expected equality of these values:
+  3 * fOpen
+    Which is: nan
+  fCToday
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:255&#x0A;Expected equality of these values:&#x0A;  2 * fClose&#x0A;    Which is: nan&#x0A;  replayer.calc_fee(kStk, 20.0, 100, 1)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:255
+Expected equality of these values:
+  2 * fClose
+    Which is: nan
+  replayer.calc_fee(kStk, 20.0, 100, 1)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:177&#x0A;Value of: replayer.init(cfg, __null, __null)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:177
+Value of: replayer.init(cfg, __null, __null)
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:261&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  r2.calc_fee(kFut, 5000.0, 10, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:261
+Expected equality of these values:
+  0.0
+    Which is: 0
+  r2.calc_fee(kFut, 5000.0, 10, 0)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:177&#x0A;Value of: replayer.init(cfg, __null, __null)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:177
+Value of: replayer.init(cfg, __null, __null)
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:272&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  r3.calc_fee(kStk, 10.0, 100, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:272
+Expected equality of these values:
+  0.0
+    Which is: 0
+  r3.calc_fee(kStk, 10.0, 100, 0)
+    Which is: nan
+]]></failure>
+    </testcase>
+    <testcase name="level2DataRefusedInCsvMode" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp" line="280" status="run" result="completed" time="0.018" timestamp="2026-11-04T20:24:56.101" classname="R2PublicTest" />
+    <testcase name="stopBeforeRunQuitsReplayEarly" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp" line="314" status="run" result="completed" time="0.017" timestamp="2026-11-04T20:24:56.120" classname="R2PublicTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:333&#x0A;Expected equality of these values:&#x0A;  0u&#x0A;    Which is: 0&#x0A;  sink._doneCnt&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:333
+Expected equality of these values:
+  0u
+    Which is: 0
+  sink._doneCnt
+    Which is: 1
+]]></failure>
+    </testcase>
+    <testcase name="clearCacheForcesReloadOnNextPrepare" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp" line="341" status="run" result="completed" time="0.006" timestamp="2026-11-04T20:24:56.137" classname="R2PublicTest" />
+    <testcase name="registeredTaskSwitchesToTaskReplayAndSchedules" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp" line="382" status="run" result="completed" time="0.015" timestamp="2026-11-04T20:24:56.144" classname="R2PublicTest" />
+    <testcase name="metadataAndTimelineQueries" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp" line="408" status="run" result="completed" time="0.036" timestamp="2026-11-04T20:24:56.159" classname="R2PublicTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:415&#x0A;Expected equality of these values:&#x0A;  nullptr&#x0A;    Which is: NULL&#x0A;  replayer.get_commodity_info(&quot;SSE.STK.999999&quot;)&#x0A;    Which is: 0x94ce40000&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:415
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  replayer.get_commodity_info("SSE.STK.999999")
+    Which is: 0x94ce40000
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:418&#x0A;Expected equality of these values:&#x0A;  std::string(&quot;000001&quot;)&#x0A;    Which is: &quot;000001&quot;&#x0A;  raw&#x0A;    Which is: &quot;&quot;&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:418
+Expected equality of these values:
+  std::string("000001")
+    Which is: "000001"
+  raw
+    Which is: ""
+]]></failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="R67LoaderGap" tests="9" failures="0" disabled="0" skipped="0" errors="0" time="0.108" timestamp="2026-11-04T20:24:56.196">
+    <testcase name="ShortAutoTransDsbFallsBackToLoader" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r67_replayer_loader_gap_test.cpp" line="103" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.196" classname="R67LoaderGap" />
+    <testcase name="AutoTransFalseIgnoresExistingDsb" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r67_replayer_loader_gap_test.cpp" line="131" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.198" classname="R67LoaderGap" />
+    <testcase name="HourResampledFromLoaderMinuteBars" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r67_replayer_loader_gap_test.cpp" line="161" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:56.201" classname="R67LoaderGap" />
+    <testcase name="TickReplayStopsOnTerminate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r67_replayer_loader_gap_test.cpp" line="198" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:56.202" classname="R67LoaderGap" />
+    <testcase name="UnsubscribedDailyBarsViaLoaderFeedSimTicks" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r67_replayer_loader_gap_test.cpp" line="229" status="run" result="completed" time="0.007" timestamp="2026-11-04T20:24:56.208" classname="R67LoaderGap" />
+    <testcase name="UnsubscribedMinuteBarsViaLoaderAdvanceCursor" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r67_replayer_loader_gap_test.cpp" line="261" status="run" result="completed" time="0.065" timestamp="2026-11-04T20:24:56.216" classname="R67LoaderGap" />
+    <testcase name="CacheClearDaysEvictsUntouchedBars" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r67_replayer_loader_gap_test.cpp" line="296" status="run" result="completed" time="0.018" timestamp="2026-11-04T20:24:56.281" classname="R67LoaderGap" />
+    <testcase name="EmptyLoaderSuccessReturnsNoBars" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r67_replayer_loader_gap_test.cpp" line="352" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.300" classname="R67LoaderGap" />
+    <testcase name="EmptyLoaderFailureCanRetryWhenBarsBecomeAvailable" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r67_replayer_loader_gap_test.cpp" line="372" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.302" classname="R67LoaderGap" />
+  </testsuite>
+  <testsuite name="R80ConfigTick" tests="3" failures="1" disabled="0" skipped="0" errors="0" time="0.038" timestamp="2026-11-04T20:24:56.304">
+    <testcase name="ContractArrayMalformedFeesAndAdjEntries" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_config_tick_test.cpp" line="80" status="run" result="completed" time="0.027" timestamp="2026-11-04T20:24:56.304" classname="R80ConfigTick">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_config_tick_test.cpp:99&#x0A;Value of: rp.init(cfg)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_config_tick_test.cpp:99
+Value of: rp.init(cfg)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="DumpStateUsesMinutePeriodNames" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_config_tick_test.cpp" line="112" status="run" result="completed" time="0.007" timestamp="2026-11-04T20:24:56.332" classname="R80ConfigTick" />
+    <testcase name="TickReplayResetsCursorAndSkipsEmptyLevel2" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_config_tick_test.cpp" line="172" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.340" classname="R80ConfigTick" />
+  </testsuite>
+  <testsuite name="R80SliceUnsub" tests="4" failures="0" disabled="0" skipped="0" errors="0" time="0.262" timestamp="2026-11-04T20:24:56.343">
+    <testcase name="FutureFirstDailyBarYieldsNullSlice" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_slice_unsub_test.cpp" line="49" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:56.343" classname="R80SliceUnsub" />
+    <testcase name="UnsubscribedMinuteBarsFeedSimTicks" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_slice_unsub_test.cpp" line="82" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:56.346" classname="R80SliceUnsub" />
+    <testcase name="HotRuleFutureCsvUsesRuleDsbName" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_slice_unsub_test.cpp" line="158" status="run" result="completed" time="0.252" timestamp="2026-11-04T20:24:56.350" classname="R80SliceUnsub" />
+    <testcase name="DayPriceReadsSimulatedDayCache" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_slice_unsub_test.cpp" line="218" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.602" classname="R80SliceUnsub" />
+  </testsuite>
+  <testsuite name="R80TaskBars" tests="2" failures="0" disabled="1" skipped="0" errors="0" time="0.01" timestamp="2026-11-04T20:24:56.605">
+    <testcase name="MinuteTaskReplaysSubscribedBars" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_task_bars_test.cpp" line="60" status="run" result="completed" time="0.01" timestamp="2026-11-04T20:24:56.605" classname="R80TaskBars" />
+    <testcase name="DISABLED_DailyTaskSessionEndContractPending" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_task_bars_test.cpp" line="131" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="R80TaskBars" />
+  </testsuite>
+  <testsuite name="R80TaskCalendar" tests="5" failures="0" disabled="0" skipped="0" errors="0" time="0.014" timestamp="2026-11-04T20:24:56.616">
+    <testcase name="DailyTaskCrossesSpringFestivalHoliday" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_task_calendar_test.cpp" line="68" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:56.616" classname="R80TaskCalendar" />
+    <testcase name="MonthlyTaskHolidayShiftFiresOnResume" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_task_calendar_test.cpp" line="87" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.620" classname="R80TaskCalendar" />
+    <testcase name="WeeklyTaskCatchUpAfterLongHoliday" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_task_calendar_test.cpp" line="101" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:56.623" classname="R80TaskCalendar" />
+    <testcase name="WeeklyTaskCatchUpAfterHolidayGap" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_task_calendar_test.cpp" line="115" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:56.627" classname="R80TaskCalendar" />
+    <testcase name="WeeklyTaskHolidayInsideWeek" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_task_calendar_test.cpp" line="133" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:56.628" classname="R80TaskCalendar" />
+  </testsuite>
+  <testsuite name="R91Fixture" tests="20" failures="2" disabled="0" skipped="0" errors="0" time="0.185" timestamp="2026-11-04T20:24:56.630">
+    <testcase name="R91BinBars_RawDailyBarsSliceAndReplay" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_bars_test.cpp" line="113" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.630" classname="R91Fixture" />
+    <testcase name="R91BinBars_MissingBinBarsYieldNullSlice" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_bars_test.cpp" line="164" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.633" classname="R91Fixture" />
+    <testcase name="R91BinBars_MissingMinuteBarsDoNotBlockValidDailyAutoReplay" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_bars_test.cpp" line="191" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:56.635" classname="R91Fixture" />
+    <testcase name="R91BinBars_AdjustedForwardBarsConcatenate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_bars_test.cpp" line="239" status="run" result="completed" time="0.009" timestamp="2026-11-04T20:24:56.639" classname="R91Fixture" />
+    <testcase name="R91BinBars_AdjustedBackwardBarsApplyFactorAndSkipMissingAdjusted" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_bars_test.cpp" line="290" status="run" result="completed" time="0.011" timestamp="2026-11-04T20:24:56.648" classname="R91Fixture" />
+    <testcase name="R2AdjFactors_LongLegalKeyAndShortKeyLookup" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_bars_test.cpp" line="370" status="run" result="completed" time="0." timestamp="2026-11-04T20:24:56.660" classname="R91Fixture" />
+    <testcase name="R2AdjFactors_IndependentReplayCallsKeepTheirOwnLoaderKey" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_bars_test.cpp" line="406" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:56.661" classname="R91Fixture" />
+    <testcase name="R91BinBars_IntegratedForwardHotBarsMergeSections" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_bars_test.cpp" line="437" status="run" result="completed" time="0.013" timestamp="2026-11-04T20:24:56.666" classname="R91Fixture" />
+    <testcase name="R91BinHft_Level2SlicesLoadFromBin" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp" line="69" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:24:56.680" classname="R91Fixture" />
+    <testcase name="R91BinHft_BarReplayUsesHftDatasAndDayPrice" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp" line="169" status="run" result="completed" time="0.007" timestamp="2026-11-04T20:24:56.685" classname="R91Fixture" />
+    <testcase name="R91BinHft_TickReplaySkipsPreOpenAndAdvancesSessions" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp" line="271" status="run" result="completed" time="0.053" timestamp="2026-11-04T20:24:56.693" classname="R91Fixture">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp:381&#x0A;Expected equality of these values:&#x0A;  2u&#x0A;    Which is: 2&#x0A;  det1.size()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp:381
+Expected equality of these values:
+  2u
+    Which is: 2
+  det1.size()
+    Which is: 3
+]]></failure>
+    </testcase>
+    <testcase name="R91BinHft_TransactionSliceLoadsWithoutOrderDetailMiss" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp" line="401" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.746" classname="R91Fixture" />
+    <testcase name="R91BinHft_OrderDetailSliceLoadsFromBin" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp" line="436" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.749" classname="R91Fixture" />
+    <testcase name="R91BinHft_OrderQueueSliceLoadsFromBin" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp" line="467" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.752" classname="R91Fixture" />
+    <testcase name="R91BinHft_AllLevel2SlicesLoadWithoutTickCursor" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp" line="498" status="run" result="completed" time="0.008" timestamp="2026-11-04T20:24:56.755" classname="R91Fixture" />
+    <testcase name="R91BinHft_OrderDetailCacheMissDoesNotPoisonTransactionCache" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp" line="555" status="run" result="completed" time="0.006" timestamp="2026-11-04T20:24:56.763" classname="R91Fixture" />
+    <testcase name="R91BinHft_OrderQueueCacheMissDoesNotPoisonTransactionCache" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp" line="591" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:24:56.769" classname="R91Fixture" />
+    <testcase name="R91BinHft_Level2SlicesRespectInclusiveEndAndCount" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp" line="625" status="run" result="completed" time="0.007" timestamp="2026-11-04T20:24:56.772" classname="R91Fixture" />
+    <testcase name="R91BinReset_ReplayTwiceThenClearCacheReloads" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp" line="41" status="run" result="completed" time="0.027" timestamp="2026-11-04T20:24:56.780" classname="R91Fixture" />
+    <testcase name="R91BinMisc_EmptyInputsFeeAndInfoQueries" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp" line="126" status="run" result="completed" time="0.006" timestamp="2026-11-04T20:24:56.808" classname="R91Fixture">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:187&#x0A;Expected equality of these values:&#x0A;  4.0&#x0A;    Which is: 4&#x0A;  replayer.calc_fee(&quot;CFFEX.IF.2001&quot;, 100.0, 2.0, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:187
+Expected equality of these values:
+  4.0
+    Which is: 4
+  replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 0)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:188&#x0A;Expected equality of these values:&#x0A;  6.0&#x0A;    Which is: 6&#x0A;  replayer.calc_fee(&quot;CFFEX.IF.2001&quot;, 100.0, 2.0, 1)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:188
+Expected equality of these values:
+  6.0
+    Which is: 6
+  replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 1)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:189&#x0A;Expected equality of these values:&#x0A;  8.0&#x0A;    Which is: 8&#x0A;  replayer.calc_fee(&quot;CFFEX.IF.2001&quot;, 100.0, 2.0, 2)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:189
+Expected equality of these values:
+  8.0
+    Which is: 8
+  replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 2)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:190&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  replayer.calc_fee(&quot;CFFEX.IF.2001&quot;, 100.0, 2.0, 3)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:190
+Expected equality of these values:
+  0.0
+    Which is: 0
+  replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 3)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:191&#x0A;Expected equality of these values:&#x0A;  5.0&#x0A;    Which is: 5&#x0A;  replayer.calc_fee(&quot;SSE.STK.600000&quot;, 10.0, 100.0, 0)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:191
+Expected equality of these values:
+  5.0
+    Which is: 5
+  replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 0)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:192&#x0A;Expected equality of these values:&#x0A;  5.0&#x0A;    Which is: 5&#x0A;  replayer.calc_fee(&quot;SSE.STK.600000&quot;, 10.0, 100.0, 1)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:192
+Expected equality of these values:
+  5.0
+    Which is: 5
+  replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 1)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:193&#x0A;Expected equality of these values:&#x0A;  5.0&#x0A;    Which is: 5&#x0A;  replayer.calc_fee(&quot;SSE.STK.600000&quot;, 10.0, 100.0, 2)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:193
+Expected equality of these values:
+  5.0
+    Which is: 5
+  replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 2)
+    Which is: nan
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:194&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  replayer.calc_fee(&quot;SSE.STK.600000&quot;, 10.0, 100.0, 3)&#x0A;    Which is: nan&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:194
+Expected equality of these values:
+  0.0
+    Which is: 0
+  replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 3)
+    Which is: nan
+]]></failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="S5R103LastTickInterval" tests="6" failures="0" disabled="0" skipped="0" errors="0" time="0.015" timestamp="2026-11-04T20:24:56.815">
+    <testcase name="ExactSameTimestampReturnsLastInsertedRecord" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_r103_last_tick_interval_test.cpp" line="105" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.815" classname="S5R103LastTickInterval" />
+    <testcase name="ExactTailSameTimestampReturnsLastInsertedRecord" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_r103_last_tick_interval_test.cpp" line="111" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.817" classname="S5R103LastTickInterval" />
+    <testcase name="BetweenGroupsReturnsLastRecordOfPreviousGroup" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_r103_last_tick_interval_test.cpp" line="117" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.820" classname="S5R103LastTickInterval" />
+    <testcase name="AfterTailReturnsNull" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_r103_last_tick_interval_test.cpp" line="123" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.822" classname="S5R103LastTickInterval" />
+    <testcase name="BeforeFirstReturnsNull" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_r103_last_tick_interval_test.cpp" line="129" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.825" classname="S5R103LastTickInterval" />
+    <testcase name="SingleRecordExactAndAfterTail" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_r103_last_tick_interval_test.cpp" line="135" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.827" classname="S5R103LastTickInterval" />
+  </testsuite>
+  <testsuite name="S5Q02FrozenTDate" tests="5" failures="0" disabled="0" skipped="0" errors="0" time="0.011" timestamp="2026-11-04T20:24:56.830">
+    <testcase name="SelSameTradingDaySessionBeginKeepsFrozen" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_sel_hft_frozen_tdate_test.cpp" line="139" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.830" classname="S5Q02FrozenTDate" />
+    <testcase name="SelDumpPersistsFrozenAndTradingDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_sel_hft_frozen_tdate_test.cpp" line="154" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:24:56.833" classname="S5Q02FrozenTDate" />
+    <testcase name="SelFrozenWithoutOwningSessionIsClearedByFirstSessionBegin" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_sel_hft_frozen_tdate_test.cpp" line="178" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:56.837" classname="S5Q02FrozenTDate" />
+    <testcase name="HftSameTradingDaySessionBeginKeepsFrozen" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_sel_hft_frozen_tdate_test.cpp" line="191" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:24:56.838" classname="S5Q02FrozenTDate" />
+    <testcase name="HftFrozenWithoutOwningSessionIsClearedByFirstSessionBegin" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_sel_hft_frozen_tdate_test.cpp" line="206" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:24:56.840" classname="S5Q02FrozenTDate" />
+  </testsuite>
+</testsuites>

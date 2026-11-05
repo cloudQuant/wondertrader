@@ -1,0 +1,86 @@
+[
+ {
+  "suite": "i03_dt_parser_host_20261104s5",
+  "class": "STALE_FIXTURE",
+  "root_cause": "run.sh 普通变体在 macOS /bin/bash 3.2 下 `\"${extra[@]}\"` 于 set -u 报 unbound variable，配置前即中止（构建脚本与本机 shell 不兼容）；thread 变体本就通过。",
+  "change": "run.sh：改为 ${extra[@]+\"${extra[@]}\"}；README 追加说明。",
+  "final_verdict": "pass（plain 6/6、thread 6/6；baseline 红控需改前副本，按空串跳过）",
+  "superseded_by": [],
+  "items": [
+   "BUG-R123-003",
+   "BUG-R18-006",
+   "BUG-R18-012",
+   "BUG-R8-006",
+   "I03-NEW-044",
+   "I03-NEW-047"
+  ]
+ },
+ {
+  "suite": "i03_dt_writer_lifecycle_20261104s5",
+  "class": "STALE_FIXTURE",
+  "root_cause": "TSan 变体中 Lifecycle.RealWriterReleaseIsBoundedWhenCallbackBlocks 的 gtest 通过，但进程退出时报 thread leak（exit 134）：回调阻塞时 writer 按卡9 9a 隔离并保留到进程退出，其线程不 join，属设计（主代理已接受）；夹具未标注该预期。长路径 terminate 为已登记 I03-NEW-118（产品），运行器用短路径。",
+  "change": "run_cases.sh：从 build-info.txt 读变体，仅 TSan 变体且仅该一例设 report_thread_leaks=0，并在 results.txt 行尾标注 tsan_thread_leak=expected-by-design(card9-9a;report_thread_leaks=0)；数据竞争等其他 TSan 报告照常计入，显式 S5_TSAN_THREAD_LEAKS 覆盖该清单；README 追加说明。",
+  "final_verdict": "pass（normal 18/18、asan 18/18、tsan 18/18，异常 0；by-design 例已标注）",
+  "superseded_by": [],
+  "items": [
+   "BUG-P10-008",
+   "BUG-R18-002",
+   "BUG-R23-001"
+  ]
+ },
+ {
+  "suite": "r23_retry_wait",
+  "class": "STALE_FIXTURE",
+  "root_cause": "build.sh 内嵌插桩脚本的锚点仍为 `fmtutil::format(\"{}rt/min1/\", _base_dir)`，I03-NEW-039（本段 2026-11-05）已改为 fmt::format，assert 失败、未编译。",
+  "change": "build.sh：锚点改为当前 `fmt::format(...)` 文本（hook 位置与 baseline 还原方式不变）；README 追加说明。",
+  "final_verdict": "pass（baseline shutdown exit 5 为预期红，normal/asan/tsan 的 shutdown 与 normal 均 0；300 秒长测未跑）",
+  "superseded_by": [],
+  "items": [
+   "BUG-R23-001"
+  ]
+ },
+ {
+  "suite": "i03_csv_block_type_20261103",
+  "class": "STALE_FIXTURE",
+  "root_cause": "EmptyDirectoryAndIgnoredFilter 期望空目录与不匹配过滤器返回成功且过滤器被忽略；BUG-L05-002（2026-11-04）合同为 WT_CSV_DUMP_NO_INPUT 且过滤器生效。",
+  "change": "check.cpp：该例改为 EmptyDirectoryAndUnmatchedFilterAreNoInput，断言空目录/无匹配为 NO_INPUT 且不写文件，并显式断言整串通配、大小写敏感的匹配/拒绝；README 同步。",
+  "final_verdict": "pass（10/10，导出符号 dump_bars/dump_ticks/_v2 均在）",
+  "superseded_by": [],
+  "items": [
+   "BUG-L05-002"
+  ]
+ },
+ {
+  "suite": "l05_csv_failure_signal",
+  "class": "STALE_FIXTURE",
+  "root_cause": "LargeWriteFailureWithLogger 的 1000 条相同记录压缩比超过 K37=B（2026-11-04）解压预算 1000:1，dump 在写前跳过该块，观察不到“写入失败”。",
+  "change": "probe.cpp：source() 多条记录逐条变化（单条不变），断言不改；README 追加说明。",
+  "final_verdict": "pass（green 全部通过；KnownRed 子集按设计 exit 1）",
+  "superseded_by": [],
+  "items": [
+   "BUG-L05-002"
+  ]
+ },
+ {
+  "suite": "i03_csv_status_20261103",
+  "class": "STALE_FIXTURE",
+  "root_cause": "CMakeLists 无 BASELINE_SOURCE 即 FATAL_ERROR，改前 WtDtHelper.cpp 快照（676a86c2…）已不存在（git 与证据中均无该哈希）；另 FlushOrWriteFailure 的 1000 条相同记录同样会触发 K37=B 预算。",
+  "change": "CMakeLists.txt：BASELINE_SOURCE 可选，缺省时不构建 csv_baseline 与改前字节对比 NormalMatchesPriorBytes（not-applicable）；check.cpp：NormalAndLegacyMatchPriorBytes 改为 NormalAndLegacyWriteIdenticalBytes（三种调用字节一致并新增 CSV 内容断言），source() 多条逐条变化；README 追加说明；run_fixtures.py 中该套件由 Blocked 改为构建+运行（见 README）。",
+  "final_verdict": "pass（14/14，导出符号齐全；改前字节对比 not-applicable）",
+  "superseded_by": [],
+  "items": [
+   "BUG-L05-002"
+  ]
+ },
+ {
+  "suite": "l04_contract_import",
+  "class": "STALE_FIXTURE",
+  "root_cause": "ValidStorageWidthIdentityPersistsAndReloads 的合约只有 rules.session、无 pricetick/volscale 且未加载会话，当前 loadContracts 的商品就绪合同（i03_commodity_ready）整文件拒绝。",
+  "change": "roundtrip.cpp：先 loadSessions（ALLDAY），rules 补 pricetick/volscale（与 l03_contract.storage_width_* 同数据），其余断言不变；README 追加说明。",
+  "final_verdict": "pass（normal 与 L04_SANITIZE=1 均通过）",
+  "superseded_by": [],
+  "items": [
+   "BUG-L04-004"
+  ]
+ }
+]

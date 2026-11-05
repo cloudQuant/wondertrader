@@ -1,0 +1,23 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Scenario.ReleaseWaitsForInFlightCallback
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Scenario
+[ RUN      ] Scenario.ReleaseWaitsForInFlightCallback
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/scenarios.cpp:102: Failure
+Expected equality of these values:
+  0
+  fake().count(C_RELEASE_DURING_CALLBACK)
+    Which is: 1
+vendor Release overlapped the host callback
+
+[  FAILED  ] Scenario.ReleaseWaitsForInFlightCallback (259 ms)
+[----------] 1 test from Scenario (259 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (259 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Scenario.ReleaseWaitsForInFlightCallback
+
+ 1 FAILED TEST

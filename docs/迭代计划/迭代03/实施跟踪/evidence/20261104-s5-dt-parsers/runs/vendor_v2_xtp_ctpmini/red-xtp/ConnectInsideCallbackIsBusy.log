@@ -1,0 +1,30 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Scenario.ConnectInsideCallbackIsBusy
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Scenario
+[ RUN      ] Scenario.ConnectInsideCallbackIsBusy
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/scenarios.cpp:149: Failure
+Expected equality of these values:
+  0
+  result.load()
+    Which is: 1
+connect inside a callback must report busy
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/scenarios.cpp:150: Failure
+Expected equality of these values:
+  1
+  kXtp ? fake().count(C_LOGIN_REQ) : fake().count(C_INIT)
+    Which is: 2
+vendor session restarted from a callback
+
+[  FAILED  ] Scenario.ConnectInsideCallbackIsBusy (14 ms)
+[----------] 1 test from Scenario (15 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (15 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Scenario.ConnectInsideCallbackIsBusy
+
+ 1 FAILED TEST

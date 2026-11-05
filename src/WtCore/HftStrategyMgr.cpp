@@ -235,16 +235,34 @@ bool HftStrategyMgr::loadFactories(const char* path)
 			return;
 		}
 
-		FuncCreateHftStraFact creator = (FuncCreateHftStraFact)DLLHelper::get_symbol(hInst, "createStrategyFact");
-		if (creator == NULL)
+		// Card 4b=A (BUG-R31-002): only a validated versioned HFT table may
+		// create a factory. CTA/UFT plugins export the same legacy symbol name,
+		// so a v1 creator is never called; the module is kept and refused.
+		const WtStrategyPluginApiV2* api = NULL;
+		std::string rejectReason;
+		const auto probe = wt_stra_plugin::probeModule(
+			[hInst](const char* symbol) { return DLLHelper::get_symbol(hInst, symbol); },
+			WT_STRA_PLUGIN_V2_FAMILY_HFT, api, rejectReason);
+		if (probe == wt_stra_plugin::ProbeResult::NotStrategyPlugin ||
+			probe == wt_stra_plugin::ProbeResult::ForeignFamily)
 		{
 			// dlopen may already have run module initializers and started work.
 			// Keep one reference: the ABI gives no way to establish quiescence.
+			if (probe == wt_stra_plugin::ProbeResult::ForeignFamily)
+				WTSLogger::warn("HFT strategy factory directory entry {} skipped: {}",
+					hftFactoryLogText(modulePath), hftFactoryLogText(rejectReason));
 			guard.recordNoCreator();
 			return;
 		}
+		if (probe != wt_stra_plugin::ProbeResult::Accepted)
+		{
+			refusedFactory = true;
+			WTSLogger::error("HFT strategy plugin {} rejected: {}",
+				hftFactoryLogText(modulePath), hftFactoryLogText(rejectReason));
+			return; // no creator ran: the module stays quarantined with its loader ref
+		}
 
-		IHftStrategyFact* fact = creator();
+		IHftStrategyFact* fact = static_cast<IHftStrategyFact*>(api->create_factory());
 		guard.recordFactory(fact);
 		if (fact == NULL)
 		{
@@ -262,10 +280,10 @@ bool HftStrategyMgr::loadFactories(const char* path)
 		const std::string name(rawName);
 		// Prepare all potentially throwing fields before publishing a factory.
 		std::string entryPath(modulePath);
-		FuncDeleteHftStraFact remover = (FuncDeleteHftStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
-		// Not active until publication: on any preparation failure the guard
-		// retains the untrusted factory and module without calling its remover.
-		auto owner = std::make_shared<FactoryOwner>(fact, remover, hInst);
+		// Card 9a: the factory is destroyed after its last wrapper only when the
+		// plugin advertises synchronous teardown; otherwise it stays quarantined
+		// with its module until process exit.
+		auto owner = std::make_shared<FactoryOwner>(fact, api, hInst);
 		const std::string displayName = hftFactoryLogText(name);
 		WTSLogger::info("Preparing HFT strategy factory[{}]", displayName.c_str());
 		bool inserted = false;
@@ -279,8 +297,8 @@ bool HftStrategyMgr::loadFactories(const char* path)
 				StraFactInfo& info = result.first->second;
 				info._module_path.swap(entryPath);
 				info._module_inst = hInst;
-				info._creator = creator;
-				info._remover = remover;
+				info._creator = NULL;
+				info._remover = NULL;
 				info._fact = fact;
 				info._owner = owner;
 				owner->_active = true;
@@ -327,6 +345,8 @@ bool HftStrategyMgr::loadFactories(const char* path)
 
 HftStrategyPtr HftStrategyMgr::createStrategy(const char* factname, const char* unitname, const char* id)
 {
+	if (!factname || !unitname || !id)
+		return HftStrategyPtr();
 	IHftStrategyFact* fact = nullptr;
 	std::shared_ptr<FactoryOwner> owner;
 	{
@@ -339,6 +359,18 @@ HftStrategyPtr HftStrategyMgr::createStrategy(const char* factname, const char* 
 	}
 	if (fact == nullptr)
 		return HftStrategyPtr();
+	// A null entry reserves the ID while the external creator is running.
+	const std::string strategyId(id);
+	{
+		std::lock_guard<std::mutex> lock(_strategies_mutex);
+		if (!_strategies.emplace(strategyId, HftStrategyPtr()).second)
+			return HftStrategyPtr();
+	}
+	auto releaseReservation = [this](const std::string* reservedId) noexcept {
+		std::lock_guard<std::mutex> lock(_strategies_mutex);
+		_strategies.erase(*reservedId);
+	};
+	std::unique_ptr<const std::string, decltype(releaseReservation)> reservation(&strategyId, releaseReservation);
 	// If allocating the wrapper fails, return the newly-created strategy to its
 	// still-live factory. After construction, shared_ptr invokes its deleter
 	// even when allocation of the control block fails.
@@ -348,6 +380,8 @@ HftStrategyPtr HftStrategyMgr::createStrategy(const char* factname, const char* 
 	};
 	std::unique_ptr<HftStrategy, decltype(destroyStrategy)> strategy(
 		fact->createStrategy(unitname, id), destroyStrategy);
+	if (!strategy)
+		return HftStrategyPtr();
 	auto destroyWrapper = [owner](HftStraWrapper* wrapper) mutable noexcept {
 		// Empty the control block's capture before deletion: weak_ptrs may keep
 		// that control block alive after the final strong wrapper disappears.
@@ -357,12 +391,18 @@ HftStrategyPtr HftStrategyMgr::createStrategy(const char* factname, const char* 
 	HftStraWrapper* rawWrapper = new HftStraWrapper(strategy.get(), fact);
 	strategy.release();
 	HftStrategyPtr ret(rawWrapper, std::move(destroyWrapper));
-	_strategies[id] = ret;
+	{
+		std::lock_guard<std::mutex> lock(_strategies_mutex);
+		_strategies.find(strategyId)->second = ret;
+		reservation.release();
+	}
 	return ret;
 }
 
 HftStrategyPtr HftStrategyMgr::createStrategy(const char* name, const char* id)
 {
+	if (!name || !id)
+		return HftStrategyPtr();
 	StringVector ay = StrUtil::split(name, ".");
 	if (ay.size() < 2)
 		return HftStrategyPtr();
@@ -375,6 +415,9 @@ HftStrategyPtr HftStrategyMgr::createStrategy(const char* name, const char* id)
 
 HftStrategyPtr HftStrategyMgr::getStrategy(const char* id)
 {
+	if (!id)
+		return HftStrategyPtr();
+	std::lock_guard<std::mutex> lock(_strategies_mutex);
 	auto it = _strategies.find(id);
 	if (it == _strategies.end())
 		return HftStrategyPtr();

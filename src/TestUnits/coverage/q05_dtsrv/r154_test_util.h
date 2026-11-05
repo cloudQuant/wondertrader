@@ -131,11 +131,11 @@ inline const char* state_commodities_json()
 {
 	return R"JSON({
 		"SHFE": {
-			"IA": {"name": "全时段品种", "session": "INITALL", "holiday": "R154_NONE"},
-			"IE": {"name": "固定区间休盘品种", "session": "INITEMP", "holiday": "R154_NONE"},
-			"CP": {"name": "收盘处理品种", "session": "CLOSEPROC", "holiday": "R154_NONE"},
-			"CU": {"name": "收盘休盘品种", "session": "CLOSEPAUSE", "holiday": "R154_NONE"},
-			"AU": {"name": "竞价前品种", "session": "INITAUC", "holiday": "R154_NONE"}
+			"IA": {"name": "全时段品种", "session": "INITALL", "holiday": "R154_NONE", "pricetick": 1, "volscale": 1},
+			"IE": {"name": "固定区间休盘品种", "session": "INITEMP", "holiday": "R154_NONE", "pricetick": 1, "volscale": 1},
+			"CP": {"name": "收盘处理品种", "session": "CLOSEPROC", "holiday": "R154_NONE", "pricetick": 1, "volscale": 1},
+			"CU": {"name": "收盘休盘品种", "session": "CLOSEPAUSE", "holiday": "R154_NONE", "pricetick": 1, "volscale": 1},
+			"AU": {"name": "竞价前品种", "session": "INITAUC", "holiday": "R154_NONE", "pricetick": 1, "volscale": 1}
 		}
 	})JSON";
 }
@@ -150,6 +150,10 @@ protected:
 		write_file(_dir / "commodities.json", state_commodities_json());
 		ASSERT_TRUE(_bdMgr.loadSessions((_dir / "sessions.json").string().c_str()));
 		ASSERT_TRUE(_bdMgr.loadCommodities((_dir / "commodities.json").string().c_str()));
+		// I03-NEW-053：卡 4a=A 要求商品带 pricetick/volscale（见上）；卡 1=A+C 下监控器
+		// 初始化用 checked 映射，品种引用的节假日模板 R154_NONE 必须已加载（空表）。
+		write_file(_dir / "holidays.json", R"JSON({"R154_NONE": []})JSON");
+		ASSERT_TRUE(_bdMgr.loadHolidays((_dir / "holidays.json").string().c_str()));
 	}
 
 	void TearDown() override

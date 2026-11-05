@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <filesystem>
@@ -21,8 +22,9 @@ namespace
 		explicit IsolatedFactoryDirectory(const char* pluginPath)
 		{
 			static unsigned int nextId = 0;
+			// I03-NEW-098：计数器在每个进程都从 1 开始，并行逐例运行时三个用例会争用同一目录；追加进程号。
 			_dir = std::filesystem::path(::testing::TempDir()) /
-				("r6_capi_factory_positive_" + std::to_string(++nextId));
+				("r6_capi_factory_positive_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(++nextId));
 			std::error_code ec;
 			std::filesystem::remove_all(_dir, ec);
 			ec.clear();

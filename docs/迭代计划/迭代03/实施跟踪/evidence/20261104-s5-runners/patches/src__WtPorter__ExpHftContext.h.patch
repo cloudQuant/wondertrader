@@ -1,0 +1,15 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/WtPorter/ExpHftContext.h	2026-10-27 12:14:47
++++ src/WtPorter/ExpHftContext.h	2026-11-04 13:25:11
+@@ -35,6 +35,12 @@
+ 	 */
+ 	virtual ~ExpHftContext(){}
+ 
++	/**
++	 * @brief 是否已绑定交易通道（BUG-R42-002 版本化数量查询用）
++	 * @details 非虚函数，不改变对象布局或虚表
++	 */
++	inline bool isTraderBound() const { return _trader != nullptr; }
++
+ public:
+ 	/**
+ 	 * @brief K线闭合回调

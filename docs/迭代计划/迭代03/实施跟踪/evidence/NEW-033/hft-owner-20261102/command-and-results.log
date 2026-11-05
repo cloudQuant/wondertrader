@@ -1,0 +1,506 @@
++ CXX=/private/tmp/wt-i03-hft-factory/clang-asan
++ boost=/opt/homebrew/Cellar/boost/1.88.0/include
++ fmt=/opt/homebrew/Cellar/fmt/11.2.0/include
++ spdlog=/opt/homebrew/Cellar/spdlog/1.15.3/include
++ case $(uname -s) in
+++ uname -s
++ ext=dylib
++ shared_flag=-dynamiclib
++ dl_lib=
++ mkdir -p /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/no-creator /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/no-remover /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs
++ shasum -a 256 /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/HftStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/HftStrategyMgr.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSTools/WTSLogger.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmtlib.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/factory.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/no_creator.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/check.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/run.sh
++ /private/tmp/wt-i03-hft-factory/clang-asan -std=c++17 -pthread -fPIC -dynamiclib /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/factory.cpp -o /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib
++ cp /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ segment=abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
++ deep_folder=deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
++ mkdir -p /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
++ cp /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/fixture.dylib
++ /private/tmp/wt-i03-hft-factory/clang-asan -std=c++17 -pthread -fPIC -dynamiclib /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/no_creator.cpp -o /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/no-creator/fixture.dylib
++ /private/tmp/wt-i03-hft-factory/clang-asan -std=c++17 -pthread -fPIC -dynamiclib -DOMIT_REMOVER /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/factory.cpp -o /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/no-remover/fixture.dylib
++ /private/tmp/wt-i03-hft-factory/clang-asan -std=c++17 -g -O0 -pthread -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/HftStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/check.cpp -o /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ baseline=/private/tmp/wt-i03-hft-owner/baseline
++ '[' -n /private/tmp/wt-i03-hft-owner/baseline ']'
++ shasum -a 256 /private/tmp/wt-i03-hft-owner/baseline/HftStrategyMgr.cpp /private/tmp/wt-i03-hft-owner/baseline/HftStrategyMgr.h
++ cp /private/tmp/wt-i03-hft-owner/baseline/HftStrategyMgr.cpp /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-baseline.cpp
++ cp /private/tmp/wt-i03-hft-owner/baseline/HftStrategyMgr.h /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/HftStrategyMgr.h
++ sed 's!../../../WtCore/HftStrategyMgr.h!HftStrategyMgr.h!' /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/check.cpp
++ /private/tmp/wt-i03-hft-factory/clang-asan -std=c++17 -g -O0 -pthread -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6 -I/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-baseline.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/logger_stub.cpp /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-check.cpp -o /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-baseline
++ ulimit -c 0
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name owner-lifetime
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current creator-throw creator-throw current-creator-throw
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=creator-throw
++ env_mode=creator-throw
++ prefix=current-creator-throw
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=creator-throw
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-creator-throw.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-creator-throw.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current creator-throw /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-creator-throw 0
+current-creator-throw exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name owner-lifetime
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current name-throw name-throw current-name-throw
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=name-throw
++ env_mode=name-throw
++ prefix=current-name-throw
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=name-throw
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-name-throw.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-name-throw.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current name-throw /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-name-throw 0
+current-name-throw exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name owner-lifetime
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current empty empty current-empty
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=empty
++ env_mode=empty
++ prefix=current-empty
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=empty
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-empty.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-empty.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current empty /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-empty 0
+current-empty exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name owner-lifetime
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current null null current-null
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=null
++ env_mode=null
++ prefix=current-null
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=null
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-null.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-null.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current null /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-null 0
+current-null exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name owner-lifetime
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current duplicate duplicate current-duplicate
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=duplicate
++ env_mode=duplicate
++ prefix=current-duplicate
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=duplicate
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-duplicate.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-duplicate.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current duplicate /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-duplicate 0
+current-duplicate exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name owner-lifetime
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current concurrent concurrent current-concurrent
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=concurrent
++ env_mode=concurrent
++ prefix=current-concurrent
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=concurrent
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-concurrent.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-concurrent.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current concurrent /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-concurrent 0
+current-concurrent exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name owner-lifetime
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current reentrant reentrant current-reentrant
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=reentrant
++ env_mode=reentrant
++ prefix=current-reentrant
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=reentrant
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-reentrant.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-reentrant.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current reentrant /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-reentrant 0
+current-reentrant exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name owner-lifetime
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current single-name single-name current-single-name
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=single-name
++ env_mode=single-name
++ prefix=current-single-name
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=single-name
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-single-name.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-single-name.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current single-name /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-single-name 0
+current-single-name exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name owner-lifetime
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current duplicate-different duplicate-different current-duplicate-different
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=duplicate-different
++ env_mode=duplicate-different
++ prefix=current-duplicate-different
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=duplicate-different
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-duplicate-different.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-duplicate-different.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current duplicate-different /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-duplicate-different 0
+current-duplicate-different exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name owner-lifetime
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current idempotent-cross-manager idempotent-cross-manager current-idempotent-cross-manager
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=idempotent-cross-manager
++ env_mode=idempotent-cross-manager
++ prefix=current-idempotent-cross-manager
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=idempotent-cross-manager
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-idempotent-cross-manager.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-idempotent-cross-manager.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current idempotent-cross-manager /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-idempotent-cross-manager 0
+current-idempotent-cross-manager exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name owner-lifetime
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current long-name long-name current-long-name
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=long-name
++ env_mode=long-name
++ prefix=current-long-name
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=long-name
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-long-name.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-long-name.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current long-name /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-long-name 0
+current-long-name exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name owner-lifetime
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current owner-lifetime owner-lifetime current-owner-lifetime
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=owner-lifetime
++ env_mode=owner-lifetime
++ prefix=current-owner-lifetime
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=owner-lifetime
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-owner-lifetime.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-owner-lifetime.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current owner-lifetime /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-owner-lifetime 0
+current-owner-lifetime exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current same-manager-concurrent concurrent current-same-manager-concurrent
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=same-manager-concurrent
++ env_mode=concurrent
++ prefix=current-same-manager-concurrent
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=concurrent
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-same-manager-concurrent.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-same-manager-concurrent.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current same-manager-concurrent /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-same-manager-concurrent 0
+current-same-manager-concurrent exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current missing-creator missing-creator current-missing-creator no-creator
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=missing-creator
++ env_mode=missing-creator
++ prefix=current-missing-creator
++ folder=no-creator
++ set +e
++ WT_HFT_FACTORY_MODE=missing-creator
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-missing-creator.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-missing-creator.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current missing-creator /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/no-creator /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/no-creator/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-missing-creator 0
+current-missing-creator exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current exception-recovery name-throw current-exception-recovery
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=exception-recovery
++ env_mode=name-throw
++ prefix=current-exception-recovery
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=name-throw
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-exception-recovery.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-exception-recovery.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current exception-recovery /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-exception-recovery 0
+current-exception-recovery exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current long-invalid-path good current-long-invalid-path
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=long-invalid-path
++ env_mode=good
++ prefix=current-long-invalid-path
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=good
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-long-invalid-path.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-long-invalid-path.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current long-invalid-path /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-long-invalid-path 0
+current-long-invalid-path exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current long-path-valid good current-long-path-valid deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=long-path-valid
++ env_mode=good
++ prefix=current-long-path-valid
++ folder=deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
++ set +e
++ WT_HFT_FACTORY_MODE=good
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-long-path-valid.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-long-path-valid.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current long-path-valid /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-long-path-valid 0
+current-long-path-valid exit=0
++ case "$prefix:$rc" in
++ for mode in owner-outlives-manager owner-no-preload owner-null-strategy legacy-raw-wrapper allocation-wrapper-failure allocation-control-failure allocation-registry-failure
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current owner-outlives-manager owner-outlives-manager current-owner-outlives-manager
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=owner-outlives-manager
++ env_mode=owner-outlives-manager
++ prefix=current-owner-outlives-manager
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=owner-outlives-manager
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-owner-outlives-manager.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-owner-outlives-manager.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current owner-outlives-manager /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-owner-outlives-manager 0
+current-owner-outlives-manager exit=0
++ case "$prefix:$rc" in
++ for mode in owner-outlives-manager owner-no-preload owner-null-strategy legacy-raw-wrapper allocation-wrapper-failure allocation-control-failure allocation-registry-failure
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current owner-no-preload owner-no-preload current-owner-no-preload
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=owner-no-preload
++ env_mode=owner-no-preload
++ prefix=current-owner-no-preload
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=owner-no-preload
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-owner-no-preload.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-owner-no-preload.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current owner-no-preload /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-owner-no-preload 0
+current-owner-no-preload exit=0
++ case "$prefix:$rc" in
++ for mode in owner-outlives-manager owner-no-preload owner-null-strategy legacy-raw-wrapper allocation-wrapper-failure allocation-control-failure allocation-registry-failure
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current owner-null-strategy owner-null-strategy current-owner-null-strategy
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=owner-null-strategy
++ env_mode=owner-null-strategy
++ prefix=current-owner-null-strategy
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=owner-null-strategy
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-owner-null-strategy.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-owner-null-strategy.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current owner-null-strategy /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-owner-null-strategy 0
+current-owner-null-strategy exit=0
++ case "$prefix:$rc" in
++ for mode in owner-outlives-manager owner-no-preload owner-null-strategy legacy-raw-wrapper allocation-wrapper-failure allocation-control-failure allocation-registry-failure
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current legacy-raw-wrapper legacy-raw-wrapper current-legacy-raw-wrapper
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=legacy-raw-wrapper
++ env_mode=legacy-raw-wrapper
++ prefix=current-legacy-raw-wrapper
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=legacy-raw-wrapper
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-legacy-raw-wrapper.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-legacy-raw-wrapper.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current legacy-raw-wrapper /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-legacy-raw-wrapper 0
+current-legacy-raw-wrapper exit=0
++ case "$prefix:$rc" in
++ for mode in owner-outlives-manager owner-no-preload owner-null-strategy legacy-raw-wrapper allocation-wrapper-failure allocation-control-failure allocation-registry-failure
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current allocation-wrapper-failure allocation-wrapper-failure current-allocation-wrapper-failure
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=allocation-wrapper-failure
++ env_mode=allocation-wrapper-failure
++ prefix=current-allocation-wrapper-failure
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=allocation-wrapper-failure
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-allocation-wrapper-failure.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-allocation-wrapper-failure.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current allocation-wrapper-failure /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-allocation-wrapper-failure 0
+current-allocation-wrapper-failure exit=0
++ case "$prefix:$rc" in
++ for mode in owner-outlives-manager owner-no-preload owner-null-strategy legacy-raw-wrapper allocation-wrapper-failure allocation-control-failure allocation-registry-failure
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current allocation-control-failure allocation-control-failure current-allocation-control-failure
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=allocation-control-failure
++ env_mode=allocation-control-failure
++ prefix=current-allocation-control-failure
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=allocation-control-failure
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-allocation-control-failure.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-allocation-control-failure.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current allocation-control-failure /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-allocation-control-failure 0
+current-allocation-control-failure exit=0
++ case "$prefix:$rc" in
++ for mode in owner-outlives-manager owner-no-preload owner-null-strategy legacy-raw-wrapper allocation-wrapper-failure allocation-control-failure allocation-registry-failure
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current allocation-registry-failure allocation-registry-failure current-allocation-registry-failure
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=allocation-registry-failure
++ env_mode=allocation-registry-failure
++ prefix=current-allocation-registry-failure
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=allocation-registry-failure
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-allocation-registry-failure.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-allocation-registry-failure.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current allocation-registry-failure /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-allocation-registry-failure 0
+current-allocation-registry-failure exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current owner-without-remover owner-without-remover current-owner-without-remover no-remover
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current
++ mode=owner-without-remover
++ env_mode=owner-without-remover
++ prefix=current-owner-without-remover
++ folder=no-remover
++ set +e
++ WT_HFT_FACTORY_MODE=owner-without-remover
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-owner-without-remover.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/current-owner-without-remover.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current owner-without-remover /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/no-remover /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/no-remover/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-owner-without-remover 0
+current-owner-without-remover exit=0
++ case "$prefix:$rc" in
++ '[' -n /private/tmp/wt-i03-hft-owner/baseline ']'
++ '[' owner = owner ']'
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-baseline owner-outlives-manager owner-outlives-manager head-red-owner-outlives-manager
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-baseline
++ mode=owner-outlives-manager
++ env_mode=owner-outlives-manager
++ prefix=head-red-owner-outlives-manager
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=owner-outlives-manager
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/head-red-owner-outlives-manager.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/head-red-owner-outlives-manager.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-baseline owner-outlives-manager /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
+src/TestUnits/fixtures/hft_factory_quarantine/run.sh: line 46: 19058 Abort trap: 6           WT_HFT_FACTORY_MODE="$env_mode" WT_HFT_MARKER="$run_dir/logs/$prefix.marker" WT_HFT_LOG_MARKER="$run_dir/logs/$prefix.formatted" perl -e 'alarm 20; exec @ARGV' -- "$binary" "$mode" "$run_dir/$folder" "$run_dir/$folder/fixture.$ext" "$run_dir/plugins2" "$run_dir/plugins2/fixture.$ext" > "$run_dir/logs/$prefix.log" 2>&1
++ rc=134
++ set -e
++ printf '%s exit=%s\n' head-red-owner-outlives-manager 134
+head-red-owner-outlives-manager exit=134
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-baseline owner-no-preload owner-no-preload head-red-owner-no-preload
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-baseline
++ mode=owner-no-preload
++ env_mode=owner-no-preload
++ prefix=head-red-owner-no-preload
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=owner-no-preload
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/head-red-owner-no-preload.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/head-red-owner-no-preload.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-baseline owner-no-preload /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
+src/TestUnits/fixtures/hft_factory_quarantine/run.sh: line 46: 19064 Abort trap: 6           WT_HFT_FACTORY_MODE="$env_mode" WT_HFT_MARKER="$run_dir/logs/$prefix.marker" WT_HFT_LOG_MARKER="$run_dir/logs/$prefix.formatted" perl -e 'alarm 20; exec @ARGV' -- "$binary" "$mode" "$run_dir/$folder" "$run_dir/$folder/fixture.$ext" "$run_dir/plugins2" "$run_dir/plugins2/fixture.$ext" > "$run_dir/logs/$prefix.log" 2>&1
++ rc=134
++ set -e
++ printf '%s exit=%s\n' head-red-owner-no-preload 134
+head-red-owner-no-preload exit=134
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-baseline single-name single-name head-positive
++ binary=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-baseline
++ mode=single-name
++ env_mode=single-name
++ prefix=head-positive
++ folder=plugins
++ set +e
++ WT_HFT_FACTORY_MODE=single-name
++ WT_HFT_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/head-positive.marker
++ WT_HFT_LOG_MARKER=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/logs/head-positive.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/head-baseline single-name /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' head-positive 0
+head-positive exit=0
++ case "$prefix:$rc" in
++ shasum -a 256 /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/HftStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/HftStrategyMgr.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/factory.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/check.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/logger_stub.cpp /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/current /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/plugins/fixture.dylib
++ shasum -a 256 /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/HftStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/HftStrategyMgr.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSTools/WTSLogger.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmtlib.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/factory.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/no_creator.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/check.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/hft_factory_quarantine/run.sh
++ cmp /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/source-before.sha256 /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/source-after.sha256
++ find /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6 -type l -print
++ test '!' -s /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6/symlinks.txt
++ printf 'evidence=%s\n' /private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6
+evidence=/private/tmp/wt-i03-hft-independent-20261102/run.Q4SQSYP6

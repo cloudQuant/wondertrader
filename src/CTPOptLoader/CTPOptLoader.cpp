@@ -154,16 +154,20 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 #endif // _WIN32
 
 	std::string map_files;
+	// I03-NEW-091 / K02=B: run() reports a result code in every mode; a missing,
+	// unparsable or incomplete configuration returns 1 (as the module failures do).
+	if (cfgfile == NULL)
+		return 1;
 
 	if (!isFile)
 	{
 		WTSVariant* root = WTSCfgLoader::load_from_content(cfgfile, true);
 		if (root == NULL)
-			return 0;
+			return 1;
 		if (!applyVariantConfig(root, map_files))
 		{
 			root->release();
-			return 0;
+			return 1;
 		}
 		root->release();
 	}
@@ -200,11 +204,11 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 	{
 		WTSVariant* root = WTSCfgLoader::load_from_file(cfgfile);
 		if (root == NULL)
-			return 0;
+			return 1;
 		if (!applyVariantConfig(root, map_files))
 		{
 			root->release();
-			return 0;
+			return 1;
 		}
 		root->release();
 	}
@@ -221,7 +225,7 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 
 	if(FRONT_ADDR.empty() || BROKER_ID.empty() || INVESTOR_ID.empty() || PASSWORD.empty() || SAVEPATH.empty())
 	{
-		return 0;
+		return 1;
 	}
 
 	SAVEPATH = StrUtil::standardisePath(SAVEPATH);
@@ -286,6 +290,7 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 
 	std::string flowPath = fmtutil::format("./CTPFlow/{}/{}/", BROKER_ID, INVESTOR_ID);
 	fs::create_directories(flowPath.c_str());
+	loader_completion::reset();
 	pUserApi = g_ctpCreator(flowPath.c_str());
 	if (pUserApi == NULL)
 	{
@@ -301,9 +306,14 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 	pUserApi->RegisterFront((char*)FRONT_ADDR.c_str());				// connect
 	pUserApi->Init();
 
-    //如果不是异步，则等待API返回
-    if(!bAsync)
-        pUserApi->Join();
-
-	return 0;
+	// K02=B (2026-11-04): every mode waits for the terminal result on this
+	// (non-callback) thread, then releases the API and returns the result code;
+	// bAsync is kept only for signature compatibility.
+	(void)bAsync;
+	const int result = loader_completion::wait();
+	pUserApi->RegisterSpi(NULL);
+	pUserApi->Release();
+	pUserApi = NULL;
+	delete pUserSpi;
+	return result;
 }

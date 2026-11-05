@@ -129,11 +129,13 @@ const char* const kPolicyCfg = R"({
 	"default":{"order":[{"action":"close","limit":0},{"action":"open","limit":0}]}
 })";
 
+// 卡8 8b=A（用户裁定，eager 全量预校验）：active 的 local/diff 执行器须带有限正数 scale 与含 default 的 policy；
+// 补最小合法参数（同 r104），单元仍惰性创建，本用例不建单元。
 const char* const kExecutersCfg = R"({
 	"executers":[
-		{"id":"r115e1","name":"local","active":true,"scale":1.0},
-		{"id":"r115e2","name":"diff","active":true,"scale":1.0},
-		{"id":"r115e3","name":"diff","active":true,"trader":"r115_ghost"}
+		{"id":"r115e1","name":"local","active":true,"scale":1.0,"policy":{"default":{"name":"WtExeFact.WtMinImpactExeUnit"}}},
+		{"id":"r115e2","name":"diff","active":true,"scale":1.0,"policy":{"default":{"name":"WtExeFact.WtMinImpactExeUnit"}}},
+		{"id":"r115e3","name":"diff","active":true,"trader":"r115_ghost","scale":1.0,"policy":{"default":{"name":"WtExeFact.WtMinImpactExeUnit"}}}
 	]
 })";
 
@@ -167,6 +169,9 @@ TEST(r115_execmon, simpdata_default_store_quote_getters_and_slices)
 	env.write("commodities.json", kCommodityCfg);
 	env.write("contracts.json", kContractCfg);
 	env.write("actpolicy.json", kPolicyCfg);
+	// K31=A：读端经宿主注入的 DateMappingV1 表映射交易日（路径 A），品种引用的节假日日历 CHINA
+	// 必须已加载，否则按 MissingCalendar fail-closed（改前路径 C 无法发现缺日历）。补空节假日表。
+	env.write("holidays.json", R"({"CHINA":[]})");
 	env.mkdir("storedata");
 
 	WtExecRunner runner;
@@ -175,7 +180,8 @@ TEST(r115_execmon, simpdata_default_store_quote_getters_and_slices)
 	std::string cfg;
 	cfg += "{\"basefiles\":{\"session\":\"" + env.file("sessions.json") + "\",";
 	cfg += "\"commodity\":\"" + env.file("commodities.json") + "\",";
-	cfg += "\"contract\":\"" + env.file("contracts.json") + "\"}";
+	cfg += "\"contract\":\"" + env.file("contracts.json") + "\",";
+	cfg += "\"holiday\":\"" + env.file("holidays.json") + "\"}";
 	cfg += ",\"bspolicy\":\"" + env.file("actpolicy.json") + "\"}";
 	ASSERT_TRUE(runner.config(cfg.c_str(), false));
 

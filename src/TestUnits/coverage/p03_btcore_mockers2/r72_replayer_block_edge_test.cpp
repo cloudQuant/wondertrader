@@ -116,7 +116,7 @@ TEST_F(R72ReplayerBlockEdge, OldRawBarBlockIsConverted)
 
 	WTSKlineSlice* s = rp.get_kline_slice(kCode, "d1", 3, 1, false);
 	ASSERT_NE(nullptr, s);
-	ASSERT_GE(s->size(), 1u);
+	ASSERT_GE(s->size(), 1);
 	EXPECT_EQ(20200102u, s->at(0)->date);
 	EXPECT_DOUBLE_EQ(11.5, s->at(0)->close);
 	EXPECT_DOUBLE_EQ(11.7, s->at(0)->high);
@@ -173,7 +173,7 @@ TEST_F(R72ReplayerBlockEdge, DailyBarsAtCloseUseClosedCursor)
 
 	WTSKlineSlice* s = rp.get_kline_slice(kCode, "d1", 5, 1, true);
 	ASSERT_NE(nullptr, s);
-	ASSERT_EQ(2u, s->size());
+	ASSERT_EQ(2, s->size());
 	EXPECT_EQ(20200102u, s->at(0)->date);
 	EXPECT_EQ(20200103u, s->at(1)->date);
 	s->release();

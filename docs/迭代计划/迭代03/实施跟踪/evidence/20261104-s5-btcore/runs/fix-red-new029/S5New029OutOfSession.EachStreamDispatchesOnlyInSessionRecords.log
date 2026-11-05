@@ -1,0 +1,40 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5New029OutOfSession.EachStreamDispatchesOnlyInSessionRecords
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5New029OutOfSession
+[ RUN      ] S5New029OutOfSession.EachStreamDispatchesOnlyInSessionRecords
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_new029_out_of_session_streams_test.cpp:100: Failure
+Expected equality of these values:
+  expected
+    Which is: { 931, 1301 }
+  hft_times(sink.details)
+    Which is: { 925, 931, 931, 1200, 1301, 1501 }
+order detail stream
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_new029_out_of_session_streams_test.cpp:101: Failure
+Expected equality of these values:
+  expected
+    Which is: { 931, 1301 }
+  hft_times(sink.queues)
+    Which is: { 925, 931, 931, 1200, 1301, 1501 }
+order queue stream
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_new029_out_of_session_streams_test.cpp:102: Failure
+Expected equality of these values:
+  expected
+    Which is: { 931, 1301 }
+  hft_times(sink.trans)
+    Which is: { 925, 931, 931, 1200, 1301, 1501 }
+transaction stream
+
+[  FAILED  ] S5New029OutOfSession.EachStreamDispatchesOnlyInSessionRecords (70 ms)
+[----------] 1 test from S5New029OutOfSession (70 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (70 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S5New029OutOfSession.EachStreamDispatchesOnlyInSessionRecords
+
+ 1 FAILED TEST

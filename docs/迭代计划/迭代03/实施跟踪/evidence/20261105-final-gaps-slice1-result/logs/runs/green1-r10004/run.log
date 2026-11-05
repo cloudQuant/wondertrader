@@ -1,0 +1,39 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S1EngineRunGuard.*:S1K25SelIsolation.*:S5MainK25Sel.*:S5SelScheduleThread.*
+[==========] Running 10 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from S1EngineRunGuard
+[ RUN      ] S1EngineRunGuard.SelSecondRunIsRejectedAndKeepsTheRunningTicker
+[       OK ] S1EngineRunGuard.SelSecondRunIsRejectedAndKeepsTheRunningTicker (3 ms)
+[ RUN      ] S1EngineRunGuard.CtaSecondRunIsRejectedAndKeepsTheRunningTicker
+[       OK ] S1EngineRunGuard.CtaSecondRunIsRejectedAndKeepsTheRunningTicker (1 ms)
+[ RUN      ] S1EngineRunGuard.HftSecondRunIsRejectedAndKeepsTheRunningTicker
+[       OK ] S1EngineRunGuard.HftSecondRunIsRejectedAndKeepsTheRunningTicker (1 ms)
+[----------] 3 tests from S1EngineRunGuard (5 ms total)
+
+[----------] 4 tests from S1K25SelIsolation
+[ RUN      ] S1K25SelIsolation.ThrowingScheduleIsIsolatedAndOtherStrategiesStillRun
+[       OK ] S1K25SelIsolation.ThrowingScheduleIsIsolatedAndOtherStrategiesStillRun (2 ms)
+[ RUN      ] S1K25SelIsolation.ThrowingTickHandlerIsIsolatedAndOtherStrategiesStillReceiveTicks
+[       OK ] S1K25SelIsolation.ThrowingTickHandlerIsIsolatedAndOtherStrategiesStillReceiveTicks (0 ms)
+[ RUN      ] S1K25SelIsolation.ReentrantTicksBetweenTwoStrategiesAreQueuedAndDeliveredOnce
+[       OK ] S1K25SelIsolation.ReentrantTicksBetweenTwoStrategiesAreQueuedAndDeliveredOnce (2 ms)
+[ RUN      ] S1K25SelIsolation.StopFromInsideAStrategyCallbackDoesNotSelfJoin
+[       OK ] S1K25SelIsolation.StopFromInsideAStrategyCallbackDoesNotSelfJoin (9 ms)
+[----------] 4 tests from S1K25SelIsolation (14 ms total)
+
+[----------] 1 test from S5MainK25Sel
+[ RUN      ] S5MainK25Sel.FiredScheduleRunsSynchronouslyOnTheCallingStrand
+[       OK ] S5MainK25Sel.FiredScheduleRunsSynchronouslyOnTheCallingStrand (0 ms)
+[----------] 1 test from S5MainK25Sel (0 ms total)
+
+[----------] 2 tests from S5SelScheduleThread
+[ RUN      ] S5SelScheduleThread.FiredTaskRunsOnceOnItsContextAndIsJoined
+[       OK ] S5SelScheduleThread.FiredTaskRunsOnceOnItsContextAndIsJoined (74 ms)
+[ RUN      ] S5SelScheduleThread.TasksOnSeveralDaysAreAllJoinedByRelease
+[       OK ] S5SelScheduleThread.TasksOnSeveralDaysAreAllJoinedByRelease (28 ms)
+[----------] 2 tests from S5SelScheduleThread (103 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 4 test suites ran. (126 ms total)
+[  PASSED  ] 10 tests.

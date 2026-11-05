@@ -12,6 +12,7 @@
 //#endif // !_WIN64
 
 #include "TraderDD.h"
+#include "../Share/ProviderRawReport.hpp"
 #include <boost/asio/post.hpp>
 #include <API/FixApi/include/fiddef.h>
 #include "../Includes/WTSError.hpp"
@@ -183,8 +184,34 @@ uint32_t strToTime(const char* strTime)
 	return strtoul(str.c_str(), NULL, 10);
 }
 
+namespace
+{
+	template <typename FieldMap>
+	std::string fixFieldsText(const FieldMap& source)
+	{
+		const std::map<int32_t, std::string> fields(source.begin(), source.end());	// stable field order
+		std::string out;
+		for (const auto& item : fields)
+		{
+			out += std::to_string(item.first);
+			out += '=';
+			out += item.second;
+			out += ';';
+		}
+		return out;
+	}
+}
+
 extern "C"
 {
+	// BUG-L01-014 / K42: optional host feature declaration (WT_TRADER_SPI_FEATURES_SYMBOL).
+	EXPORT_FLAG void setTraderSpiFeatures(ITraderApi* trader, uint64_t features)
+	{
+		TraderDD* self = dynamic_cast<TraderDD*>(trader);
+		if (self != NULL)
+			self->setSpiFeatures(features);
+	}
+
 	EXPORT_FLAG ITraderApi* createTrader()
 	{
 		TraderDD *instance = new TraderDD();
@@ -1075,6 +1102,12 @@ int TraderDD::queryPositions()
 
 					ayPositions->append(pInfo, false);
 				}
+				else
+				{
+					// BUG-L01-014 (card 6): keep every FIX field of the unconverted query row; the host pauses the account.
+					wt_provider_raw::report(m_traderSink, m_spiFeatures.load(), "TraderDD", "position", "position query row could not be converted: unknown contract",
+						wt_provider_raw::textOf("fix", fixFieldsText(fields).c_str()));
+				}
 			}
 
 			if (row >= 200)
@@ -1124,7 +1157,12 @@ void TraderDD::OnRtnOrder(HANDLE_CONN hconn, HANDLE_SESSION hsess)
 
 	WTSContractInfo* contract = m_bdMgr->getContract(code.c_str(), exchg.c_str());
 	if (contract == NULL)
+	{
+		// BUG-L01-014: keep every FIX field of the unconverted report for reconciliation.
+		wt_provider_raw::report(m_traderSink, m_spiFeatures.load(), "TraderDD", "order", "order report could not be converted: unknown contract",
+			wt_provider_raw::textOf("fix", fixFieldsText(fields).c_str()));
 		return;
+	}
 
 	WTSOrderInfo* ordInfo = NULL;
 	if(!isCancel)
@@ -1276,7 +1314,12 @@ void TraderDD::OnRtnTrade(HANDLE_CONN hconn, HANDLE_SESSION hsess)
 
 	WTSContractInfo* contract = m_bdMgr->getContract(code.c_str(), exchg.c_str());
 	if (contract == NULL)
+	{
+		// BUG-L01-014: keep every FIX field of the unconverted report for reconciliation.
+		wt_provider_raw::report(m_traderSink, m_spiFeatures.load(), "TraderDD", "trade", "trade report could not be converted: unknown contract",
+			wt_provider_raw::textOf("fix", fixFieldsText(fields).c_str()));
 		return;
+	}
 
 	std::string orderid;
 	len = 256;
@@ -1458,6 +1501,12 @@ int TraderDD::queryOrders()
 					
 					ayOrds->append(ordInfo, false);
 				}
+				else
+				{
+					// BUG-L01-014 (card 6): keep every FIX field of the unconverted query row; the host pauses the account.
+					wt_provider_raw::report(m_traderSink, m_spiFeatures.load(), "TraderDD", "order", "order query row could not be converted: unknown contract",
+						wt_provider_raw::textOf("fix", fixFieldsText(fields).c_str()));
+				}
 			}
 
 			if (m_traderSink) m_traderSink->onRspOrders(ayOrds);
@@ -1571,6 +1620,12 @@ int TraderDD::queryTrades()
 						trdInfo->setUserTag(usertag.c_str());
 
 					ayTrds->append(trdInfo, false);
+				}
+				else
+				{
+					// BUG-L01-014 (card 6): keep every FIX field of the unconverted query row; the host pauses the account.
+					wt_provider_raw::report(m_traderSink, m_spiFeatures.load(), "TraderDD", "trade", "trade query row could not be converted: unknown contract",
+						wt_provider_raw::textOf("fix", fixFieldsText(fields).c_str()));
 				}
 			}
 

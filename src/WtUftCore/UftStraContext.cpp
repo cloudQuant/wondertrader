@@ -28,6 +28,7 @@
 #include "../WTSUtils/WTSCfgLoader.h"
 
 #include <boost/filesystem.hpp>
+#include <cmath>
 #include <memory>
 namespace fs = boost::filesystem;
 
@@ -69,6 +70,9 @@ void UftStraContext::on_init()
 
 void UftStraContext::on_tick(const char* stdCode, WTSTickData* newTick)
 {
+	{
+	// Q04-007: position marking reads details owned by the published mapping.
+	std::lock_guard<std::mutex> localLock(_local_mutex);
 	auto it = _positions.find(stdCode);
 	if(it != _positions.end())
 	{
@@ -96,6 +100,7 @@ void UftStraContext::on_tick(const char* stdCode, WTSTickData* newTick)
 			else
 				pInfo._dynprofit = 0;
 		}
+	}
 	}
 
 	if (_strategy)
@@ -128,14 +133,42 @@ void UftStraContext::on_bar(const char* code, const char* period, uint32_t times
 
 void UftStraContext::on_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price)
 {
-	if (!is_my_order(localid))
-		return;
+	{
+		// Q04-007: local bookkeeping is serialized with day switches and readers;
+		// the strategy callback runs after the lock is released.
+		std::lock_guard<std::mutex> localLock(_local_mutex);
+		if (!is_my_order(localid))
+			return;
 
+		// I03-NEW-056: an event that cannot be written to the local blocks is
+		// retained in order (never dropped) and applied once capacity exists.
+		LocalEvent ev{ true, localid, stdCode, isLong, offset, vol, 0, price, false };
+		if (!drain_local_backlog_locked() || !apply_trade_locked(localid, stdCode, isLong, offset, vol, price))
+			retain_local_event_locked(ev);
+	}
+
+	if (_strategy)
+		_strategy->on_trade(this, localid, stdCode, isLong, offset, vol, price);
+}
+
+bool UftStraContext::apply_trade_locked(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price)
+{
+	(void)localid;
 	WTSContractInfo* cInfo = _engine->get_contract_info(stdCode);
 
 	uint32_t volscale = cInfo->getCommInfo()->getVolScale();
 
 	PosInfo& pItem = _positions[stdCode];
+
+	{
+		// Upper bound of new records: every detail after _valid_idx may be
+		// closed (one round and one trade record each), plus one opening
+		// detail and one opening trade record.
+		const std::size_t validIdx = (std::min)((std::size_t)pItem._valid_idx, pItem._details.size());
+		const uint32_t closable = (uint32_t)(pItem._details.size() - validIdx);
+		if (!ensure_local_capacity_locked(1, closable + 1, closable, 0))
+			return false;
+	}
 
 	uint64_t now = TimeUtils::getLocalTimeNow();
 
@@ -594,21 +627,37 @@ void UftStraContext::on_trade(uint32_t localid, const char* stdCode, bool isLong
 		}
 	}
 	*/
-
-	if (_strategy)
-		_strategy->on_trade(this, localid, stdCode, isLong, offset, vol, price);
+	return true;
 }
 
 void UftStraContext::on_order(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled /* = false */)
 {
+	{
+		std::lock_guard<std::mutex> localLock(_local_mutex);
+		if (!is_my_order(localid))
+			return;
+
+		LocalEvent ev{ false, localid, stdCode, isLong, offset, totalQty, leftQty, price, isCanceled };
+		if (!drain_local_backlog_locked() || !apply_order_locked(localid, stdCode, offset, totalQty, leftQty, price, isCanceled))
+			retain_local_event_locked(ev);
+	}
+
+	if (_strategy)
+		_strategy->on_order(this, localid, stdCode, isLong, offset, totalQty, leftQty, price, isCanceled);
+}
+
+bool UftStraContext::apply_order_locked(uint32_t localid, const char* stdCode, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled)
+{
 	auto it = _order_ids.find(localid);
 	if (it == _order_ids.end())
-		return;
+		return true;
 
 	WTSContractInfo* cInfo = _engine->get_contract_info(stdCode);
-	uft::OrderStruct*& curOrd = it->second;
-	if(curOrd == NULL)
+	if(it->second == NULL)
 	{
+		if (!ensure_local_capacity_locked(0, 0, 0, 1))
+			return false;
+		uft::OrderStruct*& curOrd = _order_ids[localid];
 		SpinLock lock(_ord_blk._mutex);
 		uint32_t idx = _ord_blk._block->_size;
 		_ord_blk._block->_size++;
@@ -629,32 +678,50 @@ void UftStraContext::on_order(uint32_t localid, const char* stdCode, bool isLong
 
 		curOrd = &os;
 	}
-
-	if (_strategy)
-		_strategy->on_order(this, localid, stdCode, isLong, offset, totalQty, leftQty, price, isCanceled);
+	return true;
 }
 
 void UftStraContext::on_channel_ready(uint32_t tradingday)
 {
-	if (_tradingday != tradingday)
+	std::vector<std::pair<std::string, double>> positions;
 	{
-		_tradingday = tradingday;
-		load_local_data();
+		std::lock_guard<std::mutex> localLock(_local_mutex);
+		if (_tradingday != tradingday)
+		{
+			// Q04-007: the trading day only advances together with a published
+			// local state; a failed reload is retried on the next ready event.
+			if (!load_local_data(tradingday))
+			{
+				WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR,
+					"Local data of trading day {} not loaded; channel ready is withheld and will be retried", tradingday);
+				return;
+			}
+		}
+		// I03-NEW-056: events retained while the blocks were unavailable are
+		// applied in order as soon as the local state can take them.
+		drain_local_backlog_locked();
+
+		if (_strategy)
+		{
+			positions.reserve(_positions.size());
+			for (const auto& v : _positions)
+				positions.emplace_back(v.first, v.second._volume);
+		}
 	}
 
 	if (_strategy)
 	{
-		for (const auto& v : _positions)
+		for (const auto& v : positions)
 		{
 			const char* stdCode = v.first.c_str();
-			const PosInfo& pInfo = v.second;
-			if (decimal::gt(pInfo._volume, 0))
+			const double volume = v.second;
+			if (decimal::gt(volume, 0))
 			{
-				_strategy->on_position(this, stdCode, true, pInfo._volume, pInfo._volume, 0, 0);
+				_strategy->on_position(this, stdCode, true, volume, volume, 0, 0);
 			}
-			else if (decimal::lt(pInfo._volume, 0))
+			else if (decimal::lt(volume, 0))
 			{
-				_strategy->on_position(this, stdCode, false, pInfo._volume, pInfo._volume, 0, 0);
+				_strategy->on_position(this, stdCode, false, volume, volume, 0, 0);
 			}
 		}
 
@@ -670,8 +737,11 @@ void UftStraContext::on_channel_lost()
 
 void UftStraContext::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* message)
 {
-	if (!is_my_order(localid))
-		return;
+	{
+		std::lock_guard<std::mutex> localLock(_local_mutex);
+		if (!is_my_order(localid))
+			return;
+	}
 
 	if (_strategy)
 		_strategy->on_entrust(localid, bSuccess, message);
@@ -809,6 +879,7 @@ double UftStraContext::stra_get_position(const char* stdCode, bool bOnlyValid /*
 
 double UftStraContext::stra_get_local_position(const char* stdCode)
 {
+	std::lock_guard<std::mutex> localLock(_local_mutex);
 	auto it = _positions.find(stdCode);
 	if (it == _positions.end())
 		return 0.0;
@@ -819,6 +890,7 @@ double UftStraContext::stra_get_local_position(const char* stdCode)
 
 double UftStraContext::stra_get_local_posprofit(const char* stdCode)
 {
+	std::lock_guard<std::mutex> localLock(_local_mutex);
 	auto it = _positions.find(stdCode);
 	if (it == _positions.end())
 		return 0.0;
@@ -829,6 +901,7 @@ double UftStraContext::stra_get_local_posprofit(const char* stdCode)
 
 double UftStraContext::stra_get_local_closeprofit(const char* stdCode)
 {
+	std::lock_guard<std::mutex> localLock(_local_mutex);
 	auto it = _positions.find(stdCode);
 	if (it == _positions.end())
 		return 0.0;
@@ -889,50 +962,117 @@ OrderIDs UftStraContext::stra_cancel_all(const char* stdCode)
 
 OrderIDs UftStraContext::stra_buy(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
+	if (local_ledger_blocked())
+	{
+		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Order of {} refused: local ledger has unrecorded events", stdCode);
+		return OrderIDs();
+	}
+	// I03-NEW-059: ids are registered before the provider call.
+	TraderAdapter::LocalOrderRegistrar registrar(_trader, &UftStraContext::register_local_order, this);
 	auto ids = _trader->buy(stdCode, price, qty, flag, false);
 
+	std::lock_guard<std::mutex> localLock(_local_mutex);
 	for(uint32_t localid : ids)
 	{
-		_order_ids[localid] = NULL;
+		if (localid != UINT_MAX)
+			_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
 	}
 	return ids;
 }
 
 OrderIDs UftStraContext::stra_sell(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
-	auto ids = _trader->sell(stdCode, price, qty, flag, false);
-	for (uint32_t localid : ids)
+	if (local_ledger_blocked())
 	{
-		_order_ids[localid] = NULL;
+		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Order of {} refused: local ledger has unrecorded events", stdCode);
+		return OrderIDs();
+	}
+	// I03-NEW-059: ids are registered before the provider call.
+	TraderAdapter::LocalOrderRegistrar registrar(_trader, &UftStraContext::register_local_order, this);
+	auto ids = _trader->sell(stdCode, price, qty, flag, false);
+
+	std::lock_guard<std::mutex> localLock(_local_mutex);
+	for(uint32_t localid : ids)
+	{
+		if (localid != UINT_MAX)
+			_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
 	}
 	return ids;
 }
 
 uint32_t UftStraContext::stra_enter_long(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
+	if (local_ledger_blocked())
+	{
+		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Order of {} refused: local ledger has unrecorded events", stdCode);
+		return UINT_MAX;
+	}
+	// I03-NEW-059: the id is registered before the provider call, so reports
+	// delivered synchronously from orderInsert are attributed to this context.
+	TraderAdapter::LocalOrderRegistrar registrar(_trader, &UftStraContext::register_local_order, this);
 	uint32_t localid = _trader->openLong(stdCode, price, qty, flag);
-	_order_ids[localid] = NULL;
+	if (localid != UINT_MAX)
+	{
+		std::lock_guard<std::mutex> localLock(_local_mutex);
+		_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
+	}
 	return localid;
 }
 
 uint32_t UftStraContext::stra_exit_long(const char* stdCode, double price, double qty, bool isToday /* = false */, int flag /* = 0 */)
 {
+	if (local_ledger_blocked())
+	{
+		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Order of {} refused: local ledger has unrecorded events", stdCode);
+		return UINT_MAX;
+	}
+	// I03-NEW-059: the id is registered before the provider call, so reports
+	// delivered synchronously from orderInsert are attributed to this context.
+	TraderAdapter::LocalOrderRegistrar registrar(_trader, &UftStraContext::register_local_order, this);
 	uint32_t localid = _trader->closeLong(stdCode, price, qty, isToday, flag);
-	_order_ids[localid] = NULL;
+	if (localid != UINT_MAX)
+	{
+		std::lock_guard<std::mutex> localLock(_local_mutex);
+		_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
+	}
 	return localid;
 }
 
 uint32_t UftStraContext::stra_enter_short(const char* stdCode, double price, double qty, int flag /* = 0 */)
 {
+	if (local_ledger_blocked())
+	{
+		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Order of {} refused: local ledger has unrecorded events", stdCode);
+		return UINT_MAX;
+	}
+	// I03-NEW-059: the id is registered before the provider call, so reports
+	// delivered synchronously from orderInsert are attributed to this context.
+	TraderAdapter::LocalOrderRegistrar registrar(_trader, &UftStraContext::register_local_order, this);
 	uint32_t localid = _trader->openShort(stdCode, price, qty, flag);
-	_order_ids[localid] = NULL;
+	if (localid != UINT_MAX)
+	{
+		std::lock_guard<std::mutex> localLock(_local_mutex);
+		_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
+	}
 	return localid;
 }
 
 uint32_t UftStraContext::stra_exit_short(const char* stdCode, double price, double qty, bool isToday /* = false */, int flag /* = 0 */)
 {
+	if (local_ledger_blocked())
+	{
+		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Order of {} refused: local ledger has unrecorded events", stdCode);
+		return UINT_MAX;
+	}
+	// I03-NEW-059: the id is registered before the provider call, so reports
+	// delivered synchronously from orderInsert are attributed to this context.
+	TraderAdapter::LocalOrderRegistrar registrar(_trader, &UftStraContext::register_local_order, this);
 	uint32_t localid = _trader->closeShort(stdCode, price, qty, isToday, flag);
-	_order_ids[localid] = NULL;
+	if (localid != UINT_MAX)
+	{
+		std::lock_guard<std::mutex> localLock(_local_mutex);
+		_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
+	}
 	return localid;
 }
 
@@ -1039,339 +1179,543 @@ void UftStraContext::stra_log_error(const char* message)
 	WTSLogger::log_dyn_raw("strategy", _name.c_str(), LL_ERROR, message);
 }
 
-void UftStraContext::load_local_data()
+void UftStraContext::register_local_order(void* owner, uint32_t localid)
 {
-	if (_tradingday == 0)
-		return;
+	UftStraContext* self = static_cast<UftStraContext*>(owner);
+	std::lock_guard<std::mutex> localLock(self->_local_mutex);
+	self->_order_ids.emplace(localid, (uft::OrderStruct*)NULL);
+}
 
-	std::string folder = fmtutil::format("{}{}/", WtHelper::getOutputDir(), _name);
-	if (!StdFile::exists(folder.c_str()))
-		fs::create_directories(folder.c_str());
+bool UftStraContext::local_ledger_blocked() const
+{
+	std::lock_guard<std::mutex> localLock(_local_mutex);
+	return !_local_backlog.empty();
+}
 
-	/*
-	 *	By Wesley @ 2023.09.08
-	 *	这里增加一个逻辑，从yaml文件读取手动生成的持仓
-	 */
-	std::string mannualfile = folder + "mannual.yaml";
-	do
+std::size_t UftStraContext::local_backlog_size() const
+{
+	std::lock_guard<std::mutex> localLock(_local_mutex);
+	return _local_backlog.size();
+}
+
+bool UftStraContext::apply_local_event_locked(const LocalEvent& ev)
+{
+	if (ev._is_trade)
+		return apply_trade_locked(ev._localid, ev._code.c_str(), ev._is_long, ev._offset, ev._qty, ev._price);
+	return apply_order_locked(ev._localid, ev._code.c_str(), ev._offset, ev._qty, ev._left, ev._price, ev._canceled);
+}
+
+bool UftStraContext::drain_local_backlog_locked()
+{
+	while (!_local_backlog.empty())
 	{
-		if (!StdFile::exists(mannualfile.c_str()))
-			break;
+		if (!apply_local_event_locked(_local_backlog.front()))
+			return false;
+		_local_backlog.pop_front();
+		if (_local_backlog.empty())
+			WTSLogger::log_dyn("strategy", _name.c_str(), LL_WARN, "Local ledger backlog applied; new orders are accepted again");
+	}
+	return true;
+}
 
-		WTSLogger::log_dyn("strategy", _name.c_str(), LL_WARN, "{} detected, positions will be overwrited", mannualfile);
+void UftStraContext::retain_local_event_locked(const LocalEvent& ev)
+{
+	_local_backlog.push_back(ev);
+	WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR,
+		"Local {} event of order {} on {} could not be recorded (local block capacity); retained in order, {} pending, new orders refused",
+		ev._is_trade ? "trade" : "order", ev._localid, ev._code, _local_backlog.size());
+}
 
-		auto releaseManual = [](WTSVariant* value) {
-			if (value != NULL)
-				value->release();
-		};
-		std::unique_ptr<WTSVariant, decltype(releaseManual)> manual(
-			WTSCfgLoader::load_from_file(mannualfile), releaseManual);
-		if (!manual)
+namespace
+{
+	// I03-NEW-056: extends a mapped local block in place (file grows, records
+	// are kept) and maps it again; the caller rebases pointers and publishes.
+	template<typename BlockT>
+	bool grow_local_block(BoostMFPtr& file, BlockT* block, std::size_t itemSize, uint32_t needed,
+		BoostMFPtr& newFile, BlockT*& newBlock, std::string& error)
+	{
+		newFile.reset();
+		newBlock = NULL;
+		if (!file || block == NULL)
 		{
-			WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "parsing mannual file {} failed", mannualfile);
-			break;
+			error = "local block is not loaded";
+			return false;
 		}
-
-		WTSVariant* ayDetails = manual->get("details");
-		if(ayDetails == NULL)
-			break;
-
-		//解析成功，开始处理持仓
-		//char		_exchg[MAX_EXCHANGE_LENGTH];
-		//char		_code[MAX_INSTRUMENT_LENGTH];
-		//uint32_t	_direct;	//方向0-多，1-空
-		//double		_volume;
-		//double		_open_price;
-
-		SpinLock lock(_pos_blk._mutex);
-		std::string filename = folder + "position.membin";
-
-		//强制新建
+		const uint64_t required = (uint64_t)block->_size + needed;
+		uint64_t capacity = (uint64_t)block->_capacity + DATA_SIZE_STEP;
+		while (capacity < required)
+			capacity += DATA_SIZE_STEP;
+		if (capacity > UINT32_MAX)
 		{
-			std::size_t uSize = sizeof(uft::PositionBlock) + sizeof(uft::DetailStruct) * DATA_SIZE_STEP;
+			error = "local block capacity overflow";
+			return false;
+		}
+		const std::size_t bytes = sizeof(BlockT) + itemSize * (std::size_t)capacity;
+		const std::string filename = file->filename();
+		try
+		{
 			BoostFile bf;
-			bf.create_new_file(filename.c_str());
-			bf.truncate_file(uSize);
+			if (!bf.open_existing_file(filename.c_str()) || !bf.truncate_file(bytes))
+			{
+				error = fmtutil::format("extending {} to {} bytes failed", filename, bytes);
+				return false;
+			}
 			bf.close_file();
+			BoostMFPtr mapped(new BoostMappingFile);
+			if (!mapped->map(filename.c_str()) || mapped->addr() == NULL || mapped->size() < bytes)
+			{
+				error = fmtutil::format("remapping {} failed", filename);
+				return false;
+			}
+			newBlock = (BlockT*)mapped->addr();
+			newBlock->_capacity = (uint32_t)capacity;
+			newFile = mapped;
+			return true;
 		}
-
-		_pos_blk._file.reset(new BoostMappingFile);
-		if (_pos_blk._file->map(filename.c_str()))
+		catch (const std::exception& e)
 		{
-			_pos_blk._block = (uft::PositionBlock*)_pos_blk._file->addr();
-			strcpy(_pos_blk._block->_blk_flag, uft::BLK_FLAG);
-			_pos_blk._block->_date = _tradingday;
-			_pos_blk._block->_capacity = DATA_SIZE_STEP;
+			error = fmtutil::format("extending {} failed: {}", filename, e.what());
+		}
+		catch (...)
+		{
+			error = fmtutil::format("extending {} failed with an unknown exception", filename);
+		}
+		newFile.reset();
+		newBlock = NULL;
+		return false;
+	}
 
-			for (uint32_t i = 0; i < ayDetails->size(); i++)
+	template<typename T, typename BlockT>
+	T* rebase_local_pointer(T* ptr, const BlockT* oldBlock, BlockT* newBlock)
+	{
+		if (ptr == NULL)
+			return NULL;
+		return (T*)((char*)newBlock + ((const char*)ptr - (const char*)oldBlock));
+	}
+}
+
+bool UftStraContext::ensure_local_capacity_locked(uint32_t posNeeded, uint32_t trdNeeded, uint32_t rndNeeded, uint32_t ordNeeded)
+{
+	std::string error;
+	if (posNeeded > 0 && (_pos_blk._block == NULL || (uint64_t)_pos_blk._block->_size + posNeeded > _pos_blk._block->_capacity))
+	{
+		BoostMFPtr newFile;
+		uft::PositionBlock* newBlock = NULL;
+		if (!grow_local_block(_pos_blk._file, _pos_blk._block, sizeof(uft::DetailStruct), posNeeded, newFile, newBlock, error))
+		{
+			WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Local position block cannot take new records: {}", error);
+			return false;
+		}
+		uft::PositionBlock* oldBlock = _pos_blk._block;
+		for (auto& item : _positions)
+			for (auto& detail : item.second._details)
+				detail = rebase_local_pointer(detail, oldBlock, newBlock);
+		BoostMFPtr oldFile = _pos_blk._file;
+		{
+			SpinLock lock(_pos_blk._mutex);
+			_pos_blk._file = newFile;
+			_pos_blk._block = newBlock;
+		}
+		oldFile.reset();
+	}
+	if (trdNeeded > 0 && (_trd_blk._block == NULL || (uint64_t)_trd_blk._block->_size + trdNeeded > _trd_blk._block->_capacity))
+	{
+		BoostMFPtr newFile;
+		uft::TradeBlock* newBlock = NULL;
+		if (!grow_local_block(_trd_blk._file, _trd_blk._block, sizeof(uft::TradeStruct), trdNeeded, newFile, newBlock, error))
+		{
+			WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Local trade block cannot take new records: {}", error);
+			return false;
+		}
+		SpinLock lock(_trd_blk._mutex);
+		_trd_blk._file = newFile;
+		_trd_blk._block = newBlock;
+	}
+	if (rndNeeded > 0 && (_rnd_blk._block == NULL || (uint64_t)_rnd_blk._block->_size + rndNeeded > _rnd_blk._block->_capacity))
+	{
+		BoostMFPtr newFile;
+		uft::RoundBlock* newBlock = NULL;
+		if (!grow_local_block(_rnd_blk._file, _rnd_blk._block, sizeof(uft::RoundStruct), rndNeeded, newFile, newBlock, error))
+		{
+			WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Local round block cannot take new records: {}", error);
+			return false;
+		}
+		SpinLock lock(_rnd_blk._mutex);
+		_rnd_blk._file = newFile;
+		_rnd_blk._block = newBlock;
+	}
+	if (ordNeeded > 0 && (_ord_blk._block == NULL || (uint64_t)_ord_blk._block->_size + ordNeeded > _ord_blk._block->_capacity))
+	{
+		BoostMFPtr newFile;
+		uft::OrderBlock* newBlock = NULL;
+		if (!grow_local_block(_ord_blk._file, _ord_blk._block, sizeof(uft::OrderStruct), ordNeeded, newFile, newBlock, error))
+		{
+			WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Local order block cannot take new records: {}", error);
+			return false;
+		}
+		uft::OrderBlock* oldBlock = _ord_blk._block;
+		for (auto& item : _order_ids)
+			item.second = rebase_local_pointer(item.second, oldBlock, newBlock);
+		BoostMFPtr oldFile = _ord_blk._file;
+		{
+			SpinLock lock(_ord_blk._mutex);
+			_ord_blk._file = newFile;
+			_ord_blk._block = newBlock;
+		}
+		oldFile.reset();
+	}
+	return true;
+}
+
+namespace
+{
+	// Maps one local block file and validates its header without modifying any
+	// existing record. A missing file is created with an empty header first; an
+	// all-zero header (an interrupted creation) is initialized as empty.
+	template<typename BlockT>
+	bool prepare_local_block(const std::string& filename, std::size_t itemSize, uint32_t tradingday,
+		BoostMFPtr& file, BlockT*& block, std::string& error)
+	{
+		file.reset();
+		block = NULL;
+		try
+		{
+			if (!StdFile::exists(filename.c_str()))
+			{
+				BoostFile bf;
+				if (!bf.create_new_file(filename.c_str())
+					|| !bf.truncate_file(sizeof(BlockT) + itemSize * DATA_SIZE_STEP))
+				{
+					error = fmtutil::format("creating {} failed", filename);
+					return false;
+				}
+				bf.close_file();
+			}
+
+			BoostMFPtr mapped(new BoostMappingFile);
+			if (!mapped->map(filename.c_str()) || mapped->addr() == NULL || mapped->size() < sizeof(BlockT))
+			{
+				error = fmtutil::format("mapping {} failed", filename);
+				return false;
+			}
+
+			BlockT* blk = (BlockT*)mapped->addr();
+			if (blk->_blk_flag[0] == '\0' && blk->_date == 0 && blk->_capacity == 0 && blk->_size == 0)
+			{
+				const std::size_t capacity = (mapped->size() - sizeof(BlockT)) / itemSize;
+				memcpy(blk->_blk_flag, uft::BLK_FLAG, uft::FLAG_SIZE);
+				blk->_capacity = (uint32_t)(std::min)(capacity, (std::size_t)DATA_SIZE_STEP);
+				blk->_date = tradingday;
+			}
+
+			if (memcmp(blk->_blk_flag, uft::BLK_FLAG, uft::FLAG_SIZE) != 0 || blk->_size > blk->_capacity
+				|| mapped->size() < sizeof(BlockT) + itemSize * (std::size_t)blk->_capacity)
+			{
+				error = fmtutil::format("{} has an invalid block header (size {}, capacity {}, bytes {})",
+					filename, blk->_size, blk->_capacity, mapped->size());
+				return false;
+			}
+
+			file = mapped;
+			block = blk;
+			return true;
+		}
+		catch (const std::exception& e)
+		{
+			error = fmtutil::format("mapping {} failed: {}", filename, e.what());
+		}
+		catch (...)
+		{
+			error = fmtutil::format("mapping {} failed with an unknown exception", filename);
+		}
+		file.reset();
+		block = NULL;
+		return false;
+	}
+
+	template<typename BlockT, typename ItemT>
+	void reset_local_block_if_stale(BlockT* block, ItemT* items, uint32_t tradingday)
+	{
+		//交易日不一致就把数据清掉
+		//复用原文件的好处就是，mmap文件大小会满足历史出现过的单日最高数据量，以后再扩的概率就很低了
+		if (block->_date != tradingday)
+		{
+			memset((void*)items, 0, sizeof(ItemT) * block->_size);
+			block->_size = 0;
+			block->_date = tradingday;
+		}
+	}
+}
+
+bool UftStraContext::load_local_data(uint32_t tradingday)
+{
+	if (tradingday == 0)
+		return false;
+
+	std::string folder;
+	std::string mannualfile;
+	BoostMFPtr posFile, ordFile, trdFile, rndFile;
+	uft::PositionBlock* posBlk = NULL;
+	uft::OrderBlock* ordBlk = NULL;
+	uft::TradeBlock* trdBlk = NULL;
+	uft::RoundBlock* rndBlk = NULL;
+	bool hasManual = false;
+	std::string manualContent;	// bytes validated above; the archive must hold exactly these
+	std::string manualArchive;
+	std::vector<uft::DetailStruct> details;	// position details to be published, in block order
+	bool rewritePositions = false;
+	wt_hashmap<std::string, PosInfo> positions;
+	std::vector<std::string> detailCodes;	// full code per published detail, empty if unknown
+
+	// Phase 1: prepare. Nothing published and no existing record modified.
+	try
+	{
+		folder = fmtutil::format("{}{}/", WtHelper::getOutputDir(), _name);
+		if (!StdFile::exists(folder.c_str()))
+			fs::create_directories(folder.c_str());
+
+		/*
+		 *	By Wesley @ 2023.09.08
+		 *	这里增加一个逻辑，从yaml文件读取手动生成的持仓
+		 *	Q04-007: 手工持仓在事务内解析，发布成功后才覆盖持仓块并归档文件
+		 */
+		mannualfile = folder + "mannual.yaml";
+		if (StdFile::exists(mannualfile.c_str()))
+		{
+			hasManual = true;
+			WTSLogger::log_dyn("strategy", _name.c_str(), LL_WARN, "{} detected, positions will be overwrited", mannualfile);
+
+			// Decision K08 (2026-11-04): a=B an unparsable file, b=B a file with any unknown
+			// contract (or a malformed entry) is rejected as a whole: nothing is imported, the
+			// file is not archived and this trading day switch fails (e=A: no ready
+			// notification, retried on the next ready event after the operator fixed it).
+			std::string reason;
+			StdFile::read_file_content(mannualfile.c_str(), manualContent);
+			auto releaseManual = [](WTSVariant* value) {
+				if (value != NULL)
+					value->release();
+			};
+			std::unique_ptr<WTSVariant, decltype(releaseManual)> manual(
+				manualContent.empty() ? NULL : WTSCfgLoader::load_from_file(mannualfile), releaseManual);
+			WTSVariant* ayDetails = manual ? manual->get("details") : NULL;
+			if (manualContent.empty())
+				reason = "the file is empty";
+			else if (!manual || manual->type() != WTSVariant::VT_Object)
+				reason = "the file cannot be parsed";
+			else if (ayDetails == NULL || ayDetails->type() != WTSVariant::VT_Array)
+				reason = "the details list is missing";
+			for (uint32_t i = 0; reason.empty() && i < ayDetails->size(); i++)
 			{
 				WTSVariant* objDetail = ayDetails->get(i);
-				const char* exchg = objDetail->getCString("exchg");
-				const char* code = objDetail->getCString("code");
-				WTSContractInfo* cInfo = _engine->get_basedata_mgr()->getContract(code, exchg);
-				if(cInfo == NULL)
+				const char* exchg = objDetail == NULL || objDetail->type() != WTSVariant::VT_Object ? NULL : objDetail->getCString("exchg");
+				const char* code = objDetail == NULL || objDetail->type() != WTSVariant::VT_Object ? NULL : objDetail->getCString("code");
+				if (exchg == NULL || code == NULL || exchg[0] == '\0' || code[0] == '\0')
 				{
-					WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "{}.{} not exist, skip this details", exchg, code);
-					continue;
+					reason = fmtutil::format("detail #{} has no exchange or code", i);
+					break;
+				}
+				WTSContractInfo* cInfo = _engine->get_basedata_mgr()->getContract(code, exchg);
+				if (cInfo == NULL)
+				{
+					reason = fmtutil::format("contract {}.{} of detail #{} does not exist", exchg, code, i);
+					break;
+				}
+				const uint32_t direct = objDetail->getUInt32("direct");
+				const double volume = objDetail->getDouble("volume");
+				const double openPrice = objDetail->getDouble("openprice");
+				if (direct > 1 || !std::isfinite(volume) || volume < 0 || !std::isfinite(openPrice) || openPrice < 0)
+				{
+					reason = fmtutil::format("detail #{} of {}.{} has an invalid direction, volume or open price", i, exchg, code);
+					break;
 				}
 
-				// Unknown contracts do not consume a persisted slot; keep valid
-				// entries contiguous within the published _size.
-				uft::DetailStruct& ds = _pos_blk._block->_details[_pos_blk._block->_size];
+				uft::DetailStruct ds;
 				wt_strcpy(ds._exchg, exchg);
 				wt_strcpy(ds._code, code);
-				ds._direct = objDetail->getUInt32("direct");
-				ds._volume = objDetail->getDouble("volume");
-				ds._open_price = objDetail->getDouble("openprice");
+				ds._direct = direct;
+				ds._volume = volume;
+				ds._open_price = openPrice;
 				ds._open_time = TimeUtils::getLocalTimeNow();
-				ds._open_tdate = _tradingday;
+				ds._open_tdate = tradingday;
+				details.emplace_back(ds);
+			}
+			if (!reason.empty())
+			{
+				WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR,
+					"Manual position file {} rejected: {}; nothing imported, the file is kept and the switch to trading day {} fails",
+					mannualfile, reason, tradingday);
+				return false;
+			}
+			rewritePositions = true;
+			WTSLogger::log_dyn("strategy", _name.c_str(), LL_WARN, "parsing mannual file {} done, {} details to import", mannualfile, details.size());
+		}
 
-				_pos_blk._block->_size++;
+		std::string error;
+		WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "loading local data of trading day {} from {}", tradingday, folder);
+		if (!prepare_local_block(folder + "position.membin", sizeof(uft::DetailStruct), tradingday, posFile, posBlk, error)
+			|| !prepare_local_block(folder + "order.membin", sizeof(uft::OrderStruct), tradingday, ordFile, ordBlk, error)
+			|| !prepare_local_block(folder + "trade.membin", sizeof(uft::TradeStruct), tradingday, trdFile, trdBlk, error)
+			|| !prepare_local_block(folder + "round.membin", sizeof(uft::RoundStruct), tradingday, rndFile, rndBlk, error))
+		{
+			WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Loading local data failed: {}", error);
+			return false;
+		}
+
+		if (!rewritePositions && posBlk->_date != tradingday)
+		{
+			//如果日期不同，先读进来未完成的持仓，再清理掉原始数据
+			WTSLogger::log_dyn("strategy", _name.c_str(), LL_INFO, "Clearing local position of {}", posBlk->_date);
+			rewritePositions = true;
+			for(uint32_t i = 0; i < posBlk->_size; i++)
+			{
+				uft::DetailStruct ds = posBlk->_details[i];
+				ds._closed_profit = 0;	//交易日切换以后，平仓盈亏置为0
+				if(decimal::eq(ds._volume, 0))
+					continue;
+
+				WTSContractInfo* cInfo = _engine->get_basedata_mgr()->getContract(ds._code, ds._exchg);
+				if (cInfo == NULL)
+					continue;
+
+				details.emplace_back(ds);
 			}
 		}
-
-		WTSLogger::log_dyn("strategy", _name.c_str(), LL_WARN, "loading mannual file {} done, {} details imported", mannualfile, _pos_blk._block->_size);
-
-		//把mmap释放掉，不影响后面的逻辑
+		else if (!rewritePositions)
 		{
-			_pos_blk._file.reset();
-			_pos_blk._block = NULL;
+			details.assign(posBlk->_details, posBlk->_details + posBlk->_size);
 		}
-	} while (false);
 
-	//不管前面解析的情况如何，文件都重命名
-	if (StdFile::exists(mannualfile.c_str()))
-		fs::rename(fs::path(mannualfile), fs::path(fmtutil::format("{}.{}", mannualfile, TimeUtils::getYYYYMMDDhhmmss())));
+		if (details.size() > posBlk->_capacity)
+		{
+			WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR,
+				"Loading local data failed: {} position details exceed capacity {}", details.size(), posBlk->_capacity);
+			return false;
+		}
 
-	if(_pos_blk._block == NULL || _pos_blk._block->_date != _tradingday)
+		//把剩余数量不为0的持仓读进来; 先建好新的汇总, 发布前不触碰已发布状态
+		detailCodes.resize(details.size());
+		for (std::size_t i = 0; i < details.size(); i++)
+		{
+			const uft::DetailStruct& ds = details[i];
+			WTSContractInfo* cInfo = _engine->get_basedata_mgr()->getContract(ds._code, ds._exchg);
+			if (cInfo == NULL)
+				continue;
+
+			PosInfo& posInfo = positions[cInfo->getFullCode()];
+			posInfo._total_profit += ds._closed_profit;
+
+			if (decimal::eq(ds._volume, 0))
+				continue;
+
+			detailCodes[i] = cInfo->getFullCode();
+			posInfo._dynprofit += ds._position_profit;
+			posInfo._opencost += ds._volume*ds._open_price*cInfo->getCommInfo()->getVolScale();
+			posInfo._volume += ds._volume*(ds._direct == 0 ? 1 : -1);
+			posInfo._details.emplace_back((uft::DetailStruct*)NULL);
+		}
+
+		// Decision K08 c=C: archive the manual file before anything is applied, and apply
+		// only what the archive holds, so the import happens exactly once. A failed rename
+		// (or a file changed meanwhile) fails this switch with nothing applied; nothing
+		// after this point can fail before the commit.
+		if (hasManual)
+		{
+			const uint64_t stamp = TimeUtils::getYYYYMMDDhhmmss();
+			manualArchive = fmtutil::format("{}.{}", mannualfile, stamp);
+			for (uint32_t seq = 1; StdFile::exists(manualArchive.c_str()); seq++)
+				manualArchive = fmtutil::format("{}.{}.{}", mannualfile, stamp, seq);
+			boost::system::error_code ec;
+			fs::rename(fs::path(mannualfile), fs::path(manualArchive), ec);
+			if (ec)
+			{
+				WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR,
+					"Archiving manual position file {} failed: {}; nothing imported and the switch to trading day {} fails",
+					mannualfile, ec.message(), tradingday);
+				return false;
+			}
+			std::string archived;
+			StdFile::read_file_content(manualArchive.c_str(), archived);
+			if (archived != manualContent)
+			{
+				boost::system::error_code back;
+				fs::rename(fs::path(manualArchive), fs::path(mannualfile), back);
+				WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR,
+					"Manual position file {} changed while it was imported{}; nothing imported and the switch to trading day {} fails",
+					mannualfile, back ? fmtutil::format(" (restoring it from {} failed: {})", manualArchive, back.message()) : std::string(), tradingday);
+				return false;
+			}
+		}
+	}
+	catch (const std::exception& e)
+	{
+		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Loading local data failed: {}", e.what());
+		return false;
+	}
+	catch (...)
+	{
+		WTSLogger::log_dyn("strategy", _name.c_str(), LL_ERROR, "Loading local data failed with an unknown exception");
+		return false;
+	}
+
+	// Phase 2: commit the persistent rollover/import. Only memory writes and
+	// pointer assignments follow; no allocation can fail from here on.
+	if (rewritePositions)
+	{
+		memset((void*)posBlk->_details, 0, sizeof(uft::DetailStruct) * (std::max)((std::size_t)posBlk->_size, details.size()));
+		if (!details.empty())
+			memcpy((void*)posBlk->_details, details.data(), sizeof(uft::DetailStruct) * details.size());
+		posBlk->_size = (uint32_t)details.size();
+	}
+	posBlk->_date = tradingday;
+	reset_local_block_if_stale(ordBlk, ordBlk->_orders, tradingday);
+	reset_local_block_if_stale(trdBlk, trdBlk->_trades, tradingday);
+	reset_local_block_if_stale(rndBlk, rndBlk->_rounds, tradingday);
+
+	for (auto& item : positions)
+		item.second._details.clear();	// capacity is kept, so the pushes below do not allocate
+	for (std::size_t i = 0; i < details.size(); i++)
+	{
+		if (detailCodes[i].empty())
+			continue;
+		positions[detailCodes[i]]._details.push_back(&posBlk->_details[i]);
+	}
+
+	// Phase 3: publish everything together, then let the previous mappings go.
+	BoostMFPtr oldPos = _pos_blk._file, oldOrd = _ord_blk._file, oldTrd = _trd_blk._file, oldRnd = _rnd_blk._file;
 	{
 		SpinLock lock(_pos_blk._mutex);
-		std::string filename = folder + "position.membin";
-		WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "loading local positions from {}", filename);
-		bool isNew = false;
-		if(!StdFile::exists(filename.c_str()))
-		{
-			std::size_t uSize = sizeof(uft::PositionBlock) + sizeof(uft::DetailStruct) * DATA_SIZE_STEP;
-			BoostFile bf;
-			bf.create_new_file(filename.c_str());
-			bf.truncate_file(uSize);
-			bf.close_file();
-
-			isNew = true;
-		}
-
-		_pos_blk._file.reset(new BoostMappingFile);
-		if (_pos_blk._file->map(filename.c_str()))
-		{
-			_pos_blk._block = (uft::PositionBlock*)_pos_blk._file->addr();
-			if(isNew)
-			{
-				strcpy(_pos_blk._block->_blk_flag, uft::BLK_FLAG);
-				_pos_blk._block->_date = _tradingday;
-				_pos_blk._block->_capacity = DATA_SIZE_STEP;
-			}
-
-			//复用原文件的好处就是，mmap文件大小会满足历史出现过的单日最高数据量，以后再扩的概率就很低了
-			if(_pos_blk._block->_date != 0 && _pos_blk._block->_date != _tradingday)
-			{	
-				WTSLogger::log_dyn("strategy", _name.c_str(), LL_INFO, "Clearing local position of {}", _pos_blk._block->_date);
-				//如果日期不同，先读进来未完成的持仓，再清理掉原始数据
-				std::vector<uft::DetailStruct> details;
-				for(uint32_t i = 0; i < _pos_blk._block->_size; i++)
-				{
-					uft::DetailStruct& ds = _pos_blk._block->_details[i];
-					ds._closed_profit = 0;	//交易日切换以后，平仓盈亏置为0
-					if(decimal::eq(ds._volume, 0))
-						continue;
-
-					WTSContractInfo* cInfo = _engine->get_basedata_mgr()->getContract(ds._code, ds._exchg);
-					if (cInfo == NULL)
-						continue;
-
-					details.emplace_back(ds);
-				}
-
-				memset(_pos_blk._block->_details, 0, sizeof(uft::DetailStruct)*_pos_blk._block->_size);
-
-				if (!details.empty())
-					memcpy(_pos_blk._block->_details, details.data(), sizeof(uft::DetailStruct)*details.size());
-				_pos_blk._block->_size = details.size();
-				_pos_blk._block->_date = _tradingday;
-				
-			}
-
-			{
-				//把剩余数量不为0的持仓读进来
-				for (uint32_t i = 0; i < _pos_blk._block->_size; i++)
-				{
-					uft::DetailStruct& ds = _pos_blk._block->_details[i];
-
-					WTSContractInfo* cInfo = _engine->get_basedata_mgr()->getContract(ds._code, ds._exchg);
-					if (cInfo == NULL)
-						continue;
-
-					PosInfo& posInfo = _positions[cInfo->getFullCode()];
-					posInfo._total_profit += ds._closed_profit;
-
-					if (decimal::eq(ds._volume, 0))
-						continue;
-
-					posInfo._dynprofit += ds._position_profit;
-					posInfo._opencost += ds._volume*ds._open_price*cInfo->getCommInfo()->getVolScale();
-					posInfo._volume += ds._volume*(ds._direct == 0 ? 1 : -1);
-
-					posInfo._details.emplace_back(&ds);
-				}
-			}
-		}
-		else
-		{
-			_pos_blk._file.reset();
-			_pos_blk._block = NULL;
-		}
+		_pos_blk._file = posFile;
+		_pos_blk._block = posBlk;
 	}
-
-	if (_ord_blk._block == NULL || _ord_blk._block->_date != _tradingday)
 	{
 		SpinLock lock(_ord_blk._mutex);
-		std::string filename = folder + "order.membin";
-		WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "loading local orders from {}", filename);
-		bool isNew = false;
-		if (!StdFile::exists(filename.c_str()))
-		{
-			std::size_t uSize = sizeof(uft::OrderBlock) + sizeof(uft::OrderStruct) * DATA_SIZE_STEP;
-			BoostFile bf;
-			bf.create_new_file(filename.c_str());
-			bf.truncate_file(uSize);
-			bf.close_file();
-
-			isNew = true;
-		}
-
-		_ord_blk._file.reset(new BoostMappingFile);
-		if (_ord_blk._file->map(filename.c_str()))
-		{
-			_ord_blk._block = (uft::OrderBlock*)_ord_blk._file->addr();
-			if (isNew)
-			{
-				strcpy(_ord_blk._block->_blk_flag, uft::BLK_FLAG);
-				_ord_blk._block->_date = _tradingday;
-				_ord_blk._block->_capacity = DATA_SIZE_STEP;
-			}
-
-			//交易日不一致就把数据清掉
-			//复用原文件的好处就是，mmap文件大小会满足历史出现过的单日最高数据量，以后再扩的概率就很低了
-			if (_ord_blk._block->_date != 0 && _ord_blk._block->_date != _tradingday)
-			{
-				memset(_ord_blk._block->_orders, 0, sizeof(uft::OrderStruct)*_ord_blk._block->_size);
-				_ord_blk._block->_size = 0;
-				_ord_blk._block->_date = _tradingday;
-			}
-			else
-			{
-				//把未完成单读到内存里来
-			}
-		}
-		else
-		{
-			_ord_blk._file.reset();
-			_ord_blk._block = NULL;
-		}
+		_ord_blk._file = ordFile;
+		_ord_blk._block = ordBlk;
 	}
-
-	if (_trd_blk._block == NULL || _trd_blk._block->_date != _tradingday)
 	{
 		SpinLock lock(_trd_blk._mutex);
-		std::string filename = folder + "trade.membin";
-		WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "loading local trades from {}", filename);
-		bool isNew = false;
-		if (!StdFile::exists(filename.c_str()))
-		{
-			std::size_t uSize = sizeof(uft::TradeBlock) + sizeof(uft::TradeStruct) * DATA_SIZE_STEP;
-			BoostFile bf;
-			bf.create_new_file(filename.c_str());
-			bf.truncate_file(uSize);
-			bf.close_file();
-
-			isNew = true;
-		}
-
-		_trd_blk._file.reset(new BoostMappingFile);
-		if (_trd_blk._file->map(filename.c_str()))
-		{
-			_trd_blk._block = (uft::TradeBlock*)_trd_blk._file->addr();
-			if (isNew)
-			{
-				strcpy(_trd_blk._block->_blk_flag, uft::BLK_FLAG);
-				_trd_blk._block->_date = _tradingday;
-				_trd_blk._block->_capacity = DATA_SIZE_STEP;
-			}
-
-			//交易日不一致就把数据清掉
-			//复用原文件的好处就是，mmap文件大小会满足历史出现过的单日最高数据量，以后再扩的概率就很低了
-			if (_trd_blk._block->_date != 0 && _trd_blk._block->_date != _tradingday)
-			{
-				memset(_trd_blk._block->_trades, 0, sizeof(uft::TradeStruct)*_trd_blk._block->_size);
-				_trd_blk._block->_size = 0;
-				_trd_blk._block->_date = _tradingday;
-			}
-			else
-			{
-				//成交数据不用读进来了
-			}			
-		}
-		else
-		{
-			_trd_blk._file.reset();
-			_trd_blk._block = NULL;
-		}
+		_trd_blk._file = trdFile;
+		_trd_blk._block = trdBlk;
 	}
-
-	if (_rnd_blk._block == NULL || _rnd_blk._block->_date != _tradingday)
 	{
 		SpinLock lock(_rnd_blk._mutex);
-		std::string filename = folder + "round.membin";
-		WTSLogger::log_dyn("strategy", _name.c_str(), LL_DEBUG, "loading local rouds from {}", filename);
-		bool isNew = false;
-		if (!StdFile::exists(filename.c_str()))
-		{
-			std::size_t uSize = sizeof(uft::RoundBlock) + sizeof(uft::RoundStruct) * DATA_SIZE_STEP;
-			BoostFile bf;
-			bf.create_new_file(filename.c_str());
-			bf.truncate_file(uSize);
-			bf.close_file();
-
-			isNew = true;
-		}
-
-		_rnd_blk._file.reset(new BoostMappingFile);
-		if (_rnd_blk._file->map(filename.c_str()))
-		{
-			_rnd_blk._block = (uft::RoundBlock*)_rnd_blk._file->addr();
-			if (isNew)
-			{
-				strcpy(_rnd_blk._block->_blk_flag, uft::BLK_FLAG);
-				_rnd_blk._block->_date = _tradingday;
-				_rnd_blk._block->_capacity = DATA_SIZE_STEP;
-			}
-
-			//交易日不一致就把数据清掉
-			//复用原文件的好处就是，mmap文件大小会满足历史出现过的单日最高数据量，以后再扩的概率就很低了
-			if (_rnd_blk._block->_date != 0 && _rnd_blk._block->_date != _tradingday)
-			{
-				memset(_rnd_blk._block->_rounds, 0, sizeof(uft::RoundStruct)*_rnd_blk._block->_size);
-				_rnd_blk._block->_size = 0;
-				_rnd_blk._block->_date = _tradingday;
-			}
-			else
-			{
-				//回合数据不用读到进来了
-			}
-		}
-		else
-		{
-			_rnd_blk._file.reset();
-			_rnd_blk._block = NULL;
-		}
+		_rnd_blk._file = rndFile;
+		_rnd_blk._block = rndBlk;
 	}
+	_positions.swap(positions);
+	// Order records of the previous mapping are owned by that mapping. Keep the
+	// local ids (late reports of earlier orders are still attributed to this
+	// strategy) but never keep pointers into a released or reset block.
+	for (auto& item : _order_ids)
+		item.second = NULL;
+	_tradingday = tradingday;
+
+	oldPos.reset();
+	oldOrd.reset();
+	oldTrd.reset();
+	oldRnd.reset();
+
+	if (hasManual)
+		WTSLogger::log_dyn("strategy", _name.c_str(), LL_WARN, "Manual positions imported from {} (archived as {})", mannualfile, manualArchive);
+	return true;
 }

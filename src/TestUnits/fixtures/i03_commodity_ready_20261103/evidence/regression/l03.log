@@ -1,0 +1,78 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 27 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 13 tests from l03_commodity
+[ RUN      ] l03_commodity.create_fills_identity_fields
+[       OK ] l03_commodity.create_fills_identity_fields (0 ms)
+[ RUN      ] l03_commodity.create_initializes_identity_buffers
+[       OK ] l03_commodity.create_initializes_identity_buffers (0 ms)
+[ RUN      ] l03_commodity.identity_field_boundary_length
+[       OK ] l03_commodity.identity_field_boundary_length (0 ms)
+[ RUN      ] l03_commodity.identity_fields_reject_values_that_do_not_fit
+[       OK ] l03_commodity.identity_fields_reject_values_that_do_not_fit (0 ms)
+[ RUN      ] l03_commodity.scalar_accessors_round_trip
+[       OK ] l03_commodity.scalar_accessors_round_trip (0 ms)
+[ RUN      ] l03_commodity.category_predicates
+[       OK ] l03_commodity.category_predicates (0 ms)
+[ RUN      ] l03_commodity.trading_mode_predicates
+[       OK ] l03_commodity.trading_mode_predicates (0 ms)
+[ RUN      ] l03_commodity.cover_and_price_modes
+[       OK ] l03_commodity.cover_and_price_modes (0 ms)
+[ RUN      ] l03_commodity.code_set_add_and_dedupe
+[       OK ] l03_commodity.code_set_add_and_dedupe (0 ms)
+[ RUN      ] l03_commodity.session_info_binding
+[       OK ] l03_commodity.session_info_binding (0 ms)
+[ RUN      ] l03_commodity.calc_fee_by_volume
+[       OK ] l03_commodity.calc_fee_by_volume (0 ms)
+[ RUN      ] l03_commodity.calc_fee_by_amount_and_rounding
+[       OK ] l03_commodity.calc_fee_by_amount_and_rounding (0 ms)
+[ RUN      ] l03_commodity.calc_fee_disabled_after_enable
+[       OK ] l03_commodity.calc_fee_disabled_after_enable (0 ms)
+[----------] 13 tests from l03_commodity (0 ms total)
+
+[----------] 14 tests from l03_contract
+[ RUN      ] l03_contract.create_and_defaults
+[       OK ] l03_contract.create_and_defaults (0 ms)
+[ RUN      ] l03_contract.date_and_limit_setters
+[       OK ] l03_contract.date_and_limit_setters (0 ms)
+[ RUN      ] l03_contract.alt_code_for_zce
+[       OK ] l03_contract.alt_code_for_zce (0 ms)
+[ RUN      ] l03_contract.identity_fields_reject_values_that_do_not_fit
+[       OK ] l03_contract.identity_fields_reject_values_that_do_not_fit (0 ms)
+[ RUN      ] l03_contract.alt_code_capacity_rejection_preserves_previous_identity
+[       OK ] l03_contract.alt_code_capacity_rejection_preserves_previous_identity (0 ms)
+[ RUN      ] l03_contract.oversized_configured_identity_is_rejected_before_registration
+[       OK ] l03_contract.oversized_configured_identity_is_rejected_before_registration (2 ms)
+[ RUN      ] l03_contract.storage_width_contract_limits_preserve_valid_edges_and_reject_before_rules_registration
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l03_includes/l03_contract_info_test.cpp:253: Failure
+Value of: validMgr.loadContracts(validFile.string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] l03_contract.storage_width_contract_limits_preserve_valid_edges_and_reject_before_rules_registration (0 ms)
+[ RUN      ] l03_contract.margin_ratio_from_commodity
+[       OK ] l03_contract.margin_ratio_from_commodity (0 ms)
+[ RUN      ] l03_contract.calc_fee_delegates_to_commodity
+[       OK ] l03_contract.calc_fee_delegates_to_commodity (0 ms)
+[ RUN      ] l03_contract.calc_fee_keeps_cents_above_int32_range
+[       OK ] l03_contract.calc_fee_keeps_cents_above_int32_range (0 ms)
+[ RUN      ] l03_contract.hot_codes
+[       OK ] l03_contract.hot_codes (0 ms)
+[ RUN      ] l03_contract.total_index_round_trip
+[       OK ] l03_contract.total_index_round_trip (0 ms)
+[ RUN      ] l03_contract.ext_data_slots
+[       OK ] l03_contract.ext_data_slots (0 ms)
+[ RUN      ] l03_contract.null_comm_info_is_guarded_by_caller_contract
+[       OK ] l03_contract.null_comm_info_is_guarded_by_caller_contract (0 ms)
+[ DISABLED ] l03_contract.DISABLED_get_long_margin_ratio_without_comm_info
+[----------] 14 tests from l03_contract (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 27 tests from 2 test suites ran. (3 ms total)
+[  PASSED  ] 26 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] l03_contract.storage_width_contract_limits_preserve_valid_edges_and_reject_before_rules_registration
+
+ 1 FAILED TEST
+  YOU HAVE 1 DISABLED TEST
+

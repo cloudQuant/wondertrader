@@ -307,9 +307,13 @@ TEST_F(ParserCTPTest, heartbeat_and_logout_callbacks)
 	info.ErrorID = 5;
 	parser_.OnRspSubMarketData(&spec, &info, 9, true);
 	parser_.OnRspUnSubMarketData(&spec, &info, 9, true);
-	// 两个订阅回调在产品侧是空实现：不得新增任何事件/日志
+	// 两个订阅回调不产生事件。I03-NEW-132：订阅应答经 IsErrorRspInfo 识别 ErrorID=5 并写一条
+	// 错误日志（与 ParserCTPOpt/ParserFemas/ParserCTPMini 同族合同一致；原断言 logs_.size()==1
+	// 固化的是谓词恒 false、错误应答无声的缺陷行为）；退订应答不经谓词，不写日志。
 	EXPECT_EQ(1u, sink_.events_.size());
-	EXPECT_EQ(1u, sink_.logs_.size());
+	ASSERT_EQ(2u, sink_.logs_.size());
+	EXPECT_EQ((int)LL_ERROR, sink_.logs_[1].ll);
+	EXPECT_NE(std::string::npos, sink_.logs_[1].msg.find("error id 5"));
 }
 
 /* ------------------------------------------------------------ 行情映射 */

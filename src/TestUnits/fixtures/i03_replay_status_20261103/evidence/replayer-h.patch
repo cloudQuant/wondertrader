@@ -1,0 +1,43 @@
+--- /tmp/i03-replay-status-baseline-20261103/HisDataReplayer.h	2026-11-03 16:49:31
++++ src/WtBtCore/HisDataReplayer.h	2026-11-03 17:01:01
+@@ -27,6 +27,7 @@
+ #include "../WTSTools/WTSHotMgr.h"
+ #include "../WTSTools/WTSBaseDataMgr.h"
+ #include "../Share/FeeSchedule.hpp"
++#include "../Includes/ReplayStatusV1.h"
+ 
+ NS_WTP_BEGIN
+ class WTSTickData;
+@@ -973,6 +974,10 @@
+ 	bool prepare_fee_context(const char* stdCode, const WTSContractInfo* fillContract, wt_fee::Context& out, std::string& error);
+ 	void report_fee_error(const std::string& message);
+ 	std::string fee_error() const;
++	WtReplayStatusV1 replay_status() const;
++	// Active runs record their first error; finalizing calls are ignored.
++	// Outside a run this sets the legacy abort flag without changing status.
++	void report_replay_error(uint32_t errorCode, const std::string& message);
+ 
+ 	/**
+ 	 * @brief 计算交易费用
+@@ -1130,6 +1135,7 @@
+ 	std::set<std::string> _bar_real_tick_codes;	///< 当前主K区间已派发真实Tick的合约；这些合约跳过该区间OHLC模拟
+ 	uint64_t		_last_replay_hft_time { 0 };
+ 	bool			_has_last_replay_hft_time { false };
++	bool            _has_dispatched_hft_event { false };
+ 	// Replay scheduling is monotonic in natural time. Keep completed half-open
+ 	// chunks for only the latest natural date; an older request must reset first.
+ 	uint32_t		_replay_completed_natural_date { 0 };
+@@ -1225,6 +1231,13 @@
+ 	typedef wt_hashmap<std::string, FeeItem>	FeeMap;
+ 	FeeMap		_fee_map;		///< 品种手续费设置映射表
+ 	wt_fee::Schedule _fee_schedule;
++	mutable std::mutex _replay_status_mutex;
++	WtReplayStatusV1 _replay_status { sizeof(WtReplayStatusV1), 1, 0, WT_REPLAY_IDLE, WT_REPLAY_ERROR_NONE, 0, {0} };
++	bool _replay_finishing = false;
++	bool _replay_stop_requested = false;
++	uint32_t _replay_failure_code = WT_REPLAY_ERROR_NONE;
++	std::string _replay_failure_message;
++	void finish_replay();
+ 	mutable std::mutex _fee_error_mutex;
+ 	std::string _fee_error;
+ 	WTSContractInfo* resolve_fee_contract(const char* stdCode, const char* rawCode, const char* exchange, uint32_t tradingDate);

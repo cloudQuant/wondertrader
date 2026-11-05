@@ -40,6 +40,14 @@ extern "C"
 	EXPORT_FLAG bool		is_initialized();
 
 	/**
+	 * @brief 查询是否已向全部 parser 提交连接命令
+	 * @details true 不表示 provider 已连接或就绪；false 包含尚未启动或至少一个命令未提交。
+	 * false 时可能已有部分命令提交，parser 及宿主仍需保留，不能据此认定回调已停止。
+	 * 此查询可与启动并发；不表示 initialize、start 或其他接口可并发调用。
+	 */
+	EXPORT_FLAG bool		are_parser_connect_commands_submitted();
+
+	/**
 	 * @brief 查询 runner 是否仍持有 parser adapter
 	 * @return true 表示 runner 仍持有 parser adapter，需要维持其生命周期
 	 * @details 该状态不证明 provider 回调已排空；false 也不作为析构安全证明。

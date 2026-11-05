@@ -1,0 +1,218 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before/src/WtCore/HftStraBaseCtx.cpp	2026-11-01 22:59:32
++++ src/WtCore/HftStraBaseCtx.cpp	2026-11-04 21:23:33
+@@ -26,6 +26,10 @@
+ #include <rapidjson/prettywriter.h>
+ namespace rj = rapidjson;
+ 
++#include <algorithm>
++#include <functional>
++#include <vector>
++
+ #include <boost/filesystem.hpp>
+ namespace fs = boost::filesystem;
+ 
+@@ -59,8 +63,67 @@
+ 
+ void HftStraBaseCtx::setTrader(TraderAdapter* trader)
+ {
++	// I03-NEW-002 contract: bind before the context is published (runners
++	// call setTrader before addContext/addSink). Rebinding is only detected
++	// for synchronous changes during an action; it is not a concurrent API.
+ 	_trader = trader;
+ 	++_trader_binding_epoch;
++}
++
++void HftStraBaseCtx::registerOrderTagLocked(uint32_t localid, const char* usertag)
++{
++	OrderTagSlot& slot = _orders[localid];
++	slot.tag = &*_tag_pool.insert(std::string(usertag ? usertag : "")).first;
++	slot.generation = ++_order_tag_generation;
++	slot.retired = false;
++}
++
++void HftStraBaseCtx::retireOrderTag(uint32_t localid)
++{
++	std::lock_guard<std::mutex> lock(_tag_mutex);
++	auto it = _orders.find(localid);
++	if (it == _orders.end() || it->second.retired)
++		return;
++	it->second.retired = true;
++	_retired_order_tags.emplace_back(localid, it->second.generation);
++	while (_retired_order_tags.size() > kRetiredOrderTagLimit)
++	{
++		const std::pair<uint32_t, uint64_t> victim = _retired_order_tags.front();
++		_retired_order_tags.pop_front();
++		auto old = _orders.find(victim.first);
++		// Only the same retired registration is evicted; a live re-registration
++		// of the same localid is never touched.
++		if (old != _orders.end() && old->second.retired && old->second.generation == victim.second)
++			_orders.erase(old);
++	}
++}
++
++OrderIDs HftStraBaseCtx::submitTagged(TraderAdapter* trader, const char* userTag,
++	const std::function<OrderIDs()>& submit)
++{
++	// R15-001: the tag is registered after the local id is reserved and before
++	// the provider call, so synchronous reports already see it. Reservations
++	// that were not accepted are removed again.
++	std::vector<uint32_t> reserved;
++	OrderIDs ids;
++	{
++		TraderAdapter::EntrustObserverScope observer(trader, [this, &reserved, userTag](uint32_t localid) {
++			reserved.push_back(localid);
++			setUserTag(localid, userTag);
++		});
++		ids = submit();
++	}
++	for (uint32_t localid : ids)
++	{
++		if (std::find(reserved.begin(), reserved.end(), localid) == reserved.end())
++			setUserTag(localid, userTag);	// adapter without a pre-send hook
++	}
++	for (uint32_t localid : reserved)
++	{
++		if (std::find(ids.begin(), ids.end(), localid) == ids.end())
++			eraseOrderTag(localid);
++	}
++	return ids;
+ }
+ 
+ void HftStraBaseCtx::init_outputs()
+@@ -267,9 +330,7 @@
+ 		if (!traderBindingUnchanged(trader, traderEpoch, "buy"))
+ 			return OrderIDs();
+ 
+-		auto ids = trader->buy(realCode.c_str(), price, qty, flag, bForceClose, ct);
+-		for (auto localid : ids)
+-			setUserTag(localid, userTag);
++		auto ids = submitTagged(trader, userTag, [&]() { return trader->buy(realCode.c_str(), price, qty, flag, bForceClose, ct); });
+ 
+ 		return ids;
+ 	}
+@@ -293,9 +354,7 @@
+ 		if (!traderBindingUnchanged(trader, traderEpoch, "buy"))
+ 			return OrderIDs();
+ 
+-		auto ids = trader->buy(stdCode, price, qty, flag, bForceClose, ct);
+-		for (auto localid : ids)
+-			setUserTag(localid, userTag);
++		auto ids = submitTagged(trader, userTag, [&]() { return trader->buy(stdCode, price, qty, flag, bForceClose, ct); });
+ 		return ids;
+ 	}
+ }
+@@ -357,9 +416,7 @@
+ 		if (!traderBindingUnchanged(trader, traderEpoch, "sell"))
+ 			return OrderIDs();
+ 
+-		auto ids = trader->sell(realCode.c_str(), price, qty, flag, bForceClose, ct);
+-		for (auto localid : ids)
+-			setUserTag(localid, userTag);
++		auto ids = submitTagged(trader, userTag, [&]() { return trader->sell(realCode.c_str(), price, qty, flag, bForceClose, ct); });
+ 		return ids;
+ 	}
+ 	else
+@@ -382,9 +439,7 @@
+ 		if (!traderBindingUnchanged(trader, traderEpoch, "sell"))
+ 			return OrderIDs();
+ 
+-		auto ids = trader->sell(stdCode, price, qty, flag, bForceClose, ct);
+-		for (auto localid : ids)
+-			setUserTag(localid, userTag);
++		auto ids = submitTagged(trader, userTag, [&]() { return trader->sell(stdCode, price, qty, flag, bForceClose, ct); });
+ 		return ids;
+ 	}
+ }
+@@ -679,7 +734,7 @@
+ 	do_set_position(stdCode, curPos, price, getOrderTag(localid));
+ }
+ 
+-void HftStraBaseCtx::on_order(uint32_t /*localid*/, const char* /*stdCode*/, bool /*isBuy*/, double /*totalQty*/, double leftQty, double /*price*/, bool isCanceled /* = false */)
++void HftStraBaseCtx::on_order(uint32_t localid, const char* /*stdCode*/, bool /*isBuy*/, double /*totalQty*/, double leftQty, double /*price*/, bool isCanceled /* = false */)
+ {
+ 	if (_ud_modified)
+ 	{
+@@ -690,6 +745,8 @@
+ 	if(isCanceled || decimal::eq(leftQty, 0))
+ 	{
+ 		//订单结束了，要把订单号清理掉，不然开销太大
++		// R15-001: bounded retirement keeps the tag for late trades.
++		retireOrderTag(localid);
+ 	}
+ }
+ 
+@@ -711,13 +768,15 @@
+ 	}
+ }
+ 
+-void HftStraBaseCtx::on_entrust(uint32_t /*localid*/, const char* /*stdCode*/, bool /*bSuccess*/, const char* /*message*/)
++void HftStraBaseCtx::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* /*message*/)
+ {
+ 	if (_ud_modified)
+ 	{
+ 		save_userdata();
+ 		_ud_modified = false;
+ 	}
++	if (!bSuccess)
++		retireOrderTag(localid);	// a rejected entrust is terminal
+ }
+ 
+ void HftStraBaseCtx::on_position(const char* /*stdCode*/, bool /*isLong*/, double /*prevol*/, double /*preavail*/, double /*newvol*/, double /*newavail*/, uint32_t /*tradingday*/)
+@@ -777,6 +836,14 @@
+ 
+ double HftStraBaseCtx::stra_get_position(const char* stdCode, bool bOnlyValid /* = false */, int flag /* = 3*/)
+ {
++	// I03-NEW-002: an unbound context has no position source. The double API
++	// cannot carry a failure, so 0 is returned with an error log; every
++	// trading action of an unbound context is rejected (fail closed).
++	if (_trader == nullptr)
++	{
++		log_error("Cannot query position of {}: trader adapter is not bound", stdCode ? stdCode : "");
++		return 0.0;
++	}
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
+ 	if (strlen(cInfo._ruletag) > 0)
+ 	{
+@@ -795,6 +862,12 @@
+ 
+ double HftStraBaseCtx::stra_get_undone(const char* stdCode)
+ {
++	// I03-NEW-002: see stra_get_position; unbound returns 0 with an error log.
++	if (_trader == nullptr)
++	{
++		log_error("Cannot query undone quantity of {}: trader adapter is not bound", stdCode ? stdCode : "");
++		return 0.0;
++	}
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _engine->get_hot_mgr());
+ 	if (strlen(cInfo._ruletag) > 0)
+ 	{
+@@ -969,7 +1042,10 @@
+ 		dInfo._usertag = userTag ? userTag : "";
+ 		pInfo._details.emplace_back(dInfo);
+ 
+-		double fee = commInfo->calcFee(trdPx, abs(diff), 0);
++		// I03-NEW-008 (card 13d): live fees come from the engine's versioned fee
++		// schedule (contract first, product fallback); a missing fee is reported
++		// by the engine (fee_error_count/last_fee_error) and the fill is kept.
++		double fee = _engine->calc_fee(stdCode, trdPx, abs(diff), 0);
+ 		_fund_info._total_fees += fee;
+ 
+ 		log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(diff), fee, userTag);
+@@ -1008,7 +1084,7 @@
+ 			pInfo._dynprofit = pInfo._dynprofit*dInfo._volume / (dInfo._volume + maxQty);//浮盈也要做等比缩放
+ 			_fund_info._total_profit += profit;
+ 
+-			double fee = commInfo->calcFee(trdPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
++			double fee = _engine->calc_fee(stdCode, trdPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
+ 			_fund_info._total_fees += fee;
+ 			//这里写成交记录
+ 			log_trade(stdCode, dInfo._long, false, curTm, trdPx, maxQty, fee, userTag);
+@@ -1042,7 +1118,7 @@
+ 			pInfo._details.emplace_back(dInfo);
+ 
+ 			//这里还需要写一笔成交记录
+-			double fee = commInfo->calcFee(trdPx, abs(left), 0);
++			double fee = _engine->calc_fee(stdCode, trdPx, abs(left), 0);
+ 			_fund_info._total_fees += fee;
+ 			//_engine->mutate_fund(fee, FFT_Fee);
+ 			log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(left), fee, userTag);

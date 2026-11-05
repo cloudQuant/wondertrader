@@ -1,5 +1,7 @@
 #include "t6_ctploader_yaml_factory_stub.hpp"
 
+#include <cstring>
+
 namespace
 {
 	T6YamlCtpApiStub g_api;
@@ -24,6 +26,8 @@ void T6YamlCtpApiStub::reset()
 	call_order.clear();
 	n_calls_ = 0;
 	stub_ret_ = 0;
+	std::lock_guard<std::mutex> lock(_qry_mtx);
+	_qry_dispatched = false;
 }
 
 void T6YamlCtpApiStub::releaseRegisteredSpi()
@@ -61,6 +65,41 @@ void T6YamlCtpApiStub::Init()
 {
 	++init_calls;
 	call_order.emplace_back("Init");
+	// K02=B（2026-11-04）：run() 在所有模式下等待加载器终态再返回。假 API 不联网，这里经真实 SPI
+	// 链路（前置连接→认证→登录→合约查询入列，费率批次进入进行中）后报告前置断开，SPI 发布失败终态，
+	// run() 随即返回而不是无限等待。
+	if (spi != nullptr)
+	{
+		CThostFtdcRspInfoField ok;
+		std::memset(&ok, 0, sizeof(ok));
+		CThostFtdcRspUserLoginField login;
+		std::memset(&login, 0, sizeof(login));
+		login.FrontID = 1;
+		login.SessionID = 2;
+		std::strncpy(login.MaxOrderRef, "1", sizeof(login.MaxOrderRef) - 1);
+		spi->OnFrontConnected();
+		spi->OnRspAuthenticate(nullptr, &ok, 1, true);
+		spi->OnRspUserLogin(&login, &ok, 2, true);
+		// I03-NEW-115（测试侧 TSan）：登录后合约查询由 SPI 的查询 worker 异步投递。先等它进入本替身
+		// （有界 5 秒），再报告前置断开；否则 worker 对 pUserApi/本替身的调用与 run() 随后的
+		// RegisterSpi(NULL)/Release()/pUserApi=NULL 无先后关系。费率批次此时仍在进行中，终态不变。
+		{
+			std::unique_lock<std::mutex> lock(_qry_mtx);
+			_qry_cv.wait_for(lock, std::chrono::seconds(5), [this]() { return _qry_dispatched; });
+		}
+		spi->OnFrontDisconnected(0x1001);
+	}
+}
+
+int T6YamlCtpApiStub::ReqQryInstrument(CThostFtdcQryInstrumentField* pField, int nRequestID)
+{
+	const int ret = T26CtpApiStub::ReqQryInstrument(pField, nRequestID);
+	{
+		std::lock_guard<std::mutex> lock(_qry_mtx);
+		_qry_dispatched = true;
+	}
+	_qry_cv.notify_all();
+	return ret;
 }
 
 int T6YamlCtpApiStub::Join()

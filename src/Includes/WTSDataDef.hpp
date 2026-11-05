@@ -13,6 +13,8 @@
 #include <deque>
 #include <string.h>
 #include <chrono>
+#include <memory>
+#include <utility>
 
 #include "WTSObject.hpp"
 
@@ -207,6 +209,260 @@ public:
 };
 
 /*
+ *	切片共享所有权（迭代03 卡11=B，2026-11-03）
+ *	切片仍然只保存指向底层缓冲区的指针（零拷贝），但生产者可以把底层缓冲区的
+ *	所有者以引用计数的形式挂到切片上。缓存 clearCache/重载/淘汰只会释放缓存自己
+ *	持有的那一份引用，仍被调用者持有的切片在 release 之前始终有效。
+ *	约束：
+ *	1、生产者挂上 owner 之后，不得再对该 owner 对应的缓冲区做结构性修改
+ *	   （扩容、重分配、clear、swap），需要修改时应改写到新的缓冲区（写时复制）。
+ *	2、owner 的析构代码位于创建它的模块中，持有切片期间不得卸载该模块。
+ *	3、ABI：owner 成员追加在各切片类已有成员之后，原有成员偏移与内联访问函数不变；
+ *	   使用旧头文件编译的插件仍可读取新宿主创建的切片，但不会获得 owner 接口。
+ */
+typedef std::shared_ptr<const void> WTSSliceOwnerPtr;
+
+/*
+ *	把一个 WTSObject 包装成切片 owner：retain 一次，owner 最后一个引用释放时 release
+ */
+inline WTSSliceOwnerPtr makeSliceOwner(WTSObject* obj)
+{
+	if (obj == NULL)
+		return WTSSliceOwnerPtr();
+
+	obj->retain();
+	try
+	{
+		return WTSSliceOwnerPtr(obj, [](WTSObject* p) { p->release(); });
+	}
+	catch (...)
+	{
+		obj->release();
+		throw;
+	}
+}
+
+class WTSSliceOwners
+{
+public:
+	WTSSliceOwners() {}
+
+	/*
+	 *	登记一个 owner，同一个 owner 只登记一次
+	 *	返回 false 表示 owner 为空
+	 */
+	inline bool add(const WTSSliceOwnerPtr& owner)
+	{
+		if (!owner)
+			return false;
+
+		if (_inline[0].get() == owner.get() || _inline[1].get() == owner.get())
+			return true;
+		for (const WTSSliceOwnerPtr& item : _extra)
+		{
+			if (item.get() == owner.get())
+				return true;
+		}
+
+		if (!_inline[0])
+			_inline[0] = owner;
+		else if (!_inline[1])
+			_inline[1] = owner;
+		else
+			_extra.emplace_back(owner);
+		return true;
+	}
+
+	inline std::size_t count() const
+	{
+		return (_inline[0] ? 1 : 0) + (_inline[1] ? 1 : 0) + _extra.size();
+	}
+
+private:
+	WTSSliceOwnerPtr				_inline[2];
+	std::vector<WTSSliceOwnerPtr>	_extra;
+};
+
+/*
+ *	切片底层缓冲区的写时复制容器
+ *	缓存用它代替直接持有 std::vector / boost::circular_buffer：
+ *	- owner() 返回的引用计数可以挂到切片上；
+ *	- 结构性修改（clear/resize/assign/push_back/swap 等）在缓冲区仍被切片引用时
+ *	  先分离到新缓冲区，已借出的切片继续指向旧缓冲区；
+ *	- 非 const 的元素访问（begin/data/operator[]/back 等）不会分离，
+ *	  仅用于尚未借出或允许原地读写的场景；需要原地改写元素时调用 mutate()。
+ */
+template <typename Container>
+class WTSSharedBuffer
+{
+public:
+	typedef Container								container_type;
+	typedef typename Container::value_type			value_type;
+	typedef typename Container::size_type			size_type;
+	typedef typename Container::iterator			iterator;
+	typedef typename Container::const_iterator		const_iterator;
+
+	WTSSharedBuffer() noexcept {}
+	WTSSharedBuffer(const WTSSharedBuffer& rhs)
+		: _data(rhs._data ? std::make_shared<Container>(*rhs._data) : std::shared_ptr<Container>()) {}
+	WTSSharedBuffer(WTSSharedBuffer&& rhs) noexcept : _data(std::move(rhs._data)) {}
+
+	WTSSharedBuffer& operator=(const WTSSharedBuffer& rhs)
+	{
+		if (this != &rhs)
+			_data = rhs._data ? std::make_shared<Container>(*rhs._data) : std::shared_ptr<Container>();
+		return *this;
+	}
+
+	WTSSharedBuffer& operator=(WTSSharedBuffer&& rhs) noexcept
+	{
+		if (this != &rhs)
+			_data = std::move(rhs._data);
+		return *this;
+	}
+
+	WTSSharedBuffer& operator=(Container&& rhs)
+	{
+		_data = std::make_shared<Container>(std::move(rhs));
+		return *this;
+	}
+
+	WTSSharedBuffer& operator=(const Container& rhs)
+	{
+		_data = std::make_shared<Container>(rhs);
+		return *this;
+	}
+
+	/* 只读视图，便于按原容器类型读取/复制 */
+	inline operator const Container&() const { return get(); }
+
+	/* 当前缓冲区的 owner；从未分配时为空 */
+	inline WTSSliceOwnerPtr owner() const { return _data; }
+
+	/* 当前缓冲区是否仍被切片等外部 owner 共享 */
+	inline bool shared() const { return _data && _data.use_count() > 1; }
+
+	inline const Container& get() const { return _data ? *_data : empty_container(); }
+
+	/* 元素级访问，不分离 */
+	inline Container& peek()
+	{
+		if (!_data)
+			_data = std::make_shared<Container>();
+		return *_data;
+	}
+
+	/* 结构性修改前调用：被共享时复制到新缓冲区 */
+	inline Container& mutate()
+	{
+		if (!_data)
+			_data = std::make_shared<Container>();
+		else if (_data.use_count() > 1)
+			_data = std::make_shared<Container>(*_data);
+		return *_data;
+	}
+
+	/* 丢弃旧内容：被共享时直接换新缓冲区，不复制 */
+	inline Container& renew()
+	{
+		if (!_data || _data.use_count() > 1)
+			_data = std::make_shared<Container>();
+		else
+			_data->clear();
+		return *_data;
+	}
+
+	inline size_type size() const { return get().size(); }
+	inline bool empty() const { return get().empty(); }
+	inline size_type capacity() const { return get().capacity(); }
+
+	inline iterator begin() { return peek().begin(); }
+	inline iterator end() { return peek().end(); }
+	inline const_iterator begin() const { return get().begin(); }
+	inline const_iterator end() const { return get().end(); }
+
+	inline value_type* data() { return peek().data(); }
+	inline const value_type* data() const { return get().data(); }
+
+	inline value_type& operator[](size_type idx) { return peek()[idx]; }
+	inline const value_type& operator[](size_type idx) const { return get()[idx]; }
+
+	inline value_type& front() { return peek().front(); }
+	inline const value_type& front() const { return get().front(); }
+	inline value_type& back() { return peek().back(); }
+	inline const value_type& back() const { return get().back(); }
+
+	inline auto array_one() { return peek().array_one(); }
+	inline auto array_two() { return peek().array_two(); }
+
+	inline void clear() { renew(); }
+	inline void resize(size_type n)
+	{
+		if (_data && _data.use_count() > 1)
+		{
+			// 被共享时只复制保留下来的前缀，避免 resize(0) 等场景复制整块旧数据
+			const size_type keep = n < _data->size() ? n : _data->size();
+			std::shared_ptr<Container> fresh = std::make_shared<Container>(_data->begin(), _data->begin() + keep);
+			fresh->resize(n);
+			_data = fresh;
+		}
+		else
+		{
+			peek().resize(n);
+		}
+	}
+	inline void reserve(size_type n) { mutate().reserve(n); }
+	inline void rset_capacity(size_type n) { mutate().rset_capacity(n); }
+	inline void push_back(const value_type& v) { mutate().push_back(v); }
+	template <typename... Args>
+	inline void emplace_back(Args&&... args) { mutate().emplace_back(std::forward<Args>(args)...); }
+
+	template <typename InputIt>
+	inline void assign(InputIt first, InputIt last)
+	{
+		// 先构造新缓冲区，源区间即便来自自身也不会被提前破坏
+		_data = std::make_shared<Container>(first, last);
+	}
+
+	/* 区间插入：先按下标记下位置，分离后再插入，避免使用旧缓冲区的迭代器 */
+	template <typename InputIt>
+	inline iterator insert(const_iterator pos, InputIt first, InputIt last)
+	{
+		const typename Container::difference_type idx = pos - get().begin();
+		Container& c = mutate();
+		return c.insert(c.begin() + idx, first, last);
+	}
+
+	/* 与普通容器交换内容：被共享时，旧内容以副本交出，新内容进入新缓冲区 */
+	inline void swap(Container& rhs)
+	{
+		if (_data && _data.use_count() > 1)
+		{
+			Container old(*_data);
+			_data = std::make_shared<Container>(std::move(rhs));
+			rhs.swap(old);
+		}
+		else
+		{
+			peek().swap(rhs);
+		}
+	}
+
+	/* 两个共享缓冲区之间只交换引用，已借出的切片不受影响 */
+	inline void swap(WTSSharedBuffer& rhs) noexcept { _data.swap(rhs._data); }
+
+private:
+	static const Container& empty_container()
+	{
+		static const Container empty;
+		return empty;
+	}
+
+private:
+	std::shared_ptr<Container>	_data;
+};
+
+/*
  *	K线数据切片
  *	这个比较特殊,因为要拼接当日和历史的
  *	所以有两个开始地址
@@ -220,6 +476,7 @@ private:
 	typedef std::pair<WTSBarStruct*, uint32_t> BarBlock;
 	std::vector<BarBlock> _blocks;
 	uint32_t		_count;
+	WTSSliceOwners	_owners;	//追加成员，保持既有成员偏移不变
 
 protected:
 	WTSKlineSlice()
@@ -285,9 +542,17 @@ public:
 	{
 		if (code == NULL || count < 0 || (count > 0 && bars == NULL))
 			return NULL;
+		// I03-NEW-083: same contract as WTSTickData::create -- a code that does not
+		// fit _code with its terminator is rejected instead of overflowing it.
+		std::size_t len = 0;
+		while (len < MAX_INSTRUMENT_LENGTH && code[len] != '\0')
+			++len;
+		if (len == MAX_INSTRUMENT_LENGTH)
+			return NULL;
 
 		WTSKlineSlice *pRet = new WTSKlineSlice;
-		wt_strcpy(pRet->_code, code);
+		memcpy(pRet->_code, code, len);
+		pRet->_code[len] = '\0';
 		pRet->_period = period;
 		pRet->_times = times;
 		if(bars)
@@ -434,7 +699,25 @@ public:
 	*	返回K线对象的合约代码
 	*/
 	inline const char*	code() const{ return _code; }
-	inline void		setCode(const char* code){ wt_strcpy(_code, code); }
+	// I03-NEW-083: a NULL or overlong code keeps the current value.
+	inline void		setCode(const char* code)
+	{
+		if (code == NULL)
+			return;
+		std::size_t len = 0;
+		while (len < MAX_INSTRUMENT_LENGTH && code[len] != '\0')
+			++len;
+		if (len == MAX_INSTRUMENT_LENGTH)
+			return;
+		memcpy(_code, code, len);
+		_code[len] = '\0';
+	}
+
+	/*
+	 *	登记底层缓冲区 owner（卡11=B）：切片释放前 owner 不会被销毁
+	 */
+	inline bool addOwner(const WTSSliceOwnerPtr& owner) { return _owners.add(owner); }
+	inline std::size_t ownerCount() const { return _owners.count(); }
 
 
 	/*
@@ -1500,6 +1783,9 @@ public:
 
 	inline bool isValidOnly() const{ return m_bValidOnly; }
 
+	//复权因子（卡11=B：写时复制克隆缓存时需要保持一致）
+	inline double factor() const{ return m_dFactor; }
+
 	/*
 	*	追加一条Tick
 	*/
@@ -1527,6 +1813,7 @@ private:
 	typedef std::pair<WTSTickStruct*, uint32_t> TickBlock;
 	std::vector<TickBlock> _blocks;
 	uint32_t		_count;
+	WTSSliceOwners	_owners;	//追加成员，保持既有成员偏移不变
 
 protected:
 	WTSTickSlice() : _count(0) { _blocks.clear(); }
@@ -1545,9 +1832,18 @@ public:
 	{
 		//if (ticks == NULL || count == 0)
 		//	return NULL;
+		// I03-NEW-083: same contract as WTSTickData::create (NULL or overlong code -> NULL).
+		if (code == NULL)
+			return NULL;
+		std::size_t len = 0;
+		while (len < MAX_INSTRUMENT_LENGTH && code[len] != '\0')
+			++len;
+		if (len == MAX_INSTRUMENT_LENGTH)
+			return NULL;
 
 		WTSTickSlice* slice = new WTSTickSlice();
-		wt_strcpy(slice->_code, code);
+		memcpy(slice->_code, code, len);
+		slice->_code[len] = '\0';
 		if(ticks != NULL)
 		{
 			slice->_blocks.emplace_back(TickBlock(ticks, count));
@@ -1602,6 +1898,12 @@ public:
 
 	inline bool empty() const{ return (_count == 0); }
 
+	/*
+	 *	登记底层缓冲区 owner（卡11=B）：切片释放前 owner 不会被销毁
+	 */
+	inline bool addOwner(const WTSSliceOwnerPtr& owner) { return _owners.add(owner); }
+	inline std::size_t ownerCount() const { return _owners.count(); }
+
 	inline const WTSTickStruct* at(int32_t idx)
 	{
 		if (_count == 0)
@@ -1634,6 +1936,7 @@ private:
 	char				m_strCode[MAX_INSTRUMENT_LENGTH];
 	WTSOrdDtlStruct*	m_ptrBegin;
 	uint32_t			m_uCount;
+	WTSSliceOwners		m_owners;	//追加成员，保持既有成员偏移不变
 
 protected:
 	WTSOrdDtlSlice() :m_ptrBegin(NULL), m_uCount(0) {}
@@ -1665,11 +1968,20 @@ public:
 
 	inline bool empty() const { return (m_uCount == 0) || (m_ptrBegin == NULL); }
 
+	/*
+	 *	登记底层缓冲区 owner（卡11=B）：切片释放前 owner 不会被销毁
+	 */
+	inline bool addOwner(const WTSSliceOwnerPtr& owner) { return m_owners.add(owner); }
+	inline std::size_t ownerCount() const { return m_owners.count(); }
+
 	inline const WTSOrdDtlStruct* at(int32_t idx)
 	{
 		if (m_ptrBegin == NULL)
 			return NULL;
 		idx = translateIdx(idx);
+		// I03-NEW-092: an index past the slice end must not yield a pointer outside the buffer.
+		if (idx < 0 || static_cast<uint32_t>(idx) >= m_uCount)
+			return NULL;
 		return m_ptrBegin + idx;
 	}
 };
@@ -1686,6 +1998,7 @@ private:
 	char				m_strCode[MAX_INSTRUMENT_LENGTH];
 	WTSOrdQueStruct*	m_ptrBegin;
 	uint32_t			m_uCount;
+	WTSSliceOwners		m_owners;	//追加成员，保持既有成员偏移不变
 
 protected:
 	WTSOrdQueSlice() :m_ptrBegin(NULL), m_uCount(0) {}
@@ -1717,11 +2030,20 @@ public:
 
 	inline bool empty() const { return (m_uCount == 0) || (m_ptrBegin == NULL); }
 
+	/*
+	 *	登记底层缓冲区 owner（卡11=B）：切片释放前 owner 不会被销毁
+	 */
+	inline bool addOwner(const WTSSliceOwnerPtr& owner) { return m_owners.add(owner); }
+	inline std::size_t ownerCount() const { return m_owners.count(); }
+
 	inline const WTSOrdQueStruct* at(int32_t idx)
 	{
 		if (m_ptrBegin == NULL)
 			return NULL;
 		idx = translateIdx(idx);
+		// I03-NEW-092: an index past the slice end must not yield a pointer outside the buffer.
+		if (idx < 0 || static_cast<uint32_t>(idx) >= m_uCount)
+			return NULL;
 		return m_ptrBegin + idx;
 	}
 };
@@ -1738,6 +2060,7 @@ private:
 	char			m_strCode[MAX_INSTRUMENT_LENGTH];
 	WTSTransStruct*	m_ptrBegin;
 	uint32_t		m_uCount;
+	WTSSliceOwners	m_owners;	//追加成员，保持既有成员偏移不变
 
 protected:
 	WTSTransSlice() :m_ptrBegin(NULL), m_uCount(0) {}
@@ -1769,11 +2092,20 @@ public:
 
 	inline bool empty() const { return (m_uCount == 0) || (m_ptrBegin == NULL); }
 
+	/*
+	 *	登记底层缓冲区 owner（卡11=B）：切片释放前 owner 不会被销毁
+	 */
+	inline bool addOwner(const WTSSliceOwnerPtr& owner) { return m_owners.add(owner); }
+	inline std::size_t ownerCount() const { return m_owners.count(); }
+
 	inline const WTSTransStruct* at(int32_t idx)
 	{
 		if (m_ptrBegin == NULL)
 			return NULL;
 		idx = translateIdx(idx);
+		// I03-NEW-092: an index past the slice end must not yield a pointer outside the buffer.
+		if (idx < 0 || static_cast<uint32_t>(idx) >= m_uCount)
+			return NULL;
 		return m_ptrBegin + idx;
 	}
 };

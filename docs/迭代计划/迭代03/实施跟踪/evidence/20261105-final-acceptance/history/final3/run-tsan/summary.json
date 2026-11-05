@@ -1,0 +1,1126 @@
+{
+ "start": "2026-11-05T19:44:23+08:00",
+ "end": "2026-11-05T20:09:06+08:00",
+ "total": 6342,
+ "by_status": {
+  "pass": 6164,
+  "skipped": 4,
+  "signal-6": 108,
+  "sanitizer-tsan(signal-6)": 57,
+  "fail": 3,
+  "timeout": 1,
+  "sanitizer-tsan(fail)": 5
+ },
+ "per_binary": {
+  "CoverageTests": {
+   "pass": 1370,
+   "skipped": 1
+  },
+  "CoverageTests_adstorage": {
+   "pass": 303
+  },
+  "CoverageTests_btcore": {
+   "pass": 682,
+   "signal-6": 13
+  },
+  "CoverageTests_btporter": {
+   "pass": 149,
+   "signal-6": 4
+  },
+  "CoverageTests_ctafact": {
+   "pass": 29
+  },
+  "CoverageTests_dtcore": {
+   "pass": 221,
+   "sanitizer-tsan(signal-6)": 3,
+   "signal-6": 5,
+   "skipped": 1
+  },
+  "CoverageTests_dtservo": {
+   "pass": 127,
+   "signal-6": 2
+  },
+  "CoverageTests_execv2": {
+   "pass": 3,
+   "signal-6": 52
+  },
+  "CoverageTests_exefact": {
+   "pass": 420
+  },
+  "CoverageTests_i03_dtporter_start": {
+   "pass": 6
+  },
+  "CoverageTests_idxfactory": {
+   "pass": 14
+  },
+  "CoverageTests_m_LoaderRunner": {
+   "pass": 1
+  },
+  "CoverageTests_m_QuoteFactory": {
+   "pass": 22,
+   "fail": 1
+  },
+  "CoverageTests_m_WtBtRunner": {
+   "pass": 21
+  },
+  "CoverageTests_m_WtLatencyHFT": {
+   "pass": 21
+  },
+  "CoverageTests_m_WtLatencyUFT": {
+   "pass": 24
+  },
+  "CoverageTests_m_WtRunner": {
+   "pass": 110
+  },
+  "CoverageTests_m_WtUftRunner": {
+   "pass": 53,
+   "fail": 2,
+   "timeout": 1
+  },
+  "CoverageTests_modulehelper_odr": {
+   "pass": 1
+  },
+  "CoverageTests_mqshare": {
+   "pass": 52,
+   "skipped": 1
+  },
+  "CoverageTests_porter": {
+   "pass": 276
+  },
+  "CoverageTests_riskmon": {
+   "pass": 7
+  },
+  "CoverageTests_selfthft": {
+   "pass": 22
+  },
+  "CoverageTests_t_CTPLoader": {
+   "pass": 57,
+   "signal-6": 8
+  },
+  "CoverageTests_t_CTPLoaderYamlPositive": {
+   "sanitizer-tsan(signal-6)": 1
+  },
+  "CoverageTests_t_CTPOptLoader": {
+   "pass": 38,
+   "signal-6": 2
+  },
+  "CoverageTests_t_ParserCTP": {
+   "pass": 24
+  },
+  "CoverageTests_t_ParserCTPMini": {
+   "pass": 30
+  },
+  "CoverageTests_t_ParserCTPOpt": {
+   "pass": 30,
+   "signal-6": 2
+  },
+  "CoverageTests_t_ParserFemas": {
+   "pass": 32
+  },
+  "CoverageTests_t_ParserShm": {
+   "pass": 22
+  },
+  "CoverageTests_t_ParserUDP": {
+   "pass": 45
+  },
+  "CoverageTests_t_ParserXTP": {
+   "pass": 72,
+   "signal-6": 2
+  },
+  "CoverageTests_t_ParserXeleSkt": {
+   "pass": 37
+  },
+  "CoverageTests_t_TraderCTP": {
+   "pass": 91
+  },
+  "CoverageTests_t_TraderCTPMini": {
+   "pass": 51,
+   "signal-6": 2
+  },
+  "CoverageTests_t_TraderCTPOpt": {
+   "pass": 60,
+   "signal-6": 1
+  },
+  "CoverageTests_t_TraderDumper": {
+   "pass": 35
+  },
+  "CoverageTests_t_TraderFemas": {
+   "pass": 76,
+   "signal-6": 1
+  },
+  "CoverageTests_t_TraderMocker": {
+   "pass": 77
+  },
+  "CoverageTests_t_TraderXTP": {
+   "pass": 60
+  },
+  "CoverageTests_t_TraderYD": {
+   "pass": 55,
+   "signal-6": 1
+  },
+  "CoverageTests_uftcore": {
+   "pass": 307,
+   "signal-6": 4
+  },
+  "CoverageTests_wtcore": {
+   "pass": 1014,
+   "sanitizer-tsan(signal-6)": 53,
+   "signal-6": 9,
+   "skipped": 1,
+   "sanitizer-tsan(fail)": 5
+  },
+  "TestUnits": {
+   "pass": 17
+  }
+ },
+ "non_pass": [
+  [
+   "CoverageTests",
+   "R22PorterCapiTest.ConfiguredStartChildChecksStateMonitor",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btcore",
+   "ExecMockerTest.passiveSellUsesNegativeUndoneSign",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R111ExecMocker.CanStopPreflightFailureDefersWithoutChangingRequestState",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R111ExecMocker.FailedFactoryPreflightSendsNoRequestAndCanBeRetried",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R111ExecMocker.FailedQuiesceRequestRetainsAllPluginOwnersUntilRetrySucceeds",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R111ExecMocker.FailedWaitRetainsPluginOwnersAndRequiresFreshCanWaitBeforeRetry",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R111ExecMocker.OtherThreadPluginCallbackDoesNotBlockControlThreadPreflight",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R111ExecMocker.PluginQuiesceUsesFactoryPreflightRequestCanWaitWaitThenDestroy",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R111ExecMocker.RejectsShortAndUnverifiablePluginTables",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R198SelMockerFactory.rejectsUnknownStrategyAndFalseInitThenAllowsRetry",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R202HftMockerFactoryAbi.DestructorReleasesRealFactoryAndStrategy",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R202HftMockerFactoryAbi.RejectsMissingStrategyParamsAndAllowsRetry",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R202HftMockerFactoryAbi.RejectsUnknownStrategyAndAllowsRetry",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btcore",
+   "R62SelMockerGap.RealSelFactoryIsDeletedThroughItsExportedAbi",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btporter",
+   "N04ExecMocker.InitFailureIsNotRegisteredWithReplayer",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btporter",
+   "N04ExecMocker.SuccessfulRunnerReplayCallsPluginAndClosesSafely",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btporter",
+   "R69BtRunnerConfig.ExecModeValidPluginConfigurationSucceeds",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_btporter",
+   "WtBtRunnerShutdown.FailedFactoryPreflightRetainsExecOwnersUntilRetry",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_dtcore",
+   "R102IndexWorkerPoolTest.PoolsizeOneBuildsPoolAndAsyncDispatchReleasesTick",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_dtcore",
+   "R18IdxWorkerMgrTest.AsyncQueuedDispatchKeepsTickAliveUntilWorkerCompletes",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_dtcore",
+   "R18WriterPluginTest.InitFalseReleasesAndDeletesWriter",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_dtcore",
+   "R18WriterPluginTest.MissingCreateSymbolRejectsLoadedModule",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_dtcore",
+   "R18WriterPluginTest.MissingDeleteSymbolRejectsBeforeCallingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_dtcore",
+   "R18WriterPluginTest.NullFactoryResultIsRejected",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_dtcore",
+   "R18WriterPluginTest.SuccessfulDynamicWriterIsReleasedAndDestroyedOnce",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_dtcore",
+   "R44ParserAdapterEdgesTest.RepeatedInitExtNeedsContract",
+   "skipped"
+  ],
+  [
+   "CoverageTests_dtcore",
+   "R68IndexWorkerFactoryTest.ReleaseDrainsPoolThenDeletesWorkersAndPinsFactoryModule",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_dtservo",
+   "Q05ServoWtDataManagerTest.InitStoreFactoryReturningNullReturnsFalse",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_dtservo",
+   "R45ParserAdapterFakeTest.ReleaseRetainsModuleContextWhileV2DrainIsPending",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "FactoryProbeFailures/V2ExecPluginFactoryPreflightTest.FailureAndThrowKeepOwnersAndCanRetryBeforeUnitRequest/0",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "FactoryProbeFailures/V2ExecPluginFactoryPreflightTest.FailureAndThrowKeepOwnersAndCanRetryBeforeUnitRequest/1",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "FactoryProbeFailures/V2ExecPluginFactoryPreflightTest.FailureAndThrowKeepOwnersAndCanRetryBeforeUnitRequest/2",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "S3K41IdentityDiagnostic.PluginDeclaringHostIdentityIsLoadedWithoutTheWarning",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "S3K41IdentityDiagnostic.PluginWithoutHostIdentityIsLoadedWithOneWarning",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "TransientFailures/V2ExecPluginQuiescePreflightTest.FalseInvalidOrThrowingPreflightCanRetry/0",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "TransientFailures/V2ExecPluginQuiescePreflightTest.FalseInvalidOrThrowingPreflightCanRetry/1",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "TransientFailures/V2ExecPluginQuiescePreflightTest.FalseInvalidOrThrowingPreflightCanRetry/2",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.ClosedUnitAdmissionRejectsDirectLateCreateAndInit",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.ConfigCloseKeepsAnAdmittedLoaderAndRejectsLaterLoads",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.CreateExceptionProducesNoUnitForHostRegistration",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.DestroyExceptionDoesNotProveSynchronousCleanup",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.FactoryPreflightRunsBeforeUnitCreation",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.FailedWaitCanRetryWithoutDestroyingUnit",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.InitOrderGateIsUnitLocalAndActivatesOnlyAfterSuccessfulInitialization",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.InitializationExceptionDoesNotProveSynchronousCleanup",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.LoaderExceptionReleasesItsAdmissionLease",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.LocalKeepsFailedStatusAndQuiescesWithRetainedInitialTarget",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.NormalFailedInitializationProvesSynchronousCleanup",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.NullContextRemainsNullAcrossV2Initialization",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.PluginRequestMayReenterHostContextWithoutLifecycleLock",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.QuiesceDrainsAnAdmittedHostOrderBeforePluginWait",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.QuiesceDuringInitializeCannotBeOvertakenByActivation",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.QuiesceRequestDuringInitializationIsNotLost",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.ReentrantFactoryWaitFailsWithoutWaitingOnItsInitializeLease",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.ReentrantQuiescePreflightFromHostOrderDoesNotWaitOnItself",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.RequestFailureCanRetryWithoutDestroyingUnit",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.SuccessfulLifecycleCallsHooksInOrderBeforeDestroy",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.ThrowingRequestCanRetryWithoutDestroyingUnit",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.ThrowingWaitCanRetryWithoutDestroyingUnit",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecPluginQuiesceLifecycleTest.UnitGateWaitsForAnAdmittedInitializeToExit",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.FailedInitializationReturnsErrorAndDestroysCandidate",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.NullFactoryDoesNotPreventValidPluginLoad",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.NullFactoryIsUnloadedWithoutBeingPublished",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsLegacyPluginBeforeCallingUnversionedFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsMismatchedMajorBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsMissingCanWaitQuiesceCallbackBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsMissingFactoryPreflightCallbackBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsMissingFactoryPreflightCapabilityBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsMissingQuiesceCapabilityBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsMissingRequestQuiesceCallbackBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsMissingRequiredCallbackBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsMissingWaitQuiesceCallbackBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsOldAbi20BinaryBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsOldAbi21BinaryBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsTableShortOfFactoryPreflightBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsTableShortOfQuiesceFieldsBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RejectsTruncatedApiTableBeforeCreatingFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RepeatedLoadSkipsNullAndDuplicateFactoriesSafely",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.WrapperKeepsModuleLoadedAndDestroysUnitBeforeFactory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "WtExecPluginV2InitFailure.FactoryPreflightIsNonblockingDuringGatedInitialization",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_execv2",
+   "WtExecPluginV2InitFailure.StopsAndJoinsWorkerBeforeHostDestroysFailedUnit",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_m_QuoteFactory",
+   "r14_quote_cli.valid_config_with_real_writer_returns_zero_after_signal",
+   "fail"
+  ],
+  [
+   "CoverageTests_m_WtUftRunner",
+   "r85_uft_runner.full_config_init_false_keeps_runner_run_closed",
+   "fail"
+  ],
+  [
+   "CoverageTests_m_WtUftRunner",
+   "r85_uft_runner.init_false_plugin_is_logged_cleaned_not_registered_or_run",
+   "fail"
+  ],
+  [
+   "CoverageTests_m_WtUftRunner",
+   "r95_uft_parser.successful_fake_parser_registers_runs_and_quiesces_before_release",
+   "timeout"
+  ],
+  [
+   "CoverageTests_mqshare",
+   "R19ExecChild.protocol",
+   "skipped"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_flow.fee_filter_only_queues_contracts_matching_code_or_product",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_flow.incremental_login_reloads_commodities_and_contracts",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_flow.incremental_login_with_missing_files_still_reaches_query",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_flow.last_instrument_response_with_fees_switch_queues_both_rate_requests",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_flow.login_success_writes_session_refs_and_queues_instrument_query",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_flow.rate_requests_use_loaded_altcode_when_present",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_instrument.czce_future_code_is_expanded_and_altcode_kept",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_instrument.czce_option_expands_code_and_strikes_through",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_CTPLoaderYamlPositive",
+   "t6_ctploader_yaml_smoke.valid_file_applies_config_and_initializes_fake_without_network",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_t_CTPOptLoader",
+   "CTPOptLoaderRun.missing_creator_symbol_returns_nonzero_and_unloads_module",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_CTPOptLoader",
+   "CTPOptLoaderRun.null_creator_returns_nonzero_and_unloads_module",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_ParserCTPOpt",
+   "R105OptTest.init_fails_closed_for_loaded_module_without_creator_symbol",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_ParserCTPOpt",
+   "R105OptTest.init_fails_closed_when_loaded_creator_returns_null",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_ParserXTP",
+   "ParserXTPInit.creator_returning_null_fails_and_closes_handle",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_ParserXTP",
+   "ParserXTPInit.module_without_creator_symbol_fails_and_closes_handle",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_TraderCTPMini",
+   "T3_006_TraderCTPMini.failed_module_init_can_retry_with_a_valid_module",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_TraderCTPMini",
+   "T3_006_TraderCTPMini.init_rejects_missing_module_and_creator_symbol",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_TraderCTPOpt",
+   "R61_TraderCTPOpt.init_rejects_missing_library_and_creator_symbol",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_TraderFemas",
+   "R93FemasTest.init_missing_creator_symbol_fails_and_connect_does_not_call_api",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_t_TraderYD",
+   "TraderYDTest.init_fails_closed_and_releases_module_without_factory",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R78UftParserAdapterInit.missing_parser_factory_releases_config_and_module_reference",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "UftTraderAdapterLifecycle.FakeFactoryThrowAndNullRollbackConfigAndAllowRetry",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "UftTraderAdapterLifecycle.FakePluginInitFalseAndThrowRollbackInSafeOrderAndAllowRetry",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "UftTraderAdapterLifecycle.NullAndOversizedIdsAreRejectedBeforeInitializationSideEffects",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "P11TraderTest.init_rejects_overlong_ids_and_keeps_empty_id_accepted",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R101CtaEngineHot.PooledScheduleMapsHotCode",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R10EventNotifier.MissingCreateServerExportUnloadsWithoutStartingWorker",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R10EventNotifier.MissingRegisterExportUnloadsCandidateAndPreservesActiveNotifier",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R110CtaRule.RunExportsListsAndPoolForwardsQfqTick",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R110ExecEnv.DiffPoolForwardsEverything",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R120DiffTest.PoolForwardsEveryCallbackAndPersistsDiff",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R120DiffTest.SetPositionMigratesExpiredTargetToZero",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R120Notifier.BurstPublishesEveryPayload",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R120Notifier.NullTradeAndOrderGuardsPlusLatePost",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R130MiscTail.ParserOrdinaryInitFalsePropagatesAndRetainsApiUntilQuiescent",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R130MiscTail.ParserOrdinaryInitRejectsNullBaseDataManagerBeforeProviderWork",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R130MiscTail.ParserOrdinaryInitSuccessSubscribesContractsAndConnects",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R130MiscTail.ParserSuccessfulInitReleaseAndRepeatReleaseBalanceCfgRetain",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R3TraderTest.cancel_freq_window_denies_cancel_after_boundary",
+   "sanitizer-tsan(fail)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R3TraderTest.cancel_localid_frequency_cache_uses_standardized_contract_code",
+   "sanitizer-tsan(fail)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R3TraderTest.cancel_localid_risk_rejection_retries_do_not_grow_cache",
+   "sanitizer-tsan(fail)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R3TraderTest.order_freq_window_denies_submission_after_boundary",
+   "sanitizer-tsan(fail)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R3TraderTest.order_freq_window_precheck_uses_standard_code_after_raw_submission",
+   "sanitizer-tsan(fail)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R41EngineFixture.R120QfqSubscriptionDispatchesThroughPool",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R41EngineFixture.R41AdjustedTickDispatchMatchesDirectAndPoolModes",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R41EngineFixture.R41OnScheduleWithPoolCommitsLeftoverPositionToZero",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R41EngineFixture.R41OnScheduleWithPoolUsesThreadPool",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R41EngineFixture.R41UnruledStockAdjustmentDispatchMatchesDirectAndPoolModes",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R59Exec.null_data_manager_and_pool_lifecycle",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R66EventNotifierTest.R66ActiveNotifierPublishesAllChannels",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.AccountEventQueuedDuringInitializationRunsAfterSuccessfulReady",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.ChannelEventsContinueAfterBlockedReadyCallback",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.ChannelLostTransitionIsDeliveredBeforeQueuedTickAndRecovery",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.DifferentContractsCanRunCallbacksInParallel",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.InitializationCallbackCanSpawnAndJoinSameCodePositionEvent",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.LatestTargetReconciliationPrecedesTickQueuedDuringInitialization",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.PreflightFailureBeforePluginEntryCanBeCleared",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.QuiesceDrainsAcceptedCallbacksAndRejectsNewIngress",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.QuiesceWaitFromPluginCallbackReturnsFalseWithoutBlocking",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.QuiesceWaitsForIngressProducerBeforeDrainingAcceptedTarget",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.SameCodeCallbacksStayFifoAndReentrantCallbackDoesNotWait",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.StrictSyncUnmanagedHoldBecomesAuthoritativeZeroTarget",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R71LocalSerialTest.TargetReservationCapturesTicksBeforeCreatorStarts",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R90CtaEngine.PooledTickAndBarDispatch",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R90ExecPool.ArbiPoolForwardsEverything",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R90ExecPool.LocalPoolForwardsEverything",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "S5MainK43TraderResidency.ProviderWithoutCallbackChannelIsStillDeletedAndUnloaded",
+   "signal-6"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "UnresolvedReportJournal.SymlinkAndVisiblePathReplacementFailClosed",
+   "skipped"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtArbiExecuterSerialization.DifferentCodesCanRunInParallel",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtArbiExecuterSerialization.LostEventRemainsObservableAcrossReadyLostReadyBurst",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtArbiExecuterSerialization.QueuedReadyRecoveryIsDiscardedAfterChannelEpochChanges",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtArbiExecuterSerialization.QuiesceFailsWhenCallbackDropsAcceptedQueuedEvent",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtArbiExecuterSerialization.QuiesceWaitsForAcceptedFifoAndRejectsNewIngress",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtArbiExecuterSerialization.ReadyAndLostCallbacksRemainOrdered",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtArbiExecuterSerialization.SameCodePositionsAreFifoAndNeverOverlap",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.DifferentCodesCanRunCallbacksInParallel",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.InitialReadyExceptionBlocksRetryBeforeCreationCompletes",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.MissingMatchingExchangeRetainsOmittedTargetAndReportsError",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.OmittedTargetThreeToZeroUsesRawCodeAndExchangeAndPersists",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.OmittedTargetZeroUsesSignedTargetDelta",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.PositionChangedTargetAndDiffSurviveReload",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.QuiesceDrainsAcceptedPoolFifoAndRejectsNewIngress",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.QuiesceStaysIncompleteWhenCallbackDropsQueuedEvent",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.ReadyPrecedesRecoveryAndOldReadyEpochIsSkipped",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.ReadyTraderBindingWaitsForExplicitPostRegistrationReady",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.RecoveryUsesDiffCapturedBeforeQueuedTrade",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.RuntimeFailureAfterPartialTradeBlocksTargetReplay",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.RuntimeReadyExceptionFailsUnitAndSkipsRecovery",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.SameCodeCallbacksAreFifoAndReentryDoesNotDeadlock",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.SnapshotFailureBlocksPositionDispatchAndPersistsTombstoneWhenWritable",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "WtDiffExecuterConcurrencyTest.TradeAndTargetUseConsistentPersistedSnapshot",
+   "sanitizer-tsan(signal-6)"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "r31_stra_mgr.sel_real_plugin_exports_and_accepts_the_by_value_deleter_abi",
+   "signal-6"
+  ]
+ ],
+ "disabled_total": 163,
+ "list_failures": [],
+ "external_platform_skipped": [
+  {
+   "id": "BUG-L00-010",
+   "requires": "Windows/MSVC",
+   "rerun": "MSVC 实际构建并运行双 DLL、多 TU、静态初始化与卸载重载测试",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-L01-018",
+   "requires": "Windows/MSVC",
+   "rerun": "MSVC 下运行有效/非法/1969 日期矩阵（weekday helper 合组及日期映射传播用例）",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R160-002",
+   "requires": "Windows/MSVC 签名构建",
+   "rerun": "MSVC 签名构建并验证产物",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R42-001",
+   "requires": "Linux + MSan（或 Valgrind）",
+   "rerun": "MSan 全插桩构建后运行 r41_ticker/r101_sel_ctx_gap/r120_sel_engine_run 等相关用例的未初始化读取检测",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R93-005",
+   "requires": "真实 XTP SDK",
+   "rerun": "真实 XTP SDK 回调排空/Release 合同验证",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R93-006",
+   "requires": "真实 YD 柜台/官方时序",
+   "rerun": "部分成交、首包终态、乱序与 TradeVolume 语义验证",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-P05-010",
+   "requires": "有来源的真实历史 LMDB 键样本及版本说明",
+   "rerun": "以真实样本运行 AD 键兼容读取验证",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R8-003",
+   "requires": "完整 dtservo/生产数据服务环境",
+   "rerun": "完整 dtservo 生产数据服务验收",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-P04-011",
+   "requires": "真实 provider（部分：其余需合同裁定）",
+   "rerun": "真实 provider 同步回调合同与同刻并发回调顺序验证",
+   "status": "skipped(platform)"
+  }
+ ]
+}

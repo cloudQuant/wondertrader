@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <map>
@@ -172,20 +173,25 @@ TEST(t6_ctploader_yaml_smoke, valid_file_applies_config_and_initializes_fake_wit
 		EXPECT_TRUE(std::filesystem::exists(workspacePath / "CTPFlow" / "9550" / "T6USER"));
 	}
 
-	EXPECT_EQ(0, result);
-	EXPECT_EQ(static_cast<CThostFtdcTraderApi*>(&api), pUserApi);
+	// K02=B（2026-11-04 用户裁定）：run() 等待 SPI 发布的终态并返回该结果码，随后注销 SPI、释放 API、
+	// 清空 pUserApi，不再调用 Join()。假 API 在费率批次进行中报告前置断开，终态为失败（改前期望：返回 0、
+	// 保留 pUserApi、调用 Join，见 evidence/20261104-s5-main/k02-loader/before-int1/）。
+	EXPECT_EQ(EXIT_FAILURE, result);
+	EXPECT_EQ(nullptr, pUserApi);
 	EXPECT_EQ(1, api.create_calls);
 	EXPECT_EQ("./CTPFlow/9550/T6USER/", api.flow_path);
 	EXPECT_EQ("tcp://127.0.0.1:1", api.front);
-	EXPECT_EQ(1, api.register_spi_calls);
-	EXPECT_NE(nullptr, api.spi);
+	EXPECT_EQ(2, api.register_spi_calls);
+	EXPECT_EQ(nullptr, api.spi);
 	EXPECT_EQ(1, api.subscribe_public_calls);
 	EXPECT_EQ(1, api.subscribe_private_calls);
 	EXPECT_EQ(1, api.init_calls);
-	EXPECT_EQ(1, api.join_calls);
+	EXPECT_EQ(0, api.join_calls);
+	EXPECT_EQ(1u, api.n_auth_);
+	EXPECT_EQ(1u, api.n_login_);
 	EXPECT_EQ((std::vector<std::string>{
 		"CreateFtdcTraderApi", "RegisterSpi", "SubscribePublicTopic",
-		"SubscribePrivateTopic", "RegisterFront", "Init", "Join"}), api.call_order);
+		"SubscribePrivateTopic", "RegisterFront", "Init", "RegisterSpi"}), api.call_order);
 
 	EXPECT_EQ("tcp://127.0.0.1:1", FRONT_ADDR);
 	EXPECT_EQ("9550", BROKER_ID);

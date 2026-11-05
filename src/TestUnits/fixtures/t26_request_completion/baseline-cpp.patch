@@ -1,0 +1,510 @@
+--- a/CTPLoader/TraderSpi.cpp
++++ b/CTPLoader/TraderSpi.cpp
+@@ -9,6 +9,7 @@
+ #include <filesystem>
+ #include <string_view>
+ #include <atomic>
++#include <climits>
+ #include <cmath>
+ #include <cfloat>
+ #include <cerrno>
+@@ -410,10 +411,24 @@
+ 
+ void CTraderSpi::ReqQryInstrument()
+ {
+-	AppendQuery([]() {
++	if (QRYFEES)
++	{
++		std::lock_guard<std::mutex> lock(_mtx);
++		if (_fee_batch_active || _stopped)
++		{
++			_fee_response_failed.store(true, std::memory_order_release);
++			return;
++		}
++		_fee_batch_active = true;
++		_fee_watchdog.reset(new boost::thread([this]() { RunFeeWatchdog(); }));
++	}
++	AppendQuery([this]() {
+ 		CThostFtdcQryInstrumentField req;
+ 		memset(&req, 0, sizeof(req));
+-		int iResult = pUserApi->ReqQryInstrument(&req, ++iRequestID);
++		const int requestId = QRYFEES ? BeginFeeQuery(FeeQueryKind::Instrument) : ++iRequestID;
++		if (requestId == 0) { FinishFeeBatchIfReady(); return false; }
++		int iResult = pUserApi->ReqQryInstrument(&req, requestId);
++		if (QRYFEES) FinishFeeSubmission(requestId, iResult);
+ 		std::cerr << "--->>> Quering instruments: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
+ 		return true;
+ 	});
+@@ -421,7 +436,7 @@
+ 
+ void CTraderSpi::ReqQryCommission(const Contract& cInfo)
+ {
+-	AppendQuery([&cInfo]() {
++	AppendFeeQuery([this, cInfo]() {
+ 		//auto it = _fees.find(cInfo.m_strProduct);
+ 		//if (it != _fees.end())
+ 		//	return false;
+@@ -433,7 +448,10 @@
+ 		const std::string& instrumentId = cInfo.m_strAltCode.empty() ? cInfo.m_strCode : cInfo.m_strAltCode;
+ 		std::snprintf(req.InstrumentID, sizeof(req.InstrumentID), "%s", instrumentId.c_str());
+ 		strcpy(req.ExchangeID, cInfo.m_strExchg.c_str());
+-		int iResult = pUserApi->ReqQryInstrumentCommissionRate(&req, ++iRequestID);
++		const int requestId = BeginFeeQuery(FeeQueryKind::Commission, &cInfo);
++		if (requestId == 0) { FinishFeeBatchIfReady(); return false; }
++		int iResult = pUserApi->ReqQryInstrumentCommissionRate(&req, requestId);
++		FinishFeeSubmission(requestId, iResult);
+ 		std::cerr << "--->>> Quering commission ratio: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
+ 		return true;
+ 	});
+@@ -441,7 +459,7 @@
+ 
+ void CTraderSpi::ReqQryMargin(const Contract& cInfo)
+ {
+-	AppendQuery([&cInfo]() {
++	AppendFeeQuery([this, cInfo]() {
+ 		//auto it = _margins.find(cInfo.m_strProduct);
+ 		//if (it != _margins.end())
+ 		//	return false;
+@@ -454,7 +472,10 @@
+ 		std::snprintf(req.InstrumentID, sizeof(req.InstrumentID), "%s", instrumentId.c_str());
+ 		strcpy(req.ExchangeID, cInfo.m_strExchg.c_str());
+ 		req.HedgeFlag = THOST_FTDC_HF_Speculation;
+-		int iResult = pUserApi->ReqQryInstrumentMarginRate(&req, ++iRequestID);
++		const int requestId = BeginFeeQuery(FeeQueryKind::Margin, &cInfo);
++		if (requestId == 0) { FinishFeeBatchIfReady(); return false; }
++		int iResult = pUserApi->ReqQryInstrumentMarginRate(&req, requestId);
++		FinishFeeSubmission(requestId, iResult);
+ 		std::cerr << "--->>> Quering margin ratio: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
+ 		return true;
+ 	});
+@@ -484,6 +505,157 @@
+ 	}
+ 
+ 	_query_ready.notify_one();
++}
++
++void CTraderSpi::AppendFeeQuery(const QueryTask& task)
++{
++	{
++		std::lock_guard<std::mutex> lock(_mtx);
++		if (_stopped || _fee_finish_claimed)
++		{
++			_fee_response_failed.store(true, std::memory_order_release);
++			return;
++		}
++		++_fee_queued;
++		_queries.emplace(task);
++		if (!_worker)
++			_worker.reset(new boost::thread([this]() { RunQueryWorker(); }));
++	}
++	_query_ready.notify_one();
++}
++
++int CTraderSpi::BeginFeeQuery(FeeQueryKind kind, const Contract* contract)
++{
++	std::lock_guard<std::mutex> lock(_mtx);
++	if (kind != FeeQueryKind::Instrument && _fee_queued > 0) --_fee_queued;
++	if (_stopped || _fee_finish_claimed || iRequestID == INT_MAX)
++	{
++		_fee_response_failed.store(true, std::memory_order_release);
++		if (kind == FeeQueryKind::Instrument) _fee_batch_sealed = true;
++		return 0;
++	}
++	const int requestId = ++iRequestID;
++#ifndef WT_T26_QUERY_TIMEOUT_MS
++#define WT_T26_QUERY_TIMEOUT_MS 60000
++#endif
++	FeeQueryState state{kind, false, false,
++		std::chrono::steady_clock::now() + std::chrono::milliseconds(WT_T26_QUERY_TIMEOUT_MS)};
++	if (contract)
++	{
++		state.code = contract->m_strCode;
++		state.altcode = contract->m_strAltCode;
++		state.product = contract->m_strProduct;
++		state.exchange = contract->m_strExchg;
++	}
++	_fee_requests.emplace(requestId, std::move(state));
++	return requestId;
++}
++
++bool CTraderSpi::AcceptFeeCallback(int requestId, FeeQueryKind kind, bool responseError)
++{
++	std::lock_guard<std::mutex> lock(_mtx);
++	const auto it = _fee_requests.find(requestId);
++	if (_fee_batch_active && !_fee_finish_claimed && it != _fee_requests.end() &&
++		it->second.kind == kind && it->second.terminal && responseError)
++		_fee_response_failed.store(true, std::memory_order_release);
++	return _fee_batch_active && !_fee_finish_claimed && it != _fee_requests.end()
++		&& it->second.kind == kind && !it->second.terminal;
++}
++
++bool CTraderSpi::FeeCallbackIdentityMatches(int requestId, const std::string& code, const std::string& exchange)
++{
++	std::lock_guard<std::mutex> lock(_mtx);
++	const auto it = _fee_requests.find(requestId);
++	if (it == _fee_requests.end() || code.empty()) return false;
++	const FeeQueryState& state = it->second;
++	return (exchange.empty() || exchange == state.exchange) &&
++		(code == state.code || (!state.altcode.empty() && code == state.altcode) ||
++		 (state.kind == FeeQueryKind::Commission && code == state.product));
++}
++
++bool CTraderSpi::RememberFeeOrigin(int requestId, std::map<std::string, std::string>& origins, const std::string& code)
++{
++	std::lock_guard<std::mutex> lock(_mtx);
++	const auto it = _fee_requests.find(requestId);
++	if (it == _fee_requests.end()) return false;
++	const auto entry = origins.emplace(code, it->second.exchange);
++	return entry.second || entry.first->second == it->second.exchange;
++}
++
++void CTraderSpi::FinishFeeCallback(int requestId, bool last)
++{
++	if (!last) return;
++	std::lock_guard<std::mutex> lock(_mtx);
++	auto it = _fee_requests.find(requestId);
++	if (it != _fee_requests.end()) it->second.terminal = true;
++}
++
++void CTraderSpi::FinishFeeSubmission(int requestId, int result)
++{
++	{
++		std::lock_guard<std::mutex> lock(_mtx);
++		auto it = _fee_requests.find(requestId);
++		if (it == _fee_requests.end()) return;
++		it->second.callReturned = true;
++		if (result != 0)
++		{
++			_fee_response_failed.store(true, std::memory_order_release);
++			it->second.terminal = true;
++			if (it->second.kind == FeeQueryKind::Instrument) _fee_batch_sealed = true;
++		}
++	}
++	FinishFeeBatchIfReady();
++}
++
++bool CTraderSpi::FeeQueryExpiredLocked() const
++{
++	const auto now = std::chrono::steady_clock::now();
++	for (const auto& request : _fee_requests)
++		if ((!request.second.terminal || !request.second.callReturned) && now >= request.second.deadline) return true;
++	return false;
++}
++
++void CTraderSpi::RunFeeWatchdog()
++{
++	std::unique_lock<std::mutex> lock(_mtx);
++	while (!_stopped && !_fee_finish_claimed)
++	{
++		_fee_watchdog_ready.wait_for(lock, std::chrono::milliseconds(100));
++		if (_stopped || _fee_finish_claimed) return;
++		if (FeeQueryExpiredLocked())
++		{
++			_fee_finish_claimed = true;
++			lock.unlock();
++			std::cerr << "--->>> CTP fee query timed out" << std::endl;
++			exit(EXIT_FAILURE);
++		}
++	}
++}
++
++void CTraderSpi::FinishFeeBatchIfReady()
++{
++	std::shared_ptr<boost::thread> worker;
++	std::shared_ptr<boost::thread> watchdog;
++	{
++		std::lock_guard<std::mutex> lock(_mtx);
++		if (!_fee_batch_active || !_fee_batch_sealed || _fee_finish_claimed || _fee_queued != 0)
++			return;
++		for (const auto& request : _fee_requests)
++			if (!request.second.terminal || !request.second.callReturned) return;
++		_fee_finish_claimed = true;
++		_stopped = true;
++		worker = _worker;
++		watchdog = _fee_watchdog;
++	}
++	_query_ready.notify_all();
++	_fee_watchdog_ready.notify_all();
++	// The final terminal callback can run on the query worker itself. Drain the
++	// other owned threads; that worker cannot join itself and exits the process.
++	if (watchdog && watchdog->joinable() && watchdog->get_id() != boost::this_thread::get_id()) watchdog->join();
++	if (worker && worker->joinable() && worker->get_id() != boost::this_thread::get_id()) worker->join();
++	if (_fee_response_failed.load(std::memory_order_acquire)) exit(EXIT_FAILURE);
++	DumpToJson();
++	exit(DumpFees() ? EXIT_SUCCESS : EXIT_FAILURE);
+ }
+ 
+ bool CTraderSpi::IsQueryQueueEmpty()
+@@ -500,9 +672,15 @@
+ 		QueryTask task;
+ 		{
+ 			std::unique_lock<std::mutex> lock(_mtx);
+-			_query_ready.wait(lock, [this]() { return _stopped || !_queries.empty(); });
++			_query_ready.wait_for(lock, std::chrono::milliseconds(100), [this]() { return _stopped || !_queries.empty(); });
+ 			if (_stopped)
+ 				return;
++			if (FeeQueryExpiredLocked())
++			{
++				lock.unlock();
++				std::cerr << "--->>> CTP fee query timed out" << std::endl;
++				exit(EXIT_FAILURE);
++			}
+ 			if (_queries.empty())
+ 				continue;
+ 
+@@ -521,6 +699,12 @@
+ 			std::unique_lock<std::mutex> lock(_mtx);
+ 			if (_query_ready.wait_for(lock, std::chrono::milliseconds(10), [this]() { return _stopped; }))
+ 				return;
++			if (FeeQueryExpiredLocked())
++			{
++				lock.unlock();
++				std::cerr << "--->>> CTP fee query timed out" << std::endl;
++				exit(EXIT_FAILURE);
++			}
+ 		}
+ 
+ 		// This lock-held check is the task's commit/active linearization point:
+@@ -533,7 +717,14 @@
+ 				return;
+ 		}
+ 
+-		bool ret = task();
++		bool ret = false;
++		try { ret = task(); }
++		catch (...)
++		{
++			std::cerr << "--->>> CTP query dispatch threw an exception" << std::endl;
++			if (QRYFEES) exit(EXIT_FAILURE);
++			throw;
++		}
+ 		size_t queueLeft = 0;
+ 		{
+ 			std::lock_guard<std::mutex> lock(_mtx);
+@@ -551,15 +742,20 @@
+ CTraderSpi::~CTraderSpi()
+ {
+ 	std::shared_ptr<boost::thread> worker;
++	std::shared_ptr<boost::thread> watchdog;
+ 	{
+ 		std::lock_guard<std::mutex> lock(_mtx);
+ 		_stopped = true;
+ 		worker = _worker;
++		watchdog = _fee_watchdog;
+ 	}
+ 	_query_ready.notify_all();
++	_fee_watchdog_ready.notify_all();
+ 
+ 	if (worker && worker->joinable())
+ 		worker->join();
++	if (watchdog && watchdog->joinable())
++		watchdog->join();
+ }
+ 
+ inline bool isOption(TThostFtdcProductClassType pClass)
+@@ -638,10 +834,18 @@
+ }
+ 
+ 
+-void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
++void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+ {
+-	if (!IsErrorRspInfo(pRspInfo))
++	std::unique_lock<std::mutex> feeCallback(_fee_callback_mutex, std::defer_lock);
++	if (QRYFEES)
+ 	{
++		feeCallback.lock();
++		if (!AcceptFeeCallback(nRequestID, FeeQueryKind::Instrument, pRspInfo && pRspInfo->ErrorID != 0)) return;
++	}
++	const bool responseError = IsErrorRspInfo(pRspInfo);
++	if (QRYFEES && responseError) _fee_response_failed.store(true, std::memory_order_release);
++	if (!responseError)
++	{
+ 		if (pInstrument)
+ 		{
+ 			if (!hasTerminator(pInstrument->InstrumentID) ||
+@@ -661,7 +865,7 @@
+ 			if (it != _contracts.end())
+ 			{
+ 				std::cerr << "--->>> " << pInstrument->ExchangeID << "." << pInstrument->InstrumentID << " already exists, skipped" << std::endl;
+-				return;
++				goto instrument_payload_done;
+ 			}
+ 
+ 			bool bOption = isOption(pInstrument->ProductClass);
+@@ -855,11 +1059,12 @@
+ 		}
+ 	}
+ 
++instrument_payload_done:
+ 	if (bIsLast)
+ 	{
+ 		if(QRYFEES)
+ 		{
+-			for (auto& v : _contracts)
++			if (!_fee_response_failed.load(std::memory_order_acquire)) for (auto& v : _contracts)
+ 			{
+ 				const Contract& cInfo = v.second;
+ 				if(!SET_FILTERS.empty() && SET_FILTERS.find(cInfo.m_strCode) == SET_FILTERS.end() 
+@@ -869,6 +1074,13 @@
+ 				ReqQryCommission(cInfo);
+ 				ReqQryMargin(cInfo);
+ 			}
++			FinishFeeCallback(nRequestID, true);
++			{
++				std::lock_guard<std::mutex> lock(_mtx);
++				_fee_batch_sealed = true;
++			}
++			feeCallback.unlock();
++			FinishFeeBatchIfReady();
+ 		}
+ 		else
+ 		{
+@@ -878,12 +1090,23 @@
+ 	}
+ }
+ 
+-void CTraderSpi::OnRspQryInstrumentCommissionRate(CThostFtdcInstrumentCommissionRateField *pInstrumentCommissionRate, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
++void CTraderSpi::OnRspQryInstrumentCommissionRate(CThostFtdcInstrumentCommissionRateField *pInstrumentCommissionRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+ {
++	std::unique_lock<std::mutex> feeCallback(_fee_callback_mutex);
++	if (QRYFEES && !AcceptFeeCallback(nRequestID, FeeQueryKind::Commission, pRspInfo && pRspInfo->ErrorID != 0)) return;
+ 	const bool responseError = IsErrorRspInfo(pRspInfo);
+ 	if (responseError) _fee_response_failed.store(true, std::memory_order_release);
+-	if(!responseError && pInstrumentCommissionRate != NULL)
++	bool identityValid = true;
++	if (QRYFEES && pInstrumentCommissionRate != NULL)
+ 	{
++		identityValid = hasTerminator(pInstrumentCommissionRate->InstrumentID) &&
++			hasTerminator(pInstrumentCommissionRate->ExchangeID) &&
++			FeeCallbackIdentityMatches(nRequestID, pInstrumentCommissionRate->InstrumentID,
++				pInstrumentCommissionRate->ExchangeID);
++		if (!identityValid) _fee_response_failed.store(true, std::memory_order_release);
++	}
++	if(!responseError && pInstrumentCommissionRate != NULL && identityValid)
++	{
+ 		const auto& rate = *pInstrumentCommissionRate;
+ 		const bool finite = isValidFeeValue(rate.OpenRatioByMoney) && isValidFeeValue(rate.CloseRatioByMoney) &&
+ 			isValidFeeValue(rate.CloseTodayRatioByMoney) && isValidFeeValue(rate.OpenRatioByVolume) &&
+@@ -901,28 +1124,44 @@
+ 		}
+ 		else
+ 		{
+-			FeeInfo& fInfo = _fees[rate.InstrumentID];
+-			fInfo._byvol = !money; // Includes the all-zero, mode-independent case.
+-			fInfo._open = money ? rate.OpenRatioByMoney : rate.OpenRatioByVolume;
+-			fInfo._close = money ? rate.CloseRatioByMoney : rate.CloseRatioByVolume;
+-			fInfo._closet = money ? rate.CloseTodayRatioByMoney : rate.CloseTodayRatioByVolume;
++			FeeInfo candidate{};
++			candidate._byvol = !money; // Includes the all-zero, mode-independent case.
++			candidate._open = money ? rate.OpenRatioByMoney : rate.OpenRatioByVolume;
++			candidate._close = money ? rate.CloseRatioByMoney : rate.CloseRatioByVolume;
++			candidate._closet = money ? rate.CloseTodayRatioByMoney : rate.CloseTodayRatioByVolume;
++			const auto existing = _fees.find(rate.InstrumentID);
++			if (QRYFEES && (!RememberFeeOrigin(nRequestID, _fee_origins, rate.InstrumentID) ||
++				(existing != _fees.end() && (existing->second._byvol != candidate._byvol ||
++				 existing->second._open != candidate._open || existing->second._close != candidate._close ||
++				 existing->second._closet != candidate._closet))))
++				_fee_response_failed.store(true, std::memory_order_release);
++			else
++				_fees[rate.InstrumentID] = candidate;
+ 		}
+ 	}
+ 
+-	if (IsQueryQueueEmpty() && QRYFEES)
+-	{
+-		if (_fee_response_failed.load(std::memory_order_acquire)) exit(EXIT_FAILURE);
+-		DumpToJson();
+-		exit(DumpFees() ? EXIT_SUCCESS : EXIT_FAILURE);
+-	}
++	if (QRYFEES) FinishFeeCallback(nRequestID, bIsLast);
++	feeCallback.unlock();
++	if (QRYFEES) FinishFeeBatchIfReady();
+ }
+ 
+-void CTraderSpi::OnRspQryInstrumentMarginRate(CThostFtdcInstrumentMarginRateField *pInstrumentMarginRate, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
++void CTraderSpi::OnRspQryInstrumentMarginRate(CThostFtdcInstrumentMarginRateField *pInstrumentMarginRate, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+ {
++	std::unique_lock<std::mutex> feeCallback(_fee_callback_mutex);
++	if (QRYFEES && !AcceptFeeCallback(nRequestID, FeeQueryKind::Margin, pRspInfo && pRspInfo->ErrorID != 0)) return;
+ 	const bool responseError = IsErrorRspInfo(pRspInfo);
+ 	if (responseError) _fee_response_failed.store(true, std::memory_order_release);
+-	if (!responseError && pInstrumentMarginRate != NULL)
++	bool identityValid = true;
++	if (QRYFEES && pInstrumentMarginRate != NULL)
+ 	{
++		identityValid = hasTerminator(pInstrumentMarginRate->InstrumentID) &&
++			hasTerminator(pInstrumentMarginRate->ExchangeID) &&
++			FeeCallbackIdentityMatches(nRequestID, pInstrumentMarginRate->InstrumentID,
++				pInstrumentMarginRate->ExchangeID);
++		if (!identityValid) _fee_response_failed.store(true, std::memory_order_release);
++	}
++	if (!responseError && pInstrumentMarginRate != NULL && identityValid)
++	{
+ 		const auto& rate = *pInstrumentMarginRate;
+ 		// The exported margin field has no per-volume mode. Validate even the
+ 		// fields not selected for output so unsupported data cannot become zero.
+@@ -936,18 +1175,19 @@
+ 		}
+ 		else
+ 		{
+-			MarginInfo& mInfo = _margins[rate.InstrumentID];
+-			mInfo._long = rate.LongMarginRatioByMoney;
+-			mInfo._short = rate.ShortMarginRatioByMoney;
++			const auto existing = _margins.find(rate.InstrumentID);
++			if (QRYFEES && (!RememberFeeOrigin(nRequestID, _margin_origins, rate.InstrumentID) ||
++				(existing != _margins.end() && (existing->second._long != rate.LongMarginRatioByMoney ||
++				 existing->second._short != rate.ShortMarginRatioByMoney))))
++				_fee_response_failed.store(true, std::memory_order_release);
++			else
++				_margins[rate.InstrumentID] = MarginInfo{rate.LongMarginRatioByMoney, rate.ShortMarginRatioByMoney};
+ 		}
+ 	}
+ 
+-	if (IsQueryQueueEmpty() && QRYFEES)
+-	{
+-		if (_fee_response_failed.load(std::memory_order_acquire)) exit(EXIT_FAILURE);
+-		DumpToJson();
+-		exit(DumpFees() ? EXIT_SUCCESS : EXIT_FAILURE);
+-	}
++	if (QRYFEES) FinishFeeCallback(nRequestID, bIsLast);
++	feeCallback.unlock();
++	if (QRYFEES) FinishFeeBatchIfReady();
+ }
+ 
+ void CTraderSpi::LoadFromJson()
+@@ -1323,13 +1563,33 @@
+ {
+ 	std::cerr << "--->>> " << "OnFrontDisconnected" << std::endl;
+ 	std::cerr << "--->>> Reason = " << nReason << std::endl;
++	bool active = false;
++	{
++		std::lock_guard<std::mutex> lock(_mtx);
++		active = _fee_batch_active && !_fee_finish_claimed;
++	}
++	if (active) exit(EXIT_FAILURE);
+ }
+ 
+ 
+-void CTraderSpi::OnRspError(CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
++void CTraderSpi::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+ {
+ 	std::cerr << "--->>> " << "OnRspError" << std::endl;
+ 	IsErrorRspInfo(pRspInfo);
++	if (!QRYFEES) return;
++	{
++		std::lock_guard<std::mutex> callbackLock(_fee_callback_mutex);
++		std::lock_guard<std::mutex> lock(_mtx);
++		auto it = _fee_requests.find(nRequestID);
++		if (it == _fee_requests.end() || _fee_finish_claimed) return;
++		_fee_response_failed.store(true, std::memory_order_release);
++		if (bIsLast)
++		{
++			it->second.terminal = true;
++			if (it->second.kind == FeeQueryKind::Instrument) _fee_batch_sealed = true;
++		}
++	}
++	FinishFeeBatchIfReady();
+ }
+ 
+ bool CTraderSpi::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)

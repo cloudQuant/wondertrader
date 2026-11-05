@@ -83,7 +83,9 @@ std::string commodity_config(const CommodityIdentityConfig& fields)
 	return "{" + json_quote(fields.exchg) + ":{" + json_quote(fields.pid) + ":{" +
 		"\"name\":" + json_quote(fields.name) + "," +
 		"\"session\":" + json_quote(fields.session) + "," +
-		"\"holiday\":" + json_quote(fields.holiday) + "}}}";
+		"\"holiday\":" + json_quote(fields.holiday) + "," +
+		// I03-NEW-053（卡 4a=A）：商品须有正 pricetick 与正整数 volscale 才就绪。
+		"\"pricetick\":1,\"volscale\":1}}}";
 }
 
 std::string session_config(const std::string& session)
@@ -170,7 +172,12 @@ protected:
 	"NIGHT":{"name":"夜盘偏移","offset":300,
 		"sections":[{"from":2100,"to":2300},{"from":900,"to":1500}]},
 	"OUTER":{"name":"外盘","offset":-300,
-		"sections":[{"from":2100,"to":2359}]},
+		"sections":[{"from":2100,"to":2359}]}
+})";
+	// I03-NEW-053（卡 2 配置整批校验后发布）：缺 sections 的条目会使整份文件被拒，
+	// 因此 BADSEC 从共享夹具移出，由各用例单独加载并断言整份不发布。
+	static constexpr const char* R1_BADSEC_JSON = R"({
+	"LATE":{"name":"同文件合法条目","offset":0,"sections":[{"from":900,"to":1500}]},
 	"BADSEC":{"name":"无sections","offset":0}
 })";
 
@@ -178,7 +185,12 @@ protected:
 	"SSE":{"STK":{"name":"股票","session":"DAY0","holiday":"CHINA","pricetick":0.01,
 		"volscale":1,"category":0,"covermode":0,"pricemode":0,"trademode":1,"lotstick":1,"minlots":1}},
 	"SHFE":{"rb":{"name":"螺纹钢","session":"NIGHT","holiday":"CHINA","pricetick":1,
-		"volscale":10,"covermode":0,"pricemode":1},
+		"volscale":10,"covermode":0,"pricemode":1}}
+})";
+	// I03-NEW-053（卡 4a=A）：缺 session / session 不存在的商品使整份商品文件不发布，
+	// nosec/ghost 移出共享夹具，由 commodities 用例单独加载断言。
+	static constexpr const char* R1_BAD_COMMODITIES_JSON = R"({
+	"SHFE":{"late":{"name":"同文件合法品种","session":"NIGHT","holiday":"CHINA","pricetick":1,"volscale":1},
 		"nosec":{"name":"缺session","pricetick":1,"volscale":1,"covermode":0,"pricemode":0},
 		"ghost":{"name":"假session","session":"NOPE","pricetick":1,"volscale":1,"covermode":0,"pricemode":0}}
 })";
@@ -188,8 +200,7 @@ protected:
 		"600000":{"name":"浦发银行","exchg":"SSE","product":"STK","altcode":"SH600000",
 			"opendate":20200101,"expiredate":20500101,"maxlimitqty":100000,"minlimitqty":1},
 		"600999":{"name":"退市股","exchg":"SSE","product":"STK",
-			"opendate":20100101,"expiredate":20231231,"volscale":5},
-		"BADPROD":{"name":"未知品种","exchg":"SSE","product":"NOPE"}
+			"opendate":20100101,"expiredate":20231231,"volscale":5}
 	},
 	"SHFE":{
 		"rb2401":{"name":"螺纹2401","exchg":"SHFE","product":"rb",
@@ -201,6 +212,11 @@ protected:
 })";
 
 	static constexpr const char* R1_HOLIDAYS_JSON = R"({"CHINA":[20240101,20240210]})";
+	// I03-NEW-053（卡 4a=A）：引用未知/未就绪品种的合约使整份合约文件不发布。
+	static constexpr const char* R1_BAD_CONTRACTS_JSON = R"({
+	"SSE":{"600001":{"name":"同文件合法合约","exchg":"SSE","product":"STK"},
+		"BADPROD":{"name":"未知品种","exchg":"SSE","product":"NOPE"}}
+})";
 
 	WTSBaseDataMgr	_mgr;
 	std::string	_sess_file;
@@ -363,11 +379,15 @@ TEST(R1BaseDataMgrConfigBoundary, commodity_identity_fields_enforce_caps_and_ret
 				continue;
 			}
 
-			if (field == 3 && edge == 3)
+			// I03-NEW-053（卡 4a=A）：空 exchg/pid/name/session 的商品不能就绪，整份文件不发布
+			// 并给出拒绝原因（原期望：空字段照样登记、空 session 仅告警跳过）；空 holiday 仍可登记。
+			if (edge == 3 && field != 4)
 			{
-				EXPECT_TRUE(loaded);
-				EXPECT_TRUE(logs.contains("No session configured"));
-				EXPECT_EQ(nullptr, manager.getSessionComms(""));
+				EXPECT_FALSE(loaded) << fieldNames[field] << " empty";
+				EXPECT_TRUE(logs.contains("rejected, nothing loaded")) << fieldNames[field] << " empty";
+				EXPECT_TRUE(logs.contains(field == 3 ? "session is not loaded" : "empty identity")) << fieldNames[field] << " empty";
+				EXPECT_EQ(nullptr, manager.getSessionComms(sessionId.c_str())) << fieldNames[field] << " empty";
+				EXPECT_EQ(nullptr, manager.getSessionComms("")) << fieldNames[field] << " empty";
 				continue;
 			}
 
@@ -391,7 +411,9 @@ TEST(R1BaseDataMgrConfigBoundary, commodity_identity_fields_enforce_caps_and_ret
 TEST(R1BaseDataMgrConfigBoundary, contract_identity_fields_enforce_caps_and_retain_values)
 {
 	ScopedBoundaryLogCapture logs;
-	const std::array<std::size_t, 4> capacities = { 32, 64, 32, 32 };
+	// Import must also fit AD's narrower storage key, independently of the
+	// generic WTSContractInfo object's larger exchange field.
+	const std::array<std::size_t, 4> capacities = { 32, 64, MAX_EXCHANGE_LENGTH, 32 };
 	const std::array<const char*, 4> fieldNames = { "code", "name", "exchg", "product" };
 
 	for (std::size_t field = 0; field < fieldNames.size(); ++field)
@@ -418,6 +440,17 @@ TEST(R1BaseDataMgrConfigBoundary, contract_identity_fields_enforce_caps_and_reta
 			const std::string contractsPath = write_tmp("identity_contracts.json", contract_config(fields));
 			WTSBaseDataMgr manager;
 			ASSERT_TRUE(manager.loadSessions(sessionsPath.c_str()));
+			// I03-NEW-053（卡 4a=A）：空 exchg/product 的商品不能就绪而不登记，引用它的合约
+			// 也随之整份不发布（原期望：空字段的商品与合约照样登记）。
+			if (edge == 3 && (field == 2 || field == 3))
+			{
+				EXPECT_FALSE(manager.loadCommodities(commoditiesPath.c_str())) << fieldNames[field] << " empty";
+				logs.clear();
+				EXPECT_FALSE(manager.loadContracts(contractsPath.c_str())) << fieldNames[field] << " empty";
+				EXPECT_TRUE(logs.contains("rejected, nothing loaded")) << fieldNames[field] << " empty";
+				EXPECT_EQ(0u, manager.getGlobalSize()) << fieldNames[field] << " empty";
+				continue;
+			}
 			ASSERT_TRUE(manager.loadCommodities(commoditiesPath.c_str())) << fieldNames[field] << " edge " << edge;
 			logs.clear();
 			const bool loaded = manager.loadContracts(contractsPath.c_str());
@@ -426,7 +459,10 @@ TEST(R1BaseDataMgrConfigBoundary, contract_identity_fields_enforce_caps_and_reta
 			if (oversized)
 			{
 				EXPECT_FALSE(loaded) << fieldNames[field] << " length " << value.size();
-				EXPECT_TRUE(logs.contains("Contract identity exceeds field capacity"))
+				const char* expected = (field == 0 || field == 2)
+					? "Contract identity exceeds storage field capacity"
+					: "Contract identity exceeds field capacity";
+				EXPECT_TRUE(logs.contains(expected))
 					<< fieldNames[field] << " length " << value.size();
 				EXPECT_EQ(0u, manager.getGlobalSize());
 				continue;
@@ -493,8 +529,12 @@ TEST_F(R1BaseDataMgrTest, sessions_loaded_and_missing_sections_skipped)
 	EXPECT_EQ(day0->getCloseTime(), 1500u);
 	WTSSessionInfo* daya = _mgr.getSession("DAYA");
 	ASSERT_TRUE(daya != NULL);
-	// BADSEC 没有 sections：loadSessions 在加入 session map 前跳过该项。
+	// I03-NEW-053（卡 2 整批校验后发布）：BADSEC 没有 sections，整份文件被拒，
+	// 同文件的 LATE 也不发布，已发布会话保持不变（原期望为逐项跳过）。
+	const std::string badSec = write_tmp("badsec_sessions.json", R1_BADSEC_JSON);
+	EXPECT_FALSE(_mgr.loadSessions(badSec.c_str()));
 	EXPECT_EQ(_mgr.getSession("BADSEC"), nullptr);
+	EXPECT_EQ(_mgr.getSession("LATE"), nullptr);
 	WTSArray* all = _mgr.getAllSessions();
 	ASSERT_TRUE(all != NULL);
 	// DAY0/DAYA/NIGHT/OUTER 共 4 个。
@@ -516,7 +556,12 @@ TEST_F(R1BaseDataMgrTest, commodities_lookup_and_missing_session_branches)
 	EXPECT_TRUE(rb->isFuture());
 	EXPECT_EQ(rb->getVolScale(), 10u);
 
-	// 缺 session → warn+continue；session 不存在 → error+continue：两者都不入库
+	// I03-NEW-053（卡 4a=A）：缺 session、session 不存在的商品使整份文件不发布，
+	// 同文件的合法品种 late 也不登记，先前已登记的品种不受影响（原期望为逐项跳过）。
+	const std::string badComms = write_tmp("bad_commodities.json", R1_BAD_COMMODITIES_JSON);
+	EXPECT_FALSE(_mgr.loadCommodities(badComms.c_str()));
+	EXPECT_EQ(_mgr.getCommodity("SHFE.late"), nullptr);
+	EXPECT_EQ(_mgr.getCommodity("SHFE", "rb"), rb);
 	EXPECT_EQ(_mgr.getCommodity("SHFE.nosec"), nullptr);
 	EXPECT_EQ(_mgr.getCommodity("SHFE", "nosec"), nullptr);
 	EXPECT_EQ(_mgr.getCommodity("SHFE.ghost"), nullptr);
@@ -553,8 +598,13 @@ TEST_F(R1BaseDataMgrTest, contract_lookup_by_code_fullcode_altcode_and_dates)
 	EXPECT_EQ(delisted->getVolScale(), 5u);		// 合约级 volscale 覆盖品种级
 	EXPECT_EQ(_mgr.getContract("600999", "SSE", 20240101), nullptr);
 	ASSERT_TRUE(_mgr.getContract("600999", "SSE", 20200601) != NULL);
-	// 未知 product 且无 rules 的合约被跳过
+	// I03-NEW-053（卡 4a=A）：未知 product 且无 rules 的合约使整份合约文件不发布，
+	// 同文件的合法合约 600001 也不登记，已有合约不变（原期望为逐项跳过）。
+	const std::string badContracts = write_tmp("bad_contracts.json", R1_BAD_CONTRACTS_JSON);
+	EXPECT_FALSE(_mgr.loadContracts(badContracts.c_str()));
 	EXPECT_EQ(_mgr.getContract("BADPROD", ""), nullptr);
+	EXPECT_EQ(_mgr.getContract("600001", "SSE"), nullptr);
+	EXPECT_EQ(_mgr.getGlobalSize(), 4u);
 	// rules 自动生成品种
 	WTSCommodityInfo* autoComm = _mgr.getCommodity("SHFE", "autoX");
 	ASSERT_TRUE(autoComm != NULL);
@@ -563,7 +613,7 @@ TEST_F(R1BaseDataMgrTest, contract_lookup_by_code_fullcode_altcode_and_dates)
 
 TEST_F(R1BaseDataMgrTest, code_list_sorted_by_fullcode_and_index_queries)
 {
-	// 600000/600999/rb2401/autoX 共 4 条（BADPROD 被跳过）
+	// 600000/600999/rb2401/autoX 共 4 条（BADPROD 已移出共享夹具，见上一用例）
 	EXPECT_EQ(_mgr.getGlobalSize(), 4u);
 	EXPECT_EQ(_mgr.getContractSize(""), 4u);
 	EXPECT_EQ(_mgr.getContractSize("SSE"), 2u);
@@ -659,7 +709,7 @@ TEST_F(R1BaseDataMgrTest, boundary_time_offsets_and_weekend_shift)
 	// getOffsetMins()==-300 <0：isStart → tDate*10000+open(2100)；isEnd → 次日*10000+close(2359)
 	EXPECT_EQ(_mgr.getBoundaryTime("OUTER", 20240110, true, true), 202401102100ull);
 	EXPECT_EQ(_mgr.getBoundaryTime("OUTER", 20240110, true, false), 202401112359ull);
-	// 缺少 sections 的 session 在加载时被跳过；未知 session 的边界查询返回 0。
+	// 缺少 sections 的 session 不会被发布（I03-NEW-053）；未知 session 的边界查询返回 0。
 	EXPECT_EQ(_mgr.getBoundaryTime("BADSEC", 20240110, true, true), 0ull);
 }
 
@@ -690,7 +740,7 @@ TEST_F(R1BaseDataMgrTest, calc_trading_date_branches)
 
 TEST_F(R1BaseDataMgrTest, missing_commodity_pid_falls_back_to_empty_tpl)
 {
-	// SHFE.nosec 未入库 → getTplIDByPID 返回 "" → 模板查不到 → 工作日 false
+	// SHFE.nosec 未入库（I03-NEW-053：已移出共享夹具，仍不存在）→ getTplIDByPID 返回 "" → 模板查不到 → 工作日 false
 	EXPECT_FALSE(_mgr.isHoliday("SHFE.nosec", 20240108, false));
 	EXPECT_FALSE(_mgr.isHoliday("SHFE.nosec", 20240101, false));
 	// 已入库品种走 SHFE.rb → CHINA 模板

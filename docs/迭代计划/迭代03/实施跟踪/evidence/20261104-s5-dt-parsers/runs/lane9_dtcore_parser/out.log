@@ -1,0 +1,90 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R18ParserAdapterTest.*:R44ParserAdapterEdgesTest.*
+[==========] Running 31 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 23 tests from R18ParserAdapterTest
+[ RUN      ] R18ParserAdapterTest.FreshAdapterIsIdleAndExposesBaseDataMgr
+[       OK ] R18ParserAdapterTest.FreshAdapterIsIdleAndExposesBaseDataMgr (2 ms)
+[ RUN      ] R18ParserAdapterTest.InitExtReturnsFalseWhenApiInitFails
+[       OK ] R18ParserAdapterTest.InitExtReturnsFalseWhenApiInitFails (9 ms)
+[ RUN      ] R18ParserAdapterTest.InitExtRetainsApiWhenProviderInitThrows
+[       OK ] R18ParserAdapterTest.InitExtRetainsApiWhenProviderInitThrows (2 ms)
+[ RUN      ] R18ParserAdapterTest.InitExtRetainsApiWhenRegisterSpiThrows
+[       OK ] R18ParserAdapterTest.InitExtRetainsApiWhenRegisterSpiThrows (1 ms)
+[ RUN      ] R18ParserAdapterTest.InitExtRetainsApiWhenSubscribeThrows
+[       OK ] R18ParserAdapterTest.InitExtRetainsApiWhenSubscribeThrows (1 ms)
+[ RUN      ] R18ParserAdapterTest.ProviderReleaseThrowRetainsOwnerAndIsNotRetried
+[       OK ] R18ParserAdapterTest.ProviderReleaseThrowRetainsOwnerAndIsNotRetried (1 ms)
+[ RUN      ] R18ParserAdapterTest.InitExtTransfersNonNullApiBeforeArgumentValidation
+[       OK ] R18ParserAdapterTest.InitExtTransfersNonNullApiBeforeArgumentValidation (1 ms)
+[ RUN      ] R18ParserAdapterTest.QuarantineOwnerKeepsFailedAdapterAndApiAlive
+[       OK ] R18ParserAdapterTest.QuarantineOwnerKeepsFailedAdapterAndApiAlive (13 ms)
+[ RUN      ] R18ParserAdapterTest.RepeatedInitExtDoesNotLoseTransferredApis
+[       OK ] R18ParserAdapterTest.RepeatedInitExtDoesNotLoseTransferredApis (2 ms)
+[ RUN      ] R18ParserAdapterTest.InitExtSubscribesEveryContractFullCode
+[       OK ] R18ParserAdapterTest.InitExtSubscribesEveryContractFullCode (1 ms)
+[ RUN      ] R18ParserAdapterTest.RunReportsConnectionCommandSubmission
+[       OK ] R18ParserAdapterTest.RunReportsConnectionCommandSubmission (2 ms)
+[ RUN      ] R18ParserAdapterTest.InitReleasesRetainedConfigWhenNoApiWasCreated
+[       OK ] R18ParserAdapterTest.InitReleasesRetainedConfigWhenNoApiWasCreated (1 ms)
+[ RUN      ] R18ParserAdapterTest.ReleaseReturnsRetainedConfigWhenModuleLoadFails
+dlopen(/parsers/libr18_missing_parser.dylib, 0x0002): tried: '/parsers/libr18_missing_parser.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/parsers/libr18_missing_parser.dylib' (no such file), '/parsers/libr18_missing_parser.dylib' (no such file)
+[       OK ] R18ParserAdapterTest.ReleaseReturnsRetainedConfigWhenModuleLoadFails (2 ms)
+[ RUN      ] R18ParserAdapterTest.InitRejectsNullCfgEmptyModuleAndMissingModule
+dlopen(/parsers/libr18_no_such_parser_module.dylib, 0x0002): tried: '/parsers/libr18_no_such_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/parsers/libr18_no_such_parser_module.dylib' (no such file), '/parsers/libr18_no_such_parser_module.dylib' (no such file)
+dlopen(/parsers/libr18_no_such_parser_module.dylib, 0x0002): tried: '/parsers/libr18_no_such_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/parsers/libr18_no_such_parser_module.dylib' (no such file), '/parsers/libr18_no_such_parser_module.dylib' (no such file)
+[       OK ] R18ParserAdapterTest.InitRejectsNullCfgEmptyModuleAndMissingModule (2 ms)
+[ RUN      ] R18ParserAdapterTest.StoppedAdapterNeverFillsContractInfo
+[       OK ] R18ParserAdapterTest.StoppedAdapterNeverFillsContractInfo (77 ms)
+[ RUN      ] R18ParserAdapterTest.HandleQuoteRejectedWhenDatesZeroOrContractUnknown
+[       OK ] R18ParserAdapterTest.HandleQuoteRejectedWhenDatesZeroOrContractUnknown (1 ms)
+[ RUN      ] R18ParserAdapterTest.HandleQuoteKeepsPresetContractInsteadOfLookingUp
+[       OK ] R18ParserAdapterTest.HandleQuoteKeepsPresetContractInsteadOfLookingUp (56 ms)
+[ RUN      ] R18ParserAdapterTest.ThreeLevel2HandlersRejectBeforeDataManager
+[       OK ] R18ParserAdapterTest.ThreeLevel2HandlersRejectBeforeDataManager (2 ms)
+[ RUN      ] R18ParserAdapterTest.ThreeLevel2HandlersResolveContractAndDelegateWrite
+[       OK ] R18ParserAdapterTest.ThreeLevel2HandlersResolveContractAndDelegateWrite (9 ms)
+[ RUN      ] R18ParserAdapterTest.MgrAddAndGetGuards
+[       OK ] R18ParserAdapterTest.MgrAddAndGetGuards (13 ms)
+[ RUN      ] R18ParserAdapterTest.MgrRunAndReleaseDriveEveryAdapter
+[       OK ] R18ParserAdapterTest.MgrRunAndReleaseDriveEveryAdapter (2 ms)
+[ DISABLED ] R18ParserAdapterTest.DISABLED_HandleQuoteCrashesWhenDataManagerIsNull
+[ RUN      ] R18ParserAdapterTest.ReleaseIsIdempotent
+[       OK ] R18ParserAdapterTest.ReleaseIsIdempotent (7 ms)
+[ RUN      ] R18ParserAdapterTest.MgrRejectsEmptyIdAndAcceptsUniqueId
+[       OK ] R18ParserAdapterTest.MgrRejectsEmptyIdAndAcceptsUniqueId (2 ms)
+[----------] 23 tests from R18ParserAdapterTest (219 ms total)
+
+[----------] 8 tests from R44ParserAdapterEdgesTest
+[ RUN      ] R44ParserAdapterEdgesTest.InitExtRejectsNullApiWithoutTouchingId
+[       OK ] R44ParserAdapterEdgesTest.InitExtRejectsNullApiWithoutTouchingId (1 ms)
+[ RUN      ] R44ParserAdapterEdgesTest.InitExtWithEmptyContractTableSubscribesEmptySet
+[       OK ] R44ParserAdapterEdgesTest.InitExtWithEmptyContractTableSubscribesEmptySet (2 ms)
+[ RUN      ] R44ParserAdapterEdgesTest.SingleInitExtReleasesApi
+[       OK ] R44ParserAdapterEdgesTest.SingleInitExtReleasesApi (12 ms)
+[ RUN      ] R44ParserAdapterEdgesTest.RepeatedInitExtNeedsContract
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_parser_adapter_edges_test.cpp:217: Skipped
+Repeated initExt semantics are unspecified; define the ownership and replacement contract before enabling this scenario.
+
+[  SKIPPED ] R44ParserAdapterEdgesTest.RepeatedInitExtNeedsContract (1 ms)
+[ RUN      ] R44ParserAdapterEdgesTest.ReleasedAdapterDropsLevel2Callbacks
+[       OK ] R44ParserAdapterEdgesTest.ReleasedAdapterDropsLevel2Callbacks (19 ms)
+[ RUN      ] R44ParserAdapterEdgesTest.NullBaseDataMgrStillAllowsLogAndRelease
+[       OK ] R44ParserAdapterEdgesTest.NullBaseDataMgrStillAllowsLogAndRelease (2 ms)
+[ RUN      ] R44ParserAdapterEdgesTest.EmptyAdapterMgrRunAndReleaseAreNoops
+[       OK ] R44ParserAdapterEdgesTest.EmptyAdapterMgrRunAndReleaseAreNoops (1 ms)
+[ RUN      ] R44ParserAdapterEdgesTest.InitFailsOnExistingButUnloadableModuleFile
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib' (slice is not valid mach-o file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib' (slice is not valid mach-o file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib' (slice is not valid mach-o file), '/System/Volumes/Preboot/Cryptexes/OS/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib' (slice is not valid mach-o file)
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib' (slice is not valid mach-o file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib' (slice is not valid mach-o file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib' (slice is not valid mach-o file), '/System/Volumes/Preboot/Cryptexes/OS/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r44_pa_46408_7/mod/parsers/libr44bad.dylib' (slice is not valid mach-o file)
+[       OK ] R44ParserAdapterEdgesTest.InitFailsOnExistingButUnloadableModuleFile (21 ms)
+[ DISABLED ] R44ParserAdapterEdgesTest.DISABLED_RunAfterReleaseUsesFreedApi
+[----------] 8 tests from R44ParserAdapterEdgesTest (61 ms total)
+
+[----------] Global test environment tear-down
+[==========] 31 tests from 2 test suites ran. (282 ms total)
+[  PASSED  ] 30 tests.
+[  SKIPPED ] 1 test, listed below:
+[  SKIPPED ] R44ParserAdapterEdgesTest.RepeatedInitExtNeedsContract
+
+  YOU HAVE 2 DISABLED TESTS
+

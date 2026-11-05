@@ -168,7 +168,6 @@ void WtStraDtSel::on_schedule(ISelStraCtx* ctx, uint32_t uDate, uint32_t uTime)
 		WTSValueArray* closes = kline->extractData(KFT_CLOSE);
 		double hc = closes->maxvalue(-days, -2); // 区间内最高收盘价
 		double lc = closes->minvalue(-days, -2); // 区间内最低收盘价
-		double curPx = closes->at(-1);           // 当前收盘价
 		closes->release(); // 释放收盘价数据数组资源
 
 		// 获取当前交易日的开盘、最高和最低价
@@ -181,9 +180,6 @@ void WtStraDtSel::on_schedule(ISelStraCtx* ctx, uint32_t uDate, uint32_t uTime)
 		double upper_bound = openPx + _k1 * (std::max(hh - lc, hc - ll));
 		// 下边界 = 开盘价 - K2 * max(最高价-最低收盘价, 最高收盘价-最低价)
 		double lower_bound = openPx - _k2 * std::max(hh - lc, hc - ll);
-
-		// 获取品种信息
-		WTSCommodityInfo* commInfo = ctx->stra_get_comminfo(curCode.c_str());
 
 		// 获取当前持仓并转换为持仓手数
 		double curPos = ctx->stra_get_position(curCode.c_str()) / trdUnit;

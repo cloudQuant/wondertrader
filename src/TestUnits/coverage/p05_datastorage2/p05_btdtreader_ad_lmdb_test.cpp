@@ -384,7 +384,10 @@ TEST_F(P05BtReaderADTest, DayBarRoundTripFieldByField)
 	for(size_t i = 0; i < bars.size(); i++)
 	{
 		EXPECT_EQ(out[i].date, bars[i].date) << i;
-		EXPECT_EQ(out[i].time, bars[i].time) << i;
+		// 卡3 3c=C（用户裁定 2026-11-04，R4-BUG-13）：库内为旧 writer 写法 time=交易日，
+		// LMDB 值无逐条版本，读端一律把日线 time 归一为 0；其余字段逐项保留。
+		ASSERT_NE(bars[i].time, 0u) << i;
+		EXPECT_EQ(out[i].time, 0u) << i;
 		EXPECT_DOUBLE_EQ(out[i].open, bars[i].open) << i;
 		EXPECT_DOUBLE_EQ(out[i].high, bars[i].high) << i;
 		EXPECT_DOUBLE_EQ(out[i].low, bars[i].low) << i;
@@ -949,6 +952,9 @@ TEST_F(P05BtReaderADTest, MalformedLmdbValuesAreRejectedWithoutChangingOutput)
 		ASSERT_TRUE(_reader->read_raw_bars("KEX", "valid2409", KP_DAY, buffer));
 		ASSERT_EQ(sizeof(WTSBarStruct), buffer.size());
 		const WTSBarStruct* out = reinterpret_cast<const WTSBarStruct*>(buffer.data());
+		EXPECT_EQ(20240601u, out->date);
+		// 3c=C：读端日线 time 归一为 0（库内 time=20240601）
+		EXPECT_EQ(0u, out->time);
 		EXPECT_DOUBLE_EQ(200.0, out->open);
 		EXPECT_EQ(0xA1B2C3D4u, out->reserve_);
 	}
@@ -958,7 +964,8 @@ TEST_F(P05BtReaderADTest, MalformedLmdbValuesAreRejectedWithoutChangingOutput)
 		ASSERT_EQ(sizeof(WTSBarStruct), buffer.size());
 		const WTSBarStruct* out = reinterpret_cast<const WTSBarStruct*>(buffer.data());
 		EXPECT_EQ(20240603u, out->date);
-		EXPECT_EQ(20240603u, out->time);
+		// 3c=C：旧 value ABI 转换后日线 time 同样归一为 0（库内 time=20240603）
+		EXPECT_EQ(0u, out->time);
 		EXPECT_DOUBLE_EQ(150.0, out->open);
 		EXPECT_DOUBLE_EQ(152.0, out->high);
 		EXPECT_DOUBLE_EQ(149.0, out->low);
@@ -976,7 +983,8 @@ TEST_F(P05BtReaderADTest, MalformedLmdbValuesAreRejectedWithoutChangingOutput)
 		ASSERT_EQ(sizeof(WTSBarStruct), buffer.size());
 		const WTSBarStruct* out = reinterpret_cast<const WTSBarStruct*>(buffer.data());
 		EXPECT_EQ(20240605u, out->date);
-		EXPECT_EQ(20240605u, out->time);
+		// 3c=C：packed v2 value 转换后日线 time 归一为 0（库内 time=20240605）
+		EXPECT_EQ(0u, out->time);
 		EXPECT_DOUBLE_EQ(170.0, out->open);
 		EXPECT_DOUBLE_EQ(172.0, out->high);
 		EXPECT_DOUBLE_EQ(169.0, out->low);

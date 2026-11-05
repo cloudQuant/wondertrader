@@ -15,6 +15,7 @@
 
 #include "../Includes/FasterDefs.h"
 #include "../Includes/SelStrategyDefs.h"
+#include "../Includes/IStrategyPluginV2.h"
 
 #include "../Share/DLLHelper.hpp"
 
@@ -60,7 +61,8 @@ private:
 		DllHandle			_module_inst;
 		ISelStrategyFact*	_fact;
 		FuncCreateSelStraFact	_creator;
-		FuncDeleteSelStraFact	_remover;
+		FuncDeleteSelStraFact	_remover;	// v1, never called by the host
+		const WtStrategyPluginApiV2* _api;	// validated versioned table (card 4b=A)
 	} StraFactInfo;
 	typedef wt_hashmap<std::string, StraFactInfo> StraFactMap;
 	StraFactMap	_factories;
@@ -68,6 +70,7 @@ private:
 	std::unordered_set<DllHandle> _conflicting_factory_modules;
 
 	typedef wt_hashmap<std::string, SelStrategyPtr> StrategyMap;
+	std::mutex _strategies_mutex;
 	StrategyMap	_strategies;
 };
 

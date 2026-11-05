@@ -349,7 +349,7 @@ TEST_F(R23RdmCountTest, KlineCountIsTailWindowOfHisDayBars)
 	// KP_DAY → getRTKilneBlock 直接返回 NULL（:2164），全部来自 his
 	WTSKlineSlice* slice = _reader.readKlineSliceByCount("SSE.STK.600000", KP_DAY, 2, 202401102359);
 	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 2u);
+	EXPECT_EQ(slice->size(), 2);
 	const WTSBarStruct* first = slice->at(0);
 	const WTSBarStruct* last = slice->at(-1);
 	ASSERT_TRUE(first != NULL);
@@ -362,7 +362,7 @@ TEST_F(R23RdmCountTest, KlineCountIsTailWindowOfHisDayBars)
 	// count 大于可用条数 → 被 min() 收敛到全部 4 条
 	WTSKlineSlice* all = _reader.readKlineSliceByCount("SSE.STK.600000", KP_DAY, 100, 202401102359);
 	ASSERT_TRUE(all != NULL);
-	EXPECT_EQ(all->size(), 4u);
+	EXPECT_EQ(all->size(), 4);
 	EXPECT_EQ(all->at(0)->date, 20240105u);
 	all->release();
 }
@@ -378,7 +378,7 @@ TEST_F(R23RdmCountTest, KlineCountWithZeroEtimeUsesYear2030Sentinel)
 	// etime==0 → :2238 置为 203012312359，尾窗落在最后一天
 	WTSKlineSlice* slice = _reader.readKlineSliceByCount("SSE.STK.600000", KP_DAY, 1, 0);
 	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 1u);
+	EXPECT_EQ(slice->size(), 1);
 	const WTSBarStruct* only = slice->at(0);
 	ASSERT_TRUE(only != NULL);
 	EXPECT_EQ(only->date, 20240108u);
@@ -406,7 +406,7 @@ TEST_F(R23RdmCountTest, KlineCountSplicesHisTailWithRtMin1Block)
 
 	WTSKlineSlice* slice = _reader.readKlineSliceByCount("SSE.STK.600000", KP_Minute1, 4, 202401101500);
 	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 4u);
+	EXPECT_EQ(slice->size(), 4);
 	EXPECT_EQ(slice->get_block_counts(), 2u);
 	const WTSBarStruct* first = slice->at(0);
 	ASSERT_TRUE(first != NULL);
@@ -420,7 +420,7 @@ TEST_F(R23RdmCountTest, KlineCountSplicesHisTailWithRtMin1Block)
 	// count 恰好等于 RT 条数 → 不再回补 his
 	WTSKlineSlice* only_rt = _reader.readKlineSliceByCount("SSE.STK.600000", KP_Minute1, 3, 202401101500);
 	ASSERT_TRUE(only_rt != NULL);
-	EXPECT_EQ(only_rt->size(), 3u);
+	EXPECT_EQ(only_rt->size(), 3);
 	EXPECT_EQ(only_rt->get_block_counts(), 1u);
 	EXPECT_EQ(only_rt->at(0)->time % 10000, 1450u);
 	only_rt->release();
@@ -461,7 +461,7 @@ TEST_F(R23RdmCountTest, KlineCountWithEmptyHistoryKeepsRealtimeBars)
 
 	WTSKlineSlice* slice = _reader.readKlineSliceByCount("SSE.STK.600000", KP_Minute1, 5, 202401101500);
 	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 2u);
+	EXPECT_EQ(slice->size(), 2);
 	EXPECT_EQ(slice->get_block_counts(), 1u);
 	ASSERT_TRUE(slice->at(0) != NULL);
 	ASSERT_TRUE(slice->at(-1) != NULL);

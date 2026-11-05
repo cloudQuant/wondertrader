@@ -336,13 +336,24 @@ TEST(n06_cta_ctx, dualthrust_unrepresentable_days_waits_and_releases_slice)
 
 TEST(n06_cta_ctx, dualthrust_undefined_short_windows_wait_without_signals)
 {
-	// This checks scheduling safety only; it does not define whether days 0/1
-	// should be accepted or how those configurations should eventually behave.
-	for (uint32_t days : {0u, 1u})
+	// Iteration 03 card 8d requires init to reject days=0 before callbacks.
+	WtStraDualThrust zero("s3-zero-window");
+	VarHolder zeroCfg(makeDtCfg(0, 0.5, 0.5));
+	MockCtaCtx zeroCtx;
+	const bool initialized = zero.init(zeroCfg.get());
+	if (initialized)
+		zero.on_init(&zeroCtx);
+	EXPECT_FALSE(initialized);
+	EXPECT_TRUE(zeroCtx.subs.empty());
+	EXPECT_TRUE(zeroCtx.orders.empty());
+	EXPECT_TRUE(zeroCtx.indexValues.empty());
+
+	// A one-day window remains accepted, but waits without signals.
+	for (uint32_t days : {1u})
 	{
 		WtStraDualThrust dt("s3-short-window");
 		VarHolder cfg(makeDtCfg(days, 0.5, 0.5));
-		ASSERT_TRUE(dt.init(cfg.get()));  // Preserve the current init behavior.
+		ASSERT_TRUE(dt.init(cfg.get()));
 		std::vector<WTSBarStruct> bars(2);
 		bars[0].open = 100; bars[0].high = 102; bars[0].low = 99; bars[0].close = 101;
 		bars[1].open = 100; bars[1].high = 110; bars[1].low = 99; bars[1].close = 109;
@@ -464,7 +475,7 @@ TEST(n06_cta_ctx, DISABLED_ZERO_PERIOD_DAYS_DIVIDE_CLASS)
 	ma.on_schedule(&ctx, 20240102, 150000);   // 除零 → inf，不崩溃但结果无意义
 
 	WtStraDualThrust dt("s8");
-	VarHolder cfg2(makeDtCfg(0, 0.5, 0.5));
-	dt.init(cfg2.get());
+	VarHolder cfg2(makeDtCfg(2, 0.5, 0.5));
+	ASSERT_TRUE(dt.init(cfg2.get()));
 	dt.on_schedule(&ctx, 20240102, 150000);
 }

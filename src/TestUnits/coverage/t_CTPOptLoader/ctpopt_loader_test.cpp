@@ -14,6 +14,7 @@
  *  - OnFrontConnected / ReqAuth / ReqUserLogin / ReqQryInstrument / OnRspUserLogin 成功分支：
  *    都要解引用全局 pUserApi（NULL）。
  */
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <chrono>
@@ -82,7 +83,7 @@ public:
 	{
 		const auto nonce = std::chrono::steady_clock::now().time_since_epoch().count();
 		_path = std::filesystem::temp_directory_path() /
-			("wt_ctpoptloader_option_roundtrip_" + std::to_string(nonce));
+			("wt_ctpoptloader_option_roundtrip_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(nonce));
 		std::filesystem::create_directories(_path);
 	}
 
@@ -276,7 +277,7 @@ TEST(CTPOptLoaderRun, yaml_content_fills_globals_and_stops_before_module_load)
 	FRONT_ADDR = "untouched";
 	pUserApi = nullptr;
 
-	EXPECT_EQ(run(cfg, true, false), 0);
+	EXPECT_EQ(run(cfg, true, false), 1) << "I03-NEW-091 / K02=B: configuration errors return non-zero";
 	EXPECT_EQ(FRONT_ADDR, "tcp://127.0.0.1:1234");
 	EXPECT_EQ(BROKER_ID, "brk9999");
 	EXPECT_EQ(INVESTOR_ID, "inv001");
@@ -318,7 +319,7 @@ TEST(CTPOptLoaderRun, yaml_content_honours_configured_names_and_flags)
 		"  contfile: mycont.json\n"
 		"  module: \"" + modulePath + "\"\n";
 
-	EXPECT_EQ(run(cfg.c_str(), true, false), 0);
+	EXPECT_EQ(run(cfg.c_str(), true, false), 1) << "I03-NEW-091 / K02=B: configuration errors return non-zero";
 	EXPECT_EQ(CLASSMASK, 7u);
 	EXPECT_EQ(COMM_FILE, "mycomm.json");
 	EXPECT_EQ(CONT_FILE, "mycont.json");
@@ -329,30 +330,30 @@ TEST(CTPOptLoaderRun, yaml_content_honours_configured_names_and_flags)
 	EXPECT_EQ(pUserApi, nullptr);
 }
 
-TEST(CTPOptLoaderRun, empty_content_returns_zero_without_touching_globals)
+TEST(CTPOptLoaderRun, empty_content_is_rejected_without_touching_globals)
 {
 	COMM_FILE = "sentinel-comm";
 	FRONT_ADDR = "sentinel-front";
 
 	// 空内容 -> YAML 根节点为 null -> 直接 return 0，连配置都不解析
-	EXPECT_EQ(run("", true, false), 0);
+	EXPECT_EQ(run("", true, false), 1) << "I03-NEW-091 / K02=B: configuration errors return non-zero";
 	EXPECT_EQ(COMM_FILE, "sentinel-comm");
 	EXPECT_EQ(FRONT_ADDR, "sentinel-front");
 	EXPECT_EQ(pUserApi, nullptr);
 }
 
-TEST(CTPOptLoaderRun, missing_json_file_returns_zero_without_touching_globals)
+TEST(CTPOptLoaderRun, missing_json_file_is_rejected_without_touching_globals)
 {
 	// isFile=true 且不以 .ini 结尾 -> load_from_file 路径；文件不存在返回 NULL
 	FRONT_ADDR = "sentinel-front";
 	CONT_FILE = "sentinel-cont";
-	EXPECT_EQ(run("t4_no_such_loader_cfg.json", true, true), 0);
+	EXPECT_EQ(run("t4_no_such_loader_cfg.json", true, true), 1) << "I03-NEW-091 / K02=B: configuration errors return non-zero";
 	EXPECT_EQ(FRONT_ADDR, "sentinel-front");
 	EXPECT_EQ(CONT_FILE, "sentinel-cont");
 	EXPECT_EQ(pUserApi, nullptr);
 }
 
-TEST(CTPOptLoaderRun, yaml_content_missing_ctp_section_returns_zero_without_touching_globals)
+TEST(CTPOptLoaderRun, yaml_content_missing_ctp_section_is_rejected_without_touching_globals)
 {
 	const char* cfg =
 		"config:\n"
@@ -361,13 +362,13 @@ TEST(CTPOptLoaderRun, yaml_content_missing_ctp_section_returns_zero_without_touc
 	FRONT_ADDR = "sentinel-front";
 	CONT_FILE = "sentinel-cont";
 
-	EXPECT_EQ(run(cfg, true, false), 0);
+	EXPECT_EQ(run(cfg, true, false), 1) << "I03-NEW-091 / K02=B: configuration errors return non-zero";
 	EXPECT_EQ(FRONT_ADDR, "sentinel-front");
 	EXPECT_EQ(CONT_FILE, "sentinel-cont");
 	EXPECT_EQ(pUserApi, nullptr);
 }
 
-TEST(CTPOptLoaderRun, yaml_content_missing_config_section_returns_zero_without_touching_globals)
+TEST(CTPOptLoaderRun, yaml_content_missing_config_section_is_rejected_without_touching_globals)
 {
 	const char* cfg =
 		"ctp:\n"
@@ -380,13 +381,13 @@ TEST(CTPOptLoaderRun, yaml_content_missing_config_section_returns_zero_without_t
 	FRONT_ADDR = "sentinel-front";
 	CONT_FILE = "sentinel-cont";
 
-	EXPECT_EQ(run(cfg, true, false), 0);
+	EXPECT_EQ(run(cfg, true, false), 1) << "I03-NEW-091 / K02=B: configuration errors return non-zero";
 	EXPECT_EQ(FRONT_ADDR, "sentinel-front");
 	EXPECT_EQ(CONT_FILE, "sentinel-cont");
 	EXPECT_EQ(pUserApi, nullptr);
 }
 
-TEST(CTPOptLoaderRun, yaml_content_wrong_type_ctp_section_returns_zero_without_touching_globals)
+TEST(CTPOptLoaderRun, yaml_content_wrong_type_ctp_section_is_rejected_without_touching_globals)
 {
 	const char* cfg =
 		"ctp: []\n"
@@ -395,11 +396,11 @@ TEST(CTPOptLoaderRun, yaml_content_wrong_type_ctp_section_returns_zero_without_t
 		"  mask: 7\n";
 	seedRunGlobalsForMalformedConfig();
 
-	EXPECT_EQ(run(cfg, true, false), 0);
+	EXPECT_EQ(run(cfg, true, false), 1) << "I03-NEW-091 / K02=B: configuration errors return non-zero";
 	expectRunGlobalsUnchangedAfterMalformedConfig();
 }
 
-TEST(CTPOptLoaderRun, yaml_content_wrong_type_config_section_returns_zero_without_touching_globals)
+TEST(CTPOptLoaderRun, yaml_content_wrong_type_config_section_is_rejected_without_touching_globals)
 {
 	const char* cfg =
 		"ctp:\n"
@@ -410,11 +411,11 @@ TEST(CTPOptLoaderRun, yaml_content_wrong_type_config_section_returns_zero_withou
 		"config: false\n";
 	seedRunGlobalsForMalformedConfig();
 
-	EXPECT_EQ(run(cfg, true, false), 0);
+	EXPECT_EQ(run(cfg, true, false), 1) << "I03-NEW-091 / K02=B: configuration errors return non-zero";
 	expectRunGlobalsUnchangedAfterMalformedConfig();
 }
 
-TEST(CTPOptLoaderRun, yaml_content_container_value_returns_zero_without_touching_globals)
+TEST(CTPOptLoaderRun, yaml_content_container_value_is_rejected_without_touching_globals)
 {
 	const char* cfg =
 		"ctp:\n"
@@ -428,7 +429,7 @@ TEST(CTPOptLoaderRun, yaml_content_container_value_returns_zero_without_touching
 		"  mask: 7\n";
 	seedRunGlobalsForMalformedConfig();
 
-	EXPECT_EQ(run(cfg, true, false), 0);
+	EXPECT_EQ(run(cfg, true, false), 1) << "I03-NEW-091 / K02=B: configuration errors return non-zero";
 	expectRunGlobalsUnchangedAfterMalformedConfig();
 }
 
@@ -458,7 +459,7 @@ TEST(CTPOptLoaderRun, json_file_applies_valid_config_before_required_path_check)
 	})";
 	configFile.close();
 
-	EXPECT_EQ(run(configPath.c_str(), true, true), 0);
+	EXPECT_EQ(run(configPath.c_str(), true, true), 1) << "I03-NEW-091 / K02=B: configuration errors return non-zero";
 	EXPECT_EQ(FRONT_ADDR, "tcp://127.0.0.1:1234");
 	EXPECT_EQ(BROKER_ID, "brk9999");
 	EXPECT_EQ(INVESTOR_ID, "inv001");
@@ -481,7 +482,7 @@ TEST(CTPOptLoaderRun, ini_branch_applies_builtin_defaults_for_absent_file)
 	ONLYINCFG = true;
 	INCREMENTAL = true;
 
-	EXPECT_EQ(run("t4_no_such_loader_cfg.ini", true, true), 0);
+	EXPECT_EQ(run("t4_no_such_loader_cfg.ini", true, true), 1) << "I03-NEW-091 / K02=B: configuration errors return non-zero";
 	// ini 分支的 mask 默认是 1|2|4，与 yaml 分支的 0 默认值不同
 	EXPECT_EQ(CLASSMASK, 7u);
 	EXPECT_EQ(COMM_FILE, "commodities.json");
@@ -559,14 +560,16 @@ TEST(CTPOptLoaderRun, successful_fake_creator_initializes_api_in_isolated_direct
 
 	const int result = run(completeLoaderConfig(modulePath, (workspace.path() / "output").string()).c_str(), true, false);
 
+	// K02=B（2026-11-04 用户裁定）：run() 在所有模式下等待终态结果、于非回调线程释放 API 并返回结果码；
+	// 假模块 Init() 投递成功末包。原断言（异步立即返回后 pUserApi 仍可用）见证据 before/。
 	ASSERT_EQ(result, 0);
-	ASSERT_NE(pUserApi, nullptr);
-	EXPECT_STREQ(pUserApi->GetTradingDay(), "20261028");
+	EXPECT_EQ(pUserApi, nullptr);
+	int completion = -1;
+	EXPECT_TRUE(loader_completion::finished(&completion));
+	EXPECT_EQ(completion, 0);
 	EXPECT_TRUE(std::filesystem::exists(workspace.path() / "ctpopt_creator_saw_flow_path"));
 	EXPECT_FALSE(std::filesystem::exists(workspace.path() / "ctpopt_creator_flow_path_missing"));
 	EXPECT_TRUE(std::filesystem::exists(workspace.path() / "CTPFlow" / "brk9999" / "inv001"));
-	pUserApi->Release();
-	pUserApi = nullptr;
 }
 
 /* ------------------------------------------------------------------ */

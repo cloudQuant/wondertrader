@@ -1,0 +1,23 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before/src/TestUnits/fixtures/l04_lmdb_key_bounds/key_bounds.cpp.before	2026-11-02 21:45:58
++++ src/TestUnits/fixtures/l04_lmdb_key_bounds/key_bounds.cpp	2026-11-04 17:47:45
+@@ -31,14 +31,18 @@
+     assert(std::memcmp(rawHft + offset, hftTail, sizeof(hftTail)) == 0);
+     const std::string longExchg(MAX_EXCHANGE_LENGTH, 'E');
+     const std::string longCode(MAX_INSTRUMENT_LENGTH, 'C');
+-    for (const char* ex : {static_cast<const char*>(nullptr), "", longExchg.c_str()}) {
++    for (const char* ex : {static_cast<const char*>(nullptr), longExchg.c_str()}) {
+         rejects([&] { LMDBBarKey k(ex, code.c_str(), 1); });
+         rejects([&] { LMDBHftKey k(ex, code.c_str(), 1, 1); });
+     }
+-    for (const char* co : {static_cast<const char*>(nullptr), "", longCode.c_str()}) {
++    for (const char* co : {static_cast<const char*>(nullptr), longCode.c_str()}) {
+         rejects([&] { LMDBBarKey k(exchg.c_str(), co, 1); });
+         rejects([&] { LMDBHftKey k(exchg.c_str(), co, 1, 1); });
+     }
++    // Iteration 03 s5: empty fields fit the fixed key (historical strcpy behavior the
++    // l04 coverage lane relies on); product entries reject them via lmdbKeyIdentityValid.
++    { LMDBBarKey k("", code.c_str(), 1); LMDBHftKey h(exchg.c_str(), "", 1, 1); (void)k; (void)h; }
++    assert(!lmdbKeyIdentityValid("", code.c_str()) && !lmdbKeyIdentityValid(exchg.c_str(), ""));
+     // Rejection must not depend on reading beyond fixed-size, non-NUL fields.
+     char noTermExchg[MAX_EXCHANGE_LENGTH]; std::memset(noTermExchg, 'E', sizeof(noTermExchg));
+     char noTermCode[MAX_INSTRUMENT_LENGTH]; std::memset(noTermCode, 'C', sizeof(noTermCode));

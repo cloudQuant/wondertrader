@@ -1,0 +1,99 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/WtDataStorageAD/WtDataReaderAD.cpp	2026-11-04 17:51:37
++++ src/WtDataStorageAD/WtDataReaderAD.cpp	2026-11-04 21:22:17
+@@ -11,6 +11,7 @@
+ #include "../Includes/IBaseDataMgr.h"
+ #include "../Includes/IHotMgr.h"
+ #include "../Includes/WTSDataDef.hpp"
++#include "../Includes/DateMappingClient.hpp"
+ 
+ #include <boost/filesystem.hpp>
+ #include <cstring>
+@@ -178,6 +179,23 @@
+ 	sink->reader_log(ll, buffer);
+ }
+ 
++// Decision card 1 (A+C): trading dates come from the typed client over the
++// guarded legacy IBaseDataMgr virtuals; a failure stops the read.
++static bool ad_reader_trading_date(IDataReaderSink* sink, IBaseDataMgr* mgr, const char* stdPID,
++	uint32_t uDate, uint32_t uTime, uint32_t& tradingDate)
++{
++	wtp::DateMappingClient mapping(mgr);
++	const wtp::DateMappingResult32 result = mapping.calcTradingDate(stdPID, uDate, uTime, false);
++	if (result.status != wtp::DateMappingStatus::Ok)
++	{
++		pipe_reader_log(sink, LL_ERROR, "Mapping trading date of {} at {}.{} failed: {}",
++			stdPID == NULL ? "" : stdPID, uDate, uTime, wtp::dateMappingStatusName(result.status));
++		return false;
++	}
++	tradingDate = result.value;
++	return true;
++}
++
+ namespace {
+ 
+ // Display at most the bytes the key check inspects; the field may be unterminated.
+@@ -277,6 +295,12 @@
+ 	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "readTickSlice"))
+ 		return NULL;
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	std::string stdPID = fmtutil::format<64>("{}.{}", cInfo._exchg, cInfo._product);
+ 
+ 	uint32_t curDate, curTime, curSecs;
+@@ -296,7 +320,9 @@
+ 		curSecs = (uint32_t)(etime % 100000);
+ 	}
+ 
+-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), curDate, curTime, false);
++	uint32_t endTDate = 0;
++	if (!ad_reader_trading_date(_sink, _base_data_mgr, stdPID.c_str(), curDate, curTime, endTDate))
++		return NULL;
+ 
+ 	std::string curCode = cInfo._code;
+ 	if (commInfo->isFuture())
+@@ -870,13 +896,19 @@
+ 		// Preserve the established empty-slice shape only when this reader already
+ 		// owns a cache buffer. A first zero-count read has no backing block and
+ 		// historically returns NULL.
+-		const std::string zeroCountKey = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
++		const std::string zeroCountKey = fmt::format("{}#{}", stdCode, (uint32_t)period);
+ 		auto cached = _bars_cache.find(zeroCountKey);
+ 		if (cached == _bars_cache.end() || cached->second._bars.empty())
+ 			return NULL;
+ 	}
+ 
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	std::string stdPID = fmtutil::format<64>("{}.{}", cInfo._exchg, cInfo._product);
+ 
+ 	uint32_t curDate, curTime, curSecs;
+@@ -914,7 +946,9 @@
+ 		return NULL;
+ 	}
+ 
+-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), curDate, curTime, false);
++	uint32_t endTDate = 0;
++	if (!ad_reader_trading_date(_sink, _base_data_mgr, stdPID.c_str(), curDate, curTime, endTDate))
++		return NULL;
+ 
+ 	std::string curCode = cInfo._code;
+ 	if (commInfo->isFuture())
+@@ -953,7 +987,7 @@
+ 		return NULL;
+ 	}
+ 
+-	std::string key = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
++	std::string key = fmt::format("{}#{}", stdCode, (uint32_t)period);
+ 	BarsList& barsList = _bars_cache[key];
+ 	const bool cachedFutureBar = !barsList._bars.empty() &&
+ 		(isDay ? barsList._bars.back().date : barsList._bars.back().time) > cutoffBarTime;

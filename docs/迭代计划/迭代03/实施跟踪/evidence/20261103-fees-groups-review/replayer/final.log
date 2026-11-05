@@ -1,0 +1,39 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = FeeIdentityTest.*:HisDataReplayerRuntimeTest.calcFeeForUnconfiguredCode:HisDataReplayerRuntimeTest.amountBasedFeeRequiresCommodityAtInit:HisDataReplayerRuntimeTest.amountBasedFeeUsesPhysicalContractVolumeScale:HisDataReplayerRuntimeTest.volumeBasedFeeInitAllowsMissingCommodityButFillRequiresMetadata:HisDataReplayerRuntimeTest.volumeBasedFeeUsesVerifiedPhysicalContract
+[==========] Running 13 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 8 tests from FeeIdentityTest
+[ RUN      ] FeeIdentityTest.ContextUsesPhysicalOverrideAndProductFallbackWithZeroValid
+[       OK ] FeeIdentityTest.ContextUsesPhysicalOverrideAndProductFallbackWithZeroValid (9 ms)
+[ RUN      ] FeeIdentityTest.RealDispatchAndGetterCarrySameEventIdentityAcrossRoll
+[       OK ] FeeIdentityTest.RealDispatchAndGetterCarrySameEventIdentityAcrossRoll (18 ms)
+[ RUN      ] FeeIdentityTest.ReloadInvalidatesOldRatesAndSuccessfulYamlReloadClearsFirstError
+[       OK ] FeeIdentityTest.ReloadInvalidatesOldRatesAndSuccessfulYamlReloadClearsFirstError (8 ms)
+[ RUN      ] FeeIdentityTest.InitAllowsNoFeesButRejectsExplicitBadFees
+[       OK ] FeeIdentityTest.InitAllowsNoFeesButRejectsExplicitBadFees (11 ms)
+[ RUN      ] FeeIdentityTest.FirstFeeErrorStopsPrepareAndExplicitSuccessfulReloadEnablesRetry
+[       OK ] FeeIdentityTest.FirstFeeErrorStopsPrepareAndExplicitSuccessfulReloadEnablesRetry (5 ms)
+[ RUN      ] FeeIdentityTest.InitAmountFeeRequiresLoadedProductAndAcceptsValidProduct
+[       OK ] FeeIdentityTest.InitAmountFeeRequiresLoadedProductAndAcceptsValidProduct (3 ms)
+[ RUN      ] FeeIdentityTest.InitAmountFeeRequiresRealContractAndPositiveMultiplier
+[       OK ] FeeIdentityTest.InitAmountFeeRequiresRealContractAndPositiveMultiplier (6 ms)
+[ RUN      ] FeeIdentityTest.ActiveReplayRejectsReloadWithoutDiscardingExistingSchedule
+[       OK ] FeeIdentityTest.ActiveReplayRejectsReloadWithoutDiscardingExistingSchedule (3 ms)
+[----------] 8 tests from FeeIdentityTest (66 ms total)
+
+[----------] 5 tests from HisDataReplayerRuntimeTest
+[ RUN      ] HisDataReplayerRuntimeTest.calcFeeForUnconfiguredCode
+[       OK ] HisDataReplayerRuntimeTest.calcFeeForUnconfiguredCode (7 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.amountBasedFeeRequiresCommodityAtInit
+[       OK ] HisDataReplayerRuntimeTest.amountBasedFeeRequiresCommodityAtInit (4 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.amountBasedFeeUsesPhysicalContractVolumeScale
+[       OK ] HisDataReplayerRuntimeTest.amountBasedFeeUsesPhysicalContractVolumeScale (10 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.volumeBasedFeeInitAllowsMissingCommodityButFillRequiresMetadata
+[       OK ] HisDataReplayerRuntimeTest.volumeBasedFeeInitAllowsMissingCommodityButFillRequiresMetadata (4 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.volumeBasedFeeUsesVerifiedPhysicalContract
+[       OK ] HisDataReplayerRuntimeTest.volumeBasedFeeUsesVerifiedPhysicalContract (7 ms)
+[----------] 5 tests from HisDataReplayerRuntimeTest (34 ms total)
+
+[----------] Global test environment tear-down
+[==========] 13 tests from 2 test suites ran. (100 ms total)
+[  PASSED  ] 13 tests.

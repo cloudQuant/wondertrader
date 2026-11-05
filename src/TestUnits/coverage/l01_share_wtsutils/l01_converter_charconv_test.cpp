@@ -1,5 +1,6 @@
 // L01 (lane Share/WTSUtils): Converter.hpp + charconv.hpp coverage.
 // 疑似缺陷见 docs/迭代计划/迭代01/bugs/l01_share_wtsutils.md
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include "Share/Converter.hpp"
@@ -214,7 +215,7 @@ TEST(l01_convert, csv_reader_preserves_negative_int32)
 {
 	const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
 	const std::filesystem::path path = std::filesystem::temp_directory_path() /
-		(std::string("wondertrader_converter_negative_") + std::to_string(stamp) + ".csv");
+		(std::string("wondertrader_converter_negative_") + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(stamp) + ".csv");
 	{
 		std::ofstream output(path, std::ios::binary | std::ios::trunc);
 		ASSERT_TRUE(output.good());

@@ -1,0 +1,11 @@
+--- /tmp/i03-resampled-provenance-baseline-20261103/previous-check.cpp	2026-11-03 17:33:57
++++ src/TestUnits/fixtures/i03_bar_fee_provenance_20261103/check.cpp	2026-11-03 17:30:19
+@@ -130,7 +130,7 @@
+     r.register_sink(&sink,"test"); ASSERT_TRUE(r.prepare());
+     auto raw=r._bars_cache.at("SHFE.rb.HOT#d#1"); auto aggregate=r._bars_cache.at("SHFE.rb.HOT#d#2");
+     ASSERT_EQ(raw->_physical_sources.size(),3u); EXPECT_EQ(raw->_physical_sources[0],"rb2405"); EXPECT_EQ(raw->_physical_sources[1],"rb2409");
+-    ASSERT_EQ(aggregate->_bars.size(),2u); EXPECT_EQ(aggregate->_bars[0].vol,20); EXPECT_TRUE(aggregate->_physical_sources.empty());
++    ASSERT_EQ(aggregate->_bars.size(),2u); EXPECT_EQ(aggregate->_bars[0].vol,20); ASSERT_EQ(aggregate->_physical_sources.size(),2u); EXPECT_TRUE(aggregate->_physical_sources[0].empty()); EXPECT_EQ(aggregate->_physical_sources[1],"rb2409");
+     r.run(); EXPECT_EQ(r.replay_status().state,WT_REPLAY_FAILED);
+     ASSERT_FALSE(sink.sources.empty()); EXPECT_EQ(sink.sources.front(),""); EXPECT_FALSE(r.fee_error().empty()); EXPECT_EQ(m._pos_map.count("SHFE.rb.HOT"),0u);
+ }

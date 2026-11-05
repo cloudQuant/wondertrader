@@ -64,7 +64,7 @@ TEST_F(R142ReaderADTest, R142ReaderADKlineIncrementalAppendAndRtMiss)
 	_sink->set_clock(20230103, 933, 0);
 	WTSKlineSlice* s1 = _reader->readKlineSlice("EXR.rb2301", KP_Minute1, 3, 0);
 	ASSERT_TRUE(s1 != NULL);
-	ASSERT_EQ(s1->size(), 3u);
+	ASSERT_EQ(s1->size(), 3);
 	EXPECT_EQ(s1->at(0)->time, mt(20230103, 931));
 	EXPECT_EQ(s1->at(2)->time, mt(20230103, 933));
 	s1->release();
@@ -80,7 +80,7 @@ TEST_F(R142ReaderADTest, R142ReaderADKlineIncrementalAppendAndRtMiss)
 	_sink->set_clock(20230103, 936, 0);
 	WTSKlineSlice* s2 = _reader->readKlineSlice("EXR.rb2301", KP_Minute1, 3, 0);
 	ASSERT_TRUE(s2 != NULL);
-	ASSERT_EQ(s2->size(), 3u);
+	ASSERT_EQ(s2->size(), 3);
 	auto expect_bar = [](const WTSBarStruct& actual, uint64_t time, double price) {
 		EXPECT_EQ(actual.date, 20230103u);
 		EXPECT_EQ(actual.reserve_, 0u);
@@ -123,7 +123,7 @@ TEST_F(R142ReaderADTest, R142ReaderADDayKlineCapacityGrowthReloads)
 	WTSKlineSlice* s1 = _reader->readKlineSlice("EXS.rb2301", KP_DAY, 1,
 		20230103090000000ull);
 	ASSERT_TRUE(s1 != NULL);
-	ASSERT_EQ(s1->size(), 1u);
+	ASSERT_EQ(s1->size(), 1);
 	EXPECT_EQ(s1->at(0)->date, 20230103u);
 	s1->release();
 
@@ -131,7 +131,7 @@ TEST_F(R142ReaderADTest, R142ReaderADDayKlineCapacityGrowthReloads)
 	WTSKlineSlice* s2 = _reader->readKlineSlice("EXS.rb2301", KP_DAY, 3,
 		20230103090000000ull);
 	ASSERT_TRUE(s2 != NULL);
-	ASSERT_EQ(s2->size(), 3u);
+	ASSERT_EQ(s2->size(), 3);
 	EXPECT_EQ(s2->at(0)->date, 20230101u);
 	EXPECT_EQ(s2->at(2)->date, 20230103u);
 	s2->release();

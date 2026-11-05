@@ -1,0 +1,13 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/TestUnits/coverage/p09_storage_readers/p09_rdm_window_range_test.cpp	2026-10-30 09:25:00
++++ src/TestUnits/coverage/p09_storage_readers/p09_rdm_window_range_test.cpp	2026-11-04 21:21:01
+@@ -74,7 +74,9 @@
+ 	WTSSessionInfo* getSessionByCode(const char*, const char*) override { return _session; }
+ 	WTSArray* getAllSessions() override { return NULL; }
+ 	bool isHoliday(const char*, uint32_t, bool) override { return false; }
+-	uint32_t calcTradingDate(const char*, uint32_t uDate, uint32_t, bool) override { return uDate; }
++	// I03-NEW-053（卡 1=A+C）：读端经 C 路径把 date=0 交给管理器取“当前交易日”，
++	// 并拒绝 0/非法日期结果；替身原来对 0 回吐 0，现返回固定的合法当前交易日。
++	uint32_t calcTradingDate(const char*, uint32_t uDate, uint32_t, bool) override { return uDate == 0 ? 20201231u : uDate; }
+ 	uint64_t getBoundaryTime(const char*, uint32_t tDate, bool, bool isStart) override
+ 	{
+ 		return isStart ? ((uint64_t)tDate) * 1000000000ull + 90000000ull

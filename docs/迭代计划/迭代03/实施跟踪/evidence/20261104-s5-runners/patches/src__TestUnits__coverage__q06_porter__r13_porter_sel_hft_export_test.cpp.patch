@@ -1,0 +1,19 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/q06_porter/r13_porter_sel_hft_export_test.cpp	2026-11-02 21:46:51
++++ src/TestUnits/coverage/q06_porter/r13_porter_sel_hft_export_test.cpp	2026-11-04 21:25:56
+@@ -41,6 +41,8 @@
+ USING_NS_WTP;
+ 
+ extern WtRtRunner& getRunner();
++// I03-NEW-064（迭代03）：C API 只在 runner 已配置的引擎上建上下文（.before 见 s5-runners 证据）。
++bool i03s5_fresh_configured_porter(const char* engine);
+ 
+ namespace {
+ 
+@@ -324,6 +326,7 @@
+ 	void SetUp() override
+ 	{
+ 		g_pos.clear();
++		ASSERT_TRUE(i03s5_fresh_configured_porter("sel"));
+ 		_h = create_sel_context("r13_sel_export", 20240601, 153000, "d",
+ 			"CHINA", "TRADING", 2);
+ 		ASSERT_NE(_h, 0U);

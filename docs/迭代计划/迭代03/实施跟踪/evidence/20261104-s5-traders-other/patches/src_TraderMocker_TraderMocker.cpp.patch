@@ -1,0 +1,149 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before/src/TraderMocker/TraderMocker.cpp	2026-11-04 08:16:04
++++ src/TraderMocker/TraderMocker.cpp	2026-11-04 17:59:56
+@@ -377,16 +377,16 @@
+ 			ordInfo->setPriceType(entrust->getPriceType());
+ 			ordInfo->setOrderFlag(entrust->getOrderFlag());
+ 
+-			ITraderSpi* listener = get_listener();
+-			if (listener != NULL)
+-			{
++			// BUG-R60-001: re-read the gated listener for every delivery; a
++			// release() issued from onRspEntrust must suppress onPushOrder.
++			if (ITraderSpi* listener = get_listener())
+ 				listener->onRspEntrust(entrust, NULL);
++			if (ITraderSpi* listener = get_listener())
+ 				listener->onPushOrder(ordInfo);
+-			}
+ 
+ 			_codes.insert(ct->getFullCode());
+ 
+-			write_log(listener, LL_INFO, "共有{}个品种有待撮合订单", _codes.size());
++			write_log(get_listener(), LL_INFO, "共有{}个品种有待撮合订单", _codes.size());
+ 
+ 			if (_orders == NULL)
+ 				_orders = WTSArray::create();
+@@ -425,8 +425,10 @@
+ 	int32_t count = 0;
+ 	for (const std::string& fullcode : _codes)
+ 	{
++		// BUG-R60-001: leave the pass at a code boundary but still persist the
++		// fills already applied in it (see the tail below).
+ 		if (_terminated.load(std::memory_order_acquire))
+-			return count;
++			break;
+ 
+ 		std::string code, exchg;
+ 		auto pos = fullcode.find(".");
+@@ -451,6 +453,10 @@
+ 
+ 				for (auto it = _awaits->begin(); it != _awaits->end(); it++)
+ 				{
++					// BUG-R60-001: a stop requested from a callback of this pass
++					// ends matching at the next order boundary.
++					if (_terminated.load(std::memory_order_acquire))
++						break;
+ 					WTSOrderInfo* ordInfo = (WTSOrderInfo*)it->second;
+ 					if (ordInfo->getVolLeft() == 0 ||
+ 						strcmp(ordInfo->getCode(), ct->getCode()) != 0 ||
+@@ -495,6 +501,9 @@
+ 					std::vector<uint32_t> ayVol = split_volume((uint32_t)maxVolume, (uint32_t)_min_qty, (uint32_t)_max_qty);
+ 					for (uint32_t curVol : ayVol)
+ 					{
++						// BUG-R60-001: do not start another fill after a stop request.
++						if (_terminated.load(std::memory_order_acquire))
++							break;
+ 
+ 						WTSTradeInfo* trade = WTSTradeInfo::create(curTick->code(), curTick->exchg());
+ 						trade->setDirection(ordInfo->getDirection());
+@@ -569,12 +578,14 @@
+ 						}
+ 						
+ 
+-		ITraderSpi* listener = get_listener();
+-		if (listener)
+ 						{
+ 							StdUniqueLock lock(_mutex_api);
+-			listener->onPushOrder(ordInfo);
+-			listener->onPushTrade(trade);
++							// BUG-R60-001: re-read the gated listener per delivery so a
++							// release() from onPushOrder suppresses onPushTrade.
++							if (ITraderSpi* listener = get_listener())
++								listener->onPushOrder(ordInfo);
++							if (ITraderSpi* listener = get_listener())
++								listener->onPushTrade(trade);
+ 						}
+ 
+ 						if (_trades == NULL)
+@@ -791,6 +802,8 @@
+ 		std::lock_guard<std::mutex> requestLock(_request_mutex);
+ 		_requests_closed = true;
+ 	}
++	// BUG-R60-001: isolate every later callback of this instance from the host.
++	_delivery_closed.store(true, std::memory_order_release);
+ 	_terminated.store(true, std::memory_order_release);
+ 	_io_service.stop();
+ }
+@@ -844,6 +857,9 @@
+ 		std::lock_guard<std::mutex> requestLock(_request_mutex);
+ 		_requests_closed = true;
+ 	}
++	// BUG-R60-001: no delivery starts after the stop request; deliveries already
++	// in progress finish before the joins below return.
++	_delivery_closed.store(true, std::memory_order_release);
+ 	_terminated.store(true, std::memory_order_release);
+ 	if (_released)
+ 		return;
+@@ -953,14 +969,13 @@
+ 
+ void TraderMocker::disconnect()
+ {
+-	_terminated.store(true, std::memory_order_release);
+-	// Card 9d: from a callback the matcher only observes the stop request; it is
+-	// joined later from an external thread.
+-	if (on_own_thread())
+-		return;
+-
+-	std::lock_guard<std::mutex> releaseLock(_release_mutex);
+-	join_matcher_locked();
++	// BUG-R60-001 (E contract): disconnect ends this session object exactly like
++	// release(): admission and delivery close, the matcher and io worker are
++	// joined (deferred to an external caller when invoked from a callback, card
++	// 9d) and the UDP socket is closed. A released or disconnected instance is
++	// terminal (card 9c); reconnecting uses a new TraderMocker instance, so no
++	// callback or queued request of the old session can reach the new one.
++	release();
+ }
+ 
+ bool TraderMocker::isConnected()
+@@ -989,6 +1004,8 @@
+ 	_match_started.store(true, std::memory_order_release);
+ 
+ 	boost::asio::post(_io_service, [this](){
++		// BUG-R60-001: serialized with the matcher like every other delivery.
++		StdUniqueLock stateLock(_mtx_awaits);
+ 		StdUniqueLock lock(_mutex_api);
+ 
+ 		if (ITraderSpi* listener = get_listener())
+@@ -1025,10 +1042,9 @@
+ 		 */
+ 		if(ordInfo == NULL)
+ 		{
+-			ITraderSpi* listener = get_listener();
+-			write_log(listener, LL_ERROR, "订单{}不存在或者已完成", order_id);
++			write_log(get_listener(), LL_ERROR, "订单{}不存在或者已完成", order_id);
+ 			WTSError* err = WTSError::create(WEC_ORDERCANCEL, "订单不存在或者处于不可撤销状态");
+-			if (listener)
++			if (ITraderSpi* listener = get_listener())
+ 				listener->onTraderError(err);
+ 			err->release();
+ 			return;
+@@ -1094,6 +1110,9 @@
+ 	if (_requests_closed)
+ 		return -1;
+ 	boost::asio::post(_io_service, [this](){
++		// BUG-R60-001: every delivery is serialized with the matcher by the
++		// state lock (lock order _mtx_awaits, then _mutex_api).
++		StdUniqueLock stateLock(_mtx_awaits);
+ 		WTSArray* ay = WTSArray::create();
+ 		WTSAccountInfo* accountInfo = WTSAccountInfo::create();
+ 		accountInfo->setCurrency("CNY");

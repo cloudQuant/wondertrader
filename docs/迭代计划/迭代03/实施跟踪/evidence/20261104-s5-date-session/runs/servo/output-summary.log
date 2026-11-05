@@ -1,0 +1,68 @@
+[==========] Running 24 tests from 6 test suites.
+[----------] Global test environment set-up.
+[----------] 6 tests from Q05ServoWtDataManagerTest
+[ RUN      ] Q05ServoWtDataManagerTest.FreshInstanceGuardsReturnDefaults
+[       OK ] Q05ServoWtDataManagerTest.FreshInstanceGuardsReturnDefaults (1 ms)
+[ RUN      ] Q05ServoWtDataManagerTest.InitWithoutRunnerAndStoreSectionIsSafe
+[       OK ] Q05ServoWtDataManagerTest.InitWithoutRunnerAndStoreSectionIsSafe (2 ms)
+[ RUN      ] Q05ServoWtDataManagerTest.InitWithFalseAlignFlagStillSkipsStore
+[       OK ] Q05ServoWtDataManagerTest.InitWithFalseAlignFlagStillSkipsStore (2 ms)
+[ RUN      ] Q05ServoWtDataManagerTest.InitStoreLoadFailureReturnsFalseWithoutDereferencingReader
+[       OK ] Q05ServoWtDataManagerTest.InitStoreLoadFailureReturnsFalseWithoutDereferencingReader (2 ms)
+[ RUN      ] Q05ServoWtDataManagerTest.InitStoreLoadedModuleMissingReaderSymbolsReturnsFalse
+[       OK ] Q05ServoWtDataManagerTest.InitStoreLoadedModuleMissingReaderSymbolsReturnsFalse (1 ms)
+[ RUN      ] Q05ServoWtDataManagerTest.InitStoreFactoryReturningNullReturnsFalse
+[       OK ] Q05ServoWtDataManagerTest.InitStoreFactoryReturningNullReturnsFalse (530 ms)
+[----------] 6 tests from Q05ServoWtDataManagerTest (540 ms total)
+[----------] 1 test from R102ServoExportsTest
+[ RUN      ] R102ServoExportsTest.AllQueryExportsDispatchCallbacksOnSeededStore
+[       OK ] R102ServoExportsTest.AllQueryExportsDispatchCallbacksOnSeededStore (216 ms)
+[----------] 1 test from R102ServoExportsTest (216 ms total)
+[----------] 5 tests from R102WtDataManagerTest
+[ RUN      ] R102WtDataManagerTest.TickQueriesAndSecondBarsFromFileStore
+[       OK ] R102WtDataManagerTest.TickQueriesAndSecondBarsFromFileStore (89 ms)
+[ RUN      ] R102WtDataManagerTest.KlineRangeCountCacheAssemblyAndIncremental
+[       OK ] R102WtDataManagerTest.KlineRangeCountCacheAssemblyAndIncremental (104 ms)
+[ RUN      ] R102WtDataManagerTest.SubscribeBarsAndUpdateFromTick
+[       OK ] R102WtDataManagerTest.SubscribeBarsAndUpdateFromTick (185 ms)
+[ RUN      ] R102WtDataManagerTest.IncrementalRangeProcessesBarsAfterOverlappingBoundary
+[       OK ] R102WtDataManagerTest.IncrementalRangeProcessesBarsAfterOverlappingBoundary (148 ms)
+[ RUN      ] R102WtDataManagerTest.IncrementalCountProcessesBarsAfterOverlappingBoundary
+[       OK ] R102WtDataManagerTest.IncrementalCountProcessesBarsAfterOverlappingBoundary (128 ms)
+[ DISABLED ] R102WtDataManagerTest.DISABLED_InitStoreWithoutPluginDerefsNullReader
+[----------] 5 tests from R102WtDataManagerTest (657 ms total)
+[----------] 5 tests from R133WtDataManagerTest
+[ RUN      ] R133WtDataManagerTest.minute_range_cache_and_incremental
+[       OK ] R133WtDataManagerTest.minute_range_cache_and_incremental (143 ms)
+[ RUN      ] R133WtDataManagerTest.future_bars_count_cache_erases_then_updates
+[       OK ] R133WtDataManagerTest.future_bars_count_cache_erases_then_updates (143 ms)
+[ RUN      ] R133WtDataManagerTest.subscribe_nonbase_creates_rt_map
+[       OK ] R133WtDataManagerTest.subscribe_nonbase_creates_rt_map (63 ms)
+[ RUN      ] R133WtDataManagerTest.day_range_and_count_cache_branches
+[       OK ] R133WtDataManagerTest.day_range_and_count_cache_branches (78 ms)
+[ RUN      ] R133WtDataManagerTest.realtime_day_and_second_buckets_are_cached_and_reported
+[       OK ] R133WtDataManagerTest.realtime_day_and_second_buckets_are_cached_and_reported (146 ms)
+[----------] 5 tests from R133WtDataManagerTest (580 ms total)
+[----------] 1 test from R78DtDataManager
+[ RUN      ] R78DtDataManager.unknown_contract_guards
+[       OK ] R78DtDataManager.unknown_contract_guards (57 ms)
+[----------] 1 test from R78DtDataManager (57 ms total)
+[----------] 6 tests from R8WtDataManagerSinksTest
+[ RUN      ] R8WtDataManagerSinksTest.FreshInstanceExposesNullSinks
+[       OK ] R8WtDataManagerSinksTest.FreshInstanceExposesNullSinks (2 ms)
+[ RUN      ] R8WtDataManagerSinksTest.InitBindsRunnerSinksEvenWhenStoreIsMissing
+[       OK ] R8WtDataManagerSinksTest.InitBindsRunnerSinksEvenWhenStoreIsMissing (13 ms)
+[ RUN      ] R8WtDataManagerSinksTest.InitWithAlignFlagTrueTakesSecondBranch
+[       OK ] R8WtDataManagerSinksTest.InitWithAlignFlagTrueTakesSecondBranch (12 ms)
+[ RUN      ] R8WtDataManagerSinksTest.InitWithoutRunnerLeavesSinksNull
+[       OK ] R8WtDataManagerSinksTest.InitWithoutRunnerLeavesSinksNull (18 ms)
+[ RUN      ] R8WtDataManagerSinksTest.NonStockCommodityTakesHotRuleFactorBranch
+[       OK ] R8WtDataManagerSinksTest.NonStockCommodityTakesHotRuleFactorBranch (11 ms)
+[ RUN      ] R8WtDataManagerSinksTest.InitStoreWithEmptySectionIsNotEvenAttempted
+[       OK ] R8WtDataManagerSinksTest.InitStoreWithEmptySectionIsNotEvenAttempted (1 ms)
+[ DISABLED ] R8WtDataManagerSinksTest.DISABLED_InitStoreWithDefaultModuleNameDerefsNullReader
+[ DISABLED ] R8WtDataManagerSinksTest.DISABLED_TickSliceDelegationWithoutReaderSegfaults
+[----------] 6 tests from R8WtDataManagerSinksTest (60 ms total)
+[----------] Global test environment tear-down
+[==========] 24 tests from 6 test suites ran. (2112 ms total)
+[  PASSED  ] 24 tests.

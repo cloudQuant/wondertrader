@@ -1,0 +1,4 @@
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang -g -O1 -fno-omit-frame-pointer -Isrc/WTSUtils/lmdb -c src/WTSUtils/lmdb/mdb.c -o /tmp/wt-i03-lmdb-binding-final-20261102/normal-mdb.o
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang -g -O1 -fno-omit-frame-pointer -c src/WTSUtils/lmdb/midl.c -o /tmp/wt-i03-lmdb-binding-final-20261102/normal-midl.o
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -g -O1 -fno-omit-frame-pointer src/TestUnits/fixtures/lmdb_bar_migration/migration_test.cpp /tmp/wt-i03-lmdb-binding-final-20261102/normal-mdb.o /tmp/wt-i03-lmdb-binding-final-20261102/normal-midl.o -o /tmp/wt-i03-lmdb-binding-final-20261102/normal-test
+ld: warning: symbols in __TEXT,text_env (/private/tmp/wt-i03-lmdb-binding-final-20261102/normal-mdb.o) have unwind information, but it's not a code section (missing 'regular,pure_instructions' section flag)

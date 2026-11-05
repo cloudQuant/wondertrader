@@ -2,6 +2,7 @@
 
 #include "../Share/StdUtils.hpp"
 #include "../Share/StrUtil.hpp"
+#include "../Includes/WTSVariant.hpp"
 #include "../WTSTools/WTSLogger.h"
 
 #include <filesystem>
@@ -742,7 +743,46 @@ bool ExeUnitWrapper::failedInitializationWasSafelyDestroyed() const
 	return _failed_init_cleanup_proven;
 }
 
+bool ExeUnitWrapper::hostOrderIdentitySupported() const
+{
+	std::shared_ptr<ExePluginV2State> plugin;
+	{
+		std::lock_guard<std::mutex> lock(_lifecycle_mutex);
+		plugin = _plugin;
+	}
+	return plugin != NULL && (plugin->_api.capabilities & WT_EXEC_PLUGIN_V2_CAP_HOST_ORDER_IDENTITY) != 0;
+}
+
 bool ExeUnitWrapper::initialize(ExecuteContext* ctx, const char* stdCode,
+	WTSVariant* cfg, std::string& error)
+{
+	return initialize(ctx, stdCode, cfg, error, false);
+}
+
+bool ExeUnitWrapper::initialize(ExecuteContext* ctx, const char* stdCode,
+	WTSVariant* cfg, std::string& error, bool hostVerifiesIdentity)
+{
+	// Per-unit shallow copy: the shared policy node is never mutated, and the
+	// reserved host identity key is always overwritten by the host.
+	WTSVariant* unitCfg = NULL;
+	if (cfg != NULL && cfg->type() == WTSVariant::VT_Object)
+	{
+		unitCfg = WTSVariant::createObject();
+		const WTSVariant::MemberNames names = cfg->memberNames();
+		for (const std::string& name : names)
+		{
+			WTSVariant* child = cfg->get(name.c_str());
+			if (child != NULL)
+				unitCfg->append(name.c_str(), child, true);
+		}
+		unitCfg->append(WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY,
+			(uint32_t)((hostVerifiesIdentity && hostOrderIdentitySupported()) ? 1 : 0));
+	}
+	struct ReleaseCfg { WTSVariant* cfg; ~ReleaseCfg() { if (cfg) cfg->release(); } } releaseCfg{ unitCfg };
+	return initializeUnit(ctx, stdCode, unitCfg != NULL ? unitCfg : cfg, error);
+}
+
+bool ExeUnitWrapper::initializeUnit(ExecuteContext* ctx, const char* stdCode,
 	WTSVariant* cfg, std::string& error)
 {
 	error.clear();
@@ -1316,6 +1356,12 @@ bool WtExecuterFactory::loadFactories(const char* path)
 			continue;
 		}
 		WTSLogger::info("Executer factory {} loaded through V2", name);
+		// Decision K41 (2026-11-04): a plugin that does not declare host-verified order
+		// identity is accepted with its limits (non-shared owner mode, no automatic timeout
+		// cancel; every cancel still verifies owner and ledger). Say so once at load time.
+		if ((plugin->_api.capabilities & WT_EXEC_PLUGIN_V2_CAP_HOST_ORDER_IDENTITY) == 0)
+			WTSLogger::warn("Executer factory {} ({}) does not declare host order identity: its units run in non-shared owner mode "
+				"without automatic timeout cancels, and every cancel still needs a verified owner and ledger entry", name, modulePath);
 		if (!advance())
 			return false;
 	}
@@ -1483,8 +1529,10 @@ bool WtExecuterFactory::snapshotLivePluginUnitOwners(
 }
 
 ExecuteUnitPtr WtExecuterFactory::createUnit(const char* factname, const char* unitname,
-	WtExecPluginV2UnitKind kind)
+	WtExecPluginV2UnitKind kind, bool* pluginEntered)
 {
+	if (pluginEntered != NULL)
+		*pluginEntered = false;
 	if (factname == NULL || unitname == NULL || factname[0] == '\0' || unitname[0] == '\0')
 		return ExecuteUnitPtr();
 	FactoryOperationLease operation(_admissions, false);
@@ -1500,6 +1548,10 @@ ExecuteUnitPtr WtExecuterFactory::createUnit(const char* factname, const char* u
 		plugin = it->second;
 	}
 	void* unitHandle = NULL;
+	// From here on plugin-owned code runs; a failure can no longer be proven
+	// side-effect-free by the host.
+	if (pluginEntered != NULL)
+		*pluginEntered = true;
 	try
 	{
 		unitHandle = plugin->_api.create_unit(plugin->_factory, kind, unitname);
@@ -1536,8 +1588,11 @@ ExecuteUnitPtr WtExecuterFactory::createUnit(const char* factname, const char* u
 	}
 }
 
-ExecuteUnitPtr WtExecuterFactory::createUnit(const char* name, WtExecPluginV2UnitKind kind)
+ExecuteUnitPtr WtExecuterFactory::createUnit(const char* name, WtExecPluginV2UnitKind kind,
+	bool* pluginEntered)
 {
+	if (pluginEntered != NULL)
+		*pluginEntered = false;
 	if (name == NULL)
 		return ExecuteUnitPtr();
 
@@ -1545,7 +1600,7 @@ ExecuteUnitPtr WtExecuterFactory::createUnit(const char* name, WtExecPluginV2Uni
 	if (parts.size() < 2 || parts[0].empty() || parts[1].empty())
 		return ExecuteUnitPtr();
 
-	return createUnit(parts[0].c_str(), parts[1].c_str(), kind);
+	return createUnit(parts[0].c_str(), parts[1].c_str(), kind, pluginEntered);
 }
 
 ExecuteUnitPtr WtExecuterFactory::createExeUnit(const char* factname, const char* unitname)
@@ -1576,4 +1631,19 @@ ExecuteUnitPtr WtExecuterFactory::createDiffExeUnit(const char* name)
 ExecuteUnitPtr WtExecuterFactory::createArbiExeUnit(const char* name)
 {
 	return createUnit(name, WT_EXEC_PLUGIN_V2_UNIT_ARBI);
+}
+
+ExecuteUnitPtr WtExecuterFactory::createExeUnit(const char* name, bool& pluginEntered)
+{
+	return createUnit(name, WT_EXEC_PLUGIN_V2_UNIT_PLAIN, &pluginEntered);
+}
+
+ExecuteUnitPtr WtExecuterFactory::createDiffExeUnit(const char* name, bool& pluginEntered)
+{
+	return createUnit(name, WT_EXEC_PLUGIN_V2_UNIT_DIFF, &pluginEntered);
+}
+
+ExecuteUnitPtr WtExecuterFactory::createArbiExeUnit(const char* name, bool& pluginEntered)
+{
+	return createUnit(name, WT_EXEC_PLUGIN_V2_UNIT_ARBI, &pluginEntered);
 }

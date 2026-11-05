@@ -11,6 +11,8 @@
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/executor_work_guard.hpp>
+#include <chrono>
+#include <vector>
 #include "WtHelper.h"
 
 #include "../Share/TimeUtils.hpp"
@@ -46,6 +48,7 @@ EventNotifier::EventNotifier()
 	, _register(NULL)
 	, _accepting(false)
 	, _stopped(false)
+	, _core(std::make_shared<Core>())
 {
 	
 }
@@ -54,10 +57,38 @@ EventNotifier::EventNotifier()
 EventNotifier::~EventNotifier()
 {
 	stopAccepting();
-	if (_worker)
-		_worker->join();
+	// Decision K24=E1 (2026-11-04): wait for the queue to drain with a bound. A
+	// worker still busy (e.g. a publisher blocked by the MQ module) is detached
+	// and its core is retained until process exit; the MQ server is then not
+	// destroyed because a handler may still be using it.
+	std::shared_ptr<Core> core = _core;
+	bool drained = true;
+	if (core->worker)
+	{
+		std::unique_lock<std::mutex> lock(core->mtx);
+		drained = core->cv.wait_for(lock, std::chrono::milliseconds(_stop_timeout_ms),
+			[&core]() { return core->finished; });
+		lock.unlock();
+		if (drained)
+		{
+			if (core->worker->joinable())
+				core->worker->join();
+		}
+		else
+		{
+			WTSLogger::error("EventNotifier worker did not drain within {} ms; it is detached and its MQ server is retained until process exit",
+				_stop_timeout_ms);
+			core->worker->detach();
+			static std::mutex* retainedMutex = new std::mutex();
+			static std::vector<std::shared_ptr<Core>>* retained = new std::vector<std::shared_ptr<Core>>();
+			std::lock_guard<std::mutex> retainLock(*retainedMutex);
+			retained->push_back(core);
+		}
+	}
+	if (!drained)
+		return;
 
-	_asyncio.stop();
+	core->io.stop();
 
 	if (_remover && _mq_sid != 0)
 		_remover(_mq_sid);
@@ -68,8 +99,8 @@ void EventNotifier::stopAccepting()
 	std::lock_guard<std::mutex> lock(_state_mutex);
 	_accepting = false;
 	_stopped.store(true, std::memory_order_relaxed);
-	if (_work)
-		_work->reset();
+	if (_core->work)
+		_core->work->reset();
 }
 
 // The caller holds _state_mutex until postHandler has returned. This makes an
@@ -88,7 +119,7 @@ void EventNotifier::postHandler(const char* topic, Handler&& handler)
 {
 	try
 	{
-		boost::asio::post(_asyncio, [topic, task = std::forward<Handler>(handler)]() mutable {
+		boost::asio::post(_core->io, [topic, task = std::forward<Handler>(handler)]() mutable {
 			try { task(); }
 			catch (const std::exception& ex) {
 				std::fprintf(stderr, "EventNotifier %s handler failed: %s\n", topic, ex.what());
@@ -143,35 +174,53 @@ bool EventNotifier::init(WTSVariant* cfg)
 		return false;
 	}
 
-	// Keep the existing notifier intact until the candidate module has all required exports.
+	//注册回调函数
+	registerCallbacks(on_mq_log);
+
+	//创建一个MQServer
+	// This configuration has no confirm option. Match the MQ module's default
+	// behavior explicitly so the plugin ABI receives the complete argument list.
+	// I03-NEW-065: id 0 means no server was created; report failure, keep the
+	// existing notifier state and start no worker.
+	const WtUInt32 sid = creator(url.c_str(), false);
+	if (sid == 0)
+	{
+		WTSLogger::error("MQ module {} failed to create a server for {}", dllpath.c_str(), url.c_str());
+		return false;
+	}
+
+	// Keep the existing notifier intact until the candidate module has all
+	// required exports and has created its server.
 	_url = url;
 	_creator = creator;
 	_remover = remover;
 	_publisher = publisher;
 	_register = registerCallbacks;
+	_mq_sid = sid;
+	_stop_timeout_ms = cfg->has("stop_timeout_ms") ? cfg->getUInt32("stop_timeout_ms") : 5000;
+	_core->publisher = publisher;
+	_core->sid = sid;
 
-	//注册回调函数
-	_register(on_mq_log);
-	
-	//创建一个MQServer
-	// This configuration has no confirm option. Match the MQ module's default
-	// behavior explicitly so the plugin ABI receives the complete argument list.
-	_mq_sid = _creator(_url.c_str(), false);
-
-	if (_worker == NULL)
+	if (_core->worker == NULL)
 	{
 		std::lock_guard<std::mutex> lock(_state_mutex);
-		_work.reset(new WorkGuard(_asyncio.get_executor()));
+		_core->work.reset(new WorkGuard(_core->io.get_executor()));
 		try
 		{
-			_worker.reset(new StdThread([this]() {
-				_asyncio.run();
+			std::shared_ptr<Core> core = _core;
+			_core->worker.reset(new StdThread([core]() {
+				core->io.run();
+				{
+					std::lock_guard<std::mutex> doneLock(core->mtx);
+					core->finished = true;
+				}
+				core->cv.notify_all();
 			}));
 			_accepting = true;
 		}
 		catch (...)
 		{
-			_work.reset();
+			_core->work.reset();
 			throw;
 		}
 	}
@@ -188,7 +237,12 @@ void EventNotifier::notify_log(const char* tag, const char* message)
 
 	std::string strTag = tag;
 	std::string strMsg = message;
-	postHandler("LOG", [this, strTag, strMsg]() {
+	postHandler("LOG", [weakCore = std::weak_ptr<Core>(_core), strTag, strMsg]() {
+		// K24: a queued handler must not own the core that owns its io_context (that
+		// cycle leaked discarded handlers and their retained trade/order references).
+		const std::shared_ptr<Core> core = weakCore.lock();
+		if (!core)
+			return;
 		std::string data;
 		{
 			rj::Document root(rj::kObjectType);
@@ -205,8 +259,7 @@ void EventNotifier::notify_log(const char* tag, const char* message)
 			data = sb.GetString();
 		}
 
-		if (_publisher)
-			_publisher(_mq_sid, "LOG", data.c_str(), (WtUInt32)data.size());
+		core->publish("LOG", data);
 	});
 }
 
@@ -217,7 +270,12 @@ void EventNotifier::notify_event(const char* message)
 		return;
 
 	std::string strMsg = message;
-	postHandler("GRP_EVENT", [this, strMsg]() {
+	postHandler("GRP_EVENT", [weakCore = std::weak_ptr<Core>(_core), strMsg]() {
+		// K24: a queued handler must not own the core that owns its io_context (that
+		// cycle leaked discarded handlers and their retained trade/order references).
+		const std::shared_ptr<Core> core = weakCore.lock();
+		if (!core)
+			return;
 		std::string data;
 		{
 			rj::Document root(rj::kObjectType);
@@ -232,8 +290,7 @@ void EventNotifier::notify_event(const char* message)
 
 			data = sb.GetString();
 		}
-		if (_publisher)
-			_publisher(_mq_sid, "GRP_EVENT", data.c_str(), (WtUInt32)data.size());
+		core->publish("GRP_EVENT", data);
 	});
 }
 
@@ -245,7 +302,12 @@ void EventNotifier::notify(const char* trader, const char* message)
 
 	std::string strTrader = trader;
 	std::string strMsg = message;
-	postHandler("TRD_NOTIFY", [this, strTrader, strMsg]() {
+	postHandler("TRD_NOTIFY", [weakCore = std::weak_ptr<Core>(_core), strTrader, strMsg]() {
+		// K24: a queued handler must not own the core that owns its io_context (that
+		// cycle leaked discarded handlers and their retained trade/order references).
+		const std::shared_ptr<Core> core = weakCore.lock();
+		if (!core)
+			return;
 		std::string data;
 		{
 			rj::Document root(rj::kObjectType);
@@ -261,8 +323,7 @@ void EventNotifier::notify(const char* trader, const char* message)
 
 			data = sb.GetString();
 		}
-		if (_publisher)
-			_publisher(_mq_sid, "TRD_NOTIFY", data.c_str(), (WtUInt32)data.size());
+		core->publish("TRD_NOTIFY", data);
 	});
 }
 
@@ -279,13 +340,17 @@ void EventNotifier::notify(const char* trader, uint32_t localid, const char* std
 	std::shared_ptr<WTSTradeInfo> retainedTrade(trdInfo, [](WTSTradeInfo* p) {
 		p->release();
 	});
-	postHandler("TRD_TRADE", [this, strTrader, strCode, localid, retainedTrade]() {
+	postHandler("TRD_TRADE", [weakCore = std::weak_ptr<Core>(_core), strTrader, strCode, localid, retainedTrade]() {
+		// K24: a queued handler must not own the core that owns its io_context (that
+		// cycle leaked discarded handlers and their retained trade/order references).
+		const std::shared_ptr<Core> core = weakCore.lock();
+		if (!core)
+			return;
 		std::string data;
 		tradeToJson(strTrader.c_str(), localid, strCode.c_str(), retainedTrade.get(), data);
 		if (data.empty())
 			WTSLogger::error("EventNotifier failed to serialize TRD_TRADE JSON");
-		else if (_publisher)
-			_publisher(_mq_sid, "TRD_TRADE", data.c_str(), (WtUInt32)data.size());
+		else core->publish("TRD_TRADE", data);
 	});
 }
 
@@ -301,13 +366,17 @@ void EventNotifier::notify(const char* trader, uint32_t localid, const char* std
 	std::shared_ptr<WTSOrderInfo> retainedOrder(ordInfo, [](WTSOrderInfo* p) {
 		p->release();
 	});
-	postHandler("TRD_ORDER", [this, strTrader, strCode, localid, retainedOrder]() {
+	postHandler("TRD_ORDER", [weakCore = std::weak_ptr<Core>(_core), strTrader, strCode, localid, retainedOrder]() {
+		// K24: a queued handler must not own the core that owns its io_context (that
+		// cycle leaked discarded handlers and their retained trade/order references).
+		const std::shared_ptr<Core> core = weakCore.lock();
+		if (!core)
+			return;
 		std::string data;
 		orderToJson(strTrader.c_str(), localid, strCode.c_str(), retainedOrder.get(), data);
 		if (data.empty())
 			WTSLogger::error("EventNotifier failed to serialize TRD_ORDER JSON");
-		else if (_publisher)
-			_publisher(_mq_sid, "TRD_ORDER", data.c_str(), (WtUInt32)data.size());
+		else core->publish("TRD_ORDER", data);
 	});
 
 	
@@ -401,7 +470,12 @@ void EventNotifier::notify_chart_index(uint64_t time, const char* straId, const 
 	std::string sid = straId;
 	std::string iname = idxName;
 	std::string lname = lineName;
-	postHandler("CHART_INDEX", [this, time, sid, iname, lname, val]() {
+	postHandler("CHART_INDEX", [weakCore = std::weak_ptr<Core>(_core), time, sid, iname, lname, val]() {
+		// K24: a queued handler must not own the core that owns its io_context (that
+		// cycle leaked discarded handlers and their retained trade/order references).
+		const std::shared_ptr<Core> core = weakCore.lock();
+		if (!core)
+			return;
 		std::string data;
 		{
 			rj::Document root(rj::kObjectType);
@@ -419,8 +493,7 @@ void EventNotifier::notify_chart_index(uint64_t time, const char* straId, const 
 
 			data = sb.GetString();
 		}
-		if (_publisher)
-			_publisher(_mq_sid, "CHART_INDEX", data.c_str(), (WtUInt32)data.size());
+		core->publish("CHART_INDEX", data);
 	});
 }
 
@@ -433,7 +506,12 @@ void EventNotifier::notify_chart_marker(uint64_t time, const char* straId, doubl
 	std::string sid = straId;
 	std::string sIcon = icon;
 	std::string sTag = tag;
-	postHandler("CHART_MARKER", [this, time, sid, sIcon, sTag, price]() {
+	postHandler("CHART_MARKER", [weakCore = std::weak_ptr<Core>(_core), time, sid, sIcon, sTag, price]() {
+		// K24: a queued handler must not own the core that owns its io_context (that
+		// cycle leaked discarded handlers and their retained trade/order references).
+		const std::shared_ptr<Core> core = weakCore.lock();
+		if (!core)
+			return;
 		std::string data;
 		{
 			rj::Document root(rj::kObjectType);
@@ -451,8 +529,7 @@ void EventNotifier::notify_chart_marker(uint64_t time, const char* straId, doubl
 
 			data = sb.GetString();
 		}
-		if (_publisher)
-			_publisher(_mq_sid, "CHART_MARKER", data.c_str(), (WtUInt32)data.size());
+		core->publish("CHART_MARKER", data);
 	});
 }
 
@@ -465,7 +542,12 @@ void EventNotifier::notify_trade(const char* straId, const char* stdCode, bool i
 	std::string sid = straId;
 	std::string code = stdCode;
 	std::string tag = userTag;
-	postHandler("STRA_TRADE", [this, sid, code, tag, isLong, isOpen, curTime, price]() {
+	postHandler("STRA_TRADE", [weakCore = std::weak_ptr<Core>(_core), sid, code, tag, isLong, isOpen, curTime, price]() {
+		// K24: a queued handler must not own the core that owns its io_context (that
+		// cycle leaked discarded handlers and their retained trade/order references).
+		const std::shared_ptr<Core> core = weakCore.lock();
+		if (!core)
+			return;
 		std::string data;
 		{
 			rj::Document root(rj::kObjectType);
@@ -485,7 +567,6 @@ void EventNotifier::notify_trade(const char* straId, const char* stdCode, bool i
 
 			data = sb.GetString();
 		}
-		if (_publisher)
-			_publisher(_mq_sid, "STRA_TRADE", data.c_str(), (WtUInt32)data.size());
+		core->publish("STRA_TRADE", data);
 	});
 }

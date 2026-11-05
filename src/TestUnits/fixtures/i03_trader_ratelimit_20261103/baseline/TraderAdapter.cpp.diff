@@ -1,0 +1,630 @@
+--- src/TestUnits/fixtures/i03_trader_ratelimit_20261103/baseline/TraderAdapter.cpp	2026-11-03 21:26:59
++++ src/WtCore/TraderAdapter.cpp	2026-11-03 21:44:29
+@@ -1381,10 +1381,49 @@
+ 			_unresolved_diagnostic = "unable to retain WTS trade snapshot";
+ 		} catch (...) {}
+ 	}
++}
++
++namespace
++{
++	// Flags recorded for submissions that are still inside orderInsert.
++	const uint8_t INFLIGHT_REJECTED = 1;	///< rejection or cancel report observed
++	const uint8_t INFLIGHT_ACCEPTED = 2;	///< live order or trade report observed
++	const uint8_t INFLIGHT_LEDGER = 4;		///< a rejection report adjusted the undone qty
++	const uint8_t INFLIGHT_NONE = 0x80;		///< localid is not being submitted
++
++	thread_local void* t_entrust_outcome = NULL;
+ }
+ 
++uint8_t TraderAdapter::noteInflightReport(uint32_t localid, uint8_t bits)
++{
++	if (localid == 0)
++		return INFLIGHT_NONE;
++	std::lock_guard<std::mutex> lock(_inflight_mutex);
++	auto it = _inflight_entrusts.find(localid);
++	if (it == _inflight_entrusts.end())
++		return INFLIGHT_NONE;
++	const uint8_t prev = it->second;
++	it->second = static_cast<uint8_t>(prev | bits);
++	return prev;
++}
++
++bool TraderAdapter::frequencyAvailable(bool isOrder, const char* stdCode, const RiskParams* riskPara) const
++{
++	if (riskPara == NULL)
++		return true;
++	FrequencyWindow<CodeTimeCacheMap>& window = isOrder ? _order_frequency : _cancel_frequency;
++	const uint32_t boundary = isOrder ? riskPara->_order_times_boundary : riskPara->_cancel_times_boundary;
++	const uint32_t seconds = isOrder ? riskPara->_order_stat_timespan : riskPara->_cancel_stat_timespan;
++	return window.available(stdCode, boundary, seconds, rateNow());
++}
++
+ uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
+ {
++	// Take the caller's split outcome slot and clear it, so a nested
++	// submission made from a re-entrant callback cannot write into it.
++	EntrustOutcome* outcome = static_cast<EntrustOutcome*>(t_entrust_outcome);
++	t_entrust_outcome = NULL;
++
+ 	if (isUnresolvedReportPaused())
+ 		return UINT_MAX;
+ 	// Risk checks are performed with the caller's standardized code. Preserve
+@@ -1394,11 +1433,19 @@
+ 	if (!checkOrderLimits(riskCode.c_str()))
+ 		return UINT_MAX;
+ 	const RiskParams* riskPara = _risk_mon_enabled ? getRiskParams(riskCode.c_str()) : NULL;
++	const uint32_t boundary = riskPara ? riskPara->_order_times_boundary : 0;
++	const uint32_t seconds = riskPara ? riskPara->_order_stat_timespan : 0;
++	// Per-request reservation: N requests (committed or still pending) are
++	// admitted in the sliding window ending now; N+1 never reaches the API.
+ 	FrequencyWindow<CodeTimeCacheMap>::Reservation reservation(_order_frequency, riskCode,
+-		riskPara ? riskPara->_order_times_boundary : 0,
+-		riskPara ? riskPara->_order_stat_timespan : 0);
++		boundary, seconds, rateNow());
+ 	if (!reservation)
++	{
++		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,
++			"[{}] {} entrust rejected by frequency limit: {} requests within {} seconds, temporarily banned until the window expires",
++			_id.c_str(), riskCode.c_str(), boundary, seconds);
+ 		return UINT_MAX;
++	}
+ 
+ 	if (isUnresolvedReportPaused())
+ 		return UINT_MAX;
+@@ -1423,24 +1470,111 @@
+ 	
+ 	if (isUnresolvedReportPaused())
+ 		return UINT_MAX;
+-	reservation.beginSubmission();
++	reservation.beginSubmission(rateNow());
+ 	if (isUnresolvedReportPaused())
+ 	{
+ 		reservation.rollback(); // provider has not been called
+ 		return UINT_MAX;
+ 	}
++
++	// Track the localid while the provider call is in progress so reports
++	// delivered synchronously (or concurrently) can be reconciled below.
++	struct InflightGuard
++	{
++		TraderAdapter* self;
++		uint32_t localid;
++		bool active;
++		uint8_t finish()
++		{
++			uint8_t bits = 0;
++			if (active)
++			{
++				std::lock_guard<std::mutex> lock(self->_inflight_mutex);
++				auto it = self->_inflight_entrusts.find(localid);
++				if (it != self->_inflight_entrusts.end())
++				{
++					bits = it->second;
++					self->_inflight_entrusts.erase(it);
++				}
++				active = false;
++			}
++			return bits;
++		}
++		~InflightGuard() { finish(); }
++	};
++	{
++		std::lock_guard<std::mutex> lock(_inflight_mutex);
++		_inflight_entrusts[localid] = 0;
++	}
++	InflightGuard inflight{ this, localid, true };
++
++	// An exception leaves the reservation committed (unknown outcome).
+ 	int32_t ret = _trader_api->orderInsert(entrust);
+-	if(ret < 0)
++	const uint8_t seen = inflight.finish();
++
++	if (seen & INFLIGHT_REJECTED)
+ 	{
+-		// The provider interface does not classify negative returns as
+-		// definitely unsent; retain this slot until it expires.
++		// The provider processed the request and already reported it dead.
++		reservation.commit();
++		if (outcome)
++			outcome->ledger_consumed = (seen & INFLIGHT_LEDGER) != 0;
++		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,
++			"[{}] Order {} of {} was rejected synchronously by provider, ret: {}", _id.c_str(), localid, riskCode.c_str(), ret);
++		return UINT_MAX;
++	}
++
++	if (ret < 0 && (seen & INFLIGHT_ACCEPTED) == 0)
++	{
++		// Synchronous failure: the request did not reach the provider, so
++		// the frequency slot is returned.
++		reservation.rollback();
+ 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] Order placing failed: {}", _id.c_str(), ret);
+ 		return UINT_MAX;
+ 	}
++
++	if (ret < 0)
++	{
++		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,
++			"[{}] Order {} returned {} but provider already reported it live; keeping it", _id.c_str(), localid, ret);
++	}
+ 	reservation.commit();
+ 	return localid;
+ }
+ 
++bool TraderAdapter::submitSplit(OrderIDs& ids, const char* stdCode, bool isBuy, double qty,
++	const std::function<uint32_t()>& submit)
++{
++	const double signedQty = isBuy ? qty : -qty;
++	// Reserve before the provider call: a synchronous rejection report then
++	// finds a non-zero undone quantity and consumes exactly this split.
++	updateUndone(stdCode, signedQty, true);
++
++	EntrustOutcome outcome;
++	void* previous = t_entrust_outcome;
++	t_entrust_outcome = &outcome;
++	uint32_t localid = UINT_MAX;
++	try
++	{
++		localid = submit();
++	}
++	catch (...)
++	{
++		t_entrust_outcome = previous;
++		throw;	// unknown outcome: keep the reservation
++	}
++	t_entrust_outcome = previous;
++
++	if (localid != UINT_MAX)
++	{
++		ids.emplace_back(localid);
++		return true;
++	}
++
++	if (!outcome.ledger_consumed)
++		updateUndone(stdCode, -signedQty, true);
++	return false;
++}
++
+ void TraderAdapter::updateUndone(const char* stdCode, double qty, bool bOuput /* = false */)
+ {
+ 	double& undone = _undone_qty[stdCode];
+@@ -1481,16 +1615,21 @@
+ 			return false;
+ 		}
+ 	}
+-	return !riskPara || _cancel_frequency.available(stdCode,
+-		riskPara->_cancel_times_boundary, riskPara->_cancel_stat_timespan);
++	return frequencyAvailable(false, stdCode, riskPara);
+ }
+ 
+ bool TraderAdapter::isTradeEnabled(const char* stdCode) const
+ {
+ 	if (!_risk_mon_enabled)
+ 		return true;
+-	std::lock_guard<std::mutex> lock(_risk_exclude_mutex);
+-	return _exclude_codes.find(stdCode) == _exclude_codes.end();
++	{
++		std::lock_guard<std::mutex> lock(_risk_exclude_mutex);
++		if (_exclude_codes.find(stdCode) != _exclude_codes.end())
++			return false;
++	}
++	// A full order window is a temporary ban that lifts automatically when
++	// recorded requests expire.
++	return frequencyAvailable(true, stdCode, const_cast<TraderAdapter*>(this)->getRiskParams(stdCode));
+ }
+ 
+ bool TraderAdapter::checkOrderLimits(const char* stdCode)
+@@ -1511,8 +1650,7 @@
+ 			return false;
+ 		}
+ 	}
+-	return !riskPara || _order_frequency.available(stdCode,
+-		riskPara->_order_times_boundary, riskPara->_order_stat_timespan);
++	return frequencyAvailable(true, stdCode, riskPara);
+ }
+ 
+ OrderIDs TraderAdapter::buy(const char* stdCode, double price, double qty, int flag, bool bForceClose, WTSContractInfo* cInfo /* = NULL */)
+@@ -1544,9 +1682,10 @@
+ 
+ 	WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO, "[{}] Buying {} of quantity {}", _id.c_str(), stdCode, qty);
+ 
+-	updateUndone(stdCode, qty, true);
++	bool stopped = false;
+ 
+-	const PosItem& pItem = _positions[stdCode];
++	// Snapshot: re-entrant reports may modify _positions while splits are submitted.
++	const PosItem pItem = _positions[stdCode];
+ 	WTSTradeStateInfo* statInfo = (WTSTradeStateInfo*)_stat_map->get(stdCode);
+ 	if (statInfo == NULL)
+ 	{
+@@ -1603,8 +1742,11 @@
+ 			for (;;)
+ 			{
+ 				double curQty = min(leftQty, unitQty);
+-				uint32_t localid = openLong(stdCode, price, curQty, flag, cInfo);
+-				ret.emplace_back(localid);
++				if (!submitSplit(ret, stdCode, true, curQty, [&]() { return openLong(stdCode, price, curQty, flag, cInfo); }))
++				{
++					stopped = true;
++					break;
++				}
+ 
+ 				leftQty -= curQty;
+ 
+@@ -1644,8 +1786,11 @@
+ 				for (;;)
+ 				{
+ 					double curQty = min(leftQty, unitQty);
+-					uint32_t localid = closeShort(stdCode, price, curQty, (commInfo->getCoverMode() == CM_CoverToday), flag, cInfo);//如果不支持平今, 则直接下平仓标记即可
+-					ret.emplace_back(localid);
++					if (!submitSplit(ret, stdCode, true, curQty, [&]() { return closeShort(stdCode, price, curQty, (commInfo->getCoverMode() == CM_CoverToday), flag, cInfo); }))//如果不支持平今, 则直接下平仓标记即可
++					{
++						stopped = true;
++						break;
++					}
+ 
+ 					leftQty -= curQty;
+ 
+@@ -1689,8 +1834,11 @@
+ 				for (;;)
+ 				{
+ 					double curQty = min(leftQty, unitQty);
+-					uint32_t localid = closeShort(stdCode, price, curQty, false, flag, cInfo);//如果不支持平今, 则直接下平仓标记即可
+-					ret.emplace_back(localid);
++					if (!submitSplit(ret, stdCode, true, curQty, [&]() { return closeShort(stdCode, price, curQty, false, flag, cInfo); }))//如果不支持平今, 则直接下平仓标记即可
++					{
++						stopped = true;
++						break;
++					}
+ 
+ 					leftQty -= curQty;
+ 
+@@ -1729,8 +1877,11 @@
+ 					for (;;)
+ 					{
+ 						double curQty = min(leftQty, unitQty);
+-						uint32_t localid = closeShort(stdCode, price, curQty, false, flag, cInfo);
+-						ret.emplace_back(localid);
++						if (!submitSplit(ret, stdCode, true, curQty, [&]() { return closeShort(stdCode, price, curQty, false, flag, cInfo); }))
++						{
++							stopped = true;
++							break;
++						}
+ 
+ 						leftQty -= curQty;
+ 
+@@ -1755,8 +1906,11 @@
+ 					for (;;)
+ 					{
+ 						double curQty = min(leftQty, unitQty);
+-						uint32_t localid = closeShort(stdCode, price, curQty, false, flag, cInfo);
+-						ret.emplace_back(localid);
++						if (!submitSplit(ret, stdCode, true, curQty, [&]() { return closeShort(stdCode, price, curQty, false, flag, cInfo); }))
++						{
++							stopped = true;
++							break;
++						}
+ 
+ 						leftQty -= curQty;
+ 
+@@ -1780,8 +1934,11 @@
+ 					for (;;)
+ 					{
+ 						double curQty = min(leftQty, unitQty);
+-						uint32_t localid = closeShort(stdCode, price, curQty, true, flag, cInfo);
+-						ret.emplace_back(localid);
++						if (!submitSplit(ret, stdCode, true, curQty, [&]() { return closeShort(stdCode, price, curQty, true, flag, cInfo); }))
++						{
++							stopped = true;
++							break;
++						}
+ 
+ 						leftQty -= curQty;
+ 
+@@ -1797,12 +1954,20 @@
+ 			}
+ 		}
+ 
++		if (stopped)
++			break;
++
+ 		if(left == 0)
+ 			break;
+ 	}
+ 
+-	if(left > 0)
++	if (stopped)
+ 	{
++		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,
++			"[{}] Signal of buying {} of quantity {} stopped after a rejected split, {} splits accepted", _id.c_str(), stdCode, qty, ret.size());
++	}
++	else if(left > 0)
++	{
+ 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, 
+ 			"[{}] Signal of buying {} of quantity {} left quantity of {} not triggered", _id.c_str(), stdCode, qty, left);
+ 	}
+@@ -1838,9 +2003,10 @@
+ 
+ 	WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO, "[{}] Selling {} of quantity {}", _id.c_str(), stdCode, qty);
+ 
+-	updateUndone(stdCode, -qty, true);
++	bool stopped = false;
+ 
+-	const PosItem& pItem = _positions[stdCode];	
++	// Snapshot: re-entrant reports may modify _positions while splits are submitted.
++	const PosItem pItem = _positions[stdCode];	
+ 	WTSTradeStateInfo* statInfo = (WTSTradeStateInfo*)_stat_map->get(stdCode);
+ 	if (statInfo == NULL)
+ 	{
+@@ -1897,8 +2063,11 @@
+ 			for (;;)
+ 			{
+ 				double curQty = min(leftQty, unitQty);
+-				uint32_t localid = openShort(stdCode, price, curQty, flag, cInfo);
+-				ret.emplace_back(localid);
++				if (!submitSplit(ret, stdCode, false, curQty, [&]() { return openShort(stdCode, price, curQty, flag, cInfo); }))
++				{
++					stopped = true;
++					break;
++				}
+ 
+ 				leftQty -= curQty;
+ 
+@@ -1936,8 +2105,11 @@
+ 				for (;;)
+ 				{
+ 					double curQty = min(leftQty, unitQty);
+-					uint32_t localid = closeLong(stdCode, price, curQty, (commInfo->getCoverMode() == CM_CoverToday), flag, cInfo);//如果不支持平今, 则直接下平仓标记即可
+-					ret.emplace_back(localid);
++					if (!submitSplit(ret, stdCode, false, curQty, [&]() { return closeLong(stdCode, price, curQty, (commInfo->getCoverMode() == CM_CoverToday), flag, cInfo); }))//如果不支持平今, 则直接下平仓标记即可
++					{
++						stopped = true;
++						break;
++					}
+ 
+ 					leftQty -= curQty;
+ 
+@@ -1979,8 +2151,11 @@
+ 				for (;;)
+ 				{
+ 					double curQty = min(leftQty, unitQty);
+-					uint32_t localid = closeLong(stdCode, price, curQty, false, flag, cInfo);//如果不支持平今, 则直接下平仓标记即可
+-					ret.emplace_back(localid);
++					if (!submitSplit(ret, stdCode, false, curQty, [&]() { return closeLong(stdCode, price, curQty, false, flag, cInfo); }))//如果不支持平今, 则直接下平仓标记即可
++					{
++						stopped = true;
++						break;
++					}
+ 
+ 					leftQty -= curQty;
+ 
+@@ -2015,8 +2190,11 @@
+ 					for (;;)
+ 					{
+ 						double curQty = min(leftQty, unitQty);
+-						uint32_t localid = closeLong(stdCode, price, curQty, false, flag, cInfo);
+-						ret.emplace_back(localid);
++						if (!submitSplit(ret, stdCode, false, curQty, [&]() { return closeLong(stdCode, price, curQty, false, flag, cInfo); }))
++						{
++							stopped = true;
++							break;
++						}
+ 
+ 						leftQty -= curQty;
+ 
+@@ -2042,8 +2220,11 @@
+ 						for (;;)
+ 						{
+ 							double curQty = min(leftQty, unitQty);
+-							uint32_t localid = closeLong(stdCode, price, curQty, false, flag, cInfo);
+-							ret.emplace_back(localid);
++							if (!submitSplit(ret, stdCode, false, curQty, [&]() { return closeLong(stdCode, price, curQty, false, flag, cInfo); }))
++							{
++								stopped = true;
++								break;
++							}
+ 
+ 							leftQty -= curQty;
+ 
+@@ -2069,8 +2250,11 @@
+ 						for (;;)
+ 						{
+ 							double curQty = min(leftQty, unitQty);
+-							uint32_t localid = closeLong(stdCode, price, curQty, true, flag, cInfo);
+-							ret.emplace_back(localid);
++							if (!submitSplit(ret, stdCode, false, curQty, [&]() { return closeLong(stdCode, price, curQty, true, flag, cInfo); }))
++							{
++								stopped = true;
++								break;
++							}
+ 
+ 							leftQty -= curQty;
+ 
+@@ -2087,12 +2271,20 @@
+ 			}
+ 		}
+ 
++		if (stopped)
++			break;
++
+ 		if (left == 0)
+ 			break;
+ 	}
+ 
+-	if (left > 0)
++	if (stopped)
+ 	{
++		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,
++			"[{}] Signal of selling {} of quantity {} stopped after a rejected split, {} splits accepted", _id.c_str(), stdCode, qty, ret.size());
++	}
++	else if (left > 0)
++	{
+ 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, 
+ 			"[{}] Signal of buying {} of quantity {} left quantity of {} not triggered", _id.c_str(), stdCode, qty, left);
+ 	}
+@@ -2120,22 +2312,39 @@
+ 	if (!checkCancelLimits(stdCode.c_str()))
+ 		return false;
+ 	const RiskParams* riskPara = _risk_mon_enabled ? getRiskParams(stdCode.c_str()) : NULL;
++	const uint32_t boundary = riskPara ? riskPara->_cancel_times_boundary : 0;
++	const uint32_t seconds = riskPara ? riskPara->_cancel_stat_timespan : 0;
++	// Cancels use the same window boundary contract as orders (card 7d).
+ 	FrequencyWindow<CodeTimeCacheMap>::Reservation reservation(_cancel_frequency, stdCode,
+-		riskPara ? riskPara->_cancel_times_boundary : 0,
+-		riskPara ? riskPara->_cancel_stat_timespan : 0);
++		boundary, seconds, rateNow());
+ 	if (!reservation)
++	{
++		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,
++			"[{}] {} cancel rejected by frequency limit: {} requests within {} seconds, temporarily banned until the window expires",
++			_id.c_str(), stdCode.c_str(), boundary, seconds);
+ 		return false;
++	}
+ 
+ 	WTSEntrustAction* action = WTSEntrustAction::create(ordInfo->getCode(), cInfo->getExchg());
+ 	action->setEntrustID(ordInfo->getEntrustID());
+ 	action->setOrderID(ordInfo->getOrderID());
+-	reservation.beginSubmission();
+-	int ret = _trader_api->orderAction(action);
++	reservation.beginSubmission(rateNow());
++	int ret = -1;
++	try
++	{
++		ret = _trader_api->orderAction(action);
++	}
++	catch (...)
++	{
++		action->release();
++		throw;	// unknown outcome: the reservation stays committed
++	}
++	action->release();
+ 	bool isSent = (ret >= 0);
+ 	if (isSent)
+ 		reservation.commit();
+-	// A negative return has no documented definitely-unsent contract.
+-	action->release();
++	else
++		reservation.rollback();	// synchronous failure: the slot is returned
+ 	return isSent;
+ }
+ 
+@@ -2170,31 +2379,50 @@
+ 
+ 	OrderIDs ret;
+ 
+-	double actQty = 0;
++	// Snapshot candidates under the order lock: doCancel may re-enter
++	// onPushOrder synchronously, which mutates _orders.
++	std::vector<std::pair<uint32_t, WTSOrderInfo*>> candidates;
+ 	bool isAll = strlen(stdCode) == 0;
+-	if (_orders != NULL && _orders->size() > 0)
+ 	{
+-		for (auto it = _orders->begin(); it != _orders->end(); it++)
++		SpinLock lock(_mtx_orders);
++		if (_orders != NULL)
+ 		{
+-			WTSOrderInfo* orderInfo = (WTSOrderInfo*)it->second;
+-			if(!orderInfo->isAlive())
+-				continue;
++			for (auto it = _orders->begin(); it != _orders->end(); it++)
++			{
++				WTSOrderInfo* orderInfo = (WTSOrderInfo*)it->second;
++				if (!orderInfo->isAlive())
++					continue;
+ 
+-			bool bBuy = (orderInfo->getDirection() == WDT_LONG && orderInfo->getOffsetType() == WOT_OPEN) || (orderInfo->getDirection() == WDT_SHORT && orderInfo->getOffsetType() != WOT_OPEN);
+-			if(bBuy != isBuy)
+-				continue;
++				bool bBuy = (orderInfo->getDirection() == WDT_LONG && orderInfo->getOffsetType() == WOT_OPEN) || (orderInfo->getDirection() == WDT_SHORT && orderInfo->getOffsetType() != WOT_OPEN);
++				if (bBuy != isBuy)
++					continue;
+ 
+-			if (isAll || strcmp(orderInfo->getCode(), cInfo._code) == 0)
+-			{
+-				if(doCancel(orderInfo))
++				if (isAll || strcmp(orderInfo->getCode(), cInfo._code) == 0)
+ 				{
+-					actQty += orderInfo->getVolLeft();
+-					ret.emplace_back(it->first);
++					orderInfo->retain();
++					candidates.emplace_back(it->first, orderInfo);
+ 				}
+ 			}
++		}
++	}
+ 
+-			if (!decimal::eq(qty, 0) && decimal::ge(actQty, qty))
+-				break;
++	struct ReleaseAll
++	{
++		std::vector<std::pair<uint32_t, WTSOrderInfo*>>& items;
++		~ReleaseAll() { for (auto& item : items) item.second->release(); }
++	} releaser{ candidates };
++
++	double actQty = 0;
++	for (auto& item : candidates)
++	{
++		if (!decimal::eq(qty, 0) && decimal::ge(actQty, qty))
++			break;
++		WTSOrderInfo* orderInfo = item.second;
++		const double leftQty = orderInfo->getVolLeft();
++		if (doCancel(orderInfo))
++		{
++			actQty += leftQty;
++			ret.emplace_back(item.first);
+ 		}
+ 	}
+ 
+@@ -2384,6 +2612,7 @@
+ 			rejectExternal();
+ 			return;
+ 		}
++		noteInflightReport(localid, INFLIGHT_REJECTED);
+ 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, err->getMessage());
+ 		WTSContractInfo* cInfo = entrust->getContractInfo();
+ 		if (cInfo == NULL || cInfo->getCommInfo() == NULL)
+@@ -2419,9 +2648,19 @@
+ 		//所以这里加一个检查未完成单的逻辑
+ 		//如果有错单，正常情况下未完成单一定不为0
+ 		//如果未完成订单为0，则说明这一次是重复通知，则不再处理了
+-		double oldQty = _undone_qty[stdCode];
+-		if (decimal::eq(oldQty, 0))
+-			return;
++		// While the order is still being submitted, its reserved split
++		// quantity is known to be pending: consume it exactly once.
++		const uint8_t inflight = noteInflightReport(localid, INFLIGHT_LEDGER);
++		if (inflight == INFLIGHT_NONE)
++		{
++			double oldQty = _undone_qty[stdCode];
++			if (decimal::eq(oldQty, 0))
++				return;
++		}
++		else if (inflight & INFLIGHT_LEDGER)
++		{
++			return;	// duplicate rejection during the same submission
++		}
+ 
+ 		bool isBuy = (isLong&&isOpen) || (!isLong && !isOpen);
+ 		updateUndone(stdCode.c_str(), qty * (isBuy ? -1 : 1), true);
+@@ -3029,8 +3268,12 @@
+ 		userTag += _order_pattern.size() + 1;
+ 		localid = convert::to_uint32(userTag);
+ 
++		const bool canceled = orderInfo->getOrderState() == WOS_Canceled;
++		const uint8_t inflight = noteInflightReport(localid,
++			canceled ? (INFLIGHT_REJECTED | INFLIGHT_LEDGER) : INFLIGHT_ACCEPTED);
+ 		//如果订单撤销, 并且是wt的订单, 则要先更新未完成数量
+-		if (orderInfo->getOrderState() == WOS_Canceled )
++		//提交过程中已由拒单回报扣减过的，不再重复扣减
++		if (canceled && (inflight == INFLIGHT_NONE || (inflight & INFLIGHT_LEDGER) == 0))
+ 		{
+ 			//撤单的时候, 要更新未完成
+ 			[[maybe_unused]] bool isLong = (orderInfo->getDirection() == WDT_LONG);
+@@ -3271,6 +3514,7 @@
+ 		char* userTag = (char*)tradeRecord->getUserTag();
+ 		userTag += _order_pattern.size() + 1;
+ 		localid = convert::to_uint32(userTag);
++		noteInflightReport(localid, INFLIGHT_ACCEPTED);
+ 
+ 		updateUndone(stdCode.c_str(), vol*(isBuy ? -1 : 1), true);
+ 	}

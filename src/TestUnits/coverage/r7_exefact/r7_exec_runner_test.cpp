@@ -13,6 +13,7 @@
 //    TraderMocker 插件做 config/init 正控，不调用 run/connect；
 //  * addExeFactories 会 dlopen executer 目录下的插件，与 WtCtaStraFact 等同名符号冲突
 //    （BUG-L00-003 实测 34 个 duplicate symbol）-> 不调用。
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <cstdint>
@@ -41,7 +42,7 @@ namespace {
 	{
 		const auto nonce = std::chrono::steady_clock::now().time_since_epoch().count();
 		std::filesystem::path dir = std::filesystem::temp_directory_path()
-			/ ("r7_trader_init_" + std::to_string(nonce));
+			/ ("r7_trader_init_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(nonce));
 		std::filesystem::create_directories(dir);
 		return dir.string();
 	}

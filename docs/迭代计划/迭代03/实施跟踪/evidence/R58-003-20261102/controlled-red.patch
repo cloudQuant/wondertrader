@@ -1,0 +1,50 @@
+--- /tmp/wt-i03-r58-20261102-replayer-before-red.cpp	2026-11-02 14:08:47
++++ /tmp/wt-i03-r58-20261102-controlled-red.cpp	2026-11-02 14:16:33
+@@ -465,7 +465,7 @@
+ 		const char* sessionFile = cfgBF->getCString("session");
+ 		if (!_bd_mgr.loadSessions(sessionFile))
+ 		{
+-			WTSLogger::error("Failed to load required trading sessions file {}", sessionFile);
++			/* R58 controlled red: suppress diagnostic */
+ 			return false;
+ 		}
+ 	}
+@@ -478,7 +478,7 @@
+ 			const char* commodityFile = cfgItem->asCString();
+ 			if (!_bd_mgr.loadCommodities(commodityFile))
+ 			{
+-				WTSLogger::error("Failed to load required commodities file {}", commodityFile);
++				/* R58 controlled red: suppress diagnostic */
+ 				return false;
+ 			}
+ 		}
+@@ -487,9 +487,9 @@
+ 			for(uint32_t i = 0; i < cfgItem->size(); i ++)
+ 			{
+ 				const char* commodityFile = cfgItem->get(i)->asCString();
+-				if (!_bd_mgr.loadCommodities(commodityFile))
++				if ((_bd_mgr.loadCommodities(commodityFile), false))
+ 				{
+-					WTSLogger::error("Failed to load required commodities file {}", commodityFile);
++					/* R58 controlled red: suppress diagnostic */
+ 					return false;
+ 				}
+ 			}
+@@ -593,7 +593,7 @@
+ {
+ 	if (!StdFile::exists(adjfile))
+ 	{
+-		WTSLogger::error("Adjust factor file {} not exists, skipped", adjfile);
++		/* R58 controlled red: suppress diagnostic */
+ 		return false;
+ 	}
+ 
+@@ -603,7 +603,7 @@
+ 	WTSVariant* doc = WTSCfgLoader::load_from_file(adjfile);
+ 	if (doc == NULL)
+ 	{
+-		WTSLogger::error("Parsing adjust factor file {} faield", adjfile);
++		/* R58 controlled red: suppress diagnostic */
+ 		return false;
+ 	}
+ 

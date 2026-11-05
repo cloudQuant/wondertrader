@@ -1,0 +1,14 @@
+diff --git a/src/CMakeLists.txt b/tmp/wt-i03-r202-003-20261102/snapshot/src/CMakeLists.txt
+index d3ab8103..6fe64212 100644
+--- a/src/CMakeLists.txt
++++ b/tmp/wt-i03-r202-003-20261102/snapshot/src/CMakeLists.txt
+@@ -10,7 +10,8 @@ IF(APPLE)
+ ENDIF()
+ # 添加boost
+ find_package(Boost REQUIRED COMPONENTS system filesystem thread)
+-include_directories(${Boost_INCLUDE_DIRS})
++include_directories(${Boost_INCLUDE_DIRS})
++include_directories(BEFORE /opt/homebrew/Cellar/boost/1.88.0/include)
+ link_directories(${Boost_LIBRARY_DIRS})
+ # 添加rapidjson
+ find_package(RapidJSON REQUIRED)

@@ -1,0 +1,30 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S3New072DiffCallbacks.CallbacksDuringFailedCreationReturnPromptlyAndAreDroppedWithWarning
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S3New072DiffCallbacks
+[ RUN      ] S3New072DiffCallbacks.CallbacksDuringFailedCreationReturnPromptlyAndAreDroppedWithWarning
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-red-src/src/TestUnits/coverage/n01_wtcore_tradepaths/s3_new072_diff_callbacks_nonblocking_test.cpp:264: Failure
+Value of: returnedWhileCreating
+  Actual: false
+Expected: true
+an adapter callback waited for the execution-unit creation of the same code
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-red-src/src/TestUnits/coverage/n01_wtcore_tradepaths/s3_new072_diff_callbacks_nonblocking_test.cpp:269: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  warnings.countContaining("deferred callback")
+    Which is: 0
+dropping queued events is reported once
+
+[  FAILED  ] S3New072DiffCallbacks.CallbacksDuringFailedCreationReturnPromptlyAndAreDroppedWithWarning (855 ms)
+[----------] 1 test from S3New072DiffCallbacks (855 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (857 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S3New072DiffCallbacks.CallbacksDuringFailedCreationReturnPromptlyAndAreDroppedWithWarning
+
+ 1 FAILED TEST

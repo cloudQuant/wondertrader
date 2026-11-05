@@ -35,6 +35,8 @@
 USING_NS_WTP;
 
 extern WtRtRunner& getRunner();
+// BUG-R42-002 gate: HFT contexts bind only a registered trader (module-less local adapter).
+TraderAdapterPtr i03s5_register_test_trader(WtRtRunner& runner, const char* id);
 
 namespace
 {
@@ -206,7 +208,8 @@ TEST(R124PorterExpSel, SubscribedTickIsForwarded)
 	ASSERT_NE(r, nullptr);
 	ASSERT_TRUE(r->config(simple_cfg(dir, "sel").c_str(), false));
 
-	const uint32_t id = r->createSelContext("r124_sel_sub", 20240102, 93000, "d",
+	/* K27=A（2026-11-04 用户裁定）：SEL 调度时间为 HHMM，HHMMSS 值在入口被拒；原写法 93000/153000 见证据 before/。 */
+	const uint32_t id = r->createSelContext("r124_sel_sub", 20240102, 930, "d",
 		0, "CHINA", "TRADING");
 	ASSERT_NE(id, 0U);
 	SelContextPtr ctx = r->getSelContext(id);
@@ -248,7 +251,9 @@ TEST(R124PorterExpHft, SubscribedTickAndTradeAreForwarded)
 	ASSERT_NE(r, nullptr);
 	ASSERT_TRUE(r->config(hft_cfg(dir).c_str(), false));
 
-	const uint32_t id = r->createHftContext("r124_hft_sub", "R124_TRADER_ABSENT", false, 0);
+	// R42-002 gate (迭代03): an unknown trader no longer yields a context.
+	ASSERT_TRUE(i03s5_register_test_trader(*r, "r124_hft_trader") != nullptr);
+	const uint32_t id = r->createHftContext("r124_hft_sub", "r124_hft_trader", false, 0);
 	ASSERT_NE(id, 0U);
 	HftContextPtr base = r->getHftContext(id);
 	ASSERT_TRUE(base != nullptr);
@@ -274,8 +279,10 @@ TEST(R124PorterExpHft, SubscribedTickAndTradeAreForwarded)
 	EXPECT_TRUE(g.last_isbuy);
 	EXPECT_DOUBLE_EQ(2.0, g.last_vol);
 	EXPECT_DOUBLE_EQ(4500.0, g.last_price);
-	/* 基类 on_trade 必须真的执行到 do_set_position */
-	EXPECT_DOUBLE_EQ(2.0, ctx->stra_get_position(code));
+	/* 基类 on_trade 必须真的执行到 do_set_position。上下文现绑定真实（无模块）
+	 * TraderAdapter，stra_get_position 查询的是通道持仓而非上下文账本，故改用只读
+	 * 上下文账本的持仓均价：只有 do_set_position 记下 2 手 @4500 才为 4500。 */
+	EXPECT_DOUBLE_EQ(4500.0, ctx->stra_get_position_avgpx(code));
 
 	register_hft_callbacks(NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 		NULL, NULL, NULL, NULL, NULL);

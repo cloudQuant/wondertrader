@@ -1,0 +1,32 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/TestUnits/fixtures/i03_parser_xele_lifecycle_v2/xele_fixture.hpp	2026-11-03 21:34:06
++++ src/TestUnits/fixtures/i03_parser_xele_lifecycle_v2/xele_fixture.hpp	2026-11-04 21:21:13
+@@ -121,12 +121,17 @@
+ 	BaseData()
+ 	{
+ 		_commodity = WTSCommodityInfo::create("ag", "silver", "SHFE", "TRADING", "CHINA");
++		// I03-NEW-053（卡 1=A+C）：ParserXeleSkt 经 C 路径校验管理器能解析商品及其会话后
++		// 才映射交易日，否则丢帧；替身原来 getCommodity 返回空、商品无会话。
++		_session = WTSSessionInfo::create("TRADING", "trading", 0);
++		_session->addTradingSection(0, 0);
++		_commodity->setSessionInfo(_session);
+ 		_contract = WTSContractInfo::create("ag2512", "ag2512", "SHFE", "ag");
+ 		_contract->setCommInfo(_commodity);
+ 	}
+-	~BaseData() { _contract->release(); _commodity->release(); }
+-	WTSCommodityInfo* getCommodity(const char*) override { return nullptr; }
+-	WTSCommodityInfo* getCommodity(const char*, const char*) override { return nullptr; }
++	~BaseData() { _contract->release(); _commodity->release(); _session->release(); }
++	WTSCommodityInfo* getCommodity(const char*) override { return _commodity; }
++	WTSCommodityInfo* getCommodity(const char*, const char*) override { return _commodity; }
+ 	WTSContractInfo* getContract(const char* code, const char* = "", uint32_t = 0) override
+ 	{ return code && std::strcmp(code, "ag2512") == 0 ? _contract : nullptr; }
+ 	WTSArray* getContracts(const char* = "", uint32_t = 0) override { return nullptr; }
+@@ -137,7 +142,7 @@
+ 	uint32_t calcTradingDate(const char*, uint32_t date, uint32_t, bool = false) override { return date; }
+ 	uint64_t getBoundaryTime(const char*, uint32_t date, bool = false, bool = true) override { return date; }
+ private:
+-	WTSCommodityInfo* _commodity; WTSContractInfo* _contract;
++	WTSCommodityInfo* _commodity; WTSContractInfo* _contract; WTSSessionInfo* _session;
+ };
+ 
+ // Records quotes and Close events; an optional action runs inside handleQuote

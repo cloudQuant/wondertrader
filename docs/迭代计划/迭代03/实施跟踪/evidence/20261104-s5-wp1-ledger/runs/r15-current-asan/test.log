@@ -1,0 +1,94 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R15CtxTest.*
+[==========] Running 42 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 42 tests from R15CtxTest
+[ RUN      ] R15CtxTest.strategy_pointer_roundtrip
+[       OK ] R15CtxTest.strategy_pointer_roundtrip (29 ms)
+[ RUN      ] R15CtxTest.null_strategy_events_only_touch_base
+[       OK ] R15CtxTest.null_strategy_events_only_touch_base (7 ms)
+[ RUN      ] R15CtxTest.on_init_and_session_callbacks_forward_to_strategy
+[       OK ] R15CtxTest.on_init_and_session_callbacks_forward_to_strategy (0 ms)
+[ RUN      ] R15CtxTest.session_end_forwards_date_then_base_writes_fund_line
+[       OK ] R15CtxTest.session_end_forwards_date_then_base_writes_fund_line (8 ms)
+[ RUN      ] R15CtxTest.on_tick_without_subscription_skips_strategy
+[       OK ] R15CtxTest.on_tick_without_subscription_skips_strategy (0 ms)
+[ RUN      ] R15CtxTest.on_tick_subscribed_forwards_same_pointer
+[       OK ] R15CtxTest.on_tick_subscribed_forwards_same_pointer (3 ms)
+[ RUN      ] R15CtxTest.on_bar_forwards_code_period_times_and_bar
+[       OK ] R15CtxTest.on_bar_forwards_code_period_times_and_bar (6 ms)
+[ RUN      ] R15CtxTest.ordque_orddtl_trans_forward_when_strategy_set
+[       OK ] R15CtxTest.ordque_orddtl_trans_forward_when_strategy_set (1 ms)
+[ RUN      ] R15CtxTest.on_trade_forwards_inner_code_and_order_tag
+[       OK ] R15CtxTest.on_trade_forwards_inner_code_and_order_tag (0 ms)
+[ RUN      ] R15CtxTest.on_order_and_entrust_forward_tag_and_cancel_flag
+[       OK ] R15CtxTest.on_order_and_entrust_forward_tag_and_cancel_flag (0 ms)
+[ RUN      ] R15CtxTest.on_position_forwards_only_to_strategy
+[       OK ] R15CtxTest.on_position_forwards_only_to_strategy (0 ms)
+[ RUN      ] R15CtxTest.channel_events_forward_and_flush_userdata_only_when_dirty
+[       OK ] R15CtxTest.channel_events_forward_and_flush_userdata_only_when_dirty (3 ms)
+[ RUN      ] R15CtxTest.order_tag_default_capacity_preserves_registered_tag
+[       OK ] R15CtxTest.order_tag_default_capacity_preserves_registered_tag (0 ms)
+[ RUN      ] R15CtxTest.order_tag_set_get_erase_with_default_context
+[       OK ] R15CtxTest.order_tag_set_get_erase_with_default_context (0 ms)
+[ RUN      ] R15CtxTest.order_tag_lookup_miss_does_not_match_or_erase_neighbor
+[       OK ] R15CtxTest.order_tag_lookup_miss_does_not_match_or_erase_neighbor (0 ms)
+[ RUN      ] R15CtxTest.order_tags_keep_unordered_ids_and_replace_exact_duplicate
+[       OK ] R15CtxTest.order_tags_keep_unordered_ids_and_replace_exact_duplicate (0 ms)
+[ RUN      ] R15CtxTest.order_tags_do_not_silently_evict_or_truncate
+[       OK ] R15CtxTest.order_tags_do_not_silently_evict_or_truncate (1 ms)
+[ RUN      ] R15CtxTest.registered_order_tag_reaches_callbacks_and_remains_after_terminal_order
+[       OK ] R15CtxTest.registered_order_tag_reaches_callbacks_and_remains_after_terminal_order (0 ms)
+[ RUN      ] R15CtxTest.order_tags_survive_open_close_and_reverse_without_truncation
+[       OK ] R15CtxTest.order_tags_survive_open_close_and_reverse_without_truncation (11 ms)
+[ RUN      ] R15CtxTest.unbound_trader_actions_fail_before_engine_or_mapping_side_effects
+[       OK ] R15CtxTest.unbound_trader_actions_fail_before_engine_or_mapping_side_effects (0 ms)
+[ RUN      ] R15CtxTest.fresh_context_starts_without_a_trader
+[       OK ] R15CtxTest.fresh_context_starts_without_a_trader (0 ms)
+[ RUN      ] R15CtxTest.unbound_trader_reentrant_diagnostic_cannot_submit_actions
+[       OK ] R15CtxTest.unbound_trader_reentrant_diagnostic_cannot_submit_actions (0 ms)
+[ RUN      ] R15CtxTest.bound_trader_still_handles_queries_and_unknown_cancel
+[       OK ] R15CtxTest.bound_trader_still_handles_queries_and_unknown_cancel (0 ms)
+[ RUN      ] R15CtxTest.bound_trader_sends_order_only_to_fake_api
+[       OK ] R15CtxTest.bound_trader_sends_order_only_to_fake_api (5 ms)
+[ RUN      ] R15CtxTest.unbinding_a_previously_bound_trader_rejects_actions
+[       OK ] R15CtxTest.unbinding_a_previously_bound_trader_rejects_actions (0 ms)
+[ RUN      ] R15CtxTest.reentrant_bind_during_unbound_diagnostic_does_not_submit_outer_order
+[       OK ] R15CtxTest.reentrant_bind_during_unbound_diagnostic_does_not_submit_outer_order (0 ms)
+[ RUN      ] R15CtxTest.trader_unbound_during_rule_callback_rejects_outer_order
+[       OK ] R15CtxTest.trader_unbound_during_rule_callback_rejects_outer_order (0 ms)
+[ RUN      ] R15CtxTest.trader_replaced_during_rule_callback_rejects_outer_order
+[       OK ] R15CtxTest.trader_replaced_during_rule_callback_rejects_outer_order (0 ms)
+[ RUN      ] R15CtxTest.trader_unbound_then_rebound_during_rule_callback_rejects_outer_order
+[       OK ] R15CtxTest.trader_unbound_then_rebound_during_rule_callback_rejects_outer_order (0 ms)
+[ RUN      ] R15CtxTest.each_entry_and_exit_rejects_reentrant_unbind_from_rule_lookup
+[       OK ] R15CtxTest.each_entry_and_exit_rejects_reentrant_unbind_from_rule_lookup (0 ms)
+[ RUN      ] R15CtxTest.trader_unbound_during_custom_code_lookup_rejects_outer_order
+[       OK ] R15CtxTest.trader_unbound_during_custom_code_lookup_rejects_outer_order (0 ms)
+[ RUN      ] R15CtxTest.trader_unbound_during_contract_lookup_rejects_outer_buy
+[       OK ] R15CtxTest.trader_unbound_during_contract_lookup_rejects_outer_buy (0 ms)
+[ RUN      ] R15CtxTest.trader_unbound_during_commodity_lookup_rejects_outer_sell
+[       OK ] R15CtxTest.trader_unbound_during_commodity_lookup_rejects_outer_sell (0 ms)
+[ RUN      ] R15CtxTest.trader_unbound_during_sell_position_lookup_rejects_outer_sell
+[       OK ] R15CtxTest.trader_unbound_during_sell_position_lookup_rejects_outer_sell (0 ms)
+[ RUN      ] R15CtxTest.bound_long_only_sell_uses_existing_position_semantics
+[       OK ] R15CtxTest.bound_long_only_sell_uses_existing_position_semantics (0 ms)
+[ RUN      ] R15CtxTest.bound_long_only_sell_keeps_custom_position_mapping
+[       OK ] R15CtxTest.bound_long_only_sell_keeps_custom_position_mapping (0 ms)
+[ RUN      ] R15CtxTest.synchronous_report_sees_tag_registered_before_provider_call
+[       OK ] R15CtxTest.synchronous_report_sees_tag_registered_before_provider_call (5 ms)
+[ RUN      ] R15CtxTest.rejected_reservation_does_not_keep_a_tag
+[       OK ] R15CtxTest.rejected_reservation_does_not_keep_a_tag (17 ms)
+[ RUN      ] R15CtxTest.terminal_tags_retire_in_a_bounded_window_and_live_tags_never_evict
+[       OK ] R15CtxTest.terminal_tags_retire_in_a_bounded_window_and_live_tags_never_evict (320 ms)
+[ RUN      ] R15CtxTest.tag_pointer_survives_reentrant_erase_and_replacement
+[       OK ] R15CtxTest.tag_pointer_survives_reentrant_erase_and_replacement (5 ms)
+[ RUN      ] R15CtxTest.concurrent_tag_writes_and_reads_are_synchronized
+[       OK ] R15CtxTest.concurrent_tag_writes_and_reads_are_synchronized (221 ms)
+[ RUN      ] R15CtxTest.unbound_queries_return_zero_with_diagnostic_instead_of_dereferencing
+[       OK ] R15CtxTest.unbound_queries_return_zero_with_diagnostic_instead_of_dereferencing (0 ms)
+[----------] 42 tests from R15CtxTest (656 ms total)
+
+[----------] Global test environment tear-down
+[==========] 42 tests from 1 test suite ran. (657 ms total)
+[  PASSED  ] 42 tests.

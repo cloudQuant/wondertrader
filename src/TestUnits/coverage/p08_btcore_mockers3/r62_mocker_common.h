@@ -25,6 +25,7 @@
 #include <Includes/WTSDataDef.hpp>
 #include <Includes/WTSVariant.hpp>
 #include <WtBtCore/HisDataReplayer.h>
+#include "../s5_bt_basefiles.h"
 #include <WtBtCore/WtHelper.h>
 
 namespace r62
@@ -108,7 +109,8 @@ namespace r62
 		cfg->append("align_by_section", false);
 		cfg->append("dont_simtick_if_notrade", false);
 		cfg->append("cache_clear_days", static_cast<uint32_t>(10));
-		cfg->append("fees", (root / "dist/common/fees.json").string().c_str());
+		// 卡13d：发行 fees.json 不含股票品种；在其全部条目上补 SSE/SZSE 股票零费率（旧期望即股票零费用）。
+		cfg->append("fees", s5bt::write_fees(root, s5bt::scratch_dir()).c_str());
 
 		WTSVariant* basefiles = WTSVariant::createObject();
 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
@@ -120,6 +122,8 @@ namespace r62
 		comms->release();
 
 		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
+		// 卡13d（I03-NEW-080）：成交合约须有物理合约元数据；只登记测试所用合约。
+		basefiles->append("contract", s5bt::write_contracts(s5bt::scratch_dir()).c_str());
 		cfg->append("basefiles", basefiles);
 		basefiles->release();
 		return cfg;

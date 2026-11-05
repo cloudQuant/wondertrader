@@ -1,0 +1,296 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-ctp/before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp	2026-11-03 18:25:28
++++ src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp	2026-11-04 20:25:56
+@@ -538,6 +538,12 @@
+         trader_.killWorker();
+         std::error_code ec;
+         std::filesystem::remove_all(tmp_, ec);
++        // 迭代03 s5：夹具自建的配置/合约/品种对象在用例结束时归还（LSan 定位到仅此夹具泄漏，非产品）。
++        if (cfg_) { cfg_->release(); cfg_ = NULL; }
++        for (WTSContractInfo* ct : { ct_ag_, ct_ag2_, ct_if_, ct_if2_, ct_spd_ })
++            if (ct) ct->release();
++        for (WTSCommodityInfo* comm : { comm_ag_, comm_if_, comm_spd_ })
++            if (comm) comm->release();
+     }
+ 
+     /// 认证 + 登录回报：停在 WS_LOGINED（结算确认之前）
+@@ -727,6 +733,10 @@
+     lf.FrontID = 7;
+     lf.SessionID = 8;
+     strcpy(lf.MaxOrderRef, "50");
++    // 迭代03 s5 N-2 夹具迁移（11-03 已实施的 CTP 身份合同）：登录回报须带与配置一致的 Broker/User 与合法交易日，旧夹具缺省这三项。
++    strcpy(lf.BrokerID, "9999");
++    strcpy(lf.UserID, "88880001");
++    strcpy(lf.TradingDay, "20240115");
+     trader_.OnRspUserLogin(&lf, NULL, 2, true);
+ 
+     EXPECT_EQ(TraderCTP::WS_LOGINED, trader_.state());
+@@ -948,21 +958,25 @@
+ //////////////////////////////////////////////////////////////////////////
+ // 7) release/disconnect 与 connect()（L281-303 / L305-366 / L368-379）
+ //
++// 迭代03 s5（BUG-T25-005 / T2-CTP-03 原修复方向“无 worker 时不留旧释放任务”，卡9）：
++// 旧断言要求无 worker 时 disconnect 只把 release() 压进查询队列、不释放；该行为正是
++// T2-CTP-03 指出的残留旧任务缺陷。现合同：disconnect 与 release 同为有界终止停止，
++// 无 worker 时直接停止并释放 SDK 一次，不在队列中留下任何任务。原断言见证据 before/。
+ TEST_F(T25TraderCTPTest, disconnect_without_worker_only_queues_release)
+ {
+     trader_.attach(&api_);
+     EXPECT_FALSE(trader_.hasWorker());
+ 
+-    trader_.disconnect();                     // m_thrdWorker==NULL ⇒ 只压队列，不 join
+-    EXPECT_EQ(1u, trader_.queryDepth());
+-    EXPECT_FALSE(trader_.stopped());
+-    EXPECT_EQ(0, api_.n_release_.load());
+-
+-    EXPECT_EQ(1u, trader_.drainQueries());    // 队列项就是 release()
++    trader_.disconnect();                     // 无 worker：直接有界停止并释放
++    EXPECT_EQ(0u, trader_.queryDepth());
+     EXPECT_TRUE(trader_.stopped());
+     EXPECT_EQ(1, api_.n_release_.load());
+     EXPECT_EQ(NULL, trader_.api());
+     EXPECT_FALSE(trader_.hasWorker());
++
++    EXPECT_EQ(0u, trader_.drainQueries());    // 不留旧释放任务
++    trader_.disconnect();                     // 重复停止不再释放
++    EXPECT_EQ(1, api_.n_release_.load());
+ }
+ 
+ TEST_F(T25TraderCTPTest, release_after_ready_clears_api_and_every_container)
+@@ -1043,13 +1057,17 @@
+     EXPECT_TRUE(sink_.hasLog("registerFront: tcp://127.0.0.1:1234"));
+     ASSERT_TRUE(trader_.hasWorker());
+ 
+-    // 第二次 connect：worker 已存在 ⇒ 走 L334 的 false 分支，不再新建线程
++    // 第二次 connect：迭代03 s5 按卡9c（重复 init/reinit 拒绝并保留原实例）改写。
++    // 旧断言要求再次调用 creator/RegisterFront/Init（会泄漏旧 SDK 对象并让其继续回调本 SPI），
++    // 现合同：保留原 API，不再创建、不再 Init，记录错误日志。原断言见证据 before/。
+     trader_.setQuick(true);
+     trader_.connect();
+-    EXPECT_EQ(2, api_.n_register_front_.load());
+-    EXPECT_EQ((int)THOST_TERT_QUICK, api_.last_sub_public_);
+-    EXPECT_EQ((int)THOST_TERT_QUICK, api_.last_sub_private_);
+-    EXPECT_EQ(2, api_.n_init_.load());
++    EXPECT_EQ(1, g_n_creator.load());
++    EXPECT_EQ(1, api_.n_register_front_.load());
++    EXPECT_EQ((int)THOST_TERT_RESUME, api_.last_sub_public_);
++    EXPECT_EQ((int)THOST_TERT_RESUME, api_.last_sub_private_);
++    EXPECT_EQ(1, api_.n_init_.load());
++    EXPECT_TRUE(sink_.hasLog("Repeated connect rejected"));
+     EXPECT_TRUE(trader_.hasWorker());
+ 
+     // 队列由 worker 线程消费（生产语义），用例只轮询观察，不同步执行
+@@ -1123,6 +1141,9 @@
+ TEST_F(T25TraderCTPTest, settlement_confirm_query_with_null_field_or_error_keeps_or_skips_state)
+ {
+     bringToLogin();
++    // 迭代03 s5 N-2 夹具迁移（11-03 已实施的 CTP 身份合同）：回报只认本代次已发出的确认查询请求号；先执行排队的确认查询再注入回报。
++    ASSERT_EQ(1u, trader_.drainQueries());
++    const int confirmQueryId = api_.last_req_id_;
+ 
+     // bIsLast 才复位 m_bInQuery（L808-812）；先造出「正在查询」的形状
+     trader_.setInQuery(true);
+@@ -1140,7 +1161,7 @@
+     EXPECT_EQ(0, api_.n_confirm_.load());         // 错误回报不许发确认
+ 
+     // pSettlementInfoConfirm==NULL 且无错误 ⇒ 也进 WS_CONFIRM_QRYED 并发确认（L836-840）
+-    trader_.OnRspQrySettlementInfoConfirm(NULL, &ok_, 3, true);
++    trader_.OnRspQrySettlementInfoConfirm(NULL, &ok_, confirmQueryId, true);
+     EXPECT_EQ(TraderCTP::WS_CONFIRM_QRYED, trader_.state());
+     EXPECT_EQ(1, api_.n_confirm_.load());
+ }
+@@ -1159,20 +1180,29 @@
+     EXPECT_EQ(0u, sink_.n_login_result_);
+ 
+     // 状态对但带错误 ⇒ 仍不动
+-    trader_.setState(TraderCTP::WS_CONFIRM_QRYED);
++    // 迭代03 s5 N-2 夹具迁移（11-03 已实施的 CTP 身份合同）：WS_CONFIRM_QRYED 改由真实路径进入（确认查询 → 确认日期早于交易日 → confirm() 发出请求），
++    // 确认回报只认该请求号；旧夹具 setState 强置状态、请求号任意。
++    ASSERT_EQ(1u, trader_.drainQueries());
++    CThostFtdcSettlementInfoConfirmField older;
++    memset(&older, 0, sizeof(older));
++    strcpy(older.ConfirmDate, "20240112");
++    trader_.OnRspQrySettlementInfoConfirm(&older, &ok_, api_.last_req_id_, true);
++    ASSERT_EQ(TraderCTP::WS_CONFIRM_QRYED, trader_.state());
++    ASSERT_EQ(1, api_.n_confirm_.load());
++    const int confirmId = api_.last_req_id_;
+     CThostFtdcRspInfoField err;
+     fillErr(err, 90, "确认失败");
+-    trader_.OnRspSettlementInfoConfirm(&f, &err, 2, true);
++    trader_.OnRspSettlementInfoConfirm(&f, &err, confirmId, true);
+     EXPECT_EQ(TraderCTP::WS_CONFIRM_QRYED, trader_.state());
+     EXPECT_EQ(0u, sink_.n_login_result_);
+ 
+     // 状态对但回报对象为 NULL ⇒ 仍不动（L847 的第二个条件）
+-    trader_.OnRspSettlementInfoConfirm(NULL, &ok_, 3, true);
++    trader_.OnRspSettlementInfoConfirm(NULL, &ok_, confirmId, true);
+     EXPECT_EQ(TraderCTP::WS_CONFIRM_QRYED, trader_.state());
+     EXPECT_EQ(0u, sink_.n_login_result_);
+ 
+     // 只有「状态对 + 无错误 + 对象非空」三者齐备才就绪
+-    trader_.OnRspSettlementInfoConfirm(&f, &ok_, 4, true);
++    trader_.OnRspSettlementInfoConfirm(&f, &ok_, confirmId, true);
+     EXPECT_EQ(TraderCTP::WS_ALLREADY, trader_.state());
+     EXPECT_EQ(1u, sink_.n_login_result_);
+ }
+@@ -1208,13 +1238,16 @@
+ 
+ TEST_F(T25TraderCTPTest, query_confirm_sync_failure_clears_gate_and_worker_releases)
+ {
++    // 迭代03 s5 N-2 前提迁移（不改断言）：
++    //  1) 卡9c：connect() 只在尚无 API 时创建 SDK 对象并启动 worker；旧用例先经 seam 注入 API 再 connect，
++    //     改为先摘下 seam 指针，由 creator 返回同一替身；
++    //  2) 11-03 CTP 身份合同：确认查询只在本代次仍处于 WS_LOGINED 时发出；旧用例在确认查询执行前就把
++    //     状态强置 WS_ALLREADY，查询被代次守卫丢弃（改前基线即失败）。改为确认查询失败后再强置就绪并排账户查询。
+     bringToLogin();                                 // 先排入首次确认状态查询
+-    trader_.setState(TraderCTP::WS_ALLREADY);
+-    ASSERT_EQ(0, trader_.queryAccount());            // 再排普通查询，验证 worker 能继续消费
+     api_.ret_ = 7;
+     g_api_for_creator = &api_;
+     trader_.setCreator(&fakeCreator);
+-
++    trader_.detach();
+     trader_.connect();
+     ASSERT_TRUE(trader_.hasWorker());
+     ASSERT_TRUE(waitUntil([this]() {
+@@ -1225,6 +1258,8 @@
+     EXPECT_TRUE(sink_.hasLog("Sending query of settlement data confirming state failed: 7"));
+ 
+     api_.ret_ = 0;                                  // 下一项正常受理，等待其末帧再停机
++    trader_.setState(TraderCTP::WS_ALLREADY);
++    ASSERT_EQ(0, trader_.queryAccount());            // 再排普通查询，验证 worker 能继续消费
+     ASSERT_TRUE(waitUntil([this]() {
+         return api_.n_qry_acct_.load() == 1 && trader_.inQuery();
+     })) << "同步失败后 worker 没有执行后续账户查询";
+@@ -1606,6 +1641,9 @@
+     strcpy(io.InstrumentID, kCodeAg);
+     strcpy(io.ExchangeID, kExchgAg);
+     strcpy(io.OrderRef, "1001");
++    // 迭代03 s5 N-2 夹具迁移（11-03 已实施的 CTP 身份合同）：委托回报只在 Broker/Investor 与登记身份一致时还原本地 ID 与 tag（真实回报携带这两项）。
++    strcpy(io.BrokerID, "9999");
++    strcpy(io.InvestorID, "88880001");
+     io.Direction = THOST_FTDC_D_Sell;
+     io.CombOffsetFlag[0] = THOST_FTDC_OF_Close;
+     io.OrderPriceType = THOST_FTDC_OPT_FiveLevelPrice;
+@@ -1696,6 +1734,9 @@
+     ia.FrontID = 12345;
+     ia.SessionID = 67;
+     strcpy(ia.OrderRef, "1001");
++    // 迭代03 s5 N-2 夹具迁移（11-03 已实施的 CTP 身份合同）：同上，撤单回报须带 Broker/Investor 才归属本地 tag。
++    strcpy(ia.BrokerID, "9999");
++    strcpy(ia.InvestorID, "88880001");
+ 
+     CThostFtdcRspInfoField err;
+     fillErr(err, 30, "撤单被拒");
+@@ -1891,12 +1932,14 @@
+     EXPECT_EQ(0u, sink_.n_log_);                        // 事件确实没往旧 sink 上打
+ 
+     // 认证失败分支：日志与 onLoginResult 都判空，但状态仍要落
++    // 迭代03 s5 N-2 夹具迁移（11-03 已实施的 CTP 身份合同）：认证回报只对本次登录尝试的认证请求有效，先发起登录再注入失败回报。
+     trader_.attach(&api_);
++    ASSERT_EQ(0, trader_.login("88880001", "pwd", "prod01"));
+     CThostFtdcRspAuthenticateField authf;
+     memset(&authf, 0, sizeof(authf));
+     CThostFtdcRspInfoField err;
+     fillErr(err, 11, "AuthCode invalid");
+-    trader_.OnRspAuthenticate(&authf, &err, 1, true);
++    trader_.OnRspAuthenticate(&authf, &err, api_.last_req_id_, true);
+     EXPECT_EQ(TraderCTP::WS_LOGINFAILED, trader_.state());
+     // 事件与登录结果一条都不许发出去
+     EXPECT_EQ(0u, sink_.n_events_.size());
+@@ -2005,6 +2048,9 @@
+     EXPECT_EQ(0u, sink_.n_login_result_);
+ }
+ 
++// 迭代03 s5 N-2 改写（11-03 已实施的 CTP 身份合同：委托/订单关联缓存是身份登记的一部分，
++// 初始化失败时登录 fail-closed，不再“告警后继续”）。旧断言期望 WS_LOGINED 并继续排确认查询，
++// 与该合同冲突；改为断言登录失败、可观察且不进入后续链路。原断言见证据 before/。
+ TEST_F(T25TraderCTPTest, login_warns_and_continues_when_cache_dir_is_not_writable)
+ {
+     namespace fs = std::filesystem;
+@@ -2025,24 +2071,26 @@
+     lf.FrontID = 12345;
+     lf.SessionID = 67;
+     strcpy(lf.MaxOrderRef, "1000");
++    strcpy(lf.BrokerID, "9999");
++    strcpy(lf.UserID, "88880001");
++    strcpy(lf.TradingDay, "20240115");
+     trader_.OnRspUserLogin(&lf, &ok_, 2, true);
+ 
+     fs::permissions(dir, fs::perms::all, fs::perm_options::replace);   // 别让 TearDown 删不掉
+ 
+-    // L766-768 / L779-781：两个缓存各自的告警回调都被打了一次
+-    EXPECT_EQ(TraderCTP::WS_LOGINED, trader_.state());
+-    EXPECT_EQ(20240115u, trader_.tradingDate());
+-    const auto failed_mapping_logs = std::count_if(
+-        sink_.logs_.begin(), sink_.logs_.end(), [](const std::string& message) {
+-            return message.find("Mapping cache file failed") != std::string::npos;
+-        });
+-    EXPECT_LE(2, failed_mapping_logs);
+-    EXPECT_EQ(1u, trader_.queryDepth());                // 失败被吞掉，登录链照旧往下走
+-    EXPECT_EQ(0u, trader_.eidSize());                   // 缓存没建起来 ⇒ 容量 0
+-    EXPECT_EQ(0u, trader_.oidSize());
+-    EXPECT_EQ("", trader_.eidValue("012345#0000000067#001001"));   // get() 只查索引 ⇒ 安全回落空串
++    EXPECT_EQ(TraderCTP::WS_LOGINFAILED, trader_.state());
++    EXPECT_TRUE(sink_.hasLog("Login identity initialization failed"));
++    EXPECT_EQ(1u, sink_.n_login_result_);
++    EXPECT_FALSE(sink_.last_succ_);
++    EXPECT_EQ(0u, trader_.queryDepth());                // 不再继续排结算确认查询
++    EXPECT_FALSE(trader_.isConnected());
++    EXPECT_EQ(0u, trader_.eidSize());
++    char eid[64] = { 0 };
++    EXPECT_FALSE(trader_.makeEntrustID(eid, sizeof(eid)));   // 无身份代次 ⇒ 不分配
+ }
+ 
++// 迭代03 s5 N-2 改写（同上）：缓存初始化失败时登录即失败，下单因通道未就绪被拒，不会到达 SDK。
++// 旧用例期望登录成功、就绪后再因缓存不可写拒单，前提与 fail-closed 登录合同冲突。原断言见证据 before/。
+ TEST_F(T25TraderCTPTest, order_insert_rejects_when_user_tag_cache_init_failed)
+ {
+     namespace fs = std::filesystem;
+@@ -2052,30 +2100,31 @@
+     ASSERT_FALSE(ec);
+     fs::permissions(dir, fs::perms::owner_read | fs::perms::owner_exec, fs::perm_options::replace);
+ 
+-    bringToLogin();
++    trader_.attach(&api_);
++    ASSERT_EQ(0, trader_.login("88880001", "pwd", "prod01"));
++    CThostFtdcRspAuthenticateField authf;
++    memset(&authf, 0, sizeof(authf));
++    trader_.OnRspAuthenticate(&authf, &ok_, 1, true);
++    CThostFtdcRspUserLoginField lf;
++    memset(&lf, 0, sizeof(lf));
++    lf.FrontID = 12345;
++    lf.SessionID = 67;
++    strcpy(lf.MaxOrderRef, "1000");
++    strcpy(lf.BrokerID, "9999");
++    strcpy(lf.UserID, "88880001");
++    strcpy(lf.TradingDay, "20240115");
++    trader_.OnRspUserLogin(&lf, &ok_, 2, true);
+     fs::permissions(dir, fs::perms::all, fs::perm_options::replace);
+ 
+-    // Finish the real settlement-confirm path instead of forcing WS_ALLREADY.
+-    ASSERT_EQ(1u, trader_.queryDepth());
+-    EXPECT_EQ(1u, trader_.drainQueries());
+-    CThostFtdcSettlementInfoConfirmField conf;
+-    memset(&conf, 0, sizeof(conf));
+-    strcpy(conf.ConfirmDate, "20240115");
+-    trader_.OnRspQrySettlementInfoConfirm(&conf, &ok_, 3, true);
+-    ASSERT_EQ(TraderCTP::WS_ALLREADY, trader_.state());
+-    ASSERT_TRUE(trader_.isConnected());
+-
++    ASSERT_EQ(TraderCTP::WS_LOGINFAILED, trader_.state());
++    ASSERT_FALSE(trader_.isConnected());
+     char eid[64] = { 0 };
+-    ASSERT_TRUE(trader_.makeEntrustID(eid, sizeof(eid)));
++    EXPECT_FALSE(trader_.makeEntrustID(eid, sizeof(eid)));
+     WTSEntrust* e = WTSEntrust::create(kCodeAg, 1, 7000.0, kExchgAg);
+-    e->setEntrustID(eid);
+     e->setUserTag("TAG-CACHE-FAIL");
+-
+     EXPECT_LT(trader_.orderInsert(e), 0);
+     EXPECT_EQ(0, api_.n_insert_.load());
+     EXPECT_EQ(0u, trader_.eidSize());
+-    EXPECT_TRUE(sink_.hasLog("Cache insertion rejected because cache is not initialized"));
+-    EXPECT_TRUE(sink_.hasLog("Order insert rejected because user tag could not be persisted"));
+     e->release();
+ }
+ 

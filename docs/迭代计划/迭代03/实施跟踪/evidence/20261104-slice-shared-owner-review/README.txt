@@ -1,0 +1,1 @@
+主线程 2026-11-04 独立复跑：ninja 增量重编 green-asan/green-tsan exit 0；ASan/UBSan+LSan：abi 2/2、rdm 9/9、replay 3/3、servo 5/5、unit 6/6、reader_bench 1/1，rdm_regress 176/177（day_tail_fragment_is_dropped 基线同样失败）；TSan：rdm 9/9、replay 3/3、servo 5/5、unit 6/6、reader_bench 1/1、rdm_regress 176/177，无 ThreadSanitizer 报告；TSan 下 i03_slice_bench 超时 exit 142，基准不计。

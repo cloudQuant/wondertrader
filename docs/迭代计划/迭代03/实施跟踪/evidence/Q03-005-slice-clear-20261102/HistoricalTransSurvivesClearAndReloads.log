@@ -1,0 +1,31 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = Q03RdmClearLifetime.HistoricalTransSurvivesClearAndReloads
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q03RdmClearLifetime
+[ RUN      ] Q03RdmClearLifetime.HistoricalTransSurvivesClearAndReloads
+/tmp/wt-i03-q03-lifetime/src/WTSUtils/zstdlib/zstd_compress.c:1326:46: runtime error: applying non-zero offset 1 to null pointer
+    #0 0x00010580b3e4 in ZSTD_reset_matchState zstd_compress.c:1326
+    #1 0x000105808bb8 in ZSTD_resetCCtx_internal zstd_compress.c:1527
+    #2 0x0001057f69f4 in ZSTD_compressBegin_internal zstd_compress.c:2946
+    #3 0x0001057f92e4 in ZSTD_compress_advanced_internal zstd_compress.c:3120
+    #4 0x0001057f963c in ZSTD_compress_usingDict zstd_compress.c:3135
+    #5 0x0001057f977c in ZSTD_compressCCtx zstd_compress.c:3145
+    #6 0x0001057f9968 in ZSTD_compress zstd_compress.c:3155
+    #7 0x00010536559c in WTSCmpHelper::compress_data(void const*, unsigned long, unsigned int) WTSCmpHelper.hpp:44
+    #8 0x000105332500 in q03::make_block(unsigned short, unsigned short, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) q03_storage3_fixture.h:135
+    #9 0x00010533af5c in q03::Q03RdmClearLifetime_HistoricalTransSurvivesClearAndReloads_Test::TestBody() q03_rdm_clear_lifetime_test.cpp:65
+    #10 0x0001060cea1c in void testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2664
+    #11 0x000105fe5010 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2700
+    #12 0x000105fe4d08 in testing::Test::Run() gtest.cc:2739
+    #13 0x000105fe8320 in testing::TestInfo::Run() gtest.cc:2885
+    #14 0x000105fec8c0 in testing::TestSuite::Run() gtest.cc:3063
+    #15 0x00010601ebec in testing::internal::UnitTestImpl::RunAllTests() gtest.cc:6054
+    #16 0x0001060fbf54 in bool testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2664
+    #17 0x00010601d0c8 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2700
+    #18 0x00010601cc10 in testing::UnitTest::Run() gtest.cc:5594
+    #19 0x000106123254 in RUN_ALL_TESTS() gtest.h:2334
+    #20 0x000106123178 in main gtest_main.cc:64
+    #21 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-q03-lifetime/src/WTSUtils/zstdlib/zstd_compress.c:1326:46 

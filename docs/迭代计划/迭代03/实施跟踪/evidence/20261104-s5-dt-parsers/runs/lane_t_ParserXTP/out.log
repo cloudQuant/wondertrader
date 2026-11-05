@@ -1,0 +1,180 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 73 tests from 7 test suites.
+[----------] Global test environment set-up.
+[----------] 12 tests from ParserXTP
+[ RUN      ] ParserXTP.factory_entries_create_and_destroy_parser
+[       OK ] ParserXTP.factory_entries_create_and_destroy_parser (0 ms)
+[ RUN      ] ParserXTP.state_queries_before_init_answer_deterministically
+[       OK ] ParserXTP.state_queries_before_init_answer_deterministically (0 ms)
+[ RUN      ] ParserXTP.register_spi_accepts_null_sink_without_touching_callbacks
+[       OK ] ParserXTP.register_spi_accepts_null_sink_without_touching_callbacks (0 ms)
+[ RUN      ] ParserXTP.on_error_filters_zero_error_id_and_logs_nonzero
+[       OK ] ParserXTP.on_error_filters_zero_error_id_and_logs_nonzero (0 ms)
+[ RUN      ] ParserXTP.unsubscribe_marketdata_callback_is_documented_noop
+[       OK ] ParserXTP.unsubscribe_marketdata_callback_is_documented_noop (0 ms)
+[ RUN      ] ParserXTP.sub_marketdata_error_path_formats_exchange_and_ticker
+[       OK ] ParserXTP.sub_marketdata_error_path_formats_exchange_and_ticker (0 ms)
+[ RUN      ] ParserXTP.on_disconnected_delivers_close_event_without_running_relogin_post
+[       OK ] ParserXTP.on_disconnected_delivers_close_event_without_running_relogin_post (0 ms)
+[ RUN      ] ParserXTP.depth_market_data_without_basedata_or_contract_bails_out
+[       OK ] ParserXTP.depth_market_data_without_basedata_or_contract_bails_out (0 ms)
+[ RUN      ] ParserXTP.depth_market_data_converts_snapshot_and_level1_queues
+[       OK ] ParserXTP.depth_market_data_converts_snapshot_and_level1_queues (0 ms)
+[ RUN      ] ParserXTP.tickbytick_converts_entrust_and_trade_branches
+[       OK ] ParserXTP.tickbytick_converts_entrust_and_trade_branches (5 ms)
+[ RUN      ] ParserXTP.subscribe_before_login_only_buffers_without_api_calls
+[       OK ] ParserXTP.subscribe_before_login_only_buffers_without_api_calls (0 ms)
+[ RUN      ] ParserXTP.price_helper_guards_sentinels
+[       OK ] ParserXTP.price_helper_guards_sentinels (0 ms)
+[----------] 12 tests from ParserXTP (7 ms total)
+
+[----------] 1 test from gate_placeholder_ParserXTP
+[ RUN      ] gate_placeholder_ParserXTP.compiles_with_module_flags
+[       OK ] gate_placeholder_ParserXTP.compiles_with_module_flags (0 ms)
+[----------] 1 test from gate_placeholder_ParserXTP (0 ms total)
+
+[----------] 4 tests from ParserXTPInit
+[ RUN      ] ParserXTPInit.missing_module_fails_without_registering_or_connecting
+dlopen(/private/tmp/wt-i03-s5-dt-parsers-cov/build_x64/Debug/bin/TestUnits/libwt_t1_xtp_missing_34_250558454659083.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-dt-parsers-cov/build_x64/Debug/bin/TestUnits/libwt_t1_xtp_missing_34_250558454659083.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-dt-parsers-cov/build_x64/Debug/bin/TestUnits/libwt_t1_xtp_missing_34_250558454659083.dylib' (no such file), '/private/tmp/wt-i03-s5-dt-parsers-cov/build_x64/Debug/bin/TestUnits/libwt_t1_xtp_missing_34_250558454659083.dylib' (no such file)
+[       OK ] ParserXTPInit.missing_module_fails_without_registering_or_connecting (3 ms)
+[ RUN      ] ParserXTPInit.module_without_creator_symbol_fails_and_closes_handle
+[       OK ] ParserXTPInit.module_without_creator_symbol_fails_and_closes_handle (752 ms)
+[ RUN      ] ParserXTPInit.creator_returning_null_fails_and_closes_handle
+[       OK ] ParserXTPInit.creator_returning_null_fails_and_closes_handle (1538 ms)
+[ RUN      ] ParserXTPInit.successful_creator_registers_parser_spi
+[       OK ] ParserXTPInit.successful_creator_registers_parser_spi (460 ms)
+[----------] 4 tests from ParserXTPInit (2753 ms total)
+
+[----------] 5 tests from XtpSeamF
+[ RUN      ] XtpSeamF.mirror_head_slots_track_ctor_and_register_spi
+[       OK ] XtpSeamF.mirror_head_slots_track_ctor_and_register_spi (0 ms)
+[ RUN      ] XtpSeamF.mirror_tail_slots_are_the_objects_the_parser_uses
+[       OK ] XtpSeamF.mirror_tail_slots_are_the_objects_the_parser_uses (0 ms)
+[ RUN      ] XtpSeamF.is_connected_and_disconnect_pair_without_an_api_pointer
+[       OK ] XtpSeamF.is_connected_and_disconnect_pair_without_an_api_pointer (0 ms)
+[ RUN      ] XtpSeamF.connect_disconnect_joins_the_worker_and_release_is_idempotent
+[       OK ] XtpSeamF.connect_disconnect_joins_the_worker_and_release_is_idempotent (4 ms)
+[ RUN      ] XtpSeamF.worker_thread_shutdown_fails_closed_until_owner_joins
+[       OK ] XtpSeamF.worker_thread_shutdown_fails_closed_until_owner_joins (13 ms)
+[----------] 5 tests from XtpSeamF (19 ms total)
+
+[----------] 22 tests from XtpLoginF
+[ RUN      ] XtpLoginF.connect_fails_closed_without_api_and_does_not_start_worker
+[       OK ] XtpLoginF.connect_fails_closed_without_api_and_does_not_start_worker (7 ms)
+[ RUN      ] XtpLoginF.login_minus_one_logs_connect_failure_and_defers_the_event
+[       OK ] XtpLoginF.login_minus_one_logs_connect_failure_and_defers_the_event (18 ms)
+[ RUN      ] XtpLoginF.login_minus_one_pump_delivers_connect_event_carrying_the_raw_code
+[       OK ] XtpLoginF.login_minus_one_pump_delivers_connect_event_carrying_the_raw_code (0 ms)
+[ RUN      ] XtpLoginF.pending_login_failure_rechecks_unregistered_sink
+[       OK ] XtpLoginF.pending_login_failure_rechecks_unregistered_sink (19 ms)
+[ RUN      ] XtpLoginF.login_other_failure_sends_one_sync_and_one_posted_connect_event
+[       OK ] XtpLoginF.login_other_failure_sends_one_sync_and_one_posted_connect_event (0 ms)
+[ RUN      ] XtpLoginF.login_failure_without_sink_stays_silent_and_posts_nothing
+[       OK ] XtpLoginF.login_failure_without_sink_stays_silent_and_posts_nothing (0 ms)
+[ RUN      ] XtpLoginF.login_error_message_bytes_reach_the_sink_unchanged
+[       OK ] XtpLoginF.login_error_message_bytes_reach_the_sink_unchanged (0 ms)
+[ RUN      ] XtpLoginF.login_forwards_every_seeded_config_field_to_the_vendor_call
+[       OK ] XtpLoginF.login_forwards_every_seeded_config_field_to_the_vendor_call (0 ms)
+[ RUN      ] XtpLoginF.login_success_sets_trading_date_and_starts_subscription_before_pump
+[       OK ] XtpLoginF.login_success_sets_trading_date_and_starts_subscription_before_pump (0 ms)
+[ RUN      ] XtpLoginF.connect_succeeds_with_initialized_api_and_eight_digit_trading_day
+[       OK ] XtpLoginF.connect_succeeds_with_initialized_api_and_eight_digit_trading_day (0 ms)
+[ RUN      ] XtpLoginF.login_success_pump_delivers_connect_then_login_in_that_order
+[       OK ] XtpLoginF.login_success_pump_delivers_connect_then_login_in_that_order (0 ms)
+[ RUN      ] XtpLoginF.connect_returns_true_even_when_login_failed_and_never_creates_a_worker
+[       OK ] XtpLoginF.connect_returns_true_even_when_login_failed_and_never_creates_a_worker (0 ms)
+[ RUN      ] XtpLoginF.subscribe_md_strips_exchange_prefix_and_routes_each_exchange
+[       OK ] XtpLoginF.subscribe_md_strips_exchange_prefix_and_routes_each_exchange (0 ms)
+[ RUN      ] XtpLoginF.subscribe_md_order_is_market_data_then_tick_by_tick_per_exchange
+[       OK ] XtpLoginF.subscribe_md_order_is_market_data_then_tick_by_tick_per_exchange (0 ms)
+[ RUN      ] XtpLoginF.subscribe_md_market_data_failure_logs_sse_and_still_subs_tick_by_tick
+[       OK ] XtpLoginF.subscribe_md_market_data_failure_logs_sse_and_still_subs_tick_by_tick (0 ms)
+[ RUN      ] XtpLoginF.subscribe_md_tick_by_tick_failure_logs_its_own_line
+[       OK ] XtpLoginF.subscribe_md_tick_by_tick_failure_logs_its_own_line (0 ms)
+[ RUN      ] XtpLoginF.subscribe_md_with_empty_buffers_touches_the_api_zero_times
+[       OK ] XtpLoginF.subscribe_md_with_empty_buffers_touches_the_api_zero_times (0 ms)
+[ RUN      ] XtpLoginF.subscribe_md_clears_only_its_local_copy_so_buffers_survive
+[       OK ] XtpLoginF.subscribe_md_clears_only_its_local_copy_so_buffers_survive (0 ms)
+[ RUN      ] XtpLoginF.second_login_resubscribes_the_very_same_codes
+[       OK ] XtpLoginF.second_login_resubscribes_the_very_same_codes (0 ms)
+[ RUN      ] XtpLoginF.unsubscribe_before_login_only_removes_the_local_cache
+[       OK ] XtpLoginF.unsubscribe_before_login_only_removes_the_local_cache (0 ms)
+[ DISABLED ] XtpLoginF.DISABLED_init_dereferences_null_creator_when_vendor_dylib_is_absent
+[ DISABLED ] XtpLoginF.DISABLED_posted_login_handlers_deref_sink_nulled_after_post
+[ RUN      ] XtpLoginF.on_disconnected_relogin_runs_only_when_the_context_is_pumped
+[       OK ] XtpLoginF.on_disconnected_relogin_runs_only_when_the_context_is_pumped (2725 ms)
+[ RUN      ] XtpLoginF.on_disconnected_relogin_bails_out_when_the_api_is_gone
+[       OK ] XtpLoginF.on_disconnected_relogin_bails_out_when_the_api_is_gone (2815 ms)
+[----------] 22 tests from XtpLoginF (5588 ms total)
+
+[----------] 16 tests from XtpOnlineF
+[ RUN      ] XtpOnlineF.post_login_subscribe_sends_market_data_and_tick_by_tick
+[       OK ] XtpOnlineF.post_login_subscribe_sends_market_data_and_tick_by_tick (0 ms)
+[ RUN      ] XtpOnlineF.post_login_subscribe_routes_same_code_by_exchange_and_preserves_counts
+[       OK ] XtpOnlineF.post_login_subscribe_routes_same_code_by_exchange_and_preserves_counts (0 ms)
+[ RUN      ] XtpOnlineF.post_login_subscribe_drops_foreign_prefixes_without_any_call
+[       OK ] XtpOnlineF.post_login_subscribe_drops_foreign_prefixes_without_any_call (0 ms)
+[ RUN      ] XtpOnlineF.post_login_subscribe_accumulates_into_member_buffers
+[       OK ] XtpOnlineF.post_login_subscribe_accumulates_into_member_buffers (0 ms)
+[ RUN      ] XtpOnlineF.post_login_subscribe_failure_logs_the_api_return_code
+[       OK ] XtpOnlineF.post_login_subscribe_failure_logs_the_api_return_code (0 ms)
+[ RUN      ] XtpOnlineF.post_login_subscribe_logs_sse_failure_on_its_own_line
+[       OK ] XtpOnlineF.post_login_subscribe_logs_sse_failure_on_its_own_line (0 ms)
+[ RUN      ] XtpOnlineF.post_login_subscribe_tick_by_tick_failure_logs_its_own_return_code
+[       OK ] XtpOnlineF.post_login_subscribe_tick_by_tick_failure_logs_its_own_return_code (0 ms)
+[ RUN      ] XtpOnlineF.post_login_subscribe_without_api_buffers_only
+[       OK ] XtpOnlineF.post_login_subscribe_without_api_buffers_only (0 ms)
+[ RUN      ] XtpOnlineF.unsubscribe_sends_tracked_codes_by_exchange_for_both_streams
+[       OK ] XtpOnlineF.unsubscribe_sends_tracked_codes_by_exchange_for_both_streams (0 ms)
+[ RUN      ] XtpOnlineF.unsubscribe_retains_cache_until_both_sync_requests_succeed
+[       OK ] XtpOnlineF.unsubscribe_retains_cache_until_both_sync_requests_succeed (0 ms)
+[ RUN      ] XtpOnlineF.disconnect_unregisters_spi_releases_once_and_nulls_the_pointer
+[       OK ] XtpOnlineF.disconnect_unregisters_spi_releases_once_and_nulls_the_pointer (0 ms)
+[ RUN      ] XtpOnlineF.second_disconnect_is_a_no_op
+[       OK ] XtpOnlineF.second_disconnect_is_a_no_op (0 ms)
+[ RUN      ] XtpOnlineF.release_routes_through_disconnect_and_keeps_the_io_context_idle
+[       OK ] XtpOnlineF.release_routes_through_disconnect_and_keeps_the_io_context_idle (0 ms)
+[ RUN      ] XtpOnlineF.depth_market_data_after_login_writes_the_login_trading_date
+[       OK ] XtpOnlineF.depth_market_data_after_login_writes_the_login_trading_date (0 ms)
+[ RUN      ] XtpOnlineF.level_one_queue_after_login_inherits_the_login_trading_date
+[       OK ] XtpOnlineF.level_one_queue_after_login_inherits_the_login_trading_date (0 ms)
+[ RUN      ] XtpOnlineF.tickbytick_after_login_still_uses_the_message_date
+[       OK ] XtpOnlineF.tickbytick_after_login_still_uses_the_message_date (0 ms)
+[----------] 16 tests from XtpOnlineF (0 ms total)
+
+[----------] 13 tests from XtpData27
+[ RUN      ] XtpData27.tickbytick_szentrust_uses_matching_szse_contract
+[       OK ] XtpData27.tickbytick_szentrust_uses_matching_szse_contract (0 ms)
+[ RUN      ] XtpData27.tickbytick_szentrust_with_mismatched_master_exchange_is_not_dispatched
+[       OK ] XtpData27.tickbytick_szentrust_with_mismatched_master_exchange_is_not_dispatched (0 ms)
+[ RUN      ] XtpData27.tickbytick_sztrade_cancel_branch_marks_szse_master_exchange
+[       OK ] XtpData27.tickbytick_sztrade_cancel_branch_marks_szse_master_exchange (0 ms)
+[ RUN      ] XtpData27.tickbytick_szse_unknown_contract_logs_the_szse_key
+[       OK ] XtpData27.tickbytick_szse_unknown_contract_logs_the_szse_key (0 ms)
+[ RUN      ] XtpData27.tickbytick_szentrust_sdk_buy_code_maps_to_bdt_buy
+[       OK ] XtpData27.tickbytick_szentrust_sdk_buy_code_maps_to_bdt_buy (0 ms)
+[ RUN      ] XtpData27.tickbytick_szentrust_maps_all_documented_side_and_order_type_flags
+[       OK ] XtpData27.tickbytick_szentrust_maps_all_documented_side_and_order_type_flags (0 ms)
+[ RUN      ] XtpData27.tickbytick_shentrust_preserves_documented_add_delete_and_direction_flags
+[       OK ] XtpData27.tickbytick_shentrust_preserves_documented_add_delete_and_direction_flags (0 ms)
+[ RUN      ] XtpData27.tickbytick_shtrade_flag_maps_aggressor_side_and_unknown_direction
+[       OK ] XtpData27.tickbytick_shtrade_flag_maps_aggressor_side_and_unknown_direction (0 ms)
+[ RUN      ] XtpData27.tickbytick_sztrade_match_flag_does_not_supply_a_direction
+[       OK ] XtpData27.tickbytick_sztrade_match_flag_does_not_supply_a_direction (0 ms)
+[ DISABLED ] XtpData27.DISABLED_state_type_support_scope_is_not_confirmed
+[ RUN      ] XtpData27.tickbytick_trading_date_comes_from_the_message_not_the_login
+[       OK ] XtpData27.tickbytick_trading_date_comes_from_the_message_not_the_login (0 ms)
+[ RUN      ] XtpData27.stock_category_skips_the_settlement_block
+[       OK ] XtpData27.stock_category_skips_the_settlement_block (0 ms)
+[ RUN      ] XtpData27.level_one_queue_size_is_clamped_to_the_50_slot_array
+[       OK ] XtpData27.level_one_queue_size_is_clamped_to_the_50_slot_array (0 ms)
+[ RUN      ] XtpData27.subscribe_reports_treat_null_error_info_as_success
+[       OK ] XtpData27.subscribe_reports_treat_null_error_info_as_success (0 ms)
+[----------] 13 tests from XtpData27 (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 73 tests from 7 test suites ran. (8372 ms total)
+[  PASSED  ] 73 tests.
+
+  YOU HAVE 3 DISABLED TESTS
+

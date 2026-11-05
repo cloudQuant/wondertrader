@@ -1,0 +1,10 @@
+
+=================================================================
+==50578==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 77 byte(s) in 1 object(s) allocated from:
+    #0 0x000100ef4e24 in malloc+0x70 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x54e24)
+    #1 0x000100a5fea0 in main+0x1c (leak-control:arm64+0x100007ea0)
+    #2 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: 77 byte(s) leaked in 1 allocation(s).

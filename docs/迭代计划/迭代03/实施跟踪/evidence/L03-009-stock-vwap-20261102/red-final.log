@@ -1,0 +1,118 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r7_stkvw.unrepresentable_session_date_does_not_advance_high_water_or_order:r7_stkvw.invalid_session_date_clears_stale_tick_without_changing_watermark:r7_stkvw.unverifiable_previous_offset_date_does_not_latch_rollover:r7_stkvw.v2_profile_selects_night_session_and_maps_tick:r7_stkvw.natural_action_date_increment_keeps_midnight_retry_fresh:r7_stkvw.unchanged_action_date_across_midnight_is_rejected_as_unsupported:r7_stkvw.trading_day_action_date_combo_from_unsupported_provider_is_rejected:r7_stkvw.invalid_action_time_does_not_poison_valid_tick
+[==========] Running 8 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 8 tests from r7_stkvw
+[ RUN      ] r7_stkvw.invalid_action_time_does_not_poison_valid_tick
+[       OK ] r7_stkvw.invalid_action_time_does_not_poison_valid_tick (0 ms)
+[ RUN      ] r7_stkvw.unrepresentable_session_date_does_not_advance_high_water_or_order
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1139: Failure
+Value of: ctx.buys.empty()
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1141: Failure
+Expected equality of these values:
+  unit._tick_time_high_water
+    Which is: 99991231220000000
+  0u
+    Which is: 0
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1142: Failure
+Expected equality of these values:
+  unit._high_water_action_date
+    Which is: 99991231
+  0u
+    Which is: 0
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1143: Failure
+Expected equality of these values:
+  unit._high_water_action_time
+    Which is: 220000000
+  0u
+    Which is: 0
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1145: Failure
+Value of: ctx.hasLog("session-adjusted date cannot be verified")
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1144: Failure
+Value of: unit._unsupported_date_contract
+  Actual: true
+Expected: false
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1145: Failure
+Value of: ctx.hasLog("session-adjusted date cannot be verified")
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1151: Failure
+Expected equality of these values:
+  ctx.buys.size()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] r7_stkvw.unrepresentable_session_date_does_not_advance_high_water_or_order (1 ms)
+[ RUN      ] r7_stkvw.invalid_session_date_clears_stale_tick_without_changing_watermark
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1185: Failure
+Expected equality of these values:
+  unit._last_tick
+    Which is: 0x629000000890
+  nullptr
+    Which is: (nullptr)
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1186: Failure
+Expected equality of these values:
+  unit._tick_time_high_water
+    Which is: 99991231220000000
+  water
+    Which is: 20240103220000000
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1187: Failure
+Expected equality of these values:
+  unit._high_water_action_date
+    Which is: 99991231
+  waterDate
+    Which is: 20240103
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1190: Failure
+Expected equality of these values:
+  ctx.buys.size()
+    Which is: 1
+  existingOrders
+    Which is: 0
+
+[  FAILED  ] r7_stkvw.invalid_session_date_clears_stale_tick_without_changing_watermark (0 ms)
+[ RUN      ] r7_stkvw.unverifiable_previous_offset_date_does_not_latch_rollover
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1223: Failure
+Value of: unit._unsupported_date_contract
+  Actual: true
+Expected: false
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1227: Failure
+Value of: ctx.hasLog("previous session-adjusted date cannot be verified")
+  Actual: false
+Expected: true
+
+[  FAILED  ] r7_stkvw.unverifiable_previous_offset_date_does_not_latch_rollover (0 ms)
+[ RUN      ] r7_stkvw.v2_profile_selects_night_session_and_maps_tick
+[       OK ] r7_stkvw.v2_profile_selects_night_session_and_maps_tick (0 ms)
+[ RUN      ] r7_stkvw.natural_action_date_increment_keeps_midnight_retry_fresh
+[       OK ] r7_stkvw.natural_action_date_increment_keeps_midnight_retry_fresh (0 ms)
+[ RUN      ] r7_stkvw.unchanged_action_date_across_midnight_is_rejected_as_unsupported
+[       OK ] r7_stkvw.unchanged_action_date_across_midnight_is_rejected_as_unsupported (0 ms)
+[ RUN      ] r7_stkvw.trading_day_action_date_combo_from_unsupported_provider_is_rejected
+[       OK ] r7_stkvw.trading_day_action_date_combo_from_unsupported_provider_is_rejected (0 ms)
+[----------] 8 tests from r7_stkvw (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 8 tests from 1 test suite ran. (4 ms total)
+[  PASSED  ] 5 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] r7_stkvw.unrepresentable_session_date_does_not_advance_high_water_or_order
+[  FAILED  ] r7_stkvw.invalid_session_date_clears_stale_tick_without_changing_watermark
+[  FAILED  ] r7_stkvw.unverifiable_previous_offset_date_does_not_latch_rollover
+
+ 3 FAILED TESTS

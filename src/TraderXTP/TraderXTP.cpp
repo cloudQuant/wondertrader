@@ -8,6 +8,7 @@
  * \brief 
  */
 #include "TraderXTP.h"
+#include "../Share/ProviderRawReport.hpp"
 
 #include "../Includes/IBaseDataMgr.h"
 #include "../Includes/WTSContractInfo.hpp"
@@ -19,6 +20,12 @@
 #include "../Share/Converter.hpp"
 
 #include <filesystem>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
 namespace fs = std::filesystem;
 
  //By Wesley @ 2022.01.05
@@ -34,8 +41,49 @@ inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, cons
 	sink->handleTraderLog(ll, buffer);
 }
 
+namespace
+{
+	// Card 9d: the TraderXTP whose worker runs on this thread.
+	thread_local const TraderXTP* t_xtp_worker_owner = NULL;
+
+	// Card 9a/9b: keep this module mapped while a retained instance may run.
+	void pin_xtp_module()
+	{
+#ifdef _WIN32
+		HMODULE self = NULL;
+		::GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_PIN,
+			reinterpret_cast<LPCSTR>(&pin_xtp_module), &self);
+#else
+		Dl_info info;
+		if (::dladdr(reinterpret_cast<void*>(&pin_xtp_module), &info) != 0 && info.dli_fname != NULL)
+			(void)::dlopen(info.dli_fname, RTLD_NOW | RTLD_NOLOAD | RTLD_NODELETE);
+#endif
+	}
+
+	// The registry is never destroyed so retained instances stay reachable.
+	void quarantine_xtp(TraderXTP* trader, const char* reason)
+	{
+		static std::mutex* mtx = new std::mutex();
+		static std::vector<TraderXTP*>* retained = new std::vector<TraderXTP*>();
+		{
+			std::lock_guard<std::mutex> lock(*mtx);
+			retained->push_back(trader);
+		}
+		pin_xtp_module();
+		std::fprintf(stderr, "[TraderXTP] deleteTrader: instance quarantined until process exit (%s)\n", reason);
+	}
+}
+
 extern "C"
 {
+	// BUG-L01-014 / K42: optional host feature declaration (WT_TRADER_SPI_FEATURES_SYMBOL).
+	EXPORT_FLAG void setTraderSpiFeatures(ITraderApi* trader, uint64_t features)
+	{
+		TraderXTP* self = dynamic_cast<TraderXTP*>(trader);
+		if (self != NULL)
+			self->setSpiFeatures(features);
+	}
+
 	EXPORT_FLAG ITraderApi* createTrader()
 	{
 		TraderXTP *instance = new TraderXTP();
@@ -46,6 +94,29 @@ extern "C"
 	{
 		if (NULL != trader)
 		{
+			TraderXTP* xtp = dynamic_cast<TraderXTP*>(trader);
+			if (xtp != NULL)
+			{
+				if (xtp->isCallbackContext())
+				{
+					// Card 9d/9b: an SDK callback, API call or the worker cannot
+					// confirm its own exit. Close admission, request stop, keep it.
+					xtp->release();
+					xtp->detachForQuarantine();
+					quarantine_xtp(xtp, "called from an SDK callback, API call or worker thread");
+					trader = NULL;
+					return;
+				}
+				xtp->release();
+				if (!xtp->isQuiesced())
+				{
+					// Card 9a: the worker, API calls or SDK callbacks did not drain.
+					xtp->detachForQuarantine();
+					quarantine_xtp(xtp, "worker, API calls or SDK callbacks did not drain");
+					trader = NULL;
+					return;
+				}
+			}
 			delete trader;
 			trader = NULL;
 		}
@@ -267,6 +338,22 @@ private:
 	TraderXTPExecutionScope _scope;
 };
 
+// BUG-R93-005 / card 9: counts an SDK callback while it runs inside this
+// wrapper; once stop or API replacement is requested it is dropped.
+class TraderXTP::CallbackGate
+{
+public:
+	explicit CallbackGate(TraderXTP& owner) : _owner(&owner), _admitted(owner.enterCallback()) {}
+	~CallbackGate() { _owner->leaveCallback(); }
+	CallbackGate(const CallbackGate&) = delete;
+	CallbackGate& operator=(const CallbackGate&) = delete;
+	explicit operator bool() const { return _admitted; }
+
+private:
+	TraderXTP* _owner;
+	bool _admitted;
+};
+
 
 TraderXTP::TraderXTP()
 	: _api(NULL)
@@ -295,7 +382,88 @@ TraderXTP::TraderXTP()
 
 TraderXTP::~TraderXTP()
 {
+	if (isCallbackContext())
+	{
+		// Card 9b/9d: freeing the object from its own callback or worker leaves
+		// that thread running on freed memory; deleteTrader quarantines instead.
+		std::fprintf(stderr, "[TraderXTP] Direct delete on an SDK callback/worker thread is unsupported; use deleteTrader\n");
+		std::abort();
+	}
 	release();
+	if (!isQuiesced())
+	{
+		std::fprintf(stderr, "[TraderXTP] Destroyed before SDK callbacks/API calls drained; use deleteTrader\n");
+		std::abort();
+	}
+
+	// I03-NEW-067: the result containers are created lazily by SDK callbacks and
+	// owned by this instance; release() only clears them. Callbacks and API calls
+	// are proven drained above, so return ownership exactly once.
+	if (_positions != NULL)
+	{
+		_positions->release();
+		_positions = NULL;
+	}
+	if (_trades != NULL)
+	{
+		_trades->release();
+		_trades = NULL;
+	}
+	if (_orders != NULL)
+	{
+		_orders->release();
+		_orders = NULL;
+	}
+}
+
+bool TraderXTP::isCallbackContext() const
+{
+	return isTraderXTPReentrantRelease(this) || t_xtp_worker_owner == this;
+}
+
+bool TraderXTP::isQuiesced() const
+{
+	{
+		std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(_api_lifecycle_mutex));
+		if (_drain_uncertain || _api != NULL || _callbacks_in_flight != 0 || _api_calls_in_flight != 0 || _api_release_in_progress)
+			return false;
+	}
+	std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(_worker_mutex));
+	return !(_thrd_worker && _thrd_worker->joinable());
+}
+
+void TraderXTP::detachForQuarantine()
+{
+	std::lock_guard<std::mutex> lock(_worker_mutex);
+	if (_worker_joining)
+		return;	// an external release() is joining it
+	if (_thrd_worker && _thrd_worker->joinable())
+		_thrd_worker->detach();
+}
+
+bool TraderXTP::enterCallback()
+{
+	std::lock_guard<std::mutex> lock(_api_lifecycle_mutex);
+	++_callbacks_in_flight;
+	// Dropped after release/disconnect or while the API is being replaced.
+	return !_api_stopping && !_api_release_requested && !_api_release_in_progress && !_api_reconfiguring;
+}
+
+void TraderXTP::leaveCallback()
+{
+	// Notify under the lock: a releaser may free this object right after it
+	// observes zero callbacks and reacquires the mutex.
+	std::lock_guard<std::mutex> lock(_api_lifecycle_mutex);
+	if (_callbacks_in_flight > 0)
+		--_callbacks_in_flight;
+	_api_lifecycle_condition.notify_all();
+}
+
+bool TraderXTP::waitCallbacksDrained()
+{
+	std::unique_lock<std::mutex> lock(_api_lifecycle_mutex);
+	return _api_lifecycle_condition.wait_for(lock, std::chrono::milliseconds(_drain_timeout_ms),
+		[this]() { return _callbacks_in_flight == 0; });
 }
 
 #pragma region "XTP::API::TraderSpi"
@@ -455,11 +623,22 @@ WTSTradeInfo* TraderXTP::makeTradeInfo(XTPQueryTradeRsp* trade_info)
 	return pRet;
 }
 
-void TraderXTP::OnDisconnected(uint64_t /*session_id*/, int reason)
+void TraderXTP::OnDisconnected(uint64_t session_id, int reason)
 {
 	TraderXTPExecutionScope callbackScope(this, true);
-	if (_sink)
-		_sink->handleEvent(WTE_Close, reason);
+	CallbackGate callbackGate(*this);
+	if (!callbackGate)
+		return;
+	{
+		// BUG-R93-005: a disconnect of a login session that belonged to an API
+		// instance already replaced/released, or of a session other than the
+		// current one, must not close or relogin the current session.
+		std::lock_guard<std::mutex> stateLock(_login_state_mutex);
+		if (session_id != 0 && (_retired_sessions.count(session_id) != 0 || (_sessionid != 0 && session_id != _sessionid)))
+			return;
+	}
+	if (ITraderSpi* sink = this->sink())
+		sink->handleEvent(WTE_Close, reason);
 
 	if (_worker_stopping.load())
 		return;
@@ -467,7 +646,7 @@ void TraderXTP::OnDisconnected(uint64_t /*session_id*/, int reason)
 	boost::asio::post(_asyncio, [this, generation](){
 		if (_worker_stopping.load() || generation != _worker_generation.load())
 			return;
-		write_log(_sink, LL_WARN, "[TraderrXTP] Connection lost, relogin in 2 seconds...");
+		write_log(sink(), LL_WARN, "[TraderrXTP] Connection lost, relogin in 2 seconds...");
 		scheduleReconnect(generation, true);
 	});
 }
@@ -475,32 +654,49 @@ void TraderXTP::OnDisconnected(uint64_t /*session_id*/, int reason)
 void TraderXTP::OnError(XTPRI *error_info)
 {
 	TraderXTPExecutionScope callbackScope(this, true);
-	if (_sink && error_info)
-		write_log(_sink,LL_ERROR, error_info->error_msg);
+	CallbackGate callbackGate(*this);
+	if (!callbackGate)
+		return;
+	if (sink() && error_info)
+		write_log(sink(),LL_ERROR, error_info->error_msg);
 }
 
 void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64_t /*session_id*/)
 {
 	TraderXTPExecutionScope callbackScope(this, true);
+	CallbackGate callbackGate(*this);
+	if (!callbackGate)
+		return;
 	if(IsErrorInfo(error_info))
 	{
 		WTSEntrust* entrust = makeEntrust(order_info);
 
 		WTSError* error = WTSError::create(WEC_ORDERINSERT, error_info->error_msg);
-		_sink->onRspEntrust(entrust, error);
+		// BUG-R93-005: registerSpi(NULL) may have detached the host.
+		if (ITraderSpi* sink = this->sink())
+			sink->onRspEntrust(entrust, error);
 		error->release();
 
-		entrust->release();
+		// I03-NEW-068: makeEntrust() returns NULL for an unregistered contract;
+		// the host still receives the error (it rejects a NULL entrust itself).
+		if (entrust != NULL)
+			entrust->release();
 	}
 	else
 	{
 		WTSOrderInfo *orderInfo = makeOrderInfo(order_info);
 		if (orderInfo)
 		{
-			if (_sink)
-				_sink->onPushOrder(orderInfo);
+			if (ITraderSpi* sink = this->sink())
+				sink->onPushOrder(orderInfo);
 
 			orderInfo->release();
+		}
+		else
+		{
+			// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+			wt_provider_raw::report(this->sink(), m_spiFeatures.load(), "TraderXTP", "order", "order report could not be converted",
+				wt_provider_raw::hexOf("XTPOrderInfo", order_info));
 		}
 	}
 }
@@ -508,23 +704,36 @@ void TraderXTP::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, uint64
 void TraderXTP::OnTradeEvent(XTPTradeReport *trade_info, uint64_t /*session_id*/)
 {
 	TraderXTPExecutionScope callbackScope(this, true);
+	CallbackGate callbackGate(*this);
+	if (!callbackGate)
+		return;
 	WTSTradeInfo *trdInfo = makeTradeInfo(trade_info);
 	if (trdInfo)
 	{
-		if (_sink)
-			_sink->onPushTrade(trdInfo);
+		if (ITraderSpi* sink = this->sink())
+			sink->onPushTrade(trdInfo);
 
 		trdInfo->release();
+	}
+	else
+	{
+		// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+		wt_provider_raw::report(this->sink(), m_spiFeatures.load(), "TraderXTP", "trade", "trade report could not be converted",
+			wt_provider_raw::hexOf("XTPTradeReport", trade_info));
 	}
 }
 
 void TraderXTP::OnCancelOrderError(XTPOrderCancelInfo */*cancel_info*/, XTPRI *error_info, uint64_t /*session_id*/)
 {
 	TraderXTPExecutionScope callbackScope(this, true);
+	CallbackGate callbackGate(*this);
+	if (!callbackGate)
+		return;
 	if (IsErrorInfo(error_info))
 	{
 		WTSError* error = WTSError::create(WEC_ORDERCANCEL, error_info->error_msg);
-		_sink->onTraderError(error);
+		if (ITraderSpi* sink = this->sink())
+			sink->onTraderError(error);
 		error->release();
 	}
 
@@ -533,13 +742,22 @@ void TraderXTP::OnCancelOrderError(XTPOrderCancelInfo */*cancel_info*/, XTPRI *e
 void TraderXTP::OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, int /*request_id*/, bool is_last, uint64_t /*session_id*/)
 {
 	TraderXTPExecutionScope callbackScope(this, true);
+	CallbackGate callbackGate(*this);
+	if (!callbackGate)
+		return;
 	//if (is_last)
 	//{
 	//	m_bInQuery = false;
 	//	triggerQuery();
 	//}
 
-	if (!IsErrorInfo(error_info) && order_info)
+	if (IsErrorInfo(error_info))
+	{
+		// K42: the SDK documents no "no record" code for order queries, so any
+		// error makes the snapshot FAILED (card 14c: fail closed without a contract).
+		_qry_orders_failed = true;
+	}
+	else if (order_info)
 	{
 		if (NULL == _orders)
 			_orders = WTSArray::create();
@@ -549,12 +767,34 @@ void TraderXTP::OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, in
 		{
 			_orders->append(orderInfo, false);
 		}
+		else
+		{
+			// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the struct); the host pauses the account.
+			wt_provider_raw::report(this->sink(), m_spiFeatures.load(), "TraderXTP", "order", "order query row could not be converted",
+				wt_provider_raw::hexOf("XTPQueryOrderRsp", order_info));
+			_qry_orders_dropped = true;
+		}
 	}
 
 	if (is_last)
 	{
-		if (_sink)
-			_sink->onRspOrders(_orders);
+		if (ITraderSpi* sink = this->sink())
+		{
+			// K42 (BUG-I02-NEW-154): a host that declared query-status support learns
+			// whether the snapshot is complete; others keep the legacy callback, which
+			// hosts handle conservatively.
+			if (m_spiFeatures.load() & WT_TRADER_SPI_FEATURE_QUERY_STATUS)
+			{
+				if (NULL == _orders)
+					_orders = WTSArray::create();
+				sink->onRspOrdersWithStatus(_orders, _qry_orders_failed ? WT_QUERY_STATUS_FAILED
+					: _qry_orders_dropped ? WT_QUERY_STATUS_PARTIAL : WT_QUERY_STATUS_COMPLETE);
+			}
+			else
+				sink->onRspOrders(_orders);
+		}
+		_qry_orders_failed = false;
+		_qry_orders_dropped = false;
 
 		if (_orders)
 			_orders->clear();
@@ -564,6 +804,9 @@ void TraderXTP::OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, in
 void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, int /*request_id*/, bool is_last, uint64_t /*session_id*/)
 {
 	TraderXTPExecutionScope callbackScope(this, true);
+	CallbackGate callbackGate(*this);
+	if (!callbackGate)
+		return;
 	//if (is_last)
 	//{
 	//	m_bInQuery = false;
@@ -580,12 +823,18 @@ void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, in
 		{
 			_trades->append(trdInfo, false);
 		}
+		else
+		{
+			// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the struct); the host pauses the account.
+			wt_provider_raw::report(this->sink(), m_spiFeatures.load(), "TraderXTP", "trade", "trade query row could not be converted",
+				wt_provider_raw::hexOf("XTPQueryTradeRsp", trade_info));
+		}
 	}
 
 	if (is_last)
 	{
-		if (_sink)
-			_sink->onRspTrades(_trades);
+		if (ITraderSpi* sink = this->sink())
+			sink->onRspTrades(_trades);
 
 		if (_trades)
 			_trades->clear();
@@ -595,6 +844,9 @@ void TraderXTP::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, in
 void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_info, int /*request_id*/, bool is_last, uint64_t /*session_id*/)
 {
 	TraderXTPExecutionScope callbackScope(this, true);
+	CallbackGate callbackGate(*this);
+	if (!callbackGate)
+		return;
 	//if (is_last)
 	//{
 	//	m_bInQuery = false;
@@ -653,8 +905,8 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
 			}
 		}
 
-		if (_sink)
-			_sink->onRspPosition(ayPos);
+		if (ITraderSpi* sink = this->sink())
+			sink->onRspPosition(ayPos);
 
 		if (_positions)
 		{
@@ -669,6 +921,9 @@ void TraderXTP::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_i
 void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int /*request_id*/, bool is_last, uint64_t /*session_id*/)
 {
 	TraderXTPExecutionScope callbackScope(this, true);
+	CallbackGate callbackGate(*this);
+	if (!callbackGate)
+		return;
 	//if (is_last)
 	//{
 	//	m_bInQuery = false;
@@ -695,8 +950,8 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int /*r
 
 		WTSArray * ay = WTSArray::create();
 		ay->append(accountInfo, false);
-		if (_sink)
-			_sink->onRspAccount(ay);
+		if (ITraderSpi* sink = this->sink())
+			sink->onRspAccount(ay);
 
 		ay->release();
 	}
@@ -707,6 +962,21 @@ void TraderXTP::OnQueryAsset(XTPQueryAssetRsp *asset, XTPRI *error_info, int /*r
 #pragma region "ITraderApi"
 bool TraderXTP::init(WTSVariant *params)
 {
+	if (params == NULL)
+	{
+		write_log(sink(), LL_ERROR, "[TraderXTP] Cannot initialize with null configuration");
+		return false;
+	}
+	{
+		// Card 9c: an initialized instance (module loaded) or one with a live API
+		// rejects init() and keeps its original configuration.
+		std::lock_guard<std::mutex> lock(_api_lifecycle_mutex);
+		if (m_hInstXTP != NULL || m_funcCreator != NULL || _api != NULL)
+		{
+			write_log(sink(), LL_ERROR, "[TraderXTP] Repeated init rejected");
+			return false;
+		}
+	}
 	{
 		std::lock_guard<std::mutex> lock(_login_state_mutex);
 		_user = params->getCString("user");
@@ -736,7 +1006,7 @@ bool TraderXTP::init(WTSVariant *params)
 	const char* moduleDir = getBinDir();
 	if ((moduleDir == NULL || *moduleDir == '\0') && !fs::path(wrappedModule).is_absolute())
 	{
-		write_log(_sink, LL_ERROR, "[TraderXTP] Cannot locate trader module directory");
+		write_log(sink(), LL_ERROR, "[TraderXTP] Cannot locate trader module directory");
 		return false;
 	}
 	std::string dllpath = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + wrappedModule;
@@ -751,7 +1021,20 @@ bool TraderXTP::init(WTSVariant *params)
 #else
 	const char* creatorName = "_ZN3XTP3API9TraderApi15CreateTraderApiEhPKc13XTP_LOG_LEVEL";
 #endif
+	if (m_hInstXTP == NULL)
+	{
+		// BUG-R93-005: a missing module is an explicit initialization failure.
+		write_log(sink(), LL_ERROR, "[TraderXTP] Failed to load trader API module: {}", dllpath);
+		return false;
+	}
 	m_funcCreator = (XTPCreator)DLLHelper::get_symbol(m_hInstXTP, creatorName);
+	if (m_funcCreator == NULL)
+	{
+		write_log(sink(), LL_ERROR, "[TraderXTP] Trader API creator symbol not found in {}: {}", dllpath, creatorName);
+		DLLHelper::free_library(m_hInstXTP);
+		m_hInstXTP = NULL;
+		return false;
+	}
 
 	return true;
 }
@@ -854,7 +1137,7 @@ void TraderXTP::finishApiRelease()
 
 void TraderXTP::release()
 {
-	if (isTraderXTPReentrantRelease(this))
+	if (isCallbackContext())
 	{
 		// Do not wait for this API call or SDK callback to unwind. An external owner
 		// must call release() again to complete API destruction.
@@ -877,12 +1160,16 @@ void TraderXTP::release()
 		{
 			std::lock_guard<std::mutex> stateLock(_login_state_mutex);
 			_state = TS_NOTLOGIN;
+			// A late OnDisconnected of this session must not relogin a later API.
+			if (_sessionid != 0)
+				_retired_sessions.insert(_sessionid);
 			_sessionid = 0;
 		}
 		api = _api;
 		_api = NULL;
 	}
 
+	bool drained = true;
 	if (api)
 	{
 		try
@@ -893,32 +1180,55 @@ void TraderXTP::release()
 		{
 			// Still attempt Release and complete the local shutdown protocol.
 		}
-		try
+		// BUG-R93-005 / card 9a: SDK Release() must not overlap a callback that
+		// already entered this wrapper. Bounded; on timeout keep the API alive.
+		drained = waitCallbacksDrained();
+		if (drained)
 		{
-			api->Release();
+			try
+			{
+				api->Release();
+			}
+			catch (...)
+			{
+				// The SDK release call has no error return; do not strand concurrent releasers.
+			}
 		}
-		catch (...)
+		else
 		{
-			// The SDK release call has no error return; do not strand concurrent releasers.
+			std::lock_guard<std::mutex> lock(_api_lifecycle_mutex);
+			_retained_apis.push_back(api);
+			_drain_uncertain = true;
+			std::fprintf(stderr, "[TraderXTP] release: SDK callbacks did not drain within %u ms; API kept, instance must be quarantined\n",
+				_drain_timeout_ms);
 		}
 	}
+	else if (!waitCallbacksDrained())
+	{
+		std::lock_guard<std::mutex> lock(_api_lifecycle_mutex);
+		_drain_uncertain = true;
+		drained = false;
+	}
 
-	if (_orders)
-		_orders->clear();
+	if (drained)
+	{
+		if (_orders)
+			_orders->clear();
 
-	if (_positions)
-		_positions->clear();
+		if (_positions)
+			_positions->clear();
 
-	if (_trades)
-		_trades->clear();
+		if (_trades)
+			_trades->clear();
+	}
 
 	finishApiRelease();
 }
 
 void TraderXTP::registerSpi(ITraderSpi *listener)
 {
-	_sink = listener;
-	if (_sink)
+	_sink.store(listener, std::memory_order_release);
+	if (listener)
 	{
 		_bd_mgr = listener->getBaseDataMgr();
 	}
@@ -936,7 +1246,29 @@ void TraderXTP::reconnect(bool nonblocking)
 
 	if (_api)
 	{
+		{
+			// BUG-R93-005: the replaced API's session is retired; a late
+			// OnDisconnected carrying it must not relogin the new API.
+			std::lock_guard<std::mutex> stateLock(_login_state_mutex);
+			if (_sessionid != 0)
+				_retired_sessions.insert(_sessionid);
+			_sessionid = 0;
+			_state = TS_NOTLOGIN;
+		}
 		_api->RegisterSpi(NULL);
+		// Card 9a: never Release() the old API under a callback that already
+		// entered this wrapper (new callbacks are dropped while reconfiguring).
+		if (!waitCallbacksDrained())
+		{
+			{
+				std::lock_guard<std::mutex> lock(_api_lifecycle_mutex);
+				_retained_apis.push_back(_api);
+				_drain_uncertain = true;
+			}
+			_api = NULL;
+			write_log(sink(), LL_ERROR, "[TraderXTP] Previous API callbacks did not drain; reconnect aborted and old API retained");
+			return;
+		}
 		_api->Release();
 		_api = NULL;
 	}
@@ -954,7 +1286,7 @@ void TraderXTP::reconnect(bool nonblocking)
 	if (_api == NULL)
 	{
 		connectionResult = -1;
-		write_log(_sink,LL_ERROR, "[TraderrXTP] Module initializing failed");
+		write_log(sink(),LL_ERROR, "[TraderrXTP] Module initializing failed");
 		scheduleReconnect(_worker_generation.load(), false);
 	}
 	else
@@ -971,15 +1303,15 @@ void TraderXTP::reconnect(bool nonblocking)
 	// acquire its own nested lease, while release/reconnect must wait for this callback.
 	if (!apiLease.handoffToApiCall())
 		return;
-	if (_sink)
-		_sink->handleEvent(WTE_Connect, connectionResult);
+	if (ITraderSpi* sink = this->sink())
+		sink->handleEvent(WTE_Connect, connectionResult);
 }
 
 void TraderXTP::connect()
 {
 	if (m_funcCreator == NULL)
 	{
-		write_log(_sink, LL_ERROR, "[TraderXTP] Cannot connect without a trader API creator");
+		write_log(sink(), LL_ERROR, "[TraderXTP] Cannot connect without a trader API creator");
 		return;
 	}
 	if (isTraderXTPReentrantRelease(this))
@@ -1007,7 +1339,9 @@ bool TraderXTP::startWorker()
 	_worker.reset(new boost::asio::executor_work_guard<boost::asio::io_context::executor_type>(
 		boost::asio::make_work_guard(_asyncio)));
 	_thrd_worker.reset(new StdThread([this]() {
+		t_xtp_worker_owner = this;
 		_asyncio.run();
+		t_xtp_worker_owner = NULL;
 	}));
 	return true;
 }
@@ -1094,7 +1428,7 @@ void TraderXTP::scheduleReconnect(uint64_t generation, bool login)
 				std::lock_guard<std::mutex> lock(_login_state_mutex);
 				user = _user;
 			}
-			write_log(_sink, LL_WARN, "[TraderrXTP] {} reconnecting...", user.c_str());
+			write_log(sink(), LL_WARN, "[TraderrXTP] {} reconnecting...", user.c_str());
 			reconnect(true);
 		}
 	});
@@ -1194,7 +1528,7 @@ bool TraderXTP::doLoginLocked(const char* requestedUser, const char* requestedPa
 	if (iResult == 0)
 	{
 		auto error_info = _api->GetApiLastError();
-		write_log(_sink, LL_ERROR, "[TraderXTP] Login failed: {}", error_info->error_msg);
+		write_log(sink(), LL_ERROR, "[TraderXTP] Login failed: {}", error_info->error_msg);
 		std::string msg = error_info->error_msg;
 		{
 			std::lock_guard<std::mutex> stateLock(_login_state_mutex);
@@ -1204,8 +1538,8 @@ bool TraderXTP::doLoginLocked(const char* requestedUser, const char* requestedPa
 		boost::asio::post(_asyncio, [this, msg, generation] {
 			if (_worker_stopping.load() || generation != _worker_generation.load())
 				return;
-			if (_sink)
-				_sink->onLoginResult(false, msg.c_str(), 0);
+			if (ITraderSpi* sink = this->sink())
+				sink->onLoginResult(false, msg.c_str(), 0);
 		});
 	}
 	else
@@ -1232,7 +1566,7 @@ bool TraderXTP::doLoginLocked(const char* requestedUser, const char* requestedPa
 					fs::create_directories(path.c_str());
 				ss << user << "_eid.sc";
 				m_eidCache.init(ss.str().c_str(), tradingday, [this](const char* message) {
-					write_log(_sink, LL_WARN, message);
+					write_log(sink(), LL_WARN, message);
 				});
 			}
 
@@ -1245,11 +1579,11 @@ bool TraderXTP::doLoginLocked(const char* requestedUser, const char* requestedPa
 					fs::create_directories(path.c_str());
 				ss << user << "_oid.sc";
 				m_oidCache.init(ss.str().c_str(), tradingday, [this](const char* message) {
-					write_log(_sink, LL_WARN, message);
+					write_log(sink(), LL_WARN, message);
 				});
 			}
 
-			write_log(_sink, LL_INFO, "[TraderXTP] [{}] Login succeed, trading date: {}, api version: {}", user, tradingday, _api->GetApiVersion());
+			write_log(sink(), LL_INFO, "[TraderXTP] [{}] Login succeed, trading date: {}, api version: {}", user, tradingday, _api->GetApiVersion());
 
 			{
 				std::lock_guard<std::mutex> stateLock(_login_state_mutex);
@@ -1264,13 +1598,13 @@ bool TraderXTP::doLoginLocked(const char* requestedUser, const char* requestedPa
 					std::lock_guard<std::mutex> stateLock(_login_state_mutex);
 					_state = TS_ALLREADY;
 				}
-				if (_sink)
-					_sink->onLoginResult(true, 0, tradingday);
+				if (ITraderSpi* sink = this->sink())
+					sink->onLoginResult(true, 0, tradingday);
 			});
 		}
 		else
 		{
-			write_log(_sink, LL_INFO, "[TraderXTP] [{}] Connection recovered", user.c_str());
+			write_log(sink(), LL_INFO, "[TraderXTP] [{}] Connection recovered", user.c_str());
 			std::lock_guard<std::mutex> stateLock(_login_state_mutex);
 			_state = TS_ALLREADY;
 		}
@@ -1339,7 +1673,7 @@ int TraderXTP::orderInsert(WTSEntrust* entrust)
 	if (iResult == 0)
 	{
 		auto error_info = _api->GetApiLastError();
-		write_log(_sink,LL_ERROR, "[TraderXTP] Order inserting failed: {}", error_info->error_msg);
+		write_log(sink(),LL_ERROR, "[TraderXTP] Order inserting failed: {}", error_info->error_msg);
 	}
 
 	return 0;
@@ -1361,7 +1695,7 @@ int TraderXTP::orderAction(WTSEntrustAction* action)
 	if (iResult == 0)
 	{
 		auto error_info = _api->GetApiLastError();
-		write_log(_sink,LL_ERROR, "[TraderXTP] Order cancelling failed: {}", error_info->error_msg);
+		write_log(sink(),LL_ERROR, "[TraderXTP] Order cancelling failed: {}", error_info->error_msg);
 	}
 
 	return 0;
@@ -1387,7 +1721,7 @@ int TraderXTP::queryAccount()
 	if (iResult != 0)
 	{
 		auto error_info = _api->GetApiLastError();
-		write_log(_sink,LL_ERROR, "[TraderXTP] Account querying failed: {}", error_info->error_msg);
+		write_log(sink(),LL_ERROR, "[TraderXTP] Account querying failed: {}", error_info->error_msg);
 	}
 
 	return 0;
@@ -1408,7 +1742,7 @@ int TraderXTP::queryPositions()
 	if (iResult != 0)
 	{
 		auto error_info = _api->GetApiLastError();
-		write_log(_sink,LL_ERROR, "[TraderXTP] Positions querying failed: {}", error_info->error_msg);
+		write_log(sink(),LL_ERROR, "[TraderXTP] Positions querying failed: {}", error_info->error_msg);
 	}
 
 	return 0;
@@ -1431,7 +1765,7 @@ int TraderXTP::queryOrders()
 	if (iResult != 0)
 	{
 		auto error_info = _api->GetApiLastError();
-		write_log(_sink,LL_ERROR, "[TraderXTP] Orders querying failed: {}", error_info->error_msg);
+		write_log(sink(),LL_ERROR, "[TraderXTP] Orders querying failed: {}", error_info->error_msg);
 	}
 
 	return 0;
@@ -1454,7 +1788,7 @@ int TraderXTP::queryTrades()
 	if (iResult != 0)
 	{
 		auto error_info = _api->GetApiLastError();
-		write_log(_sink,LL_ERROR, "[TraderXTP] Trades querying failed: {}", error_info->error_msg);
+		write_log(sink(),LL_ERROR, "[TraderXTP] Trades querying failed: {}", error_info->error_msg);
 	}
 
 	return 0;

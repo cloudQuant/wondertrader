@@ -1,0 +1,90 @@
+701c701,703
+<                 (rel, 'git show HEAD:src/WtCore/CtaStrategyMgr.cpp', 'git show %s:src/WtCore/CtaStrategyMgr.cpp' % ctx.R.head)])
+---
+>                 # slice1 2026-11-05: run.sh now pins its historical control commit itself
+>                 # (9094fd8e, hash-checked); this rewrite only applies to an older run.sh.
+>                 (rel, 'git show HEAD:src/WtCore/CtaStrategyMgr.cpp', 'git show %s:src/WtCore/CtaStrategyMgr.cpp' % ctx.R.head, 0)])
+1856c1858,1860
+<     def demo():
+---
+>     # slice4-result (2026-11-05): run.py now asserts the card 3/9d contract (all 12 cases pass);
+>     # the old "known-red" demo expectation is retired, so the probe is a primary variant.
+>     def green():
+1860,1862c1864
+<             return 'expected-red', '脚本确认 R202NextDay/R202Reentry 仍为已知红（缺陷复现）且正控通过：' + res
+<         if 'expected known-red failure' in text:
+<             return 'fail', '负向探针在当前树已通过（不再红），与脚本“已知红”旧期望不符：' + res
+---
+>             return 'pass', 'R202NextDay/R202Reentry 及收盘正控在卡3/9d 合同下全部通过：' + res
+1864c1866
+<     ctx.variant('known-red-probe', demo, role='demo')
+---
+>     ctx.variant('green', green)
+1902,1909c1904,1909
+<     rel = 'src/TestUnits/fixtures/i03_fee_consumer_pipeline/run.py'
+<     ctx.mirror([(rel, "previous = Path('/tmp/wt-i03-l06-fees-20261102')", "previous = None"),
+<                 (rel, "snap = previous / 'snapshot'", "snap = Path(os.environ['WT_FX_SNAP'])"),
+<                 (rel, "build = previous / 'build'", "build = Path(os.environ['WT_FX_BUILD'])")] + compdb_edits(rel))
+< 
+<     def demo():
+<         rc, text = ctx.sh('run.py', [SYS_PY, '-I', str(ctx.fxdir() / 'run.py'), str(ctx.dir / 'run')], cwd=ctx.dir, env=fx_env(ctx, ctx.tree))
+<         m = re.search(r"^\[\('Exported.*\]$", text, re.M)
+---
+>     # 2026-11-05 (fixtures-agent): run.py now takes <out> <coverage build> itself, derives
+>     # the build's source root from its compile database and asserts every card-13d case
+>     # passes; no mirror rewriting is needed any more.
+>     def green():
+>         rc, text = ctx.sh('run.py', [SYS_PY, '-I', str(ctx.fx / 'run.py'), str(ctx.dir / 'run'), str(ctx.build)], cwd=ctx.dir)
+>         m = re.search(r"^\[\('Unmigrated.*\]$", text, re.M)
+1911,1916c1911,1912
+<         if rc == 0:
+<             return 'expected-red', '反例按 README 复现（两例 exit 1 现存缺陷、旧品种键正控 exit 0）：' + obs
+<         if obs:
+<             return 'fail', '观测与 README 期望 [1,1,0] 不符：' + obs
+<         return 'fail', 'run.py exit %s（编译/链接失败？）' % rc
+<     ctx.variant('counterexample', demo, role='demo')
+---
+>         return ('pass' if rc == 0 else 'fail'), 'run.py exit %s（卡13d 四例逐进程）：%s' % (rc, obs)
+>     ctx.variant('green', green)
+2337,2345c2333,2336
+<     da = ctx.dep('asan', ['WTSUtils'])
+<     dp = ctx.dep('plain', ['WTSUtils'])
+<     rel = 'src/TestUnits/fixtures/r20_zstd_ubsan/run.sh'
+<     ctx.mirror([(rel, 'lib="$old/build/build_x64/Debug/libs/libWTSUtils.a"', 'lib="%s"' % (da / 'build_x64/Debug/libs/libWTSUtils.a')),
+<                 (rel, 'normal="$old/build-normal/build_x64/Debug/libs/libWTSUtils.a"', 'normal="%s"' % (dp / 'build_x64/Debug/libs/libWTSUtils.a'))])
+<     ctx.note('旧 /tmp/wt-i03-r20-20261102 的 sanitizer/普通 WTSUtils 改为 --out/_deps 的 asan/plain 构建；rg 由运行器提供的 grep -E 替身执行')
+< 
+<     def demo():
+<         rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.root())
+---
+>     # 2026-11-05 (fixtures-agent): the vendored zstd UB was fixed (R20_wtbtcore#1); run.sh is now
+>     # a self-contained green regression check built from this tree's zstdlib sources.
+>     def green():
+>         rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+2347,2350c2338,2339
+<         if rc == 0:
+<             return 'expected-red', 'vendored zstd 在 UBSan 下仍报告 zstd_compress.c:1326:46 null+offset（脚本断言的已知第三方 UB）：' + res
+<         return 'fail', 'run.sh exit %s（UBSan 观测与脚本期望不符或构建失败）：%s' % (rc, res)
+<     ctx.variant('ubsan-observation', demo, role='demo')
+---
+>         return ('pass' if rc == 0 else 'fail'), 'run.sh exit %s（ASan+UBSan 与普通 direct/wrapper/sweep）：%s' % (rc, res)
+>     ctx.variant('green', green)
+2354c2343
+< @suite('r22_timezone', 'src/TestUnits/fixtures/r22_timezone/build.sh')
+---
+> @suite('r22_timezone', 'src/TestUnits/fixtures/r22_timezone/run.sh')
+2356,2359c2345,2353
+<     ctx.attribution = '夹具问题'
+<     ctx.suggestion = '把 TimeUtils.baseline.hpp 与运行脚本 run.py 放入套件目录（或让 build.sh 在缺少基线时只构建 current-*），并在 README 写明运行命令'
+<     raise Blocked('build.sh 无条件 cp docs/迭代计划/迭代03/实施跟踪/evidence/R22-timezone-race-20261102/TimeUtils.baseline.hpp（冻结树不含 docs，set -e 即中止）；'
+<                   '套件内也没有运行入口，探针运行脚本 run.py 只在该 docs 证据目录', '夹具问题')
+---
+>     # 2026-11-05 (fixtures-agent): baseline header moved into baseline/, run.sh added.
+>     def green():
+>         rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+>         lines = [l for l in read(ctx.dir / 'run/results.txt').splitlines() if l.strip()]
+>         bad = [l for l in lines if not l.endswith('OK')]
+>         return ('pass' if rc == 0 and lines and not bad else 'fail'), 'run.sh exit %s；%d 项，MISMATCH %d%s（含 baseline-tsan-race 红控）' % (
+>             rc, len(lines), len(bad), ('：' + ' | '.join(bad[:4])) if bad else '')
+>     ctx.variant('green+red-baseline', green)
+>     return combine(ctx)

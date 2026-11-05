@@ -291,7 +291,7 @@ TEST_F(R200Fixture, R200His_DailyCursorCatchesUpAfterMinuteRun)
 
 	WTSKlineSlice* catchup = rp.get_kline_slice(kIc, "d", 5, 1, false);
 	ASSERT_NE(nullptr, catchup);
-	ASSERT_EQ(5u, catchup->size());	// 一根暖场日线 + 回放范围内追平到 07 的四根日线
+	ASSERT_EQ(5, catchup->size());	// 一根暖场日线 + 回放范围内追平到 07 的四根日线
 	EXPECT_EQ(20191231u, catchup->at(0)->date);
 	EXPECT_EQ(20200102u, catchup->at(1)->date);
 	EXPECT_EQ(20200103u, catchup->at(2)->date);

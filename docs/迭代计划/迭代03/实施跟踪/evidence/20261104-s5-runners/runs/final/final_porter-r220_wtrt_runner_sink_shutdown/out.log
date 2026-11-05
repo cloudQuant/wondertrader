@@ -1,0 +1,34 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r220_wtrt_runner_sink_shutdown.*
+[==========] Running 12 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 12 tests from r220_wtrt_runner_sink_shutdown
+[ RUN      ] r220_wtrt_runner_sink_shutdown.reentrant_release_keeps_owners_until_control_thread_retry
+[       OK ] r220_wtrt_runner_sink_shutdown.reentrant_release_keeps_owners_until_control_thread_retry (51 ms)
+[ RUN      ] r220_wtrt_runner_sink_shutdown.quiesces_all_cta_sel_hosts_and_retries_without_releasing_owners
+[       OK ] r220_wtrt_runner_sink_shutdown.quiesces_all_cta_sel_hosts_and_retries_without_releasing_owners (2 ms)
+[ RUN      ] r220_wtrt_runner_sink_shutdown.config_ready_callback_defers_release_until_config_unwinds
+[       OK ] r220_wtrt_runner_sink_shutdown.config_ready_callback_defers_release_until_config_unwinds (39 ms)
+[ RUN      ] r220_wtrt_runner_sink_shutdown.parser_without_created_api_is_quarantined_outside_runnable_manager
+[       OK ] r220_wtrt_runner_sink_shutdown.parser_without_created_api_is_quarantined_outside_runnable_manager (3 ms)
+[ RUN      ] r220_wtrt_runner_sink_shutdown.parser_api_failure_keeps_runner_graph_until_drain_proof
+[       OK ] r220_wtrt_runner_sink_shutdown.parser_api_failure_keeps_runner_graph_until_drain_proof (0 ms)
+[ RUN      ] r220_wtrt_runner_sink_shutdown.missing_config_preflight_keeps_safe_retry_available
+[       OK ] r220_wtrt_runner_sink_shutdown.missing_config_preflight_keeps_safe_retry_available (14 ms)
+[ RUN      ] r220_wtrt_runner_sink_shutdown.callback_reentry_does_not_wait_on_teardown_that_waits_for_callback
+[       OK ] r220_wtrt_runner_sink_shutdown.callback_reentry_does_not_wait_on_teardown_that_waits_for_callback (12 ms)
+[ RUN      ] r220_wtrt_runner_sink_shutdown.external_parser_requires_configured_engine
+[       OK ] r220_wtrt_runner_sink_shutdown.external_parser_requires_configured_engine (0 ms)
+[ RUN      ] r220_wtrt_runner_sink_shutdown.ext_parser_init_callback_can_reenter_quote_registry
+[       OK ] r220_wtrt_runner_sink_shutdown.ext_parser_init_callback_can_reenter_quote_registry (38 ms)
+[ RUN      ] r220_wtrt_runner_sink_shutdown.ext_parser_init_racing_release_is_quarantined_not_published
+[       OK ] r220_wtrt_runner_sink_shutdown.ext_parser_init_racing_release_is_quarantined_not_published (26 ms)
+[ RUN      ] r220_wtrt_runner_sink_shutdown.external_parser_quote_is_drained_before_parser_map_release
+[       OK ] r220_wtrt_runner_sink_shutdown.external_parser_quote_is_drained_before_parser_map_release (9 ms)
+[ RUN      ] r220_wtrt_runner_sink_shutdown.producer_callback_release_waits_for_control_thread_retry
+[       OK ] r220_wtrt_runner_sink_shutdown.producer_callback_release_waits_for_control_thread_retry (0 ms)
+[----------] 12 tests from r220_wtrt_runner_sink_shutdown (200 ms total)
+
+[----------] Global test environment tear-down
+[==========] 12 tests from 1 test suite ran. (200 ms total)
+[  PASSED  ] 12 tests.

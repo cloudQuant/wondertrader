@@ -6,6 +6,7 @@
  *          将大单拆分为多个小单并按时间分布执行，减少市场冲击
  */
 #include "WtStockVWapExeUnit.h"
+#include "../Includes/IExecPluginV2.h"
 #include <cmath>
 #include <fstream>
 #include <iterator>
@@ -206,6 +207,8 @@ const char * WtStockVWapExeUnit::getName()
  */
 void WtStockVWapExeUnit::init(ExecuteContext * ctx, const char * stdCode, WTSVariant * cfg)
 {
+	// Reserved host key (IExecPluginV2.h): automatic timeout cancels only with host-verified identity.
+	_host_order_identity = cfg != NULL && cfg->getUInt32(WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY) == 1;
 	_config_valid = false;
 	_execution_state = ExecutionState::active;
 	_pending_remainder = 0;
@@ -606,6 +609,19 @@ void WtStockVWapExeUnit::on_tick(WTSTickData * newTick)
 		}
 		return;
 	}
+	uint32_t natural_offset_date = 0;
+	if (_sess_info == nullptr || !_sess_info->tryGetOffsetDate(newTick->actiondate(),
+		newTick->actiontime() / 100000, natural_offset_date) || !validActionDate(natural_offset_date))
+	{
+		_ctx->writeLog(fmt::format("{} session-adjusted date cannot be verified, skip VWAP order", _code).c_str());
+		// Do not retain a stale price for a later channel or order callback.
+		if (_last_tick)
+		{
+			_last_tick->release();
+			_last_tick = nullptr;
+		}
+		return;
+	}
 	if (trading_date == 0 && _sess_info->getOffsetMins() != 0 && !_date_contract_warning_logged)
 	{
 		_date_contract_warning_logged = true;
@@ -616,13 +632,23 @@ void WtStockVWapExeUnit::on_tick(WTSTickData * newTick)
 	if (_high_water_action_date == newTick->actiondate() &&
 		newTick->actiontime() < _high_water_action_time && _sess_info->getOffsetMins() != 0)
 	{
-		const uint32_t previous_offset_date = _sess_info->getOffsetDate(_high_water_action_date, _high_water_action_time / 100000);
-		const uint32_t current_offset_date = _sess_info->getOffsetDate(newTick->actiondate(), newTick->actiontime() / 100000);
-		if (previous_offset_date != current_offset_date)
+		uint32_t previous_offset_date = 0;
+		if (!_sess_info->tryGetOffsetDate(_high_water_action_date, _high_water_action_time / 100000, previous_offset_date) ||
+			!validActionDate(previous_offset_date))
+		{
+			_ctx->writeLog(fmt::format("{} previous session-adjusted date cannot be verified, skip VWAP order", _code).c_str());
+			if (_last_tick)
+			{
+				_last_tick->release();
+				_last_tick = nullptr;
+			}
+			return;
+		}
+		if (previous_offset_date != natural_offset_date)
 		{
 			_unsupported_date_contract = true;
 			_ctx->writeLog(fmt::format("{} unsupported date rollover: action_date stayed {} while time moved backward across offset dates {} -> {}; provider natural-date semantics are not supported",
-				_code, newTick->actiondate(), previous_offset_date, current_offset_date).c_str());
+				_code, newTick->actiondate(), previous_offset_date, natural_offset_date).c_str());
 			if (_last_tick)
 			{
 				_last_tick->release();
@@ -640,7 +666,6 @@ void WtStockVWapExeUnit::on_tick(WTSTickData * newTick)
 
 	if (trading_date != 0)
 	{
-		const uint32_t natural_offset_date = _sess_info->getOffsetDate(newTick->actiondate(), newTick->actiontime() / 100000);
 		if (trading_date < natural_offset_date)
 		{
 			_unsupported_date_contract = true;
@@ -771,6 +796,20 @@ void WtStockVWapExeUnit::on_tick(WTSTickData * newTick)
 		{
 			// 检查订单是否超时，如果超时则撤销
 			_orders_mon.check_orders_with_generation(_ord_sticky, now, [this, now](uint32_t localid, uint64_t generation) {
+				if (_host_order_identity)
+				{
+					// 迭代03 卡5 / N05-003：宿主按 owner 与不可复用身份核验后才撤单；核验失败即隔离，不回退裸 ID。
+					const int verified = _orders_mon.cancel_timeout_verified(localid, generation, _ord_sticky, now,
+						[this](uint32_t id) { return _ctx->cancel(id); });
+					if (verified > 0)
+					{
+					_cancel_cnt++;
+						_ctx->writeLog((std::string("Expired order ") + std::to_string(localid) + " of " + _code + " canceled with host-verified identity").c_str());
+					}
+					else if (verified < 0)
+						_ctx->writeLog((std::string("Expired order ") + std::to_string(localid) + " of " + _code + " cannot be auto-canceled: host could not verify its identity; order remains monitored").c_str());
+					return;
+				}
 				if (!_orders_mon.mark_unverified_timeout(localid, generation, _ord_sticky, now))
 					return; // 终态或 localid 已复用；不得复活旧快照
 				_ctx->writeLog(fmt::format("Expired order {} of {} cannot be auto-canceled: legacy localid is unverified; order remains monitored",

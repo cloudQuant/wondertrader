@@ -1,0 +1,36 @@
+Note: Google Test filter = MwAd.UnknownKeyLayoutIsQuarantinedUntouched
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from MwAd
+[ RUN      ] MwAd.UnknownKeyLayoutIsQuarantinedUntouched
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:202: Failure
+Value of: ok
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:203: Failure
+Expected: (_sink->count_containing("quarantined")) >= (1u), actual: 0 vs 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:205: Failure
+Value of: cur == __null
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:209: Failure
+Expected equality of these values:
+  rows.size()
+    Which is: 2
+  1u
+    Which is: 1
+quarantined DB must not be written
+
+[  FAILED  ] MwAd.UnknownKeyLayoutIsQuarantinedUntouched (3 ms)
+[----------] 1 test from MwAd (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] MwAd.UnknownKeyLayoutIsQuarantinedUntouched
+
+ 1 FAILED TEST

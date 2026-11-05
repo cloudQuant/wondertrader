@@ -1,0 +1,35 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = C3TickerLeapSecond.Sel
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from C3TickerLeapSecond
+[ RUN      ] C3TickerLeapSecond.Sel
+==================
+WARNING: ThreadSanitizer: data race (pid=59668)
+  Write of size 4 at 0x00016cf920b4 by main thread:
+    #0 wtp::WtSelRtTicker::on_tick(wtp::WTSTickData*, unsigned int) WtSelTicker.cpp:137 (test:arm64+0x1003b5c70)
+    #1 void expectLeapSecondRejected<R202NextDayEngine<(anonymous namespace)::R202SelEngine>, wtp::WtSelRtTicker>()::'lambda'(unsigned int)::operator()(unsigned int) const merged.cpp:669 (test:arm64+0x1000659a4)
+    #2 void expectLeapSecondRejected<R202NextDayEngine<(anonymous namespace)::R202SelEngine>, wtp::WtSelRtTicker>() merged.cpp:672 (test:arm64+0x10000e828)
+    #3 C3TickerLeapSecond_Sel_Test::TestBody() merged.cpp:686 (test:arm64+0x10000e484)
+    #4 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (test:arm64+0x100463e84)
+
+  Previous read of size 4 at 0x00016cf920b4 by thread T1:
+    #0 wtp::WtSelRtTicker::run()::$_0::operator()() const WtSelTicker.cpp:233 (test:arm64+0x1003b7ab8)
+    #1 std::__1::__invoke_result_impl<void, wtp::WtSelRtTicker::run()::$_0>::type std::__1::__invoke[abi:nqe220108]<wtp::WtSelRtTicker::run()::$_0>(wtp::WtSelRtTicker::run()::$_0&&) invoke.h:90 (test:arm64+0x1003b7998)
+    #2 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::WtSelRtTicker::run()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::WtSelRtTicker::run()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (test:arm64+0x1003b7940)
+    #3 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::WtSelRtTicker::run()::$_0>>(void*) thread.h:169 (test:arm64+0x1003b753c)
+
+  Location is stack of main thread.
+
+  Thread T1 (tid=5246188, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (test:arm64+0x1002cebf8)
+    #2 std::__1::thread::thread[abi:nqe220108]<wtp::WtSelRtTicker::run()::$_0, 0>(wtp::WtSelRtTicker::run()::$_0&&) thread.h:218 (test:arm64+0x1003b7318)
+    #3 std::__1::thread::thread[abi:nqe220108]<wtp::WtSelRtTicker::run()::$_0, 0>(wtp::WtSelRtTicker::run()::$_0&&) thread.h:209 (test:arm64+0x1003b68d4)
+    #4 wtp::WtSelRtTicker::run() WtSelTicker.cpp:230 (test:arm64+0x1003b6810)
+    #5 void expectLeapSecondRejected<R202NextDayEngine<(anonymous namespace)::R202SelEngine>, wtp::WtSelRtTicker>() merged.cpp:665 (test:arm64+0x10000e7d8)
+    #6 C3TickerLeapSecond_Sel_Test::TestBody() merged.cpp:686 (test:arm64+0x10000e484)
+    #7 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (test:arm64+0x100463e84)
+
+SUMMARY: ThreadSanitizer: data race WtSelTicker.cpp:137 in wtp::WtSelRtTicker::on_tick(wtp::WTSTickData*, unsigned int)
+==================

@@ -1,0 +1,45 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = q04_uftctx_local.unextendable_block_retains_events_and_refuses_new_orders
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from q04_uftctx_local
+[ RUN      ] q04_uftctx_local.unextendable_block_retains_events_and_refuses_new_orders
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:567: Failure
+Expected equality of these values:
+  (double)capacity
+    Which is: 8000
+  ctx._ctx.stra_get_local_position(kAg)
+    Which is: 8001
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:568: Failure
+Expected equality of these values:
+  capacity
+    Which is: 8000
+  blockSize(posFile)
+    Which is: 8001
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:574: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  ctx._ctx.stra_enter_long(kAg, 5000.0, 1.0, 0)
+    Which is: 1330213651
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:575: Failure
+Expected equality of these values:
+  sent
+    Which is: 1
+  ctx._api._entrusts.size()
+    Which is: 2
+a blocked local ledger must refuse new orders
+
+[  FAILED  ] q04_uftctx_local.unextendable_block_retains_events_and_refuses_new_orders (19 ms)
+[----------] 1 test from q04_uftctx_local (19 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (19 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] q04_uftctx_local.unextendable_block_retains_events_and_refuses_new_orders
+
+ 1 FAILED TEST

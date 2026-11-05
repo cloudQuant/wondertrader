@@ -431,7 +431,7 @@ TEST_F(TraderYDTest, make_entrust_id_validates_buffer_and_increments_ref)
 	ASSERT_TRUE(api_.makeEntrustID(buf2, sizeof(buf2)));
 	const std::string second(buf2);
 	EXPECT_NE(first, second);
-	EXPECT_EQ(0u, second.compare(0, 7, "yduser#"));
+	EXPECT_EQ(0, second.compare(0, 7, "yduser#"));
 	// 两次 fetch_add(1) 之间恰好相差 1
 	const unsigned long a = strtoul(first_ref.c_str(), NULL, 10);
 	const unsigned long b = strtoul(second.substr(7).c_str(), NULL, 10);

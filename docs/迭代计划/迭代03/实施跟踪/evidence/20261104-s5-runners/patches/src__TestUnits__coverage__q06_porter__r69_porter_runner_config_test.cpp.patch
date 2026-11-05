@@ -1,0 +1,49 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp	2026-10-31 13:11:23
++++ src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp	2026-11-04 17:53:48
+@@ -283,8 +283,11 @@
+ 
+ 	write_text(dir + "/traders.json",
+ 		"{\"traders\":[{\"active\":false,\"id\":\"r69_trd_off\"}]}");
++	// 迭代03（BUG-R134-003/WSN06-001）：router 规则加载结果现传播为配置失败，执行器管理器
++	// 只接受数组（N02ExecMgrTest.LoadRouterRulesRejectsNullAndNonArray）；原夹具用 {} 依赖旧的
++	// 忽略返回值行为，改为空数组仍到达两处 load_router_rules 入口（.before 见 s5-runners 证据）。
+ 	write_text(dir + "/executers.json",
+-		"{\"executers\":[],\"routers\":{}}");
++		"{\"executers\":[],\"routers\":[]}");
+ 	write_text(dir + "/actions.json", kActions);
+ 
+ 	WtRtRunner* r = new_runner(dir);
+@@ -294,7 +297,7 @@
+ 		"{\"basefiles\":{},"
+ 		"\"traders\":\"" + dir + "/traders.json\","
+ 		"\"executers\":\"" + dir + "/executers.json\","
+-		"\"routers\":{},"
++		"\"routers\":[],"
+ 		+ tail(dir, "cta") + "}";
+ 
+ 	ASSERT_TRUE(r->config(cfg.c_str(), false));
+@@ -340,12 +343,23 @@
+ 	WtRtRunner* r = new_runner(dir);
+ 	ASSERT_NE(r, nullptr);
+ 
+-	const std::string cfg =
++	// 卡8b=A（迭代03 s5-runners，BUG-R134-003/WSN06-001）：配置了却不存在的执行器
++	// 侧文件是配置错误，在任何副作用之前拒绝且 config 仍可重试；原用例在此处
++	// 断言成功，与已裁定的全表预检冲突（.before 见 s5-runners 证据）。空 data /
++	// no-store 可选模式的对照保留在随后的重试中。
++	const std::string missingExecFile =
+ 		"{" + query_basefiles(dir) + ","
+ 		"\"executers\":\"" + dir + "/r69_absent_executers.json\","
+ 		"\"notifier\":{\"active\":false},"
+ 		+ tail(dir, "cta") + "}";
++	EXPECT_FALSE(r->config(missingExecFile.c_str(), false));
++	EXPECT_EQ(nullptr, r->getEngine());
+ 
++	const std::string cfg =
++		"{" + query_basefiles(dir) + ","
++		"\"notifier\":{\"active\":false},"
++		+ tail(dir, "cta") + "}";
++
+ 	ASSERT_TRUE(r->config(cfg.c_str(), false));
+ 	ASSERT_NE(r->getEngine(), nullptr);
+ 	ASSERT_NE(nullptr, r->getEngine()->get_commodity_info("SHFE.au.2406"));

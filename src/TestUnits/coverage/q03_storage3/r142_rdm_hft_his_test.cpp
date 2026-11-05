@@ -770,7 +770,7 @@ TEST_F(R142RdmHftHisTest, R142RdmKlineHisEndBetweenBarsBacksOff)
 	WTSKlineSlice* s = _reader.readKlineSliceByRange("SSE.STK.600805", KP_Minute1,
 		202401100930ull, 202401100932ull);
 	ASSERT_TRUE(s != NULL);
-	ASSERT_EQ(s->size(), 1u);
+	ASSERT_EQ(s->size(), 1);
 	EXPECT_EQ(s->at(0)->time, TimeUtils::timeToMinBar(20240110, 931));
 	s->release();
 }

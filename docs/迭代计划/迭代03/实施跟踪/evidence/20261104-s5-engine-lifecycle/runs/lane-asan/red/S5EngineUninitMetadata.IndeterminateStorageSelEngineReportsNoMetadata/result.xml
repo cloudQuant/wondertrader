@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="1" failures="1" disabled="0" errors="0" time="5.438" timestamp="2026-11-04T20:21:11.173" name="AllTests">
+  <testsuite name="S5EngineUninitMetadata" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="5.438" timestamp="2026-11-04T20:21:11.173">
+    <testcase name="IndeterminateStorageSelEngineReportsNoMetadata" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_engine_uninit_metadata_test.cpp" line="71" status="run" result="completed" time="5.438" timestamp="2026-11-04T20:21:11.173" classname="S5EngineUninitMetadata">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_engine_uninit_metadata_test.cpp:74&#x0A;Death test: std::exit(probeUninitializedEngine&lt;WtSelEngine&gt;(0xA5))&#x0A;    Result: died but not with expected exit code:&#x0A;            Terminated by signal 6&#x0A;Actual msg:&#x0A;[  DEATH   ] /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtEngine.cpp:132:25: runtime error: member call on misaligned address 0xa5a5a5a5a5a5a5a5 for type &apos;wtp::IBaseDataMgr&apos;, which requires 8 byte alignment&#x0A;[  DEATH   ] 0xa5a5a5a5a5a5a5a5: note: pointer points here&#x0A;[  DEATH   ] &lt;memory cannot be printed&gt;&#x0A;[  DEATH   ]     #0 0x0001010f521c in wtp::WtEngine::get_commodity_info(char const*)+0x254 (red-s5_engine_uninit_metadata_test:arm64+0x10061921c)&#x0A;[  DEATH   ]     #1 0x000100ae5424 in int (anonymous namespace)::probeUninitializedEngine&lt;wtp::WtSelEngine&gt;(unsigned char)+0x2a0 (red-s5_engine_uninit_metadata_test:arm64+0x100009424)&#x0A;[  DEATH   ]     #2 0x000100ae6374 in S5EngineUninitMetadata_IndeterminateStorageSelEngineReportsNoMetadata_Test::TestBody()+0x5b8 (red-s5_engine_uninit_metadata_test:arm64+0x10000a374)&#x0A;[  DEATH   ]     #3 0x000101585434 in void testing::internal::HandleExceptionsInMethodIfSupported&lt;testing::Test, void&gt;(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-s5_engine_uninit_metadata_test:arm64+0x100aa9434)&#x0A;[  DEATH   ]     #4 0x00010158537c in testing::Test::Run()+0xcc (red-s5_engine_uninit_metadata_test:arm64+0x100aa937c)&#x0A;[  DEATH   ]     #5 0x000101585f5c in testing::TestInfo::Run()+0xd0 (red-s5_engine_uninit_metadata_test:arm64+0x100aa9f5c)&#x0A;[  DEATH   ]     #6 0x0001015869e0 in testing::TestSuite::Run()+0x1c4 (red-s5_engine_uninit_metadata_test:arm64+0x100aaa9e0)&#x0A;[  DEATH   ]     #7 0x000101591e08 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-s5_engine_uninit_metadata_test:arm64+0x100ab5e08)&#x0A;[  DEATH   ]     #8 0x0001015917b4 in bool testing::internal::HandleExceptionsInMethodIfSupported&lt;testing::internal::UnitTestImpl, bool&gt;(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-s5_engine_uninit_metadata_test:arm64+0x100ab57b4)&#x0A;[  DEATH   ]     #9 0x000101591718 in testing::UnitTest::Run()+0x78 (red-s5_engine_uninit_metadata_test:arm64+0x100ab5718)&#x0A;[  DEATH   ]     #10 0x000101572790 in main+0x40 (red-s5_engine_uninit_metadata_test:arm64+0x100a96790)&#x0A;[  DEATH   ]     #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)&#x0A;[  DEATH   ] &#x0A;[  DEATH   ] SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtEngine.cpp:132:25 &#x0A;[  DEATH   ] &#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_engine_uninit_metadata_test.cpp:74
+Death test: std::exit(probeUninitializedEngine<WtSelEngine>(0xA5))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtEngine.cpp:132:25: runtime error: member call on misaligned address 0xa5a5a5a5a5a5a5a5 for type 'wtp::IBaseDataMgr', which requires 8 byte alignment
+[  DEATH   ] 0xa5a5a5a5a5a5a5a5: note: pointer points here
+[  DEATH   ] <memory cannot be printed>
+[  DEATH   ]     #0 0x0001010f521c in wtp::WtEngine::get_commodity_info(char const*)+0x254 (red-s5_engine_uninit_metadata_test:arm64+0x10061921c)
+[  DEATH   ]     #1 0x000100ae5424 in int (anonymous namespace)::probeUninitializedEngine<wtp::WtSelEngine>(unsigned char)+0x2a0 (red-s5_engine_uninit_metadata_test:arm64+0x100009424)
+[  DEATH   ]     #2 0x000100ae6374 in S5EngineUninitMetadata_IndeterminateStorageSelEngineReportsNoMetadata_Test::TestBody()+0x5b8 (red-s5_engine_uninit_metadata_test:arm64+0x10000a374)
+[  DEATH   ]     #3 0x000101585434 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-s5_engine_uninit_metadata_test:arm64+0x100aa9434)
+[  DEATH   ]     #4 0x00010158537c in testing::Test::Run()+0xcc (red-s5_engine_uninit_metadata_test:arm64+0x100aa937c)
+[  DEATH   ]     #5 0x000101585f5c in testing::TestInfo::Run()+0xd0 (red-s5_engine_uninit_metadata_test:arm64+0x100aa9f5c)
+[  DEATH   ]     #6 0x0001015869e0 in testing::TestSuite::Run()+0x1c4 (red-s5_engine_uninit_metadata_test:arm64+0x100aaa9e0)
+[  DEATH   ]     #7 0x000101591e08 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-s5_engine_uninit_metadata_test:arm64+0x100ab5e08)
+[  DEATH   ]     #8 0x0001015917b4 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-s5_engine_uninit_metadata_test:arm64+0x100ab57b4)
+[  DEATH   ]     #9 0x000101591718 in testing::UnitTest::Run()+0x78 (red-s5_engine_uninit_metadata_test:arm64+0x100ab5718)
+[  DEATH   ]     #10 0x000101572790 in main+0x40 (red-s5_engine_uninit_metadata_test:arm64+0x100a96790)
+[  DEATH   ]     #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+[  DEATH   ] 
+[  DEATH   ] SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtEngine.cpp:132:25 
+[  DEATH   ] 
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

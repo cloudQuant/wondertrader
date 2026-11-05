@@ -1,0 +1,56 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r85_uft_runner.full_config_init_false_keeps_runner_run_closed
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from r85_uft_runner
+[ RUN      ] r85_uft_runner.full_config_init_false_keeps_runner_run_closed
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r85_uft_runner_child.DISABLED_log_capture_probe
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from r85_uft_runner_child
+[ RUN      ] r85_uft_runner_child.DISABLED_log_capture_probe
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp:1303: Failure
+Value of: capture.contains("Trader runner_config_false initialization failed; adapter was not registered")
+  Actual: false
+Expected: true
+
+[  FAILED  ] r85_uft_runner_child.DISABLED_log_capture_probe (3 ms)
+[----------] 1 test from r85_uft_runner_child (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] r85_uft_runner_child.DISABLED_log_capture_probe
+
+ 1 FAILED TEST
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp:1348: Failure
+Value of: childPassed
+  Actual: false
+Expected: true
+Invalid section 0 for session ALLDAY in sessions.yaml
+UFT session 'ALLDAY' is missing from the loaded base data
+UFT runner cannot run without a successful, active configuration
+
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp:1349: Failure
+Expected: (std::string::npos) != (runnerLogs.find("Trader runner_config_false initialization failed; adapter was not registered")), actual: 18446744073709551615 vs 18446744073709551615
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp:1357: Failure
+Expected equality of these values:
+  (std::vector<std::string>{ "factory.create", "api.init refs=2", "api.init.false", "api.release refs=2", "factory.delete.begin", "api.destroy refs=2", "factory.delete.end"})
+    Which is: { "factory.create", "api.init refs=2", "api.init.false", "api.release refs=2", "factory.delete.begin", "api.destroy refs=2", "factory.delete.end" }
+  readLifecycleEvents(logPath)
+    Which is: {}
+
+[  FAILED  ] r85_uft_runner.full_config_init_false_keeps_runner_run_closed (129 ms)
+[----------] 1 test from r85_uft_runner (129 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (129 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] r85_uft_runner.full_config_init_false_keeps_runner_run_closed
+
+ 1 FAILED TEST

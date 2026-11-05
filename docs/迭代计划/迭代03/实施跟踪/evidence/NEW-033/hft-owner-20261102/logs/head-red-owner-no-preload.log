@@ -1,0 +1,80 @@
+FAIL factory outlives manager
+=================================================================
+==19064==ERROR: AddressSanitizer: heap-use-after-free on address 0x603000001c00 at pc 0x00010471e9a4 bp 0x00016b794070 sp 0x00016b794068
+READ of size 8 at 0x603000001c00 thread T0
+    #0 0x00010471e9a0 in HftStraWrapper::~HftStraWrapper() HftStrategyMgr.h:45
+    #1 0x00010471e830 in HftStraWrapper::~HftStraWrapper() HftStrategyMgr.h:42
+    #2 0x00010471e7c8 in std::__1::default_delete<HftStraWrapper>::operator()[abi:nqe220108](HftStraWrapper*) const unique_ptr.h:74
+    #3 0x00010471e3d0 in std::__1::__shared_ptr_pointer<HftStraWrapper*, std::__1::shared_ptr<HftStraWrapper>::__shared_ptr_default_delete<HftStraWrapper, HftStraWrapper>, std::__1::allocator<HftStraWrapper>>::__on_zero_shared() shared_ptr.h:122
+    #4 0x0001046fc928 in std::__1::__shared_count::__release_shared[abi:nqe220108]() shared_count.h:65
+    #5 0x0001046fc7ec in std::__1::__shared_weak_count::__release_shared[abi:nqe220108]() shared_count.h:100
+    #6 0x00010471d87c in std::__1::shared_ptr<HftStraWrapper>::~shared_ptr[abi:nqe220108]() shared_ptr.h:501
+    #7 0x00010466e498 in std::__1::shared_ptr<HftStraWrapper>::~shared_ptr[abi:nqe220108]() shared_ptr.h:499
+    #8 0x00010472edac in std::__1::shared_ptr<HftStraWrapper>::reset[abi:nqe220108]() shared_ptr.h:551
+    #9 0x000104727268 in main head-check.cpp:90
+    #10 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x603000001c00 is located 0 bytes inside of 32-byte region [0x603000001c00,0x603000001c20)
+freed by thread T0 here:
+    #0 0x000104f54f10 in free+0x74 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x54f10)
+    #1 0x000104725ca8 in operator delete(void*, unsigned long) head-check.cpp:34
+    #2 0x000104a4dbf4 in (anonymous namespace)::Factory::~Factory()+0x54 (fixture.dylib:arm64+0x1bf4)
+    #3 0x000104a4d620 in deleteStrategyFact+0xd0 (fixture.dylib:arm64+0x1620)
+    #4 0x000104704f68 in HftStrategyMgr::_StraFactInfo::~_StraFactInfo() HftStrategyMgr.h:157
+    #5 0x000104704dc0 in HftStrategyMgr::_StraFactInfo::~_StraFactInfo() HftStrategyMgr.h:153
+    #6 0x000104704d5c in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>::~pair() pair.h:88
+    #7 0x000104704cfc in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>::~pair() pair.h:88
+    #8 0x000104704ca4 in void std::__1::__destroy_at[abi:nqe220108]<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>>(std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>*) construct_at.h:67
+    #9 0x000104704c08 in void std::__1::allocator_traits<std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HftStrategyMgr::_StraFactInfo>, void*>>>::destroy[abi:nqe220108]<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>, 0>(std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HftStrategyMgr::_StraFactInfo>, void*>>&, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>*) allocator_traits.h:313
+    #10 0x00010471b4ec in std::__1::__tree<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HftStrategyMgr::_StraFactInfo>, std::__1::__map_value_compare<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>>>::__tree_deleter::operator()[abi:nqe220108](std::__1::__tree_node<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HftStrategyMgr::_StraFactInfo>, void*>*) __tree:1464
+    #11 0x00010471b0cc in std::__1::__tree<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HftStrategyMgr::_StraFactInfo>, std::__1::__map_value_compare<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>>>::destroy(std::__1::__tree_node<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HftStrategyMgr::_StraFactInfo>, void*>*) __tree:1411
+    #12 0x00010471af30 in std::__1::__tree<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HftStrategyMgr::_StraFactInfo>, std::__1::__map_value_compare<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>>>::~__tree[abi:nqe220108]() __tree:1007
+    #13 0x00010471aec8 in std::__1::__tree<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HftStrategyMgr::_StraFactInfo>, std::__1::__map_value_compare<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>>>::~__tree[abi:nqe220108]() __tree:1005
+    #14 0x00010471ae6c in std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HftStrategyMgr::_StraFactInfo, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>>>::~map[abi:nqe220108]() map:1070
+    #15 0x000104668c40 in std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HftStrategyMgr::_StraFactInfo, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, HftStrategyMgr::_StraFactInfo>>>::~map[abi:nqe220108]() map:1070
+    #16 0x000104668d64 in HftStrategyMgr::~HftStrategyMgr() head-baseline.cpp:144
+    #17 0x000104668e30 in HftStrategyMgr::~HftStrategyMgr() head-baseline.cpp:143
+    #18 0x000104726ef8 in main head-check.cpp:82
+    #19 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+previously allocated by thread T0 here:
+    #0 0x000104f650e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000104a4ccd4 in createStrategyFact+0x31c (fixture.dylib:arm64+0xcd4)
+    #2 0x00010466ba74 in HftStrategyMgr::loadFactories(char const*)::$_0::operator()(std::__1::__fs::filesystem::path const&) const head-baseline.cpp:247
+    #3 0x0001046698c8 in HftStrategyMgr::loadFactories(char const*) head-baseline.cpp:308
+    #4 0x000104726df8 in main head-check.cpp:79
+    #5 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: heap-use-after-free HftStrategyMgr.h:45 in HftStraWrapper::~HftStraWrapper()
+Shadow bytes around the buggy address:
+  0x603000001980: fa fa 00 00 00 00 fa fa 00 00 00 00 fa fa 00 00
+  0x603000001a00: 00 00 fa fa 00 00 00 00 fa fa 00 00 00 00 fa fa
+  0x603000001a80: 00 00 00 00 fa fa 00 00 00 00 fa fa 00 00 00 00
+  0x603000001b00: fa fa 00 00 00 00 fa fa 00 00 00 00 fa fa 00 00
+  0x603000001b80: 00 00 fa fa 00 00 00 00 fa fa 00 00 00 00 fa fa
+=>0x603000001c00:[fd]fd fd fd fa fa fd fd fd fa fa fa 00 00 00 00
+  0x603000001c80: fa fa 00 00 00 00 fa fa fa fa fa fa fa fa fa fa
+  0x603000001d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x603000001d80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x603000001e00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x603000001e80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==19064==ABORTING

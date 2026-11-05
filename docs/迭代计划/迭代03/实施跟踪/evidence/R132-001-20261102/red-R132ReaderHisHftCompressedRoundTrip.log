@@ -1,0 +1,26 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R132ReaderHisTest.R132ReaderHisHftCompressedRoundTrip
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R132ReaderHisTest
+[ RUN      ] R132ReaderHisTest.R132ReaderHisHftCompressedRoundTrip
+/opt/homebrew/Cellar/llvm/22.1.8/bin/../include/c++/v1/__algorithm/lower_bound.h:40:53: runtime error: reference binding to misaligned address 0x616000001b8c for type 'wtp::WTSOrdQueStruct', which requires 8 byte alignment
+0x616000001b8c: note: pointer points here
+  1b 00 03 00 42 e9 3f 60  d5 16 96 47 e0 bc 13 2e  87 fc ee 8a f6 fe d9 02  99 d1 b0 cf 41 52 fd 51
+              ^ 
+    #0 0x0001031c4218 in wtp::WTSOrdQueStruct* std::__1::__lower_bound_bisecting[abi:nqe220108]<std::__1::_ClassicAlgPolicy, wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct, std::__1::__identity, wtp::WtDataReader::readOrdQueSlice(char const*, unsigned int, unsigned long long)::$_1>(wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct const&, std::__1::iterator_traits<wtp::WTSOrdQueStruct*>::difference_type, wtp::WtDataReader::readOrdQueSlice(char const*, unsigned int, unsigned long long)::$_1&, std::__1::__identity&) lower_bound.h:40
+    #1 0x0001031c4028 in wtp::WTSOrdQueStruct* std::__1::__lower_bound[abi:nqe220108]<std::__1::_ClassicAlgPolicy, wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct, std::__1::__identity, wtp::WtDataReader::readOrdQueSlice(char const*, unsigned int, unsigned long long)::$_1>(wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct const&, wtp::WtDataReader::readOrdQueSlice(char const*, unsigned int, unsigned long long)::$_1&, std::__1::__identity&) lower_bound.h:89
+    #2 0x00010305337c in wtp::WTSOrdQueStruct* std::__1::lower_bound[abi:nqe220108]<wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct, wtp::WtDataReader::readOrdQueSlice(char const*, unsigned int, unsigned long long)::$_1>(wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct const&, wtp::WtDataReader::readOrdQueSlice(char const*, unsigned int, unsigned long long)::$_1) lower_bound.h:97
+    #3 0x00010304fbec in wtp::WtDataReader::readOrdQueSlice(char const*, unsigned int, unsigned long long) WtDataReader.cpp:789
+    #4 0x000102ee0a28 in r132::R132ReaderHisTest_R132ReaderHisHftCompressedRoundTrip_Test::TestBody() r132_reader_his_test.cpp:170
+    #5 0x000103477df4 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (R132Focused:arm64+0x10059fdf4)
+    #6 0x000103477d3c in testing::Test::Run()+0xcc (R132Focused:arm64+0x10059fd3c)
+    #7 0x00010347891c in testing::TestInfo::Run()+0xd0 (R132Focused:arm64+0x1005a091c)
+    #8 0x0001034793a0 in testing::TestSuite::Run()+0x1c4 (R132Focused:arm64+0x1005a13a0)
+    #9 0x0001034847c8 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (R132Focused:arm64+0x1005ac7c8)
+    #10 0x000103484174 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (R132Focused:arm64+0x1005ac174)
+    #11 0x0001034840d8 in testing::UnitTest::Run()+0x78 (R132Focused:arm64+0x1005ac0d8)
+    #12 0x00010320b558 in main+0x40 (R132Focused:arm64+0x100333558)
+    #13 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /opt/homebrew/Cellar/llvm/22.1.8/bin/../include/c++/v1/__algorithm/lower_bound.h:40:53 

@@ -25,7 +25,10 @@
 
 #include "../Share/BoostFile.hpp"
 #include "../Share/SpinMutex.hpp"
+#include "../Share/fmtlib.h"
 
+
+struct WtRiskMonPluginCapsV2;
 
 NS_WTP_BEGIN
 class WTSSessionInfo;
@@ -47,6 +50,7 @@ class WtDtMgr;
 class TraderAdapterMgr;
 
 class EventNotifier;
+class WtRiskContextProxy;
 
 typedef std::function<void()>	TaskItem;
 
@@ -71,6 +75,34 @@ private:
 };
 typedef std::shared_ptr<WtRiskMonWrapper>	WtRiskMonPtr;
 
+/*
+ *	I03-NEW-115: one field of the engine clock. The ticker thread publishes
+ *	the clock (set_date_time/set_trading_date) while the task worker, the
+ *	strategy threads and external callers read it, so every field is an
+ *	independent relaxed atomic. The implicit conversion keeps the derived
+ *	engines' expressions unchanged. Fields are read one by one: a reader may
+ *	still combine two adjacent publications (as before), but never reads a
+ *	torn or racing value.
+ */
+class WtEngineClockField
+{
+public:
+	WtEngineClockField(uint32_t val = 0) noexcept : _val(val) {}
+	WtEngineClockField(const WtEngineClockField&) = delete;
+	WtEngineClockField& operator=(const WtEngineClockField&) = delete;
+
+	inline uint32_t load() const noexcept { return _val.load(std::memory_order_relaxed); }
+	inline operator uint32_t() const noexcept { return load(); }
+	inline WtEngineClockField& operator=(uint32_t val) noexcept
+	{
+		_val.store(val, std::memory_order_relaxed);
+		return *this;
+	}
+
+private:
+	std::atomic<uint32_t>	_val;
+};
+
 class IEngineEvtListener
 {
 public:
@@ -83,6 +115,9 @@ class WtEngine : public WtPortContext, public IParserStub
 {
 public:
 	WtEngine();
+	// Releases the engine-owned fund object after the task worker and the
+	// engine's risk monitor have been stopped (BUG-R42-001 / NEW-034).
+	~WtEngine();
 
 	inline void set_adapter_mgr(TraderAdapterMgr* mgr) { _adapter_mgr = mgr; }
 
@@ -90,11 +125,11 @@ public:
 
 	void set_trading_date(uint32_t curTDate);
 
-	inline uint32_t get_date() { return _cur_date; }
-	inline uint32_t get_min_time() { return _cur_time; }
-	inline uint32_t get_raw_time() { return _cur_raw_time; }
-	inline uint32_t get_secs() { return _cur_secs; }
-	inline uint32_t get_trading_date() { return _cur_tdate; }
+	inline uint32_t get_date() { return _cur_date.load(); }
+	inline uint32_t get_min_time() { return _cur_time.load(); }
+	inline uint32_t get_raw_time() { return _cur_raw_time.load(); }
+	inline uint32_t get_secs() { return _cur_secs.load(); }
+	inline uint32_t get_trading_date() { return _cur_tdate.load(); }
 
 	inline IBaseDataMgr*		get_basedata_mgr(){ return _base_data_mgr; }
 	inline IHotMgr*				get_hot_mgr() { return _hot_mgr; }
@@ -125,9 +160,36 @@ public:
 	double calc_fee(const char* stdCode, double price, double qty, uint32_t offset);
 	inline bool fee_config_valid() const { return _fee_config_valid; }
 
+	/*
+	 *	Checked fee of one live fill (I03-NEW-008, card 13d).
+	 *	The physical contract is the fill contract: a continuous code (HOT/2ND or
+	 *	a custom rule) resolves to the mapped contract of the current trading
+	 *	day. Lookup is contract-level first, then product-level; a legal zero
+	 *	rate is valid. Missing fees, unknown metadata or invalid inputs return
+	 *	false with a reason. Callers keep the fill and report the failure.
+	 */
+	bool calc_fee_checked(const char* stdCode, double price, double qty, uint32_t offset,
+		double& fee, std::string& error);
+	/*
+	 *	Records an observable fee-accounting failure; the first failure per code
+	 *	is logged at error level, every failure is counted.
+	 */
+	void report_fee_error(const char* stdCode, const std::string& message);
+	inline uint64_t fee_error_count() const { return _fee_error_count.load(); }
+	std::string last_fee_error() const;
+
+	/*
+	 *	Installs an in-process monitor supplied by host code. The caller
+	 *	vouches that its stop() is synchronous (no WtPortContext call and no
+	 *	use of a borrowed getFundInfo() pointer after stop() returns). Plugin
+	 *	monitors are loaded through init_riskmon and must declare that
+	 *	capability (IRiskMonPluginV2.h, card 9a).
+	 */
 	inline void setRiskMonitor(WtRiskMonPtr& monitor)
 	{
 		_risk_mon = monitor;
+		_risk_mon_stop_proven = true;
+		_risk_mon_stopped = false;
 	}
 
 	inline void regEventListener(IEngineEvtListener* listener)
@@ -179,6 +241,16 @@ protected:
 	void		save_datas();
 
 	void		append_signal(const char* stdCode, double qty, bool bStandBy);
+	/// I03-NEW-124: append_signal() body; the caller holds _sig_mtx.
+	void		append_signal_locked(const char* stdCode, double qty, bool bStandBy);
+	/// Decision K26=B1 (2026-11-04): base volume for a portfolio increment is the
+	/// pending (not yet triggered) target when one exists, else the position.
+	/// I03-NEW-124: the caller holds _sig_mtx.
+	double		pending_target_or(const std::string& realCode, double position) const
+	{
+		auto it = _sig_map.find(realCode);
+		return it == _sig_map.end() ? position : it->second._volume;
+	}
 
 	void		do_set_position(const char* stdCode, double qty, double curPx = -1);
 
@@ -190,6 +262,14 @@ protected:
 
 	bool		init_riskmon(WTSVariant* cfg);
 
+	/*
+	 *	Stops the risk monitor once (card 9a, BUG-I02-NEW-034). A monitor
+	 *	without a proven synchronous stop is quarantined: its context is
+	 *	detached and keeps the fund object, and neither the monitor nor the
+	 *	fund is released.
+	 */
+	void		stop_risk_monitor();
+
 private:
 	void		init_outputs();
 	inline void	log_trade(const char* stdCode, bool isLong, bool isOpen, uint64_t curTime, double price, double qty, double fee = 0.0);
@@ -197,11 +277,11 @@ private:
 		double profit, double totalprofit = 0);
 
 protected:
-	uint32_t		_cur_date;		//当前日期
-	uint32_t		_cur_time;		//当前时间, 是1分钟线时间, 比如0900, 这个时候的1分钟线是0901, _cur_time也就是0901, 这个是为了CTA里面方便
-	uint32_t		_cur_raw_time;	//当前真实时间
-	uint32_t		_cur_secs;		//当前秒数, 包含毫秒
-	uint32_t		_cur_tdate;		//当前交易日
+	WtEngineClockField	_cur_date;		//当前日期
+	WtEngineClockField	_cur_time;		//当前时间, 是1分钟线时间, 比如0900, 这个时候的1分钟线是0901, _cur_time也就是0901, 这个是为了CTA里面方便
+	WtEngineClockField	_cur_raw_time;	//当前真实时间
+	WtEngineClockField	_cur_secs;		//当前秒数, 包含毫秒
+	WtEngineClockField	_cur_tdate;		//当前交易日
 
 	uint32_t		_fund_udt_span;	//组合资金更新时间间隔
 
@@ -238,6 +318,15 @@ protected:
 	}SigInfo;
 	typedef wt_hashmap<std::string, SigInfo>	SignalMap;
 	SignalMap		_sig_map;
+	/*
+	 *	I03-NEW-124: guards _sig_map and makes a portfolio target change one
+	 *	step: read the base (pending target or position), add the increment,
+	 *	then store the signal or apply it through do_set_position(). The CTA
+	 *	pool runs handle_pos_change() for several strategies at once.
+	 *	Lock order: _sig_mtx -> _pos_mtx -> PosInfo::_mtx -> _fund_mtx ->
+	 *	_price_mtx. Never held across save_datas().
+	 */
+	SpinMutex		_sig_mtx;
 
 	//////////////////////////////////////////////////////////////////////////
 	//信号过滤器
@@ -252,6 +341,7 @@ protected:
 		double	_close;
 		double	_close_today;
 		bool	_by_volume;
+		double	_min_fee;	//per-fill minimum (shared with the backtest FeeSchedule rule)
 
 		_FeeItem()
 		{
@@ -259,10 +349,31 @@ protected:
 		}
 	} FeeItem;
 	typedef wt_hashmap<std::string, FeeItem>	FeeMap;
-	FeeMap		_fee_map;
+	FeeMap		_fee_map;			//product-level rates, key EXCHG.PRODUCT
+	FeeMap		_contract_fee_map;	//contract-level rates (fee format v2), key EXCHG.CODE
+
+	std::atomic<uint64_t>	_fee_error_count;
+	mutable StdUniqueMutex	_fee_error_mtx;
+	std::string				_last_fee_error;
+	wt_hashset<std::string>	_fee_error_codes;
 	
 
 	WTSPortFundInfo*	_port_fund;
+	/*
+	 *	I03-NEW-115: guards the fields of _port_fund->fundInfo() after init.
+	 *	Lock order is fixed: _sig_mtx -> _pos_mtx -> PosInfo::_mtx ->
+	 *	_fund_mtx -> _price_mtx (I03-NEW-124 added the two ends); no lock is
+	 *	taken in reverse and none is held across save_datas() (SpinMutex is
+	 *	not reentrant). save_datas() itself runs under _save_mtx, which is
+	 *	taken before any of them.
+	 */
+	SpinMutex			_fund_mtx;
+	/*
+	 *	I03-NEW-124: serializes save_datas(); the CTA pool calls it from
+	 *	handle_pos_change() concurrently, and each call truncates and rewrites
+	 *	datas.json. A blocking mutex: it is held across file I/O.
+	 */
+	StdUniqueMutex		_save_mtx;
 
 	//////////////////////////////////////////////////////////////////////////
 	//持仓数据
@@ -299,13 +410,33 @@ protected:
 	} PosInfo;
 	typedef std::shared_ptr<PosInfo> PosInfoPtr;
 	typedef wt_hashmap<std::string, PosInfoPtr> PositionMap;
+	/*
+	 *	I03-NEW-115: _pos_mtx guards the map itself (find/insert/iterate);
+	 *	PosInfo::_mtx guards one position. Callers copy the PosInfoPtr inside
+	 *	_pos_mtx and lock the position only after releasing the map lock; a
+	 *	reference into the map must not outlive _pos_mtx, because an insert
+	 *	may relocate the map storage.
+	 */
 	PositionMap		_pos_map;
 	SpinMutex		_pos_mtx;
+
+	/* Snapshot of all positions in map order, taken under _pos_mtx. */
+	std::vector<std::pair<std::string, PosInfoPtr>> snapshot_positions();
+	/* Finds or inserts the position of stdCode under _pos_mtx. */
+	PosInfoPtr	get_or_create_position(const char* stdCode);
 
 	//////////////////////////////////////////////////////////////////////////
 	//
 	typedef wt_hashmap<std::string, double> PriceMap;
 	PriceMap		_price_map;
+	/*
+	 *	I03-NEW-124: guards _price_map. Strategy threads (the CTA pool, trader
+	 *	callbacks via get_cur_price) read it while the engine thread inserts.
+	 *	Leaf lock: nothing else is taken or called while it is held.
+	 */
+	SpinMutex		_price_mtx;
+	/* Stores the latest price of stdCode under _price_mtx. */
+	void		set_cur_price(const char* stdCode, double price);
 
 	//后台任务线程, 把风控和资金, 持仓更新都放到这个线程里去
 	typedef std::queue<TaskItem>	TaskQueue;
@@ -326,6 +457,10 @@ protected:
 	} RiskMonFactInfo;
 	RiskMonFactInfo	_risk_fact;
 	WtRiskMonPtr	_risk_mon;
+	WtRiskContextProxy*	_risk_ctx;		//context lent to a plugin monitor
+	const ::WtRiskMonPluginCapsV2* _risk_caps;	//verified capability table of the risk module
+	bool			_risk_mon_stop_proven;
+	bool			_risk_mon_stopped;
 	double			_risk_volscale;
 	uint32_t		_risk_date;
 
@@ -343,3 +478,14 @@ protected:
 	bool			_fee_config_valid;
 };
 NS_WTP_END
+
+/* I03-NEW-115: the derived engines log clock fields directly. */
+template <>
+struct fmt::formatter<wtp::WtEngineClockField> : fmt::formatter<uint32_t>
+{
+	template <typename FormatContext>
+	auto format(const wtp::WtEngineClockField& val, FormatContext& ctx) const -> decltype(ctx.out())
+	{
+		return fmt::formatter<uint32_t>::format(val.load(), ctx);
+	}
+};

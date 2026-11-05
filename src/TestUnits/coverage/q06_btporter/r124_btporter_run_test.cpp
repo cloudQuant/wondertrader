@@ -111,6 +111,7 @@ namespace
 			return 10;
 
 		write_text(dir + "/sessions.json", kSessions);
+		write_text(dir + "/holidays.json", "{\"CHINA\":[]}");
 		write_text(dir + "/commodities.json", kCommodities);
 		write_text(dir + "/contracts.json", kContracts);
 		if (!stdfs::exists(dir + "/sessions.json")
@@ -135,6 +136,7 @@ namespace
 				+ "\"tick\":" + (tick ? "true" : "false") + ","
 				+ "\"basefiles\":{"
 				+ "\"session\":\"" + dir + "/sessions.json\","
+				"\"holiday\":\"" + dir + "/holidays.json\","	// 卡1：日期映射须有交易日历（CHINA）
 				+ "\"commodity\":\"" + dir + "/commodities.json\","
 				+ "\"contract\":\"" + dir + "/contracts.json\"}},"
 				+ "\"env\":{\"mocker\":\"none\"}}";
@@ -175,6 +177,7 @@ TEST(R124BtRunnerRun, EmptySyncReplayCompletesWithoutWorker)
 	const std::string dir = prepare_dir("run");
 	ASSERT_FALSE(dir.empty());
 	write_text(dir + "/sessions.json", kSessions);
+	write_text(dir + "/holidays.json", "{\"CHINA\":[]}");
 	write_text(dir + "/commodities.json", kCommodities);
 	write_text(dir + "/contracts.json", kContracts);
 
@@ -187,6 +190,7 @@ TEST(R124BtRunnerRun, EmptySyncReplayCompletesWithoutWorker)
 		"\"tick\":false,"
 		"\"basefiles\":{"
 		"\"session\":\"" + dir + "/sessions.json\","
+		"\"holiday\":\"" + dir + "/holidays.json\","	// 卡1：日期映射须有交易日历（CHINA）
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
 		"\"env\":{\"mocker\":\"none\"}}";
@@ -217,6 +221,7 @@ TEST(R124BtRunnerRun, FailedExecConfigDoesNotReplaceExistingReplaySink)
 	const std::string& dir = temp.path();
 	ASSERT_FALSE(dir.empty());
 	write_text(dir + "/sessions.json", kSessions);
+	write_text(dir + "/holidays.json", "{\"CHINA\":[]}");
 	write_text(dir + "/commodities.json", kCommodities);
 	write_text(dir + "/contracts.json", kContracts);
 
@@ -228,6 +233,7 @@ TEST(R124BtRunnerRun, FailedExecConfigDoesNotReplaceExistingReplaySink)
 		"\"stime\":20240102000000,\"etime\":20240103000000,"
 		"\"tick\":false,\"basefiles\":{"
 		"\"session\":\"" + dir + "/sessions.json\","
+		"\"holiday\":\"" + dir + "/holidays.json\","	// 卡1：日期映射须有交易日历（CHINA）
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
 		"\"env\":{\"mocker\":\"exec\"},"
@@ -251,6 +257,7 @@ TEST(R124BtRunnerRun, StrategyModesRejectMissingNamesAndPropagateFactoryFailure)
 	const std::string& dir = temp.path();
 	ASSERT_FALSE(dir.empty());
 	write_text(dir + "/sessions.json", kSessions);
+	write_text(dir + "/holidays.json", "{\"CHINA\":[]}");
 	write_text(dir + "/commodities.json", kCommodities);
 	write_text(dir + "/contracts.json", kContracts);
 
@@ -260,6 +267,7 @@ TEST(R124BtRunnerRun, StrategyModesRejectMissingNamesAndPropagateFactoryFailure)
 			+ "\"stime\":20240102000000,\"etime\":20240103000000,"
 			+ "\"tick\":false,\"basefiles\":{"
 			+ "\"session\":\"" + dir + "/sessions.json\","
+			"\"holiday\":\"" + dir + "/holidays.json\","	// 卡1：日期映射须有交易日历（CHINA）
 			+ "\"commodity\":\"" + dir + "/commodities.json\","
 			+ "\"contract\":\"" + dir + "/contracts.json\"}},"
 			+ "\"env\":{\"mocker\":\"" + mode + "\"},"
@@ -286,7 +294,9 @@ TEST(R124BtRunnerRun, StrategyModesRejectMissingNamesAndPropagateFactoryFailure)
 			ASSERT_TRUE(runner.replayer().prepare());
 			runner.replayer().run(false);
 			EXPECT_EQ(1U, sentinel.init);
-			EXPECT_EQ(1U, sentinel.done);
+			// K38 BT-B（2026-11-04 用户裁定）：每代恰好一次 handle_replay_done，含 prepare 被拒的那一代；
+			// 被拒的 prepare 与重试成功的回放各一次（改前期望 1）。
+			EXPECT_EQ(2U, sentinel.done);
 		}
 
 		{

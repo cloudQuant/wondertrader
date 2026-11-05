@@ -41,6 +41,9 @@
 USING_NS_WTP;
 
 extern WtRtRunner& getRunner();
+// BUG-R42-002 gate (迭代03): HFT contexts bind only a registered trader; the
+// fixtures below register a module-less local adapter (see i03_s5_test_trader_support.cpp).
+TraderAdapterPtr i03s5_register_test_trader(WtRtRunner& runner, const char* id);
 
 namespace {
 
@@ -142,8 +145,9 @@ const char* kSessions =
 	"{\"TRADING\":{\"name\":\"Trading\",\"offset\":0,"
 	"\"sections\":[{\"from\":0,\"to\":2359}]}}";
 
+// I03-NEW-104: product-level date mapping needs the commodity's trading calendar (card 1).
 const char* kCommodities =
-	"{\"SHFE\":{\"rb\":{\"name\":\"Rebar\",\"session\":\"TRADING\",\"pricetick\":1,"
+	"{\"SHFE\":{\"rb\":{\"name\":\"Rebar\",\"session\":\"TRADING\",\"holiday\":\"CHINA\",\"pricetick\":1,"
 	"\"volscale\":10,\"covermode\":0,\"pricemode\":0,\"trademode\":0,\"category\":1}}}";
 
 const char* kContracts =
@@ -154,7 +158,8 @@ std::string make_cfg(const std::string& dir, const char* env)
 	return "{\"basefiles\":{"
 		"\"session\":\"" + dir + "/sessions.json\","
 		"\"commodity\":\"" + dir + "/commodities.json\","
-		"\"contract\":\"" + dir + "/contracts.json\"},"
+		"\"contract\":\"" + dir + "/contracts.json\","
+		"\"holiday\":\"" + dir + "/holidays.json\"},"
 		"\"env\":{\"name\":\"" + std::string(env) + "\"},"
 		"\"data\":{\"store\":{\"module\":\"WtDataStorage\",\"path\":\"" + dir + "\"}},"
 		"\"bspolicy\":\"" + dir + "/actions.json\"}";
@@ -165,12 +170,14 @@ struct LiveFixture
 	std::string dir;
 	std::string inst_before;
 	bool cleaned = false;
+	bool module_present = false;	// I03-NEW-104: only a missing module may skip the test
 
 	bool setup(const char* tag, const char* env)
 	{
 		const std::string bin = binDir();
 		if (bin.empty() || !stdfs::exists(bin + "libWtDataStorage.dylib"))
 			return false;
+		module_present = true;
 
 		dir = prepare_dir(tag);
 		if (dir.empty())
@@ -178,7 +185,8 @@ struct LiveFixture
 		write_text(dir + "/sessions.json", kSessions);
 		write_text(dir + "/commodities.json", kCommodities);
 		write_text(dir + "/contracts.json", kContracts);
-		write_text(dir + "/actions.json", "{}");
+		write_text(dir + "/actions.json", "{\"default\":{\"order\":[{\"action\":\"open\"}]}}");	// I03-NEW-104: an empty policy is rejected (fail-closed)
+		write_text(dir + "/holidays.json", "{\"CHINA\":[]}");	// I03-NEW-104: card 1 requires a trading calendar
 
 		clear_bars();
 		reset_singleton();
@@ -215,7 +223,11 @@ TEST(R143PorterBars, cta_get_bars_returns_loaded_blocks)
 {
 	LiveFixture fx;
 	if (!fx.setup("cta", "cta"))
-		GTEST_SKIP() << "libWtDataStorage.dylib not found in this build";
+	{
+		if (!fx.module_present)
+			GTEST_SKIP() << "libWtDataStorage.dylib not found in this build";
+		FAIL() << "porter live fixture setup failed although libWtDataStorage.dylib is present (config rejected)";
+	}
 
 	const CtxHandler h = create_cta_context("r143_cta_bars", 0);
 	ASSERT_NE(0U, h);
@@ -235,9 +247,13 @@ TEST(R143PorterBars, sel_get_bars_returns_loaded_blocks)
 {
 	LiveFixture fx;
 	if (!fx.setup("sel", "sel"))
-		GTEST_SKIP() << "libWtDataStorage.dylib not found in this build";
+	{
+		if (!fx.module_present)
+			GTEST_SKIP() << "libWtDataStorage.dylib not found in this build";
+		FAIL() << "porter live fixture setup failed although libWtDataStorage.dylib is present (config rejected)";
+	}
 
-	const CtxHandler h = create_sel_context("r143_sel_bars", 20240102, 93000, "d");
+	const CtxHandler h = create_sel_context("r143_sel_bars", 20240102, 930, "d");	/* K27=A（2026-11-04 用户裁定）：SEL 调度时间为 HHMM，HHMMSS 值在入口被拒；原写法 93000/153000 见证据 before/。 */
 	ASSERT_NE(0U, h);
 
 	const WtUInt32 cnt = sel_get_bars(h, kCode, "d", 5, bars_cb);
@@ -254,9 +270,14 @@ TEST(R143PorterBars, hft_get_bars_returns_loaded_blocks)
 {
 	LiveFixture fx;
 	if (!fx.setup("hft", "hft"))
-		GTEST_SKIP() << "libWtDataStorage.dylib not found in this build";
+	{
+		if (!fx.module_present)
+			GTEST_SKIP() << "libWtDataStorage.dylib not found in this build";
+		FAIL() << "porter live fixture setup failed although libWtDataStorage.dylib is present (config rejected)";
+	}
 
-	const CtxHandler h = create_hft_context("r143_hft_bars", "R143_TRADER_ABSENT", false, 0);
+	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "r143_test_trader") != nullptr);
+	const CtxHandler h = create_hft_context("r143_hft_bars", "r143_test_trader", false, 0);
 	ASSERT_NE(0U, h);
 
 	const WtUInt32 cnt = hft_get_bars(h, kCode, "d", 5, bars_cb);

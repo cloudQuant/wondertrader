@@ -17,9 +17,44 @@
 #include "../Share/charconv.hpp"
 
 #include "../Includes/WTSVariant.hpp"
+#include <cstdio>
+#include <cstring>
+#include <memory>
 #include <rapidjson/document.h>
 namespace rj = rapidjson;
 
+namespace {
+struct VariantReleaser {
+	void operator()(WTSVariant* value) const { if (value) value->release(); }
+};
+
+bool containsRawNul(const std::string& content)
+{
+	return content.find('\0') != std::string::npos;
+}
+
+void reportConfigFailure(const char* message)
+{
+	std::fprintf(stderr, "WTSCfgLoader: %s\n", message);
+}
+
+bool jsonContainsNul(const rj::Value& value)
+{
+	if (value.IsString())
+		return std::memchr(value.GetString(), '\0', value.GetStringLength()) != nullptr;
+	if (value.IsObject())
+	{
+		for (const auto& member : value.GetObject())
+			if (jsonContainsNul(member.name) || jsonContainsNul(member.value)) return true;
+	}
+	else if (value.IsArray())
+	{
+		for (const auto& item : value.GetArray())
+			if (jsonContainsNul(item)) return true;
+	}
+	return false;
+}
+}
 
 /**
  * @brief 将rapidjson解析的JSON数据转换为WTSVariant对象
@@ -146,26 +181,45 @@ WTSVariant* WTSCfgLoader::load_from_json(const char* content)
 	rj::Document root;
 	root.Parse(content);
 
-	if (root.HasParseError())
+	if (root.HasParseError()) {
 		return NULL;
+	}
 
 	// json_to_variant assumes a document root is an object or array. Reject scalar
 	// roots before its array branch calls GetArray(); array roots retain their
 	// existing object-destination failure behavior below.
 	if (!root.IsObject() && !root.IsArray())
 		return NULL;
-
-	WTSVariant* ret = WTSVariant::createObject();
-	if (!json_to_variant(root, ret))
-	{
-		ret->release();
+	if (jsonContainsNul(root)) {
+		reportConfigFailure("embedded NUL in JSON key or string");
 		return NULL;
 	}
 
-	return ret;
+	std::unique_ptr<WTSVariant, VariantReleaser> ret(WTSVariant::createObject());
+	if (!json_to_variant(root, ret.get()))
+		return NULL;
+
+	return ret.release();
 }
 
 #include "../WTSUtils/yamlcpp/yaml.h"
+namespace {
+bool yamlContainsNul(const YAML::Node& node)
+{
+	if (node.IsScalar()) return containsRawNul(node.Scalar());
+	if (node.IsMap())
+	{
+		for (const auto& item : node)
+			if (yamlContainsNul(item.first) || yamlContainsNul(item.second)) return true;
+	}
+	else if (node.IsSequence())
+	{
+		for (const auto& item : node)
+			if (yamlContainsNul(item)) return true;
+	}
+	return false;
+}
+}
 /**
  * @brief 将YAML::Node转换为WTSVariant对象
  * 
@@ -244,15 +298,16 @@ WTSVariant* WTSCfgLoader::load_from_yaml(const char* content)
 
 	if (!root.IsMap())
 		return NULL;
-
-	WTSVariant* ret = WTSVariant::createObject();
-	if (!yaml_to_variant(root, ret))
-	{
-		ret->release();
+	if (yamlContainsNul(root)) {
+		reportConfigFailure("embedded NUL in YAML key or string");
 		return NULL;
 	}
 
-	return ret;
+	std::unique_ptr<WTSVariant, VariantReleaser> ret(WTSVariant::createObject());
+	if (!yaml_to_variant(root, ret.get()))
+		return NULL;
+
+	return ret.release();
 }
 
 /**
@@ -268,6 +323,10 @@ WTSVariant* WTSCfgLoader::load_from_yaml(const char* content)
  */
 WTSVariant* WTSCfgLoader::load_from_content(const std::string& content, bool isYaml /* = false */)
 {
+	if (containsRawNul(content)) {
+		reportConfigFailure("embedded NUL in configuration input");
+		return NULL;
+	}
 	//加一个自动检测编码的逻辑
 	bool isUTF8 = EncodingHelper::isUtf8((unsigned char*)content.data(), content.size());
 
@@ -284,12 +343,26 @@ WTSVariant* WTSCfgLoader::load_from_content(const std::string& content, bool isY
 
 	if (buffer.empty())
 		buffer = content;
+	if (containsRawNul(buffer)) {
+		reportConfigFailure("embedded NUL in converted configuration input");
+		return NULL;
+	}
 
 	if (isYaml)
 		return load_from_yaml(buffer.c_str());
 	else
 		return load_from_json(buffer.c_str());
 }
+
+WTSVariant* WTSCfgLoader::load_from_normalized_content(const std::string& content, bool isYaml /* = false */)
+{
+	if (containsRawNul(content)) {
+		reportConfigFailure("embedded NUL in configuration input");
+		return NULL;
+	}
+	return isYaml ? load_from_yaml(content.c_str()) : load_from_json(content.c_str());
+}
+
 
 /**
  * @brief 从文件加载配置
@@ -310,6 +383,10 @@ WTSVariant* WTSCfgLoader::load_from_file(const char* filename)
 	StdFile::read_file_content(filename, content);
 	if (content.empty())
 		return NULL;
+	if (containsRawNul(content)) {
+		reportConfigFailure("embedded NUL in configuration file");
+		return NULL;
+	}
 
 	//加一个自动检测编码的逻辑
 	bool isUTF8 = EncodingHelper::isUtf8((unsigned char*)content.data(), content.size());
@@ -324,6 +401,10 @@ WTSVariant* WTSCfgLoader::load_from_file(const char* filename)
 	if (!isUTF8)
 		content = ChartoUTF8(content);
 #endif
+	if (containsRawNul(content)) {
+		reportConfigFailure("embedded NUL in converted configuration file");
+		return NULL;
+	}
 
 	if (StrUtil::endsWith(filename, ".json"))
 		return load_from_json(content.c_str());

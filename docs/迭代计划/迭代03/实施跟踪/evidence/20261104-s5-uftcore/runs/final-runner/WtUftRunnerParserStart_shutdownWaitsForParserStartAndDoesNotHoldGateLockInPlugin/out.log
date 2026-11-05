@@ -1,0 +1,26 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = WtUftRunnerParserStart.shutdownWaitsForParserStartAndDoesNotHoldGateLockInPlugin
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from WtUftRunnerParserStart
+[ RUN      ] WtUftRunnerParserStart.shutdownWaitsForParserStartAndDoesNotHoldGateLockInPlugin
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtUftRunner/r220_uft_runner_sink_shutdown_test.cpp:470: Failure
+Value of: shutdown_result.load(std::memory_order_acquire)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtUftRunner/r220_uft_runner_sink_shutdown_test.cpp:471: Failure
+Expected equality of these values:
+  stats->_release_count.load(std::memory_order_acquire)
+    Which is: 0
+  1u
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtUftRunner/r220_uft_runner_sink_shutdown_test.cpp:472: Failure
+Expected equality of these values:
+  stats->_destroy_count.load(std::memory_order_acquire)
+    Which is: 0
+  1u
+    Which is: 1
+
+libc++abi: terminating

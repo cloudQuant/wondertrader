@@ -1,0 +1,396 @@
+--- /tmp/i03-bar-fee-provenance-baseline-20261103/HisDataReplayer.cpp	2026-11-03 17:09:25
++++ src/WtBtCore/HisDataReplayer.cpp	2026-11-03 17:22:38
+@@ -2477,7 +2477,8 @@
+ 				position_at_or_after_now(entry.second);
+ 		}
+ 	};
+-	auto dispatch_sim_tick = [&](const char* stdCode, WTSTickData* curTick, bool adjustedSource)
++	auto dispatch_sim_tick = [&](const char* stdCode, WTSTickData* curTick, bool adjustedSource,
++		const BarsListPtr& bars, std::size_t index)
+ 	{
+ 		WTSReleaseGuard<WTSTickData> tickGuard(curTick);
+ 		try
+@@ -2486,8 +2487,16 @@
+ 			{
+ 				_tick_simulated = true;
+ 				CodeHelper::CodeInfo simCode = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
+-				WTSContractInfo* physical = fee_is_continuous(stdCode, simCode) ? NULL :
+-					resolve_fee_contract(stdCode, simCode._code, simCode._exchg, _cur_tdate);
++				WTSContractInfo* physical = NULL;
++				if (fee_is_continuous(stdCode, simCode))
++				{
++					if (bars && bars->_physical_sources.size() == bars->_bars.size() && index < bars->_physical_sources.size())
++					{
++						const std::string source = bars->_physical_sources[index];
++						if (!source.empty()) physical = resolve_fee_contract(stdCode, source.c_str(), simCode._exchg, _cur_tdate);
++					}
++				}
++				else physical = resolve_fee_contract(stdCode, simCode._code, simCode._exchg, _cur_tdate);
+ 				curTick->setContractInfo(physical);
+ 				if (_tick_enabled && _running.load())
+ 				{
+@@ -2576,7 +2585,7 @@
+ 
+ 							update_price(barsList->_code.c_str(), curTS.price);
+ 							dispatch_sim_tick(barsList->_code.c_str(), WTSTickData::create(curTS),
+-								base_tick_code(barsList->_code) != barsList->_code);
++								base_tick_code(barsList->_code) != barsList->_code, barsList, simCursor);
+ 						}
+ 
+ 						break;
+@@ -2637,7 +2646,7 @@
+ 							curTS.price = newPx;
+ 							curTS.volume = nextBar.vol;
+ 							update_price(barsList->_code.c_str(), curTS.price);
+-							dispatch_sim_tick(realCode.c_str(), WTSTickData::create(curTS), cInfo.isExright());
++							dispatch_sim_tick(realCode.c_str(), WTSTickData::create(curTS), cInfo.isExright(), barsList, barsList->_cursor);
+ 						}
+ 
+ 						break;
+@@ -2711,11 +2720,24 @@
+ 					: static_cast<uint32_t>(std::min<std::size_t>(saved.cursor, saved.bars->_bars.size()));
+ 		}
+ 	};
+-	auto dispatch_unsub_tick = [&](const char* stdCode, WTSTickData* curTick)
++	auto dispatch_unsub_tick = [&](const char* stdCode, WTSTickData* curTick, const BarsListPtr& bars, std::size_t index)
+ 	{
+ 		WTSReleaseGuard<WTSTickData> tickGuard(curTick);
+ 		try
+ 		{
++			if (!curTick) return;
++			CodeHelper::CodeInfo info = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
++			WTSContractInfo* physical = NULL;
++			if (fee_is_continuous(stdCode, info))
++			{
++				if (bars && bars->_physical_sources.size() == bars->_bars.size() && index < bars->_physical_sources.size())
++				{
++					const std::string source = bars->_physical_sources[index];
++					if (!source.empty()) physical = resolve_fee_contract(stdCode, source.c_str(), info._exchg, _cur_tdate);
++				}
++			}
++			else physical = resolve_fee_contract(stdCode, info._code, info._exchg, _cur_tdate);
++			curTick->setContractInfo(physical);
+ 			_listener->handle_tick(stdCode, curTick, pxType);
+ 		}
+ 		catch (...)
+@@ -2726,9 +2748,11 @@
+ 		restore_event_cursors();
+ 	};
+ 
+-	for (auto& item : _unbars_cache)
++	std::vector<BarsListPtr> unsubSnapshot;
++	unsubSnapshot.reserve(_unbars_cache.size());
++	for (const auto& item : _unbars_cache) if (item.second) unsubSnapshot.push_back(item.second);
++	for (const BarsListPtr& barsList : unsubSnapshot)
+ 	{
+-		BarsListPtr& barsList = (BarsListPtr&)item.second;
+ 		if (barsList->_period != KP_DAY)
+ 		{
+ 			//如果历史数据指标不在尾部, 说明是回测模式, 要继续回放历史数据
+@@ -2776,7 +2800,7 @@
+ 
+ 
+ 						WTSTickData* curTick = WTSTickData::create(curTS);
+-						dispatch_unsub_tick(barsList->_code.c_str(), curTick);
++						dispatch_unsub_tick(barsList->_code.c_str(), curTick, barsList, barsList->_cursor);
+ 						break;
+ 					}
+ 					else if (barTime < nowTime)
+@@ -2854,7 +2878,7 @@
+ 							curTS.low = min(curTS.price, curTS.low);
+ 
+ 						WTSTickData* curTick = WTSTickData::create(curTS);
+-						dispatch_unsub_tick(realCode.c_str(), curTick);
++						dispatch_unsub_tick(realCode.c_str(), curTick, barsList, barsList->_cursor);
+ 
+ 						break;
+ 					}
+@@ -4144,7 +4168,7 @@
+ 
+ WTSKlineSlice* HisDataReplayer::get_kline_slice(const char* stdCode, const char* period, uint32_t count, uint32_t times /* = 1 */, bool isMain /* = false */)
+ {
+-	thread_local static char key[64] = { 0 };
++	char key[64] = { 0 };
+ 	fmtutil::format_to(key, "{}#{}#{}", stdCode, period, times);
+ 
+ 	//if(!_tick_enabled)
+@@ -6306,15 +6330,34 @@
+ 	default: pname = "day"; break;
+ 	}
+ 
+-	if(bSubbed)
+-		_bars_cache[key].reset(new BarsList());
+-	else
+-		_unbars_cache[key].reset(new BarsList());
+-	BarsListPtr& barsList = bSubbed ? _bars_cache[key] : _unbars_cache[key];
++	BarsCache& cache = bSubbed ? _bars_cache : _unbars_cache;
++	auto previousIt = cache.find(key);
++	const bool hadPrevious = previousIt != cache.end();
++	BarsListPtr previous = hadPrevious ? previousIt->second : BarsListPtr();
++	BarsListPtr barsList(new BarsList());
++	struct CachePublishGuard
++	{
++		BarsCache& cache;
++		std::string key;
++		BarsListPtr staged, previous;
++		bool hadPrevious, committed = false;
++		~CachePublishGuard()
++		{
++			if (committed) return;
++			auto it = cache.find(key);
++			if (it != cache.end() && it->second == staged)
++			{
++				if (hadPrevious) it->second = previous;
++				else cache.erase(it);
++			}
++		}
++	} guard{cache, key, barsList, previous, hadPrevious};
++	cache[key] = barsList;
+ 	barsList->_code = stdCode;
+ 	barsList->_period = period;
+ 
+-	std::vector<std::vector<WTSBarStruct>*> barsSections;
++	struct BarSection { std::vector<WTSBarStruct> bars; std::string physicalCode; };
++	std::vector<BarSection> barsSections;
+ 
+ 	uint32_t realCnt = 0;
+ 	bool isDay = (period == KP_DAY);
+@@ -6322,7 +6365,7 @@
+ 	//const char* hot_flag = cInfo.isHot() ? FILE_SUF_HOT : FILE_SUF_2ND;
+ 	const char* ruleTag = cInfo->_ruletag;
+ 
+-	std::vector<WTSBarStruct>* hotAy = NULL;
++	std::vector<WTSBarStruct> hotBars;
+ 	uint64_t lastHotTime = 0;
+ 	do
+ 	{
+@@ -6348,22 +6391,27 @@
+ 			break;
+ 		}
+ 
+-		uint32_t barcnt = content.size() / sizeof(WTSBarStruct);
+-		if (barcnt <= 0)
+-			break;
++		if (content.empty()) break;
++		if (content.size() % sizeof(WTSBarStruct) != 0 || content.size() / sizeof(WTSBarStruct) > INT32_MAX)
++		{
++			WTSLogger::error("Invalid integrated bar block for {}", stdCode);
++			return false;
++		}
++		const std::size_t barcnt = content.size() / sizeof(WTSBarStruct);
++		hotBars.resize(barcnt);
++		memcpy(hotBars.data(), content.data(), content.size());
++		auto before = [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
++			return isDay ? a.date < b.date : a.time < b.time;
++		};
++		if (!std::is_sorted(hotBars.begin(), hotBars.end(), before))
++		{
++			WTSLogger::error("Unordered integrated bars for {}", stdCode);
++			return false;
++		}
++		lastHotTime = isDay ? hotBars.back().date : hotBars.back().time;
++		uint64_t stime = isDay ? hotBars.front().date : hotBars.front().time;
++		uint64_t etime = lastHotTime;
+ 
+-		hotAy = new std::vector<WTSBarStruct>();
+-		hotAy->resize(barcnt);
+-		memcpy(hotAy->data(), content.data(), content.size());
+-
+-		if (period != KP_DAY)
+-			lastHotTime = hotAy->at(barcnt - 1).time;
+-		else
+-			lastHotTime = hotAy->at(barcnt - 1).date;
+-
+-		uint64_t stime = isDay ? hotAy->at(0).date : hotAy->at(0).time;
+-		uint64_t etime = isDay ? hotAy->at(barcnt - 1).date : hotAy->at(barcnt - 1).time;
+-
+ 		WTSLogger::info("{} items of back {} data of hot contract {} directly loaded, from {} to {}", barcnt, pname.c_str(), stdCode, stime, etime);
+ 
+ 	} while (false);
+@@ -6408,6 +6456,11 @@
+ 		{
+ 			uint64_t sTime = _bd_mgr.getBoundaryTime(stdPID, leftDt, false, true);
+ 			uint64_t eTime = _bd_mgr.getBoundaryTime(stdPID, rightDt, false, false);
++			if (sTime == 0 || eTime == 0 || sTime > eTime)
++			{
++				WTSLogger::error("Invalid integrated bar section boundary for {}", stdCode);
++				return false;
++			}
+ 
+ 			sBar.date = leftDt;
+ 			sBar.time = ((uint32_t)(sTime / 10000) - 19900000) * 10000 + (uint32_t)(sTime % 10000);
+@@ -6449,7 +6502,11 @@
+ 		if (NULL != _bt_loader)
+ 		{
+ 			//分月合约代码
+-			std::string wCode = fmtutil::format<64>("{}.{}.{}", cInfo->_exchg, cInfo->_product, curCode + strlen(cInfo->_product));
++			const std::size_t productLength = std::strlen(cInfo->_product);
++			const bool hasProductPrefix = std::strncmp(curCode, cInfo->_product, productLength) == 0 &&
++				std::strlen(curCode) > productLength;
++			std::string wCode = fmtutil::format<64>("{}.{}.{}", cInfo->_exchg, cInfo->_product,
++				hasProductPrefix ? curCode + productLength : curCode);
+ 			bLoaded = _bt_loader->loadRawHisBars(&buffer, wCode.c_str(), period, [](void* obj, WTSBarStruct* bars, uint32_t count) {
+ 				std::string* buff = (std::string*)obj;
+ 				buff->resize(sizeof(WTSBarStruct)*count);
+@@ -6471,57 +6528,39 @@
+ 			}
+ 		}
+ 
+-		if (buffer.empty())
+-			break;
+-
+-		uint32_t barcnt = buffer.size() / sizeof(WTSBarStruct);
+-
+-		WTSBarStruct* firstBar = (WTSBarStruct*)buffer.data();
+-
+-		WTSBarStruct* pBar = std::lower_bound(firstBar, firstBar + (barcnt - 1), sBar, [period](const WTSBarStruct& a, const WTSBarStruct& b) {
+-			if (period == KP_DAY)
+-			{
+-				return a.date < b.date;
+-			}
+-			else
+-			{
+-				return a.time < b.time;
+-			}
+-		});
+-
+-		std::size_t sIdx = pBar - firstBar;
+-		if ((period == KP_DAY && pBar->date < sBar.date) || (period != KP_DAY && pBar->time < sBar.time))	//早于边界时间
++		if (buffer.empty()) break;
++		if (buffer.size() % sizeof(WTSBarStruct) != 0 || buffer.size() / sizeof(WTSBarStruct) > INT32_MAX)
+ 		{
+-			//早于边界时间, 说明没有数据了, 因为lower_bound会返回大于等于目标位置的数据
+-			continue;
++			WTSLogger::error("Invalid physical bar block for {}", curCode);
++			return false;
+ 		}
+-
+-		pBar = std::lower_bound(firstBar + sIdx, firstBar + (barcnt - 1), eBar, [period](const WTSBarStruct& a, const WTSBarStruct& b) {
+-			if (period == KP_DAY)
+-			{
+-				return a.date < b.date;
+-			}
+-			else
+-			{
+-				return a.time < b.time;
+-			}
+-		});
+-		std::size_t eIdx = pBar - firstBar;
+-		if ((period == KP_DAY && pBar->date > eBar.date) || (period != KP_DAY && pBar->time > eBar.time))
++		const std::size_t barcnt = buffer.size() / sizeof(WTSBarStruct);
++		std::vector<WTSBarStruct> physicalBars(barcnt);
++		std::memcpy(physicalBars.data(), buffer.data(), buffer.size());
++		WTSBarStruct* firstBar = physicalBars.data();
++		auto before = [period](const WTSBarStruct& a, const WTSBarStruct& b) {
++			return period == KP_DAY ? a.date < b.date : a.time < b.time;
++		};
++		if (!std::is_sorted(firstBar, firstBar + barcnt, before))
+ 		{
+-			pBar--;
+-			eIdx--;
++			WTSLogger::error("Unordered physical bars for {}", curCode);
++			return false;
+ 		}
+-
+-		if (eIdx < sIdx)
+-			continue;
+-
+-		uint32_t curCnt = eIdx - sIdx + 1;
+-
++		WTSBarStruct* first = std::lower_bound(firstBar, firstBar + barcnt, sBar, before);
++		WTSBarStruct* last = std::upper_bound(first, firstBar + barcnt, eBar, before);
++		if (first == last) continue;
++		const std::size_t sIdx = static_cast<std::size_t>(first - firstBar);
++		const std::size_t eIdx = static_cast<std::size_t>(last - firstBar - 1);
++		const std::size_t curCnt = eIdx - sIdx + 1;
++		if (curCnt > static_cast<std::size_t>(INT32_MAX) - realCnt)
++		{
++			WTSLogger::error("Integrated bar count exceeds slice limits for {}", stdCode);
++			return false;
++		}
+ 		if (cInfo->isExright())
+ 		{
+ 			double factor = hotSec._factor / baseFactor;
+-			for (uint32_t idx = sIdx; idx <= eIdx; idx++)
++			for (std::size_t idx = sIdx; idx <= eIdx; idx++)
+ 			{
+ 				firstBar[idx].open *= factor;
+ 				firstBar[idx].high *= factor;
+@@ -6543,38 +6582,59 @@
+ 			}
+ 		}
+ 
+-		std::vector<WTSBarStruct>* tempAy = new std::vector<WTSBarStruct>();
+-		tempAy->resize(curCnt);
+-		memcpy(tempAy->data(), &firstBar[sIdx], sizeof(WTSBarStruct)*curCnt);
+-		realCnt += curCnt;
++		BarSection section;
++		section.bars.assign(firstBar + sIdx, firstBar + eIdx + 1);
++		// The raw loader is asked for this exact physical contract. Keep a value
++		// only if it belongs to the subscribed product in registered metadata.
++		if (resolve_fee_contract(stdCode, curCode, cInfo->_exchg, 0))
++			section.physicalCode = curCode;
++		realCnt += static_cast<uint32_t>(curCnt);
++		barsSections.emplace_back(std::move(section));
+ 
+-		barsSections.emplace_back(tempAy);
+-
+ 		if (bAllCovered)
+ 			break;
+ 	}
+ 
+-	if (hotAy)
++	if (!hotBars.empty())
+ 	{
+-		barsSections.emplace_back(hotAy);
+-		realCnt += hotAy->size();
++		if (hotBars.size() > static_cast<std::size_t>(INT32_MAX) - realCnt) return false;
++		realCnt += static_cast<uint32_t>(hotBars.size());
++		// Aggregated continuous bars have no physical-contract provenance.
++		barsSections.push_back({std::move(hotBars), std::string()});
+ 	}
+ 
+ 	if (realCnt > 0)
+ 	{
+-		barsList->_bars.resize(realCnt);
+-
+-		uint32_t curIdx = 0;
+-		for (auto it = barsSections.rbegin(); it != barsSections.rend(); it++)
++		barsList->_bars.reserve(realCnt);
++		barsList->_physical_sources.reserve(realCnt);
++		for (auto it = barsSections.rbegin(); it != barsSections.rend(); ++it)
+ 		{
+-			std::vector<WTSBarStruct>* tempAy = *it;
+-			memcpy(barsList->_bars.data() + curIdx, tempAy->data(), tempAy->size() * sizeof(WTSBarStruct));
+-			curIdx += tempAy->size();
+-			delete tempAy;
++			barsList->_bars.insert(barsList->_bars.end(), it->bars.begin(), it->bars.end());
++			barsList->_physical_sources.insert(barsList->_physical_sources.end(), it->bars.size(), it->physicalCode);
+ 		}
+-		barsSections.clear();
++		barsList->_count = realCnt;
++		// Duplicate or out-of-order timestamps cannot establish a unique source.
++		for (std::size_t i = 1; i < barsList->_bars.size(); ++i)
++		{
++			const auto previous = isDay ? barsList->_bars[i-1].date : barsList->_bars[i-1].time;
++			const auto current = isDay ? barsList->_bars[i].date : barsList->_bars[i].time;
++			if (current < previous)
++			{
++				WTSLogger::error("Integrated bar sections are not ordered for {}", stdCode);
++				return false;
++			}
++			if (current == previous) barsList->_physical_sources.clear();
++		}
+ 	}
+ 
++	if (realCnt == 0) return false;
++	auto currentEntry = cache.find(key);
++	if (currentEntry == cache.end() || currentEntry->second != barsList)
++	{
++		WTSLogger::error("Integrated bar cache changed during load for {}", stdCode);
++		return false;
++	}
++	guard.committed = true;
+ 	WTSLogger::info("{} items of back {} data of {} cached", realCnt, pname, stdCode);
+ 
+ 	return true;

@@ -17,6 +17,15 @@
 
 #include <deque>
 
+/*
+ *	容器所有权合同版本（迭代03 卡12，2026-11-03 裁定 12a=A、12b=C）
+ *	- WTSMap::erase 三个重载均释放容器持有的那份引用，与 remove/clear 一致
+ *	- WTSStack 提供显式 pushOwned/pushTransferred/pushBorrowed；
+ *	  旧 push(obj,false) 按所有权转移兼容；pop 始终返回调用方须 release 一次的拥有引用
+ *	外部插件可据此宏判断所编译头文件的语义版本
+ */
+#define WTS_COLLECTION_OWNERSHIP_CONTRACT 20261103L
+
 NS_WTP_BEGIN
 
 //////////////////////////////////////////////////////////////////////////
@@ -492,22 +501,39 @@ public:
 		return _map.find(key);
 	}
 
+	/*
+	 *	按迭代器删除一个数据（it 必须是本容器内有效且不等于 end() 的迭代器）
+	 *	与 remove/clear 一致：先摘除节点，再释放容器持有的那份引用（引用计数-1）
+	 *	调用方原有的引用不受影响；需要保留对象的调用方须在 erase 前自行 retain
+	 */
 	inline
 	void erase(ConstIterator it) noexcept
 	{
+		WTSObject* obj = it->second;
 		_map.erase(it);
+		if (obj) obj->release();
 	}
 
 	inline
 	void erase(Iterator it) noexcept
 	{
+		WTSObject* obj = it->second;
 		_map.erase(it);
+		if (obj) obj->release();
 	}
 
+	/*
+	 *	按key删除一个数据；key不存在时无操作
+	 *	与 remove 语义相同：释放容器持有的那份引用
+	 */
 	inline
 	void erase(T key) noexcept
 	{
-		_map.erase(key);
+		Iterator it = _map.find(key);
+		if (it == _map.end())
+			return;
+
+		erase(it);
 	}
 
 	Iterator lower_bound(const T& key) noexcept
@@ -885,6 +911,20 @@ protected:
 	std::deque<WTSObject*>	_queue;
 };
 
+/*
+ *	栈容器（所有权合同见 WTS_COLLECTION_OWNERSHIP_CONTRACT）
+ *	- pushOwned(obj)       ：栈 retain 一份自己的引用，调用方原引用不变
+ *	- pushTransferred(obj) ：调用方把自己已有的一份引用转交给栈，栈不 retain
+ *	- pushBorrowed(obj)    ：栈只借用、不持有引用；调用方须保证对象在栈内期间存活，
+ *	                         clear/析构不会释放借用元素
+ *	- push(obj, true)      ：旧入口，等同 pushOwned
+ *	- push(obj, false)     ：旧入口，按所有权转移兼容，等同 pushTransferred
+ *	- pop()                ：始终返回一份调用方拥有、必须 release 一次的引用；
+ *	                         对拥有元素直接交出栈持有的引用，对借用元素先 retain 再返回；
+ *	                         空栈或 nullptr 元素返回 nullptr
+ *	- top()                ：返回借用指针，不改变引用计数
+ *	- clear()/析构         ：只释放栈实际拥有的引用
+ */
 class WTSStack : public WTSObject
 {
 public:
@@ -897,11 +937,40 @@ public:
 	inline uint32_t size() const noexcept { return (uint32_t)_vec.size(); }
 	inline bool empty() const noexcept { return _vec.empty(); }
 
+	/*
+	 *	旧入口：bAutoRetain=true 等同 pushOwned；false 等同 pushTransferred（所有权转移）
+	 */
 	inline void push(WTSObject* obj, bool bAutoRetain = true) noexcept
 	{
-		if (bAutoRetain && obj)
+		if (bAutoRetain)
+			pushOwned(obj);
+		else
+			pushTransferred(obj);
+	}
+
+	inline void pushOwned(WTSObject* obj) noexcept
+	{
+		if (obj)
 			obj->retain();
-		_vec.emplace_back(obj);
+		_vec.emplace_back(Entry{ obj, true });
+	}
+
+	inline void pushTransferred(WTSObject* obj) noexcept
+	{
+		_vec.emplace_back(Entry{ obj, true });
+	}
+
+	inline void pushBorrowed(WTSObject* obj) noexcept
+	{
+		_vec.emplace_back(Entry{ obj, false });
+	}
+
+	/*
+	 *	栈顶元素是否为借用元素；空栈返回false
+	 */
+	inline bool isTopBorrowed() const noexcept
+	{
+		return !_vec.empty() && !_vec.back()._owned;
 	}
 
 	inline WTSObject* pop() noexcept
@@ -909,28 +978,29 @@ public:
 		if (_vec.empty())
 			return nullptr;
 
-		WTSObject* obj = _vec.back();
+		Entry e = _vec.back();
 		_vec.pop_back();
-		if (obj)
-			obj->release();
-		return obj; 
+		if (e._obj && !e._owned)
+			e._obj->retain();
+		return e._obj;
 	}
 
 	inline WTSObject* top() noexcept
 	{
 		if (_vec.empty())
 			return nullptr;
-		return _vec.back();
+		return _vec.back()._obj;
 	}
 
 	void clear() noexcept
 	{
-		for (auto& obj : _vec)
+		std::vector<Entry> items;
+		items.swap(_vec);
+		for (auto& e : items)
 		{
-			if (obj)
-				obj->release();
+			if (e._obj && e._owned)
+				e._obj->release();
 		}
-		_vec.clear();
 	}
 
 	virtual void release() noexcept override
@@ -946,7 +1016,12 @@ protected:
 	}
 
 private:
-	std::vector<WTSObject*> _vec;
+	struct Entry
+	{
+		WTSObject*	_obj;
+		bool		_owned;
+	};
+	std::vector<Entry> _vec;
 };
 
 NS_WTP_END

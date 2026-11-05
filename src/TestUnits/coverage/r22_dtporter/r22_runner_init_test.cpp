@@ -109,12 +109,12 @@ const char* COMMODITIES_B_JSON = R"({
 		"volscale":10,"covermode":0,"pricemode":1}}
 })";
 
-// BADPROD 因 product 未注册会被跳过 -> ct_a 的有效合约是 2 条
+// ct_a 的有效合约是 2 条。I03-NEW-053（整批校验后发布）：引用未注册品种的合约会使整份文件被拒，
+// 旧夹具中“被跳过”的 BADPROD（product NOPE）已移除，否则 ct_a 一条都不发布。
 const char* CONTRACTS_A_JSON = R"({
 	"SSE":{
 		"600000":{"name":"a","exchg":"SSE","product":"STK","opendate":20200101,"expiredate":20500101},
-		"600999":{"name":"b","exchg":"SSE","product":"STK","opendate":20100101,"expiredate":20500101},
-		"BADPROD":{"name":"c","exchg":"SSE","product":"NOPE"}
+		"600999":{"name":"b","exchg":"SSE","product":"STK","opendate":20100101,"expiredate":20500101}
 	}
 })";
 

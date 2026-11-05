@@ -1,0 +1,28 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = CloseDumpReentry.DumperSameContractWriteIsDeferredUntilCloseJobReleasesLeases
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from CloseDumpReentry
+[ RUN      ] CloseDumpReentry.DumperSameContractWriteIsDeferredUntilCloseJobReleasesLeases
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_writer_lifecycle_20261104s5/p10_008_reentry_test.cpp:385: Failure
+Value of: sink.waitLog("ClosingTask of rb2210[SHFE] done", 10)
+  Actual: false
+Expected: true
+close job did not finish
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_writer_lifecycle_20261104s5/p10_008_reentry_test.cpp:387: Failure
+Value of: sink.waitTicks(2, 10)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_writer_lifecycle_20261104s5/p10_008_reentry_test.cpp:389: Failure
+Expected equality of these values:
+  dumper._nestedResult.load()
+    Which is: -1
+  1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_writer_lifecycle_20261104s5/p10_008_reentry_test.cpp:390: Failure
+Value of: sink.waitLog("ClosingTask mark of Trading session [S5DAY]", 10)
+  Actual: false
+Expected: true
+

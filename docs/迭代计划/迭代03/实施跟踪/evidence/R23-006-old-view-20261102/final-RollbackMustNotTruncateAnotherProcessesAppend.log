@@ -1,0 +1,20 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R23OldMapping.RollbackMustNotTruncateAnotherProcessesAppend
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R23OldMapping
+[ RUN      ] R23OldMapping.RollbackMustNotTruncateAnotherProcessesAppend
+/tmp/wt-i03-r23-old-mapping-final-20261102/src/TestUnits/fixtures/r23_old_mapping/cross_process_test.cpp:266: Failure
+Expected: (file_size(path)) > (beforeSize), actual: 1280024 vs 1280024
+rollback truncated bytes appended by another process
+
+[  FAILED  ] R23OldMapping.RollbackMustNotTruncateAnotherProcessesAppend (59 ms)
+[----------] 1 test from R23OldMapping (59 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (59 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R23OldMapping.RollbackMustNotTruncateAnotherProcessesAppend
+
+ 1 FAILED TEST

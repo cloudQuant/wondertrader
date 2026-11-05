@@ -1,0 +1,47 @@
+[
+ {
+  "suite": "i03_fee_consumer_pipeline",
+  "class": "STALE_FIXTURE",
+  "root_cause": "原套件是 2026-11-02 的现存缺陷反例（期望 [1,1,0]）。卡13d 实现后 HisDataReplayer 以 wt_fee::Schedule 严格解析费用：无版本文件只是品种表、每条必须有 open/close/closetoday/byvolume、缺费返回 NaN。F3 上观测 [0,1,1]：反例1 的旧断言 calc_fee!=0 因缺费变为 NaN 而空泛通过；反例2 因条目不完整及缺合约元数据被拒；旧品种正控因条目只给 open/byvolume 被严格解析拒绝。运行器还依赖已不存在的 /tmp/wt-i03-l06-fees-20261102 隔离构建。产品行为与卡13d 一致（CTPLoader 导出未迁移仍属 I03-NEW-008 的已知阻塞项，现为 fail-closed 而非静默 0）。coverage 无“实际导出文件→回放计费”链路的等价用例，故修夹具。",
+  "change": "consumer_test.cpp 改写为卡13d 合同下的 4 个正向用例（未迁移导出键=可观察缺费 NaN 且上下文失败；同费率写成 v2 contracts 按物理合约计费，-0.25×2=-0.5，rb2510 显式零费率=0；合约级按金额费率缺合约元数据初始化失败、加载导出合约后按合约计费；完整旧品种键按金额费率经回退计费）；run.py 改为 run.py <out> <coverage build>，由构建的 compdb 推导源码根并核对 HisDataReplayer/CodeHelper/FeeSchedule 哈希，去掉 -MD/-MF 不写构建目录，四例逐进程且全部须 exit 0；新增 exported-contracts.json（同一次 t26 normal-valid 导出的合约文件，取自 F3 运行）；README 重写当前合同并保留原记录；run_fixtures.py 该套件处理器改为直接调用新接口、主变体判定。",
+  "final_verdict": "pass",
+  "superseded_by": [],
+  "items": [
+   "I03-NEW-008"
+  ]
+ },
+ {
+  "suite": "i03_fee_engine_gate",
+  "class": "STALE_FIXTURE",
+  "root_cause": "RejectsUnsupportedEnvelopeWithoutChangingFees 与 InvalidFileAtInitIsRejectedByCtaRun 以 version=2 信封（含空表）作为“不支持/非法”样本；卡13d（I03-NEW-008）后 WtEngine::load_fees 已接入 v2 并接受这些文件，fee_config_valid 为 true，CTA run() 闸门未触发，访问空 WtDtMgr 被 UBSan 报 SEGV（exit 134），后续用例未运行。产品符合卡13d。",
+  "change": "fee_engine_gate.cpp 两处样本改为仍非法的输入：version=3（不支持的版本）及缺必填字段的 v2 品种条目（与 CoverageTests_wtcore::S5LiveFeeSchedule.InvalidVersionedTemplateBlocksStart 同合同），其余断言（整文件拒绝、快照与商品费率不变、run 门禁、恢复）保持不变；README 追加卡13d 更新说明。",
+  "final_verdict": "pass",
+  "superseded_by": [],
+  "items": [
+   "I03-NEW-008"
+  ]
+ },
+ {
+  "suite": "r20_zstd_ubsan",
+  "class": "STALE_FIXTURE",
+  "root_cause": "原脚本断言 vendored zstd 在 UBSan 下于 zstd_compress.c:1326:46 报 null+offset（已知红）。2026-11-05 R20_wtbtcore#1/I03-NEW-082 已按上游修复该 UB，F3 上 sanitized 探针 exit 0，脚本的 test code -ne 0 失败；且脚本依赖已不存在的 /tmp/wt-i03-r20-20261102 预编库。coverage 普通回归不插桩，无等价 sanitizer 覆盖，故改为修复后的回归检查。",
+  "change": "run.sh 改为自包含：用本树 src/WTSUtils/zstdlib/*.c 分别以 LLVM 22 ASan+UBSan（遇报即停）和普通方式构建探针，direct/wrapper/sweep 三模式两种进程均须 exit 0、无 sanitizer 报告且往返通过；probe.cpp 新增 sweep 模式（级别 1–19 × 0/1/88/4096/200000 字节，单次与复用 CCtx）覆盖修复涉及的 fast/double_fast/lazy 策略；README 重写。红控：用 docs 证据 before/ 的四个改前文件覆盖临时副本后运行同一脚本，三模式 sanitizer 进程均 exit 134（zstd_compress.c:1326:46），能区分修复前后；仓库内不保存改前源码，脚本不跑红控。",
+  "final_verdict": "pass",
+  "superseded_by": [],
+  "items": [
+   "R20_wtbtcore#1",
+   "I03-NEW-082"
+  ]
+ },
+ {
+  "suite": "r22_timezone",
+  "class": "STALE_FIXTURE",
+  "root_cause": "build.sh 无条件从 docs/ 证据复制改前 TimeUtils 头（冻结树只有 src/dist，set -e 中止），套件内没有运行入口（run.py 只在 docs 证据目录），因此 blocked-env。产品 getTZOffset 实现未变，探针仍适用。coverage 只有单线程 r16_timeutils.tz_offset_is_cached_and_in_whole_hours，无首次并发竞态（TSan）与失败重试的等价覆盖。",
+  "change": "新增 baseline/TimeUtils.hpp（docs 证据 TimeUtils.baseline.hpp 原件，作红控，非当前实现）与 baseline/SHA256SUMS；build.sh 改用夹具内基线并先校验哈希；新增 run.sh 复现 docs run.py 全部 30 项（含 baseline-tsan-race 红控须报 data race、当前头 TSan 竞态 3 次、10 个时区当前/改前、cache、4 种失败重试、r16 既有用例）并逐项判定；新增 README。",
+  "final_verdict": "pass",
+  "superseded_by": [],
+  "items": [
+   "BUG-R22-002"
+  ]
+ }
+]

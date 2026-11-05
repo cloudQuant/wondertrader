@@ -1,0 +1,50 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R69PorterRunnerConfig.*
+[==========] Running 15 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 15 tests from R69PorterRunnerConfig
+[ RUN      ] R69PorterRunnerConfig.BasefilesStringFormsAndEmptyEnvNameBuildCtaEngine
+[       OK ] R69PorterRunnerConfig.BasefilesStringFormsAndEmptyEnvNameBuildCtaEngine (30 ms)
+[ RUN      ] R69PorterRunnerConfig.BasefilesArrayFormsAndInactiveInlineParserBuildCtaEngine
+[       OK ] R69PorterRunnerConfig.BasefilesArrayFormsAndInactiveInlineParserBuildCtaEngine (86 ms)
+[ RUN      ] R69PorterRunnerConfig.ActiveInlineParserWithoutModuleFailsConfig
+[       OK ] R69PorterRunnerConfig.ActiveInlineParserWithoutModuleFailsConfig (9 ms)
+[ RUN      ] R69PorterRunnerConfig.ParserFileMissingKeyFailsConfig
+[       OK ] R69PorterRunnerConfig.ParserFileMissingKeyFailsConfig (6 ms)
+[ RUN      ] R69PorterRunnerConfig.BrokenParserFileFailsConfig
+[       OK ] R69PorterRunnerConfig.BrokenParserFileFailsConfig (0 ms)
+[ RUN      ] R69PorterRunnerConfig.TraderAndExecuterFilesLoadWithRouterSections
+[       OK ] R69PorterRunnerConfig.TraderAndExecuterFilesLoadWithRouterSections (5 ms)
+[ RUN      ] R69PorterRunnerConfig.TraderInitFailureInExternalFileFailsConfig
+dlopen(/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/traders/libr69_module_that_does_not_exist.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/traders/libr69_module_that_does_not_exist.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/traders/libr69_module_that_does_not_exist.dylib' (no such file), '/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/traders/libr69_module_that_does_not_exist.dylib' (no such file)
+[       OK ] R69PorterRunnerConfig.TraderInitFailureInExternalFileFailsConfig (13 ms)
+[ RUN      ] R69PorterRunnerConfig.MissingExecuterFileAndEmptyDataStillReturnTrue
+[       OK ] R69PorterRunnerConfig.MissingExecuterFileAndEmptyDataStillReturnTrue (7 ms)
+[ RUN      ] R69PorterRunnerConfig.ExplicitMissingDataStoreModuleFailsConfigAndLeavesRunnerNotReady
+dlopen(/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/libr69_no_such_data_storage.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/libr69_no_such_data_storage.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/libr69_no_such_data_storage.dylib' (no such file), '/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/libr69_no_such_data_storage.dylib' (no such file)
+[       OK ] R69PorterRunnerConfig.ExplicitMissingDataStoreModuleFailsConfigAndLeavesRunnerNotReady (7 ms)
+[ RUN      ] R69PorterRunnerConfig.ValidDataStoreModuleLoadsAndServesKlineQuery
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp:444: Failure
+Expected: (nullptr) != (bars), actual: (nullptr) vs NULL
+the real WtDataStorage reader should return the fed history bars
+
+[  FAILED  ] R69PorterRunnerConfig.ValidDataStoreModuleLoadsAndServesKlineQuery (2 ms)
+[ RUN      ] R69PorterRunnerConfig.UnknownEnvNameFallsBackToHftEngine
+[       OK ] R69PorterRunnerConfig.UnknownEnvNameFallsBackToHftEngine (0 ms)
+[ RUN      ] R69PorterRunnerConfig.HotTagsRefreshAfterRulesLoadedLater
+[       OK ] R69PorterRunnerConfig.HotTagsRefreshAfterRulesLoadedLater (0 ms)
+[ RUN      ] R69PorterRunnerConfig.HotTagsAreIsolatedBetweenInstances
+[       OK ] R69PorterRunnerConfig.HotTagsAreIsolatedBetweenInstances (1 ms)
+[ RUN      ] R69PorterRunnerConfig.RepeatedHotTagQueriesDoNotDuplicateTags
+[       OK ] R69PorterRunnerConfig.RepeatedHotTagQueriesDoNotDuplicateTags (0 ms)
+[ RUN      ] R69PorterRunnerConfig.ReleaseClearsTagsAndHotCodesBeforeReload
+[       OK ] R69PorterRunnerConfig.ReleaseClearsTagsAndHotCodesBeforeReload (5 ms)
+[----------] 15 tests from R69PorterRunnerConfig (180 ms total)
+
+[----------] Global test environment tear-down
+[==========] 15 tests from 1 test suite ran. (180 ms total)
+[  PASSED  ] 14 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R69PorterRunnerConfig.ValidDataStoreModuleLoadsAndServesKlineQuery
+
+ 1 FAILED TEST

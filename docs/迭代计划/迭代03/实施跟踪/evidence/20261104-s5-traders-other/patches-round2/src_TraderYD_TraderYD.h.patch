@@ -1,0 +1,79 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before-round2/src/TraderYD/TraderYD.h	2026-11-04 17:56:32
++++ src/TraderYD/TraderYD.h	2026-11-04 19:59:29
+@@ -12,6 +12,9 @@
+ #include <string>
+ #include <queue>
+ #include <stdint.h>
++#include <atomic>
++#include <condition_variable>
++#include <mutex>
+ #include <unordered_map>
+ 
+ #include "../Includes/WTSTypes.h"
+@@ -59,9 +62,44 @@
+ 
+ 	virtual void notifyCaughtUp() override;
+ 
++	// YD 1.108 (ydApi.h): startDestroy() is asynchronous; the listener may only be
++	// deleted after notifyAfterApiDestroy(). These two are never gated.
++	virtual void notifyBeforeApiDestroy() override;
++
++	virtual void notifyAfterApiDestroy() override;
++
+ public:
++	/*
++	 *	Card 9 (9a=A+C, 9b=A, 9c=A, 9d=A) lifecycle state, observable by the host.
++	 */
+ 	typedef enum
+ 	{
++		YS_RUNNING,			// no stop requested
++		YS_STOP_DEFERRED,	// stop requested from a callback/worker; admission closed
++		YS_RELEASED,		// worker joined, calls/callbacks drained, notifyAfterApiDestroy received
++		YS_DRAIN_UNCERTAIN	// bound expired; the instance must stay alive (quarantine)
++	} StopState;
++
++	StopState	stopState() const;
++	bool		isCallbackContext() const;
++	bool		isQuiesced() const;
++	void		detachForQuarantine();
++
++private:
++	class ApiLease;
++	class CallbackScope;
++	friend class ApiLease;
++	friend class CallbackScope;
++	bool		acquireApiLease();
++	void		releaseApiLease();
++	bool		enterCallback(bool gated);
++	void		leaveCallback();
++	void		requestStop();
++	void		workerMain();
++
++public:
++	typedef enum
++	{
+ 		WS_NOTLOGIN,		//未登录
+ 		WS_LOGINING,		//正在登录
+ 		WS_LOGINED,			//已登录
+@@ -175,9 +213,20 @@
+ 	typedef std::queue<CommonExecuter>	QueryQue;
+ 	QueryQue				m_queQuery;
+ 	StdUniqueMutex			m_mtxQuery;
+-	bool					m_bStopped;
++	std::atomic<bool>		m_bStopped;		// admission closed (release/disconnect requested)
+ 	StdThreadPtr			m_thrdWorker;
+ 
++	mutable std::mutex		m_mtxLifecycle;
++	std::condition_variable	m_cvLifecycle;
++	std::mutex				m_mtxRelease;		// serializes external release()
++	uint32_t				m_apiLeases;		// host calls touching the YD API in flight
++	uint32_t				m_activeCallbacks;	// YD callbacks inside this wrapper
++	bool					m_workerExited;
++	bool					m_destroyStarted;	// startDestroy() called
++	bool					m_apiDestroyed;		// notifyAfterApiDestroy() received
++	StopState				m_stopState;
++	uint32_t				m_drainTimeoutMs;
++
+ 	std::string		m_strModule;
+ 	DllHandle		m_hInstYD;
+ 	typedef YDApi* (*YDCreator)(const char *);

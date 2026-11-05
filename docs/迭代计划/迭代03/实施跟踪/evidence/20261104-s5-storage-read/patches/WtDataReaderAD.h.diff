@@ -1,0 +1,14 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before/src/WtDataStorageAD/WtDataReaderAD.h	2026-11-03 21:46:20
++++ src/WtDataStorageAD/WtDataReaderAD.h	2026-11-04 13:28:44
+@@ -92,7 +92,11 @@
+ 
+ private:
+ 	friend struct WtDataReaderADTestAccess;
++	friend struct WtDataReaderADBoundTestAccess;
+ 	static void set_test_cursor_get_override(LMDBRangeCursorGetOverride callback, void* context);
++	// R122-002 test hooks: forward K-line update chunk size (0 = default) and an
++	// observer of every staging buffer size. Thread-local; unset in production.
++	static void set_test_staging_hooks(std::size_t barChunk, void (*observer)(void*, std::size_t), void* context);
+ 
+ 	/**
+ 	 * @brief 数据存储的基础目录

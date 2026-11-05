@@ -591,15 +591,8 @@ TEST_F(R45RunnerExtraTest, InnerSubscriptionWithSuffixBranchesStaySilent)
 	EXPECT_TRUE(R45BarProbe::codes.empty());
 }
 
-/*!
- * 触发条件（启用即崩溃，禁止在 CI 启用）：
- * store 是空库时，WtDataManager::get_kline_slice_by_range 的 times==1 分支
- * （WtDataManager.cpp:201-204）直接交给 WtRdmDtReaderAD::readKlineSliceByRange，
- * 后者在空向量上取 &barsList._bars[0]（WtDataStorageAD/WtRdmDtReaderAD.cpp:353-388），
- * 对空 vector 的 operator[] 是 UB，实测表现为段错误。同理 times==1 的 tick 区间读
- * 走 WtRdmDtReaderAD.cpp:216-249。见 BUG-R45-003。
- */
-TEST_F(R45RunnerExtraTest, DISABLED_EmptyStoreSinglePeriodRangeReadSegfaults)
+/*! 迭代03 最终验收复核后启用（原禁用：BUG-R45-003，主记录 BUG-P05-002）。 */
+TEST_F(R45RunnerExtraTest, EmptyStoreSinglePeriodRangeReadSegfaults)
 {
 	if (!_storeReady)
 		GTEST_SKIP() << "libWtDataStorageAD.dylib / createRdmDtReader 不可用";

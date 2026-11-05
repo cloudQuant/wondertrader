@@ -126,10 +126,9 @@ TEST_F(R101TraderReport, AutoCancelErrorAndShortCloseBranches)
 }
 
 //////////////////////////////////////////////////////////////////
-// 产品缺陷：净头寸平空超过昨仓时，今仓被扣了 left 而不是 maxVol
-// src/WtCore/TraderAdapter.cpp:2287-2293（BUG-R101-001）
+// 迭代03 最终验收复核后启用（原禁用：BUG-R101-001）。
 //////////////////////////////////////////////////////////////////
-TEST_F(R101TraderReport, DISABLED_NetShortCloseOverDeductsNewPosition)
+TEST_F(R101TraderReport, NetShortCloseOverDeductsNewPosition)
 {
     wtp::TraderAdapter trader;
     plain(trader);

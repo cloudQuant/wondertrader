@@ -1,0 +1,1089 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-ctp/before/src/TraderCTP/TraderCTP.cpp	2026-11-03 18:25:09
++++ src/TraderCTP/TraderCTP.cpp	2026-11-04 20:05:03
+@@ -227,10 +227,25 @@
+ 		return instance;
+ 	}
+ 
++	/*
++	 *	卡9 9a/9b（BUG-T25-005）：仅当本实例从未创建 SDK 对象、停止已完成且当前线程
++	 *	不在本实例自己的回调/调用/worker 内时才删除并置空。否则先发起停止（回调线程上
++	 *	只关闭准入、延后释放），把实例登记到进程级隔离表并钉住本模块，保留指针（不置空）
++	 *	表示实例被隔离到进程退出；已关闭的回调闸门拒绝之后到达的任何回调。
++	 */
+ 	EXPORT_FLAG void deleteTrader(ITraderApi* &trader)
+ 	{
+ 		if (NULL != trader)
+ 		{
++			TraderCTP* ctp = dynamic_cast<TraderCTP*>(trader);
++			if (ctp != NULL && !ctp->removableByFactory())
++			{
++				ctp->release();
++				wt_vendor_td::quarantine(ctp);
++				std::fprintf(stderr, "[TraderCTP] deleteTrader retained the instance (stop state: %s); quarantined until process exit\n",
++					wt_vendor_td::stopStateName(ctp->lifecycleState()));
++				return;
++			}
+ 			delete trader;
+ 			trader = NULL;
+ 		}
+@@ -264,8 +279,48 @@
+ 
+ TraderCTP::~TraderCTP()
+ {
++	if (wt_vendor_td::Lifecycle::reentered(this))
++	{
++		// Destroying the object from inside its own callback, API call or worker
++		// would leave that frame running on freed memory (card 9d). deleteTrader
++		// quarantines such a request instead; a direct delete here is a host bug.
++		std::fprintf(stderr, "[TraderCTP] Destroying an instance from its own callback or worker is unsupported\n");
++		std::abort();
++	}
++
++	// Close admission and wait, without a bound, for the worker and every admitted
++	// frame. The destructor never calls SDK Release(): the legacy contract requires
++	// release() first, and the API object may already be gone (test seams).
++	m_lifecycle.close();
++	m_bStopped = true;
++	if (m_thrdWorker)
++	{
++		if (m_thrdWorker->joinable())
++			m_thrdWorker->join();
++		m_thrdWorker = NULL;
++	}
++	while (!m_lifecycle.quiet())
++		std::this_thread::sleep_for(std::chrono::microseconds(200));
++
++	// T1-CTPOpt-01 analogue: the query containers are owned by this instance and
++	// no admitted callback can reach them any more.
++	if (m_ayOrders) { m_ayOrders->release(); m_ayOrders = NULL; }
++	if (m_ayTrades) { m_ayTrades->release(); m_ayTrades = NULL; }
++	if (m_ayPosDetail) { m_ayPosDetail->release(); m_ayPosDetail = NULL; }
++	if (m_mapPosition) { m_mapPosition->release(); m_mapPosition = NULL; }
+ }
+ 
++bool TraderCTP::removableByFactory() const
++{
++	if (wt_vendor_td::Lifecycle::reentered(this))
++		return false;
++	// No vendored CTP header documents that Release() joins SDK threads, so an
++	// instance whose SDK API object ever existed is never provably quiescent.
++	if (m_lifecycle.sdk_created.load(std::memory_order_acquire))
++		return false;
++	return !m_lifecycle.worker_running.load(std::memory_order_acquire) && m_lifecycle.quiet();
++}
++
+ bool TraderCTP::init(WTSVariant* params)
+ {
+ 	auto fontItem = params->get("front");
+@@ -308,7 +363,7 @@
+ 	m_hInstCTP = DLLHelper::load_library(m_strModule.c_str());
+ 	if (m_hInstCTP == NULL)
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP] Failed to load CTP API module: {}", m_strModule.c_str());
++		write_log(currentSink(), LL_ERROR, "[TraderCTP] Failed to load CTP API module: {}", m_strModule.c_str());
+ 		return false;
+ 	}
+ #ifdef _WIN32
+@@ -323,7 +378,7 @@
+ 	m_funcCreator = (CTPCreator)DLLHelper::get_symbol(m_hInstCTP, creatorName);
+ 	if (m_funcCreator == NULL)
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP] CTP API creator symbol is missing: {}", creatorName);
++		write_log(currentSink(), LL_ERROR, "[TraderCTP] CTP API creator symbol is missing: {}", creatorName);
+ 		DLLHelper::free_library(m_hInstCTP);
+ 		m_hInstCTP = NULL;
+ 		return false;
+@@ -331,7 +386,7 @@
+ #endif
+ 	if (m_funcCreator == NULL)
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP] CTP API creator is unavailable");
++		write_log(currentSink(), LL_ERROR, "[TraderCTP] CTP API creator is unavailable");
+ 		return false;
+ 	}
+ 
+@@ -342,77 +397,89 @@
+ 
+ void TraderCTP::release()
+ {
+-	m_bStopped = true;
++	shutdown("release");
++}
+ 
+-	if (m_pUserAPI)
+-	{
+-		//m_pUserAPI->RegisterSpi(NULL);
+-		m_pUserAPI->Release();
+-		m_pUserAPI = NULL;
+-	}
+-
+-	if (m_ayOrders)
+-		m_ayOrders->clear();
+-
+-	if (m_ayPosDetail)
+-		m_ayPosDetail->clear();
+-
+-	if (m_mapPosition)
+-		m_mapPosition->clear();
+-
+-	if (m_ayTrades)
+-		m_ayTrades->clear();
++void TraderCTP::emitConnectFailure(const char* reason)
++{
++	// connect() is void: a failed connect is reported through the documented
++	// WTE_Connect event with a non-zero code plus an error log (T2-CTP-02).
++	write_log(currentSink(), LL_ERROR, "[TraderCTP] Connect failed: {}", reason);
++	if (ITraderSpi* sink = currentSink())
++		sink->handleEvent(WTE_Connect, -1);
+ }
+ 
+ void TraderCTP::connect()
+ {
++	auto lease = m_lifecycle.call(this);
++	if (!lease)
++	{
++		// T2-CTP-03: instances are single-use. A late callback of a released SDK
++		// object could not be told apart from one of a new object.
++		emitConnectFailure("instance has been released or is stopping");
++		return;
++	}
++	if (m_pUserAPI != NULL || m_lifecycle.sdk_created.load(std::memory_order_acquire))
++	{
++		// Card 9c: keep the original API; a second SDK object would leak and keep
++		// calling this SPI.
++		write_log(currentSink(), LL_ERROR, "[TraderCTP] Repeated connect rejected; the existing CTP API is kept");
++		return;
++	}
+ 	if (m_funcCreator == NULL)
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP] Cannot connect without a CTP API creator");
++		emitConnectFailure("cannot connect without a CTP API creator");
+ 		return;
+ 	}
+ 
+ 	std::stringstream ss;
+ 	ss << m_strFlowDir << "flows/" << m_strBroker << "/" << m_strUser << "/";
+-	fs::create_directories(ss.str().c_str());
+-	m_pUserAPI = m_funcCreator(ss.str().c_str());
+-	if (m_pUserAPI == NULL)
++	std::error_code ec;
++	fs::create_directories(ss.str().c_str(), ec);
++	if (ec)
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP] CTP API creator returned a null API instance");
++		emitConnectFailure("cannot create the CTP flow directory");
++		return;
++	}
++	CThostFtdcTraderApi* api = m_funcCreator(ss.str().c_str());
++	if (api == NULL)
++	{
+ #ifndef __APPLE__
+ 		DLLHelper::free_library(m_hInstCTP);
+ 		m_hInstCTP = NULL;
+ 		m_funcCreator = NULL;
+ #endif
++		emitConnectFailure("CTP API creator returned a null API instance");
+ 		return;
+ 	}
++	// From here on the SDK may call this SPI on its own threads: the instance can
++	// only be quarantined, never deleted, by the factory remover (card 9a).
++	m_lifecycle.sdk_created.store(true, std::memory_order_release);
++	m_pUserAPI = api;
+ 
+-	m_pUserAPI->RegisterSpi(this);
++	api->RegisterSpi(this);
+ 	if (m_bQuickStart)
+ 	{
+-		m_pUserAPI->SubscribePublicTopic(THOST_TERT_QUICK);			// 注册公有流
+-		m_pUserAPI->SubscribePrivateTopic(THOST_TERT_QUICK);		// 注册私有流
++		api->SubscribePublicTopic(THOST_TERT_QUICK);			// 注册公有流
++		api->SubscribePrivateTopic(THOST_TERT_QUICK);		// 注册私有流
+ 	}
+ 	else
+ 	{
+-		m_pUserAPI->SubscribePublicTopic(THOST_TERT_RESUME);		// 注册公有流
+-		m_pUserAPI->SubscribePrivateTopic(THOST_TERT_RESUME);		// 注册私有流
++		api->SubscribePublicTopic(THOST_TERT_RESUME);		// 注册公有流
++		api->SubscribePrivateTopic(THOST_TERT_RESUME);		// 注册私有流
+ 	}
+ 
+ 	for (std::string front : m_strFront)
+ 	{
+-		m_pUserAPI->RegisterFront((char*)front.c_str());
+-		write_log(m_sink, LL_INFO, "registerFront: {}", front.c_str());
++		api->RegisterFront((char*)front.c_str());
++		write_log(currentSink(), LL_INFO, "registerFront: {}", front.c_str());
+ 	}
+ 
+-	if (m_pUserAPI)
+-	{
+-		m_pUserAPI->Init();
+-	}
+-
+ 	if (m_thrdWorker == NULL)
+ 	{
++		m_lifecycle.worker_running.store(true, std::memory_order_release);
+ 		m_thrdWorker.reset(new StdThread([this](){
++			wt_vendor_td::WorkerMark mark(this);
+ 			while (!m_bStopped)
+ 			{
+ 				if (m_bInQuery)
+@@ -447,28 +514,122 @@
+ 					continue;
+ 				}
+ 
+-				handler();
++				{
++					// Every SDK request made by the worker holds an API lease, so a
++					// stop never releases the SDK under an in-flight request.
++					auto requestLease = m_lifecycle.call(this);
++					if (!requestLease)
++					{
++						m_bInQuery = false;
++						break;
++					}
++					handler();
++				}
+ 
+ 				m_lastQryTime = TimeUtils::getLocalTimeNow();
+ 			}
++			m_lifecycle.worker_running.store(false, std::memory_order_release);
+ 		}));
+ 	}
++
++	api->Init();
+ }
+ 
+ void TraderCTP::disconnect()
+ {
++	// BUG-T25-005 / T2-CTP-03: disconnect is the same terminal, bounded stop as
++	// release(). It no longer queues release() behind the query gate, which never
++	// opened when a query had no final frame.
++	shutdown("disconnect");
++}
++
++void TraderCTP::shutdown(const char* reason)
++{
++	using wt_vendor_td::StopState;
++	// 1. Close admission: no new host call, worker request or callback can start.
++	m_lifecycle.close();
++	m_bStopped = true;
++
++	// 2. Card 9d: on one of this instance's own frames (callback, API call or
++	//    worker) waiting could self-deadlock. Only record the deferred stop; the
++	//    next lifecycle call from a safe thread completes it.
++	if (wt_vendor_td::Lifecycle::reentered(this))
+ 	{
+-		StdUniqueLock lock(m_mtxQuery);
+-		m_queQuery.push([this]() {
+-			release();
+-		});
++		if (m_lifecycle.stopState() != StopState::Released)
++			m_lifecycle.setState(StopState::StopDeferred);
++		write_log(currentSink(), LL_WARN, "[TraderCTP] {} requested inside a provider callback/worker; admission closed, SDK release deferred to the next lifecycle call from a safe thread", reason);
++		return;
+ 	}
+ 
++	std::lock_guard<std::mutex> guard(m_lifecycle.stop_mutex);
++	if (m_lifecycle.stopState() == StopState::Released)
++		return;	// repeated release/disconnect: SDK Release() runs exactly once
++
++	const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(m_stopBoundMs);
++	auto reportUncertain = [&](const char* what) {
++		m_lifecycle.setState(StopState::DrainUncertain);
++		const std::string message = fmtutil::format("[TraderCTP] {} could not drain within {} ms ({}); CTP API not released, instance must stay alive", reason, m_stopBoundMs, what);
++		if (ITraderSpi* sink = currentSink())
++			sink->handleTraderLog(LL_ERROR, message.c_str());
++		else
++			std::fprintf(stderr, "%s\n", message.c_str());
++	};
++
++	// 3. Bounded worker stop. The stop flag bypasses the query gate; a worker
++	//    blocked inside an SDK request cannot be joined within the bound.
+ 	if (m_thrdWorker)
+ 	{
+-		m_thrdWorker->join();
++		if (!wt_vendor_td::Lifecycle::waitUntil(deadline, [this]() { return !m_lifecycle.worker_running.load(std::memory_order_acquire); }))
++		{
++			reportUncertain("query worker still inside an SDK request");
++			return;
++		}
++		if (m_thrdWorker->joinable())
++			m_thrdWorker->join();
+ 		m_thrdWorker = NULL;
+ 	}
++
++	// 4. Bounded wait for every admitted host call and callback to leave.
++	if (!wt_vendor_td::Lifecycle::waitUntil(deadline, [this]() { return m_lifecycle.quiet(); }))
++	{
++		reportUncertain("host call or SDK callback still active");
++		return;
++	}
++
++	// 5. Queries that were queued but never sent are cancelled; the query gate
++	//    has no pending owner any more.
++	size_t dropped = 0;
++	{
++		StdUniqueLock lock(m_mtxQuery);
++		dropped = m_queQuery.size();
++		QueryQue().swap(m_queQuery);
++	}
++	m_bInQuery = false;
++
++	// 6. SDK Release() exactly once, never overlapping an admitted request.
++	CThostFtdcTraderApi* api = m_pUserAPI;
++	m_pUserAPI = NULL;
++	if (api)
++	{
++		//api->RegisterSpi(NULL);
++		api->Release();
++	}
++
++	if (m_ayOrders)
++		m_ayOrders->clear();
++
++	if (m_ayPosDetail)
++		m_ayPosDetail->clear();
++
++	if (m_mapPosition)
++		m_mapPosition->clear();
++
++	if (m_ayTrades)
++		m_ayTrades->clear();
++
++	m_lifecycle.setState(StopState::Released);
++	if (dropped != 0)
++		write_log(currentSink(), LL_WARN, "[TraderCTP] {}: {} queued queries cancelled", reason, dropped);
+ }
+ 
+ bool TraderCTP::reserveIdentityLocked(uint32_t& orderRef, std::string& canonical, size_t capacity)
+@@ -513,11 +674,9 @@
+ 
+ void TraderCTP::registerSpi(ITraderSpi *listener)
+ {
+-	m_sink = listener;
+-	if (m_sink)
+-	{
++	if (listener)
+ 		m_bdMgr = listener->getBaseDataMgr();
+-	}
++	m_sink.store(listener, std::memory_order_release);
+ }
+ 
+ uint32_t TraderCTP::genRequestID()
+@@ -527,8 +686,22 @@
+ 
+ int TraderCTP::login(const char* user, const char* pass, const char* productInfo)
+ {
+-	if (user == NULL || pass == NULL || productInfo == NULL || m_pUserAPI == NULL)
++	auto lease = m_lifecycle.call(this);
++	if (!lease || user == NULL || pass == NULL || productInfo == NULL)
++		return -1;
++	if (m_pUserAPI == NULL)
++	{
++		// Legacy behavior kept (as in TraderCTPMini): credentials are retained when
++		// no API is installed yet; no login attempt or identity epoch is started.
++		std::lock_guard<std::mutex> lock(m_identityMutex);
++		if (m_wrapperState != WS_LOGINING && m_inflightInserts == 0)
++		{
++			m_strUser = user;
++			m_strPass = pass;
++			m_strProdInfo = productInfo;
++		}
+ 		return -1;
++	}
+ 	uint64_t attempt = 0;
+ 	{
+ 		std::lock_guard<std::mutex> lock(m_identityMutex);
+@@ -548,17 +721,17 @@
+ 	int iResult = authenticate(attempt);
+ 	if (iResult != 0)
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP] Sending authenticate request failed: {}", iResult);
++		write_log(currentSink(), LL_ERROR, "[TraderCTP] Sending authenticate request failed: {}", iResult);
+ 		{
+ 			std::lock_guard<std::mutex> lock(m_identityMutex);
+ 			if (m_loginAttempt != attempt) return -1;
+ 			m_identityReady = false;
+ 			m_wrapperState = WS_LOGINFAILED;
+ 		}
+-		if (m_sink)
++		if (ITraderSpi* sink = currentSink())
+ 		{
+ 			const std::string message = "CTP:认证请求发送失败: " + std::to_string(iResult);
+-			m_sink->onLoginResult(false, message.c_str(), 0);
++			sink->onLoginResult(false, message.c_str(), 0);
+ 		}
+ 		return -1;
+ 	}
+@@ -568,6 +741,9 @@
+ 
+ int TraderCTP::doLogin(uint64_t attempt)
+ {
++	auto lease = m_lifecycle.call(this);
++	if (!lease || m_pUserAPI == NULL)
++		return -1;
+ 	CThostFtdcReqUserLoginField req;
+ 	memset(&req, 0, sizeof(req));
+ 	uint32_t requestID = 0;
+@@ -585,17 +761,17 @@
+ 	int iResult = m_pUserAPI->ReqUserLogin(&req, requestID);
+ 	if (iResult != 0)
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP] Sending login request failed: {}", iResult);
++		write_log(currentSink(), LL_ERROR, "[TraderCTP] Sending login request failed: {}", iResult);
+ 		{
+ 			std::lock_guard<std::mutex> lock(m_identityMutex);
+ 			if (m_loginAttempt != attempt) return -1;
+ 			m_identityReady = false;
+ 			m_wrapperState = WS_LOGINFAILED;
+ 		}
+-		if (m_sink)
++		if (ITraderSpi* sink = currentSink())
+ 		{
+ 			const std::string message = "CTP:登录请求发送失败: " + std::to_string(iResult);
+-			m_sink->onLoginResult(false, message.c_str(), 0);
++			sink->onLoginResult(false, message.c_str(), 0);
+ 		}
+ 		return -1;
+ 	}
+@@ -605,7 +781,8 @@
+ 
+ int TraderCTP::logout()
+ {
+-	if (m_pUserAPI == NULL)
++	auto lease = m_lifecycle.call(this);
++	if (!lease || m_pUserAPI == NULL)
+ 	{
+ 		return -1;
+ 	}
+@@ -617,7 +794,7 @@
+ 	int iResult = m_pUserAPI->ReqUserLogout(&req, genRequestID());
+ 	if (iResult != 0)
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP] Sending logout request failed: {}", iResult);
++		write_log(currentSink(), LL_ERROR, "[TraderCTP] Sending logout request failed: {}", iResult);
+ 	}
+ 
+ 	return 0;
+@@ -625,9 +802,10 @@
+ 
+ int TraderCTP::orderInsert(WTSEntrust* entrust)
+ {
+-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY || entrust == NULL)
++	auto lease = m_lifecycle.call(this);
++	if (!lease || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY || entrust == NULL)
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP] Trading channel not ready");
++		write_log(currentSink(), LL_ERROR, "[TraderCTP] Trading channel not ready");
+ 		return -1;
+ 	}
+ 
+@@ -740,7 +918,7 @@
+ 		std::mutex& mutex;
+ 		uint32_t& count;
+ 		~InsertLease() { std::lock_guard<std::mutex> lock(mutex); --count; }
+-	} lease{m_identityMutex, m_inflightInserts};
++	} insertLease{m_identityMutex, m_inflightInserts};
+ 	int iResult = -1;
+ 	const uint32_t requestID = genRequestID();
+ 	if (requestID == 0 || requestID > INT_MAX) return -1;
+@@ -748,7 +926,7 @@
+ 	catch (...) { return -1; }
+ 	if (iResult != 0)
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP] Order inserting failed: {}", iResult);
++		write_log(currentSink(), LL_ERROR, "[TraderCTP] Order inserting failed: {}", iResult);
+ 		return -1;
+ 	}
+ 
+@@ -757,7 +935,8 @@
+ 
+ int TraderCTP::orderAction(WTSEntrustAction* action)
+ {
+-	if (m_wrapperState != WS_ALLREADY)
++	auto lease = m_lifecycle.call(this);
++	if (!lease || m_pUserAPI == NULL || action == NULL || m_wrapperState != WS_ALLREADY)
+ 		return -1;
+ 
+ 	uint32_t frontid, sessionid, orderref;
+@@ -787,7 +966,7 @@
+ 	int iResult = m_pUserAPI->ReqOrderAction(&req, genRequestID());
+ 	if (iResult != 0)
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP] Sending cancel request failed: {}", iResult);
++		write_log(currentSink(), LL_ERROR, "[TraderCTP] Sending cancel request failed: {}", iResult);
+ 		return -1;
+ 	}
+ 
+@@ -796,7 +975,8 @@
+ 
+ int TraderCTP::queryAccount()
+ {
+-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
++	auto lease = m_lifecycle.call(this);
++	if (!lease || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+ 	{
+ 		return -1;
+ 	}
+@@ -808,7 +988,13 @@
+ 			memset(&req, 0, sizeof(req));
+ 			wt_strcpy(req.BrokerID, m_strBroker.c_str(), m_strBroker.size());
+ 			wt_strcpy(req.InvestorID, m_strUser.c_str(), m_strUser.size());
+-			m_pUserAPI->ReqQryTradingAccount(&req, genRequestID());
++			const int iResult = m_pUserAPI->ReqQryTradingAccount(&req, genRequestID());
++			if (iResult != 0)
++			{
++				// No final frame follows a synchronous rejection (BUG-T25-005).
++				m_bInQuery = false;
++				write_log(currentSink(), LL_ERROR, "[TraderCTP] Sending account query failed: {}", iResult);
++			}
+ 		});
+ 	}
+ 
+@@ -819,7 +1005,8 @@
+ 
+ int TraderCTP::queryPositions()
+ {
+-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
++	auto lease = m_lifecycle.call(this);
++	if (!lease || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+ 	{
+ 		return -1;
+ 	}
+@@ -831,7 +1018,13 @@
+ 			memset(&req, 0, sizeof(req));
+ 			wt_strcpy(req.BrokerID, m_strBroker.c_str(), m_strBroker.size());
+ 			wt_strcpy(req.InvestorID, m_strUser.c_str(), m_strUser.size());
+-			m_pUserAPI->ReqQryInvestorPosition(&req, genRequestID());
++			const int iResult = m_pUserAPI->ReqQryInvestorPosition(&req, genRequestID());
++			if (iResult != 0)
++			{
++				// No final frame follows a synchronous rejection (BUG-T25-005).
++				m_bInQuery = false;
++				write_log(currentSink(), LL_ERROR, "[TraderCTP] Sending position query failed: {}", iResult);
++			}
+ 		});
+ 	}
+ 
+@@ -842,7 +1035,8 @@
+ 
+ int TraderCTP::queryOrders()
+ {
+-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
++	auto lease = m_lifecycle.call(this);
++	if (!lease || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+ 	{
+ 		return -1;
+ 	}
+@@ -855,7 +1049,13 @@
+ 			wt_strcpy(req.BrokerID, m_strBroker.c_str(), m_strBroker.size());
+ 			wt_strcpy(req.InvestorID, m_strUser.c_str(), m_strUser.size());
+ 
+-			m_pUserAPI->ReqQryOrder(&req, genRequestID());
++			const int iResult = m_pUserAPI->ReqQryOrder(&req, genRequestID());
++			if (iResult != 0)
++			{
++				// No final frame follows a synchronous rejection (BUG-T25-005).
++				m_bInQuery = false;
++				write_log(currentSink(), LL_ERROR, "[TraderCTP] Sending order query failed: {}", iResult);
++			}
+ 		});
+ 
+ 		//triggerQuery();
+@@ -866,7 +1066,8 @@
+ 
+ int TraderCTP::queryTrades()
+ {
+-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
++	auto lease = m_lifecycle.call(this);
++	if (!lease || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+ 	{
+ 		return -1;
+ 	}
+@@ -879,7 +1080,13 @@
+ 			wt_strcpy(req.BrokerID, m_strBroker.c_str(), m_strBroker.size());
+ 			wt_strcpy(req.InvestorID, m_strUser.c_str(), m_strUser.size());
+ 
+-			m_pUserAPI->ReqQryTrade(&req, genRequestID());
++			const int iResult = m_pUserAPI->ReqQryTrade(&req, genRequestID());
++			if (iResult != 0)
++			{
++				// No final frame follows a synchronous rejection (BUG-T25-005).
++				m_bInQuery = false;
++				write_log(currentSink(), LL_ERROR, "[TraderCTP] Sending trade query failed: {}", iResult);
++			}
+ 		});
+ 	}
+ 
+@@ -890,7 +1097,8 @@
+ 
+ int TraderCTP::querySettlement(uint32_t uDate)
+ {
+-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
++	auto lease = m_lifecycle.call(this);
++	if (!lease || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+ 	{
+ 		return -1;
+ 	}
+@@ -904,7 +1112,12 @@
+ 		wt_strcpy(req.InvestorID, m_strUser.c_str(), m_strUser.size());
+ 		fmt::format_to(req.TradingDay, "{}", uDate);
+ 
+-		m_pUserAPI->ReqQrySettlementInfo(&req, genRequestID());
++		const int iResult = m_pUserAPI->ReqQrySettlementInfo(&req, genRequestID());
++		if (iResult != 0)
++		{
++			m_bInQuery = false;
++			write_log(currentSink(), LL_ERROR, "[TraderCTP] Sending settlement query failed: {}", iResult);
++		}
+ 	});
+ 
+ 	//triggerQuery();
+@@ -914,28 +1127,40 @@
+ 
+ void TraderCTP::OnFrontConnected()
+ {
+-	if (m_sink)
+-		m_sink->handleEvent(WTE_Connect, 0);
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
++	if (ITraderSpi* sink = currentSink())
++		sink->handleEvent(WTE_Connect, 0);
+ }
+ 
+ void TraderCTP::OnFrontDisconnected(int nReason)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	{
+ 		std::lock_guard<std::mutex> lock(m_identityMutex);
+ 		m_identityReady = false;
+ 		m_wrapperState = WS_NOTLOGIN;
+ 	}
+-	if (m_sink)
+-		m_sink->handleEvent(WTE_Close, nReason);
++	if (ITraderSpi* sink = currentSink())
++		sink->handleEvent(WTE_Close, nReason);
+ }
+ 
+ void TraderCTP::OnHeartBeatWarning(int /*nTimeLapse*/)
+ {
+-	write_log(m_sink, LL_DEBUG, "[TraderCTP][{}-{}] Heartbeating...", m_strBroker.c_str(), m_strUser.c_str());
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
++	write_log(currentSink(), LL_DEBUG, "[TraderCTP][{}-{}] Heartbeating...", m_strBroker.c_str(), m_strUser.c_str());
+ }
+ 
+ void TraderCTP::OnRspAuthenticate(CThostFtdcRspAuthenticateField */*pRspAuthenticateField*/, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool /*bIsLast*/)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	uint64_t attempt = 0;
+ 	{
+ 		std::lock_guard<std::mutex> lock(m_identityMutex);
+@@ -949,7 +1174,7 @@
+ 	}
+ 	else
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP][{}-{}] Authentiation failed: {}", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg);
++		write_log(currentSink(), LL_ERROR, "[TraderCTP][{}-{}] Authentiation failed: {}", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg);
+ 		{
+ 			std::lock_guard<std::mutex> lock(m_identityMutex);
+ 			if (m_loginAttempt != attempt || m_wrapperState != WS_LOGINING) return;
+@@ -957,14 +1182,17 @@
+ 			m_wrapperState = WS_LOGINFAILED;
+ 		}
+ 
+-		if (m_sink)
+-			m_sink->onLoginResult(false, pRspInfo->ErrorMsg, 0);
++		if (ITraderSpi* sink = currentSink())
++			sink->onLoginResult(false, pRspInfo->ErrorMsg, 0);
+ 	}
+ 
+ }
+ 
+ void TraderCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool /*bIsLast*/)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	bool accepted = false;
+ 	uint32_t serverRef = 0;
+ 	uint32_t tradingDate = 0;
+@@ -1025,28 +1253,34 @@
+ 	}
+ 	if (!accepted)
+ 	{
+-		write_log(m_sink, LL_ERROR, "[TraderCTP] Login identity initialization failed or an insert is in flight");
+-		if (m_sink) m_sink->onLoginResult(false,
++		write_log(currentSink(), LL_ERROR, "[TraderCTP] Login identity initialization failed or an insert is in flight");
++		if (ITraderSpi* sink = currentSink()) sink->onLoginResult(false,
+ 			IsErrorRspInfo(pRspInfo) ? pRspInfo->ErrorMsg : "CTP login identity initialization failed", 0);
+ 		return;
+ 	}
+-	write_log(m_sink, LL_INFO, "[TraderCTP][{}-{}] Login succeed, trading date: {}...", m_strBroker.c_str(), m_strUser.c_str(), tradingDate);
++	write_log(currentSink(), LL_INFO, "[TraderCTP][{}-{}] Login succeed, trading date: {}...", m_strBroker.c_str(), m_strUser.c_str(), tradingDate);
+ 	queryConfirm();
+ }
+ 
+ void TraderCTP::OnRspUserLogout(CThostFtdcUserLogoutField */*pUserLogout*/, CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	{
+ 		std::lock_guard<std::mutex> lock(m_identityMutex);
+ 		m_identityReady = false;
+ 		m_wrapperState = WS_NOTLOGIN;
+ 	}
+-	if (m_sink)
+-		m_sink->handleEvent(WTE_Logout, 0);
++	if (ITraderSpi* sink = currentSink())
++		sink->handleEvent(WTE_Logout, 0);
+ }
+ 
+ void TraderCTP::OnRspQrySettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	if (bIsLast)
+ 	{
+ 		m_bInQuery = false;
+@@ -1074,9 +1308,9 @@
+ 					m_wrapperState = WS_ALLREADY;
+ 				}
+ 
+-				write_log(m_sink, LL_INFO, "[TraderCTP][{}-{}] Trading channel initialized...", m_strBroker.c_str(), m_strUser.c_str());
+-				if (m_sink)
+-					m_sink->onLoginResult(true, "", tradingDate);
++				write_log(currentSink(), LL_INFO, "[TraderCTP][{}-{}] Trading channel initialized...", m_strBroker.c_str(), m_strUser.c_str());
++				if (ITraderSpi* sink = currentSink())
++					sink->onLoginResult(true, "", tradingDate);
+ 			}
+ 			else
+ 			{
+@@ -1086,7 +1320,7 @@
+ 					m_wrapperState = WS_CONFIRM_QRYED;
+ 				}
+ 
+-				write_log(m_sink, LL_INFO, "[TraderCTP][{}-{}] Confirming settlement data...", m_strBroker.c_str(), m_strUser.c_str());
++				write_log(currentSink(), LL_INFO, "[TraderCTP][{}-{}] Confirming settlement data...", m_strBroker.c_str(), m_strUser.c_str());
+ 				confirm();
+ 			}
+ 		}
+@@ -1105,6 +1339,9 @@
+ 
+ void TraderCTP::OnRspSettlementInfoConfirm(CThostFtdcSettlementInfoConfirmField *pSettlementInfoConfirm, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool /*bIsLast*/)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	if (!IsErrorRspInfo(pRspInfo) && pSettlementInfoConfirm != NULL)
+ 	{
+ 		bool ready = false;
+@@ -1123,42 +1360,48 @@
+ 		if (ready)
+ 		{
+ 
+-			write_log(m_sink, LL_INFO, "[TraderCTP][{}-{}] Trading channel initialized...", m_strBroker.c_str(), m_strUser.c_str());
+-			if (m_sink)
+-				m_sink->onLoginResult(true, "", tradingDate);
++			write_log(currentSink(), LL_INFO, "[TraderCTP][{}-{}] Trading channel initialized...", m_strBroker.c_str(), m_strUser.c_str());
++			if (ITraderSpi* sink = currentSink())
++				sink->onLoginResult(true, "", tradingDate);
+ 		}
+ 	}
+ }
+ 
+ void TraderCTP::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	WTSEntrust* entrust = makeEntrust(pInputOrder);
+ 	if (entrust)
+ 	{
+ 		WTSError *err = makeError(pRspInfo, WEC_ORDERINSERT);
+ 		//g_orderMgr.onRspEntrust(entrust, err);
+-		if (m_sink)
+-			m_sink->onRspEntrust(entrust, err);
++		if (ITraderSpi* sink = currentSink())
++			sink->onRspEntrust(entrust, err);
+ 		entrust->release();
+ 		err->release();
+ 	}
+ 	else if(IsErrorRspInfo(pRspInfo))
+ 	{
+ 		WTSError *err = makeError(pRspInfo, WEC_ORDERINSERT);
+-		if (m_sink)
+-			m_sink->onTraderError(err);
++		if (ITraderSpi* sink = currentSink())
++			sink->onTraderError(err);
+ 		err->release();
+ 	}
+ }
+ 
+ void TraderCTP::OnRspOrderAction(CThostFtdcInputOrderActionField *pInputOrderAction, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	if (IsErrorRspInfo(pRspInfo))
+ 	{
+ 		WTSError* error = WTSError::create(WEC_ORDERCANCEL, pRspInfo->ErrorMsg);
+ 		WTSEntrustAction* action = makeAction(pInputOrderAction);
+-		if (m_sink)
+-			m_sink->onTraderError(error, action);
++		if (ITraderSpi* sink = currentSink())
++			sink->onTraderError(error, action);
+ 
+ 		if (error)
+ 			error->release();
+@@ -1170,6 +1413,9 @@
+ 
+ void TraderCTP::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	if (bIsLast)
+ 	{
+ 		m_bInQuery = false;
+@@ -1194,8 +1440,8 @@
+ 
+ 		WTSArray * ay = WTSArray::create();
+ 		ay->append(accountInfo, false);
+-		if (m_sink)
+-			m_sink->onRspAccount(ay);
++		if (ITraderSpi* sink = currentSink())
++			sink->onRspAccount(ay);
+ 
+ 		ay->release();
+ 	}
+@@ -1203,6 +1449,9 @@
+ 
+ void TraderCTP::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	if (bIsLast)
+ 	{
+ 		m_bInQuery = false;
+@@ -1336,8 +1585,8 @@
+ 			}
+ 		}
+ 
+-		if (m_sink)
+-			m_sink->onRspPosition(ayPos);
++		if (ITraderSpi* sink = currentSink())
++			sink->onRspPosition(ayPos);
+ 
+ 		if (m_mapPosition)
+ 		{
+@@ -1351,6 +1600,9 @@
+ 
+ void TraderCTP::OnRspQrySettlementInfo(CThostFtdcSettlementInfoField *pSettlementInfo, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	if (bIsLast)
+ 	{
+ 		m_bInQuery = false;
+@@ -1364,12 +1616,16 @@
+ 
+ 	if (bIsLast && !m_strSettleInfo.empty())
+ 	{
+-		m_sink->onRspSettlementInfo(atoi(pSettlementInfo->TradingDay), m_strSettleInfo.c_str());
++		if (ITraderSpi* sink = currentSink())
++			sink->onRspSettlementInfo(atoi(pSettlementInfo->TradingDay), m_strSettleInfo.c_str());
+ 	}
+ }
+ 
+ void TraderCTP::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	if (bIsLast)
+ 	{
+ 		m_bInQuery = false;
+@@ -1390,8 +1646,8 @@
+ 
+ 	if (bIsLast)
+ 	{
+-		if (m_sink)
+-			m_sink->onRspTrades(m_ayTrades);
++		if (ITraderSpi* sink = currentSink())
++			sink->onRspTrades(m_ayTrades);
+ 
+ 		if (NULL != m_ayTrades)
+ 			m_ayTrades->clear();
+@@ -1400,6 +1656,9 @@
+ 
+ void TraderCTP::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	if (bIsLast)
+ 	{
+ 		m_bInQuery = false;
+@@ -1420,8 +1679,8 @@
+ 
+ 	if (bIsLast)
+ 	{
+-		if (m_sink)
+-			m_sink->onRspOrders(m_ayOrders);
++		if (ITraderSpi* sink = currentSink())
++			sink->onRspOrders(m_ayOrders);
+ 
+ 		if (m_ayOrders)
+ 			m_ayOrders->clear();
+@@ -1430,16 +1689,23 @@
+ 
+ void TraderCTP::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool /*bIsLast*/)
+ {
+-	m_sink->handleTraderLog(LL_ERROR, fmtutil::format("{} rsp error: {} : {}", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg));
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
++	if (ITraderSpi* sink = currentSink())
++		sink->handleTraderLog(LL_ERROR, fmtutil::format("{} rsp error: {} : {}", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg));
+ }
+ 
+ void TraderCTP::OnRtnOrder(CThostFtdcOrderField *pOrder)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	WTSOrderInfo *orderInfo = makeOrderInfo(pOrder);
+ 	if (orderInfo)
+ 	{
+-		if (m_sink)
+-			m_sink->onPushOrder(orderInfo);
++		if (ITraderSpi* sink = currentSink())
++			sink->onPushOrder(orderInfo);
+ 
+ 		orderInfo->release();
+ 	}
+@@ -1449,11 +1715,14 @@
+ 
+ void TraderCTP::OnRtnTrade(CThostFtdcTradeField *pTrade)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	WTSTradeInfo *tRecord = makeTradeInfo(pTrade);
+ 	if (tRecord)
+ 	{
+-		if (m_sink)
+-			m_sink->onPushTrade(tRecord);
++		if (ITraderSpi* sink = currentSink())
++			sink->onPushTrade(tRecord);
+ 
+ 		tRecord->release();
+ 	}
+@@ -1774,13 +2043,16 @@
+ 
+ void TraderCTP::OnErrRtnOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo)
+ {
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
+ 	WTSEntrust* entrust = makeEntrust(pInputOrder);
+ 	if (entrust)
+ 	{
+ 		WTSError *err = makeError(pRspInfo, WEC_ORDERINSERT);
+ 		//g_orderMgr.onRspEntrust(entrust, err);
+-		if (m_sink)
+-			m_sink->onRspEntrust(entrust, err);
++		if (ITraderSpi* sink = currentSink())
++			sink->onRspEntrust(entrust, err);
+ 		entrust->release();
+ 		err->release();
+ 	}
+@@ -1788,8 +2060,11 @@
+ 
+ void TraderCTP::OnRtnInstrumentStatus(CThostFtdcInstrumentStatusField *pInstrumentStatus)
+ {
+-	if (m_sink)
+-		m_sink->onPushInstrumentStatus(pInstrumentStatus->ExchangeID, pInstrumentStatus->InstrumentID, (WTSTradeStatus)pInstrumentStatus->InstrumentStatus);
++	auto cbScope = m_lifecycle.callback(this);
++	if (!cbScope)
++		return;
++	if (ITraderSpi* sink = currentSink())
++		sink->onPushInstrumentStatus(pInstrumentStatus->ExchangeID, pInstrumentStatus->InstrumentID, (WTSTradeStatus)pInstrumentStatus->InstrumentStatus);
+ }
+ 
+ bool TraderCTP::isConnected()
+@@ -1799,6 +2074,9 @@
+ 
+ int TraderCTP::queryConfirm()
+ {
++	auto lease = m_lifecycle.call(this);
++	if (!lease)
++		return -1;
+ 	uint64_t epoch = 0;
+ 	{
+ 		std::lock_guard<std::mutex> lock(m_identityMutex);
+@@ -1816,7 +2094,7 @@
+ 				std::lock_guard<std::mutex> lock(m_identityMutex);
+ 				if (!m_identityReady || m_identityEpoch != epoch || m_wrapperState != WS_LOGINED) { m_bInQuery = false; return; }
+ 				request = genRequestID();
+-				if (request == 0 || request > INT_MAX) { m_identityReady = false; m_wrapperState = WS_LOGINFAILED; return; }
++				if (request == 0 || request > INT_MAX) { m_bInQuery = false; m_identityReady = false; m_wrapperState = WS_LOGINFAILED; return; }
+ 				m_confirmQueryRequestID = request;
+ 				wt_strcpy(req.BrokerID, m_strBroker.c_str());
+ 				wt_strcpy(req.InvestorID, m_strUser.c_str());
+@@ -1825,7 +2103,7 @@
+ 			if (iResult != 0)
+ 			{
+ 				m_bInQuery = false;
+-				write_log(m_sink, LL_ERROR, "[TraderCTP][{}-{}] Sending query of settlement data confirming state failed: {}", m_strBroker.c_str(), m_strUser.c_str(), iResult);
++				write_log(currentSink(), LL_ERROR, "[TraderCTP][{}-{}] Sending query of settlement data confirming state failed: {}", m_strBroker.c_str(), m_strUser.c_str(), iResult);
+ 			}
+ 		});
+ 	}
+@@ -1837,6 +2115,9 @@
+ 
+ int TraderCTP::confirm()
+ {
++	auto lease = m_lifecycle.call(this);
++	if (!lease)
++		return -1;
+ 	//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+ 	CThostFtdcSettlementInfoConfirmField req;
+ 	memset(&req, 0, sizeof(req));
+@@ -1858,11 +2139,11 @@
+ 	if (iResult != 0)
+ 	{
+ 		m_wrapperState = WS_LOGINFAILED;
+-		write_log(m_sink, LL_ERROR, "[TraderCTP][{}-{}] Sending confirming of settlement data failed: {}", m_strBroker.c_str(), m_strUser.c_str(), iResult);
+-		if (m_sink)
++		write_log(currentSink(), LL_ERROR, "[TraderCTP][{}-{}] Sending confirming of settlement data failed: {}", m_strBroker.c_str(), m_strUser.c_str(), iResult);
++		if (ITraderSpi* sink = currentSink())
+ 		{
+ 			std::string message = fmtutil::format("Sending confirming of settlement data failed: {}", iResult);
+-			m_sink->onLoginResult(false, message.c_str(), 0);
++			sink->onLoginResult(false, message.c_str(), 0);
+ 		}
+ 		return -1;
+ 	}
+@@ -1872,6 +2153,9 @@
+ 
+ int TraderCTP::authenticate(uint64_t attempt)
+ {
++	auto lease = m_lifecycle.call(this);
++	if (!lease || m_pUserAPI == NULL)
++		return -1;
+ 	CThostFtdcReqAuthenticateField req;
+ 	memset(&req, 0, sizeof(req));
+ 	uint32_t request = 0;

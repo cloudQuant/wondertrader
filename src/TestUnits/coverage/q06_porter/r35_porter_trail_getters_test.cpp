@@ -40,6 +40,11 @@
 USING_NS_WTP;
 
 extern WtRtRunner& getRunner();
+// I03-NEW-064（迭代03）：C API 只在 runner 已配置的引擎上建上下文（.before 见 s5-runners 证据）。
+uint32_t i03s5_inject_cta_context(WtRtRunner& runner, const char* name, int32_t slippage);
+uint32_t i03s5_inject_sel_context(WtRtRunner& runner, const char* name, uint32_t date, uint32_t time,
+	TaskPeriodType period, int32_t slippage);
+uint32_t i03s5_inject_hft_context(WtRtRunner& runner, const char* name, const char* trader, int32_t slippage);
 
 namespace {
 
@@ -101,11 +106,11 @@ protected:
 		register_cta_callbacks(cb_cta_init, cb_cta_tick, cb_cta_calc, cb_cta_bar, cb_sess, cb_cond);
 		register_sel_callbacks(cb_sel_init, cb_sel_tick, cb_sel_calc, cb_sel_bar, cb_sess);
 
-		_cta = create_cta_context("r35_cta_trail", 2);
+		_cta = i03s5_inject_cta_context(getRunner(), "r35_cta_trail", 2); // forwarding-only fixture
 		ASSERT_NE(_cta, 0U);
 		ASSERT_TRUE(getRunner().getCtaContext(_cta) != NULL);
 
-		_sel = create_sel_context("r35_sel_trail", 20240603, 145500, "d", "CHINA", "TRADING", 0);
+		_sel = i03s5_inject_sel_context(getRunner(), "r35_sel_trail", 20240603, 145500, TPT_Daily, 0);
 		ASSERT_NE(_sel, 0U);
 		ASSERT_TRUE(getRunner().getSelContext(_sel) != NULL);
 	}
@@ -221,7 +226,7 @@ TEST_F(R35PorterTrailGetters, CtaGetAllPositionEmitsTerminatorExactlyOnce)
  */
 TEST_F(R35PorterTrailGetters, TrailReadersArePerContextNotSharedAcrossTwoCtas)
 {
-	CtxHandler other = create_cta_context("r35_cta_trail_b", 0);
+	CtxHandler other = i03s5_inject_cta_context(getRunner(), "r35_cta_trail_b", 0);
 	ASSERT_NE(other, 0U);
 	ASSERT_NE(other, _cta);
 

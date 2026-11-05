@@ -1,0 +1,6 @@
+WARNING: fixture directories without handler: i03_trader_oes_query_s4
+suites to run: 4 (priority first), parallel=2, -j 2
+[18:35:22] i03_fee_consumer_pipeline                     pass               25s  green[pass]: run.py exit 0（卡13d 四例逐进程）：[('UnmigratedExportedContractKeysAreAnObservableMissingFee', 0), ('VersionedContractVolumeFeeIsUsedForThePhysic
+[18:36:40] i03_fee_engine_gate                           pass              103s  green[pass]: run.sh（I03FeeEngineGate.* + R130EngineFee.*） exit 0
+[18:37:49] r22_timezone                                  pass               69s  green+red-baseline[pass]: run.sh exit 0；30 项，MISMATCH 0（含 baseline-tsan-race 红控）
+[18:40:06] r20_zstd_ubsan                                pass              284s  green[pass]: run.sh exit 0（ASan+UBSan 与普通 direct/wrapper/sweep）：direct normal=0 sanitized=0 sanitizer_reports=0 roundtrip_pass=1，wrapper normal=0 sani

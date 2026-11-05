@@ -1,0 +1,36 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-uftcore/before2/src/WtUftCore/TraderAdapter.h	2026-11-04 19:19:06
++++ src/WtUftCore/TraderAdapter.h	2026-11-04 21:21:16
+@@ -222,7 +222,33 @@
+ 		std::string	std_code;
+ 	};
+ 	UndoneLedgerView undoneLedger(uint32_t localid) const;
++
++	/*
++	 *	I03-NEW-059: a caller that submits orders through this adapter can learn
++	 *	each local order id before the provider call, so reports delivered
++	 *	synchronously (or concurrently) from orderInsert can be attributed to it.
++	 *	The innermost registrar of this adapter on the calling thread is invoked
++	 *	once per order, after the undone reservation and before orderInsert. The
++	 *	callback must not call back into this adapter. If it throws, the order is
++	 *	not sent and its reservation is released.
++	 */
++	class LocalOrderRegistrar
++	{
++	public:
++		typedef void (*Callback)(void* owner, uint32_t localid);
++		LocalOrderRegistrar(TraderAdapter* adapter, Callback callback, void* owner);
++		~LocalOrderRegistrar();
++		LocalOrderRegistrar(const LocalOrderRegistrar&) = delete;
++		LocalOrderRegistrar& operator=(const LocalOrderRegistrar&) = delete;
+ 
++	private:
++		friend class TraderAdapter;
++		TraderAdapter*			_adapter;
++		Callback				_callback;
++		void*					_owner;
++		LocalOrderRegistrar*	_previous;
++	};
++
+ private:
+ 	struct UndoneLedgerEntry
+ 	{

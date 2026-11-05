@@ -1,0 +1,86 @@
+/*!
+ * 迭代03 第五会话主线程：决策 K28=A（空交易时段会话在配置入口拒绝）与
+ * K30=A（普通交易段内部重叠拒绝、端点相接允许），关联 BUG-L03-010。
+ */
+#include <gtest/gtest.h>
+
+#include <chrono>
+#include <filesystem>
+#include <fstream>
+#include <string>
+
+#include "Includes/WTSSessionInfo.hpp"
+#include "WTSTools/WTSBaseDataMgr.h"
+
+using namespace wtp;
+
+namespace
+{
+std::filesystem::path writeSessionFile(const std::string& name, const std::string& body)
+{
+	const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
+	const std::filesystem::path dir = std::filesystem::temp_directory_path() /
+		("s5_k28_k30_" + std::to_string(stamp));
+	std::filesystem::create_directories(dir);
+	const std::filesystem::path file = dir / name;
+	std::ofstream out(file);
+	out << body;
+	return file;
+}
+}
+
+TEST(S5MainK30Session, InteriorOverlapIsRejectedAndTouchingEndpointsAreAccepted)
+{
+	WTSSessionInfo* s = WTSSessionInfo::create("K30_DAY", "day", 0);
+	ASSERT_NE(nullptr, s);
+	EXPECT_TRUE(s->tryAddTradingSection(900, 1130));
+	EXPECT_TRUE(s->tryAddTradingSection(1130, 1500));	// 端点相接允许
+	EXPECT_FALSE(s->tryAddTradingSection(1000, 1100));	// 完全落在已有段内
+	EXPECT_FALSE(s->tryAddTradingSection(1459, 1501));	// 跨越已有段末端
+	EXPECT_TRUE(s->tryAddTradingSection(2100, 230));	// 跨零点夜盘
+	EXPECT_FALSE(s->tryAddTradingSection(200, 300));	// 与夜盘跨零点部分重叠
+	EXPECT_FALSE(s->tryAddTradingSection(2300, 2330));	// 与夜盘零点前部分重叠
+	EXPECT_TRUE(s->tryAddTradingSection(230, 300));	// 与夜盘尾端相接
+	EXPECT_EQ(4u, s->getTradingSections().size());		// 被拒绝的段不改变状态
+	s->release();
+}
+
+TEST(S5MainK30Session, OverlapCheckIsIndependentOfOffset)
+{
+	WTSSessionInfo* s = WTSSessionInfo::create("K30_NIGHT", "night", 300);
+	ASSERT_NE(nullptr, s);
+	EXPECT_TRUE(s->tryAddTradingSection(2100, 2300));
+	EXPECT_FALSE(s->tryAddTradingSection(2200, 100));
+	EXPECT_TRUE(s->tryAddTradingSection(900, 1500));
+	s->setOffsetMins(0);
+	EXPECT_FALSE(s->tryAddTradingSection(1400, 1600));
+	EXPECT_EQ(2u, s->getTradingSections().size());
+	s->release();
+}
+
+TEST(S5MainK28Session, EmptySectionsRejectTheWholeFile)
+{
+	const auto bad = writeSessionFile("sessions_empty.json",
+		"{\"GOOD\":{\"name\":\"good\",\"offset\":0,\"sections\":[{\"from\":900,\"to\":1500}]},"
+		"\"EMPTY\":{\"name\":\"empty\",\"offset\":0,\"sections\":[]}}");
+	WTSBaseDataMgr mgr;
+	EXPECT_FALSE(mgr.loadSessions(bad.string().c_str()));
+	EXPECT_EQ(nullptr, mgr.getSession("GOOD"));
+	EXPECT_EQ(nullptr, mgr.getSession("EMPTY"));
+
+	const auto good = writeSessionFile("sessions_good.json",
+		"{\"GOOD\":{\"name\":\"good\",\"offset\":0,\"sections\":[{\"from\":900,\"to\":1500}]}}");
+	WTSBaseDataMgr okMgr;
+	EXPECT_TRUE(okMgr.loadSessions(good.string().c_str()));
+	EXPECT_NE(nullptr, okMgr.getSession("GOOD"));
+}
+
+TEST(S5MainK30Session, OverlappingSectionsRejectTheWholeFile)
+{
+	const auto bad = writeSessionFile("sessions_overlap.json",
+		"{\"OVL\":{\"name\":\"overlap\",\"offset\":0,\"sections\":["
+		"{\"from\":900,\"to\":1500},{\"from\":900,\"to\":915}]}}");
+	WTSBaseDataMgr mgr;
+	EXPECT_FALSE(mgr.loadSessions(bad.string().c_str()));
+	EXPECT_EQ(nullptr, mgr.getSession("OVL"));
+}

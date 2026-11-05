@@ -13,6 +13,7 @@
  */
 #pragma once
 
+#include <atomic>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -22,14 +23,20 @@
 class T26CtpApiStub : public CThostFtdcTraderApi
 {
 public:
-	unsigned int	n_calls_;
+	// I03-NEW-139: the CTPLoader query worker calls the Req* entries while the test
+	// thread polls these counters. Counters are atomic and each Req* records its request
+	// before bumping the counter, so a test that observes the count (seq_cst) may then
+	// read the recorded request vectors.
+	std::atomic<unsigned int>	n_calls_;
 	int				stub_ret_;
 	std::string		trading_day_;
 
 	// 被捕获的请求
-	unsigned int							n_auth_;
-	unsigned int							n_login_;
-	unsigned int							n_qry_inst_;
+	std::atomic<unsigned int>				n_auth_;
+	std::atomic<unsigned int>				n_login_;
+	std::atomic<unsigned int>				n_qry_inst_;
+	std::atomic<unsigned int>				n_comm_;
+	std::atomic<unsigned int>				n_margin_;
 	std::vector<CThostFtdcQryInstrumentCommissionRateField>	comm_reqs_;
 	std::vector<CThostFtdcQryInstrumentMarginRateField>		margin_reqs_;
 	std::vector<int>					auth_reqids_;
@@ -40,7 +47,7 @@ public:
 
 	T26CtpApiStub()
 		: n_calls_(0), stub_ret_(0), trading_day_("20251027"),
-		n_auth_(0), n_login_(0), n_qry_inst_(0)
+		n_auth_(0), n_login_(0), n_qry_inst_(0), n_comm_(0), n_margin_(0)
 	{
 		std::memset(&last_auth_, 0, sizeof(last_auth_));
 		std::memset(&last_login_, 0, sizeof(last_login_));
@@ -78,8 +85,8 @@ public:
 
 	virtual int ReqQryInstrument(CThostFtdcQryInstrumentField*, int nRequestID) override
 	{
-		++n_qry_inst_;
 		qry_inst_reqids_.push_back(nRequestID);
+		++n_qry_inst_;
 		++n_calls_;
 		return stub_ret_;
 	}
@@ -87,6 +94,7 @@ public:
 	virtual int ReqQryInstrumentCommissionRate(CThostFtdcQryInstrumentCommissionRateField* pField, int) override
 	{
 		comm_reqs_.push_back(*pField);
+		++n_comm_;
 		++n_calls_;
 		return stub_ret_;
 	}
@@ -94,6 +102,7 @@ public:
 	virtual int ReqQryInstrumentMarginRate(CThostFtdcQryInstrumentMarginRateField* pField, int) override
 	{
 		margin_reqs_.push_back(*pField);
+		++n_margin_;
 		++n_calls_;
 		return stub_ret_;
 	}

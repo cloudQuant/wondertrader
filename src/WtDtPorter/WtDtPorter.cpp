@@ -45,10 +45,29 @@ const char* getModuleName()
 }
 #endif
 
+namespace
+{
+// The runner lives on the heap. At process exit its monitor and parsers are
+// stopped first; the runner (and every manager the parsers borrow) is deleted
+// only when all parser owners were released, otherwise it is retained until
+// the process ends (card 9a).
+struct RunnerHolder
+{
+	WtDtRunner* runner;
+	RunnerHolder() : runner(new WtDtRunner()) {}
+	~RunnerHolder()
+	{
+		if (runner->shutdown())
+			delete runner;
+		runner = NULL;
+	}
+};
+}
+
 WtDtRunner& getRunner()
 {
-	static WtDtRunner runner;
-	return runner;
+	static RunnerHolder holder;
+	return *holder.runner;
 }
 
 void initialize(WtString cfgFile, WtString logCfg, bool bCfgFile, bool bLogCfgFile)
@@ -63,6 +82,11 @@ void start(bool bAsync/* = false*/)
 {
 	WtDtRunner& runner = getRunner();
 	runner.start(bAsync, runner.isAlldayMode());
+}
+
+bool initial_parser_connect_commands_submitted()
+{
+	return getRunner().initialParserCommandsSubmitted();
 }
 
 const char* get_version()

@@ -44,6 +44,9 @@ EventNotifier::EventNotifier()
 	, _remover(nullptr)
 	, _publisher(nullptr)
 	, _register(nullptr)
+	, _inflight(0)
+	, _released(false)
+	, _module(NULL)
 {
 	// init 前通知函数为空操作，且析构不会误调用未初始化的函数指针。
 }
@@ -55,9 +58,62 @@ EventNotifier::EventNotifier()
  */
 EventNotifier::~EventNotifier()
 {
-	// 如果移除器函数存在且服务器ID有效，则销毁服务器
-	if (_remover && _mq_sid != 0)
-		_remover(_mq_sid);
+	// 复用幂等 release：已显式释放时不会重复销毁服务器
+	release();
+}
+
+void EventNotifier::release()
+{
+	std::lock_guard<std::mutex> lifecycle(_lifecycle_mtx);
+	FuncDestroyMQServer remover = nullptr;
+	WtUInt32 sid = 0;
+	{
+		std::unique_lock<std::mutex> lock(_state_mtx);
+		// 先关闭准入：此后 notify* 不再进入插件
+		_released = true;
+		// 等待已进入插件的发布全部返回，再销毁服务器（卡9 9b=A）
+		_drained.wait(lock, [this]() { return _inflight == 0; });
+		remover = _remover;
+		sid = _mq_sid;
+		_creator = nullptr;
+		_remover = nullptr;
+		_publisher = nullptr;
+		_register = nullptr;
+		_mq_sid = 0;
+	}
+
+	if (remover && sid != 0)
+	{
+		remover(sid);
+		// 卡9 9a=A：模块无版本化回调静默能力，保持常驻到进程退出
+		WTSLogger::info("EventNotifier released channel {}; MQ module retained until process exit", m_strURL.c_str());
+	}
+}
+
+void EventNotifier::publish(const char* topic, const char* data, WtUInt32 dataLen)
+{
+	FundPublishMessage publisher = nullptr;
+	WtUInt32 sid = 0;
+	{
+		std::lock_guard<std::mutex> lock(_state_mtx);
+		if (_released || _publisher == nullptr || _mq_sid == 0)
+			return;
+		publisher = _publisher;
+		sid = _mq_sid;
+		++_inflight;
+	}
+
+	struct InflightGuard
+	{
+		EventNotifier* self;
+		~InflightGuard()
+		{
+			std::lock_guard<std::mutex> lock(self->_state_mtx);
+			if (--self->_inflight == 0)
+				self->_drained.notify_all();
+		}
+	} guard{ this };
+	publisher(sid, topic, data, dataLen);
 }
 
 /**
@@ -70,8 +126,16 @@ EventNotifier::~EventNotifier()
 bool EventNotifier::init(WTSVariant* cfg)
 {
 	// 检查是否启用了事件通知器
-	if (!cfg || !cfg->getBoolean("active") || _mq_sid != 0)
+	if (!cfg || !cfg->getBoolean("active"))
 		return false;
+
+	std::lock_guard<std::mutex> lifecycle(_lifecycle_mtx);
+	{
+		// 卡9 9c=A：已初始化或已释放时拒绝，保留原实例
+		std::lock_guard<std::mutex> lock(_state_mtx);
+		if (_released || _mq_sid != 0)
+			return false;
+	}
 
 	// 获取服务器URL
 	m_strURL = cfg->getCString("url");
@@ -116,11 +180,15 @@ bool EventNotifier::init(WTSVariant* cfg)
 		WTSLogger::error("MQ server creation failed for {}", m_strURL.c_str());
 		return false;
 	}
-	_creator = creator;
-	_remover = remover;
-	_publisher = publisher;
-	_register = registerCallbacks;
-	_mq_sid = sid;
+	{
+		std::lock_guard<std::mutex> lock(_state_mtx);
+		_creator = creator;
+		_remover = remover;
+		_publisher = publisher;
+		_register = registerCallbacks;
+		_mq_sid = sid;
+		_module = dllInst;
+	}
 
 	// 记录初始化成功的日志
 	WTSLogger::info("EventNotifier initialized with channel {}", m_strURL.c_str());
@@ -136,9 +204,10 @@ bool EventNotifier::init(WTSVariant* cfg)
  */
 void EventNotifier::notifyEvent(const char* evtType)
 {
-	// 如果发布者函数存在，则发布消息
-	if (_publisher)
-		_publisher(_mq_sid, "BT_EVENT", evtType, (WtUInt32)strlen(evtType));
+	// 如果发布者函数存在，则发布消息（释放后为空操作）
+	if (evtType == nullptr)
+		return;
+	publish("BT_EVENT", evtType, (WtUInt32)strlen(evtType));
 }
 
 /**
@@ -151,9 +220,8 @@ void EventNotifier::notifyEvent(const char* evtType)
  */
 void EventNotifier::notifyData(const char* topic, void* data , uint32_t dataLen)
 {
-	// 如果发布者函数存在，则发布消息
-	if (_publisher)
-		_publisher(_mq_sid, topic, (const char*)data, dataLen);
+	// 如果发布者函数存在，则发布消息（释放后为空操作）
+	publish(topic, (const char*)data, dataLen);
 }
 
 /**
@@ -192,7 +260,6 @@ void EventNotifier::notifyFund(const char* topic, uint32_t uDate, double total_p
 		output = sb.GetString();
 	}
 
-	// 如果发布者函数存在，则发布消息
-	if (_publisher)
-		_publisher(_mq_sid, topic, (const char*)output.c_str(), (WtUInt32)output.size());
+	// 如果发布者函数存在，则发布消息（释放后为空操作）
+	publish(topic, (const char*)output.c_str(), (WtUInt32)output.size());
 }

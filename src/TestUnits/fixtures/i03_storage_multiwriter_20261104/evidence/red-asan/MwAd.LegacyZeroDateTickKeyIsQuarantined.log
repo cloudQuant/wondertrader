@@ -1,0 +1,27 @@
+Note: Google Test filter = MwAd.LegacyZeroDateTickKeyIsQuarantined
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from MwAd
+[ RUN      ] MwAd.LegacyZeroDateTickKeyIsQuarantined
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:221: Failure
+Value of: _writer->writeTick(t, 0)
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:224: Failure
+Expected equality of these values:
+  read_db(dbDir).size()
+    Which is: 2
+  1u
+    Which is: 1
+
+[  FAILED  ] MwAd.LegacyZeroDateTickKeyIsQuarantined (3 ms)
+[----------] 1 test from MwAd (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] MwAd.LegacyZeroDateTickKeyIsQuarantined
+
+ 1 FAILED TEST

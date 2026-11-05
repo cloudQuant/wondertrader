@@ -1,0 +1,207 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/WtExecMon/WtExecRunner.cpp	2026-10-31 09:48:26
++++ src/WtExecMon/WtExecRunner.cpp	2026-11-04 21:19:44
+@@ -14,6 +14,9 @@
+ #include "../Share/TimeUtils.hpp"
+ #include "../WTSUtils/SignalHook.hpp"
+ 
++#include <mutex>
++#include <set>
++#include <string>
+ #include <vector>
+ #include <exception>
+ 
+@@ -32,11 +35,85 @@
+ 	~ScopedVariantRelease() { if (value != NULL) value->release(); }
+ 	WTSVariant* value;
+ };
++
++// Card 8b=A (BUG-R134-003/WSN06-001): pure validation of the complete executer
++// list, mirroring WtRunner's runner-level preflight for this runner's kinds
++// (local/diff/dist). It only reads the variant tree, so an invalid entry
++// anywhere in the list is rejected before factories load or any executer is
++// constructed and published.
++// I03-NEW-045 class (card 9a): parser owners without callback-drain proof are
++// retained until process exit; they are moved here and never destroyed, so a
++// late provider callback cannot reach a freed adapter.
++void retainParserOwnersUntilProcessExit(std::vector<ParserAdapterPtr>& owners)
++{
++	static std::mutex* retainedMutex = new std::mutex();
++	static std::vector<ParserAdapterPtr>* retained = new std::vector<ParserAdapterPtr>();
++	std::lock_guard<std::mutex> lock(*retainedMutex);
++	for (ParserAdapterPtr& owner : owners)
++	{
++		if (owner)
++			retained->push_back(owner);
++	}
++	owners.clear();
+ }
+ 
++bool validateExecRunnerEntries(WTSVariant* list, std::string& error)
++{
++	if (list == NULL || list->type() != WTSVariant::VT_Array)
++	{
++		error = "executers must be an array";
++		return false;
++	}
++	std::set<std::string> ids;
++	for (uint32_t idx = 0; idx < list->size(); idx++)
++	{
++		WTSVariant* item = list->get(idx);
++		const std::string where = "executers[" + std::to_string(idx) + "]";
++		if (item == NULL || item->type() != WTSVariant::VT_Object)
++		{
++			error = where + " must be an object";
++			return false;
++		}
++		if (!item->getBoolean("active"))
++			continue;
++		const std::string id = item->getCString("id");
++		if (id.empty())
++		{
++			error = where + ".id must not be empty";
++			return false;
++		}
++		if (!ids.insert(id).second)
++		{
++			error = where + ": duplicate executer id " + id;
++			return false;
++		}
++		std::string kind = item->getCString("name");
++		if (kind.empty())
++			kind = "local";
++		std::string itemError;
++		bool valid = true;
++		if (kind == "local")
++			valid = WtLocalExecuter::validateConfig(item, itemError);
++		else if (kind == "diff")
++			valid = WtDiffExecuter::validateConfig(item, itemError);
++		else if (kind != "dist")
++		{
++			error = where + " (" + id + "): unknown executer kind " + kind;
++			return false;
++		}
++		if (!valid)
++		{
++			error = where + " (" + id + "): " + itemError;
++			return false;
++		}
++	}
++	return true;
++}
++}
++
+ #ifdef _MSC_VER
+ #include "../Common/mdump.h"
+-#include <filesystem>
++#include <filesystem>
+ namespace fs = std::filesystem;
+ const char* getModuleName()
+ {
+@@ -185,8 +262,20 @@
+ 
+ WtExecRunner::~WtExecRunner()
+ {
+-	if (!shutdownRuntime())
+-		std::terminate();
++	if (shutdownRuntime())
++		return;
++	// I03-NEW-045 class: the porter singleton is destroyed at process exit. Failed
++	// parser candidates that may still own an API are a contract result (card 9a),
++	// not an unrecoverable failure: retain them until process exit and finish.
++	if (!_parser_quarantine.empty())
++	{
++		WTSLogger::warn("{} failed parser owner(s) without callback-drain proof are retained until process exit",
++			_parser_quarantine.size());
++		retainParserOwnersUntilProcessExit(_parser_quarantine);
++		if (shutdownRuntime())
++			return;
++	}
++	std::terminate();
+ }
+ bool WtExecRunner::shutdownRuntime()
+ {
+@@ -227,6 +316,24 @@
+ 	// SPI callback. This call preserves existing shutdown behavior, but external
+ 	// provider callback quiescence remains unverified until a versioned barrier exists.
+ 	_parsers.release();
++	{
++		// I03-NEW-045 class: an adapter that still owns its API after release has
++		// no drain proof; keep it alive until process exit, not with the map.
++		std::vector<ParserAdapterPtr> retained;
++		for (auto it = _parsers._adapters.begin(); it != _parsers._adapters.end();)
++		{
++			if (it->second && it->second->hasApi())
++			{
++				retained.push_back(it->second);
++				it = _parsers._adapters.erase(it);
++			}
++			else
++				++it;
++		}
++		if (!retained.empty())
++			WTSLogger::warn("{} parser owner(s) without callback-drain proof are retained until process exit", retained.size());
++		retainParserOwnersUntilProcessExit(retained);
++	}
+ 	if (!closeRuntimeAdmissionAndDrain())
+ 	{
+ 		_shutdown_in_progress = false;
+@@ -489,10 +596,10 @@
+ 
+ 		const char* id = cfgItem->getCString("id");
+ 		std::string realid = id ? id : "";
+-		if (realid.empty())
+-		{
+-			static uint32_t auto_parserid = 1000;
+-			realid = fmtutil::format<64>("auto_parser_{}", auto_parserid++);
++		if (realid.empty())
++		{
++			static uint32_t auto_parserid = 1000;
++			realid = fmtutil::format<64>("auto_parser_{}", auto_parserid++);
+ 		}
+ 
+ 		ParserAdapterPtr adapter(new ParserAdapter);
+@@ -535,6 +642,14 @@
+ 	WTSVariant* cfg = cfgExecuter->get("executers");
+ 	if (cfg == NULL || cfg->type() != WTSVariant::VT_Array)
+ 		return false;
++
++	// Validate the whole list before loading factories or publishing any host.
++	std::string validationError;
++	if (!validateExecRunnerEntries(cfg, validationError))
++	{
++		WTSLogger::error("Invalid executer configuration: {}", validationError);
++		return false;
++	}
+ 
+ 	std::string path = WtHelper::getInstDir() + "executer//";
+ 	_exe_factory.loadFactories(path.c_str());
+@@ -750,20 +865,20 @@
+ 	RuntimeOperation operation(this, RuntimeOperation::RuntimeCall);
+ 	if (!operation.entered())
+ 		return;
+-	if (quote == NULL)
+-		return;
+-	if (_config_failed)
+-	{
+-		WTSLogger::error("Runner is not configured; ignoring quote");
+-		return;
+-	}
+-
++	if (quote == NULL)
++		return;
++	if (_config_failed)
++	{
++		WTSLogger::error("Runner is not configured; ignoring quote");
++		return;
++	}
++
+ 	uint32_t uDate = quote->actiondate();
+ 	uint32_t uTime = quote->actiontime();
+ 	uint32_t curMin = uTime / 100000;
+ 	uint32_t curSec = uTime % 100000;
+ 	WtHelper::setTime(uDate, curMin, curSec);
+-	WtHelper::setTDate(quote->tradingdate());
++	WtHelper::setTDate(quote->tradingdate());
+ 
+ 	_data_mgr.handle_push_quote(quote->code(), quote);
+ 

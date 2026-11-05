@@ -1,0 +1,43 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R60SessionIsolation.release_from_rsp_entrust_suppresses_rest_of_handler
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R60SessionIsolation
+[ RUN      ] R60SessionIsolation.release_from_rsp_entrust_suppresses_rest_of_handler
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:229: Failure
+Value of: wait_until([&]() { return sink_.late.load() != 0 || sink_.late_logs.load() != 0; }, 200)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:233: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  sink_.n_push_order()
+    Which is: 1
+onPushOrder delivered after release() returned in onRspEntrust
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:234: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  sink_.late.load()
+    Which is: 1
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:235: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  sink_.late_logs.load()
+    Which is: 1
+
+[  FAILED  ] R60SessionIsolation.release_from_rsp_entrust_suppresses_rest_of_handler (31 ms)
+[----------] 1 test from R60SessionIsolation (31 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (32 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R60SessionIsolation.release_from_rsp_entrust_suppresses_rest_of_handler
+
+ 1 FAILED TEST

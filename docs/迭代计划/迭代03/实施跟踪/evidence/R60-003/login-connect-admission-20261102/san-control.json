@@ -1,0 +1,19 @@
+{
+  "compile": [
+    "/usr/bin/c++",
+    "-fsanitize=address,undefined",
+    "/tmp/wt-i03-r60-login-connect/san-control.cpp",
+    "-o",
+    "/tmp/wt-i03-r60-login-connect/san-control"
+  ],
+  "run": [
+    "perl",
+    "-e",
+    "alarm 8; exec @ARGV",
+    "--",
+    "/tmp/wt-i03-r60-login-connect/san-control"
+  ],
+  "exit": -14,
+  "stdout": "",
+  "stderr": ""
+}

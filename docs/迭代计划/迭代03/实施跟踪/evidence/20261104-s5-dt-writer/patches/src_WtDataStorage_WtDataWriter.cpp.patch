@@ -1,0 +1,771 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-dt-writer/before/src/WtDataStorage/WtDataWriter.cpp	2026-11-04 03:08:15
++++ src/WtDataStorage/WtDataWriter.cpp	2026-11-04 20:41:17
+@@ -122,11 +122,103 @@
+  */
+ extern bool proc_block_data(std::string& content, bool isBar, bool bKeepHead = true);
+ 
++namespace
++{
++	// Writers created by this module; the lifecycle V1 table rejects foreign pointers.
++	StdUniqueMutex& writerRegistryMutex()
++	{
++		static StdUniqueMutex mtx;
++		return mtx;
++	}
++
++	std::set<IDataWriter*>& writerRegistry()
++	{
++		static std::set<IDataWriter*> writers;
++		return writers;
++	}
++
++	WtDataWriter* registeredWriter(void* handle)
++	{
++		if (handle == nullptr)
++			return nullptr;
++		IDataWriter* writer = static_cast<IDataWriter*>(handle);
++		StdUniqueLock lock(writerRegistryMutex());
++		if (writerRegistry().count(writer) == 0)
++			return nullptr;
++		return static_cast<WtDataWriter*>(writer);
++	}
++
++	WtDataWriterLifecycleV1Status lifecycleRequestStop(void* handle) noexcept
++	{
++		try
++		{
++			WtDataWriter* writer = registeredWriter(handle);
++			if (writer == nullptr)
++				return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
++			writer->requestStop();
++			return WT_DATA_WRITER_LIFECYCLE_V1_OK;
++		}
++		catch (...)
++		{
++			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;
++		}
++	}
++
++	WtDataWriterLifecycleV1Status lifecycleCanWait(void* handle) noexcept
++	{
++		try
++		{
++			WtDataWriter* writer = registeredWriter(handle);
++			if (writer == nullptr)
++				return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
++			return writer->canWaitDrain() ? WT_DATA_WRITER_LIFECYCLE_V1_OK : WT_DATA_WRITER_LIFECYCLE_V1_WOULD_DEADLOCK;
++		}
++		catch (...)
++		{
++			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;
++		}
++	}
++
++	WtDataWriterLifecycleV1Status lifecycleWaitDrained(void* handle, uint32_t timeoutMs) noexcept
++	{
++		try
++		{
++			WtDataWriter* writer = registeredWriter(handle);
++			if (writer == nullptr)
++				return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
++			return writer->waitDrained(timeoutMs);
++		}
++		catch (...)
++		{
++			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;
++		}
++	}
++
++	const WtDataWriterLifecycleApiV1 g_writer_lifecycle_v1 = {
++		(uint32_t)sizeof(WtDataWriterLifecycleApiV1),
++		WT_DATA_WRITER_LIFECYCLE_V1_ABI_VERSION,
++		WT_DATA_WRITER_LIFECYCLE_V1_CAP_DRAIN,
++		lifecycleRequestStop,
++		lifecycleCanWait,
++		lifecycleWaitDrained
++	};
++}
++
+ extern "C"
+ {
+ 	EXPORT_FLAG IDataWriter* createWriter()
+ 	{
+-		IDataWriter* ret = new WtDataWriter();
++		WtDataWriter* ret = new WtDataWriter();
++		try
++		{
++			StdUniqueLock lock(writerRegistryMutex());
++			writerRegistry().insert(ret);
++		}
++		catch (...)
++		{
++			delete ret;
++			return NULL;
++		}
+ 		return ret;
+ 	}
+ 
+@@ -134,10 +226,19 @@
+ 	{
+ 		if (writer != NULL)
+ 		{
++			{
++				StdUniqueLock lock(writerRegistryMutex());
++				writerRegistry().erase(writer);
++			}
+ 			delete writer;
+ 			writer = NULL;
+ 		}
+ 	}
++
++	EXPORT_FLAG const WtDataWriterLifecycleApiV1* getDataWriterLifecycleApiV1(uint32_t requestedMajor)
++	{
++		return requestedMajor == WT_DATA_WRITER_LIFECYCLE_V1_ABI_MAJOR ? &g_writer_lifecycle_v1 : NULL;
++	}
+ };
+ 
+ static const uint32_t CACHE_SIZE_STEP = 200;
+@@ -185,7 +286,59 @@
+ }
+ 
+ thread_local WtDataWriter::OperationFrame* WtDataWriter::_current_operation = nullptr;
++thread_local WtDataWriter* WtDataWriter::_close_job_writer = nullptr;
+ 
++WtDataWriter::CloseJobScope::CloseJobScope(WtDataWriter& writer)
++	: _writer(writer), _previous(WtDataWriter::_close_job_writer)
++{
++	WtDataWriter::_close_job_writer = &writer;
++}
++
++WtDataWriter::CloseJobScope::~CloseJobScope()
++{
++	WtDataWriter::_close_job_writer = _previous;
++	// Safe point: every lease of this contract's close job has been released.
++	_writer.replayCloseJobWrites();
++}
++
++bool WtDataWriter::deferCloseJobWrite(WTSObject* data, uint64_t type, uint32_t flag)
++{
++	try
++	{
++		_close_deferred.emplace_back(data, type, flag);
++	}
++	catch (...)
++	{
++		return false;
++	}
++	return true;
++}
++
++void WtDataWriter::replayCloseJobWrites() noexcept
++{
++	std::vector<TaskInfo> pending;
++	pending.swap(_close_deferred);
++	for (TaskInfo& task : pending)
++	{
++		try
++		{
++			switch (task._type)
++			{
++			case 0: procTick((WTSTickData*)task._obj, task._flag); break;
++			case 1: procQueue((WTSOrdQueData*)task._obj); break;
++			case 2: procOrder((WTSOrdDtlData*)task._obj); break;
++			case 3: procTrans((WTSTransData*)task._obj); break;
++			default: break;
++			}
++		}
++		catch (...)
++		{
++			try { pipe_writer_log(_sink, LL_ERROR, "Replaying a write deferred by a close job failed"); }
++			catch (...) {}
++		}
++	}
++}
++
+ WtDataWriter::OperationGuard::OperationGuard(WtDataWriter& writer, bool initialization)
+ 	: _initialization(initialization)
+ {
+@@ -311,10 +464,212 @@
+ 	{
+ 		StdUniqueLock procLock(_proc_mtx);
+ 		_proc_stopping = true;
++	}
++}
++
++bool WtDataWriter::isWorkerThread()
++{
++	const std::thread::id currentThread = std::this_thread::get_id();
++	{
++		StdUniqueLock taskLock(_task_mtx);
++		if (_task_worker_id == currentThread)
++			return true;
++	}
++	{
++		StdUniqueLock procLock(_proc_mtx);
++		if (_proc_worker_id == currentThread)
++			return true;
++	}
++	StdUniqueLock checkLock(_check_mtx);
++	return _check_worker_id == currentThread;
++}
++
++void WtDataWriter::markWorkerExited()
++{
++	{
++		StdUniqueLock lifecycleLock(_accept_mtx);
++		_workers_exited.fetch_add(1);
++	}
++	_lifecycle_cond.notify_all();
++}
++
++void WtDataWriter::requestStop()
++{
++	// Nonblocking and idempotent; safe from callbacks and writer threads. Accepted
++	// work keeps draining; the last admitted operation stops the queues.
++	bool stoppedQueues = false;
++	{
++		StdUniqueLock lifecycleLock(_accept_mtx);
++		_accepting = false;
++		_lifecycle_state = LifecycleState::Closing;
++		_terminated.store(true);
++		if (_active_operations == 0)
++		{
++			stopQueuesLocked();
++			stoppedQueues = true;
++		}
++	}
++	_check_cond.notify_all();
++	if (stoppedQueues)
++	{
++		_task_cond.notify_all();
++		_proc_cond.notify_all();
++	}
++}
++
++bool WtDataWriter::canWaitDrain()
++{
++	return !hasCurrentOperation() && !isWorkerThread();
++}
++
++WtDataWriterLifecycleV1Status WtDataWriter::waitDrained(uint32_t timeout_ms)
++{
++	if (!canWaitDrain())
++		return WT_DATA_WRITER_LIFECYCLE_V1_WOULD_DEADLOCK;
++
++	const bool forever = (timeout_ms == WT_DATA_WRITER_LIFECYCLE_V1_WAIT_FOREVER);
++	const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(forever ? 0 : timeout_ms);
++	{
++		StdUniqueLock lifecycleLock(_accept_mtx);
++		if (_lifecycle_state != LifecycleState::Closing)
++			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;	// request_stop must come first
++
++		auto opsDone = [this]() { return _active_operations == 0; };
++		if (forever)
++			_lifecycle_cond.wait(lifecycleLock, opsDone);
++		else if (!_lifecycle_cond.wait_until(lifecycleLock, deadline, opsDone))
++			return WT_DATA_WRITER_LIFECYCLE_V1_PENDING;
++		stopQueuesLocked();
++	}
++	_check_cond.notify_all();
++	_task_cond.notify_all();
++	_proc_cond.notify_all();
++
++	{
++		// No thread can be created any more: every creation happens inside an admitted
++		// operation and the queues are stopped. Wait for each started loop to return.
++		StdUniqueLock lifecycleLock(_accept_mtx);
++		auto workersDone = [this]() { return _workers_exited.load() >= _workers_started.load(); };
++		if (forever)
++			_lifecycle_cond.wait(lifecycleLock, workersDone);
++		else if (!_lifecycle_cond.wait_until(lifecycleLock, deadline, workersDone))
++			return WT_DATA_WRITER_LIFECYCLE_V1_PENDING;
++	}
++
++	StdUniqueLock releaseLock(_release_mtx);
++	if (!_workers_joined)
++	{
++		StdThreadPtr checker = _proc_chk;
++		StdThreadPtr taskWorker;
++		StdThreadPtr procWorker;
++		{
++			StdUniqueLock taskLock(_task_mtx);
++			taskWorker = _task_thrd;
++		}
++		{
++			StdUniqueLock procLock(_proc_mtx);
++			procWorker = _proc_thrd;
++		}
++		// Every loop has returned, so these joins only reap finished threads.
++		if (checker != NULL && checker->joinable())
++			checker->join();
++		if (taskWorker != NULL && taskWorker->joinable())
++			taskWorker->join();
++		if (procWorker != NULL && procWorker->joinable())
++			procWorker->join();
++		_workers_joined = true;
++	}
++	return WT_DATA_WRITER_LIFECYCLE_V1_DRAINED;
++}
++
++WtDataWriter::OrderedBroadcasts::~OrderedBroadcasts()
++{
++	for (WTSObject* event : _events)
++	{
++		if (event != NULL)
++			event->release();
++	}
++	_events.clear();
++}
++
++template<typename DataT, typename DeliverFn>
++void WtDataWriter::drainBroadcasts(OrderedBroadcasts& queue, DeliverFn deliver, const char* what)
++{
++	{
++		StdUniqueLock lock(queue._mtx);
++		if (queue._draining)
++			return;	// another frame (possibly this thread's caller) delivers in order
++		queue._draining = true;
++	}
++	for (;;)
++	{
++		WTSObject* event = NULL;
++		{
++			StdUniqueLock lock(queue._mtx);
++			if (queue._events.empty())
++			{
++				queue._draining = false;
++				return;
++			}
++			event = queue._events.front();
++			queue._events.pop_front();
++		}
++		// No writer lock is held here; a callback may re-enter the same block.
++		try
++		{
++			deliver(static_cast<DataT*>(event));
++		}
++		catch (const std::exception& ex)
++		{
++			try { pipe_writer_log(_sink, LL_ERROR, "{} broadcast failed: {}", what, ex.what()); }
++			catch (...) {}
++		}
++		catch (...)
++		{
++			try { pipe_writer_log(_sink, LL_ERROR, "{} broadcast failed with an unknown exception", what); }
++			catch (...) {}
++		}
++		event->release();
+ 	}
+ }
+ 
++namespace
++{
++	void enqueueBroadcast(StdUniqueMutex& mtx, std::deque<WTSObject*>& events, WTSObject* data)
++	{
++		data->retain();
++		try
++		{
++			StdUniqueLock lock(mtx);
++			events.push_back(data);
++		}
++		catch (...)
++		{
++			data->release();
++			throw;
++		}
++	}
++}
+ 
++void WtDataWriter::countReceived(int stream, const char* exchg, const char* what)
++{
++	// Shared by every stream and thread; the previous per-function static maps were
++	// written concurrently by synchronous producers without synchronization.
++	static StdUniqueMutex s_count_mtx;
++	static wt_hashmap<std::string, uint64_t> s_counts[4];
++	if (stream < 0 || stream > 3 || exchg == NULL)
++		return;
++	uint64_t cnt = 0;
++	{
++		StdUniqueLock lock(s_count_mtx);
++		cnt = ++s_counts[stream][exchg];
++	}
++	// groupsize 0 (missing key) must not divide by zero.
++	if (_log_group_size != 0 && cnt % _log_group_size == 0)
++		pipe_writer_log(_sink, LL_INFO, "{} {} received from exchange {}", cnt, what, exchg);
++}
++
++
+ WtDataWriter::WtDataWriter()
+ 	: _log_group_size(1000)
+ 	, _terminated(false)
+@@ -409,7 +764,17 @@
+ 
+ 	loadCache();
+ 
+-	_proc_chk.reset(new StdThread(boost::bind(&WtDataWriter::check_loop, this)));
++	_workers_started.fetch_add(1);
++	try
++	{
++		_proc_chk.reset(new StdThread(boost::bind(&WtDataWriter::check_loop, this)));
++	}
++	catch (...)
++	{
++		_workers_started.fetch_sub(1);
++		pipe_writer_log(sink, LL_ERROR, "WtDataWriter could not start its block checker thread");
++		return false;
++	}
+ 
+ 	pipe_writer_log(sink, LL_INFO, "WtDataWriter initialized, root dir: {}, save_csv_tick: {}, async_mode: {}, log_group_size: {}, disable_history: {}, "
+ 		"disable_tick: {}, disable_min1: {}, disable_min5: {}, disable_day: {}, disable_trans: {}, disable_ordque: {}, disable_orders: {}, min_price_mode: {}", 
+@@ -420,75 +785,24 @@
+ 
+ void WtDataWriter::release()
+ {
+-	const std::thread::id currentThread = std::this_thread::get_id();
+-	const bool calledFromOperation = hasCurrentOperation();
+-	bool calledFromWorker = false;
+-	{
+-		// Close admission before inspecting worker state; an admitted producer may be
+-		// waiting on a queue mutex and must be allowed to finish its enqueue.
+-		StdUniqueLock lifecycleLock(_accept_mtx);
+-		_accepting = false;
+-		_lifecycle_state = LifecycleState::Closing;
+-		_terminated.store(true);
+-	}
+-	_check_cond.notify_all();
++	// Close admission first; an admitted producer may still be waiting on a queue mutex
++	// and is allowed to finish its enqueue.
++	requestStop();
+ 
+-	{
+-		StdUniqueLock taskLock(_task_mtx);
+-		calledFromWorker = _task_worker_id == currentThread;
+-	}
+-	{
+-		StdUniqueLock procLock(_proc_mtx);
+-		calledFromWorker = calledFromWorker || _proc_worker_id == currentThread;
+-	}
+-	{
+-		StdUniqueLock checkLock(_check_mtx);
+-		calledFromWorker = calledFromWorker || _check_worker_id == currentThread;
+-	}
+-
+-	// A callback/worker may request shutdown, but cannot wait for its own lease or join itself.
+-	// The last active operation stops queues; an external owner must later join and reclaim resources.
+-	if (calledFromWorker || calledFromOperation)
+-	{
+-		bool stoppedQueues = false;
+-		{
+-			StdUniqueLock lifecycleLock(_accept_mtx);
+-			if (_active_operations == 0)
+-			{
+-				stopQueuesLocked();
+-				stoppedQueues = true;
+-			}
+-		}
+-		if (stoppedQueues)
+-		{
+-			_task_cond.notify_all();
+-			_proc_cond.notify_all();
+-		}
+-		return;
+-	}
++	// A callback/worker may request shutdown, but cannot wait for its own lease or join
++	// itself. The last active operation stops the queues; an external owner must later
++	// drain (waitDrained / lifecycle V1) and reclaim resources.
++	if (hasCurrentOperation() || isWorkerThread())
++		return;
+ 
+-	{
+-		StdUniqueLock lifecycleLock(_accept_mtx);
+-		_lifecycle_cond.wait(lifecycleLock, [this]() { return _active_operations == 0; });
+-		stopQueuesLocked();
+-	}
+-	_task_cond.notify_all();
+-	_proc_cond.notify_all();
++	// Legacy entry point: wait without limit for admitted operations, accepted queues
++	// and every writer thread (same order and guarantees as waitDrained).
++	waitDrained(WT_DATA_WRITER_LIFECYCLE_V1_WAIT_FOREVER);
+ 
+ 	StdUniqueLock releaseLock(_release_mtx);
+ 	if (_released)
+ 		return;
+ 
+-	// Stop the periodic map inspector before draining queued writes.
+-	if (_proc_chk != NULL && _proc_chk->joinable())
+-		_proc_chk->join();
+-
+-	if (_task_thrd != NULL && _task_thrd->joinable())
+-		_task_thrd->join();
+-
+-	if (_proc_thrd != NULL && _proc_thrd->joinable())
+-		_proc_thrd->join();
+-
+ 	StdUniqueLock blockMapLock(_rt_blocks_map_mtx);
+ 	_rt_ticks_blocks.clear();
+ 
+@@ -1068,6 +1382,10 @@
+ 	if (_async_proc)
+ 		return pushTask(TaskInfo(curTick, 0, procFlag));
+ 
++	// I03-NEW-048: re-entered from the close worker while it holds block leases.
++	if (_close_job_writer == this)
++		return deferCloseJobWrite(curTick, 0, procFlag);
++
+ 	return procTick(curTick, procFlag);
+ }
+ bool WtDataWriter::procTick(WTSTickData* curTick, uint32_t procFlag)
+@@ -1110,13 +1428,7 @@
+ 
+ 		_sink->broadcastTick(curTick);
+ 
+-		static wt_hashmap<std::string, uint64_t> _tcnt_map;
+-		uint64_t& cnt = _tcnt_map[curTick->exchg()];
+-		cnt++;
+-		if (cnt % _log_group_size == 0)
+-		{
+-			pipe_writer_log(_sink, LL_INFO, "{} ticks received from exchange {}", cnt, curTick->exchg());
+-		}
++		countReceived(0, curTick->exchg(), "ticks");
+ 	} while (false);
+ 	return true;
+ }
+@@ -1133,38 +1445,39 @@
+ 	if (_async_proc)
+ 		return pushTask(TaskInfo(curOrdQue, 1));
+ 
++	if (_close_job_writer == this)
++		return deferCloseJobWrite(curOrdQue, 1, 0);
++
+ 	procQueue(curOrdQue);
+ 	return true;
+ }
+ void WtDataWriter::procQueue(WTSOrdQueData* curOrdQue)
+ {
+-	do
+-	{
+-		WTSContractInfo* ct = curOrdQue->getContractInfo();
+-		WTSCommodityInfo* commInfo = ct->getCommInfo();
++	WTSContractInfo* ct = curOrdQue->getContractInfo();
++	WTSCommodityInfo* commInfo = ct->getCommInfo();
+ 
+-		//再根据状态过滤
+-		if (!_sink->canSessionReceive(commInfo->getSession()))
+-			break;
++	//再根据状态过滤
++	if (!_sink->canSessionReceive(commInfo->getSession()))
++		return;
+ 
++	std::shared_ptr<OrdQueBlockPair> pair;
++	{
+ 		BlockLease<OrdQueBlockPair> pBlockPair = getOrdQueBlock(ct, curOrdQue->tradingdate());
+ 		if (!pBlockPair)
+-			break;
++			return;
+ 
+ 		// 卡13：跨进程发布锁内 prepare（同步其他 writer 的扩容、必要时扩容、写未发布槽位）后发布 _size
+ 		if (!appendPublished<RTDayBlockHeader, WTSOrdQueStruct>(*pBlockPair.get(), curOrdQue->getOrdQueStruct(), ct->getFullCode(), "order-queue"))
+-			break;
++			return;
+ 
+-		_sink->broadcastOrdQue(curOrdQue);
++		// P10-008: enqueue under the block mutex (storage order), broadcast after unlock.
++		pair = pBlockPair.owner();
++		enqueueBroadcast(pair->_broadcasts._mtx, pair->_broadcasts._events, curOrdQue);
++	}
++	drainBroadcasts<WTSOrdQueData>(pair->_broadcasts,
++		[this](WTSOrdQueData* data) { _sink->broadcastOrdQue(data); }, "Order queue");
+ 
+-		static wt_hashmap<std::string, uint64_t> _tcnt_map;
+-		uint64_t& cnt = _tcnt_map[curOrdQue->exchg()];
+-		cnt++;
+-		if (cnt % _log_group_size == 0)
+-		{
+-			pipe_writer_log(_sink, LL_INFO, "{} queues received from exchange {}", cnt, curOrdQue->exchg());
+-		}
+-	} while (false);
++	countReceived(1, curOrdQue->exchg(), "queues");
+ }
+ 
+ bool WtDataWriter::writeOrderDetail(WTSOrdDtlData* curOrdDtl)
+@@ -1179,38 +1492,39 @@
+ 	if (_async_proc)
+ 		return pushTask(TaskInfo(curOrdDtl, 2));
+ 
++	if (_close_job_writer == this)
++		return deferCloseJobWrite(curOrdDtl, 2, 0);
++
+ 	procOrder(curOrdDtl);
+ 	return true;
+ }
+ void WtDataWriter::procOrder(WTSOrdDtlData* curOrdDtl)
+ {
+-	do
+-	{
+-		WTSContractInfo* ct = curOrdDtl->getContractInfo();
+-		WTSCommodityInfo* commInfo = ct->getCommInfo();
++	WTSContractInfo* ct = curOrdDtl->getContractInfo();
++	WTSCommodityInfo* commInfo = ct->getCommInfo();
+ 
+-		//再根据状态过滤
+-		if (!_sink->canSessionReceive(commInfo->getSession()))
+-			break;
++	//再根据状态过滤
++	if (!_sink->canSessionReceive(commInfo->getSession()))
++		return;
+ 
++	std::shared_ptr<OrdDtlBlockPair> pair;
++	{
+ 		BlockLease<OrdDtlBlockPair> pBlockPair = getOrdDtlBlock(ct, curOrdDtl->tradingdate());
+ 		if (!pBlockPair)
+-			break;
++			return;
+ 
+ 		// 卡13：跨进程发布锁内 prepare（同步其他 writer 的扩容、必要时扩容、写未发布槽位）后发布 _size
+ 		if (!appendPublished<RTDayBlockHeader, WTSOrdDtlStruct>(*pBlockPair.get(), curOrdDtl->getOrdDtlStruct(), ct->getFullCode(), "order-detail"))
+-			break;
++			return;
+ 
+-		_sink->broadcastOrdDtl(curOrdDtl);
++		// P10-008: enqueue under the block mutex (storage order), broadcast after unlock.
++		pair = pBlockPair.owner();
++		enqueueBroadcast(pair->_broadcasts._mtx, pair->_broadcasts._events, curOrdDtl);
++	}
++	drainBroadcasts<WTSOrdDtlData>(pair->_broadcasts,
++		[this](WTSOrdDtlData* data) { _sink->broadcastOrdDtl(data); }, "Order detail");
+ 
+-		static wt_hashmap<std::string, uint64_t> _tcnt_map;
+-		uint64_t& cnt = _tcnt_map[curOrdDtl->exchg()];
+-		cnt++;
+-		if (cnt % _log_group_size == 0)
+-		{
+-			pipe_writer_log(_sink, LL_INFO, "{} orders received from exchange {}", cnt, curOrdDtl->exchg());
+-		}
+-	} while (false);
++	countReceived(2, curOrdDtl->exchg(), "orders");
+ }
+ 
+ bool WtDataWriter::writeTransaction(WTSTransData* curTrans)
+@@ -1225,38 +1539,39 @@
+ 	if (_async_proc)
+ 		return pushTask(TaskInfo(curTrans, 3));
+ 
++	if (_close_job_writer == this)
++		return deferCloseJobWrite(curTrans, 3, 0);
++
+ 	procTrans(curTrans);
+ 	return true;
+ }
+ void WtDataWriter::procTrans(WTSTransData* curTrans)
+ {
+-	do
+-	{
+-		WTSContractInfo* ct = curTrans->getContractInfo();
+-		WTSCommodityInfo* commInfo = ct->getCommInfo();
++	WTSContractInfo* ct = curTrans->getContractInfo();
++	WTSCommodityInfo* commInfo = ct->getCommInfo();
+ 
+-		//再根据状态过滤
+-		if (!_sink->canSessionReceive(commInfo->getSession()))
+-			break;
++	//再根据状态过滤
++	if (!_sink->canSessionReceive(commInfo->getSession()))
++		return;
+ 
++	std::shared_ptr<TransBlockPair> pair;
++	{
+ 		BlockLease<TransBlockPair> pBlockPair = getTransBlock(ct, curTrans->tradingdate());
+ 		if (!pBlockPair)
+-			break;
++			return;
+ 
+ 		// 卡13：跨进程发布锁内 prepare（同步其他 writer 的扩容、必要时扩容、写未发布槽位）后发布 _size
+ 		if (!appendPublished<RTDayBlockHeader, WTSTransStruct>(*pBlockPair.get(), curTrans->getTransStruct(), ct->getFullCode(), "transaction"))
+-			break;
++			return;
+ 
+-		_sink->broadcastTrans(curTrans);
++		// P10-008: enqueue under the block mutex (storage order), broadcast after unlock.
++		pair = pBlockPair.owner();
++		enqueueBroadcast(pair->_broadcasts._mtx, pair->_broadcasts._events, curTrans);
++	}
++	drainBroadcasts<WTSTransData>(pair->_broadcasts,
++		[this](WTSTransData* data) { _sink->broadcastTrans(data); }, "Transaction");
+ 
+-		static wt_hashmap<std::string, uint64_t> _tcnt_map;
+-		uint64_t& cnt = _tcnt_map[curTrans->exchg()];
+-		cnt++;
+-		if (cnt % _log_group_size == 0)
+-		{
+-			pipe_writer_log(_sink, LL_INFO, "{} transactions received from exchange {}", cnt, curTrans->exchg());
+-		}
+-	} while (false);
++	countReceived(3, curTrans->exchg(), "transactions");
+ }
+ 
+ bool WtDataWriter::ensureTaskThreadLocked()
+@@ -1266,12 +1581,14 @@
+ 	if (_task_thrd != NULL)
+ 		return _task_thrd->joinable();
+ 
++	_workers_started.fetch_add(1);
+ 	try
+ 	{
+ 		_task_thrd = std::make_shared<StdThread>(&WtDataWriter::task_loop, this);
+ 	}
+ 	catch (...)
+ 	{
++		_workers_started.fetch_sub(1);
+ 		return false;
+ 	}
+ 	return true;
+@@ -1336,6 +1653,7 @@
+ 		StdUniqueLock taskLock(_task_mtx);
+ 		_task_worker_id = std::thread::id();
+ 	}
++	markWorkerExited();
+ }
+ void WtDataWriter::pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick)
+ {
+@@ -2607,7 +2925,16 @@
+ 	if (_proc_thrd != NULL)
+ 		return _proc_thrd->joinable();
+ 
+-	_proc_thrd = std::make_shared<StdThread>(&WtDataWriter::proc_loop, this);
++	_workers_started.fetch_add(1);
++	try
++	{
++		_proc_thrd = std::make_shared<StdThread>(&WtDataWriter::proc_loop, this);
++	}
++	catch (...)
++	{
++		_workers_started.fetch_sub(1);
++		return false;
++	}
+ 	return true;
+ }
+ 
+@@ -2747,6 +3074,7 @@
+ 		StdUniqueLock checkLock(_check_mtx);
+ 		_check_worker_id = std::thread::id();
+ 	}
++	markWorkerExited();
+ }
+ 
+ uint32_t WtDataWriter::dump_bars_via_dumper(WTSContractInfo* ct)
+@@ -3526,6 +3854,9 @@
+ 		//如果历史数据被禁用，则不再进行收盘作业
+ 		if (!_disable_his)
+ 		{
++			// I03-NEW-048: synchronous writes issued on this thread during the job (e.g. by
++			// a dumper) are deferred and replayed when the scope ends, after all leases.
++			CloseJobScope closeJob(*this);
+ 			uint32_t count = 0;
+ 
+ 			uint32_t uDate = _sink->getTradingDate(ct->getFullCode());
+@@ -3812,4 +4143,5 @@
+ 		StdUniqueLock procLock(_proc_mtx);
+ 		_proc_worker_id = std::thread::id();
+ 	}
++	markWorkerExited();
+ }

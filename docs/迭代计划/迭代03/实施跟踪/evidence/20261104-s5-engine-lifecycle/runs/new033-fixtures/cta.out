@@ -1,0 +1,335 @@
++ CXX=c++
++ boost=/opt/homebrew/opt/boost/include
++ fmt=/opt/homebrew/Cellar/fmt/11.2.0/include
++ spdlog=/opt/homebrew/Cellar/spdlog/1.15.3/include
++ case $(uname -s) in
+++ uname -s
++ ext=dylib
++ shared_flag=-dynamiclib
++ dl_lib=
++ mkdir -p /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/no-creator /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs
++ deep_rel=deep
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789
++ for part in 01 02 03 04 05
++ deep_rel=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789
++ mkdir -p /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789
++ shasum -a 256 /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/CtaStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/CtaStrategyMgr.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSTools/WTSLogger.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmtlib.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/factory.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/no_creator.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/check.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/run.sh
++ c++ -std=c++17 -pthread -fPIC -dynamiclib /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/factory.cpp -o /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib
++ cp /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ cp /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789/fixture.dylib
++ c++ -std=c++17 -pthread -fPIC -dynamiclib /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/no_creator.cpp -o /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/no-creator/fixture.dylib
++ c++ -std=c++17 -g -O0 -pthread -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/opt/homebrew/opt/boost/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/CtaStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/check.cpp -o /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ git rev-parse HEAD
++ git show HEAD:src/WtCore/CtaStrategyMgr.cpp
++ c++ -std=c++17 -g -O0 -pthread -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore -I/opt/homebrew/opt/boost/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/head-baseline.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/cta_factory_quarantine/check.cpp -o /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/head-baseline
++ ulimit -c 0
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current creator-throw creator-throw current-creator-throw
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=creator-throw
++ env_mode=creator-throw
++ prefix=current-creator-throw
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=creator-throw
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-creator-throw.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-creator-throw.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current creator-throw /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-creator-throw 0
+current-creator-throw exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current name-throw name-throw current-name-throw
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=name-throw
++ env_mode=name-throw
++ prefix=current-name-throw
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=name-throw
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-name-throw.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-name-throw.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current name-throw /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-name-throw 0
+current-name-throw exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current empty empty current-empty
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=empty
++ env_mode=empty
++ prefix=current-empty
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=empty
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-empty.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-empty.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current empty /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-empty 0
+current-empty exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current null null current-null
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=null
++ env_mode=null
++ prefix=current-null
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=null
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-null.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-null.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current null /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-null 0
+current-null exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current duplicate duplicate current-duplicate
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=duplicate
++ env_mode=duplicate
++ prefix=current-duplicate
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=duplicate
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-duplicate.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-duplicate.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current duplicate /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-duplicate 0
+current-duplicate exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current concurrent concurrent current-concurrent
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=concurrent
++ env_mode=concurrent
++ prefix=current-concurrent
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=concurrent
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-concurrent.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-concurrent.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current concurrent /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-concurrent 0
+current-concurrent exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current reentrant reentrant current-reentrant
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=reentrant
++ env_mode=reentrant
++ prefix=current-reentrant
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=reentrant
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-reentrant.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-reentrant.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current reentrant /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-reentrant 0
+current-reentrant exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current single-name single-name current-single-name
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=single-name
++ env_mode=single-name
++ prefix=current-single-name
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=single-name
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-single-name.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-single-name.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current single-name /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-single-name 0
+current-single-name exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current duplicate-different duplicate-different current-duplicate-different
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=duplicate-different
++ env_mode=duplicate-different
++ prefix=current-duplicate-different
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=duplicate-different
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-duplicate-different.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-duplicate-different.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current duplicate-different /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-duplicate-different 0
+current-duplicate-different exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current idempotent-cross-manager idempotent-cross-manager current-idempotent-cross-manager
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=idempotent-cross-manager
++ env_mode=idempotent-cross-manager
++ prefix=current-idempotent-cross-manager
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=idempotent-cross-manager
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-idempotent-cross-manager.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-idempotent-cross-manager.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current idempotent-cross-manager /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-idempotent-cross-manager 0
+current-idempotent-cross-manager exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current long-name long-name current-long-name
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=long-name
++ env_mode=long-name
++ prefix=current-long-name
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=long-name
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-long-name.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-long-name.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current long-name /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-long-name 0
+current-long-name exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current same-manager-concurrent concurrent current-same-manager-concurrent
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=same-manager-concurrent
++ env_mode=concurrent
++ prefix=current-same-manager-concurrent
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=concurrent
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-same-manager-concurrent.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-same-manager-concurrent.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current same-manager-concurrent /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-same-manager-concurrent 0
+current-same-manager-concurrent exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current missing-creator missing-creator current-missing-creator no-creator
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=missing-creator
++ env_mode=missing-creator
++ prefix=current-missing-creator
++ folder=no-creator
++ set +e
++ WT_CTA_FACTORY_MODE=missing-creator
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-missing-creator.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-missing-creator.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current missing-creator /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/no-creator /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/no-creator/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-missing-creator 0
+current-missing-creator exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current exception-recovery name-throw current-exception-recovery
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=exception-recovery
++ env_mode=name-throw
++ prefix=current-exception-recovery
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=name-throw
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-exception-recovery.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-exception-recovery.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current exception-recovery /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-exception-recovery 0
+current-exception-recovery exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current short-directory short-directory current-short-directory
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=short-directory
++ env_mode=short-directory
++ prefix=current-short-directory
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=short-directory
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-short-directory.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-short-directory.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current short-directory /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-short-directory 0
+current-short-directory exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current deep-directory deep-directory current-deep-directory deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=deep-directory
++ env_mode=deep-directory
++ prefix=current-deep-directory
++ folder=deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789
++ set +e
++ WT_CTA_FACTORY_MODE=deep-directory
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-deep-directory.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-deep-directory.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current deep-directory /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/deep/01_abcdefghijklmnopqrstuvwxyz0123456789/02_abcdefghijklmnopqrstuvwxyz0123456789/03_abcdefghijklmnopqrstuvwxyz0123456789/04_abcdefghijklmnopqrstuvwxyz0123456789/05_abcdefghijklmnopqrstuvwxyz0123456789/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-deep-directory 0
+current-deep-directory exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current long-directory-error long-directory-error current-long-directory-error
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current
++ mode=long-directory-error
++ env_mode=long-directory-error
++ prefix=current-long-directory-error
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=long-directory-error
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-long-directory-error.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/current-long-directory-error.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/current long-directory-error /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-long-directory-error 0
+current-long-directory-error exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate single-name
++ run_case /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/head-baseline creator-throw creator-throw head-red-creator-throw
++ binary=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/head-baseline
++ mode=creator-throw
++ env_mode=creator-throw
++ prefix=head-red-creator-throw
++ folder=plugins
++ set +e
++ WT_CTA_FACTORY_MODE=creator-throw
++ WT_CTA_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/head-red-creator-throw.marker
++ WT_CTA_LOG_MARKER=/private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/logs/head-red-creator-throw.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/head-baseline creator-throw /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins/fixture.dylib /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2 /private/tmp/wt-i03-s5-engine-lifecycle-run/q/cta/run.JAEGw3pc/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' head-red-creator-throw 0
+head-red-creator-throw exit=0
++ case "$prefix:$rc" in
++ echo 'unexpected historical control result'
+unexpected historical control result
++ return 1

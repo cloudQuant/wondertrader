@@ -123,7 +123,7 @@ TEST_F(R52ReaderTest, R52HotWrappedFileReadReturnsIntegratedBars)
 	ASSERT_NE(slice, nullptr);
 	const vector<WTSBarStruct> got = flatten_bars(slice);
 	EXPECT_EQ(got.size(), 2u);
-	EXPECT_EQ(slice->size(), 2u);
+	EXPECT_EQ(slice->size(), 2);
 	if (got.size() == 2)
 	{
 		EXPECT_EQ(got[0].date, 20240105u);

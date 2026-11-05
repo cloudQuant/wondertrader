@@ -94,6 +94,17 @@ private:
 	std::function<bool()> _shutdown;
 };
 
+// 卡8b=A（迭代03 s5-runners）：local/diff 条目须带含 default 的 policy，否则 WtExecRunner 在
+// 构造任何执行器之前整表拒绝（原夹具缺 policy，.before 见 s5-runners 证据）。
+void appendDefaultPolicy(WTSVariant* executer)
+{
+	WTSVariant* policy = WTSVariant::createObject();
+	WTSVariant* def = WTSVariant::createObject();
+	def->append("name", "WtExeFact.WtMinImpactExeUnit");
+	policy->append("default", def, false);
+	executer->append("policy", policy, false);
+}
+
 WTSVariant* makeRunnerConfig()
 {
 	WTSVariant* executers = WTSVariant::createArray();
@@ -103,6 +114,7 @@ WTSVariant* makeRunnerConfig()
 	local->append("name", "local");
 	local->append("trader", "r220_exec_trader");
 	local->append("scale", 1.0);
+	appendDefaultPolicy(local);
 	executers->append(local, false);
 
 	WTSVariant* diff = WTSVariant::createObject();
@@ -111,6 +123,7 @@ WTSVariant* makeRunnerConfig()
 	diff->append("name", "diff");
 	diff->append("trader", "r220_exec_trader");
 	diff->append("scale", 1.0);
+	appendDefaultPolicy(diff);
 	executers->append(diff, false);
 
 	WTSVariant* root = WTSVariant::createObject();

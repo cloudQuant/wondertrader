@@ -1,0 +1,73 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 20 tests from 6 test suites.
+[----------] Global test environment set-up.
+[----------] 6 tests from r104_quote_initialize
+[ RUN      ] r104_quote_initialize.full_allday_config_reaches_end_of_function
+[       OK ] r104_quote_initialize.full_allday_config_reaches_end_of_function (5 ms)
+[ RUN      ] r104_quote_initialize.array_basefiles_and_loadable_side_parser_file
+[       OK ] r104_quote_initialize.array_basefiles_and_loadable_side_parser_file (45 ms)
+[ RUN      ] r104_quote_initialize.minimal_config_skips_absent_basefiles_children
+[       OK ] r104_quote_initialize.minimal_config_skips_absent_basefiles_children (28 ms)
+[ RUN      ] r104_quote_initialize.inactive_shmcaster_is_skipped_without_touching_its_path
+[       OK ] r104_quote_initialize.inactive_shmcaster_is_skipped_without_touching_its_path (20 ms)
+[ RUN      ] r104_quote_initialize.active_shmcaster_mapping_failure_aborts_initialization_and_main
+[       OK ] r104_quote_initialize.active_shmcaster_mapping_failure_aborts_initialization_and_main (2 ms)
+[ RUN      ] r104_quote_initialize.unloadable_parser_side_file_logs_and_returns
+[       OK ] r104_quote_initialize.unloadable_parser_side_file_logs_and_returns (8 ms)
+[ DISABLED ] r104_quote_initialize.DISABLED_config_without_basefiles_derefs_null
+[ DISABLED ] r104_quote_initialize.DISABLED_state_monitor_branch_starts_threads
+[----------] 6 tests from r104_quote_initialize (112 ms total)
+
+[----------] 1 test from r104_quote_initparsers
+[ RUN      ] r104_quote_initparsers.failed_active_entries_are_not_registered
+dlopen(/private/tmp/wt-i03-s5-dt-parsers-run/lane9_m_QuoteFactory/parsers/libR104NoSuchParserModule.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-dt-parsers-run/lane9_m_QuoteFactory/parsers/libR104NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-dt-parsers-run/lane9_m_QuoteFactory/parsers/libR104NoSuchParserModule.dylib' (no such file), '/private/tmp/wt-i03-s5-dt-parsers-run/lane9_m_QuoteFactory/parsers/libR104NoSuchParserModule.dylib' (no such file)
+dlopen(/private/tmp/wt-i03-s5-dt-parsers-run/lane9_m_QuoteFactory/parsers/libR104NoSuchParserModule.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-dt-parsers-run/lane9_m_QuoteFactory/parsers/libR104NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-dt-parsers-run/lane9_m_QuoteFactory/parsers/libR104NoSuchParserModule.dylib' (no such file), '/private/tmp/wt-i03-s5-dt-parsers-run/lane9_m_QuoteFactory/parsers/libR104NoSuchParserModule.dylib' (no such file)
+[       OK ] r104_quote_initparsers.failed_active_entries_are_not_registered (0 ms)
+[----------] 1 test from r104_quote_initparsers (0 ms total)
+
+[----------] 1 test from r14_quote_cli
+[ RUN      ] r14_quote_cli.valid_config_with_real_writer_returns_zero_after_signal
+[       OK ] r14_quote_cli.valid_config_with_real_writer_returns_zero_after_signal (5769 ms)
+[----------] 1 test from r14_quote_cli (5769 ms total)
+
+[----------] 8 tests from r14_quote_entry
+[ RUN      ] r14_quote_entry.short_help_returns_zero_before_any_logging_init
+[       OK ] r14_quote_entry.short_help_returns_zero_before_any_logging_init (38 ms)
+[ RUN      ] r14_quote_entry.long_help_returns_zero
+[       OK ] r14_quote_entry.long_help_returns_zero (29 ms)
+[ RUN      ] r14_quote_entry.help_wins_over_config_and_logcfg_words
+[       OK ] r14_quote_entry.help_wins_over_config_and_logcfg_words (11 ms)
+[ RUN      ] r14_quote_entry.missing_config_path_returns_nonzero_via_explicit_c
+[       OK ] r14_quote_entry.missing_config_path_returns_nonzero_via_explicit_c (3 ms)
+[ RUN      ] r14_quote_entry.both_c_and_l_given_still_returns_nonzero_when_files_absent
+[       OK ] r14_quote_entry.both_c_and_l_given_still_returns_nonzero_when_files_absent (2 ms)
+[ RUN      ] r14_quote_entry.missing_default_config_returns_nonzero_in_empty_directory
+[       OK ] r14_quote_entry.missing_default_config_returns_nonzero_in_empty_directory (1 ms)
+[ RUN      ] r14_quote_entry.valid_syntax_without_basefiles_fails_before_runner_start
+[       OK ] r14_quote_entry.valid_syntax_without_basefiles_fails_before_runner_start (14 ms)
+[ RUN      ] r14_quote_entry.non_object_basefiles_fails_before_runner_start
+[       OK ] r14_quote_entry.non_object_basefiles_fails_before_runner_start (3 ms)
+[ DISABLED ] r14_quote_entry.DISABLED_existing_config_enters_parsers_run_and_endless_loop
+[ DISABLED ] r14_quote_entry.DISABLED_bare_argv_with_existing_config_enters_runner
+[----------] 8 tests from r14_quote_entry (104 ms total)
+
+[----------] 2 tests from r14_quote_initialize
+[ RUN      ] r14_quote_initialize.valid_basefiles_object_remains_accepted
+[       OK ] r14_quote_initialize.valid_basefiles_object_remains_accepted (3 ms)
+[ RUN      ] r14_quote_initialize.missing_config_stamps_module_dir_then_returns
+[       OK ] r14_quote_initialize.missing_config_stamps_module_dir_then_returns (0 ms)
+[----------] 2 tests from r14_quote_initialize (4 ms total)
+
+[----------] 2 tests from r14_quote_binroot
+[ RUN      ] r14_quote_binroot.static_cache_returns_same_pointer_twice
+[       OK ] r14_quote_binroot.static_cache_returns_same_pointer_twice (0 ms)
+[ RUN      ] r14_quote_binroot.value_is_the_cwd_with_at_most_one_trailing_slash
+[       OK ] r14_quote_binroot.value_is_the_cwd_with_at_most_one_trailing_slash (0 ms)
+[----------] 2 tests from r14_quote_binroot (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 20 tests from 6 test suites ran. (5991 ms total)
+[  PASSED  ] 20 tests.
+
+  YOU HAVE 4 DISABLED TESTS
+

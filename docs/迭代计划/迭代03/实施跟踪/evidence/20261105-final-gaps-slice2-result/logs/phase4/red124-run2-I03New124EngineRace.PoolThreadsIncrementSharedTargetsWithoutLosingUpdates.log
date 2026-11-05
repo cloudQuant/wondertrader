@@ -1,0 +1,64 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03New124EngineRace.PoolThreadsIncrementSharedTargetsWithoutLosingUpdates
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03New124EngineRace
+[ RUN      ] I03New124EngineRace.PoolThreadsIncrementSharedTargetsWithoutLosingUpdates
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new124_engine_sig_price_race_test.cpp:419: Failure
+Failed
+SHFE.rb.1001 found=true volume=63 details=63 (expected 64)
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new124_engine_sig_price_race_test.cpp:424: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  badPositions
+    Which is: 1
+concurrent increments were lost
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new124_engine_sig_price_race_test.cpp:428: Failure
+Expected equality of these values:
+  lots * kOpenFee
+    Which is: 2048
+  fund._fees
+    Which is: 2046
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new124_engine_sig_price_race_test.cpp:429: Failure
+Expected equality of these values:
+  -lots * kOpenFee
+    Which is: -2048
+  fund._balance
+    Which is: -2046
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new124_engine_sig_price_race_test.cpp:430: Failure
+Expected equality of these values:
+  nThreads * perThread
+    Which is: 1024
+  tradeRows()
+    Which is: 1023
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new124_engine_sig_price_race_test.cpp:441: Failure
+Expected equality of these values:
+  expLots
+    Which is: 64
+  jPositions->get(i)->getDouble("volume")
+    Which is: 63
+SHFE.rb.1001
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new124_engine_sig_price_race_test.cpp:442: Failure
+Expected equality of these values:
+  lots * kOpenFee
+    Which is: 2048
+  jFund->getDouble("fees")
+    Which is: 2046
+
+[  FAILED  ] I03New124EngineRace.PoolThreadsIncrementSharedTargetsWithoutLosingUpdates (4102 ms)
+[----------] 1 test from I03New124EngineRace (4102 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (4105 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] I03New124EngineRace.PoolThreadsIncrementSharedTargetsWithoutLosingUpdates
+
+ 1 FAILED TEST

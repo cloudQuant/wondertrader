@@ -12,6 +12,7 @@
  * 它封装了底层的数据存储和解析器管理，为上层应用提供统一的数据访问接口。
  */
 #pragma once
+#include <atomic>
 #include <vector>
 #include "../WTSTools/WTSHotMgr.h"
 #include "../WTSTools/WTSBaseDataMgr.h"
@@ -78,13 +79,21 @@ public:
 	// A failed parser candidate is quarantined because its API may still call SPI.
 	// The caller must keep this runner and the raw-pointer context it owns alive
 	// until the parser provider confirms that callbacks have stopped.
-	// This reports successful command submission, not provider readiness.
-	bool	isInitialized() const { return _is_inited && _parser_commands_submitted; }
+	bool	isInitialized() const { return _is_inited; }
+	// Command submission does not imply provider connection or readiness.
+	bool	parserCommandsSubmitted() const { return _parser_commands_submitted.load(); }
 	uint32_t	activeParserCount() const { return _parsers.size(); }
 	bool	hasQuarantinedParser() const { return !_quarantined_parsers.empty(); }
 	// Reports adapter ownership only; it does not prove provider callback drain
 	// or that destroying this runner is safe.
 	bool	hasRetainedParserAdapters() const { return _parsers.hasRetainedAdapters() || hasQuarantinedParser(); }
+
+	// Card 9 teardown: request stop of every registered and failed parser
+	// before polling any, then a bounded V2 drain. Returns true only when every
+	// parser owner was released; otherwise the remaining owners (and this runner,
+	// whose managers they borrow) must be kept alive until process exit.
+	// Must not be called from a parser callback; such a call only requests stop.
+	bool	shutdown();
 
 	/**
 	 * @brief 获取基础数据管理器
@@ -180,7 +189,7 @@ public:
 	 * @brief 根据日期获取K线数据
 	 * @param stdCode 标准化合约代码，格式如"SHFE.rb.HOT"
 	 * @param period K线周期，如"m1"/"d1"
-	 * @param uDate 交易日期，格式为YYYYMMDD，如果为0则表示当前交易日
+	 * @param uDate 交易日期，格式为YYYYMMDD；0使用一次校验过的本地日期快照
 	 * @return WTSKlineSlice* K线数据切片指针，使用后需要调用release方法释放
 	 * 
 	 * @details 该函数获取指定交易日的K线数据。
@@ -326,7 +335,10 @@ private:
 	 * @details 标记数据服务运行器是否已经初始化
 	 */
 	bool			_is_inited;
-	bool			_parser_commands_submitted;
+	std::atomic<bool>	_parser_commands_submitted;
+	// I03-NEW-044 / card 9c: parsers are started once (initialize() starts them);
+	// a repeated start() is rejected and keeps the original parser instances.
+	std::atomic<bool>	_parsers_started{false};
 	bool			_parser_init_failed = false;
 
 	/**

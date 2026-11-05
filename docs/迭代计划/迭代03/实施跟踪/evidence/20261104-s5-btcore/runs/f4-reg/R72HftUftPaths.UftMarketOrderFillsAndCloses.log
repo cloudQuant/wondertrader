@@ -1,0 +1,37 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R72HftUftPaths.UftMarketOrderFillsAndCloses
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R72HftUftPaths
+[ RUN      ] R72HftUftPaths.UftMarketOrderFillsAndCloses
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p03_btcore_mockers2/r72_hft_uft_paths_test.cpp:257: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  uft.stra_get_position(kCode, false, 1)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p03_btcore_mockers2/r72_hft_uft_paths_test.cpp:258: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  uft.stra_get_undone(kCode)
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p03_btcore_mockers2/r72_hft_uft_paths_test.cpp:259: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  uft.trade_notices.size()
+    Which is: 0
+
+[  FAILED  ] R72HftUftPaths.UftMarketOrderFillsAndCloses (63 ms)
+[----------] 1 test from R72HftUftPaths (63 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (63 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R72HftUftPaths.UftMarketOrderFillsAndCloses
+
+ 1 FAILED TEST

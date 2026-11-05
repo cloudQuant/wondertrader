@@ -1,0 +1,80 @@
+--- src/TestUnits/fixtures/i03_ctp_order_identity_20261103/baseline/TraderAdapter.cpp	2026-11-03 17:47:18
++++ src/WtCore/TraderAdapter.cpp	2026-11-03 17:48:52
+@@ -2342,8 +2342,52 @@
+ {
+ 	if (err && err->getErrorCode() != WEC_NONE)
+ 	{
++		// An external order's tag must not consume this adapter's pending
++		// quantity or be interpreted as one of its local order identifiers.
++		auto rejectExternal = [this]() {
++			WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN,
++				"[{}] Rejected entrust has no valid local order tag; pending quantity unchanged", _id.c_str());
++		};
++		if (entrust == NULL || _order_pattern.empty())
++		{
++			rejectExternal();
++			return;
++		}
++		const char* tag = entrust->getUserTag();
++		const void* terminator = std::memchr(tag, '\0', sizeof(entrust->m_strUserTag));
++		if (terminator == NULL)
++		{
++			rejectExternal();
++			return;
++		}
++		const std::string value(tag, static_cast<const char*>(terminator));
++		const std::string prefix = _order_pattern + ".";
++		if (value.size() <= prefix.size() || value.compare(0, prefix.size(), prefix) != 0)
++		{
++			rejectExternal();
++			return;
++		}
++		uint32_t localid = 0;
++		for (size_t i = prefix.size(); i < value.size(); ++i)
++		{
++			const char digit = value[i];
++			if (digit < '0' || digit > '9' ||
++				localid > ((std::numeric_limits<uint32_t>::max)() - static_cast<uint32_t>(digit - '0')) / 10)
++			{
++				rejectExternal();
++				return;
++			}
++			localid = localid * 10 + static_cast<uint32_t>(digit - '0');
++		}
++		if (localid == 0)
++		{
++			rejectExternal();
++			return;
++		}
+ 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, err->getMessage());
+ 		WTSContractInfo* cInfo = entrust->getContractInfo();
++		if (cInfo == NULL || cInfo->getCommInfo() == NULL)
++			return;
+ 		WTSCommodityInfo* commInfo = cInfo->getCommInfo();
+ 		std::string stdCode;
+ 		if (commInfo->getCategoty() == CC_FutOption || commInfo->getCategoty() == CC_SpotOption)
+@@ -2382,24 +2426,12 @@
+ 		bool isBuy = (isLong&&isOpen) || (!isLong && !isOpen);
+ 		updateUndone(stdCode.c_str(), qty * (isBuy ? -1 : 1), true);
+ 
+-		if (strlen(entrust->getUserTag()) > 0)
+-		{
+-			char* userTag = (char*)entrust->getUserTag();
+-			userTag += _order_pattern.size() + 1;
+-			uint32_t localid = convert::to_uint32(userTag);
+-
+ 			forEachSink([&](ITrdNotifySink* sink) {
+ 				sink->on_entrust(localid, stdCode.c_str(), false, err->getMessage());
+ 			});
+ 
+ 			if (_notifier)
+ 				_notifier->notify(id(), fmt::format(" Order placing failed: {}", err->getMessage()).c_str());
+-		}
+-		else
+-		{
+-			WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN,
+-				"[{}] Outter Order placing failed: {}, instrument: {}, action: {}, qty: {}", _id.c_str(), err->getMessage(), entrust->getCode(), action.c_str(), qty);
+-		}
+ 	}
+ }
+ 

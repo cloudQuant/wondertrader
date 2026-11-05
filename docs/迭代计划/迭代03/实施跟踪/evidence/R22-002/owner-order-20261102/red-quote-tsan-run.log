@@ -1,0 +1,12 @@
+argv=["/tmp/wt-r22-owner-20261102/red-quote-tsan"]
+exit=-6
+EARLY_RELEASE
+==================
+WARNING: ThreadSanitizer: thread leak (pid=46765)
+  Thread T1 (tid=1080083, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 StateMonitor::run() <null> (red-quote-tsan:arm64+0x10000bfa4)
+    #2 main <null> (red-quote-tsan:arm64+0x1000348ec)
+
+SUMMARY: ThreadSanitizer: thread leak (red-quote-tsan:arm64+0x10000bfa4) in StateMonitor::run()+0x100
+==================

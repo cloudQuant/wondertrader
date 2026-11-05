@@ -1,0 +1,111 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S1New006UftOrderClock.*
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from S1New006UftOrderClock
+[ RUN      ] S1New006UftOrderClock.ClockFailureRejectsEntryBeforeTheProvider
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:73: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  env.adapter.openLong(kS1UftCode, 5000.0, 1.0, 0)
+    Which is: 1333237850
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:74: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  g_s1_uft_clock_calls.load()
+    Which is: 0
+every UFT entry takes one checked clock snapshot
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:75: Failure
+Value of: env.api._entrusts.empty()
+  Actual: false
+Expected: true
+no request reaches the provider without a valid clock
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:76: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  env.adapter.getUndoneQty(kS1UftCode)
+    Which is: 1
+nothing is reserved for a rejected entry
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:82: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  env.api._entrusts.size()
+    Which is: 2
+the next entry retries once the clock is available
+
+[  FAILED  ] S1New006UftOrderClock.ClockFailureRejectsEntryBeforeTheProvider (2 ms)
+[ RUN      ] S1New006UftOrderClock.EveryDirectionIsGatedAndTheDefaultClockIsRestored
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:94: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  env.adapter.openLong(kS1UftCode, 5000.0, 1.0, 0)
+    Which is: 1333237852
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:95: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  env.adapter.openShort(kS1UftCode, 5000.0, 1.0, 0)
+    Which is: 1333237853
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:96: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  env.adapter.closeLong(kS1UftCode, 5000.0, 1.0, false, 0)
+    Which is: 1333237854
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:97: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  env.adapter.closeShort(kS1UftCode, 5000.0, 1.0, false, 0)
+    Which is: 1333237855
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:98: Failure
+Expected equality of these values:
+  4u
+    Which is: 4
+  g_s1_uft_clock_calls.load()
+    Which is: 0
+all four actions reach the clock gate
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:99: Failure
+Value of: env.api._entrusts.empty()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:100: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  env.adapter.getUndoneQty(kS1UftCode)
+    Which is: 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:107: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  env.api._entrusts.size()
+    Which is: 5
+
+[  FAILED  ] S1New006UftOrderClock.EveryDirectionIsGatedAndTheDefaultClockIsRestored (0 ms)
+[----------] 2 tests from S1New006UftOrderClock (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (3 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] S1New006UftOrderClock.ClockFailureRejectsEntryBeforeTheProvider
+[  FAILED  ] S1New006UftOrderClock.EveryDirectionIsGatedAndTheDefaultClockIsRestored
+
+ 2 FAILED TESTS

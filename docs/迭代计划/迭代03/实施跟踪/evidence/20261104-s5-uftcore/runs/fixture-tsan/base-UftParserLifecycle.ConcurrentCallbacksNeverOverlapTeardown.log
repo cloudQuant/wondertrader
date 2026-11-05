@@ -1,0 +1,44 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = UftParserLifecycle.ConcurrentCallbacksNeverOverlapTeardown
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from UftParserLifecycle
+[ RUN      ] UftParserLifecycle.ConcurrentCallbacksNeverOverlapTeardown
+==================
+WARNING: ThreadSanitizer: data race (pid=3073)
+  Write of size 1 at 0x00016bda2678 by main thread:
+    #0 wtp::ParserAdapter::release() <null> (uft_parser_base:arm64+0x10002f07c)
+    #1 UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody() <null> (uft_parser_base:arm64+0x100009884)
+    #2 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (uft_parser_base:arm64+0x1001369ec)
+
+  Previous read of size 1 at 0x00016bda2678 by thread T2:
+    #0 wtp::ParserAdapter::handleQuote(wtp::WTSTickData*, unsigned int) <null> (uft_parser_base:arm64+0x1000322b8)
+    #1 UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0::operator()() const <null> (uft_parser_base:arm64+0x10002a088)
+    #2 std::__1::__invoke_result_impl<void, UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0>::type std::__1::__invoke[abi:nqe220108]<UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0>(UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0&&) <null> (uft_parser_base:arm64+0x100029f88)
+    #3 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (uft_parser_base:arm64+0x100029eac)
+    #4 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0>>(void*) <null> (uft_parser_base:arm64+0x1000297c0)
+
+  As if synchronized via sleep:
+    #0 nanosleep <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x301f4)
+    #1 std::__1::this_thread::sleep_for(std::__1::chrono::duration<long long, std::__1::ratio<1l, 1000000000l>> const&) <null> (libc++.1.dylib:arm64e+0x8f10)
+    #2 UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody() <null> (uft_parser_base:arm64+0x1000097b4)
+    #3 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (uft_parser_base:arm64+0x1001369ec)
+
+  Location is stack of main thread.
+
+  Thread T2 (tid=6499419, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) <null> (uft_parser_base:arm64+0x100029724)
+    #2 std::__1::thread::thread[abi:nqe220108]<UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0, 0>(UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0&&) <null> (uft_parser_base:arm64+0x1000294bc)
+    #3 std::__1::thread::thread[abi:nqe220108]<UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0, 0>(UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0&&) <null> (uft_parser_base:arm64+0x1000293e0)
+    #4 void std::__1::allocator<std::__1::thread>::construct[abi:nqe220108]<std::__1::thread, UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0>(std::__1::thread*, UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0&&) <null> (uft_parser_base:arm64+0x100029374)
+    #5 void std::__1::allocator_traits<std::__1::allocator<std::__1::thread>>::construct[abi:nqe220108]<std::__1::thread, UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0, 0>(std::__1::allocator<std::__1::thread>&, std::__1::thread*, UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0&&) <null> (uft_parser_base:arm64+0x1000290fc)
+    #6 std::__1::thread* std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::__emplace_back_slow_path<UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0>(UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0&&) <null> (uft_parser_base:arm64+0x10002a708)
+    #7 std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0>(UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0&&)::'lambda0'()::operator()() const <null> (uft_parser_base:arm64+0x100028ee4)
+    #8 void std::__1::__if_likely_else[abi:nqe220108]<std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0>(UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0&&)::'lambda'(), std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0>(UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0&&)::'lambda0'()>(bool, std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0>(UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0&&)::'lambda'(), std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0>(UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0&&)::'lambda0'()) <null> (uft_parser_base:arm64+0x100028da4)
+    #9 std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0>(UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody()::$_0&&) <null> (uft_parser_base:arm64+0x100009fa8)
+    #10 UftParserLifecycle_ConcurrentCallbacksNeverOverlapTeardown_Test::TestBody() <null> (uft_parser_base:arm64+0x100009754)
+    #11 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (uft_parser_base:arm64+0x1001369ec)
+
+SUMMARY: ThreadSanitizer: data race (uft_parser_base:arm64+0x10002f07c) in wtp::ParserAdapter::release()+0x3c
+==================

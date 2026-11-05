@@ -1,0 +1,36 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/q06_porter/r163_porter_slices_test.cpp	2026-11-01 08:38:09
++++ src/TestUnits/coverage/q06_porter/r163_porter_slices_test.cpp	2026-11-04 17:53:07
+@@ -62,6 +62,9 @@
+ USING_NS_WTP;
+ 
+ extern WtRtRunner& getRunner();
++// BUG-R42-002 gate (迭代03): HFT contexts bind only a registered trader; the
++// fixtures below register a module-less local adapter (see i03_s5_test_trader_support.cpp).
++TraderAdapterPtr i03s5_register_test_trader(WtRtRunner& runner, const char* id);
+ 
+ namespace {
+ 
+@@ -502,9 +505,10 @@
+ 		",\"traders\":[{\"active\":true,\"id\":\"r163_trd\","
+ 		"\"module\":\"TraderMocker\",\"mockerid\":163001,\"udp_port\":0}],"
+ 		"\"executers\":["
+-		"{\"active\":true,\"id\":\"r163_exec_local\",\"name\":\"local\",\"trader\":\"r163_trd\"},"
+-		"{\"active\":true,\"id\":\"r163_exec_diff\",\"name\":\"diff\",\"trader\":\"r163_trd\"},"
+-		"{\"active\":true,\"id\":\"r163_exec_arbi\",\"name\":\"arbi\",\"trader\":\"r163_trd\"}"
++		// 卡8b=A（迭代03）：local/diff/arbi 须带 scale 与含 default 的 policy。
++		"{\"active\":true,\"id\":\"r163_exec_local\",\"name\":\"local\",\"trader\":\"r163_trd\",\"scale\":1,\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\"}}},"
++		"{\"active\":true,\"id\":\"r163_exec_diff\",\"name\":\"diff\",\"trader\":\"r163_trd\",\"scale\":1,\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\"}}},"
++		"{\"active\":true,\"id\":\"r163_exec_arbi\",\"name\":\"arbi\",\"trader\":\"r163_trd\",\"scale\":1,\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\"}}}"
+ 		"]");
+ 
+ 	EXPECT_TRUE(r->config(cfg.c_str(), false));
+@@ -566,7 +570,8 @@
+ 
+ 	WtHftEngine* eng = dynamic_cast<WtHftEngine*>(getRunner().getEngine());
+ 	ASSERT_NE(nullptr, eng);
+-	const CtxHandler h = create_hft_context("r163_hft_order", "R163_TRADER_ABSENT", false, 0);
++	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "r163_test_trader") != nullptr);
++	const CtxHandler h = create_hft_context("r163_hft_order", "r163_test_trader", false, 0);
+ 	ASSERT_NE(0U, h);
+ 	HftContextPtr base = getRunner().getHftContext(h);
+ 	ASSERT_TRUE(base != nullptr);

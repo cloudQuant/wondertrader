@@ -1,0 +1,32 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = L03WriterSessionDate.MissingAndMalformedDatesAndMissingSessionRejected
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from L03WriterSessionDate
+[ RUN      ] L03WriterSessionDate.MissingAndMalformedDatesAndMissingSessionRejected
+/tmp/wt-i03-l03-writer-fresh-20261102/red/TestUnits/coverage/r23_storage4/l03_writer_session_date_test.cpp:54: Failure
+Value of: w->writeTick(t,0)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-l03-writer-fresh-20261102/red/TestUnits/coverage/r23_storage4/l03_writer_session_date_test.cpp:54: Failure
+Value of: w->writeTick(t,0)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-l03-writer-fresh-20261102/red/WtDataStorage/WtDataWriter.cpp:2210:27: runtime error: member call on null pointer of type 'wtp::WTSSessionInfo'
+    #0 0x0001022b7418 in WtDataWriter::updateCache(wtp::WTSContractInfo*, wtp::WTSTickData*, unsigned int) WtDataWriter.cpp:2210
+    #1 0x0001022b5828 in WtDataWriter::procTick(wtp::WTSTickData*, unsigned int) WtDataWriter.cpp:859
+    #2 0x0001022b5230 in WtDataWriter::writeTick(wtp::WTSTickData*, unsigned int) WtDataWriter.cpp:841
+    #3 0x0001023e52e8 in (anonymous namespace)::L03WriterSessionDate_MissingAndMalformedDatesAndMissingSessionRejected_Test::TestBody() l03_writer_session_date_test.cpp:56
+    #4 0x000102518b98 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-test:arm64+0x100270b98)
+    #5 0x000102518ae0 in testing::Test::Run()+0xcc (red-test:arm64+0x100270ae0)
+    #6 0x0001025196c0 in testing::TestInfo::Run()+0xd0 (red-test:arm64+0x1002716c0)
+    #7 0x00010251a144 in testing::TestSuite::Run()+0x1c4 (red-test:arm64+0x100272144)
+    #8 0x00010252556c in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-test:arm64+0x10027d56c)
+    #9 0x000102524f18 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-test:arm64+0x10027cf18)
+    #10 0x000102524e7c in testing::UnitTest::Run()+0x78 (red-test:arm64+0x10027ce7c)
+    #11 0x000102505e7c in main+0x40 (red-test:arm64+0x10025de7c)
+    #12 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-l03-writer-fresh-20261102/red/WtDataStorage/WtDataWriter.cpp:2210:27 

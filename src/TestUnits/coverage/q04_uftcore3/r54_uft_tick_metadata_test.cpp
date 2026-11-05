@@ -52,7 +52,8 @@ public:
 	SessionOwner()
 		: _session(WTSSessionInfo::create("ALLDAY", "r54 all day", 0))
 	{
-		_session->addTradingSection(0, 2400);
+		// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；迭代03 第五会话 int2 归因更新。
+		_session->addTradingSection(0, 0);
 	}
 
 	~SessionOwner()

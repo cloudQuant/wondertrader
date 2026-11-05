@@ -432,3 +432,118 @@ TEST_F(R105CtpTest, null_sink_and_null_api_guards_are_silent)
 	parser_.OnRspUserLogout(NULL, NULL, 4, true);
 	SUCCEED();
 }
+
+/* ------------------------------------------------------------------ *
+ * I03-NEW-132（BUG-R105-004 的 ParserCTP 一处）：IsErrorRspInfo 与同族
+ * ParserCTPOpt/ParserFemas/ParserCTPMini 一致——pRspInfo 非空且 ErrorID != 0
+ * 才是错误。前置为合法会话：本 lane 的 init（工厂指向 stub）→ connect →
+ * OnFrontConnected 发出登录请求，再投递应答；不调用真实 SDK。
+ * ------------------------------------------------------------------ */
+namespace {
+
+CThostFtdcRspInfoField s3n132Rsp(int id, const char* msg)
+{
+	CThostFtdcRspInfoField info;
+	std::memset(&info, 0, sizeof(info));
+	info.ErrorID = id;
+	std::strncpy(info.ErrorMsg, msg, sizeof(info.ErrorMsg) - 1);
+	return info;
+}
+
+size_t s3n132Count(const R105CtpSink& sink, WTSParserEvent e)
+{
+	size_t n = 0;
+	for (const auto& ev : sink.events)
+		if (ev.e == (int)e)
+			++n;
+	return n;
+}
+
+bool s3n132ErrorLog(const R105CtpSink& sink, const char* needle)
+{
+	for (const auto& lg : sink.logs)
+		if (lg.ll == (int)LL_ERROR && lg.msg.find(needle) != std::string::npos)
+			return true;
+	return false;
+}
+
+}	// namespace
+
+#define S3N132_LOGIN_REQUESTED(tmpdir)                                  \
+	R105CtpTempDir tmpdir;                                              \
+	ASSERT_FALSE(tmpdir.path.empty());                                  \
+	{                                                                   \
+		WTSVariant* cfg = makeCfg(tmpdir.path + "/flows");              \
+		ASSERT_NE(nullptr, cfg);                                        \
+		ASSERT_TRUE(parser_.init(cfg));                                 \
+		cfg->release();                                                 \
+	}                                                                   \
+	ASSERT_TRUE(parser_.connect());                                     \
+	{                                                                   \
+		CodeSet codes;                                                  \
+		codes.insert("SHFE.ag2512");                                    \
+		parser_.subscribe(codes);                                       \
+	}                                                                   \
+	ASSERT_EQ(0, api_.sub_calls);                                       \
+	parser_.OnFrontConnected();                                         \
+	ASSERT_EQ(1, api_.login_calls);                                     \
+	api_.trading_day = "20260301"
+
+TEST_F(R105CtpTest, s3new132_error_login_last_packet_does_not_enter_success_branch)
+{
+	S3N132_LOGIN_REQUESTED(tmp);
+	CThostFtdcRspUserLoginField login;
+	std::memset(&login, 0, sizeof(login));
+	CThostFtdcRspInfoField err = s3n132Rsp(3, "invalid login");
+	parser_.OnRspUserLogin(&login, &err, api_.last_reqid, true);
+
+	EXPECT_EQ(0u, s3n132Count(sink_, WPE_Login));
+	EXPECT_EQ(0, api_.sub_calls);
+	EXPECT_FALSE(sink_.hasLog("Market data server logined"));
+	EXPECT_TRUE(s3n132ErrorLog(sink_, "error id 3"));
+}
+
+TEST_F(R105CtpTest, s3new132_zero_error_id_login_still_succeeds)
+{
+	S3N132_LOGIN_REQUESTED(tmp);
+	CThostFtdcRspUserLoginField login;
+	std::memset(&login, 0, sizeof(login));
+	CThostFtdcRspInfoField ok = s3n132Rsp(0, "CTP:no error");
+	parser_.OnRspUserLogin(&login, &ok, api_.last_reqid, true);
+
+	EXPECT_EQ(1u, s3n132Count(sink_, WPE_Login));
+	EXPECT_TRUE(sink_.hasLog("Market data server logined, 20260301"));
+	EXPECT_EQ(1, api_.sub_calls);
+	EXPECT_FALSE(s3n132ErrorLog(sink_, "error id"));
+}
+
+TEST_F(R105CtpTest, s3new132_rejected_login_does_not_block_a_later_successful_login)
+{
+	S3N132_LOGIN_REQUESTED(tmp);
+	CThostFtdcRspUserLoginField login;
+	std::memset(&login, 0, sizeof(login));
+	CThostFtdcRspInfoField err = s3n132Rsp(75, "too many sessions");
+	parser_.OnRspUserLogin(&login, &err, api_.last_reqid, true);
+	ASSERT_EQ(0u, s3n132Count(sink_, WPE_Login));
+
+	parser_.OnFrontDisconnected(0x1001);
+	parser_.OnFrontConnected();
+	ASSERT_EQ(2, api_.login_calls);
+	parser_.OnRspUserLogin(&login, NULL, api_.last_reqid, true);
+	EXPECT_EQ(1u, s3n132Count(sink_, WPE_Login));
+	EXPECT_EQ(1, api_.sub_calls);
+}
+
+TEST_F(R105CtpTest, s3new132_rsp_error_is_logged_only_for_nonzero_error_id)
+{
+	S3N132_LOGIN_REQUESTED(tmp);
+	parser_.OnRspError(NULL, 9, true);
+	CThostFtdcRspInfoField ok = s3n132Rsp(0, "");
+	parser_.OnRspError(&ok, 10, true);
+	EXPECT_FALSE(s3n132ErrorLog(sink_, "error id"));
+
+	CThostFtdcRspInfoField err = s3n132Rsp(90, "request rejected");
+	parser_.OnRspError(&err, 11, true);
+	EXPECT_TRUE(s3n132ErrorLog(sink_, "error id 90"));
+	EXPECT_EQ(0u, s3n132Count(sink_, WPE_Login));
+}

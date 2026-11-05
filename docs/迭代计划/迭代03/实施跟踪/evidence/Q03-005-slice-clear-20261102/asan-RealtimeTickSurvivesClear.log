@@ -1,0 +1,36 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = Q03RdmClearLifetime.RealtimeTickSurvivesClear
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q03RdmClearLifetime
+[ RUN      ] Q03RdmClearLifetime.RealtimeTickSurvivesClear
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==53691==ERROR: AddressSanitizer: SEGV on unknown address 0x000103a04048 (pc 0x000102acea88 bp 0x00016d4f57a0 sp 0x00016d4f4d20 T0)
+==53691==The signal is caused by a READ memory access.
+    #0 0x000102acea88 in q03::Q03RdmClearLifetime_RealtimeTickSurvivesClear_Test::TestBody() q03_rdm_clear_lifetime_test.cpp:81
+    #1 0x0001030213a4 in void testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2664
+    #2 0x000102f9cadc in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2700
+    #3 0x000102f9c88c in testing::Test::Run() gtest.cc:2739
+    #4 0x000102f9ebfc in testing::TestInfo::Run() gtest.cc:2885
+    #5 0x000102fa15ec in testing::TestSuite::Run() gtest.cc:3063
+    #6 0x000102fc4b54 in testing::internal::UnitTestImpl::RunAllTests() gtest.cc:6054
+    #7 0x00010303ca10 in bool testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2664
+    #8 0x000102fc37a0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2700
+    #9 0x000102fc33cc in testing::UnitTest::Run() gtest.cc:5594
+    #10 0x0001030536c0 in RUN_ALL_TESTS() gtest.h:2334
+    #11 0x000103053628 in main gtest_main.cc:64
+    #12 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+==53691==Register values:
+ x[0] = 0x0000000103a04018   x[1] = 0x000000016d4f4bc0   x[2] = 0x000000016d4f42f0   x[3] = 0x0000608000000610  
+ x[4] = 0x0000000000000058   x[5] = 0x0000000000000058   x[6] = 0x000000016ccfc000   x[7] = 0x0000000000000001  
+ x[8] = 0x000000016d4f54b0   x[9] = 0x000000016d4f4d20  x[10] = 0x0000000103a04018  x[11] = 0x00000001030a78c1  
+x[12] = 0x0000000041b58ab3  x[13] = 0x0000000000000000  x[14] = 0x00007fffffffffff  x[15] = 0x000010800001ffff  
+x[16] = 0x00000001029b5b00  x[17] = 0x00000001f5bd5568  x[18] = 0x0000000000000000  x[19] = 0x000000016d4f5520  
+x[20] = 0x00000001f4298100  x[21] = 0x000000016d4f6c88  x[22] = 0xfffffffffffffff0  x[23] = 0x00000001f454f760  
+x[24] = 0x0000000000000001  x[25] = 0x000000016d4f6df0  x[26] = 0x00000001f454f770  x[27] = 0x0000000000000000  
+x[28] = 0x0000000000000000     fp = 0x000000016d4f57a0     lr = 0x0000000102acea50     sp = 0x000000016d4f4d20  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV q03_rdm_clear_lifetime_test.cpp:81 in q03::Q03RdmClearLifetime_RealtimeTickSurvivesClear_Test::TestBody()
+==53691==ABORTING

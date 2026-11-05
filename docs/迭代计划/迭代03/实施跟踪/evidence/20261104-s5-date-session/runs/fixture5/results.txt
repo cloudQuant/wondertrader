@@ -1,0 +1,22 @@
+date_client exit=0
+tz_legacy exit=0
+tz_legacy_baseline exit=1
+monitor_chain exit=0
+monitor_chain_baseline exit=1
+reader_chain exit=0
+reader_chain_baseline exit=1
+xele_chain exit=0
+xele_chain_baseline exit=134
+xele_tsan exit=0
+xele_tsan_baseline exit=134
+date_client.log:    1 [  PASSED  ] 10 tests. 
+monitor_chain_baseline.log:    1 [  FAILED  ] 1 test, listed below:    1 [  PASSED  ] 2 tests. 
+monitor_chain.log:    1 [  PASSED  ] 3 tests. 
+reader_chain_baseline.log:    1 [  FAILED  ] 3 tests, listed below:    1 [  PASSED  ] 1 test. 
+reader_chain.log:    1 [  PASSED  ] 4 tests. 
+tz_legacy_baseline.log:    1 [  FAILED  ] 2 tests, listed below:    1 [  PASSED  ] 0 tests. 
+tz_legacy.log:    1 [  PASSED  ] 2 tests. 
+xele_chain_baseline.log:    1 /tmp/wt-i03-s5-date-session-fixture/baseline/ParserXeleSkt/ParserXeleSkt.cpp:54:4: runtime error: index 10 out of bounds for type 'char[10]' 
+xele_chain.log:    1 [  PASSED  ] 5 tests. 
+xele_tsan_baseline.log:    1 WARNING: ThreadSanitizer: data race (pid=55878) 
+xele_tsan.log:    1 [  PASSED  ] 1 test. 

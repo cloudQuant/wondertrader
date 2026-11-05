@@ -1,0 +1,13 @@
+--- tree/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/run.sh
++++ mirror/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/run.sh
+@@ -62,7 +62,7 @@
+   "$fixture/baseline/TraderAdapter.h" "$fixture/baseline/CodeHelper.hpp"
+   "$s5before/TraderAdapter.cpp" "$s5before/TraderAdapter.h")
+ shasum -a 256 "${watched[@]}" > "$out/source.sha256"
+-git -C "$root" rev-parse HEAD > "$out/head.txt"
++echo ccaad010e9169f610aded4d8dc0f5647f70a5cff > "$out/head.txt"
+ flags=(-std=c++17 -g -O1 -fno-omit-frame-pointer "${san[@]}" ${defs[@]+"${defs[@]}"}
+   -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -DBOOST_BIND_GLOBAL_PLACEHOLDERS
+   -I/opt/homebrew/Cellar/boost/1.88.0/include -I"$inc/Includes" -I"$inc/Share"
+# copied read-only input /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before/src/WtCore/TraderAdapter.cpp -> mirror/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before/src/WtCore/TraderAdapter.cpp (sha256 2c61ada5b332fc86b7837f2f76804f7bf877ce3f3bb5e815badfac3c9b5a6dc3)
+# copied read-only input /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before/src/WtCore/TraderAdapter.h -> mirror/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before/src/WtCore/TraderAdapter.h (sha256 f654a4638cb2505f4bff2d1d75c994c653ac4ac190f90c17a3fc1cf60ef0178b)

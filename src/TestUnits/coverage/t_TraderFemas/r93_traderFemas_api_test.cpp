@@ -12,6 +12,8 @@
  */
 #include <gtest/gtest.h>
 
+#include <cmath>
+
 #include <cstring>
 #include <filesystem>
 #include <functional>
@@ -647,7 +649,7 @@ namespace
 		// 登录成功后 makeEntrustID 以 MaxOrderLocalID（去掉尾零）为前缀
 		char eid[64] = { 0 };
 		ASSERT_TRUE(probe_.makeEntrustID(eid, sizeof(eid)));
-		EXPECT_EQ(0, std::string(eid).find("A000123"));
+		EXPECT_EQ(0u, std::string(eid).find("A000123"));
 	}
 
 	/* ------------------------------------------------------------------ */
@@ -1051,5 +1053,31 @@ namespace
 		ioc.run();
 		EXPECT_EQ(0u, probe_.queued());
 		EXPECT_FALSE(probe_.queryInFlight());
+	}
+	/// 卡8（BUG-P02-005，slice1 final gaps）：Femas 只支持整手。小数、非有限、非正或超出 int 的数量
+	/// 在下单入口明确拒绝，不到 SDK（不经 (int) 静默截断）；整数量照常提交。
+	TEST_F(R93FemasTest, card8_non_whole_lot_quantity_is_rejected_before_the_sdk)
+	{
+		make_ready();
+		for (double bad : { 1.5, 0.5, 0.0, -1.0, std::nan(""), 1e12 })
+		{
+			WTSEntrust* ent = WTSEntrust::create("rb2401", 1, 3500.0, "SHFE");
+			ent->setContractInfo(ct_);
+			ent->setDirection(WDT_LONG);
+			ent->setOffsetType(WOT_OPEN);
+			ent->setVolume(bad);
+			EXPECT_EQ(-1, probe_.orderInsert(ent)) << bad;
+			ent->release();
+		}
+		EXPECT_EQ(0, stub_.n_order_insert_);
+
+		WTSEntrust* whole = WTSEntrust::create("rb2401", 2, 3500.0, "SHFE");
+		whole->setContractInfo(ct_);
+		whole->setDirection(WDT_LONG);
+		whole->setOffsetType(WOT_OPEN);
+		ASSERT_EQ(0, probe_.orderInsert(whole));
+		EXPECT_EQ(1, stub_.n_order_insert_);
+		EXPECT_EQ(2, stub_.order_req_.Volume);
+		whole->release();
 	}
 } // namespace

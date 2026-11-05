@@ -1,0 +1,88 @@
+src/TraderATP/TraderATP.cpp:85:4: warning: initializer order does not match the declaration order [-Wreorder-ctor]
+   85 |         , _ordref(makeRefID())
+      |           ^~~~~~~~~~~~~~~~~~~~
+      |           _close_flag(false)
+   86 |         , _reqid(1)
+      |           ~~~~~~~~~
+      |           _positions(NULL)
+   87 |         , _orders(NULL)
+      |           ~~~~~~~~~~~~~
+      |           _trades(NULL)
+   88 |         , _trades(NULL)
+      |           ~~~~~~~~~~~~~
+      |           _orders(NULL)
+   89 |         , _positions(NULL)
+      |           ~~~~~~~~~~~~~~~~
+      |           _bd_mgr(NULL)
+   90 |         , _bd_mgr(NULL)
+      |           ~~~~~~~~~~~~~
+      |           _tradingday(0)
+   91 |         , _tradingday(0)
+      |           ~~~~~~~~~~~~~~
+      |           _reqid(1)
+   92 |         , _close_flag(false)
+      |           ~~~~~~~~~~~~~~~~~~
+      |           _ordref(makeRefID())
+src/TraderATP/TraderATP.cpp:85:4: note: field '_ordref' will be initialized after field '_reqid'
+   85 |         , _ordref(makeRefID())
+      |           ^~~~~~~~~~~~~~~~~~~~
+src/TraderATP/TraderATP.cpp:86:4: note: field '_reqid' will be initialized after field '_orders'
+   86 |         , _reqid(1)
+      |           ^~~~~~~~~
+src/TraderATP/TraderATP.cpp:87:4: note: field '_orders' will be initialized after field '_trades'
+   87 |         , _orders(NULL)
+      |           ^~~~~~~~~~~~~
+src/TraderATP/TraderATP.cpp:88:4: note: field '_trades' will be initialized after field '_positions'
+   88 |         , _trades(NULL)
+      |           ^~~~~~~~~~~~~
+src/TraderATP/TraderATP.cpp:91:4: note: field '_tradingday' will be initialized after field '_close_flag'
+   91 |         , _tradingday(0)
+      |           ^~~~~~~~~~~~~~
+src/TraderATP/TraderATP.cpp:213:2: warning: variable 'login_mode' is used uninitialized whenever switch default is taken [-Wsometimes-uninitialized]
+  213 |         default:
+      |         ^~~~~~~
+src/TraderATP/TraderATP.cpp:217:9: note: uninitialized use occurs here
+  217 |         return login_mode;
+      |                ^~~~~~~~~~
+src/TraderATP/TraderATP.cpp:204:29: note: initialize the variable 'login_mode' to silence this warning
+  204 |         ATPLoginModeType login_mode;
+      |                                    ^
+      |                                     = '\0'
+src/TraderATP/TraderATP.cpp:520:6: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  520 |         int i = 1, j = 1;
+      |             ^
+src/TraderATP/TraderATP.cpp:520:13: warning: variable 'j' set but not used [-Wunused-but-set-variable]
+  520 |         int i = 1, j = 1;
+      |                    ^
+src/TraderATP/TraderATP.cpp:944:12: warning: unused variable 'ayPos' [-Wunused-variable]
+  944 |         WTSArray* ayPos = WTSArray::create();
+      |                   ^~~~~
+In file included from src/TraderATP/TraderATP.cpp:35:
+In file included from src/TraderATP/../Share/fmtlib.h:7:
+In file included from /opt/homebrew/include/fmt/format.h:41:
+/opt/homebrew/include/fmt/base.h:2262:45: error: implicit instantiation of undefined template 'fmt::detail::type_is_unformattable_for<std::atomic<long long>, char>'
+ 2262 |     type_is_unformattable_for<T, char_type> _;
+      |                                             ^
+/opt/homebrew/include/fmt/base.h:2235:44: note: in instantiation of function template specialization 'fmt::detail::value<fmt::context>::value<std::atomic<long long>, 0>' requested here
+ 2235 |   FMT_CONSTEXPR20 FMT_INLINE value(T& x) : value(x, custom_tag()) {}
+      |                                            ^
+/opt/homebrew/include/fmt/base.h:2912:60: note: in instantiation of function template specialization 'fmt::detail::value<fmt::context>::value<const std::atomic<long long>, 0>' requested here
+ 2912 |   auto result = vformat_to_n(out, N, fmt.str, vargs<T...>{{args...}});
+      |                                                            ^
+src/TraderATP/../Share/fmtlib.h:26:18: note: in instantiation of function template specialization 'fmt::format_to<512UL, const std::atomic<long long> &>' requested here
+   26 |                 char* s = fmt::format_to(buffer, format, args...);
+      |                                ^
+src/TraderATP/TraderATP.cpp:42:32: note: in instantiation of function template specialization 'fmtutil::format<512, std::atomic<long long>>' requested here
+   42 |         const char* buffer = fmtutil::format(format, args...);
+      |                                       ^
+src/TraderATP/TraderATP.cpp:1377:4: note: in instantiation of function template specialization 'write_log<std::atomic<long long>>' requested here
+ 1377 |                         write_log(_sink, LL_INFO, "return num: {}", _return_nums);
+      |                         ^
+/opt/homebrew/include/fmt/base.h:2102:45: note: template is declared here
+ 2102 | template <typename T, typename Char> struct type_is_unformattable_for;
+      |                                             ^
+In file included from src/TraderATP/TraderATP.cpp:10:
+src/TraderATP/TraderATP.h:197:12: warning: private field '_sessionid' is not used [-Wunused-private-field]
+  197 |         uint64_t                _sessionid;
+      |                                 ^
+6 warnings and 1 error generated.

@@ -14,6 +14,8 @@
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
+#include <unordered_set>
+#include <vector>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/executor_work_guard.hpp>
@@ -33,6 +35,13 @@ USING_NS_WTP;
 class TraderXTP : public XTP::API::TraderSpi, public ITraderApi
 {
 public:
+	// BUG-L01-014: host features declared through setTraderSpiFeatures.
+	void setSpiFeatures(uint64_t features) { m_spiFeatures.store(features); }
+	std::atomic<uint64_t>	m_spiFeatures{ 0 };
+	// K42 / BUG-I02-NEW-154: state of the order query being assembled.
+	bool					_qry_orders_failed = false;
+	bool					_qry_orders_dropped = false;
+
 	TraderXTP();
 	virtual ~TraderXTP();
 
@@ -99,7 +108,23 @@ public:
 
 	virtual int queryTrades() override;
 
+public:
+	// Card 9 (9a/9b/9d) support for the factory remover and the host.
+	// True on this instance's worker or inside one of its SDK callbacks/API calls.
+	bool		isCallbackContext() const;
+	// True when release() completed: worker joined, API calls and SDK callbacks
+	// drained, SDK Release() returned (or no SDK API existed).
+	bool		isQuiesced() const;
+	// Detach the worker of an instance that is kept alive until process exit.
+	void		detachForQuarantine();
+
 private:
+	ITraderSpi*	sink() const { return _sink.load(std::memory_order_acquire); }
+	class CallbackGate;
+	bool		enterCallback();
+	void		leaveCallback();
+	// Waits (bounded) until no admitted SDK callback is inside this wrapper.
+	bool		waitCallbacksDrained();
 	void		reconnect(bool nonblocking = false);
 	bool		startWorker();
 	bool		stopWorker(bool joinWorker = true);
@@ -126,7 +151,7 @@ private:
 
 private:
 	XTP::API::TraderApi*	_api;
-	ITraderSpi*		_sink;
+	std::atomic<ITraderSpi*>	_sink;	// registerSpi(NULL) may race SDK callbacks
 
 	typedef WTSHashMap<std::string> PositionMap;
 	PositionMap*			_positions;
@@ -179,6 +204,17 @@ private:
 	bool				_api_release_requested = false;
 	bool				_api_release_in_progress = false;
 	uint32_t			_api_release_waiters = 0;	// Observable waiters for deterministic lifecycle tests.
+	// BUG-R93-005 / card 9: SDK callbacks admitted into this wrapper (protected by
+	// _api_lifecycle_mutex). release()/reconnect() wait for them, bounded, before
+	// SDK Release(); on timeout the old API is retained (never released) and the
+	// instance reports drain-uncertain so the remover quarantines it.
+	uint32_t			_callbacks_in_flight = 0;
+	bool				_drain_uncertain = false;
+	uint32_t			_drain_timeout_ms = 2000;
+	std::vector<XTP::API::TraderApi*>	_retained_apis;
+	// Login sessions of API instances already replaced or released: a late
+	// OnDisconnected for one of them must not trigger a relogin of the current API.
+	std::unordered_set<uint64_t>	_retired_sessions;
 
 	DllHandle		m_hInstXTP;
 	typedef XTP::API::TraderApi* (*XTPCreator)(uint8_t, const char*, XTP_LOG_LEVEL);

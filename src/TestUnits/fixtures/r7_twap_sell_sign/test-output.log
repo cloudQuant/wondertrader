@@ -1,0 +1,43 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r7_twap_sell_sign.*
+[==========] Running 5 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 5 tests from r7_twap_sell_sign
+[ RUN      ] r7_twap_sell_sign.canceled_sell_does_not_submit_a_buy
+/tmp/wt-i03-r7-sign-UYR59u/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1120: Failure
+Value of: ctx.buys.empty()
+  Actual: false
+Expected: true
+
+[  FAILED  ] r7_twap_sell_sign.canceled_sell_does_not_submit_a_buy (3 ms)
+[ RUN      ] r7_twap_sell_sign.last_slice_never_reverses_a_sell_into_a_buy
+/tmp/wt-i03-r7-sign-UYR59u/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1140: Failure
+Value of: ctx.buys.empty()
+  Actual: false
+Expected: true
+
+[  FAILED  ] r7_twap_sell_sign.last_slice_never_reverses_a_sell_into_a_buy (0 ms)
+[ RUN      ] r7_twap_sell_sign.late_buy_fill_must_not_be_retried_twice
+/tmp/wt-i03-r7-sign-UYR59u/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1159: Failure
+Expected: (ctx.buys[1].qty) <= (10.0), actual: 20 vs 10
+
+[  FAILED  ] r7_twap_sell_sign.late_buy_fill_must_not_be_retried_twice (0 ms)
+[ RUN      ] r7_twap_sell_sign.accounted_buy_fill_retries_only_the_remainder
+[       OK ] r7_twap_sell_sign.accounted_buy_fill_retries_only_the_remainder (0 ms)
+[ RUN      ] r7_twap_sell_sign.sell_slice_does_not_exceed_target_difference
+/tmp/wt-i03-r7-sign-UYR59u/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1193: Failure
+Expected: (ctx.sells[0].qty) <= (2.0), actual: 3 vs 2
+
+[  FAILED  ] r7_twap_sell_sign.sell_slice_does_not_exceed_target_difference (0 ms)
+[----------] 5 tests from r7_twap_sell_sign (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 1 test suite ran. (3 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 4 tests, listed below:
+[  FAILED  ] r7_twap_sell_sign.canceled_sell_does_not_submit_a_buy
+[  FAILED  ] r7_twap_sell_sign.last_slice_never_reverses_a_sell_into_a_buy
+[  FAILED  ] r7_twap_sell_sign.late_buy_fill_must_not_be_retried_twice
+[  FAILED  ] r7_twap_sell_sign.sell_slice_does_not_exceed_target_difference
+
+ 4 FAILED TESTS

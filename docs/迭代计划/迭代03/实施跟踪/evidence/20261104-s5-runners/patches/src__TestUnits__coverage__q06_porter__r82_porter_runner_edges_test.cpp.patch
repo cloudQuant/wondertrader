@@ -1,0 +1,98 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/q06_porter/r82_porter_runner_edges_test.cpp	2026-11-02 21:49:41
++++ src/TestUnits/coverage/q06_porter/r82_porter_runner_edges_test.cpp	2026-11-04 21:24:10
+@@ -41,6 +41,7 @@
+ #include <chrono>
+ #include <cstdlib>
+ #include <thread>
++#include <new>
+ #include <string>
+ #include <vector>
+ 
+@@ -168,9 +169,23 @@
+ 	bool g_sel_configured = false;
+ 	bool g_hft_configured = false;
+ 	std::string g_current_env;
++
++	/* 卡9c（迭代03）：runner 配置一次性，重复 config 被拒；切换 env 时以一个全新的
++	 * 进程级 runner 对象替换（与 v2 夹具相同的析构+原位重建），等价于每引擎一进程。 */
++	void fresh_porter_runner()
++	{
++		WtRtRunner& runner = getRunner();
++		runner.WtRtRunner::~WtRtRunner();
++		new (&runner) WtRtRunner();
++		g_cta_configured = false;
++		g_sel_configured = false;
++		g_hft_configured = false;
++		g_current_env.clear();
++	}
+ 
+ 	void configure_porter(const std::string& dir, const char* envName, bool& flag)
+ 	{
++		fresh_porter_runner();
+ 		getRunner().init((dir + "/r82_absent_logcfg.yaml").c_str(), true, dir.c_str());
+ 		/* WtPorter.cpp:260-266 的 isFile=false 转发支 */
+ 		config_porter(real_cfg(dir, envName).c_str(), false);
+@@ -203,6 +218,7 @@
+ 		if (!need_config(g_hft_configured, "hft"))
+ 			return true;
+ 
++		fresh_porter_runner();
+ 		getRunner().init((dir + "/r82_absent_logcfg.yaml").c_str(), true, dir.c_str());
+ 		if (!trader_mocker.install())
+ 			return false;
+@@ -861,19 +877,20 @@
+ 	}
+ 
+ 	{
+-		/* L678 + L936：executers 文件存在但 executers 段不是数组。 */
++		/* executers 文件存在但 executers 段不是数组。迭代03 卡8b=A（BUG-R134-003/WSN06-001）：
++		 * 执行器表在任何副作用之前整表预检，非法表使 config 失败（原断言为 TRUE，.before 见 s5-runners 证据）。 */
+ 		WtRtRunner* r = new_heap_runner(dir);
+ 		const std::string cfg = "{\"basefiles\":{},\"executers\":\""
+ 			+ dir + "/executers_obj.json\"," + tail + "}";
+-		EXPECT_TRUE(r->config(cfg.c_str(), false));
++		EXPECT_FALSE(r->config(cfg.c_str(), false));
+ 	}
+ 
+ 	{
+-		/* L686-689：executers 文件坏 JSON。 */
++		/* executers 文件坏 JSON：同上，卡8b=A 下 config 失败（原断言为 TRUE）。 */
+ 		WtRtRunner* r = new_heap_runner(dir);
+ 		const std::string cfg = "{\"basefiles\":{},\"executers\":\""
+ 			+ dir + "/bad.json\"," + tail + "}";
+-		EXPECT_TRUE(r->config(cfg.c_str(), false));
++		EXPECT_FALSE(r->config(cfg.c_str(), false));
+ 	}
+ 
+ 	{
+@@ -1003,7 +1020,9 @@
+ 		ASSERT_TRUE(r->addHftFactories(isolatedFactoryDir.string().c_str()));
+ 		const std::string cfg = "{\"basefiles\":{},\"strategies\":{\"hft\":[{"
+ 			"\"active\":true,\"id\":\"r82_hft_valid\","
+-			"\"name\":\"WtHftStraFact.SimpleHft\",\"trader\":\"r82_trd\",\"params\":{}}]}," + tail + "}";
++			// BUG-WSN06-002（迭代03 卡E）：SimpleHft 参数严格 schema 要求 code 必填，空对象被拒绝
++			// 且 init(false) 现传播为配置失败；合法正分支须给出最小合法参数（原为 params:{}）。
++			"\"name\":\"WtHftStraFact.SimpleHft\",\"trader\":\"r82_trd\",\"params\":{\"code\":\"SHFE.au.2406\"}}]}," + tail + "}";
+ 		EXPECT_TRUE(r->config(cfg.c_str(), false));
+ 		EXPECT_NE(dynamic_cast<WtHftEngine*>(r->getEngine()), nullptr);
+ 	}
+@@ -1109,13 +1128,14 @@
+ 		"\"env\":{\"name\":\"cta\"},\"data\":{},"
+ 		"\"bspolicy\":\"" + dir + "/actions.json\","
+ 		"\"executers\":["
+-		"{\"active\":true,\"id\":\"r82_exec_noname\"},"
+-		"{\"active\":true,\"id\":\"r82_exec_local_badtrd\",\"name\":\"local\","
+-		"\"trader\":\"r82_absent_trader\"},"
++		// 卡8b=A（迭代03）：local/diff/arbi 须带 scale 与含 default 的 policy。
++		"{\"active\":true,\"id\":\"r82_exec_noname\",\"scale\":1,\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\"}}},"
++		"{\"active\":true,\"id\":\"r82_exec_local_badtrd\",\"name\":\"local\","
++		"\"trader\":\"r82_absent_trader\",\"scale\":1,\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\"}}},"
+ 		"{\"active\":true,\"id\":\"r82_exec_diff_badtrd\",\"name\":\"diff\","
+-		"\"trader\":\"r82_absent_trader\"},"
++		"\"trader\":\"r82_absent_trader\",\"scale\":1,\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\"}}},"
+ 		"{\"active\":true,\"id\":\"r82_exec_arbi_badtrd\",\"name\":\"arbi\","
+-		"\"trader\":\"r82_absent_trader\"},"
++		"\"trader\":\"r82_absent_trader\",\"scale\":1,\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\"}}},"
+ 		"{\"active\":true,\"id\":\"r82_exec_dist\",\"name\":\"dist\"},"
+ 		"{\"active\":false,\"id\":\"r82_exec_skipped\"}"
+ 		"]}";

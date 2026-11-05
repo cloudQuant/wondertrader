@@ -1,0 +1,100 @@
+--- /tmp/i03_csv_type_baseline_20261103/WtDtHelper.cpp	2026-11-03 17:14:55
++++ src/WtDtHelper/WtDtHelper.cpp	2026-11-03 17:16:20
+@@ -27,6 +27,7 @@
+ namespace fs = boost::filesystem;
+ 
+ #include <cctype>
++#include <cstring>
+ #include <exception>
+ #include <fstream>
+ #include <limits>
+@@ -356,6 +357,41 @@
+         return false;
+     }
+ 
++    // The CSV entry points accept historical blocks only. Inspect a copied
++    // header before interpreting or decompressing its payload.
++    bool valid_csv_block(const std::string& bytes, bool isBar, uint16_t& type)
++    {
++        if (bytes.size() < sizeof(BlockHeader))
++            return false;
++        BlockHeader header;
++        std::memcpy(&header, bytes.data(), sizeof(header));
++        if (std::memcmp(header._blk_flag, BLK_FLAG, FLAG_SIZE) != 0)
++            return false;
++        type = header._type;
++        if (isBar ? (type != BT_HIS_Minute1 && type != BT_HIS_Minute5 && type != BT_HIS_Day)
++                  : (type != BT_HIS_Ticks))
++            return false;
++        if (header._version != BLOCK_VERSION_RAW && header._version != BLOCK_VERSION_CMP &&
++            header._version != BLOCK_VERSION_RAW_V2 && header._version != BLOCK_VERSION_CMP_V2)
++            return false;
++
++        const bool old = header.is_old_version();
++        const size_t itemSize = isBar ? (old ? sizeof(WTSBarStructOld) : sizeof(WTSBarStruct))
++                                      : (old ? sizeof(WTSTickStructOld) : sizeof(WTSTickStruct));
++        if (!header.is_compressed())
++            return (bytes.size() - sizeof(BlockHeader)) % itemSize == 0;
++        if (bytes.size() < sizeof(BlockHeaderV2))
++            return false;
++        BlockHeaderV2 extended;
++        std::memcpy(&extended, bytes.data(), sizeof(extended));
++        const size_t compressedSize = bytes.size() - sizeof(BlockHeaderV2);
++        if (extended._size != compressedSize)
++            return false;
++        const auto decodedSize = ZSTD_getFrameContentSize(bytes.data() + sizeof(BlockHeaderV2), compressedSize);
++        return decodedSize != ZSTD_CONTENTSIZE_ERROR && decodedSize != ZSTD_CONTENTSIZE_UNKNOWN &&
++               decodedSize % itemSize == 0;
++    }
++
+     struct CsvBatchStatus
+     {
+         uint32_t failure = WT_CSV_DUMP_SUCCESS;
+@@ -428,25 +464,16 @@
+ 			batch.fail(WT_CSV_DUMP_INPUT_ERROR);
+ 			continue;
+ 		}
+-		if (buffer.size() < sizeof(HisKlineBlock))
++		uint16_t type = 0;
++		if (!valid_csv_block(buffer, true, type))
+ 		{
+ 			if (cbLogger)
+-				cbLogger(fmtutil::format(u8"文件{}头部校验失败", path.c_str()));
++				cbLogger(fmtutil::format(u8"Invalid data block header: {}", path.c_str()));
+ 			batch.fail(WT_CSV_DUMP_INPUT_ERROR);
+ 			continue;
+ 		}
+ 
+-		BlockHeader* bHeader = (BlockHeader*)buffer.data();
+-
+-		if(bHeader->_type < BT_HIS_Minute1 || bHeader->_type > BT_HIS_Day)
+-		{
+-			if (cbLogger)
+-				cbLogger(fmtutil::format(u8"文件{}不是K线数据，跳过转换", path.c_str()));
+-			continue;
+-		}
+-
+-		bool isDay = (bHeader->_type == BT_HIS_Day);
+-
++		bool isDay = (type == BT_HIS_Day);
+ 		if (!proc_block_data(buffer, true, false) || buffer.size() % sizeof(WTSBarStruct) != 0)
+ 		{
+ 			if (cbLogger)
+@@ -578,14 +605,14 @@
+ 			batch.fail(WT_CSV_DUMP_INPUT_ERROR);
+ 			continue;
+ 		}
+-		if (buffer.size() < sizeof(HisTickBlock))
++		uint16_t type = 0;
++		if (!valid_csv_block(buffer, false, type))
+ 		{
+ 			if (cbLogger)
+-				cbLogger(fmtutil::format(u8"文件{}头部校验失败", path.c_str()));
++				cbLogger(fmtutil::format(u8"Invalid data block header: {}", path.c_str()));
+ 			batch.fail(WT_CSV_DUMP_INPUT_ERROR);
+ 			continue;
+ 		}
+-
+ 		if (!proc_block_data(buffer, false, false) || buffer.size() % sizeof(WTSTickStruct) != 0)
+ 		{
+ 			if (cbLogger)

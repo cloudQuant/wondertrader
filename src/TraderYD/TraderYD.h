@@ -12,6 +12,10 @@
 #include <string>
 #include <queue>
 #include <stdint.h>
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <unordered_map>
 
 #include "../Includes/WTSTypes.h"
 #include "../Includes/ITraderApi.h"
@@ -29,6 +33,13 @@ USING_NS_WTP;
 class TraderYD : public ITraderApi, public YDListener
 {
 public:
+	// BUG-L01-014: host features declared through setTraderSpiFeatures.
+	void setSpiFeatures(uint64_t features) { m_spiFeatures.store(features); }
+	std::atomic<uint64_t>	m_spiFeatures{ 0 };
+	// K42 / BUG-I02-NEW-154: set when an order report of this session could not be
+	// converted, i.e. the local order cache is missing an order.
+	std::atomic<bool>		m_bOrderCacheDropped{ false };
+
 	TraderYD();
 	virtual ~TraderYD();
 
@@ -57,6 +68,41 @@ public:
 	virtual void notifyAccount(const YDAccount *pAccount) override;
 
 	virtual void notifyCaughtUp() override;
+
+	// YD 1.108 (ydApi.h): startDestroy() is asynchronous; the listener may only be
+	// deleted after notifyAfterApiDestroy(). These two are never gated.
+	virtual void notifyBeforeApiDestroy() override;
+
+	virtual void notifyAfterApiDestroy() override;
+
+public:
+	/*
+	 *	Card 9 (9a=A+C, 9b=A, 9c=A, 9d=A) lifecycle state, observable by the host.
+	 */
+	typedef enum
+	{
+		YS_RUNNING,			// no stop requested
+		YS_STOP_DEFERRED,	// stop requested from a callback/worker; admission closed
+		YS_RELEASED,		// worker joined, calls/callbacks drained, notifyAfterApiDestroy received
+		YS_DRAIN_UNCERTAIN	// bound expired; the instance must stay alive (quarantine)
+	} StopState;
+
+	StopState	stopState() const;
+	bool		isCallbackContext() const;
+	bool		isQuiesced() const;
+	void		detachForQuarantine();
+
+private:
+	class ApiLease;
+	class CallbackScope;
+	friend class ApiLease;
+	friend class CallbackScope;
+	bool		acquireApiLease();
+	void		releaseApiLease();
+	bool		enterCallback(bool gated);
+	void		leaveCallback();
+	void		requestStop();
+	void		workerMain();
 
 public:
 	typedef enum
@@ -159,13 +205,34 @@ protected:
 	DataMap*					m_mapOrders;
 	WTSArray*					m_ayFunds;
 
+	// BUG-R93-006: yesterday/today quantities frozen by each close order when it
+	// was first seen, keyed by order id, so a cancel restores the order's own
+	// sources instead of inferring them from the position-wide totals.
+	struct FrozenSources
+	{
+		double	_pre;
+		double	_new;
+	};
+	std::unordered_map<std::string, FrozenSources>	m_mapFrozen;
+
 	IBaseDataMgr*				m_bdMgr;
 
 	typedef std::queue<CommonExecuter>	QueryQue;
 	QueryQue				m_queQuery;
 	StdUniqueMutex			m_mtxQuery;
-	bool					m_bStopped;
+	std::atomic<bool>		m_bStopped;		// admission closed (release/disconnect requested)
 	StdThreadPtr			m_thrdWorker;
+
+	mutable std::mutex		m_mtxLifecycle;
+	std::condition_variable	m_cvLifecycle;
+	std::mutex				m_mtxRelease;		// serializes external release()
+	uint32_t				m_apiLeases;		// host calls touching the YD API in flight
+	uint32_t				m_activeCallbacks;	// YD callbacks inside this wrapper
+	bool					m_workerExited;
+	bool					m_destroyStarted;	// startDestroy() called
+	bool					m_apiDestroyed;		// notifyAfterApiDestroy() received
+	StopState				m_stopState;
+	uint32_t				m_drainTimeoutMs;
 
 	std::string		m_strModule;
 	DllHandle		m_hInstYD;

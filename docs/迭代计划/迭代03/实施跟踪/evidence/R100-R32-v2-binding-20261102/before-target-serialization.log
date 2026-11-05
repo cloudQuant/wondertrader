@@ -1,0 +1,47 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=78766)
+  Read of size 8 at 0x0001020fc0c0 by thread T1 (mutexes: write M0):
+    #0 mdb_find_oldest mdb-annotated.c:2142 (test-tsan-annot3:arm64+0x100017fe4)
+    #1 mdb_page_alloc mdb-annotated.c:2268 (test-tsan-annot3:arm64+0x100017fe4)
+    #2 mdb_page_new mdb-annotated.c:7233 (test-tsan-annot3:arm64+0x100017654)
+    #3 mdb_cursor_put mdb-annotated.c:6697 (test-tsan-annot3:arm64+0x1000123e0)
+    #4 mdb_put mdb-annotated.c:9085 (test-tsan-annot3:arm64+0x10001d7c4)
+    #5 wt_ad_bar_migration::stageBatch(wt_ad_bar_migration::Bindings const&, wt_ad_bar_key_v2::LegacySourceHost, wt_ad_bar_key_v2::LegacyValueLayout, std::__1::function<bool (MDB_val const&, MDB_val const&, wt_ad_bar_migration::Evidence&)> const&, unsigned long) LMDBBarMigration.hpp:400 (test-tsan-annot3:arm64+0x10000acd0)
+    #6 (anonymous namespace)::batch(wt_ad_bar_migration::Bindings const&, std::__1::function<bool (MDB_val const&, MDB_val const&, wt_ad_bar_migration::Evidence&)> const&, unsigned long) migration_test.cpp:138 (test-tsan-annot3:arm64+0x10000db30)
+    #7 main::$_7::operator()() const migration_test.cpp:214 (test-tsan-annot3:arm64+0x10000db30)
+    #8 std::__1::__invoke_result_impl<void, main::$_7>::type std::__1::__invoke[abi:nqe220108]<main::$_7>(main::$_7&&) invoke.h:90 (test-tsan-annot3:arm64+0x10000db30)
+    #9 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_7, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_7>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (test-tsan-annot3:arm64+0x10000db30)
+    #10 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_7>>(void*) thread.h:169 (test-tsan-annot3:arm64+0x10000db30)
+
+  Previous write of size 8 at 0x0001020fc0c0 by thread T2:
+    #0 mdb_txn_end mdb-annotated.c:3028 (test-tsan-annot3:arm64+0x100010f34)
+    #1 mdb_txn_abort mdb-annotated.c:3102 (test-tsan-annot3:arm64+0x1000111f8)
+    #2 wt_ad_bar_migration::stageBatch(wt_ad_bar_migration::Bindings const&, wt_ad_bar_key_v2::LegacySourceHost, wt_ad_bar_key_v2::LegacyValueLayout, std::__1::function<bool (MDB_val const&, MDB_val const&, wt_ad_bar_migration::Evidence&)> const&, unsigned long) LMDBBarMigration.hpp:375 (test-tsan-annot3:arm64+0x10000aa30)
+    #3 (anonymous namespace)::batch(wt_ad_bar_migration::Bindings const&, std::__1::function<bool (MDB_val const&, MDB_val const&, wt_ad_bar_migration::Evidence&)> const&, unsigned long) migration_test.cpp:138 (test-tsan-annot3:arm64+0x10000dd58)
+    #4 main::$_8::operator()() const migration_test.cpp:214 (test-tsan-annot3:arm64+0x10000dd58)
+    #5 std::__1::__invoke_result_impl<void, main::$_8>::type std::__1::__invoke[abi:nqe220108]<main::$_8>(main::$_8&&) invoke.h:90 (test-tsan-annot3:arm64+0x10000dd58)
+    #6 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_8, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_8>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (test-tsan-annot3:arm64+0x10000dd58)
+    #7 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_8>>(void*) thread.h:169 (test-tsan-annot3:arm64+0x10000dd58)
+
+  Mutex M0 (0x00016ddcab40) created at:
+    #0 pthread_mutex_lock <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x33b9c)
+    #1 std::__1::mutex::lock() <null> (libc++.1.dylib:arm64e+0x300c)
+    #2 (anonymous namespace)::bind(MDB_env*, MDB_env*, wt_ad_bar_migration::Bindings&) migration_test.cpp:135 (test-tsan-annot3:arm64+0x100006d44)
+    #3 main migration_test.cpp:204 (test-tsan-annot3:arm64+0x1000020a4)
+
+  Thread T1 (tid=1254033, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (test-tsan-annot3:arm64+0x1000083b8)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_7, 0>(main::$_7&&) thread.h:218 (test-tsan-annot3:arm64+0x1000083b8)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_7, 0>(main::$_7&&) thread.h:209 (test-tsan-annot3:arm64+0x1000083b8)
+    #4 main migration_test.cpp:214 (test-tsan-annot3:arm64+0x100002c44)
+
+  Thread T2 (tid=1254034, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (test-tsan-annot3:arm64+0x1000084e4)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_8, 0>(main::$_8&&) thread.h:218 (test-tsan-annot3:arm64+0x1000084e4)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_8, 0>(main::$_8&&) thread.h:209 (test-tsan-annot3:arm64+0x1000084e4)
+    #4 main migration_test.cpp:214 (test-tsan-annot3:arm64+0x100002c60)
+
+SUMMARY: ThreadSanitizer: data race mdb-annotated.c:2142 in mdb_find_oldest
+==================

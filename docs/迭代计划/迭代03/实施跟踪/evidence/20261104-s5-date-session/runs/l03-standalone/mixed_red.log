@@ -1,0 +1,66 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = l03_session.full_day_section_is_not_mixed_with_other_sections
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from l03_session
+[ RUN      ] l03_session.full_day_section_is_not_mixed_with_other_sections
+src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:566: Failure
+Value of: s->tryAddTradingSection(0, 0)
+  Actual: true
+Expected: false
+
+src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:568: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  s->getSectionCount()
+    Which is: 3
+
+src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:569: Failure
+Expected equality of these values:
+  360u
+    Which is: 360
+  s->getTradingMins()
+    Which is: 3240
+
+src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:574: Failure
+Value of: all->tryAddTradingSection(900, 1500)
+  Actual: true
+Expected: false
+
+src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:575: Failure
+Value of: all->tryAddTradingSection(0, 0)
+  Actual: true
+Expected: false
+
+src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:576: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  all->getSectionCount()
+    Which is: 3
+
+src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:577: Failure
+Expected equality of these values:
+  1440u
+    Which is: 1440
+  all->getTradingMins()
+    Which is: 3240
+
+src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp:578: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  all->getSecMinList().size()
+    Which is: 3
+
+[  FAILED  ] l03_session.full_day_section_is_not_mixed_with_other_sections (0 ms)
+[----------] 1 test from l03_session (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] l03_session.full_day_section_is_not_mixed_with_other_sections
+
+ 1 FAILED TEST

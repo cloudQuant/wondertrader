@@ -1,0 +1,158 @@
+--- src/TestUnits/fixtures/i03_parser_event_contract_20261103/baseline/ParserUDP/ParserUDP.cpp	2026-11-03 21:49:09
++++ src/ParserUDP/ParserUDP.cpp	2026-11-03 21:50:14
+@@ -364,6 +364,46 @@
+ 		return;
+ 
+ 	_close_event_emitted = true;
++	emit_connect_event(_connection_epoch);
++	with_spi([](IParserSpi* sink) { sink->handleEvent(WPE_Close, 0); });
++}
++
++void ParserUDP::begin_event_epoch()
++{
++	std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++	_close_event_emitted = false;
++	const uint64_t epoch = _connection_epoch;
++	// Queued on the strand; a queued Close of this epoch is posted later, so
++	// strand order keeps Connect before Close.
++	boost::asio::post(_strand, [this, epoch]() { emit_connect_event(epoch); });
++}
++
++void ParserUDP::emit_connect_event(uint64_t epoch)
++{
++	std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++	if (epoch == 0 || epoch <= _connect_event_epoch)
++		return;
++	_connect_event_epoch = epoch;
++	with_spi([](IParserSpi* sink) { sink->handleEvent(WPE_Connect, 0); });
++}
++
++void ParserUDP::emit_login_event(uint64_t epoch)
++{
++	std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++	if (epoch == 0 || epoch != _connection_epoch || epoch <= _login_event_epoch || _stopped ||
++		_recovery_exhausted || _close_event_emitted || _stop_requested.load(std::memory_order_acquire))
++		return;
++	emit_connect_event(epoch);
++	if (_stopped || epoch != _connection_epoch || _stop_requested.load(std::memory_order_acquire))
++		return;
++	_login_event_epoch = epoch;
++	with_spi([](IParserSpi* sink) { sink->handleEvent(WPE_Login, 0); });
++}
++
++void ParserUDP::emit_queued_close(uint64_t epoch)
++{
++	std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++	emit_connect_event(epoch);
+ 	with_spi([](IParserSpi* sink) { sink->handleEvent(WPE_Close, 0); });
+ }
+ 
+@@ -409,7 +449,7 @@
+ 			_connection_epoch == epoch_before_reconnect || _b_socket == nullptr || !_b_socket->is_open() ||
+ 			_s_socket == nullptr || !_s_socket->is_open())
+ 			return;
+-		_close_event_emitted = false;
++		begin_event_epoch();
+ 		return;
+ 	}
+ 	if (_stop_requested.load(std::memory_order_acquire) || _stopped || _recovery_exhausted ||
+@@ -858,7 +898,7 @@
+ 			close_sockets();
+ 			return false;
+ 		}
+-		_close_event_emitted = false;
++		begin_event_epoch();
+ 	}
+ 	catch (...)
+ 	{
+@@ -894,9 +934,15 @@
+ 			return true;
+ 		_stopped = true;
+ 		const bool had_active_connection = !_close_event_emitted;
++		// Consume this connection's close token now, so a queued Close can never
++		// be attributed to a later connect.
++		_close_event_emitted = true;
+ 		close_sockets();
+ 		if (had_active_connection)
+-			boost::asio::post(_strand, boost::bind(&ParserUDP::doOnDisconnected, this));
++		{
++			const uint64_t epoch = _connection_epoch;
++			boost::asio::post(_strand, [this, epoch]() { emit_queued_close(epoch); });
++		}
+ 	}
+ 
+ 	return true;
+@@ -1002,7 +1048,7 @@
+ 		connection_epoch != _connection_epoch)
+ 		return;
+ 
+-	extract_buffer(bytes_transferred, isBroad, operation_owner->buffer.data());
++	extract_buffer(bytes_transferred, isBroad, operation_owner->buffer.data(), connection_epoch);
+ 	if (_stop_requested.load(std::memory_order_acquire) || _stopped || _recovery_exhausted ||
+ 		connection_epoch != _connection_epoch)
+ 		return;
+@@ -1010,7 +1056,7 @@
+ 	arm_receive(isBroad, connection_epoch);
+ }
+ 
+-void ParserUDP::extract_buffer(uint32_t length, bool isBroad, const char* buffer_data)
++void ParserUDP::extract_buffer(uint32_t length, bool isBroad, const char* buffer_data, uint64_t login_epoch)
+ {
+ 	(void)isBroad;
+ 	if (buffer_data == NULL || length < sizeof(uint32_t))
+@@ -1035,6 +1081,13 @@
+ 	{
+ 		if (payload_length < sizeof(WTSTickStruct))
+ 			return;
++		// A complete, recognized message is the only confirmation (card 14).
++		if (login_epoch != 0)
++		{
++			emit_login_event(login_epoch);
++			if (_stop_requested.load(std::memory_order_acquire) || _stopped)
++				return;
++		}
+ 		WTSTickStruct data;
+ 		std::memcpy(&data, payload, sizeof(data));
+ 		if (is_subscribed(data.exchg, data.code))
+@@ -1054,6 +1107,13 @@
+ 	{
+ 		if (payload_length < sizeof(WTSOrdDtlStruct))
+ 			return;
++		// A complete, recognized message is the only confirmation (card 14).
++		if (login_epoch != 0)
++		{
++			emit_login_event(login_epoch);
++			if (_stop_requested.load(std::memory_order_acquire) || _stopped)
++				return;
++		}
+ 		WTSOrdDtlStruct data;
+ 		std::memcpy(&data, payload, sizeof(data));
+ 		if (is_subscribed(data.exchg, data.code))
+@@ -1073,6 +1133,13 @@
+ 	{
+ 		if (payload_length < sizeof(WTSOrdQueStruct))
+ 			return;
++		// A complete, recognized message is the only confirmation (card 14).
++		if (login_epoch != 0)
++		{
++			emit_login_event(login_epoch);
++			if (_stop_requested.load(std::memory_order_acquire) || _stopped)
++				return;
++		}
+ 		WTSOrdQueStruct data;
+ 		std::memcpy(&data, payload, sizeof(data));
+ 		if (is_subscribed(data.exchg, data.code))
+@@ -1092,6 +1159,13 @@
+ 	{
+ 		if (payload_length < sizeof(WTSTransStruct))
+ 			return;
++		// A complete, recognized message is the only confirmation (card 14).
++		if (login_epoch != 0)
++		{
++			emit_login_event(login_epoch);
++			if (_stop_requested.load(std::memory_order_acquire) || _stopped)
++				return;
++		}
+ 		WTSTransStruct data;
+ 		std::memcpy(&data, payload, sizeof(data));
+ 		if (is_subscribed(data.exchg, data.code))

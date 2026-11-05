@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="6" failures="5" disabled="0" errors="0" time="0.02" timestamp="2026-11-05T13:25:22.270" name="AllTests">
+  <testsuite name="S1TraderEntryGate" tests="6" failures="5" disabled="0" skipped="0" errors="0" time="0.018" timestamp="2026-11-05T13:25:22.272">
+    <testcase name="K05SiblingAdaptersOfOneAccountShareInFlightQuantity" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp" line="154" status="run" result="completed" time="0.012" timestamp="2026-11-05T13:25:22.272" classname="S1TraderEntryGate">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:169&#x0A;Expected equality of these values:&#x0A;  (2147483647 *2U +1U)&#x0A;    Which is: 4294967295&#x0A;  b.openLong(kS1Code, 3500.0, 1.0, 0)&#x0A;    Which is: 1332976101&#x0A;adapter B must see A&apos;s 2 lots in flight: 2 + 1 exceeds the account limit&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:169
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  b.openLong(kS1Code, 3500.0, 1.0, 0)
+    Which is: 1332976101
+adapter B must see A's 2 lots in flight: 2 + 1 exceeds the account limit
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:171&#x0A;Expected equality of these values:&#x0A;  0u&#x0A;    Which is: 0&#x0A;  apiB.n_insert.load()&#x0A;    Which is: 1&#x0A;the rejected entry never reached B&apos;s provider&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:171
+Expected equality of these values:
+  0u
+    Which is: 0
+  apiB.n_insert.load()
+    Which is: 1
+the rejected entry never reached B's provider
+]]></failure>
+    </testcase>
+    <testcase name="K05ConcurrentEntriesCannotBothPassTheAccountCheck" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp" line="180" status="run" result="completed" time="0.001" timestamp="2026-11-05T13:25:22.285" classname="S1TraderEntryGate">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:217&#x0A;Expected equality of these values:&#x0A;  (2147483647 *2U +1U)&#x0A;    Which is: 4294967295&#x0A;  secondId&#x0A;    Which is: 1332976104&#x0A;the second entry passed while the first one&apos;s 2 lots were already reserved&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:217
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  secondId
+    Which is: 1332976104
+the second entry passed while the first one's 2 lots were already reserved
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:218&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  api.n_insert.load()&#x0A;    Which is: 2&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:218
+Expected equality of these values:
+  1u
+    Which is: 1
+  api.n_insert.load()
+    Which is: 2
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:219&#x0A;Expected equality of these values:&#x0A;  2.0&#x0A;    Which is: 2&#x0A;  trader.getUndoneQty(kS1Code)&#x0A;    Which is: 4&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:219
+Expected equality of these values:
+  2.0
+    Which is: 2
+  trader.getUndoneQty(kS1Code)
+    Which is: 4
+]]></failure>
+    </testcase>
+    <testcase name="K03LiveOrderReportAfterNotSentClosurePausesAccount" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp" line="226" status="run" result="completed" time="0.001" timestamp="2026-11-05T13:25:22.286" classname="S1TraderEntryGate">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:241&#x0A;Value of: trader.isTradingAdmissionClosed()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;a live report of an order recorded as not sent leaves the outcome unknown&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:241
+Value of: trader.isTradingAdmissionClosed()
+  Actual: false
+Expected: true
+a live report of an order recorded as not sent leaves the outcome unknown
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:245&#x0A;Expected equality of these values:&#x0A;  (2147483647 *2U +1U)&#x0A;    Which is: 4294967295&#x0A;  trader.openLong(kS1Code, 3500.0, 1.0, 0)&#x0A;    Which is: 1332976106&#x0A;new orders stay blocked until reconciliation&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:245
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  trader.openLong(kS1Code, 3500.0, 1.0, 0)
+    Which is: 1332976106
+new orders stay blocked until reconciliation
+]]></failure>
+    </testcase>
+    <testcase name="K03TradeAfterNotSentClosurePausesAccount" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp" line="250" status="run" result="completed" time="0." timestamp="2026-11-05T13:25:22.287" classname="S1TraderEntryGate">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:262&#x0A;Value of: trader.isTradingAdmissionClosed()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:262
+Value of: trader.isTradingAdmissionClosed()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="K03NotSentWithoutLiveEvidenceKeepsTheAccountOpen" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp" line="268" status="run" result="completed" time="0.001" timestamp="2026-11-05T13:25:22.288" classname="S1TraderEntryGate" />
+    <testcase name="New006ClockFailureRejectsEntryBeforeTheProvider" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp" line="300" status="run" result="completed" time="0.001" timestamp="2026-11-05T13:25:22.290" classname="S1TraderEntryGate">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:308&#x0A;Expected equality of these values:&#x0A;  (2147483647 *2U +1U)&#x0A;    Which is: 4294967295&#x0A;  trader.openLong(kS1Code, 3500.0, 1.0, 0)&#x0A;    Which is: 1332976110&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:308
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  trader.openLong(kS1Code, 3500.0, 1.0, 0)
+    Which is: 1332976110
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:309&#x0A;Expected equality of these values:&#x0A;  0u&#x0A;    Which is: 0&#x0A;  api.n_insert.load()&#x0A;    Which is: 1&#x0A;no request reaches the provider without a valid clock&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:309
+Expected equality of these values:
+  0u
+    Which is: 0
+  api.n_insert.load()
+    Which is: 1
+no request reaches the provider without a valid clock
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:310&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  trader.getUndoneQty(kS1Code)&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:310
+Expected equality of these values:
+  0.0
+    Which is: 0
+  trader.getUndoneQty(kS1Code)
+    Which is: 1
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:316&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  api.n_insert.load()&#x0A;    Which is: 2&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s1_trader_entry_gate_test.cpp:316
+Expected equality of these values:
+  1u
+    Which is: 1
+  api.n_insert.load()
+    Which is: 2
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

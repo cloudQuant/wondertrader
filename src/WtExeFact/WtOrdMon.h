@@ -96,7 +96,11 @@ public:
 	 */
 	void erase_order(uint32_t localid);
 
-	/** @brief 保留订单关联记录，但将终态订单从超时撤单候选中移除。 */
+	/**
+	 * @brief 保留订单关联记录，但将终态订单从超时撤单候选中移除。
+	 * @return 仅当本次把一条存活订单首次转为终态时返回 true；订单不存在或已是终态
+	 *         （重复的撤单/全成回报）时返回 false，调用方据此只消费一次终态回报。
+	 */
 	bool mark_order_terminal(uint32_t localid);
 
 	/** @brief 仅当身份仍匹配当前订单时删除；供持有身份的迟到回调安全收敛。 */
@@ -159,6 +163,42 @@ public:
 	bool mark_unverified_timeout(const WtOrdMonOrderIdentity& identity,
 		uint32_t expiresecs, uint64_t curTime);
 
+	/**
+	 * @brief 宿主身份核验超时撤单的认领（迭代03 卡5 / N05-003）。
+	 * @details 仅当候选身份仍对应一条已超时、可撤、未被认领的订单时认领成功；认领期间该单
+	 *          不再出现在超时扫描中，直到终态回报删除或 fail_timeout_cancel 转为隔离。
+	 */
+	bool claim_timeout_cancel(uint32_t localid, uint64_t generation, uint32_t expiresecs, uint64_t curTime);
+
+	/** @brief 宿主拒绝核验撤单：把认领转为持久的不可验证超时隔离（fail closed）。 */
+	bool fail_timeout_cancel(uint32_t localid, uint64_t generation);
+
+	/**
+	 * @brief 认领、锁外调用 cancel(localid)、失败即隔离的完整流程。
+	 * @return 1 已经宿主核验并发出撤单；0 候选已失效（终态/复用/已认领）；-1 宿主无法核验身份，已隔离。
+	 */
+	template <typename CancelFn>
+	int cancel_timeout_verified(uint32_t localid, uint64_t generation, uint32_t expiresecs,
+		uint64_t curTime, CancelFn&& cancel)
+	{
+		if (!claim_timeout_cancel(localid, generation, expiresecs, curTime))
+			return 0;
+		bool sent = false;
+		try
+		{
+			sent = cancel(localid);
+		}
+		catch (...)
+		{
+			(void)fail_timeout_cancel(localid, generation);
+			throw;
+		}
+		if (sent)
+			return 1;
+		(void)fail_timeout_cancel(localid, generation);
+		return -1;
+	}
+
 	/** @brief 查询执行单元生命周期内是否发生过无法验证身份的超时；不随 clear_orders 清除。 */
 	inline bool has_unverified_timeout()
 	{
@@ -191,6 +231,8 @@ private:
 		bool canCancel{ true };
 		WtOrdMonOrderIdentity identity;
 		bool unverifiedTimeout{ false };
+		bool cancelClaimed{ false };	///< 宿主核验撤单已发出，等待终态
+		bool terminal{ false };	///< 已收到终态回报（BUG-R17-001：重复终态回报只生效一次）
 	};
 	WtOrdMonOrderIdentity push_order_locked(uint32_t localid, uint64_t curTime, bool bCanCancel);
 	/** @brief 订单ID映射表，本地订单ID到订单信息的映射 */

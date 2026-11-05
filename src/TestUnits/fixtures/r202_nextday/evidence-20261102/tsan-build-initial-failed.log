@@ -1,0 +1,60 @@
+In file included from <built-in>:1:
+In file included from /private/tmp/wt-i03-r202-nextday-tsan-20261102/snapshot/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/include/fmt/format.h:747:28: error: use of undeclared identifier 'malloc'
+  747 |     T* p = static_cast<T*>(malloc(n * sizeof(T)));
+      |                            ^~~~~~
+/opt/homebrew/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<int>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<int>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+In file included from <built-in>:1:
+In file included from /private/tmp/wt-i03-r202-nextday-tsan-20261102/snapshot/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<char>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<char>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+In file included from <built-in>:1:
+In file included from /private/tmp/wt-i03-r202-nextday-tsan-20261102/snapshot/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<unsigned int>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<unsigned int, 32>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+In file included from <built-in>:1:
+In file included from /private/tmp/wt-i03-r202-nextday-tsan-20261102/snapshot/src/Share/fmt_enum_compat.h:3:
+/opt/homebrew/include/fmt/format.h:752:35: error: call to function 'free' that is neither visible in the template definition nor found by argument-dependent lookup
+  752 |   void deallocate(T* p, size_t) { free(p); }
+      |                                   ^
+/opt/homebrew/include/fmt/format.h:812:46: note: in instantiation of member function 'fmt::detail::allocator<wchar_t>::deallocate' requested here
+  812 |     if (old_data != self.store_) self.alloc_.deallocate(old_data, old_capacity);
+      |                                              ^
+/opt/homebrew/include/fmt/format.h:821:27: note: in instantiation of member function 'fmt::basic_memory_buffer<wchar_t>::grow' requested here
+  821 |       : detail::buffer<T>(grow), alloc_(alloc) {
+      |                           ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/malloc/_malloc.h:56:7: note: 'free' should be declared prior to the call site
+   56 | void  free(void * __unsafe_indexable);
+      |       ^
+5 errors generated.

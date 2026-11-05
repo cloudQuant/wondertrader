@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="6" failures="1" disabled="3" errors="0" time="0.057" timestamp="2026-11-04T21:55:52.586" name="AllTests">
+  <testsuite name="r6_wtrunner_entry" tests="6" failures="1" disabled="3" skipped="0" errors="0" time="0.057" timestamp="2026-11-04T21:55:52.586">
+    <testcase name="DISABLED_short_help_returns_zero_before_touching_runner" file="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp" line="242" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="r6_wtrunner_entry" />
+    <testcase name="DISABLED_long_help_returns_zero" file="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp" line="248" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="r6_wtrunner_entry" />
+    <testcase name="DISABLED_help_wins_over_config_and_logcfg_words" file="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp" line="253" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="r6_wtrunner_entry" />
+    <testcase name="missing_default_config_exits_nonzero_without_starting_runner" file="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp" line="343" status="run" result="completed" time="0.009" timestamp="2026-11-04T21:55:52.586" classname="r6_wtrunner_entry" />
+    <testcase name="missing_explicit_config_exits_nonzero_without_starting_runner" file="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp" line="351" status="run" result="completed" time="0.005" timestamp="2026-11-04T21:55:52.596" classname="r6_wtrunner_entry" />
+    <testcase name="valid_config_reaches_engine_run_before_main_blocks" file="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp" line="359" status="run" result="completed" time="0.042" timestamp="2026-11-04T21:55:52.601" classname="r6_wtrunner_entry">
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp:366&#x0A;Expected equality of these values:&#x0A;  result.code&#x0A;    Which is: 1&#x0A;  0&#x0A;Fee templates file ./absent_fees.json not exists&#x0A;Runner initialization rejected: fee template configuration is invalid&#x0A;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp:366
+Expected equality of these values:
+  result.code
+    Which is: 1
+  0
+Fee templates file ./absent_fees.json not exists
+Runner initialization rejected: fee template configuration is invalid
+
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp:367&#x0A;Value of: result.engine_marker_created&#x0A;  Actual: false&#x0A;Expected: true&#x0A;the CTA engine marker is written only after main passes config() and calls run(); output=Fee templates file ./absent_fees.json not exists&#x0A;Runner initialization rejected: fee template configuration is invalid&#x0A;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp:367
+Value of: result.engine_marker_created
+  Actual: false
+Expected: true
+the CTA engine marker is written only after main passes config() and calls run(); output=Fee templates file ./absent_fees.json not exists
+Runner initialization rejected: fee template configuration is invalid
+
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

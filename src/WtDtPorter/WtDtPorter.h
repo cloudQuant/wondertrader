@@ -35,6 +35,12 @@ extern "C"
 	 */
 	EXPORT_FLAG void		start(bool bAsync = false);
 
+	/** Initial snapshot only: true means all connect commands were submitted.
+	 * False includes not started or in progress; true does not mean connected.
+	 * Parsers added after the initial snapshot are not included.
+	 */
+	EXPORT_FLAG bool		initial_parser_connect_commands_submitted();
+
 	/**
 	 * @brief 获取模块版本信息
 	 * @details 返回包含平台名称、版本号和编译日期的字符串

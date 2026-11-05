@@ -39,6 +39,8 @@
 USING_NS_WTP;
 
 extern WtRtRunner& getRunner();
+// BUG-R42-002 gate: HFT contexts bind only a registered trader (module-less local adapter).
+TraderAdapterPtr i03s5_register_test_trader(WtRtRunner& runner, const char* id);
 
 class WtRtRunnerTestAccess
 {
@@ -55,6 +57,17 @@ public:
 		std::unique_lock<std::mutex> lock(runner._status_config_mutex);
 		return runner._lifecycle_changed.wait_for(lock, timeout, [&runner, state]() {
 			return runner._lifecycle_state == state;
+		});
+	}
+
+	// I03-NEW-099：生命周期状态只前进（STOPPING 之后为 RELEASED）。release 不等待阻塞中的 provider 时，
+	// 会在等待线程被唤醒前从 STOPPING 进到 RELEASED，精确等 STOPPING 在并行负载下会错过；此处等“已到达或越过”。
+	static bool waitForStateAtLeast(WtRtRunner& runner, WtRtRunner::LifecycleState state,
+		std::chrono::milliseconds timeout)
+	{
+		std::unique_lock<std::mutex> lock(runner._status_config_mutex);
+		return runner._lifecycle_changed.wait_for(lock, timeout, [&runner, state]() {
+			return static_cast<uint8_t>(runner._lifecycle_state) >= static_cast<uint8_t>(state);
 		});
 	}
 
@@ -474,7 +487,8 @@ protected:
 	void SetUp() override
 	{
 		reset_status_test_runner();
-		_dir = std::filesystem::temp_directory_path() / "wt_exec_status_api_v2";
+		// I03-NEW-098：按进程区分目录，并行逐例运行时互不覆盖夹具。
+		_dir = std::filesystem::temp_directory_path() / ("wt_exec_status_api_v2_" + std::to_string(static_cast<long>(::getpid())));
 		std::error_code ec;
 		std::filesystem::remove_all(_dir, ec);
 		std::filesystem::create_directories(_dir, ec);
@@ -484,13 +498,15 @@ protected:
 		actions << "{\"default\":{}}";
 		ASSERT_TRUE(actions.good());
 
+		// 卡2 2b=A（用户裁定 2026-11-03）：交易时段全天只能写 0-0，0-2400 被会话加载器拒绝，
+		// 会话缺失后 HFT ticker 解引用空会话（迭代03 s5-runners 更新，原为 to: 2400）。
 		std::ofstream sessions(_dir / "sessions.yaml", std::ios::binary | std::ios::trunc);
 		sessions << "ALLDAY:\n"
 			"    name: AllDay\n"
 			"    offset: 0\n"
 			"    sections:\n"
 			"        - from: 0\n"
-			"          to: 2400\n";
+			"          to: 0\n";
 		ASSERT_TRUE(sessions.good());
 	}
 
@@ -798,6 +814,8 @@ protected:
 		}
 
 		close(events[1]);
+		// I03-NEW-097：子进程启动（含 runner 配置）在并行覆盖率负载下可能超过 3 秒；启动就绪只设宽松上限，
+		// “故障后快速退出”的 3 秒界限保持不变。
 		const bool run_ready = [&events]() {
 			pollfd descriptor;
 			descriptor.fd = events[0];
@@ -806,7 +824,7 @@ protected:
 			int poll_result;
 			do
 			{
-				poll_result = poll(&descriptor, 1, 3000);
+				poll_result = poll(&descriptor, 1, 30000);
 			} while (poll_result < 0 && errno == EINTR);
 			if (poll_result <= 0 || (descriptor.revents & POLLIN) == 0)
 				return false;
@@ -983,7 +1001,9 @@ TEST_F(ExecUnitStatusApiV2Fixture, ReleaseDuringStartupIsDeferredAndWakesSynchro
 	ASSERT_TRUE(configure("hft"));
 	getRunner().registerHftCallbacks(&block_hft_init_callback, NULL, NULL, NULL, NULL,
 		NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-	ASSERT_NE(0u, getRunner().createHftContext("status_startup_barrier", "missing_trader", false, 0));
+	// R42-002 gate: bind a registered local adapter (an unknown trader yields no context).
+	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "status_bound_trader") != nullptr);
+	ASSERT_NE(0u, getRunner().createHftContext("status_startup_barrier", "status_bound_trader", false, 0));
 
 	StartupBarrier barrier;
 	g_startup_barrier.store(&barrier, std::memory_order_release);
@@ -1051,8 +1071,11 @@ TEST_F(ExecUnitStatusApiV2Fixture, StartupCallbackCanJoinChildThreadRequestingRe
 	ASSERT_TRUE(configure("hft"));
 	getRunner().registerHftCallbacks(&release_from_child_then_block_hft_init, NULL, NULL,
 		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+	// R42-002 gate: an unknown trader no longer yields a context; bind a
+	// registered local adapter so the startup callback still runs.
+	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "status_bound_trader") != nullptr);
 	ASSERT_NE(0u, getRunner().createHftContext("status_child_release_barrier",
-		"missing_trader", false, 0));
+		"status_bound_trader", false, 0));
 
 	StartupBarrier barrier;
 	g_child_startup_release_returned.store(false, std::memory_order_release);
@@ -1154,8 +1177,10 @@ TEST_F(ExecUnitStatusApiV2Fixture, StartupReentryScopeIsBoundToRunnerInstance)
 	g_startup_release_callback_called.store(false, std::memory_order_release);
 	getRunner().registerHftCallbacks(&release_other_runner_on_hft_init, NULL, NULL, NULL,
 		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+	// R42-002 gate: bind a registered local adapter (see above).
+	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "status_bound_trader") != nullptr);
 	ASSERT_NE(0u, getRunner().createHftContext("status_other_runner_scope",
-		"missing_trader", false, 0));
+		"status_bound_trader", false, 0));
 
 	getRunner().run(true);
 	g_startup_release_target = nullptr;
@@ -1240,7 +1265,7 @@ TEST_F(ExecUnitStatusApiV2Fixture, ExternalReleaseDoesNotWaitForInFlightProvider
 		}
 		releaseCondition.notify_all();
 	});
-	const bool stoppingObserved = WtRtRunnerTestAccess::waitForState(getRunner(),
+	const bool stoppingObserved = WtRtRunnerTestAccess::waitForStateAtLeast(getRunner(),
 		WtRtRunner::LifecycleState::STOPPING, std::chrono::seconds(2));
 	EXPECT_TRUE(stoppingObserved);
 	bool releaseFinishedWhileProviderBlocked = false;

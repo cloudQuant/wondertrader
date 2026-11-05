@@ -45,7 +45,6 @@ bool inner_result = true;
 void reenter() { inner_result = reentrant_manager->loadFactories(reentrant_dir.c_str()); }
 void failNextAllocation() { allocationsSinceArmed.store(0, std::memory_order_relaxed); failAllocationAfter.store(0, std::memory_order_relaxed); }
 void failControlBlockAllocation() { allocationsSinceArmed.store(0, std::memory_order_relaxed); failAllocationAfter.store(1, std::memory_order_relaxed); }
-void failStrategyRegistryAllocation() { allocationsSinceArmed.store(0, std::memory_order_relaxed); failAllocationAfter.store(2, std::memory_order_relaxed); }
 std::string readMarker(const char* path) { std::ifstream in(path); return {std::istreambuf_iterator<char>(in), {}}; }
 size_t countText(const std::string& text, const std::string& part) {
  size_t n=0, pos=0; while ((pos=text.find(part,pos))!=std::string::npos) { ++n; pos+=part.size(); } return n;
@@ -65,6 +64,34 @@ int main(int argc, char** argv) {
    check(log.find("...")!=std::string::npos,"invalid path display was bounded");
    check(log.find(invalid)==std::string::npos,"full invalid path did not reach fixed buffer");
    check(log.size()<1024,"invalid path diagnostic remains bounded");
+  }
+  std::printf("%s: %s\n",mode.c_str(),failures?"FAIL":"PASS"); return failures?1:0;
+ }
+ // Do not preload the fixture: only the manager's loader reference can keep
+ // the code backing the externally-held strategy and its factory available.
+ if (mode == "owner-no-preload") {
+  const char* markerPath=std::getenv("WT_HFT_MARKER");
+  check(markerPath!=nullptr,"marker path available");
+  HftStrategyPtr strategy;
+  {
+   HftStrategyMgr manager;
+   check(manager.loadFactories(dir.c_str()),"factory loads without control handle");
+   strategy=manager.createStrategy("stable.unit","external");
+   check(strategy && strategy->self(),"qualified-name overload creates strategy");
+  }
+  if (markerPath) {
+   const std::string before=readMarker(markerPath);
+   check(before.find("factory-delete\n")==std::string::npos,"factory outlives manager");
+   check(before.find("unload\n")==std::string::npos,"module outlives manager");
+  }
+  if (strategy && strategy->self())
+   check(std::strcmp(strategy->self()->getName(),"unit")==0,"strategy remains callable");
+  strategy.reset();
+  if (markerPath) {
+   const std::string after=readMarker(markerPath);
+   check(countText(after,"strategy-delete\n")==1,"strategy deleted once");
+   check(countText(after,"factory-delete\n")==1,"factory deleted once");
+   check(after.find("strategy-delete\n")<after.find("factory-delete\n"),"strategy deletion precedes factory deletion");
   }
   std::printf("%s: %s\n",mode.c_str(),failures?"FAIL":"PASS"); return failures?1:0;
  }
@@ -89,9 +116,10 @@ int main(int argc, char** argv) {
  auto creates=(IntFn)dlsym(control,"fixture_creations"); auto names=(IntFn)dlsym(control,"fixture_names");
  auto deletes=(IntFn)dlsym(control,"fixture_deletes"); auto entered=(IntFn)dlsym(control,"fixture_entered");
  auto factoryDeletes=(IntFn)dlsym(control,"fixture_factory_deletes");
+ auto strategyCalls=(IntFn)dlsym(control,"fixture_strategy_calls");
  auto proceed=(VoidFn)dlsym(control,"fixture_proceed"); auto setcb=(SetFn)dlsym(control,"fixture_set_callback");
  auto setCreatedCb=(SetFn)dlsym(control,"fixture_set_created_callback");
- check(creates && names && deletes && factoryDeletes && entered && proceed && setcb && setCreatedCb, "fixture exports"); if (failures) return 92;
+ check(creates && names && deletes && factoryDeletes && strategyCalls && entered && proceed && setcb && setCreatedCb, "fixture exports"); if (failures) return 92;
  if (mode == "owner-outlives-manager" || mode == "owner-null-strategy" || mode == "owner-without-remover") {
   HftStrategyPtr first, second;
   std::weak_ptr<HftStraWrapper> weak;
@@ -99,7 +127,13 @@ int main(int argc, char** argv) {
    HftStrategyMgr manager;
    check(manager.loadFactories(dir.c_str()),"factory loads");
    first=manager.createStrategy("stable", mode=="owner-null-strategy" ? "missing" : "unit", "first");
-   check(first && (mode=="owner-null-strategy" ? first->self()==nullptr : first->self()!=nullptr),"expected wrapper and strategy");
+   if (mode=="owner-null-strategy") {
+    check(!first && !manager.getStrategy("first"),"null strategy is not published");
+    first=manager.createStrategy("stable","unit","first");
+    check(first && first->self(),"same ID can be retried after null strategy");
+   } else {
+    check(first && first->self(),"expected wrapper and strategy");
+   }
    if (mode=="owner-outlives-manager") {
     second=manager.createStrategy("stable","unit","second");
     check(second && second->self(),"second wrapper is valid");
@@ -114,7 +148,7 @@ int main(int argc, char** argv) {
    check(deletes()==2 && factoryDeletes()==1,"last wrapper is deleted before factory remover");
    check(weak.expired(),"weak wrapper expires without retaining factory");
   } else if (mode=="owner-null-strategy") {
-   check(deletes()==0 && factoryDeletes()==1,"null strategy wrapper releases factory without strategy deletion");
+   check(deletes()==1 && factoryDeletes()==1,"retried strategy releases before factory removal");
   } else {
    check(deletes()==1 && factoryDeletes()==0,"missing remover keeps factory while deleting strategy");
   }
@@ -182,22 +216,45 @@ int main(int argc, char** argv) {
    check(countText(log,std::string(128,'x')+"...")==2,"both log display names are bounded");
    check(log.find(first)==std::string::npos && log.find(second)==std::string::npos,"full long names do not reach logger");
   }
- } else if (mode == "allocation-wrapper-failure" || mode == "allocation-control-failure" || mode == "allocation-registry-failure") {
+ } else if (mode == "allocation-wrapper-failure" || mode == "allocation-control-failure") {
   check(manager.loadFactories(dir.c_str()),"allocation-failure factory loads");
-  setCreatedCb(mode=="allocation-wrapper-failure" ? failNextAllocation :
-    (mode=="allocation-control-failure" ? failControlBlockAllocation : failStrategyRegistryAllocation));
+  setCreatedCb(mode=="allocation-wrapper-failure" ? failNextAllocation : failControlBlockAllocation);
   bool threw=false;
   try { (void)manager.createStrategy("stable","unit","failed"); }
   catch (const std::bad_alloc&) { threw=true; }
   failAllocationAfter.store(-1, std::memory_order_relaxed);
   setCreatedCb(nullptr);
   check(threw,"expected allocation failure propagated");
-  const int expectedBoundary=mode=="allocation-wrapper-failure" ? 1 : (mode=="allocation-control-failure" ? 2 : 3);
+  const int expectedBoundary=mode=="allocation-wrapper-failure" ? 1 : 2;
   check(allocationsSinceArmed.load(std::memory_order_relaxed)==expectedBoundary,"expected allocation boundary reached");
   check(deletes()==1 && factoryDeletes()==0,"failed wrapper construction deletes strategy exactly once and keeps factory");
   check(!manager.getStrategy("failed"),"failed creation is not published");
+  // BUG-I02-NEW-033 (2026-11-05): the ID reservation is rolled back, so the same ID can be retried.
+  auto sameId=manager.createStrategy("stable","unit","failed");
+  check(sameId && sameId->self(),"same ID can be retried after allocation failure (reservation rolled back)");
   auto retry=manager.createStrategy("stable","unit","retry");
   check(retry && retry->self(),"manager remains usable after allocation failure");
+ } else if (mode == "allocation-registry-failure") {
+  // BUG-I02-NEW-033 (2026-11-05): createStrategy now reserves the strategy ID in
+  // the registry before the external creator runs, so the registry insertion is
+  // the first allocation of the call. The old injection (third allocation after
+  // the creator) no longer reached the registry; arm before the call instead.
+  check(manager.loadFactories(dir.c_str()),"allocation-failure factory loads");
+  const int deletesBefore=deletes();
+  const int callsBefore=strategyCalls();
+  failNextAllocation();
+  bool threw=false;
+  try { (void)manager.createStrategy("stable","unit","failed"); }
+  catch (const std::bad_alloc&) { threw=true; }
+  failAllocationAfter.store(-1, std::memory_order_relaxed);
+  check(threw,"expected registry allocation failure propagated");
+  check(allocationsSinceArmed.load(std::memory_order_relaxed)==1,"registry insertion was the injected allocation");
+  check(strategyCalls()==callsBefore,"creator is not called when the ID cannot be reserved");
+  check(deletes()==deletesBefore && factoryDeletes()==0,"no strategy to delete and factory kept");
+  check(!manager.getStrategy("failed"),"failed creation is not published");
+  auto sameId=manager.createStrategy("stable","unit","failed");
+  check(sameId && sameId->self(),"same ID can be reserved and created after the registry failure");
+  check(strategyCalls()==callsBefore+1 && manager.getStrategy("failed")==sameId,"retry publishes exactly one strategy");
  } else if (mode == "long-path-valid") {
   check(dir.size()>128,"real directory is longer than display bound");
   check(manager.loadFactories(dir.c_str()),"complete real path still loads");

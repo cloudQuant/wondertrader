@@ -1,0 +1,177 @@
+[
+ {
+  "suite": "i03_fractional_targets_20261103",
+  "class": "STALE_FIXTURE",
+  "root_cause": "卡8b=A eager 全量预校验后，Local/Arbi/Diff 执行器 validateConfig() 要求 policy（含 default、<factory>.<unit> 形状），缺 policy 报 \"policy is missing\" 拒绝（ExecPolicyConfig.h:44-51）。夹具 3 例 ExecutionScaleRequiresCompletePositiveNumber 的正向配置只有 scale，不是完整配置，故 init 返回 false。readExecutionScale 对 \"1.25\"/次正规数字符串仍接受，不是产品回归。",
+  "change": "src/TestUnits/fixtures/i03_fractional_targets_20261103/{local,arbi,diff}.inc：该用例全部 15 个配置统一带合法 policy，使非法 scale 拒绝只由 scale 触发、正向配置完整；断言与 scale 输入不变。README.md 追加处置说明。",
+  "final_verdict": "pass：green[pass]: run.sh exit 0（tests=44 failures=0 errors=0，fractional+groups 合并过滤）",
+  "superseded_by": [],
+  "items": [
+   "BUG-P02-005",
+   "BUG-P02-002",
+   "BUG-R10-001"
+  ]
+ },
+ {
+  "suite": "i03_execution_groups_20261103",
+  "class": "STALE_FIXTURE",
+  "root_cause": "无独立入口，经 i03_fractional_targets_20261103/run.sh 合并编译运行；F3 上本目录过滤用例 18/18 通过，来源套件失败仅因上项 3 例。",
+  "change": "无（随来源套件修复）。",
+  "final_verdict": "pass：无独立入口：README 规定经 i03_fractional_targets_20261103/run.sh 合并编译运行；本目录 filter.txt 匹配 18 例，失败 0；来源套件结论 pass",
+  "superseded_by": [],
+  "items": [
+   "BUG-P02-005"
+  ]
+ },
+ {
+  "suite": "i03_diff_batch_atomic_20261103",
+  "class": "STALE_FIXTURE",
+  "root_cause": "无独立入口，经 i03_fractional_targets_20261103/run.sh 合并编译运行；F3 上本目录过滤用例 17/17 通过，来源套件失败仅因上项 3 例。",
+  "change": "无（随来源套件修复）。",
+  "final_verdict": "pass：无独立入口：README 规定经 i03_fractional_targets_20261103/run.sh 合并编译运行；本目录 filter.txt 匹配 17 例，失败 0；来源套件结论 pass",
+  "superseded_by": [],
+  "items": [
+   "BUG-P02-005"
+  ]
+ },
+ {
+  "suite": "i03_exec_eager_validation_20261103",
+  "class": "STALE_FIXTURE",
+  "root_cause": "green：runner 用例 I03RunnerSelStrategies.ValidSelConfigCreatesInitializesAndRunsOnInit 的合法 SEL 配置中 period: min 条目沿用 time: 1500，被 K27=A（min 周期 time 为 1..1440 分钟间隔）拒绝。red：baseline/ 改前 6 个产品源与当前树不可组合（WtPorter/WtExecMon 链接缺 WtLocalExecuter::validateConfig），red-unbuildable。green-asan：整树 ASan 构建受运行器 1200s 上限约束。",
+  "change": "src/TestUnits/fixtures/i03_exec_eager_validation_20261103/runner.inc：i03SelEntry() 增加 time 参数（默认 1500），min 条目传 5。run.sh：asan 分支显式 -DCMAKE_{EXE,SHARED,MODULE}_LINKER_FLAGS 后追加调用方 ${LDFLAGS:-}（显式参数会覆盖 CMake 从 LDFLAGS 的初始化，运行器的 nanomsg rpath 适配因此丢失；第二轮 green-asan exec 因 dyld 找不到 @rpath/libnanomsg.6.dylib 而 abort 134）。README.md 追加处置说明（red 记为 blocked/not-applicable）。",
+  "final_verdict": "pass：（自带红控无法与当前树组合构建，未形成红绿对照）green[pass]: green：3/3 exit 0；red[red-unbuildable/red]: run.sh exit 1，未生成 exit_codes.txt（构建失败？见 /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-result-fxrun3/i03_exec_eager_validation_20261103/run-red/build.log）；green-asan[pass]: green-asan：3/3 exit 0",
+  "superseded_by": [],
+  "items": [
+   "BUG-R10-001",
+   "BUG-P02-002",
+   "BUG-R134-003",
+   "BUG-WSN06-001"
+  ]
+ },
+ {
+  "suite": "r13_sel_period_contract",
+  "class": "SUPERSEDED",
+  "root_cause": "extract.py 按固定文本从 WtRtRunner.cpp/WtPorter.cpp 抽取函数体链接替身；K27=A 后源码已改写，抽取锚点断言失败，未编译探针。",
+  "change": "src/TestUnits/fixtures/r13_sel_period_contract/README.md：追加处置与取代说明（含 NULL/空 period 子项无 coverage 直接用例的缺口）。",
+  "final_verdict": "SUPERSEDED，不修；运行器原样结论 fail：green+baseline-extract[fail]: run.sh exit 1（脚本逐项断言 baseline/current 期望；0 行）",
+  "superseded_by": [
+   "CoverageTests_porter::R13PorterSelExport.create_sel_context_registers_contexts_for_supported_period_tokens",
+   "CoverageTests_porter::R13PorterSelExport.create_sel_context_rejects_schedules_that_can_never_fire",
+   "CoverageTests_porter::S3R13SelPublicSchedule.DocumentedPeriodsCreatedThroughTheCApiFireOnTheirSchedule",
+   "CoverageTests_porter::S3R13SelPublicSchedule.AliasesAndUnschedulableInputsAreRejectedAndNeverFire",
+   "CoverageTests_porter::I03S5RtRunnerSel.InvalidSelPeriodIsRejectedByPreflight"
+  ],
+  "items": [
+   "BUG-R13-004"
+  ]
+ },
+ {
+  "suite": "r13_real_schedule",
+  "class": "SUPERSEDED",
+  "root_cause": "run.py 依赖 /tmp 旧隔离快照并在复制的 WtSelEngine.cpp 按固定文本注入测试 join；当前调度实现已改写，锚点断言失败；original/joined 是旧缺陷已知红。",
+  "change": "src/TestUnits/fixtures/r13_real_schedule/README.md：追加处置与取代说明。",
+  "final_verdict": "SUPERSEDED，不修；运行器原样结论 fail：controlled-probe[fail/demo]: run.py exit 1，观测与脚本期望不符：AssertionError",
+  "superseded_by": [
+   "CoverageTests_wtcore::S5SelScheduleThread.FiredTaskRunsOnceOnItsContextAndIsJoined",
+   "CoverageTests_wtcore::S5SelScheduleThread.TasksOnSeveralDaysAreAllJoinedByRelease",
+   "CoverageTests_wtcore::R211SelEngine.ExpiredTaskTerminatesBeforeSchedule",
+   "CoverageTests_wtcore::S3K27SelPeriodFire.WeeklyTaskFiresOnTargetWeekdayOnceAtItsMinute",
+   "CoverageTests_wtcore::S3K27SelPeriodFire.MonthlyTaskUsesTheDayOfMonth",
+   "CoverageTests_wtcore::S3K27SelPeriodFire.MonthlyTargetDayInsideHolidaysIsCarriedForward",
+   "CoverageTests_wtcore::S3K27SelPeriodFire.YearlyTaskUsesMonthAndDay",
+   "CoverageTests_wtcore::S3K27SelPeriodFire.MinuteTaskFiresOnSessionMinuteMultiplesOfItsInterval",
+   "CoverageTests_wtcore::S3K27SelPeriodFire.MinuteTaskWithoutSessionNeverFires"
+  ],
+  "items": [
+   "BUG-R13-004",
+   "BUG-R192-002",
+   "BUG-R192-003"
+  ]
+ },
+ {
+  "suite": "r3_cancel_batch_cache",
+  "class": "SUPERSEDED",
+  "root_cause": "run.py 抽取 TraderAdapter doCancel/cancel 方法体与替身编译；当前实现引用 RiskParams/getRiskParams/_risk_mon_enabled/CodeTimeCacheMap/预留等替身缺失标识符，两种模式均编译失败；其红控为修复前已知红。",
+  "change": "src/TestUnits/fixtures/r3_cancel_batch_cache/README.md：追加处置与取代说明（批量撤单缓存记账的等价证明在 i03_trader_ratelimit 夹具，coverage 二进制无直接用例）。",
+  "final_verdict": "SUPERSEDED，不修；运行器原样结论 fail：normal[fail]: run.py（single/failure 期望 0，batch 期望 1 已内置） exit 1；sanitize[fail]: run.py R3_SANITIZE=1（single/failure 期望 0，batch 期望 1 已内置） exit 1",
+  "superseded_by": [
+   "CoverageTests_wtcore::R3TraderTest.cancel_freq_window_denies_cancel_after_boundary",
+   "CoverageTests_wtcore::R3TraderTest.cancel_localid_synchronous_api_failure_is_not_cached",
+   "CoverageTests_wtcore::R3TraderTest.cancel_localid_risk_rejection_retries_do_not_grow_cache",
+   "CoverageTests_wtcore::R3TraderTest.cancel_localid_frequency_cache_uses_standardized_contract_code",
+   "CoverageTests_wtcore::R170TraderRisk.CancelWindowRejectsAtBoundaryAndRecovers",
+   "fixture:i03_trader_ratelimit_20261103::I03RateLimit.cancel_boundary_batch_uses_same_window",
+   "fixture:i03_trader_ratelimit_20261103::I03RateLimit.batch_cancel_survives_sync_cancel_reports"
+  ],
+  "items": [
+   "BUG-R3-002",
+   "BUG-R3-003"
+  ]
+ },
+ {
+  "suite": "r3_split_reject",
+  "class": "SUPERSEDED",
+  "root_cause": "run.py 抽取 TraderAdapter::buy/sell 方法体与替身编译；当前实现调用 submitSplit 等新辅助函数，14 个编译错误；其红控为修复前已知红，限流器只是测试接缝。",
+  "change": "src/TestUnits/fixtures/r3_split_reject/README.md：追加处置与取代说明（拆单子单被拒的等价证明在 i03_trader_ratelimit 夹具，coverage 二进制无直接用例）。",
+  "final_verdict": "SUPERSEDED，不修；运行器原样结论 fail：green[fail]: run.py exit 1",
+  "superseded_by": [
+   "fixture:i03_trader_ratelimit_20261103::I03RateLimit.buy_split_partial_rate_reject",
+   "fixture:i03_trader_ratelimit_20261103::I03RateLimit.sell_split_partial_rate_reject",
+   "fixture:i03_trader_ratelimit_20261103::I03RateLimit.buy_and_sell_split_partial_api_failure",
+   "fixture:i03_trader_ratelimit_20261103::I03RateLimit.buy_and_sell_split_all_rejected",
+   "fixture:i03_trader_ratelimit_20261103::I03RateLimit.sell_close_long_split_partial_failure",
+   "fixture:i03_trader_ratelimit_20261103::I03RateLimit.nested_buy_inside_split_keeps_both_ledgers",
+   "CoverageTests_wtcore::R3TraderTest.buy_splits_by_rule_cap_and_single_order_max_volume",
+   "CoverageTests_wtcore::R59Buy.open_splits_by_limit_volume_and_handles_market_price",
+   "CoverageTests_wtcore::R59Sell.open_splits_by_limit_volume_and_handles_market_price"
+  ],
+  "items": [
+   "BUG-R3-002",
+   "BUG-R3-003",
+   "BUG-R3-008"
+  ]
+ },
+ {
+  "suite": "i03_frequency_20261103",
+  "class": "SUPERSEDED",
+  "root_cause": "run.py 按签名抽取 TraderAdapter 6 个方法体与 check.cpp 替身编译；当前方法体引用 account_net_limits::Registry、_account_gate、getPosition、getUndoneQty 等替身缺失成员，20 个编译错误，探针未运行。",
+  "change": "src/TestUnits/fixtures/i03_frequency_20261103/README.md：追加处置与取代说明。",
+  "final_verdict": "SUPERSEDED，不修；运行器原样结论 fail：green[fail]: run.py（抽取的生产请求方法 + 本地 fake） exit 1",
+  "superseded_by": [
+   "CoverageTests_wtcore::R3TraderTest.order_freq_window_denies_submission_after_boundary",
+   "CoverageTests_wtcore::R3TraderTest.order_freq_window_precheck_uses_standard_code_after_raw_submission",
+   "CoverageTests_wtcore::R3TraderTest.cancel_freq_window_denies_cancel_after_boundary",
+   "CoverageTests_wtcore::R170TraderRisk.OrderWindowRejectsAtBoundaryAndRecovers",
+   "CoverageTests_wtcore::R170TraderRisk.CancelWindowRejectsAtBoundaryAndRecovers",
+   "CoverageTests_wtcore::R90TraderRisk.FrequencyWindowsRejectStandardCodeAfterRawCodeEvents",
+   "CoverageTests_wtcore::P11PreOrderRisk.order_frequency_window_rejects_standard_code_after_successful_orders",
+   "fixture:i03_trader_ratelimit_20261103::I03RateLimit.*"
+  ],
+  "items": [
+   "BUG-R3-002",
+   "BUG-R3-003"
+  ]
+ },
+ {
+  "suite": "r7_twap_sell_sign",
+  "class": "SUPERSEDED",
+  "root_cause": "无脚本入口；README 复现依赖 git archive ccaad010、docs/ 下 UBSan CMake 补丁与前一节工作目录，各节红控属于修复前版本。",
+  "change": "src/TestUnits/fixtures/r7_twap_sell_sign/README.md：追加处置与取代说明（回报顺序反例无 coverage 直接用例的缺口）。",
+  "final_verdict": "SUPERSEDED，不修；运行器原样结论 blocked-env：README 复现步骤依赖 `git archive ccaad010 src` 快照、docs/…/R7-002-total-times-ccaad010/CMakeLists.ubsan.patch 与前一节工作目录，且各节红控属于当时版本；套件无脚本入口，冻结树不含 docs",
+  "superseded_by": [
+   "CoverageTests_exefact::r7_twap.sell_side_keeps_sign_and_splits_evenly",
+   "CoverageTests_exefact::r7_twap.opposite_live_order_canceled_first_without_new_order",
+   "CoverageTests_exefact::r7_twap.cancel_report_refires_with_cancel_times_price_step",
+   "CoverageTests_exefact::r7_twap.tiny_diffqty_floors_to_min_open_lots",
+   "CoverageTests_exefact::r7_twap_legal_lot.sell_rounds_down_to_legal_unit_and_keeps_odd_remainder",
+   "CoverageTests_exefact::r7_twap_legal_lot.t1_sell_is_capped_by_available_then_legal_unit",
+   "CoverageTests_exefact::r7_twap_legal_lot.buy_and_target_change_use_legal_units_only",
+   "CoverageTests_exefact::r7_twap_legal_lot.whole_lot_future_control_and_fractional_target_remainder",
+   "CoverageTests_exefact::r7_twap_legal_lot.unavailable_lot_rules_hold_every_order",
+   "CoverageTests_exefact::n05_unmanaged_cancel_latch.twap_ready_suppresses_latched_cancel_and_keeps_unlatched_behavior"
+  ],
+  "items": [
+   "BUG-R7-012"
+  ]
+ }
+]

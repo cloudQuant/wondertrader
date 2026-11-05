@@ -1,0 +1,60 @@
+{
+  "scope": "独立源码快照普通构建定向复测；非全量回归",
+  "groups": 5,
+  "executions": 14,
+  "failures": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "group": "adjusted_keys",
+      "ids": [
+        "R2_wtbtcore#2"
+      ],
+      "filter": "R91Fixture.R2AdjFactors_*:R91Fixture.R91BinBars_Adjusted*",
+      "tests": 4,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "group": "replay_public",
+      "ids": [
+        "BUG-I02-NEW-101",
+        "BUG-I02-NEW-102"
+      ],
+      "filter": "R2PublicTest.stopBeforeRunQuitsReplayEarly:R2PublicTest.metadataAndTimelineQueries",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "group": "p07_loader",
+      "ids": [
+        "BUG-I02-NEW-074"
+      ],
+      "filter": "P07TickLoaderTest.singleItemHftStreamsReplayFinalRecord:P07TickLoaderTest.hftTickCallbackExceptionAllowsReplayByDayRetry:P07TickLoaderTest.emptyNullTickLoaderCallbackIsAValidEmptyBucket:P07TickLoaderTest.emptyReplayBucketsStayBoundedAcrossLongNoDataRange",
+      "tests": 4,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "group": "day_price",
+      "ids": [
+        "BUG-I02-NEW-109"
+      ],
+      "filter": "R80SliceUnsub.DayPriceReadsSimulatedDayCache",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "group": "runner_config",
+      "ids": [
+        "BUG-R9-001"
+      ],
+      "filter": "R205BtRunnerConfig.*:Z15BtRunnerConfigLock.*",
+      "tests": 3,
+      "failures": 0,
+      "skipped": 0
+    }
+  ]
+}

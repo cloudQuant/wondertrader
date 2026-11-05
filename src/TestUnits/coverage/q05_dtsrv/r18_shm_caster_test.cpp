@@ -285,7 +285,7 @@ TEST_F(R18ShmCasterTest, FreshCasterRejectsAllFourBroadcastOverloads)
 	tr->release();
 }
 
-TEST_F(R18ShmCasterTest, DISABLED_InitWithActiveTrueNeedsRealMappedFile)
+TEST_F(R18ShmCasterTest, InitWithActiveTrueNeedsRealMappedFile)
 {
 	const fs::path shmPath = _dir / "r18_cast_queue.bin";
 	write_file(_dir / "active.json",

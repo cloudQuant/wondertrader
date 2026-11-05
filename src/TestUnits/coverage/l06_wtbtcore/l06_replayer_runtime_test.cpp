@@ -8,6 +8,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -83,6 +84,22 @@ protected:
 		std::filesystem::remove_all(_workdir, ec);
 	}
 
+	// Fee calculations now require a registered physical contract. Keep the
+	// shared fixture setup unchanged for the unrelated runtime tests.
+	bool initStockFeeReplayer(HisDataReplayer& replayer)
+	{
+		const auto path = _workdir / "stock_fee_contract.json";
+		std::ofstream out(path);
+		out << R"({"SSE":{"000001":{"name":"stock","exchg":"SSE","product":"STK","opendate":20100101,"expiredate":20301231,"volscale":2}}})";
+		out.close();
+		if (!out.good()) return false;
+		WTSVariant* cfg = build_replayer_cfg(_workdir, fee_fixture("fees_minfee.json"), true);
+		cfg->get("basefiles")->append("contract", path.string().c_str());
+		const bool ok = replayer.init(cfg);
+		cfg->release();
+		return ok;
+	}
+
 	HisDataReplayer _replayer;
 	std::filesystem::path _workdir;
 };
@@ -142,12 +159,17 @@ TEST_F(HisDataReplayerRuntimeTest, rawcodeWithoutRuleIsEmpty)
 
 TEST_F(HisDataReplayerRuntimeTest, calcFeeForUnconfiguredCode)
 {
-	// 已配置品种走 minfee/费率分支 (test_replayer_fee 已覆盖, 此处仅做回归锚点)
-	EXPECT_DOUBLE_EQ(5.0, _replayer.calc_fee("SSE.STK.000001", 1.0, 100.0, 0));
-	// 未配置费率的品种: _fee_map miss → 0
-	EXPECT_DOUBLE_EQ(0.0, _replayer.calc_fee("SSE.NOPE.600000", 10.0, 100.0, 0));
-	// 数量为 0 且费率缺失时不应抛异常
-	EXPECT_DOUBLE_EQ(0.0, _replayer.calc_fee("SZSE.STK.000002", 0.0, 0.0, 1));
+	HisDataReplayer replayer;
+	ASSERT_TRUE(initStockFeeReplayer(replayer));
+	EXPECT_DOUBLE_EQ(5.0, replayer.calc_fee("SSE.STK.000001", 1.0, 100.0, 0));
+	// Missing contract, product or fee metadata remains an observable failure,
+	// including a zero-quantity request; it is not an explicit zero fee.
+	EXPECT_TRUE(std::isnan(replayer.calc_fee("SSE.NOPE.600000", 10.0, 100.0, 0)));
+	EXPECT_TRUE(std::isnan(replayer.calc_fee("SZSE.STK.000002", 0.0, 0.0, 1)));
+	wt_fee::Context context; context.product = "unchanged"; std::string error;
+	EXPECT_FALSE(replayer.prepare_fee_context("SZSE.STK.000002", nullptr, context, error));
+	EXPECT_EQ(context.product, "unchanged");
+	EXPECT_FALSE(error.empty());
 }
 
 TEST_F(HisDataReplayerRuntimeTest, amountBasedFeeRequiresCommodityAtInit)
@@ -158,13 +180,18 @@ TEST_F(HisDataReplayerRuntimeTest, amountBasedFeeRequiresCommodityAtInit)
 	cfg->release();
 }
 
-TEST_F(HisDataReplayerRuntimeTest, amountBasedFeeUsesCommodityVolumeScale)
+TEST_F(HisDataReplayerRuntimeTest, amountBasedFeeUsesPhysicalContractVolumeScale)
 {
-	// SetUp loaded the real stock commodity table used by this amount-based fee template.
-	EXPECT_DOUBLE_EQ(10000.0, _replayer.calc_fee("SSE.STK.000001", 100000.0, 100.0, 0));
+	HisDataReplayer replayer;
+	ASSERT_TRUE(initStockFeeReplayer(replayer));
+	// The physical contract overrides its commodity multiplier of one with two.
+	wt_fee::Context context; std::string error;
+	ASSERT_TRUE(replayer.prepare_fee_context("SSE.STK.000001", nullptr, context, error));
+	EXPECT_EQ(context.volume_scale, 2.0);
+	EXPECT_DOUBLE_EQ(20000.0, replayer.calc_fee("SSE.STK.000001", 100000.0, 100.0, 0));
 }
 
-TEST_F(HisDataReplayerRuntimeTest, volumeBasedFeeDoesNotRequireCommodity)
+TEST_F(HisDataReplayerRuntimeTest, volumeBasedFeeInitAllowsMissingCommodityButFillRequiresMetadata)
 {
 	const auto fees = _workdir / "fees_volume_only.json";
 	std::ofstream out(fees);
@@ -177,8 +204,36 @@ TEST_F(HisDataReplayerRuntimeTest, volumeBasedFeeDoesNotRequireCommodity)
 	HisDataReplayer replayerWithoutCommodity;
 	ASSERT_TRUE(replayerWithoutCommodity.init(cfg));
 	cfg->release();
+	wt_fee::Context missing; missing.product = "unchanged"; std::string error;
+	EXPECT_FALSE(replayerWithoutCommodity.prepare_fee_context("DCE.a.2401", nullptr, missing, error));
+	EXPECT_EQ(missing.product, "unchanged");
+	EXPECT_TRUE(std::isnan(replayerWithoutCommodity.calc_fee("DCE.a.2401", 100.0, 2.0, 0)));
+}
 
-	EXPECT_DOUBLE_EQ(2.5, replayerWithoutCommodity.calc_fee("DCE.a", 100.0, 2.0, 0));
+TEST_F(HisDataReplayerRuntimeTest, volumeBasedFeeUsesVerifiedPhysicalContract)
+{
+	const auto fees = _workdir / "fees_volume_only.json";
+	std::ofstream out(fees);
+	out << R"({"DCE.a":{"open":1.25,"close":0.75,"closetoday":0.5,"byvolume":true}})";
+	out.close(); ASSERT_TRUE(out.good());
+	const auto comms = _workdir / "fee_commodity.json";
+	const auto contracts = _workdir / "fee_contract.json";
+	std::ofstream commOut(comms);
+	commOut << R"({"DCE":{"a":{"name":"soy","session":"SD0930","holiday":"CHINA","pricetick":1,"volscale":10}}})";
+	commOut.close(); ASSERT_TRUE(commOut.good());
+	std::ofstream contractOut(contracts);
+	contractOut << R"({"DCE":{"a2401":{"name":"soy January","exchg":"DCE","product":"a","opendate":20100101,"expiredate":20301231,"volscale":10}}})";
+	contractOut.close(); ASSERT_TRUE(contractOut.good());
+	WTSVariant* cfg = build_replayer_cfg(_workdir, fees, false);
+	cfg->get("basefiles")->append("commodity", comms.string().c_str());
+	cfg->get("basefiles")->append("contract", contracts.string().c_str());
+	HisDataReplayer verified;
+	const bool initialized = verified.init(cfg); cfg->release(); ASSERT_TRUE(initialized);
+	wt_fee::Context context; std::string error;
+	ASSERT_TRUE(verified.prepare_fee_context("DCE.a.2401", nullptr, context, error));
+	EXPECT_EQ(context.physical_contract, "DCE.a2401");
+	EXPECT_EQ(context.volume_scale, 10.0);
+	EXPECT_DOUBLE_EQ(2.5, verified.calc_fee("DCE.a.2401", 100.0, 2.0, 0));
 }
 
 TEST_F(HisDataReplayerRuntimeTest, stopAndClearCacheAreSafeWhenIdle)

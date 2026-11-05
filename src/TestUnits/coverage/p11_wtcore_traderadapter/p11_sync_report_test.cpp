@@ -376,3 +376,85 @@ TEST_F(P11SyncReport, trade_report_stats_and_self_match_guard)
 }
 
 } // namespace
+
+// 迭代03 第五会话主线程：决策 K42（2026-11-04 用户裁定，BUG-I02-NEW-154）——订单查询回报的版本化完整性状态。
+// COMPLETE：快照（含空快照）可信，缺席的活单按卡5d 记 Absent；PARTIAL：只合并行，不据缺席下结论；
+// FAILED：不改变任何状态。旧回调 onRspOrders 在过渡期维持保守处理（空快照不可信）。
+namespace {
+WTSArray* k42EmptyArray() { return WTSArray::create(); }
+}
+
+TEST_F(P11SyncReport, k42_complete_empty_snapshot_retires_absent_live_orders)
+{
+    TraderAdapter trader;
+    buildReady(trader);
+    trader.onLoginResult(true, "ok", 20240510);
+    trader.onRspPosition(makeArray({ makePos(ct_, WDT_LONG, 10, 10, 0, 0) }));
+    trader.onRspOrders(makeArray({ makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 5, 0, "O1001", kTag1001) }));
+    ASSERT_DOUBLE_EQ(5.0, trader.getUndoneQty(kStdCode));
+
+    WTSArray* legacyEmpty = k42EmptyArray();
+    trader.onRspOrders(legacyEmpty);
+    legacyEmpty->release();
+    EXPECT_DOUBLE_EQ(5.0, trader.getUndoneQty(kStdCode)) << "legacy empty snapshot is indistinguishable from a failure";
+
+    WTSArray* completeEmpty = k42EmptyArray();
+    trader.onRspOrdersWithStatus(completeEmpty, WT_QUERY_STATUS_COMPLETE);
+    completeEmpty->release();
+    EXPECT_DOUBLE_EQ(0.0, trader.getUndoneQty(kStdCode)) << "a complete empty snapshot retires the absent live order";
+}
+
+TEST_F(P11SyncReport, k42_partial_snapshot_never_retires_missing_orders)
+{
+    TraderAdapter trader;
+    buildReady(trader);
+    trader.onLoginResult(true, "ok", 20240510);
+    trader.onRspPosition(makeArray({ makePos(ct_, WDT_LONG, 10, 10, 0, 0) }));
+    trader.onRspOrders(makeArray({
+        makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 5, 0, "O1001", kTag1001),
+        makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 2, 0, "O1002", kTag1002) }));
+    ASSERT_DOUBLE_EQ(7.0, trader.getUndoneQty(kStdCode));
+
+    WTSArray* partial = makeArray({ makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 2, 0, "O1002", kTag1002) });
+    trader.onRspOrdersWithStatus(partial, WT_QUERY_STATUS_PARTIAL);
+    partial->release();
+    EXPECT_DOUBLE_EQ(7.0, trader.getUndoneQty(kStdCode)) << "an order missing from a partial snapshot stays live";
+
+    WTSArray* complete = makeArray({ makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 2, 0, "O1002", kTag1002) });
+    trader.onRspOrdersWithStatus(complete, WT_QUERY_STATUS_COMPLETE);
+    complete->release();
+    EXPECT_DOUBLE_EQ(2.0, trader.getUndoneQty(kStdCode)) << "the same rows as a complete snapshot retire the missing order";
+}
+
+TEST_F(P11SyncReport, k42_failed_query_changes_nothing)
+{
+    TraderAdapter trader;
+    buildReady(trader);
+    trader.onLoginResult(true, "ok", 20240510);
+    trader.onRspPosition(makeArray({ makePos(ct_, WDT_LONG, 10, 10, 0, 0) }));
+    trader.onRspOrders(makeArray({ makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 5, 0, "O1001", kTag1001) }));
+    WTSArray* empty = k42EmptyArray();
+    trader.onRspOrdersWithStatus(empty, WT_QUERY_STATUS_FAILED);
+    trader.onRspOrdersWithStatus(NULL, WT_QUERY_STATUS_COMPLETE);
+    empty->release();
+    EXPECT_DOUBLE_EQ(5.0, trader.getUndoneQty(kStdCode));
+}
+
+// 迭代03 第五会话主线程：BUG-L01-014（卡6）——provider 无法转换的原始回报经版本化 SPI 上送后，
+// 宿主保存原始文本、暂停账户，不自动入账。
+TEST_F(P11SyncReport, l01014_raw_provider_report_is_kept_and_pauses_the_account)
+{
+    TraderAdapter trader;
+    buildReady(trader);
+    trader.onLoginResult(true, "ok", 20240510);
+    ASSERT_FALSE(trader.accountGate()->paused());
+    const size_t before = trader.unresolvedTradeReports().size();
+
+    trader.onUnresolvedProviderReport("trade", "trade report could not be converted", "InstrumentID=zz9999;TradeID=T0099;Volume=2");
+    EXPECT_TRUE(trader.accountGate()->paused()) << "an unconvertible report pauses the whole account";
+    const auto reports = trader.unresolvedTradeReports();
+    ASSERT_EQ(before + 1, reports.size());
+    EXPECT_NE(std::string::npos, reports.back().payload.find("provider_raw_report"));
+    EXPECT_NE(std::string::npos, reports.back().payload.find("InstrumentID=zz9999;TradeID=T0099;Volume=2"));
+    EXPECT_DOUBLE_EQ(10.0 * 0.0, trader.getUndoneQty(kStdCode)) << "nothing is booked";
+}

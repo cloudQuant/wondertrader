@@ -16,6 +16,8 @@
 #include "../WTSUtils/WtLMDB.hpp"
 #include "../Includes/FasterDefs.h"
 #include "../Includes/IRdmDtReader.h"
+#include "../Includes/DateMappingBinding.h"
+#include "../Includes/WTSDataDef.hpp"
 
 #include "../Share/StdUtils.hpp"
 #include "../Share/BoostMappingFile.hpp"
@@ -57,6 +59,9 @@ public:
 	 * @param sink 数据读取器回调接口
 	 * @details 从配置对象中读取数据目录等信息，初始化数据读取器
 	 */
+	/// K31=A：宿主注入 DateMappingV1 表（可选导出 bindRdmDtReaderDateMappingV1 调用；须在 init 前，只接受一次）。
+	bool bindDateMapping(const wtp::DateMappingV1* table) noexcept { return _date_binding.bind(table); }
+
 	virtual void init(WTSVariant* cfg, IRdmDtReaderSink* sink) override;
 
 	/**
@@ -146,6 +151,7 @@ private:
 	static void set_test_range_results_override(LMDBRangeResultsOverride callback, void* context);
 	std::string		_base_dir;        /**< 数据文件存储的基础路径 */
 	IBaseDataMgr*	_base_data_mgr;    /**< 基础数据管理器指针 */
+	wtp::DateMappingBinding	_date_binding;	/**< K31=A：已注入时走路径 A，否则路径 C */
 	IHotMgr*		_hot_mgr;          /**< 主力合约管理器指针 */
 
 	/**
@@ -158,14 +164,23 @@ private:
 		std::string		_code;          /**< 合约代码 */
 		WTSKlinePeriod	_period;        /**< K线周期 */
 		uint64_t		_last_bar_time;  /**< 最后K线时间 */
+		uint64_t		_snapshot_txnid;  /**< R21-BUG-07：缓存对应的 LMDB 已提交事务号 */
+		bool			_snapshot_valid;  /**< R21-BUG-07：扫描期间无提交时为 true */
+		// 决策 K35=C：末 bar 游标 + 有界陈旧
+		uint32_t		_cursor;          /**< 缓存末 bar 的 LMDB 键时间（日线为日期，分钟线为 bar.time） */
+		bool			_cursor_valid;    /**< 末 bar 键可用 uint32 表示且缓存来自完整扫描链 */
+		uint32_t		_full_tdate;      /**< 最近一次全量校验时请求终点的交易日 */
+		int64_t			_full_at_ms;      /**< 最近一次全量校验的单调时钟（毫秒） */
+		uint32_t		_incr_since_full; /**< 最近一次全量校验后的增量刷新次数 */
 
-		std::vector<WTSBarStruct>	_bars;  /**< K线数据存储容器 */
+		WTSSharedBuffer<std::vector<WTSBarStruct>>	_bars;  /**< K线数据存储容器（卡11=B 写时复制，切片持有 owner） */
 
 		/**
 		 * @brief 构造函数
 		 * @details 初始化最后K线时间为0
 		 */
-		_BarsList() :_last_bar_time(0){}
+		_BarsList() :_last_bar_time(0), _snapshot_txnid(0), _snapshot_valid(false),
+			_cursor(0), _cursor_valid(false), _full_tdate(0), _full_at_ms(0), _incr_since_full(0){}
 	} BarsList;
 
 	/**
@@ -179,7 +194,7 @@ private:
 		uint64_t		_first_tick_time; /**< 第一个Tick时间 */
 		uint64_t		_last_tick_time;  /**< 最后Tick时间 */
 
-		std::vector<WTSTickStruct>	_ticks; /**< Tick数据存储容器 */
+		WTSSharedBuffer<std::vector<WTSTickStruct>>	_ticks; /**< Tick数据存储容器（卡11=B 写时复制，切片持有 owner） */
 
 		/**
 		 * @brief 构造函数
@@ -190,6 +205,10 @@ private:
 
 	typedef wt_hashmap<std::string, BarsList> BarsCache;  /**< K线数据缓存容器类型定义 */
 	BarsCache	_bars_cache;     /**< K线数据缓存映射表，以合约代码为键 */
+
+	// 决策 K35=C：增量刷新后的全量校验上限（配置 full_check_increments / full_check_seconds，0 表示不按该项触发）
+	uint32_t	_full_check_increments = 64;
+	int64_t		_full_check_ms = 60000;
 
 	typedef wt_hashmap<std::string, TicksList> TicksCache;  /**< Tick数据缓存容器类型定义 */
 	TicksCache	_ticks_cache;    /**< Tick数据缓存映射表，以合约代码为键 */

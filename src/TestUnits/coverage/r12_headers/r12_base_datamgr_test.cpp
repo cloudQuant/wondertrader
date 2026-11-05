@@ -46,9 +46,11 @@ const char* kSessions = R"({
 	"R12DAY":{"name":"r12日盘","offset":0,"auction":{"from":915,"to":925},
 		"sections":[{"from":900,"to":1130},{"from":1300,"to":1500}]},
 	"R12NIGHT":{"name":"r12夜盘","offset":300,
-		"sections":[{"from":2100,"to":2300},{"from":900,"to":1130}]},
-	"R12EMPTY":{"name":"r12无时段","offset":0}
+		"sections":[{"from":2100,"to":2300},{"from":900,"to":1130}]}
 })";
+// I03-NEW-053（卡 2 配置整批校验后发布）：会话条目必须带 sections 数组，缺失会使整份文件被拒。
+// 决策 K28（2026-11-04）：空 sections 数组同样使整份文件被拒，因此原“无时段”模板 R12EMPTY
+// 已从夹具移除；空数组被拒的行为由 l03_includes/s5_main_k28_k30_session_test.cpp 覆盖。
 
 const char* kCommodities = R"({
 	"SSE":{"STK":{"name":"r12股票","session":"R12DAY","holiday":"CHN","pricetick":0.01,
@@ -192,8 +194,8 @@ TEST_F(R12BaseDataMgr, session_lookup_by_id_and_code)
 
 	WTSArray* all = _mgr.getAllSessions();
 	ASSERT_NE(all, nullptr);
-	// 三个模板都在（含无时段的 R12EMPTY）
-	EXPECT_GE(all->size(), 2u);
+	// 两个模板都在（K28 后夹具不再含无时段的 R12EMPTY）
+	EXPECT_EQ(all->size(), 2u);
 	all->release();
 
 	// 时段挂的品种集合

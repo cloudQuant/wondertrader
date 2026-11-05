@@ -1,0 +1,42 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5TraderCTPMini.ReleaseFromCallbackIsDeferred
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03S5TraderCTPMini
+[ RUN      ] I03S5TraderCTPMini.ReleaseFromCallbackIsDeferred
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:558: Failure
+Expected equality of these values:
+  0
+  inside
+    Which is: 1
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:559: Failure
+Expected equality of these values:
+  kDeferred
+    Which is: 1
+  state
+    Which is: -1
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:560: Failure
+Expected equality of these values:
+  0
+  sink_.pushed_trades.load()
+    Which is: 1
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:566: Failure
+Expected equality of these values:
+  kReleased
+    Which is: 2
+  trader_.stopState()
+    Which is: -1
+
+[  FAILED  ] I03S5TraderCTPMini.ReleaseFromCallbackIsDeferred (3 ms)
+[----------] 1 test from I03S5TraderCTPMini (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] I03S5TraderCTPMini.ReleaseFromCallbackIsDeferred
+
+ 1 FAILED TEST

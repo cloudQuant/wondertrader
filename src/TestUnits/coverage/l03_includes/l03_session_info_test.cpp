@@ -210,6 +210,69 @@ TEST(l03_session, offset_arithmetic_keeps_valid_offsets_and_avoids_int32_overflo
 	}
 }
 
+TEST(l03_session, multi_day_offsets_normalize_endpoints_and_checked_date)
+{
+	struct Example { int32_t offset; uint32_t time; uint32_t left; uint32_t right; uint32_t date; };
+	const Example examples[] = {
+		{1441, 0, 1, 1, 20240229},
+		{1441, 2359, 0, 2400, 20240301},
+		{-1441, 0, 2359, 2359, 20240226},
+		{-1441, 900, 859, 859, 20240227},
+		{2880, 900, 900, 900, 20240301},
+		{-2880, 900, 900, 900, 20240226},
+		{2880, 0, 0, 2400, 20240301},
+		{-2880, 0, 0, 2400, 20240226},
+		{(std::numeric_limits<int32_t>::max)(), 900, 1107, 1107, 61070323},
+	};
+	for (const auto& e : examples)
+	{
+		auto* s = WTSSessionInfo::create("L03_MULTI", "multi-day", e.offset);
+		ASSERT_NE(s, nullptr);
+		uint32_t date = 123;
+		EXPECT_EQ(e.left, s->offsetTime(e.time, true));
+		EXPECT_EQ(e.right, s->offsetTime(e.time, false));
+		ASSERT_TRUE(s->tryGetOffsetDate(20240228, e.time, date));
+		EXPECT_EQ(e.date, date);
+		EXPECT_EQ(e.date, s->getOffsetDate(20240228, e.time));
+		EXPECT_EQ(e.time % 2400, s->originalTime(s->offsetTime(e.time, true)));
+		s->release();
+	}
+}
+
+TEST(l03_session, checked_offset_date_rejects_out_of_range_without_publication)
+{
+	auto* s = WTSSessionInfo::create("L03_LIMIT", "limit", (std::numeric_limits<int32_t>::min)());
+	ASSERT_NE(s, nullptr);
+	uint32_t result = 123;
+	EXPECT_FALSE(s->tryGetOffsetDate(20240228, 900, result));
+	EXPECT_EQ(123u, result);
+	s->setOffsetMins(2880);
+	for (auto input : {std::pair<uint32_t,uint32_t>{20240230, 900}, {20241301, 900},
+		{99991231, 900}, {20240228, 1260}, {20240228, 2401}})
+	{
+		result = 123;
+		EXPECT_FALSE(s->tryGetOffsetDate(input.first, input.second, result));
+		EXPECT_EQ(123u, result);
+	}
+	s->release();
+}
+
+TEST(l03_session, offset_setter_rebuilds_sections_after_multiple_days)
+{
+	auto* s = WTSSessionInfo::create("L03_RESET", "reset", 0);
+	ASSERT_NE(s, nullptr);
+	s->addTradingSection(900, 1000);
+	for (int32_t offset : {2880, -2880, 0})
+	{
+		s->setOffsetMins(offset);
+		ASSERT_EQ(1u, s->getTradingSections().size());
+		EXPECT_EQ(900u, s->getTradingSections()[0].first);
+		EXPECT_EQ(1000u, s->getTradingSections()[0].second);
+		EXPECT_EQ(60u, s->getTradingMins());
+	}
+	s->release();
+}
+
 //////////////////////////////////////////////////////////////////////////
 // getOffsetDate：交易日归属
 //////////////////////////////////////////////////////////////////////////
@@ -468,9 +531,65 @@ TEST_F(L03DaySessionTest, trading_minutes_and_section_list)
 	EXPECT_EQ(sess_->getSecMinList().size(), 3u);
 }
 
-TEST(l03_session, DISABLED_zero_length_section_semantics_contract_pending)
+TEST(l03_session, all_day_section_aggregate_views_survive_offset_changes)
 {
-	GTEST_SKIP() << "09:00-09:00 是零长度还是全天时段尚无明确合同；0-0 全天正控单独保留。";
+	for (int32_t initialOffset : {0, 300, -300})
+	{
+		WTSSessionInfo* s = WTSSessionInfo::create("L03_ALL_DAY", "all day", initialOffset);
+		ASSERT_NE(s, nullptr);
+		s->addTradingSection(0, 0);
+		const auto check = [&] {
+			EXPECT_EQ(s->getTradingMins(), 1440u);
+			EXPECT_EQ(s->getTradingSeconds(), 1440u * 60u);
+			ASSERT_EQ(s->getSecMinList().size(), 1u);
+			EXPECT_EQ(s->getSecMinList().back(), 1440u);
+		};
+		check();
+		for (int32_t nextOffset : {300, -300, 0})
+		{
+			s->setOffsetMins(nextOffset);
+			check();
+		}
+		s->release();
+	}
+}
+
+// BUG-L03-010 (S5, decision card 2): 0-0 is the only full-day section; it
+// cannot be mixed with another section in either order, so the full-day
+// aggregate views never exceed one day.
+TEST(l03_session, full_day_section_is_not_mixed_with_other_sections)
+{
+	for (int32_t offset : {0, 300, -300})
+	{
+		WTSSessionInfo* s = WTSSessionInfo::create("L03_MIX", "mixed", offset);
+		ASSERT_TRUE(s->tryAddTradingSection(900, 1500));
+		EXPECT_FALSE(s->tryAddTradingSection(0, 0));
+		s->addTradingSection(0, 0);
+		EXPECT_EQ(1u, s->getSectionCount());
+		EXPECT_EQ(360u, s->getTradingMins());
+		s->release();
+
+		WTSSessionInfo* all = WTSSessionInfo::create("L03_ALL", "all", offset);
+		ASSERT_TRUE(all->tryAddTradingSection(0, 0));
+		EXPECT_FALSE(all->tryAddTradingSection(900, 1500));
+		EXPECT_FALSE(all->tryAddTradingSection(0, 0));
+		EXPECT_EQ(1u, all->getSectionCount());
+		EXPECT_EQ(1440u, all->getTradingMins());
+		ASSERT_EQ(1u, all->getSecMinList().size());
+		EXPECT_EQ(1440u, all->getSecMinList().back());
+		all->release();
+	}
+}
+
+TEST(l03_session, non_midnight_zero_length_section_is_rejected)
+{
+	auto* s = WTSSessionInfo::create("L03_ZERO", "zero width");
+	ASSERT_TRUE(s->tryAddTradingSection(900, 1000));
+	EXPECT_FALSE(s->tryAddTradingSection(900, 900));
+	s->addTradingSection(900, 900);
+	ASSERT_EQ(1u, s->getSectionCount());
+	EXPECT_EQ(60u, s->getTradingMins());
+	s->release();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -736,10 +855,15 @@ TEST(l03_session, set_offset_mins_keeps_registered_sections_consistent)
 	const std::vector<uint32_t>& before_append = s->getSecMinList();
 	ASSERT_EQ(before_append.size(), 4u);
 	EXPECT_EQ(before_append[3], 660u);
-	s->addTradingSection(900, 915);
+	// 决策 K30（2026-11-04）：与已登记交易时段重叠的追加被拒（旧夹具追加 900-915 与 900-1500 重叠），
+	// 时段表与分钟缓存都不变；改为追加不重叠的 1600-1615 验证缓存失效。
+	EXPECT_FALSE(s->tryAddTradingSection(900, 915));
+	ASSERT_EQ(s->getTradingSections().size(), 4u);
+	ASSERT_EQ(s->getSecMinList().size(), 4u);
+	s->addTradingSection(1600, 1615);
 	s->addAuctionTime(900, 905);
-	EXPECT_EQ(s->getTradingSections()[4].first, 1400u);
-	EXPECT_EQ(s->getTradingSections()[4].second, 1415u);
+	EXPECT_EQ(s->getTradingSections()[4].first, 2100u);
+	EXPECT_EQ(s->getTradingSections()[4].second, 2115u);
 	EXPECT_EQ(s->getAuctionSections()[3].first, 1400u);
 	EXPECT_EQ(s->getAuctionSections()[3].second, 1405u);
 	const std::vector<uint32_t>& after_append = s->getSecMinList();

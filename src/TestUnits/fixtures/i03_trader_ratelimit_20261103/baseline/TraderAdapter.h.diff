@@ -1,0 +1,56 @@
+--- src/TestUnits/fixtures/i03_trader_ratelimit_20261103/baseline/TraderAdapter.h	2026-11-03 21:26:59
++++ src/WtCore/TraderAdapter.h	2026-11-03 21:44:41
+@@ -66,6 +66,10 @@
+ {
+ public:
+ 	friend struct N01TraderAdapterRiskTestAccess;
++
++	// Monotonic millisecond clock for order/cancel frequency windows (card 7c).
++	// Wall-clock time is only used by the logger.
++	typedef uint64_t (*RateClock)();
+ 
+ 	// A versioned WTS-visible snapshot, not a provider SDK payload.
+ 	struct UnresolvedTradeReport
+@@ -393,6 +397,21 @@
+ 	uint32_t doEntrust(WTSEntrust* entrust);
+ 	bool	doCancel(WTSOrderInfo* ordInfo);
+ 
++	// Outcome of one split submitted by buy()/sell(); filled by doEntrust.
++	struct EntrustOutcome
++	{
++		bool ledger_consumed = false;	///< a synchronous report already adjusted undone qty
++	};
++	// Reserves undone qty for one split before the provider call and rolls it
++	// back unless the split was accepted or a re-entrant report consumed it.
++	bool submitSplit(OrderIDs& ids, const char* stdCode, bool isBuy, double qty,
++		const std::function<uint32_t()>& submit);
++	// ORs report flags into an in-flight submission; returns the previous
++	// flags, or 0x80 when localid is not being submitted.
++	uint8_t noteInflightReport(uint32_t localid, uint8_t bits);
++	uint64_t rateNow() const { return _rate_clock(); }
++	bool frequencyAvailable(bool isOrder, const char* stdCode, const RiskParams* riskPara) const;
++
+ 	inline void	printPosition(const char* stdCode, const PosItem& pItem);
+ 
+ 	inline WTSContractInfo* getContract(const char* stdCode);
+@@ -731,8 +750,18 @@
+ 		//这两个缓存时间内的容器,主要是为了控制电光流量而设置的
+ 	typedef std::vector<uint64_t> TimeCacheList;
+ 	typedef wt_hashmap<std::string, TimeCacheList> CodeTimeCacheMap;
+-	FrequencyWindow<CodeTimeCacheMap> _order_frequency;
+-	FrequencyWindow<CodeTimeCacheMap> _cancel_frequency;
++	// Sliding windows ending at "now": N requests (including pending ones)
++	// are admitted, N+1 is rejected before the API, and quota recovers when
++	// recorded requests expire. There is no permanent frequency exclusion.
++	mutable FrequencyWindow<CodeTimeCacheMap> _order_frequency;
++	mutable FrequencyWindow<CodeTimeCacheMap> _cancel_frequency;
++	RateClock _rate_clock = &FrequencyWindow<CodeTimeCacheMap>::now;
++
++	// Submissions currently inside orderInsert, keyed by local order id, so a
++	// synchronous (re-entrant) provider report can be reconciled with the
++	// return value. Bits: 1 = rejection/cancel observed, 2 = acceptance observed.
++	std::mutex _inflight_mutex;
++	wt_hashmap<uint32_t, uint8_t> _inflight_entrusts;
+ 	CodeTimeCacheMap& _order_time_cache = _order_frequency.cache;
+ 	CodeTimeCacheMap& _cancel_time_cache = _cancel_frequency.cache;
+ 	mutable std::mutex _risk_exclude_mutex;

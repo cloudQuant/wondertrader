@@ -64,3 +64,11 @@ add_check(retry_after_missing_register retry missing_register "$<TARGET_FILE_DIR
 add_check(retry_after_zero_id retry-zero zero "$<TARGET_FILE_DIR:fake_full>")
 add_check(full_plugin_single full-single full)
 add_check(optional_publisher_single no-publish-single missing_publish)
+# R20_wtbtcore#3 (card 9): explicit release, release before init, and release
+# while publications are in flight (the fake sleeps inside publish).
+add_check(release_destroys_once release full)
+add_check(release_before_init release-before-init full)
+add_check(concurrent_release concurrent-release full)
+set_tests_properties(concurrent_release PROPERTIES ENVIRONMENT
+    "WT_R20_MQ_LOG=${CMAKE_CURRENT_BINARY_DIR}/logs/concurrent_release.log;WT_R20_MQ_SLOW_PUBLISH_US=2000;LLVM_PROFILE_FILE=${CMAKE_CURRENT_BINARY_DIR}/logs/concurrent_release.profraw")
+

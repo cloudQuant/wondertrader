@@ -1,0 +1,17 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before/src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp	2026-11-04 07:57:38
++++ src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp	2026-11-04 17:58:38
+@@ -315,6 +315,14 @@
+ 	{
+ 		probe.setStrand(&strand);
+ 		probe.registerSpi(&sink);
++	}
++
++	// BUG-T4-003 (card 9b): the destructor now completes release(), which calls
++	// RegisterSpi(NULL)/Release() on the API. Several cases inject the non-
++	// dereferenceable kApiSentinel; clear it so teardown never calls into it.
++	void TearDown() override
++	{
++		probe.setApi(nullptr);
+ 	}
+ 
+ 	boost::asio::io_context ioc;

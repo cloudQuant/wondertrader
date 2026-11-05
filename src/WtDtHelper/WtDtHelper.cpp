@@ -27,7 +27,10 @@
 namespace fs = boost::filesystem;
 
 #include <cctype>
+#include <cstring>
 #include <exception>
+#include <fstream>
+#include <limits>
 
 #include <rapidjson/document.h>
 namespace rj = rapidjson;
@@ -38,11 +41,17 @@ USING_NS_WTP;
 namespace
 {
 	thread_local bool g_fail_next_block_close_for_test = false;
+	thread_local bool g_fail_next_csv_read_close_for_test = false;
 }
 
 extern "C" void wt_dt_helper_fail_next_close_for_test()
 {
 	g_fail_next_block_close_for_test = true;
+}
+
+extern "C" void wt_dt_helper_fail_next_csv_read_close_for_test()
+{
+	g_fail_next_csv_read_close_for_test = true;
 }
 #endif
 
@@ -299,24 +308,195 @@ bool readHelperFile(const std::string& path, std::string& content, FuncLogCallba
 	return false;
 }
 
-void dump_bars(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /* = "" */, FuncLogCallback cbLogger /* = NULL */)
+namespace
 {
+    // CSV exports need to observe input close failures as well as short reads.
+    // Keep the common readHelperFile behavior unchanged for other entry points.
+    bool read_csv_source(const std::string& path, std::string& content, FuncLogCallback cbLogger)
+    {
+        try
+        {
+            const auto length = std::filesystem::file_size(path);
+            if (length > (std::numeric_limits<std::size_t>::max)() ||
+                length > static_cast<std::uintmax_t>((std::numeric_limits<std::streamsize>::max)()))
+                throw std::runtime_error("Input file is too large to read");
+            std::ifstream file(path, std::ios::binary);
+            if (!file.is_open())
+                throw std::runtime_error("Failed to open file");
+            std::string input(static_cast<std::size_t>(length), '\0');
+            if (!input.empty())
+            {
+                file.read(&input[0], static_cast<std::streamsize>(input.size()));
+                if (file.gcount() != static_cast<std::streamsize>(input.size()) || file.bad())
+                    throw std::runtime_error("Failed to read expected number of bytes");
+            }
+            file.close();
+            bool closed = !file.fail();
+#ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
+            if (g_fail_next_csv_read_close_for_test)
+            {
+                g_fail_next_csv_read_close_for_test = false;
+                closed = false;
+            }
+#endif
+            if (!closed)
+                throw std::runtime_error("Failed to close input file");
+            content.swap(input);
+            return true;
+        }
+        catch (const std::exception& e)
+        {
+            if (cbLogger)
+                cbLogger(fmtutil::format(u8"读取数据文件{}失败: {}", path.c_str(), e.what()));
+        }
+        catch (...)
+        {
+            if (cbLogger)
+                cbLogger(fmtutil::format(u8"读取数据文件{}失败: 未知异常", path.c_str()));
+        }
+        return false;
+    }
+
+    // The CSV entry points accept historical blocks only. Inspect a copied
+    // header before interpreting or decompressing its payload.
+    bool valid_csv_block(const std::string& bytes, bool isBar, uint16_t& type)
+    {
+        if (bytes.size() < sizeof(BlockHeader))
+            return false;
+        BlockHeader header;
+        std::memcpy(&header, bytes.data(), sizeof(header));
+        if (std::memcmp(header._blk_flag, BLK_FLAG, FLAG_SIZE) != 0)
+            return false;
+        type = header._type;
+        if (isBar ? (type != BT_HIS_Minute1 && type != BT_HIS_Minute5 && type != BT_HIS_Day)
+                  : (type != BT_HIS_Ticks))
+            return false;
+        if (header._version != BLOCK_VERSION_RAW && header._version != BLOCK_VERSION_CMP &&
+            header._version != BLOCK_VERSION_RAW_V2 && header._version != BLOCK_VERSION_CMP_V2)
+            return false;
+
+        const bool old = header.is_old_version();
+        const size_t itemSize = isBar ? (old ? sizeof(WTSBarStructOld) : sizeof(WTSBarStruct))
+                                      : (old ? sizeof(WTSTickStructOld) : sizeof(WTSTickStruct));
+        if (!header.is_compressed())
+            return (bytes.size() - sizeof(BlockHeader)) % itemSize == 0;
+        if (bytes.size() < sizeof(BlockHeaderV2))
+            return false;
+        BlockHeaderV2 extended;
+        std::memcpy(&extended, bytes.data(), sizeof(extended));
+        const size_t compressedSize = bytes.size() - sizeof(BlockHeaderV2);
+        if (extended._size != compressedSize)
+            return false;
+        const auto decodedSize = ZSTD_getFrameContentSize(bytes.data() + sizeof(BlockHeaderV2), compressedSize);
+        return decodedSize != ZSTD_CONTENTSIZE_ERROR && decodedSize != ZSTD_CONTENTSIZE_UNKNOWN &&
+               decodedSize % itemSize == 0;
+    }
+
+    struct CsvBatchStatus
+    {
+        uint32_t failure = WT_CSV_DUMP_SUCCESS;
+        bool succeeded = false;
+        // Number of .dsb files accepted by the contract filter, whatever their outcome.
+        uint32_t matched = 0;
+        void fail(uint32_t value)
+        {
+            if (failure == WT_CSV_DUMP_SUCCESS)
+                failure = value;
+            else if (failure != value)
+                failure = WT_CSV_DUMP_PARTIAL_FAILURE;
+        }
+        uint32_t result() const
+        {
+            if (failure == WT_CSV_DUMP_SUCCESS && matched == 0)
+                return WT_CSV_DUMP_NO_INPUT;
+            return succeeded && failure != WT_CSV_DUMP_SUCCESS ? WT_CSV_DUMP_PARTIAL_FAILURE : failure;
+        }
+    };
+
+    // BUG-L05-002: strFilter is the contract filter documented by the original public
+    // header ("合约过滤器，支持通配符，默认为空（处理所有合约）"). It is one pattern matched
+    // against the whole file stem (the contract code used for the CSV name); '*' matches any
+    // sequence and '?' one character. Matching is case-sensitive and byte-wise.
+    bool csv_filter_match(const char* pattern, const std::string& name)
+    {
+        if (pattern == NULL || *pattern == '\0')
+            return true;
+        const size_t plen = std::strlen(pattern);
+        size_t p = 0, n = 0, star = std::string::npos, mark = 0;
+        while (n < name.size())
+        {
+            if (p < plen && (pattern[p] == '?' || pattern[p] == name[n]))
+            {
+                ++p;
+                ++n;
+            }
+            else if (p < plen && pattern[p] == '*')
+            {
+                star = p++;
+                mark = n;
+            }
+            else if (star != std::string::npos)
+            {
+                p = star + 1;
+                n = ++mark;
+            }
+            else
+                return false;
+        }
+        while (p < plen && pattern[p] == '*')
+            ++p;
+        return p == plen;
+    }
+
+    void log_batch_end(FuncLogCallback cbLogger, const CsvBatchStatus& batch, WtString binFolder, WtString strFilter)
+    {
+        if (!cbLogger)
+            return;
+        const uint32_t result = batch.result();
+        if (result == WT_CSV_DUMP_SUCCESS)
+            cbLogger(fmtutil::format(u8"目录{}全部导出完成...", binFolder));
+        else if (result == WT_CSV_DUMP_NO_INPUT)
+            cbLogger(fmtutil::format(u8"No .dsb file in {} matched filter '{}'; nothing exported", binFolder,
+                strFilter ? strFilter : ""));
+    }
+
+    bool write_csv_file(WtString filename, const std::string& content, FuncLogCallback cbLogger);
+}
+
+uint32_t dump_bars_v2(WtString binFolder, WtString csvFolder, WtString strFilter, FuncLogCallback cbLogger)
+{
+    if (!binFolder || !*binFolder || !csvFolder || !*csvFolder)
+        return WT_CSV_DUMP_INVALID_ARGUMENT;
+    CsvBatchStatus batch;
+    try
+    {
 	std::string srcFolder = StrUtil::standardisePath(binFolder);
 	if (!StdFile::exists(srcFolder.c_str()))
 	{
 		if (cbLogger)
 			cbLogger(fmtutil::format(u8"目录{}不存在", binFolder));
-		return;
+		return WT_CSV_DUMP_INPUT_ERROR;
 	}
 
+	boost::system::error_code ec;
 	if (!StdFile::exists(csvFolder))
-		fs::create_directories(csvFolder);
+		fs::create_directories(csvFolder, ec);
+	if (ec || !fs::is_directory(csvFolder, ec))
+	{
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"目录{}创建失败", csvFolder));
+		return WT_CSV_DUMP_OUTPUT_ERROR;
+	}
 
 	fs::path myPath(srcFolder);
 	fs::directory_iterator endIter;
-	for (fs::directory_iterator iter(myPath); iter != endIter; iter++)
+	fs::directory_iterator iter(myPath, ec);
+	for (; !ec && iter != endIter; iter.increment(ec))
 	{
-		if (fs::is_directory(iter->path()))
+		const bool isDir = fs::is_directory(iter->path(), ec);
+		if (ec)
+			break;
+		if (isDir)
 			continue;
 
 		if (iter->path().extension() != ".dsb")
@@ -325,34 +505,34 @@ void dump_bars(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /*
 		const std::string& path = iter->path().string();
 
 		std::string fileCode = iter->path().stem().string();
+		if (!csv_filter_match(strFilter, fileCode))
+			continue;
+		++batch.matched;
 
 		if (cbLogger)
 			cbLogger(fmtutil::format(u8"正在读取数据文件{}...", path));
 
 		std::string buffer;
-		StdFile::read_file_content(path.c_str(), buffer);
-		if (buffer.size() < sizeof(HisKlineBlock))
+		if (!read_csv_source(path, buffer, cbLogger))
+		{
+			batch.fail(WT_CSV_DUMP_INPUT_ERROR);
+			continue;
+		}
+		uint16_t type = 0;
+		if (!valid_csv_block(buffer, true, type))
 		{
 			if (cbLogger)
-				cbLogger(fmtutil::format(u8"文件{}头部校验失败", path.c_str()));
+				cbLogger(fmtutil::format(u8"Invalid data block header: {}", path.c_str()));
+			batch.fail(WT_CSV_DUMP_INPUT_ERROR);
 			continue;
 		}
 
-		BlockHeader* bHeader = (BlockHeader*)buffer.data();
-
-		if(bHeader->_type < BT_HIS_Minute1 || bHeader->_type > BT_HIS_Day)
-		{
-			if (cbLogger)
-				cbLogger(fmtutil::format(u8"文件{}不是K线数据，跳过转换", path.c_str()));
-			continue;
-		}
-
-		bool isDay = (bHeader->_type == BT_HIS_Day);
-
+		bool isDay = (type == BT_HIS_Day);
 		if (!proc_block_data(buffer, true, false) || buffer.size() % sizeof(WTSBarStruct) != 0)
 		{
 			if (cbLogger)
 				cbLogger(fmtutil::format(u8"文件{}数据块校验失败，跳过转换", path.c_str()));
+			batch.fail(WT_CSV_DUMP_INPUT_ERROR);
 			continue;
 		}
 
@@ -399,34 +579,67 @@ void dump_bars(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /*
 				<< curBar.add << std::endl;
 		}
 
-		StdFile::write_file_content(filename.c_str(), ss.str().c_str(), (uint32_t)ss.str().size());
+		if (!ss || !write_csv_file(filename.c_str(), ss.str(), cbLogger))
+		{
+			batch.fail(WT_CSV_DUMP_OUTPUT_ERROR);
+			continue;
+		}
 
+		batch.succeeded = true;
 		if (cbLogger)
 			cbLogger(fmtutil::format(u8"{}写入完成,共{}条bar", filename, kcnt));
 	}
 
-	if (cbLogger)
-		cbLogger(fmtutil::format(u8"目录{}全部导出完成...", binFolder));
+	if (ec)
+	{
+		batch.fail(WT_CSV_DUMP_INPUT_ERROR);
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"目录{}读取失败: {}", binFolder, ec.message()));
+	}
+	log_batch_end(cbLogger, batch, binFolder, strFilter);
+    return batch.result();
+    }
+    catch (...)
+    {
+        batch.fail(WT_CSV_DUMP_INTERNAL_ERROR);
+        return batch.result();
+    }
 }
 
-void dump_ticks(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /* = "" */, FuncLogCallback cbLogger /* = NULL */)
+uint32_t dump_ticks_v2(WtString binFolder, WtString csvFolder, WtString strFilter, FuncLogCallback cbLogger)
 {
+    if (!binFolder || !*binFolder || !csvFolder || !*csvFolder)
+        return WT_CSV_DUMP_INVALID_ARGUMENT;
+    CsvBatchStatus batch;
+    try
+    {
 	std::string srcFolder = StrUtil::standardisePath(binFolder);
 	if (!StdFile::exists(srcFolder.c_str()))
 	{
 		if (cbLogger)
 			cbLogger(fmtutil::format(u8"目录{}不存在", binFolder));
-		return;
+		return WT_CSV_DUMP_INPUT_ERROR;
 	}
 
+	boost::system::error_code ec;
 	if (!StdFile::exists(csvFolder))
-		fs::create_directories(csvFolder);
+		fs::create_directories(csvFolder, ec);
+	if (ec || !fs::is_directory(csvFolder, ec))
+	{
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"目录{}创建失败", csvFolder));
+		return WT_CSV_DUMP_OUTPUT_ERROR;
+	}
 
 	fs::path myPath(srcFolder);
 	fs::directory_iterator endIter;
-	for (fs::directory_iterator iter(myPath); iter != endIter; iter++)
+	fs::directory_iterator iter(myPath, ec);
+	for (; !ec && iter != endIter; iter.increment(ec))
 	{
-		if (fs::is_directory(iter->path()))
+		const bool isDir = fs::is_directory(iter->path(), ec);
+		if (ec)
+			break;
+		if (isDir)
 			continue;
 
 		if (iter->path().extension() != ".dsb")
@@ -435,23 +648,32 @@ void dump_ticks(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /
 		const std::string& path = iter->path().string();
 
 		std::string fileCode = iter->path().stem().string();
+		if (!csv_filter_match(strFilter, fileCode))
+			continue;
+		++batch.matched;
 
 		if (cbLogger)
 			cbLogger(fmtutil::format(u8"正在读取数据文件{}...", path.c_str()));
 
 		std::string buffer;
-		StdFile::read_file_content(path.c_str(), buffer);
-		if (buffer.size() < sizeof(HisTickBlock))
+		if (!read_csv_source(path, buffer, cbLogger))
 		{
-			if (cbLogger)
-				cbLogger(fmtutil::format(u8"文件{}头部校验失败", path.c_str()));
+			batch.fail(WT_CSV_DUMP_INPUT_ERROR);
 			continue;
 		}
-
+		uint16_t type = 0;
+		if (!valid_csv_block(buffer, false, type))
+		{
+			if (cbLogger)
+				cbLogger(fmtutil::format(u8"Invalid data block header: {}", path.c_str()));
+			batch.fail(WT_CSV_DUMP_INPUT_ERROR);
+			continue;
+		}
 		if (!proc_block_data(buffer, false, false) || buffer.size() % sizeof(WTSTickStruct) != 0)
 		{
 			if (cbLogger)
 				cbLogger(fmtutil::format(u8"文件{}数据块校验失败，跳过转换", path.c_str()));
+			batch.fail(WT_CSV_DUMP_INPUT_ERROR);
 			continue;
 		}
 
@@ -510,14 +732,41 @@ void dump_ticks(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /
 			ss << std::endl;
 		}
 
-		StdFile::write_file_content(filename.c_str(), ss.str().c_str(), (uint32_t)ss.str().size());
+		if (!ss || !write_csv_file(filename.c_str(), ss.str(), cbLogger))
+		{
+			batch.fail(WT_CSV_DUMP_OUTPUT_ERROR);
+			continue;
+		}
 
+		batch.succeeded = true;
 		if (cbLogger)
 			cbLogger(fmtutil::format(u8"{}写入完成,共{}条tick数据", filename.c_str(), tcnt));
 	}
 
-	if (cbLogger)
-		cbLogger(fmtutil::format(u8"目录{}全部导出完成...", binFolder));
+	if (ec)
+	{
+		batch.fail(WT_CSV_DUMP_INPUT_ERROR);
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"目录{}读取失败: {}", binFolder, ec.message()));
+	}
+	log_batch_end(cbLogger, batch, binFolder, strFilter);
+    return batch.result();
+    }
+    catch (...)
+    {
+        batch.fail(WT_CSV_DUMP_INTERNAL_ERROR);
+        return batch.result();
+    }
+}
+
+void dump_bars(WtString binFolder, WtString csvFolder, WtString strFilter, FuncLogCallback cbLogger)
+{
+    (void)dump_bars_v2(binFolder, csvFolder, strFilter, cbLogger);
+}
+
+void dump_ticks(WtString binFolder, WtString csvFolder, WtString strFilter, FuncLogCallback cbLogger)
+{
+    (void)dump_ticks_v2(binFolder, csvFolder, strFilter, cbLogger);
 }
 
 namespace
@@ -541,6 +790,44 @@ namespace
 			return;
 		}
 		cbLogger(message.c_str());
+	}
+
+	bool write_csv_file(WtString filename, const std::string& content, FuncLogCallback cbLogger)
+	{
+		std::ofstream file(filename, std::ios::binary);
+		if (!file.is_open())
+		{
+			log_path_message(cbLogger, u8"数据文件", filename, u8"创建失败");
+			return false;
+		}
+		if (content.size() > static_cast<std::size_t>((std::numeric_limits<std::streamsize>::max)()))
+		{
+			log_path_message(cbLogger, u8"数据文件", filename, u8"写入失败");
+			return false;
+		}
+		file.write(content.data(), static_cast<std::streamsize>(content.size()));
+		file.flush();
+		const bool written = !file.fail();
+		file.close();
+		bool closed = !file.fail();
+#ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
+		if (g_fail_next_block_close_for_test)
+		{
+			g_fail_next_block_close_for_test = false;
+			closed = false;
+		}
+#endif
+		if (!written)
+		{
+			log_path_message(cbLogger, u8"数据文件", filename, u8"写入失败");
+			return false;
+		}
+		if (!closed)
+		{
+			log_path_message(cbLogger, u8"数据文件", filename, u8"关闭失败");
+			return false;
+		}
+		return true;
 	}
 
 	bool write_block_file(WtString filename, const std::string& content,
@@ -1249,6 +1536,7 @@ WtUInt32 resample_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCa
 	{
 		if (cbLogger)
 			cbLogger(fmtutil::format(u8"{}数据为空", barFile));
+		sInfo->release();
 		return 0;
 	}
 
@@ -1278,6 +1566,7 @@ WtUInt32 resample_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCa
 		//如果返回的K线的时间小于要查找的时间，说明没有符合条件的数据
 		if (cbLogger)
 			cbLogger(u8"没有找到指定时间范围的K线");
+		sInfo->release();
 		return 0;
 	}
 	else if (sIdx != 0 && ((isDay && pBar->date > bar.date) || (!isDay && pBar->time > bar.time)))
@@ -1315,18 +1604,34 @@ WtUInt32 resample_bars(WtString barFile, FuncGetBarsCallback cb, FuncCountDataCa
 
 	uint32_t hitCnt = eIdx - sIdx + 1;
 	WTSKlineSlice* slice = WTSKlineSlice::create("", kp, 1, &bars[sIdx], hitCnt);
+	// Decision K47=B (2026-11-05, BUG-I02-NEW-104): a resample needs a multiple greater
+	// than one. A same-period request (e.g. d -> d with times 1) is rejected with an
+	// explicit diagnostic instead of the generic resample failure below.
+	if (times <= 1)
+	{
+		if (cbLogger)
+			cbLogger(fmtutil::format(u8"重采样倍数{}无效：必须大于1，同周期重采样不受支持，请直接读取原始K线", times));
+		slice->release();
+		sInfo->release();
+		return 0;
+	}
 	WTSDataFactory fact;
 	WTSKlineData* kline = fact.extractKlineData(slice, kp, times, sInfo, true, bAlignSec);
 	if(kline == NULL)
 	{
 		if (cbLogger)
 			cbLogger(u8"K线重采样失败");
+		// BUG-I02-NEW-104 (z15 B): every failed return releases the session and slice.
+		slice->release();
+		sInfo->release();
 		return 0;
 	}
 
 	uint32_t newCnt = kline->size();
 	cbCnt(newCnt);
-	cb(&kline->getDataRef().at(0),newCnt, true);
+	// An empty result must not index element 0 (std::out_of_range would cross the C ABI).
+	if (newCnt > 0)
+		cb(&kline->getDataRef().at(0),newCnt, true);
 
 	if (cbLogger)
 		cbLogger(fmtutil::format(u8"{}重采样完成,共将{}条bar重采样为{}条新bar", barFile, hitCnt, newCnt));

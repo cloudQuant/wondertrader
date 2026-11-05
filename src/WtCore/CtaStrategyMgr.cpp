@@ -13,6 +13,7 @@
 #include "../Share/StdUtils.hpp"
 
 #include "../WTSTools/WTSLogger.h"
+#include "../Includes/IStrategyPluginV2.h"
 
 #include <filesystem>
 #include <system_error>
@@ -238,16 +239,34 @@ bool CtaStrategyMgr::loadFactories(const char* path)
 			return;
 		}
 
-		FuncCreateStraFact creator = (FuncCreateStraFact)DLLHelper::get_symbol(hInst, "createStrategyFact");
-		if (creator == NULL)
+		// Card 4b=A: only a validated versioned CTA table may create a factory.
+		// Legacy v1 creators/deleters are never called (unknown deleter ABI and
+		// stale inlined headers); the module is kept and refused instead.
+		const WtStrategyPluginApiV2* api = NULL;
+		std::string rejectReason;
+		const auto probe = wt_stra_plugin::probeModule(
+			[hInst](const char* symbol) { return DLLHelper::get_symbol(hInst, symbol); },
+			WT_STRA_PLUGIN_V2_FAMILY_CTA, api, rejectReason);
+		if (probe == wt_stra_plugin::ProbeResult::NotStrategyPlugin ||
+			probe == wt_stra_plugin::ProbeResult::ForeignFamily)
 		{
 			// dlopen may already have run module initializers and started work.
 			// Keep one reference: the ABI gives no way to establish quiescence.
+			if (probe == wt_stra_plugin::ProbeResult::ForeignFamily)
+				WTSLogger::warn("CTA strategy factory directory entry {} skipped: {}",
+					ctaPathForLog(modulePath.c_str()).c_str(), rejectReason.c_str());
 			guard.recordNoCreator();
 			return;
 		}
+		if (probe != wt_stra_plugin::ProbeResult::Accepted)
+		{
+			refusedFactory = true;
+			WTSLogger::error("CTA strategy plugin {} rejected: {}",
+				ctaPathForLog(modulePath.c_str()).c_str(), rejectReason.c_str());
+			return; // no creator ran: the module stays quarantined with its loader ref
+		}
 
-		ICtaStrategyFact* fact = creator();
+		ICtaStrategyFact* fact = static_cast<ICtaStrategyFact*>(api->create_factory());
 		guard.recordFactory(fact);
 		if (fact == NULL)
 		{
@@ -266,8 +285,11 @@ bool CtaStrategyMgr::loadFactories(const char* path)
 		StraFactInfo info{};
 		info._module_inst = hInst;
 		info._module_path = modulePath;
-		info._creator = creator;
-		info._remover = (FuncDeleteStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
+		// v1 entry points are deliberately not recorded; the manager never
+		// destroys CTA factories (they stay with their module until exit).
+		info._creator = NULL;
+		info._remover = NULL;
+		info._api = api;
 		info._fact = fact;
 		// WTSLogger formats into a fixed buffer. Bound only the displayed name;
 		// the full plugin-provided name remains the registration identity.

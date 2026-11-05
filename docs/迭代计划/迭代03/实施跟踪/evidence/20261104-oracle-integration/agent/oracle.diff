@@ -1,0 +1,682 @@
+--- /tmp/wt-i03-oracle-20261104/before/src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp	2026-11-02 14:04:11
++++ src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp	2026-11-04 08:46:49
+@@ -755,13 +755,20 @@
+ 	dump_bars(file("").c_str(), csvDir.c_str(), "", log_cb);
+ 	// srcFolder 用 standardisePath 归一化，直接传根目录
+ 	dump_bars(_root.string().c_str(), csvDir.c_str(), "", log_cb);
+-	const std::string brokenHeader = "文件" + file("broken.dsb") + "头部校验失败";
+-	const std::string secondBrokenHeader = "文件" + file("second_broken.dsb") + "头部校验失败";
+-	const std::string nonBarType = "文件" + file("tick_like.dsb") + "不是K线数据，跳过转换";
++	// BUG-L05-002 CSV 数据块识别（2026-11-03，见 fixtures/i03_csv_block_type_20261103）：解码前统一校验
++	// 文件标识/支持版本/K线类型/载荷长度，任一不符输出 "Invalid data block header: <文件>" 并跳过。
++	// 过短文件、非 K 线类型（tick 块）与载荷长度不整除的块都由该诊断报告，且必须带出对应文件名。
++	const std::string invalidHeader = "Invalid data block header: ";
++	const std::string brokenHeader = invalidHeader + file("broken.dsb");
++	const std::string secondBrokenHeader = invalidHeader + file("second_broken.dsb");
++	const std::string nonBarType = invalidHeader + file("tick_like.dsb");
++	const std::string malformedPayload = invalidHeader + file("malformed.dsb");
+ 	EXPECT_TRUE(any_log_has(brokenHeader.c_str())) << brokenHeader;
+ 	EXPECT_TRUE(any_log_has(secondBrokenHeader.c_str())) << secondBrokenHeader;
+ 	EXPECT_TRUE(any_log_has(nonBarType.c_str())) << nonBarType;
+-	EXPECT_TRUE(any_log_has("数据块校验失败"));
++	EXPECT_TRUE(any_log_has(malformedPayload.c_str())) << malformedPayload;
++	// 合法 K 线文件不得被误报
++	EXPECT_FALSE(any_log_has((invalidHeader + file("SHFE.rb2010.dsb")).c_str()));
+ 
+ 	const std::string csv = (std::filesystem::path(csvDir) / "SHFE.rb2010.csv").string();
+ 	ASSERT_TRUE(std::filesystem::exists(csv));
+@@ -790,7 +797,18 @@
+ 	log_sink().clear();
+ 	dump_bars(_root.string().c_str(), file("csv").c_str(), "", log_cb);
+ 	EXPECT_TRUE(any_log_has("写入完成"));
+-	EXPECT_TRUE(any_log_has("不是K线数据，跳过转换"));
++	// CSV 数据块识别（2026-11-03）：非 K 线类型改为输入错误（部分失败），带文件名的诊断，
++	// 且批次不再报告"全部导出完成"；有效文件仍照常导出。
++	const std::string nonBar = "Invalid data block header: " + file("not_bar.dsb");
++	EXPECT_TRUE(any_log_has(nonBar.c_str())) << nonBar;
++	EXPECT_FALSE(any_log_has("全部导出完成"));
++
++	// 只含有效 K 线输出的批次报告整体成功（本用例原意）。
++	ASSERT_TRUE(std::filesystem::remove(file("not_bar.dsb")));
++	log_sink().clear();
++	dump_bars(_root.string().c_str(), file("csv").c_str(), "", log_cb);
++	EXPECT_TRUE(any_log_has("写入完成"));
++	EXPECT_FALSE(any_log_has("Invalid data block header"));
+ 	EXPECT_TRUE(any_log_has("全部导出完成"));
+ }
+ 
+--- /tmp/wt-i03-oracle-20261104/before/src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp	2026-11-02 14:04:11
++++ src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp	2026-11-04 08:46:49
+@@ -497,11 +497,17 @@
+ 
+ 	const std::string csvDir = (_root / "tick_csv").string();
+ 	dump_ticks(_root.string().c_str(), csvDir.c_str(), "", t_log_cb);
+-	const std::string brokenHeader = "文件" + (_root / "broken.dsb").string() + "头部校验失败";
+-	const std::string secondBrokenHeader = "文件" + (_root / "second_broken.dsb").string() + "头部校验失败";
++	// BUG-L05-002 CSV 数据块识别（2026-11-03，见 fixtures/i03_csv_block_type_20261103）：解码前统一校验
++	// 文件标识/支持版本/tick 类型/载荷长度，不符输出 "Invalid data block header: <文件>" 并跳过。
++	const std::string invalidHeader = "Invalid data block header: ";
++	const std::string brokenHeader = invalidHeader + (_root / "broken.dsb").string();
++	const std::string secondBrokenHeader = invalidHeader + (_root / "second_broken.dsb").string();
++	const std::string malformedPayload = invalidHeader + file("malformed.dsb");
+ 	EXPECT_TRUE(t_any_log_has(brokenHeader.c_str())) << brokenHeader;
+ 	EXPECT_TRUE(t_any_log_has(secondBrokenHeader.c_str())) << secondBrokenHeader;
+-	EXPECT_TRUE(t_any_log_has("数据块校验失败"));
++	EXPECT_TRUE(t_any_log_has(malformedPayload.c_str())) << malformedPayload;
++	// 合法 tick 文件不得被误报
++	EXPECT_FALSE(t_any_log_has((invalidHeader + (_root / "SHFE.rb2010.dsb").string()).c_str()));
+ 	EXPECT_FALSE(t_any_log_has("全部导出完成"));
+ 
+ 	const std::string csv = (_root / "tick_csv" / "SHFE.rb2010.csv").string();
+--- /tmp/wt-i03-oracle-20261104/before/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp	2026-11-01 08:49:15
++++ src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp	2026-11-04 08:46:27
+@@ -313,6 +313,21 @@
+ 		+ "    span: 0\n    udp_port: 0\n";
+ }
+ 
++/*
++ * 卡8 8b=A（用户裁定，eager 全量预校验）：local/diff 执行器条目在任何副作用之前必须带
++ * 有限正数 scale，以及含 default 的 policy 对象，且每个 name 严格为 "<factory>.<unit>"
++ * （见 WtCore/ExecPolicyConfig.h、i03_exec_eager_validation_20261103/README.md）。
++ * 下面是满足该合同的最小合法参数（与该夹具 kI03Policy 相同的工厂/单元名）；单元是否可加载
++ * 仍在首次建单元时惰性 fail-closed，本 lane 不创建单元。dist 条目不在该校验范围，不追加。
++ */
++std::string exec_valid_params()
++{
++	return std::string("    scale: 1\n")
++		+ "    policy:\n"
++		+ "        default:\n"
++		+ "            name: WtExeFact.WtMinImpactExeUnit\n";
++}
++
+ } // namespace
+ 
+ /* =========================================================================
+@@ -333,9 +348,9 @@
+ 	 */
+ 	const std::string cfg = basefiles_block() + env_block() + tail_block()
+ 		+ "executers:\n"
+-		+ "-   id: r104wt_e_local\n    active: true\n    name: local\n    trader: r104wt_t1\n"
+-		+ "-   id: r104wt_e_diff\n    active: true\n    name: diff\n    trader: r104wt_t1\n"
+-		+ "-   id: r104wt_e_diff2\n    active: true\n    name: diff\n    trader: r104wt_absent\n"
++		+ "-   id: r104wt_e_local\n    active: true\n    name: local\n    trader: r104wt_t1\n" + exec_valid_params()
++		+ "-   id: r104wt_e_diff\n    active: true\n    name: diff\n    trader: r104wt_t1\n" + exec_valid_params()
++		+ "-   id: r104wt_e_diff2\n    active: true\n    name: diff\n    trader: r104wt_absent\n" + exec_valid_params()
+ 		+ "-   id: r104wt_e_dist\n    active: true\n    name: dist\n";
+ 	write_fixture("all_children.yaml", cfg);
+ 
+@@ -355,8 +370,8 @@
+ 	const std::string cfg = basefiles_block() + env_block() + tail_block()
+ 		+ "traders:\n" + one_trader_block("r104wt_trader_ok", 104101)
+ 		+ "executers:\n"
+-		+ "-   id: r104wt_exec_local_bound\n    active: true\n    name: local\n    trader: r104wt_trader_ok\n"
+-		+ "-   id: r104wt_exec_diff_bound\n    active: true\n    name: diff\n    trader: r104wt_trader_ok\n";
++		+ "-   id: r104wt_exec_local_bound\n    active: true\n    name: local\n    trader: r104wt_trader_ok\n" + exec_valid_params()
++		+ "-   id: r104wt_exec_diff_bound\n    active: true\n    name: diff\n    trader: r104wt_trader_ok\n" + exec_valid_params();
+ 	write_fixture("trader_success.yaml", cfg);
+ 
+ 	ASSERT_TRUE(runner.config(fixture("trader_success.yaml")))
+@@ -394,7 +409,7 @@
+ 	const std::string cfg = basefiles_block() + env_block() + tail_block()
+ 		+ "traders:\n" + one_trader_block("r104wt_trader_missing", 104102, "R104MissingTrader")
+ 		+ "executers:\n"
+-		+ "-   id: r104wt_exec_missing_trader\n    active: true\n    name: local\n    trader: r104wt_trader_missing\n";
++		+ "-   id: r104wt_exec_missing_trader\n    active: true\n    name: local\n    trader: r104wt_trader_missing\n" + exec_valid_params();
+ 	write_fixture("trader_missing.yaml", cfg);
+ 
+ 	EXPECT_FALSE(runner.config(fixture("trader_missing.yaml")));
+@@ -433,8 +448,8 @@
+ 		+ one_trader_block("r104wt_trader_first", 104103)
+ 		+ one_trader_block("r104wt_trader_second", 104104, "R104MissingTrader")
+ 		+ "executers:\n"
+-		+ "-   id: r104wt_exec_rollback_local\n    active: true\n    name: local\n    trader: r104wt_trader_first\n"
+-		+ "-   id: r104wt_exec_rollback_diff\n    active: true\n    name: diff\n    trader: r104wt_trader_first\n";
++		+ "-   id: r104wt_exec_rollback_local\n    active: true\n    name: local\n    trader: r104wt_trader_first\n" + exec_valid_params()
++		+ "-   id: r104wt_exec_rollback_diff\n    active: true\n    name: diff\n    trader: r104wt_trader_first\n" + exec_valid_params();
+ 	write_fixture("trader_rollback.yaml", cfg);
+ 
+ 	EXPECT_FALSE(runner.config(fixture("trader_rollback.yaml")));
+@@ -468,9 +483,9 @@
+ 	 */
+ 	const std::string cfg = basefiles_block() + env_block() + tail_block()
+ 		+ "executers:\n"
+-		+ "-   id: r104wt_e_default\n    active: true\n    scale: 1\n"
+-		+ "-   id: r104wt_e_local_absent\n    active: true\n    name: local\n    trader: r104wt_absent\n"
+-		+ "-   id: r104wt_e_diff2\n    active: true\n    name: diff\n"
++		+ "-   id: r104wt_e_default\n    active: true\n" + exec_valid_params()
++		+ "-   id: r104wt_e_local_absent\n    active: true\n    name: local\n    trader: r104wt_absent\n" + exec_valid_params()
++		+ "-   id: r104wt_e_diff2\n    active: true\n    name: diff\n" + exec_valid_params()
+ 		+ "-   id: r104wt_e_dist2\n    active: true\n    name: dist\n";
+ 	write_fixture("default_exec.yaml", cfg);
+ 
+@@ -490,7 +505,7 @@
+ 	 */
+ 	write_fixture("executers_side.yaml",
+ 		"executers:\n"
+-		"-   id: r104wt_e_side\n    active: true\n");
++		"-   id: r104wt_e_side\n    active: true\n" + exec_valid_params());
+ 	const std::string cfg = basefiles_block() + env_block() + tail_block()
+ 		+ "executers: " + fixture("executers_side.yaml") + "\n";
+ 	write_fixture("exec_side_cfg.yaml", cfg);
+--- /tmp/wt-i03-oracle-20261104/before/src/TestUnits/coverage/p05_datastorage2/l03_ad_bar_alignment_test.cpp	2026-11-02 16:05:34
++++ src/TestUnits/coverage/p05_datastorage2/l03_ad_bar_alignment_test.cpp	2026-11-04 08:44:34
+@@ -79,16 +79,30 @@
+ 	_writer->add_ext_dumper("record", &dumper);
+ 	auto tick = make_tick("ALGN", "rb02", 20240109, 20240109, 93100000, 90, 1, 10, 2, 1);
+ 	write_or_fail(tick_of(ct, tick), 0);
++	// 卡3 3c=C（用户裁定 2026-11-04，R4-BUG-13）：版本 1 的旧日线缓存由 writer 打开时原地迁移为
++	// time=0 并把头版本提升为 2；其余字段逐字节保留。分钟缓存不迁移，仍为版本 1、逐字节不变。
++	WTSBarStruct firstDay = first, secondDay = second;
++	firstDay.time = secondDay.time = 0;
++	EXPECT_EQ(read_head(path_of("cache_d1.dmb"))._version, (uint16_t)2);
++	EXPECT_EQ(read_head(path_of("cache_m1.dmb"))._version, (uint16_t)1);
++	EXPECT_EQ(read_head(path_of("cache_m5.dmb"))._version, (uint16_t)1);
+ 	for (const auto& entry : {std::pair<const char*, const char*>{"cache_d1.dmb", "d1"},
+ 		{"cache_m1.dmb", "m1"}, {"cache_m5.dmb", "m5"}})
+ 	{
++		const bool isDay = std::strcmp(entry.second, "d1") == 0;
++		const WTSBarStruct& firstExpected = isDay ? firstDay : first;
++		const WTSBarStruct& secondExpected = isDay ? secondDay : second;
+ 		const auto firstAfter = rawBarAt(path_of(entry.first), 0);
+ 		const auto secondAfter = rawBarAt(path_of(entry.first), 1);
+-		EXPECT_EQ(std::memcmp(&firstAfter, &first, sizeof(first)), 0);
++		EXPECT_EQ(std::memcmp(&firstAfter, &firstExpected, sizeof(first)), 0) << entry.second;
+ 		EXPECT_EQ(secondAfter.date, 20240109u);
++		if (isDay)
++		{
++			EXPECT_EQ(secondAfter.time, 0u) << "new day bar must carry time=0";
++		}
+ 		EXPECT_DOUBLE_EQ(secondAfter.close, 90);
+ 		ASSERT_EQ(dumper.values[entry.second].size(), 1u);
+-		EXPECT_EQ(std::memcmp(&dumper.values[entry.second][0], &second, sizeof(second)), 0);
++		EXPECT_EQ(std::memcmp(&dumper.values[entry.second][0], &secondExpected, sizeof(second)), 0) << entry.second;
+ 	}
+ 	_writer->release();
+ 	_writer.reset(); // Close each LMDB before opening it for readback.
+@@ -101,7 +115,9 @@
+ 		LMDBBarKey key("ALGN", "rb02", entry.second == std::string("d1") ? second.date : static_cast<uint32_t>(second.time));
+ 		const std::string value = query.get(&key, sizeof(key));
+ 		ASSERT_EQ(value.size(), sizeof(second));
+-		EXPECT_EQ(std::memcmp(value.data(), &second, sizeof(second)), 0);
++		// 跨日落库的 LMDB day 记录同样遵守 time=0（3c=C）；分钟记录逐字节等于原 bar
++		const WTSBarStruct& expected = entry.second == std::string("d1") ? secondDay : second;
++		EXPECT_EQ(std::memcmp(value.data(), &expected, sizeof(second)), 0) << entry.second;
+ 	}
+ }
+ 
+--- /tmp/wt-i03-oracle-20261104/before/src/TestUnits/coverage/p05_datastorage2/p05_btdtreader_ad_lmdb_test.cpp	2026-10-30 21:27:29
++++ src/TestUnits/coverage/p05_datastorage2/p05_btdtreader_ad_lmdb_test.cpp	2026-11-04 08:44:34
+@@ -384,7 +384,10 @@
+ 	for(size_t i = 0; i < bars.size(); i++)
+ 	{
+ 		EXPECT_EQ(out[i].date, bars[i].date) << i;
+-		EXPECT_EQ(out[i].time, bars[i].time) << i;
++		// 卡3 3c=C（用户裁定 2026-11-04，R4-BUG-13）：库内为旧 writer 写法 time=交易日，
++		// LMDB 值无逐条版本，读端一律把日线 time 归一为 0；其余字段逐项保留。
++		ASSERT_NE(bars[i].time, 0u) << i;
++		EXPECT_EQ(out[i].time, 0u) << i;
+ 		EXPECT_DOUBLE_EQ(out[i].open, bars[i].open) << i;
+ 		EXPECT_DOUBLE_EQ(out[i].high, bars[i].high) << i;
+ 		EXPECT_DOUBLE_EQ(out[i].low, bars[i].low) << i;
+@@ -949,6 +952,9 @@
+ 		ASSERT_TRUE(_reader->read_raw_bars("KEX", "valid2409", KP_DAY, buffer));
+ 		ASSERT_EQ(sizeof(WTSBarStruct), buffer.size());
+ 		const WTSBarStruct* out = reinterpret_cast<const WTSBarStruct*>(buffer.data());
++		EXPECT_EQ(20240601u, out->date);
++		// 3c=C：读端日线 time 归一为 0（库内 time=20240601）
++		EXPECT_EQ(0u, out->time);
+ 		EXPECT_DOUBLE_EQ(200.0, out->open);
+ 		EXPECT_EQ(0xA1B2C3D4u, out->reserve_);
+ 	}
+@@ -958,7 +964,8 @@
+ 		ASSERT_EQ(sizeof(WTSBarStruct), buffer.size());
+ 		const WTSBarStruct* out = reinterpret_cast<const WTSBarStruct*>(buffer.data());
+ 		EXPECT_EQ(20240603u, out->date);
+-		EXPECT_EQ(20240603u, out->time);
++		// 3c=C：旧 value ABI 转换后日线 time 同样归一为 0（库内 time=20240603）
++		EXPECT_EQ(0u, out->time);
+ 		EXPECT_DOUBLE_EQ(150.0, out->open);
+ 		EXPECT_DOUBLE_EQ(152.0, out->high);
+ 		EXPECT_DOUBLE_EQ(149.0, out->low);
+@@ -976,7 +983,8 @@
+ 		ASSERT_EQ(sizeof(WTSBarStruct), buffer.size());
+ 		const WTSBarStruct* out = reinterpret_cast<const WTSBarStruct*>(buffer.data());
+ 		EXPECT_EQ(20240605u, out->date);
+-		EXPECT_EQ(20240605u, out->time);
++		// 3c=C：packed v2 value 转换后日线 time 归一为 0（库内 time=20240605）
++		EXPECT_EQ(0u, out->time);
+ 		EXPECT_DOUBLE_EQ(170.0, out->open);
+ 		EXPECT_DOUBLE_EQ(172.0, out->high);
+ 		EXPECT_DOUBLE_EQ(169.0, out->low);
+--- /tmp/wt-i03-oracle-20261104/before/src/TestUnits/coverage/p05_datastorage2/r4_writer_ad_cache_test.cpp	2026-10-31 18:14:10
++++ src/TestUnits/coverage/p05_datastorage2/r4_writer_ad_cache_test.cpp	2026-11-04 08:44:03
+@@ -34,7 +34,8 @@
+ }
+ #endif
+ 
+-// d1 缓存项的 time 字段被写成交易日本身（WtDataWriterAD.cpp:601/620）
++// 交易日常量。卡3 3c=C（用户裁定 2026-11-04，R4-BUG-13）：d1 缓存项 date=交易日、time=0；
++// 新建 cache_d1.dmb 头版本为 2（BLOCK_VERSION_DAY_T0），tick/m1/m5 缓存仍为版本 1。
+ static const uint32_t R4_TD1 = 20230103;
+ static const uint32_t R4_TD2 = 20230104;
+ // 09:30 的 tick → minutes=30 → barMins=31 → minuteToTime(31)：540+31=571 分 = 09:31
+@@ -81,7 +82,9 @@
+ 		// L146/187/228/269：strcpy(_blk_flag, BLK_FLAG) 拷 7 字符 + 结尾 0，共 FLAG_SIZE=8 字节
+ 		EXPECT_EQ(std::memcmp(head._blk_flag, BLK_FLAG, FLAG_SIZE), 0) << name;
+ 		EXPECT_EQ(head._type, (uint16_t)BT_RT_Cache) << name;
+-		EXPECT_EQ(head._version, (uint16_t)1) << name;
++		// 卡3 3c=C：新建日线缓存写版本 2（全部条目 time=0 的版本标记），其余缓存保持版本 1
++		const uint16_t expect_version = (std::strcmp(name, "cache_d1.dmb") == 0) ? (uint16_t)2 : (uint16_t)1;
++		EXPECT_EQ(head._version, expect_version) << name;
+ 		EXPECT_EQ(head._size, 0u) << name;
+ 		EXPECT_EQ(head._capacity, R4_INIT_CAP) << name;
+ 	}
+@@ -185,6 +188,7 @@
+ 		BadFlag,
+ 		BadType,
+ 		BadVersion,
++		DayVersionOnMinuteCache,
+ 		SizeExceedsCapacity,
+ 		PayloadShorterThanCapacity,
+ 		ExtremeCapacity
+@@ -199,7 +203,10 @@
+ 		{"short_header", "cache_tick.dmb", Corruption::ShortHeader},
+ 		{"bad_flag", "cache_m1.dmb", Corruption::BadFlag},
+ 		{"bad_type", "cache_m5.dmb", Corruption::BadType},
++		// 卡3 3c=C：日线缓存只接受版本 1/2，未知版本（3）仍 fail-closed
+ 		{"bad_version", "cache_d1.dmb", Corruption::BadVersion},
++		// 版本 2 只对日线缓存有效：分钟缓存出现版本 2 仍按非法版本拒绝
++		{"day_version_on_minute_cache", "cache_m1.dmb", Corruption::DayVersionOnMinuteCache},
+ 		{"size_over_capacity", "cache_tick.dmb", Corruption::SizeExceedsCapacity},
+ 		{"payload_short", "cache_m1.dmb", Corruption::PayloadShorterThanCapacity},
+ 		{"extreme_capacity", "cache_m5.dmb", Corruption::ExtremeCapacity}
+@@ -243,6 +250,9 @@
+ 				header._type = 0;
+ 				break;
+ 			case Corruption::BadVersion:
++				header._version = 3;
++				break;
++			case Corruption::DayVersionOnMinuteCache:
+ 				header._version = 2;
+ 				break;
+ 			case Corruption::SizeExceedsCapacity:
+@@ -896,8 +906,9 @@
+ 	ASSERT_TRUE(read_bar_item(path_of("cache_m5.dmb"), "EXBC", "rb2301", m5));
+ 
+ 	EXPECT_EQ(d1._bar.date, R4_TD1);
+-	// L601/620：day bar 的 time 被写成 barDate = tradingdate
+-	EXPECT_EQ(d1._bar.time, (uint64_t)R4_TD1);
++	// 卡3 3c=C（R4-BUG-13）：新日线 time=0，交易日只在 date 中
++	EXPECT_EQ(d1._bar.time, (uint64_t)0);
++	EXPECT_EQ(read_head(path_of("cache_d1.dmb"))._version, (uint16_t)2);
+ 	EXPECT_DOUBLE_EQ(d1._bar.open, 3900.0);
+ 	EXPECT_DOUBLE_EQ(d1._bar.vol, 10.0);
+ 	EXPECT_EQ(m1._bar.time, (uint64_t)R4_M1_931);
+--- /tmp/wt-i03-oracle-20261104/before/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp	2026-11-02 13:20:18
++++ src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp	2026-11-04 08:42:54
+@@ -745,58 +745,123 @@
+ 		}
+ 	}
+ 
+-	TEST_F(R60MockerTest, same_instance_reinitializes_and_delivers_each_connect)
++	/// Card 9c=A (user decision, see 决策积压清单 card 9): an initialized TraderMocker
++	/// rejects every further init() and keeps its original configuration; once
++	/// released it is terminal (no re-init, no re-connect). A new lifecycle
++	/// therefore uses a fresh instance. Both tests below keep their original
++	/// intent (each lifecycle delivers exactly its own connect event and frees its
++	/// resources; nothing issued against a released lifecycle reaches a later one).
++	WTSVariant* r60_lifecycle_cfg(uint32_t mockerId, uint16_t port)
++	{
++		WTSVariant* cfg = WTSVariant::createObject();
++		cfg->append("span", 5);
++		cfg->append("newpx", true);
++		cfg->append("mockerid", mockerId);
++		cfg->append("maxqty", 10);
++		cfg->append("minqty", 1);
++		cfg->append("udp_port", port);
++		return cfg;
++	}
++
++	uint16_t pick_other_free_udp_port(uint16_t used)
+ 	{
++		uint16_t port = pick_free_udp_port();
++		for (int attempt = 0; port == used && attempt < 16; ++attempt)
++			port = pick_free_udp_port();
++		return port;
++	}
++
++	TEST_F(R60MockerTest, same_instance_rejects_reinit_and_fresh_instances_deliver_each_connect)
++	{
+ 		(void)pick_free_udp_port();
+ 		const std::vector<int> baselineFds = open_fd_snapshot();
+ 		std::vector<int> warmedFds;
++		R60MockerSink sink;
++		for (int cycle = 0; cycle != 2; ++cycle)
+ 		{
+-			R60MockerSink sink;
+-			TraderMocker api;
+-			api.registerSpi(&sink);
+-			for (int cycle = 0; cycle != 2; ++cycle)
+ 			{
++				TraderMocker api;
++				api.registerSpi(&sink);
+ 				const uint16_t port = pick_free_udp_port();
+-				WTSVariant* cfg = WTSVariant::createObject();
+-				cfg->append("span", 5);
+-				cfg->append("newpx", true);
+-				cfg->append("mockerid", 9690);
+-				cfg->append("maxqty", 10);
+-				cfg->append("minqty", 1);
+-				cfg->append("udp_port", port);
++				const uint16_t otherPort = pick_other_free_udp_port(port);
++				ASSERT_NE(port, otherPort);
++				WTSVariant* cfg = r60_lifecycle_cfg(9690, port);
+ 				const bool initialized = api.init(cfg);
+ 				cfg->release();
+-				ASSERT_TRUE(initialized);
++				ASSERT_TRUE(initialized) << "cycle " << cycle;
++
++				// 9c: a repeated init on the live instance is rejected and must not
++				// replace the first configuration (connect below must bind `port`).
++				WTSVariant* otherCfg = r60_lifecycle_cfg(9690, otherPort);
++				EXPECT_FALSE(api.init(otherCfg)) << "repeated init accepted in cycle " << cycle;
++				otherCfg->release();
++
+ 				const uint32_t previousEvents = sink.n_event();
+ 				api.connect();
+ 				const bool connected = wait_until([&]() { return sink.n_event() == previousEvents + 1; });
+ 				EXPECT_TRUE(connected) << "connect event was not delivered in cycle " << cycle;
+-				EXPECT_EQ(boost::asio::error::address_in_use, try_bind_udp_port(port));
++				EXPECT_EQ(boost::asio::error::address_in_use, try_bind_udp_port(port)) << "cycle " << cycle;
++				EXPECT_FALSE(try_bind_udp_port(otherPort)) << "rejected init replaced udp_port in cycle " << cycle;
+ 				api.release();
+ 				api.release();
+-				EXPECT_FALSE(try_bind_udp_port(port));
+-				if (cycle == 0)
+-					warmedFds = open_fd_snapshot();
+-				else
+-					EXPECT_EQ(warmedFds, open_fd_snapshot());
++				EXPECT_FALSE(try_bind_udp_port(port)) << "cycle " << cycle;
++
++				// 9c: the released instance stays terminal. init is rejected; connect
++				// neither re-binds the port nor delivers another connect event.
++				WTSVariant* againCfg = r60_lifecycle_cfg(9690, port);
++				EXPECT_FALSE(api.init(againCfg)) << "released instance re-initialized in cycle " << cycle;
++				againCfg->release();
++				const uint32_t releasedEvents = sink.n_event();
++				EXPECT_EQ(previousEvents + 1, releasedEvents) << "cycle " << cycle;
++				api.connect();
++				EXPECT_FALSE(try_bind_udp_port(port)) << "released instance re-bound its port in cycle " << cycle;
++				EXPECT_FALSE(wait_until([&]() { return sink.n_event() != releasedEvents; }, 200))
++					<< "released instance delivered another connect event in cycle " << cycle;
+ 			}
++			if (cycle == 0)
++				warmedFds = open_fd_snapshot();
++			else
++				EXPECT_EQ(warmedFds, open_fd_snapshot());
+ 		}
++		EXPECT_EQ(2u, sink.n_event()) << "each fresh lifecycle must deliver exactly one connect event";
+ 		EXPECT_EQ(baselineFds, open_fd_snapshot());
+ 	}
+ 
+-	TEST_F(R60MockerTest, released_instance_does_not_deliver_old_queued_query_after_reinit)
++	TEST_F(R60MockerTest, released_instance_rejects_reinit_and_old_query_never_reaches_new_lifecycle)
+ 	{
+-		init_api(9691, pick_free_udp_port());
++		const uint16_t firstPort = pick_free_udp_port();
++		init_api(9691, firstPort);
+ 		connect_api();
+ 		api_.release();
+ 
+-		// The existing API accepts this post while its io_context is stopped.
+-		// A later lifecycle must never deliver it to the current listener.
+-		api_.queryAccount();
+-		init_api(9691, pick_free_udp_port());
++		// After release, admission is closed: the query is rejected instead of being
++		// posted to the stopped io_context, and the instance cannot be revived.
++		EXPECT_EQ(-1, api_.queryAccount());
++		WTSVariant* reinitCfg = r60_lifecycle_cfg(9691, firstPort);
++		EXPECT_FALSE(api_.init(reinitCfg)) << "released instance accepted re-initialization";
++		reinitCfg->release();
+ 		api_.connect();
++		EXPECT_FALSE(try_bind_udp_port(firstPort)) << "released instance re-bound its port";
++
++		// The later lifecycle is a fresh instance delivering to the same listener.
++		TraderMocker fresh;
++		fresh.registerSpi(&sink_);
++		WTSVariant* freshCfg = r60_lifecycle_cfg(9691, pick_free_udp_port());
++		const bool initialized = fresh.init(freshCfg);
++		freshCfg->release();
++		ASSERT_TRUE(initialized);
++		fresh.connect();
+ 		ASSERT_TRUE(wait_until([this]() { return sink_.n_event() == 2; }));
+-		EXPECT_EQ(0u, sink_.n_account()) << "a query queued while released crossed into the new lifecycle";
++		EXPECT_FALSE(wait_until([this]() { return sink_.n_account() != 0 || sink_.n_event() != 2; }, 200));
++		EXPECT_EQ(0u, sink_.n_account()) << "a query issued while released crossed into the new lifecycle";
++		EXPECT_EQ(2u, sink_.n_event()) << "the released instance delivered another connect event";
++
++		// Positive control: the new lifecycle's own query is delivered exactly once.
++		EXPECT_EQ(0, fresh.queryAccount());
++		EXPECT_TRUE(wait_until([this]() { return sink_.n_account() == 1; }));
++		EXPECT_FALSE(wait_until([this]() { return sink_.n_account() > 1; }, 200));
++		EXPECT_EQ(1u, sink_.n_account());
++		fresh.release();
+ 	}
+ 
+ 	TEST_F(R60MockerTest, release_reentered_from_connect_callback_does_not_terminate)
+--- /tmp/wt-i03-oracle-20261104/before/src/TestUnits/fixtures/i03_leaks_main_20261104/run_cases.py	2026-11-04 08:13:27
++++ src/TestUnits/fixtures/i03_leaks_main_20261104/run_cases.py	2026-11-04 08:47:45
+@@ -2,10 +2,13 @@
+ """Run gtest cases one per process in scratch cwd; record argv/exit/xml counts.
+ usage: run_cases.py <cases.json> <results.json>
+ cases.json: [{"id": "...", "name": "...", "bin": "...", "filter": "...", "env": {...}, "timeout": 300}]
++Output root: $WT_I03_LEAKS_ROOT (default /tmp/wt-i03-leaks-20261104) / run / <id> / <name>.
++A missing/non-executable binary is recorded as exit 127 (perl exec failure is no longer
++silent), and the script exits 2 when any case is missing its XML output.
+ """
+ import json, os, subprocess, sys, xml.etree.ElementTree as ET
+ 
+-R = "/tmp/wt-i03-leaks-20261104"
++R = os.environ.get("WT_I03_LEAKS_ROOT", "/tmp/wt-i03-leaks-20261104")
+ cases = json.load(open(sys.argv[1]))
+ out = []
+ for c in cases:
+@@ -14,7 +17,7 @@
+     xml = os.path.join(d, "result.xml")
+     if os.path.exists(xml):
+         os.remove(xml)
+-    argv = ["perl", "-e", "alarm %d; exec @ARGV" % c.get("timeout", 300), "--",
++    argv = ["perl", "-e", "alarm %d; exec @ARGV or exit 127" % c.get("timeout", 300), "--",
+             c["bin"], "--gtest_filter=" + c["filter"], "--gtest_output=xml:" + xml]
+     env = dict(os.environ)
+     env["TMPDIR"] = d + "/"
+@@ -27,7 +30,7 @@
+     with open(os.path.join(d, "output.log"), "wb") as f:
+         p = subprocess.run(argv, cwd=d, env=env, stdout=f, stderr=subprocess.STDOUT)
+     rec = {"id": c["id"], "name": c["name"], "argv": argv, "cwd": d, "exit": p.returncode,
+-           "env_overrides": c.get("env", {})}
++           "env_overrides": c.get("env", {}), "bin_exists": os.access(c["bin"], os.X_OK)}
+     if os.path.exists(xml):
+         r = ET.parse(xml).getroot()
+         rec["xml"] = {k: r.get(k) for k in ("tests", "failures", "disabled", "errors", "skipped")}
+@@ -37,3 +40,8 @@
+     out.append(rec)
+     print("%s %s exit=%s xml=%s" % (c["id"], c["name"], p.returncode, rec["xml"]), flush=True)
+ json.dump(out, open(sys.argv[2], "w"), ensure_ascii=False, indent=1)
++missing = [r["id"] + "/" + r["name"] for r in out if r["xml"] is None]
++print("cases=%d xml_missing=%d nonzero_exit=%d" % (len(out), len(missing), sum(1 for r in out if r["exit"] != 0)), flush=True)
++if missing:
++    print("XML missing: " + ", ".join(missing), flush=True)
++    sys.exit(2)
+--- /tmp/wt-i03-oracle-20261104/before/src/TestUnits/fixtures/t26_fees_atomic/fee_probe.cpp	2026-11-02 18:41:55
++++ src/TestUnits/fixtures/t26_fees_atomic/fee_probe.cpp	2026-11-04 08:50:28
+@@ -1,4 +1,5 @@
+ #include "CTPLoader/TraderSpi.h"
++#include <chrono>
+ #include <cmath>
+ #include <cstring>
+ #include <iostream>
+@@ -31,6 +32,24 @@
+   }
+   static void load(CTraderSpi& spi) { spi.LoadFromJson(); }
+   static void tradingDay(CTraderSpi& spi, int day) { spi._trading_day=day; }
++#ifdef WT_T26_PROBE_ARM_REQUESTS
++  // 2026-11-04: the current CTPLoader (T26-011 request tracking + card 14, 14c=C) accepts
++  // fee callbacks only for an in-flight request ID while QRYFEES is set, and fails a
++  // request whose terminal frame arrives without any payload row. Register exactly the
++  // IDs this probe injects (sent and SDK-returned, as BeginFeeQuery/FinishFeeSubmission
++  // would). Only the current-code builds define this macro; the baseline/unit-baseline
++  // red controls compile the original probe flow unchanged.
++  static void arm(CTraderSpi& spi, int id, bool commission, bool sealed, const char* code) {
++    std::lock_guard<std::mutex> lock(spi._mtx);
++    spi._fee_batch_active=true; spi._fee_batch_sealed=sealed;
++    CTraderSpi::FeeQueryState state{};
++    state.kind=commission ? CTraderSpi::FeeQueryKind::Commission : CTraderSpi::FeeQueryKind::Margin;
++    state.callReturned=true;
++    state.deadline=std::chrono::steady_clock::now()+std::chrono::minutes(1);
++    state.code=code;
++    spi._fee_requests.emplace(id,std::move(state));
++  }
++#endif
+ };
+ 
+ template<size_t N> void set(char (&out)[N], const char* value) {
+@@ -48,10 +67,10 @@
+   set(f.InstrumentID, code); f.OpenRatioByVolume=value; f.CloseRatioByVolume=value;
+   f.CloseTodayRatioByVolume=value; spi.OnRspQryInstrumentCommissionRate(&f,nullptr,2,false);
+ }
+-void margin(CTraderSpi& spi, const char* code, double value) {
++void margin(CTraderSpi& spi, const char* code, double value, int id=3, bool last=false) {
+   CThostFtdcInstrumentMarginRateField f{};
+   set(f.InstrumentID,code); f.LongMarginRatioByMoney=value; f.ShortMarginRatioByMoney=value;
+-  spi.OnRspQryInstrumentMarginRate(&f,nullptr,3,false);
++  spi.OnRspQryInstrumentMarginRate(&f,nullptr,id,last);
+ }
+ int main(int argc,char** argv) {
+   if(argc!=3) return 99;
+@@ -80,13 +99,26 @@
+     if(mode=="loaded_fee_conflict") commission(spi,"SR2510",0.50);
+     margin(spi,"SR510",0.15);
+     if(mode=="loaded_duplicate_margin") margin(spi,"SR2510",0.15);
+-    QRYFEES=true; spi.OnRspQryInstrumentMarginRate(nullptr,nullptr,4,true);
++    QRYFEES=true;
++#ifdef WT_T26_PROBE_ARM_REQUESTS
++    // 14c: request 4 carries one row (identical to the staged SR510 margin) before the
++    // original empty terminal frame, so the batch is not an empty response.
++    CTraderSpiQueueTestAccess::arm(spi,4,false,true,"SR510");
++    margin(spi,"SR510",0.15,4,false);
++#endif
++    spi.OnRspQryInstrumentMarginRate(nullptr,nullptr,4,true);
+     return 97;
+   }
+   instrument(spi,"rb2510","rb"); instrument(spi,"au2512","au");
+   if(_contracts.size()!=2) { std::cerr << "instrument setup failed\n"; return 98; }
+   commission(spi,"rb2510",0.0); commission(spi,"au",-0.25);
++#ifdef WT_T26_PROBE_ARM_REQUESTS
++  // filter publishes rb2510 from the terminal row (0.20): stage the same value, because the
++  // current code rejects two different values for one key (no assertion reads this margin).
++  margin(spi,"rb2510",mode=="filter"?0.20:0.10); margin(spi,"au2512",0.20);
++#else
+   margin(spi,"rb2510",0.10); margin(spi,"au2512",0.20);
++#endif
+   if(mode.rfind("units_",0)==0 || mode.rfind("nan_field_",0)==0 || mode.rfind("sentinel_fee_",0)==0) {
+     CThostFtdcInstrumentCommissionRateField f{}; set(f.InstrumentID,"rb2510");
+     if(mode=="units_mixed_open_volume") { f.OpenRatioByVolume=1; f.CloseRatioByMoney=0.01; }
+@@ -159,16 +191,29 @@
+   QRYFEES=true;
+   if(mode=="earlier_error" || mode=="earlier_margin_error") {
+     CTraderSpiQueueTestAccess::add(spi);
++#ifdef WT_T26_PROBE_ARM_REQUESTS
++    CTraderSpiQueueTestAccess::arm(spi,8,mode=="earlier_error",false,"");
++#endif
+     CThostFtdcRspInfoField err{}; err.ErrorID=8;
+     if(mode=="earlier_error") spi.OnRspQryInstrumentCommissionRate(nullptr,&err,8,true);
+     else spi.OnRspQryInstrumentMarginRate(nullptr,&err,8,true);
+     CTraderSpiQueueTestAccess::clear(spi);
+   }
++#ifdef WT_T26_PROBE_ARM_REQUESTS
++  CTraderSpiQueueTestAccess::arm(spi,4,mode=="response_error",true,mode=="filter"?"rb2510":"au2512");
++#endif
+   if(mode=="response_error") {
+     CThostFtdcRspInfoField err{}; err.ErrorID=7;
+     spi.OnRspQryInstrumentCommissionRate(nullptr,&err,4,true);
+   } else if (mode=="empty_terminal" || mode=="empty_data") {
+     // A successful terminal empty payload is legal after earlier records.
++#ifdef WT_T26_PROBE_ARM_REQUESTS
++    // 14c: the earlier record must belong to the same request. Deliver one non-terminal
++    // row identical to the staged au2512 margin; empty_data then re-empties the margin
++    // table so DumpFees still sees no margin data, as before.
++    margin(spi,"au2512",0.20,4,false);
++    if(mode=="empty_data") _margins.clear();
++#endif
+     spi.OnRspQryInstrumentMarginRate(nullptr,nullptr,4,true);
+   } else {
+     CThostFtdcInstrumentMarginRateField f{};
+--- /tmp/wt-i03-oracle-20261104/before/src/TestUnits/fixtures/t26_fees_atomic/README.md	2026-11-02 18:44:48
++++ src/TestUnits/fixtures/t26_fees_atomic/README.md	2026-11-04 08:52:23
+@@ -21,3 +21,13 @@
+ **消费键尚未闭合**：真实 `CodeHelper::extractStdCode("SHFE.rb.2510")` 产生商品键 `SHFE.rb`；本夹具生成的文件键为 `SHFE.rb2510`。仓内 `WtEngine::calc_fee` 和 `HisDataReplayer::calc_fee` 都按 `stdCommID()` 商品键查找；前者加载时还按商品键查基础数据，后者在缺键时返回零。该对照重现键不匹配，但没有运行当前完整消费者对象链；本次未改变文件键格式，不证明生成文件可用于端到端费率计算。
+ 
+ 写/flush/close/替换前的受控 hook 只编译在隔离测试目标；真实 `RLIMIT_FSIZE` 测试另行触发文件大小限制。已有/无旧文件、只读文件、0600 模式和目录型目标均覆盖，失败场景核对旧文件或目录及临时文件；注入的 close 并非真实内核关闭故障，替换前 hook 也不是实际 rename 的系统错误。最初构建曾因预包含 fmt 前缺少 stdlib 失败，隔离脚本第一次还缺少 FasterLibs；修正构建命令后重跑，不计前两次通过。没有检查真实磁盘故障、真实 SDK、Linux/Windows、整树构建或完整回归。
++
++## 2026-11-04 适配当前 CTPLoader（夹具输入调整，验证内容不变）
++
++2026-11-02 之后 `TraderSpi` 又经 T26-011（请求号在途跟踪）与卡14（14c=C：请求终帧时该请求 0 行即空响应，fail-closed）修改，原 `run.sh` 对工作区文件反向打补丁失败，未登记请求号的探针在 `valid` 等例中走到 `return 97`。本次只改夹具：
++
++- `run.sh`：红控不再对移动中的工作区反向打补丁。`baseline` 取不可变提交 `ccaad010` 的 `TraderSpi.{cpp,h}`（哈希 `dc2a4e9c…`/`edc91a5c…`，与 2026-11-02 反向补丁所得基线一致）；`unit-baseline` 由该基线正向应用 `evidence-20261102` 的两个 T26-007 补丁（校验得 2026-11-02 候选 `065f27b0…`/`903cea67…`），再反向应用单位补丁（校验 `20f3627d…`/`903cea67…`）。任何哈希不符即退出。当前代码仍取自工作区。
++- `fee_probe.cpp`：新增仅在当前代码构建（normal/asan，`-DWT_T26_PROBE_ARM_REQUESTS`）生效的请求登记：按 `BeginFeeQuery`/`FinishFeeSubmission` 的状态登记探针注入的请求号 4/8；`loaded_*`、`empty_terminal`、`empty_data` 在原有空终帧之前，向同一请求补一行与已暂存数据完全相同的非终帧（`empty_data` 随后仍清空保证金表，失败原因仍为 "no margin records were received"）；`filter` 暂存 rb2510 保证金与终帧同值（当前代码拒绝同键不同值，断言不读该值）。baseline/unit-baseline 不定义该宏，探针流程与 2026-11-02 逐字相同。
++- `run_tests.py`、`consumer_key_probe.cpp` 未改。
++
++结果（`evidence-20261104/`，HEAD `ccaad010`，当前 `TraderSpi.cpp` `85bc0dbb…`、`.h` `7b434cc9…`）：`run.sh` exit 0；普通 75/75、ASan/UBSan 75/75；`results.txt` 与 2026-11-02 逐字节相同（含 18 项单位红控与 5 项基线红控的退出码）；商品键与合约键不匹配对照仍存在。上述"非终帧+空终帧"只证明当前代码在同一请求先有数据时接受空终帧，不是真实 SDK 空结果表达的证据（14c 仍为 X）。限制同上文：非端到端 SDK 查询、无 Windows/Linux、无完整回归。
+--- /tmp/wt-i03-oracle-20261104/before/src/TestUnits/fixtures/t26_fees_atomic/run.sh	2026-11-02 18:34:23
++++ src/TestUnits/fixtures/t26_fees_atomic/run.sh	2026-11-04 08:50:51
+@@ -11,14 +11,36 @@
+ cp src/CTPLoader/TraderSpi.cpp src/CTPLoader/TraderSpi.h "$out/current/CTPLoader/"
+ cp -RL "$out/current/" "$out/baseline/"
+ cp -RL "$out/current/" "$out/unit-baseline/"
+-patch -s -R -p1 -d "$out/baseline" < src/TestUnits/fixtures/t26_fees_atomic/evidence-20261102/TraderSpi.cpp.patch
+-patch -s -R -p1 -d "$out/baseline" < src/TestUnits/fixtures/t26_fees_atomic/evidence-20261102/TraderSpi.h.patch
+-patch -s -R -p1 -d "$out/unit-baseline" < src/TestUnits/fixtures/t26_fees_atomic/evidence-20261102/TraderSpi.units.patch
++# 2026-11-04: the working-tree CTPLoader moved on after 2026-11-02 (T26-011 request tracking,
++# card 14), so reverse-applying the stored patches to it no longer works. Rebuild both red
++# controls from immutable inputs instead and verify them against the 2026-11-02 hashes:
++#   baseline      = TraderSpi.{cpp,h} at checkpoint ccaad010 (identical to the 2026-11-02
++#                   reverse-patched baseline, dc2a4e9c... / edc91a5c...);
++#   unit-baseline = baseline + forward T26-007 patches (= 2026-11-02 candidate, 065f27b0... /
++#                   903cea67...), then the units patch reversed (20f3627d... / 903cea67...).
++ev=src/TestUnits/fixtures/t26_fees_atomic/evidence-20261102
++base_commit=ccaad010e9169f610aded4d8dc0f5647f70a5cff
++check() { [ "$(shasum -a 256 "$1" | cut -d' ' -f1)" = "$2" ] || { echo "hash mismatch: $1" >&2; exit 1; }; }
++git show "$base_commit:src/CTPLoader/TraderSpi.cpp" > "$out/baseline/CTPLoader/TraderSpi.cpp"
++git show "$base_commit:src/CTPLoader/TraderSpi.h" > "$out/baseline/CTPLoader/TraderSpi.h"
++check "$out/baseline/CTPLoader/TraderSpi.cpp" dc2a4e9c522612bd0d6aa9fefd83a6c36b2e8820c9db3389d7ad41a526cd7d31
++check "$out/baseline/CTPLoader/TraderSpi.h" edc91a5cf58ce3341734896491168554039800bb4385d81d9f9274cf92422553
++cp "$out/baseline/CTPLoader/TraderSpi.cpp" "$out/baseline/CTPLoader/TraderSpi.h" "$out/unit-baseline/CTPLoader/"
++patch -s -p1 -d "$out/unit-baseline" < "$ev/TraderSpi.cpp.patch"
++patch -s -p1 -d "$out/unit-baseline" < "$ev/TraderSpi.h.patch"
++check "$out/unit-baseline/CTPLoader/TraderSpi.cpp" 065f27b0775033387dbc64ae0a8ac1a1ec6a6a3bfe96e20c80f5e1fc880acd07
++check "$out/unit-baseline/CTPLoader/TraderSpi.h" 903cea6794c9f579c1811f3474874f2c67ff0544429469f6886d16f375c8f69c
++patch -s -R -p1 -d "$out/unit-baseline" < "$ev/TraderSpi.units.patch"
++check "$out/unit-baseline/CTPLoader/TraderSpi.cpp" 20f3627dca70853f8d3d612f6210c795e2f35cb19a1a08c6c429b6e466593ba0
++check "$out/unit-baseline/CTPLoader/TraderSpi.h" 903cea6794c9f579c1811f3474874f2c67ff0544429469f6886d16f375c8f69c
++find "$out/baseline/CTPLoader" "$out/unit-baseline/CTPLoader" -name '*.orig' -delete
++shasum -a 256 "$out"/{current,baseline,unit-baseline}/CTPLoader/TraderSpi.{cpp,h} > "$out/variant-sources.sha256"
+ sources=(src/CTPLoader/TraderSpi.cpp src/CTPLoader/TraderSpi.h
+  src/TestUnits/fixtures/t26_fees_atomic/fee_probe.cpp
+  src/TestUnits/fixtures/t26_fees_atomic/consumer_key_probe.cpp
+  src/TestUnits/fixtures/t26_fees_atomic/run_tests.py
+- src/TestUnits/fixtures/t26_fees_atomic/run.sh)
++ src/TestUnits/fixtures/t26_fees_atomic/run.sh
++ "$ev/TraderSpi.cpp.patch" "$ev/TraderSpi.h.patch" "$ev/TraderSpi.units.patch")
+ shasum -a 256 "${sources[@]}" > "$out/source-before.sha256"
+ compiler=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++
+ for variant in baseline unit-baseline normal asan; do
+@@ -26,6 +48,8 @@
+  if [[ $variant = baseline ]]; then snap="$out/baseline"; fi
+  if [[ $variant = unit-baseline ]]; then snap="$out/unit-baseline"; fi
+  if [[ $variant != baseline ]]; then flags+=(-DWT_T26_FEES_TEST_HOOKS); fi
++ # current-code builds only: the probe registers its injected request IDs (see fee_probe.cpp)
++ if [[ $variant = normal || $variant = asan ]]; then flags+=(-DWT_T26_PROBE_ARM_REQUESTS); fi
+  if [[ $variant = asan || $variant = baseline || $variant = unit-baseline ]]; then flags+=(-fsanitize=address,undefined -fno-omit-frame-pointer); fi
+  args=(-std=c++17 -g -O1 -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -include stdlib.h
+   -include "$snap/Share/fmt_enum_compat.h" -I"$snap"

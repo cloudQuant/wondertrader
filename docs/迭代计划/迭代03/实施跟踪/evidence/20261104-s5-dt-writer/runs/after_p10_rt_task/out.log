@@ -1,0 +1,98 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = P10RtBlockTest.*:P10TaskQueueTest.*:P10DayDsbTest.*
+[==========] Running 41 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 14 tests from P10DayDsbTest
+[ RUN      ] P10DayDsbTest.NewDayFileWritesRawV2HeaderAndFirstBar
+[       OK ] P10DayDsbTest.NewDayFileWritesRawV2HeaderAndFirstBar (1 ms)
+[ RUN      ] P10DayDsbTest.AppendNewerDateKeepsOrderAndCount
+[       OK ] P10DayDsbTest.AppendNewerDateKeepsOrderAndCount (1 ms)
+[ RUN      ] P10DayDsbTest.SameDateDifferentValuesReplacesLastBar
+[       OK ] P10DayDsbTest.SameDateDifferentValuesReplacesLastBar (4 ms)
+[ RUN      ] P10DayDsbTest.SameDateIdenticalBarIsNoOp
+[       OK ] P10DayDsbTest.SameDateIdenticalBarIsNoOp (1 ms)
+[ RUN      ] P10DayDsbTest.OlderThanLastDateIsIgnored
+[       OK ] P10DayDsbTest.OlderThanLastDateIsIgnored (1 ms)
+[ RUN      ] P10DayDsbTest.OverOneHundredBarsSwitchesToCompressedV2
+[       OK ] P10DayDsbTest.OverOneHundredBarsSwitchesToCompressedV2 (110 ms)
+[ RUN      ] P10DayDsbTest.CompressedFileStaysCompressedAfterAppend
+[       OK ] P10DayDsbTest.CompressedFileStaysCompressedAfterAppend (94 ms)
+[ RUN      ] P10DayDsbTest.ExactlyOneHundredBarsStaysRaw
+[       OK ] P10DayDsbTest.ExactlyOneHundredBarsStaysRaw (22 ms)
+[ RUN      ] P10DayDsbTest.AltCodeFileRenamedBeforeWrite
+[       OK ] P10DayDsbTest.AltCodeFileRenamedBeforeWrite (2 ms)
+[ RUN      ] P10DayDsbTest.UnwritableBaseDirRejected
+[       OK ] P10DayDsbTest.UnwritableBaseDirRejected (1 ms)
+[ RUN      ] P10DayDsbTest.DumpBarsToFileRejectsNullContract
+[       OK ] P10DayDsbTest.DumpBarsToFileRejectsNullContract (0 ms)
+[ RUN      ] P10DayDsbTest.HeaderOnlyDayFileDecodesToEmptyPayload
+[       OK ] P10DayDsbTest.HeaderOnlyDayFileDecodesToEmptyPayload (3 ms)
+[ RUN      ] P10DayDsbTest.AppendingToHeaderOnlyDayFilePersistsFirstBar
+[       OK ] P10DayDsbTest.AppendingToHeaderOnlyDayFilePersistsFirstBar (1 ms)
+[ RUN      ] P10DayDsbTest.DamagedDayFileIsPreservedOnAppend
+[       OK ] P10DayDsbTest.DamagedDayFileIsPreservedOnAppend (3 ms)
+[----------] 14 tests from P10DayDsbTest (251 ms total)
+
+[----------] 15 tests from P10RtBlockTest
+[ RUN      ] P10RtBlockTest.TickBlockCreatesDmbWithV2Header
+[       OK ] P10RtBlockTest.TickBlockCreatesDmbWithV2Header (533 ms)
+[ RUN      ] P10RtBlockTest.PipeToTicksWritesBlockAndDiskRoundTrip
+[       OK ] P10RtBlockTest.PipeToTicksWritesBlockAndDiskRoundTrip (311 ms)
+[ RUN      ] P10RtBlockTest.TickBlockDateSwitchClearsBlock
+[       OK ] P10RtBlockTest.TickBlockDateSwitchClearsBlock (208 ms)
+[ RUN      ] P10RtBlockTest.TickBlockCapacityRepairedFromRealFileSize
+[       OK ] P10RtBlockTest.TickBlockCapacityRepairedFromRealFileSize (20 ms)
+[ RUN      ] P10RtBlockTest.KlineBlocksUseTradingMinutesAsCapacity
+[       OK ] P10RtBlockTest.KlineBlocksUseTradingMinutesAsCapacity (7 ms)
+[ RUN      ] P10RtBlockTest.HftBlocksCreateAndReportTypes
+[       OK ] P10RtBlockTest.HftBlocksCreateAndReportTypes (3 ms)
+[ RUN      ] P10RtBlockTest.NullContractAndNoAutoCreateRejected
+[       OK ] P10RtBlockTest.NullContractAndNoAutoCreateRejected (0 ms)
+[ RUN      ] P10RtBlockTest.ReleaseBlockCancelsCachedPair
+[       OK ] P10RtBlockTest.ReleaseBlockCancelsCachedPair (2 ms)
+[ RUN      ] P10RtBlockTest.SixBlockMapsSnapshotCloseReopenAndShutdownAreSynchronized
+[       OK ] P10RtBlockTest.SixBlockMapsSnapshotCloseReopenAndShutdownAreSynchronized (28 ms)
+[ RUN      ] P10RtBlockTest.ExpiredCheckerCloseWaitsForActiveBlockLease
+[       OK ] P10RtBlockTest.ExpiredCheckerCloseWaitsForActiveBlockLease (158 ms)
+[ RUN      ] P10RtBlockTest.RealCheckerClosesAndReopensAllSixExpiredMappings
+[       OK ] P10RtBlockTest.RealCheckerClosesAndReopensAllSixExpiredMappings (70 ms)
+[ RUN      ] P10RtBlockTest.ReleaseJoinsActiveCheckerBeforeClearingBlockMaps
+[       OK ] P10RtBlockTest.ReleaseJoinsActiveCheckerBeforeClearingBlockMaps (148 ms)
+[ RUN      ] P10RtBlockTest.SnapshotOwnsBlockPairAcrossMapClear
+[       OK ] P10RtBlockTest.SnapshotOwnsBlockPairAcrossMapClear (37 ms)
+[ RUN      ] P10RtBlockTest.AsyncFirstOrderDetailInsertInterleavesWithRealCheckerSnapshot
+[       OK ] P10RtBlockTest.AsyncFirstOrderDetailInsertInterleavesWithRealCheckerSnapshot (63 ms)
+[ RUN      ] P10RtBlockTest.AsyncWorkerFirstCreatesAllSixBlocksBeforeRealCheckerSnapshot
+[       OK ] P10RtBlockTest.AsyncWorkerFirstCreatesAllSixBlocksBeforeRealCheckerSnapshot (265 ms)
+[----------] 15 tests from P10RtBlockTest (1859 ms total)
+
+[----------] 12 tests from P10TaskQueueTest
+[ RUN      ] P10TaskQueueTest.PublicOperationsAreClosedBeforeInitialization
+[       OK ] P10TaskQueueTest.PublicOperationsAreClosedBeforeInitialization (0 ms)
+[ RUN      ] P10TaskQueueTest.RealInitializationRejectsConcurrentAndRepeatedInitialization
+[       OK ] P10TaskQueueTest.RealInitializationRejectsConcurrentAndRepeatedInitialization (34 ms)
+[ RUN      ] P10TaskQueueTest.RealInitializationAndReleaseRaceJoinsCreatedChecker
+[       OK ] P10TaskQueueTest.RealInitializationAndReleaseRaceJoinsCreatedChecker (56 ms)
+[ RUN      ] P10TaskQueueTest.FailedRealInitializationCanBeReleasedRepeatedly
+[       OK ] P10TaskQueueTest.FailedRealInitializationCanBeReleasedRepeatedly (0 ms)
+[ RUN      ] P10TaskQueueTest.EnqueueAfterWorkerIsWaitingWakesItAndReleasesOwnership
+[       OK ] P10TaskQueueTest.EnqueueAfterWorkerIsWaitingWakesItAndReleasesOwnership (25 ms)
+[ RUN      ] P10TaskQueueTest.ProcQueueUsesPredicateWaitAndDoesNotLoseNotification
+[       OK ] P10TaskQueueTest.ProcQueueUsesPredicateWaitAndDoesNotLoseNotification (34 ms)
+[ RUN      ] P10TaskQueueTest.ReleaseStopsIdleWorkersIdempotentlyAndRejectsProducers
+[       OK ] P10TaskQueueTest.ReleaseStopsIdleWorkersIdempotentlyAndRejectsProducers (43 ms)
+[ RUN      ] P10TaskQueueTest.ReleaseDrainsAcceptedTasksAndRejectsConcurrentProducer
+[       OK ] P10TaskQueueTest.ReleaseDrainsAcceptedTasksAndRejectsConcurrentProducer (26 ms)
+[ RUN      ] P10TaskQueueTest.ReleaseWaitsForSynchronousWriteLeaseAndRejectsLaterCalls
+[       OK ] P10TaskQueueTest.ReleaseWaitsForSynchronousWriteLeaseAndRejectsLaterCalls (0 ms)
+[ RUN      ] P10TaskQueueTest.PreCloseWriteLeaseMayEnqueueAfterReleaseClosesAdmission
+[       OK ] P10TaskQueueTest.PreCloseWriteLeaseMayEnqueueAfterReleaseClosesAdmission (40 ms)
+[ RUN      ] P10TaskQueueTest.TransHisDataLeaseStartsBeforeSinkAccessAndDefersReentrantRelease
+[       OK ] P10TaskQueueTest.TransHisDataLeaseStartsBeforeSinkAccessAndDefersReentrantRelease (84 ms)
+[ RUN      ] P10TaskQueueTest.CallbackCanReenterWriterAndRequestShutdownWithoutSelfJoin
+[       OK ] P10TaskQueueTest.CallbackCanReenterWriterAndRequestShutdownWithoutSelfJoin (0 ms)
+[----------] 12 tests from P10TaskQueueTest (346 ms total)
+
+[----------] Global test environment tear-down
+[==========] 41 tests from 3 test suites ran. (2459 ms total)
+[  PASSED  ] 41 tests.

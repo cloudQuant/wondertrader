@@ -306,9 +306,14 @@ TEST(L02ShareBlock, KeyInfoPackedLayout)
 	key._offset = 8;
 	key._updatetime = 1234567890ULL;
 	EXPECT_STREQ("k1", key._key);
-	EXPECT_EQ(SMVT_DOUBLE, key._type);
-	EXPECT_EQ(8u, key._offset);
-	EXPECT_EQ(1234567890ULL, key._updatetime);
+	// I03-NEW-109: gtest binds const references to its arguments; binding one to a
+	// member of a #pragma pack(1) struct is a misaligned reference (UB). Copy first.
+	const ValueType keyType = key._type;
+	const uint32_t keyOffset = key._offset;
+	const uint64_t keyUpdate = key._updatetime;
+	EXPECT_EQ(SMVT_DOUBLE, keyType);
+	EXPECT_EQ(8u, keyOffset);
+	EXPECT_EQ(1234567890ULL, keyUpdate);
 }
 
 TEST(L02ShareBlock, ValueTypeSizeTable)
@@ -338,10 +343,15 @@ TEST(L02ShareBlock, SectionInfoZeroInitializedAndTypedAccess)
 	using namespace shareblock;
 	SecInfo sec;
 	// 构造函数整体 memset
-	EXPECT_EQ(0, sec._count);
-	EXPECT_EQ(0, sec._state);
-	EXPECT_EQ(0u, sec._offset);
-	EXPECT_EQ(0ULL, sec._updatetime);
+	// I03-NEW-109: copy packed members before handing them to gtest (see above).
+	const uint16_t secCount = sec._count;
+	const uint16_t secState = sec._state;
+	const uint32_t secOffset = sec._offset;
+	const uint64_t secUpdate = sec._updatetime;
+	EXPECT_EQ(0, secCount);
+	EXPECT_EQ(0, secState);
+	EXPECT_EQ(0u, secOffset);
+	EXPECT_EQ(0ULL, secUpdate);
 	EXPECT_EQ('\0', sec._name[0]);
 
 	// get<T> 直接指向 _data 内的偏移

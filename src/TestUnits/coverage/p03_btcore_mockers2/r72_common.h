@@ -34,6 +34,7 @@
 #include <Includes/WTSStruct.h>
 #include <Includes/WTSVariant.hpp>
 #include <WtBtCore/HisDataReplayer.h>
+#include "../s5_bt_basefiles.h"
 #include <WtBtCore/WtHelper.h>
 #include <WtDataStorage/DataDefine.h>
 
@@ -314,7 +315,8 @@ namespace r72
 		cfg->append("align_by_section", false);
 		cfg->append("dont_simtick_if_notrade", false);
 		cfg->append("cache_clear_days", static_cast<uint32_t>(10));
-		cfg->append("fees", fees);
+		// 卡13d：空 fees 不再等于零费率；未指定时使用零费率模板，保持旧夹具的零费用期望。
+		cfg->append("fees", (fees != NULL && *fees) ? std::string(fees).c_str() : s5bt::write_zero_fees(s5bt::scratch_dir()).c_str());
 
 		WTSVariant* basefiles = WTSVariant::createObject();
 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
@@ -326,6 +328,8 @@ namespace r72
 		comms->release();
 
 		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
+		// 卡13d（I03-NEW-080）：成交合约须有物理合约元数据；只登记测试所用合约。
+		basefiles->append("contract", s5bt::write_contracts(s5bt::scratch_dir()).c_str());
 		cfg->append("basefiles", basefiles);
 		basefiles->release();
 		return cfg;

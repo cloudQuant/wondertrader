@@ -62,7 +62,15 @@ public:
 
 	WTSTickSlice* getTicks(const char*, uint32_t, uint64_t) override { return NULL; }
 	WTSTickData* grabLastTick(const char*) override { return NULL; }
-	double getPosition(const char*, bool = true, int32_t = 3) override { return pos; }
+	// I03-NEW-074：与 r7_twap 替身同理，按 flag 返回一致的多/空/净分解（多 >= 0、空 <= 0、净 = 多 + 空）。
+	double getPosition(const char*, bool = true, int32_t flag = 3) override
+	{
+		if (flag == 1)
+			return pos > 0 ? pos : 0.0;
+		if (flag == 2)
+			return pos < 0 ? pos : 0.0;
+		return pos;
+	}
 	OrderMap* getOrders(const char*) override { return NULL; }
 	double getUndoneQty(const char*) override { return undone; }
 
@@ -655,8 +663,10 @@ TEST(r24_twap, fire_at_once_zero_qty_and_sell_side_floor)
 	EXPECT_DOUBLE_EQ(ctx.buys[0].qty, 25.0);
 	ctx.pos = 40;
 	unit.on_order(9000, kTCode, true, 5, 10.50, true);
-	EXPECT_TRUE(ctx.hasLog("re_fire will be done"));
-	EXPECT_TRUE(ctx.buys.size() == 1u);                  // L471-472：0 量直接返回
+	// R7-012（有界重发）：实仓已超过本轮目标时买单撤单不重发（保持方向、量为 0），不再记录
+	// “re_fire will be done”（改前期望记录该日志后在 fire_at_once 内 0 量早退）。
+	EXPECT_FALSE(ctx.hasLog("re_fire will be done"));
+	EXPECT_TRUE(ctx.buys.size() == 1u);
 	EXPECT_TRUE(ctx.sells.empty());
 	ctx.comm->release();
 
@@ -667,16 +677,16 @@ TEST(r24_twap, fire_at_once_zero_qty_and_sell_side_floor)
 	WtTWapExeUnit unit2;
 	bootT(unit2, ctx2, 100, mkTCfg(4, 2, 0, -8.0));
 	unit2.on_tick(mkVTick(kTCode, 100000000, 10.50, 10.49, 10.51, 0, 10.49));
-	ASSERT_EQ(ctx2.buys.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx2.buys[0].price, 10.51);          // mode2 买 -> ask
+	// R7-012：负的 minopenlots 不是合法的最小开仓量，有界数量计算返回 0，首轮也不下单
+	// （改前期望：首轮按 ask 买入 25 手）。
+	EXPECT_TRUE(ctx2.buys.empty());
 	ctx2.pos = 40;
 	unit2.on_order(9000, kTCode, true, 5, 10.51, true);
-	// fire_at_once(-8)：mode2 卖 -> bidprice(0)=10.49；L508 再减 0.01*1 = 10.48 < 跌停 10.49
-	ASSERT_EQ(ctx2.sells.size(), 1u);
-	EXPECT_DOUBLE_EQ(ctx2.sells[0].qty, 8.0);
-	EXPECT_DOUBLE_EQ(ctx2.sells[0].price, 10.49);
-	EXPECT_EQ(ctx2.countLog("modified to lower limit price"), 1u);
-	EXPECT_EQ(ctx2.buys.size(), 1u);
+	// R7-012：撤单重发不得反向（买单撤单不能变成卖单），负的 minopenlots 也不能把重发量变成反向数量
+	// （改前期望：fire_at_once(-8) 反向卖 8 手并按跌停价收敛）。
+	EXPECT_TRUE(ctx2.sells.empty());
+	EXPECT_EQ(ctx2.countLog("modified to lower limit price"), 0u);
+	EXPECT_TRUE(ctx2.buys.empty());
 	ctx2.comm->release();
 }
 

@@ -16,6 +16,13 @@
 #include "../Share/fmtlib.h"
 
 #include "../Share/BoostMappingFile.hpp"
+// Feature macros (iteration 03): local blocks grow and retain unrecordable events
+// in order (I03-NEW-056); order ids are registered before the provider call (I03-NEW-059).
+#define WT_UFT_LOCAL_LEDGER_BACKLOG 1
+#define WT_UFT_PRE_REGISTERED_ORDER_IDS 1
+#include <deque>
+#include <mutex>
+#include <string>
 typedef std::shared_ptr<BoostMappingFile> BoostMFPtr;
 
 class UftStrategy;
@@ -61,6 +68,18 @@ public:
 	 * @param trader 交易适配器指针
 	 */
 	void setTrader(TraderAdapter* trader);
+
+	/**
+	 * @brief 本地账务记录是否阻塞(I03-NEW-056)
+	 * @details 本地数据块无法扩容时，成交/委托事件不丢弃：按到达顺序保留在内存积压中，
+	 * 记错误日志，并拒绝新的下单(撤单不受影响)，直到积压按序补记完成。
+	 */
+	bool	local_ledger_blocked() const;
+
+	/**
+	 * @brief 尚未写入本地数据块的事件数(I03-NEW-056)
+	 */
+	std::size_t	local_backlog_size() const;
 
 public:
 	/**
@@ -780,8 +799,48 @@ private:
 	/**
 	 * @brief 加载本地数据
 	 * @details 加载本地内存映射文件中的持仓、订单、成交和回合数据
+	 *
+	 * BUG-Q04-007: the reload is a transaction. All four blocks are mapped and
+	 * validated and the new in-memory state is prepared while the published
+	 * state stays untouched. Only then are the persistent day rollover and the
+	 * manual import written, and the new mappings, positions and trading day
+	 * published together; the previous mappings are released afterwards. On any
+	 * failure nothing is published, the trading day is not advanced and the next
+	 * on_channel_ready retries. The caller must hold _local_mutex.
+	 * @return true when the state for tradingday has been published
 	 */
-	void	load_local_data();
+	bool	load_local_data(uint32_t tradingday);
+
+	/**
+	 * @brief 本地事件(I03-NEW-056: 无法落块时按序保留)
+	 */
+	typedef struct _LocalEvent
+	{
+		bool		_is_trade;
+		uint32_t	_localid;
+		std::string	_code;
+		bool		_is_long;
+		uint32_t	_offset;
+		double		_qty;		///< 成交量或委托总量
+		double		_left;
+		double		_price;
+		bool		_canceled;
+	} LocalEvent;
+
+	// The helpers below require _local_mutex.
+	bool	apply_trade_locked(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price);
+	bool	apply_order_locked(uint32_t localid, const char* stdCode, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled);
+	bool	apply_local_event_locked(const LocalEvent& ev);
+	bool	drain_local_backlog_locked();
+	void	retain_local_event_locked(const LocalEvent& ev);
+	// Extends the position/trade/round/order blocks so that they can take the
+	// given numbers of new records; pointers into a remapped block are rebased.
+	bool	ensure_local_capacity_locked(uint32_t posNeeded, uint32_t trdNeeded, uint32_t rndNeeded, uint32_t ordNeeded);
+	// I03-NEW-059: called by TraderAdapter before the provider call for every
+	// local order id created on behalf of this context.
+	static void register_local_order(void* owner, uint32_t localid);
+
+	std::deque<LocalEvent>	_local_backlog;
 
 	/**
 	 * @brief 持仓块配对
@@ -848,12 +907,21 @@ private:
 	 * @brief 检查是否为本策略发出的订单
 	 * @param localid 本地订单ID
 	 * @return 是否属于本策略的订单
+	 * @note 调用方必须持有 _local_mutex
 	 */
 	inline bool is_my_order(uint32_t localid) const
 	{
 		auto it = _order_ids.find(localid);
 		return it != _order_ids.end();
 	}
+
+	/**
+	 * @brief 本地状态互斥锁(BUG-Q04-007)
+	 * @details 保护 _positions、_order_ids、四个本地数据块与 _tradingday。
+	 * 交易回报线程、策略线程和交易日切换都经由它串行化。持锁期间不调用
+	 * 交易通道或策略回调，避免同步回报重入时自锁。
+	 */
+	mutable std::mutex	_local_mutex;
 
 private:
 	/**

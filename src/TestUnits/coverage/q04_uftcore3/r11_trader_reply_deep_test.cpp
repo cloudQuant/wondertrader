@@ -160,7 +160,11 @@ TEST(R11TraderDeep, positionResponseAfterLoginChainsQueryOrders)
 TEST(R11TraderDeep, orderResponseFiltersBadEntries)
 {
 	DeepEnv env(false);
-	uint32_t localid = env._adapter.openLong(kAg, 5000.0, 2.0, 0);
+	//卡5(Q04-002): 死单与活单必须是两笔订单, 且活单回报数量须与实际委托一致。
+	//旧夹具让两行复用同一 usertag(同一订单先死后活)并以 6 手回报一笔 2 手委托;
+	//逐单账本中终态是墓碑且剩余量只减不增, 故改为分别委托 2 手(死)与 6 手(活)。
+	ASSERT_NE(UINT_MAX, env._adapter.openLong(kAg, 5000.0, 2.0, 0));
+	uint32_t localid = env._adapter.closeShort(kAg, 5000.0, 6.0, false, 0);
 	ASSERT_NE(UINT_MAX, localid);
 	//NULL 数组 -> 整块跳过
 	env._adapter.onRspOrders(nullptr);
@@ -168,7 +172,7 @@ TEST(R11TraderDeep, orderResponseFiltersBadEntries)
 	WTSOrderInfo* ghost = env.makeForeignOrder("unknown", 3.0, WOS_NotTraded_Queuing);
 	WTSOrderInfo* dead = env.makeOrder(0, "ag2406", 2.0, WDT_LONG, WOT_OPEN, WOS_Canceled);
 	WTSOrderInfo* foreign = env.makeForeignOrder("ag2406", 4.0, WOS_NotTraded_Queuing);
-	WTSOrderInfo* alive = env.makeOrder(0, "ag2406", 6.0, WDT_SHORT, WOT_CLOSE,
+	WTSOrderInfo* alive = env.makeOrder(1, "ag2406", 6.0, WDT_SHORT, WOT_CLOSE,
 		WOS_PartTraded_Queuing, WOF_NOR, 2.0);
 	ghost->setOrderID("ORD-901");
 	dead->setOrderID("ORD-902");
@@ -340,8 +344,9 @@ TEST(R11TraderDeep, pushOrderCancelWrongAndAutoCancel)
 
 	//活单 1 + 三条撤销各 2(撤单信息量 + 首次推送信息量) = 7
 	EXPECT_EQ(7u, env._adapter.getInfos(kAg));
-	//未完成量: 下单 13, 三个订单撤销回收 (5-1)+4+4 = 12
-	EXPECT_DOUBLE_EQ(1.0, env._adapter.getUndoneQty(kAg));
+	//未完成量: 卡5(Q04-002)逐单账本中撤单终态释放该单全部剩余, 已成交的 1 手不是未完成量;
+	//三单均已终结 -> 0(旧断言按合约聚合量期望留下尚无成交回报的 1 手)
+	EXPECT_DOUBLE_EQ(0.0, env._adapter.getUndoneQty(kAg));
 	//死单不留在 _orders
 	orders = env._adapter.getOrders("");
 	ASSERT_NE(nullptr, orders);

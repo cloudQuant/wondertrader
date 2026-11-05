@@ -39,8 +39,18 @@ public:
 	void	initialize(const char* cfgFile, const char* logCfg, const char* modDir = "", bool bCfgFile = true, bool bLogCfgFile = true);
 	void	start(bool bAsync = false, bool bAlldayMode = false);
 	bool	isAlldayMode() const { return _allday_mode; }
+	// Status of the initial start snapshot only; excludes dynamically added parsers.
+	// True means commands were submitted, not that providers are connected.
+	bool initialParserCommandsSubmitted() const { return _initial_parser_commands_submitted.load(); }
 
 	bool	createExtParser(const char* id);
+
+	// Card 9 / R5-007 teardown order: state monitor, then every parser (stop all
+	// before polling any, bounded V2 drain; external parsers are retained, not
+	// released, once their host callback gate is closed and drained), then index
+	// workers and the data manager. Returns false while any parser owner remains; the runner and its
+	// borrowed managers must then be kept alive until process exit.
+	bool	shutdown();
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -78,6 +88,7 @@ public:
 
 private:
 	void initDataMgr(WTSVariant* config, bool bAlldayMode = false);
+	void retainDumpersUnlessWriterReleased();
 	void initParsers(WTSVariant* cfg);
 
 private:
@@ -113,7 +124,9 @@ private:
 	std::atomic<bool> _to_exit;
 	bool _allday_mode;
 	bool _startup_blocked; // guarded by parser registry mutex; required init failed
+	bool _config_load_failed = false; // guarded by parser registry mutex; a later valid config may retry
 	bool _parser_registry_started; // guarded with ParserAdapterMgr by registry mutex
 	bool _parser_registry_stopped; // guarded with ParserAdapterMgr by registry mutex
+	std::atomic<bool> _initial_parser_commands_submitted{false};
 };
 

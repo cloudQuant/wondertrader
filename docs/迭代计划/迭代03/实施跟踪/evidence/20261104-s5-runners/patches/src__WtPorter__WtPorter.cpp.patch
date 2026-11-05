@@ -1,0 +1,80 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/WtPorter/WtPorter.cpp	2026-11-04 09:21:10
++++ src/WtPorter/WtPorter.cpp	2026-11-04 17:45:07
+@@ -9,6 +9,7 @@
+  */
+ #include "WtPorter.h"
+ #include "WtRtRunner.h"
++#include "ExpHftContext.h"
+ 
+ #include "../WtCore/WtHelper.h"
+ #include "../WTSTools/WTSLogger.h"
+@@ -16,6 +17,7 @@
+ #include "../Includes/WTSVersion.h"
+ 
+ #include <cstring>
++#include <limits>
+ #include <exception>
+ 
+ namespace
+@@ -320,6 +322,11 @@
+  */
+ void register_ext_data_loader(FuncLoadFnlBars fnlBarLoader, FuncLoadRawBars rawBarLoader, FuncLoadAdjFactors fctLoader, FuncLoadRawTicks tickLoader)
+ {
++	// BUG-R134-004: no data manager path requests ticks from an external
++	// loader (IHisDataLoader has no tick entry), so a tick loader is never
++	// called. Make that observable instead of silently accepting it.
++	if (tickLoader != NULL)
++		WTSLogger::warn("External tick loader is not supported by the live runner and will never be called");
+ 	getRunner().registerExtDataLoader(fnlBarLoader, rawBarLoader, fctLoader, tickLoader);
+ }
+ 
+@@ -1885,8 +1892,49 @@
+ 		return 0;
+ 
+ 	return ctx->stra_get_undone(stdCode);
++}
++
++namespace
++{
++	// BUG-R42-002: resolve a bound export context or report a distinguishable
++	// status. A failed query never presents 0 as a legal quantity.
++	int32_t resolve_hft_qty_context(CtxHandler cHandle, const char* stdCode, double* outQty,
++		HftContextPtr& ctx)
++	{
++		if (outQty != NULL)
++			*outQty = std::numeric_limits<double>::quiet_NaN();
++		if (outQty == NULL || stdCode == NULL || stdCode[0] == '\0')
++			return WT_HFT_QTY_INVALID_ARGUMENT_V2;
++		ctx = getRunner().getHftContext(cHandle);
++		if (ctx == NULL)
++			return WT_HFT_QTY_UNKNOWN_CONTEXT_V2;
++		ExpHftContext* exported = dynamic_cast<ExpHftContext*>(ctx.get());
++		if (exported == NULL || !exported->isTraderBound())
++			return WT_HFT_QTY_TRADER_UNBOUND_V2;
++		return WT_HFT_QTY_OK_V2;
++	}
+ }
+ 
++int32_t hft_get_position_v2(CtxHandler cHandle, const char* stdCode, bool bOnlyValid, double* outQty)
++{
++	HftContextPtr ctx;
++	const int32_t status = resolve_hft_qty_context(cHandle, stdCode, outQty, ctx);
++	if (status != WT_HFT_QTY_OK_V2)
++		return status;
++	*outQty = ctx->stra_get_position(stdCode, bOnlyValid);
++	return WT_HFT_QTY_OK_V2;
++}
++
++int32_t hft_get_undone_v2(CtxHandler cHandle, const char* stdCode, double* outQty)
++{
++	HftContextPtr ctx;
++	const int32_t status = resolve_hft_qty_context(cHandle, stdCode, outQty, ctx);
++	if (status != WT_HFT_QTY_OK_V2)
++		return status;
++	*outQty = ctx->stra_get_undone(stdCode);
++	return WT_HFT_QTY_OK_V2;
++}
++
+ /**
+  * @brief 获取高频策略合约当前价格
+  * @param stdCode 合约代码

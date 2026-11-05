@@ -16,6 +16,7 @@
 #include "../Includes/FasterDefs.h"
 #include "../Includes/ISelStraCtx.h"
 #include "../Includes/SelStrategyDefs.h"
+#include "../Includes/IStrategyPluginV2.h"
 #include "../Includes/WTSDataDef.hpp"
 #include "../Share/fmtlib.h"
 #include "../Share/DLLHelper.hpp"
@@ -165,7 +166,7 @@ private:
 	 * @param userTag 用户自定义标签
 	 * @param bTriggered 是否由条件触发
 	 */
-	void	do_set_position(const char* stdCode, double qty, double price = 0.0, const char* userTag = "", bool bTriggered = false);
+	bool	do_set_position(const char* stdCode, double qty, double price, const char* userTag, const WTSContractInfo* fillContract);
 	/**
 	 * @brief 添加信号
 	 * @details 添加交易信号到信号列表中
@@ -183,7 +184,7 @@ private:
 	 * @param last_px 上一次价格
 	 * @param cur_px 当前价格
 	 */
-	void	proc_tick(const char* stdCode, double last_px, double cur_px);
+	bool	proc_tick(const char* stdCode, double last_px, double cur_px, const WTSContractInfo* fillContract = nullptr);
 
 public:
 	/**
@@ -802,6 +803,8 @@ protected:
 		FuncCreateSelStraFact	_creator;
 		/// @brief 删除选股策略工厂的函数指针
 		FuncDeleteSelStraFact	_remover;
+		/// @brief 已校验的版本化插件表（卡4b=A）；为空表示测试注入的旧接口
+		const WtStrategyPluginApiV2* _api;
 
 		/**
 		 * @brief 构造函数
@@ -811,6 +814,9 @@ protected:
 		{
 			_module_inst = NULL;
 			_fact = NULL;
+			_creator = NULL;
+			_remover = NULL;
+			_api = NULL;
 		}
 
 		/**
@@ -826,14 +832,41 @@ protected:
 		{
 			if (_fact != NULL)
 			{
-				if (_remover == NULL)
+				if (_api != NULL)
+				{
+					// Card 9a: without the synchronous-teardown capability the
+					// factory and its module stay loaded until process exit.
+					if (!wt_stra_plugin::hasSyncTeardown(_api))
+					{
+						_fact = NULL;
+						_module_inst = NULL;
+						_api = NULL;
+						return false;
+					}
+					try
+					{
+						_api->destroy_factory(static_cast<void*>(_fact));
+					}
+					catch (...)
+					{
+						_fact = NULL;
+						_module_inst = NULL;
+						_api = NULL;
+						return false;
+					}
+					_fact = NULL;
+				}
+				else if (_remover == NULL)
 				{
 					// Keep the module loaded when its factory cannot be destroyed safely.
 					_fact = NULL;
 					_module_inst = NULL;
 					return false;
 				}
+			}
 
+			if (_fact != NULL)
+			{
 				try
 				{
 					_remover(_fact);
@@ -853,6 +886,7 @@ protected:
 			_module_inst = NULL;
 			_creator = NULL;
 			_remover = NULL;
+			_api = NULL;
 			return true;
 		}
 	} StraFactInfo;
@@ -867,6 +901,9 @@ protected:
 
 	/// @brief 当前交易日，记录当前的交易日期，格式为YYYYMMDD
 	uint32_t		_cur_tdate;
+
+	/// @brief 冻结量所属交易日（卡3 3d=C：session-begin 仅在交易日不同时清零冻结量）
+	uint32_t		_frozen_tdate = 0;
 
 	/// @brief tick订阅列表，存储当前策略订阅的所有合约代码
 	wt_hashset<std::string> _tick_subs;

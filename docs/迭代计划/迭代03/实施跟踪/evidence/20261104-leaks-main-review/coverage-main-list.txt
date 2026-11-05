@@ -1,0 +1,1530 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+cppcli_path_init.
+  current_and_executable_directories_are_available
+  fallback_paths_are_defined_for_failed_lookups
+cppcli_error_exit.
+  missing_required_option_returns_failure
+  invalid_type_returns_failure
+  invalid_one_of_returns_failure
+  out_of_range_returns_failure
+  valid_arguments_return_success
+  help_returns_success_before_required_validation
+l01_codehelper.
+  codeinfo_default_all_zero
+  codeinfo_exright_flags
+  codeinfo_std_comm_id_and_clear
+  codeinfo_has_rule
+  codeinfo_accessor_helpers
+  is_std_chn_fut_opt_code_true
+  is_std_chn_fut_opt_code_false
+  is_std_monthly_fut_code
+  std_code_to_std_comm_id
+  raw_month_code_to_raw_comm_id
+  raw_month_code_to_std_code_4_digits
+  raw_month_code_to_std_code_3_digits
+  raw_month_code_to_std_code_as_comm
+  raw_month_code_to_std_code_dynamic_fields_near_buffer_limit
+  raw_month_code_to_std_code_null_and_short_inputs_return_empty
+  raw_flat_code_to_std_code
+  is_monthly_code_true
+  is_monthly_code_false
+  raw_fut_opt_code_to_std_code_matched
+  raw_fut_opt_code_to_std_code_unmatched
+  try_raw_fut_opt_code_to_std_code_accepts_supported_formats
+  try_raw_fut_opt_code_to_std_code_rejects_malformed_input
+  std_code_to_std_hot_code
+  std_code_to_std_2nd_code
+  std_code_to_std_hot_code_without_suffix_sep
+  std_fut_opt_code_to_raw_code
+  index_code_month
+  extract_std_chn_fut_opt_code_cffex
+  extract_std_chn_fut_opt_code_other_exchg
+  extract_std_chn_fut_opt_code_shfe
+  extract_std_code_monthly_future
+  extract_std_code_exright_suffix
+  extract_std_code_plain_and_two_segment
+  extract_std_code_rejects_malformed_segments
+  extract_std_code_rejects_fields_that_exceed_fixed_capacity
+  extract_std_code_std_comm_id_capacity_boundaries
+  extract_std_code_fut_opt_goes_to_opt_branch
+  extract_std_code_zce_legacy_three_digit_option_round_trip
+  extract_std_code_exright_on_monthly_keeps_month
+l01_convert.
+  to_str_into_caller_buffer
+  to_str_into_caller_buffer_terminates_each_result
+  to_str_caller_buffer_capacity_failure_is_empty
+  to_str_internal_static_buffer_max_width
+  to_str_internal_static_buffer_terminates_each_result
+  from_str_cstr
+  from_str_std_string
+  to_int_helpers
+  to_int32_parses_negative_decimal
+  to_int_helpers_validate_signs_and_boundaries
+  csv_reader_preserves_negative_int32
+l01_charconv.
+  url_encode_ascii
+  url_encode_non_ascii
+  url_decode_basic
+  url_decode_keeps_percent_for_safe_chars
+  encoding_helper_pre_num
+  encoding_helper_is_utf8
+  encoding_helper_is_gbk
+  encoding_helper_is_gbk_rejects_malformed_without_stalling
+  utf8_to_char_pure_ascii
+  char_to_utf8_pure_ascii
+l01_objectpool.
+  construct_value_initializes_pod
+  construct_calls_constructor_body
+  destroy_invokes_destructor
+  addresses_are_distinct_while_in_use
+  freed_chunk_is_reused
+  release_memory_then_allocate_again
+  destructor_of_empty_and_used_pool
+  pool_is_polymorphic_through_base_pointer
+  non_trivial_type_with_std_string
+  DISABLED_destroy_null_is_undefined_and_rejected
+  independent_pools_do_not_share_chunks
+l01_timeutils.
+  get_next_minute
+  get_next_minute_normalizes_large_negative_offset
+  get_next_minute_handles_multi_day_and_extreme_offsets
+  get_next_month
+  get_next_month_normalizes_negative_months
+  get_next_month_handles_large_offsets_within_four_digit_years
+  min_bar_helpers
+  time_to_min_bar_roundtrips_historical_and_future_dates
+  time_to_min_bar_stays_monotonic_after_uint32_boundary
+  make_time_hour_minute_ms_offsets
+  make_time_to_utc_uses_tz_offset
+  time_to_string_roundtrip
+  get_next_date
+  get_week_day
+  try_get_week_day_rejects_invalid_gregorian_dates
+  is_weekends
+  week_day_and_weekends_are_consistent
+  time32_from_time_t
+  time32_from_milliseconds_and_from_local_time
+  time32_default_zero_msec
+  time32_fmt
+  time32_fmt_returns_shared_static_buffer
+  wall_clock_helpers_are_sane
+  ticker_measures_elapsed_time
+L02CsvFixture.
+  LoadMissingFileReturnsFalse
+  HeaderAndRowAccess
+  MissingFieldAndColumnDefaults
+  ShortRowsReturnDefaultsForMissingCells
+  HeaderSpecialCharsStrippedAndLowerCased
+  TrimAndCustomSplitter
+  TrailingEmptyFieldStopsMapping
+  TabSplitterAndLongIntegers
+L02ShareBlock.
+  KeyInfoPackedLayout
+  ValueTypeSizeTable
+  SectionInfoZeroInitializedAndTypedAccess
+  ShmBlockLayout
+  CmdBlockRingIndices
+  SmallCmdBlockTemplate
+L02SessionFixture.
+  IdNameAndSections
+  OpenCloseAndTotals
+  EmptySessionDefaults
+  OffsetTimeNoOffset
+  OffsetTimeWithShift
+  OffsetDateCrossDay
+  TimeToMinutesDaySession
+  MinuteToTimeDaySession
+  SecondsRoundTrip
+  TradingTimeFlags
+  NightSessionOffsetSections
+L02ContractInfo.
+  CommodityBasics
+  CommodityFeeCalculation
+  FeeCalculationBeyondInt32CentRange
+  ContractBasics
+  ContractMarginAndFee
+L02VariantFixture.
+  ObjectRefCountLifecycle
+  ObjectReleaseBalancesRetain
+  PoolObjectReturnsToPool
+  VariantObjectAppendsAllScalarTypes
+  VariantCrossTypeConversions
+  VariantBooleanParsingAcceptsYes
+  VariantWrongTypeAccessors
+  VariantAppendInvalidOnWrongContainer
+  VariantChildRefCountIsBalanced
+  VariantNestedMembersAndMemberNames
+  VariantArrayIndexedAccess
+  VariantArrayWithEmbeddedContainers
+  WtsArrayAppendAtGrabAndSet
+  WtsArrayMergeIterateAndSort
+  WtsMapNullAndOwnedValuesAcrossClear
+  WtsMapFinalReleaseSkipsNullAndReleasesTransferredValue
+  WtsHashMapAddGetGrabRemove
+  WtsHashMapClearReleasesEntries
+  WtsHashMapNullValuesRemainSafeAcrossLifecycle
+  WtsQueuePushPopFrontBack
+  WtsQueueReleaseClearsRetainedEntries
+  WtsQueueSwapIteratorsAndPushNoRetain
+R56BaseDataMgr.
+  ContractRulesAutoCreateCommodityAndWindows
+  HolidayTableSkipsNonArrayAndDrivesTradingDays
+  CalcTradingDateFullDaySessions
+  CalcTradingDatePartDayOffsetAndWeekend
+  CommodityLoadingSkipsMissingSession
+  SessionAuctionVariantsAndMissingSections
+R56Csv.
+  BomHeaderParsedAndFieldsExposed
+  HeaderOnlyFileStopsAtEof
+  FieldsCacheIsIndependentAcrossReadersAndEmptyHeaders
+  ShortRowMissingCellsReturnDefaults
+R56DataFactory.
+  TickDispatcherPeriods
+  TickMin1AlignsToSections
+  TickMin5LastOfSectionAndAlign
+  BarDrivenMinuteAlignClampsToSection
+  HourAndHalfHandleZeroAndMidnight
+  ExtractAlignsAndDropsOpenBar
+  ExtractHourAndHalfCrossDay
+R56HotMgr.
+  OptionalHotRulesOmittedLeavesManagerUninitialized
+  ExplicitMissingHotRulesFileFailsWithoutInitializingManager
+  LoadParsesFactorsAndRuleTag
+  RawCodeOnSwitchBoundaries
+  IsHotCurrentAndHistorical
+  UnknownProductIsNotHot
+  SplitSectionsCoversWindowAndEnd
+  SecondRulesAndReloadSameTag
+  ReleaseResetsCustomRules
+  CustomRawCodeDateBoundaries
+  EmptyCustomRuleMapReturnsEmptyAndNonEmptyMapStillWorks
+  SplitSectionsUsesOnlyTheFirstFutureRuleAndSkipsEmptyInitialFrom
+R56Logger.
+  InitSuccessWritesAllLevelsAndCategories
+  InitReleasesConfigAndKeepsRetainedPatternAfterMissingRoot
+  SecondInitReturnsWithoutReconfiguring
+  RootInfoFiltersDebug
+  RootWarnFiltersInfo
+  RootFatalFiltersLowerLevels
+  UnknownRootLevelDisablesAndStopShutsDown
+  AsyncLoggerAndDynReleaseIdempotent
+  UninitializedDynamicLogFallsBackToConsolePath
+  DISABLED_LogByCatPrefixKeepsFormattedPayload
+l03_commodity.
+  create_fills_identity_fields
+  create_initializes_identity_buffers
+  identity_field_boundary_length
+  identity_fields_reject_values_that_do_not_fit
+  scalar_accessors_round_trip
+  category_predicates
+  trading_mode_predicates
+  cover_and_price_modes
+  code_set_add_and_dedupe
+  session_info_binding
+  calc_fee_by_volume
+  calc_fee_by_amount_and_rounding
+  calc_fee_disabled_after_enable
+l03_contract.
+  create_and_defaults
+  date_and_limit_setters
+  alt_code_for_zce
+  identity_fields_reject_values_that_do_not_fit
+  alt_code_capacity_rejection_preserves_previous_identity
+  oversized_configured_identity_is_rejected_before_registration
+  storage_width_contract_limits_preserve_valid_edges_and_reject_before_rules_registration
+  margin_ratio_from_commodity
+  calc_fee_delegates_to_commodity
+  calc_fee_keeps_cents_above_int32_range
+  hot_codes
+  total_index_round_trip
+  ext_data_slots
+  null_comm_info_is_guarded_by_caller_contract
+  DISABLED_get_long_margin_ratio_without_comm_info
+l03_object.
+  initial_ref_is_single
+  retain_and_release_balancing
+  release_is_idempotent_at_zero_refs
+  refcount_works_on_concrete_includes_type
+l03_pool_object.
+  allocate_returns_usable_ready_item
+  recycled_after_last_release
+  shared_pool_serves_many_release_paths
+l03_switch_item.
+  create_and_accessors
+  empty_fields_and_date_edges
+  refcount_lifecycle
+l03_session.
+  create_and_id_name
+  empty_sections_fallback_branches
+  offset_time_zero_offset
+  offset_time_positive_offset_wrap
+  offset_time_negative_offset_wrap
+  original_time_inverse_mapping
+  offset_arithmetic_keeps_valid_offsets_and_avoids_int32_overflow
+  multi_day_offsets_normalize_endpoints_and_checked_date
+  checked_offset_date_rejects_out_of_range_without_publication
+  offset_setter_rebuilds_sections_after_multiple_days
+  offset_date_branches
+  night_section_raw_vs_offseted
+  time_to_minutes_offset_nonmonotonic_sections
+  minute_to_time_24h_uses_2400_convention
+  all_day_section_aggregate_views_survive_offset_changes
+  non_midnight_zero_length_section_is_rejected
+  midnight_section_raw_2400_and_0_alias
+  auction_sections
+  empty_auction_range_with_zero_start_threshold_survives_offsets
+  set_offset_mins_keeps_registered_sections_consistent
+L03DaySessionTest.
+  trading_sections_keep_raw_and_offset
+  time_to_minutes_inside_sections
+  time_to_minutes_break_and_auto_adjust
+  auction_time_short_circuits_to_zero
+  minute_to_time_forward_and_boundary
+  minute_to_time_head_first_mode
+  seconds_round_trip
+  trading_minutes_and_section_list
+  trading_time_and_section_edges
+  auction_only_maps_minutes_and_does_not_create_trading_time
+L04ADLayout.
+  HeaderSizesMatchStorageModule
+  FlexibleArrayOffsets
+L04ADStoreTest.
+  BarCacheFileRoundTrip
+  MapSizeSetterFailureCleansEnvAndAllowsRoundTripRetry
+  TickCacheFileRoundTrip
+  BarsCommittedAndReadableBack
+  GetLowersReturnsTailSliceWithLeftBound
+  GetUppersSkipsBarEqualToLastBarTime
+  CodesInSameDbAreIsolatedByKeyPrefix
+  TickRangeByDateUsesHftKeyOrdering
+  BarTimeEncodingMatchesReaderExpectation
+L04BlockHeader.
+  PackedSizes
+  FlexibleArrayOffsets
+  BlkFlagContent
+  VersionFlagsMatrix
+  BlockTypeEnumValues
+L04BlockFixture.
+  KlineBlockFileRoundTrip
+  TickBlockFileRoundTrip
+  TickCacheBlockFileRoundTrip
+  CompressedV2BlockHeaderSizeField
+  OldBarToNewBarFieldMapping
+L04LmdbKeys.
+  ReverseEndian16KnownVectors
+  ReverseEndian32KnownVectors
+  ReverseEndianIsInvolution
+  ReverseEndianBytesMatchMemoryOrder
+  BarKeyPackedLayout
+  BarKeyTimeStoredBigEndian
+  BarKeyPaddingZeroed
+  BarKeyStringViewKeepsFullLength
+  HftKeyPackedLayout
+  HftKeyDateSplitRoundTrip
+  BarKeyLexicographicOrderMatchesTimeOrder
+  HftKeyLexicographicOrderMatchesDateThenTime
+  FullRangeSentinelsBracketEveryKey
+  SameCodeDifferentExchgSortsByExchg
+  ExchgPrefixDoesNotCollideAcrossContracts
+  MaxLengthFieldsFitExactly
+  KeySizeMatchesStorageStringSize
+L04ProcBlockData.
+  RawV2DropHead
+  RawV2KeepHead
+  UnknownVersionRemainsGenericPassthrough
+  RejectsMisalignedRawBarPayloadsWithoutMutation
+  EmptyRawBarsAreAccepted
+  RejectsIncompleteBaseHeadersWithoutMutation
+  RejectsIncompleteCompressedHeadersWithoutMutation
+  OldBarsUpgraded
+  OldBarsUpgradedKeepHead
+  OldTicksUpgraded
+  CompressedNewBarsUncompressed
+  CompressedOldBarsUncompressedAndUpgraded
+  CompressedSizeMismatchRejected
+  MalformedCompressedFramesAreRejectedWithoutMutation
+L04BtReaderTest.
+  InitWithNullCfgKeepsEmptyBaseDir
+  ReadsBarsFromTempStore
+  ReadsTicksFromTempStore
+  ReadsHftSlicesFromTempStore
+  CorruptedBlockReturnsFalse
+  LengthCorrectButTruncatedZstdFrameReturnsFalse
+  MisalignedRawBarsReturnFalseWithoutReadingPayload
+  MisalignedUnknownVersionBarsFailAtDataReaderConsumer
+  PublicDataReaderRetriesAfterMisalignedHistoryIsRepaired
+  MissingHistoryOnPriorDateReturnsEmptySlice
+  FailedHistoryWithSameDayBackwardAdjustedRealtimeReturnsNull
+L05DtCoreHelper.
+  CwdIsStandardised
+  ModuleDirRoundtrip
+L05DtCoreStatHelper.
+  AccumulatesCounters
+  HandlesSendBytesOverflow
+  DefaultStatInfoIsZeroed
+L05DtCoreCaster.
+  OverriddenHooksAreCalled
+  DefaultImplsAreNoOps
+L05HelperBarTest.
+  StoreBarsRejectsZeroCount
+  StoreBarsRejectsUnknownPeriod
+  StoreAndReadBarsRoundtrip
+  StoreBarsReportsMissingParentDirectoryFailure
+  StoreBarsLongPathCreateFailureKeepsDiagnosticAndReturnsFalse
+  StoreBarsReportsReadOnlyFileFailure
+  StoreBarsReportsWriteFailure
+  CheckedCloseIsIdempotentAfterClosingRealFile
+  CheckedCloseReportsNativeFailureWithoutSecondClose
+  ReadBarsHeaderValidation
+  ReadDsbRejectsMalformedCompressedBlocks
+  ReadDsbPreservesRawV2AndLegacyRawBars
+  ReadFileErrorsAreCaughtAndShortHeadersRemainDistinct
+  OrderDataReadersCatchFileErrorsAndKeepShortHeaderDiagnostics
+  ResampleReadFailureAndShortHeaderHaveSeparateDiagnostics
+  DumpBarsMissingSourceFolder
+  DumpBarsWritesCsvAndSkipsOthers
+  DumpBarsValidOutputReportsBatchSuccess
+  DumpBarsReportsOneOutputFailureAndContinues
+  DumpBarsReportsShortWriteWithoutSuccess
+  DumpBarsReportsOutputDirectoryCreationFailure
+  DumpBarsReportsInputReadFailure
+  DumpBarsOverwritesWriteOnlyOutput
+  DumpBarsReportsUnenumerableSource
+  TransCsvBarsMissingSourceFolder
+  TransCsvBarsDailyRoundtrip
+  TransCsvBarsRejectsMalformedDatesAndKeepsValidDates
+  ReadDsbTicksRoundtrip
+  TransCsvBarsMinuteAndUnknownPeriod
+  TransCsvBarsUnreadableFileIsSkipped
+  TransCsvBarsDoesNotReportWriteFailureAsSuccess
+  TransCsvBarsDoesNotReportCreationFailureAsSuccess
+  ReadDmbBarsValidationPaths
+L05HelperTickTest.
+  StoreTicksRejectsZeroCount
+  StoreLevel2TypesReportMissingParentDirectoryFailure
+  StoreLevel2TypesReportReadOnlyFileFailure
+  StoreLevel2TypesReportWriteFailure
+  StoreAndReadTicksRoundtrip
+  ReadTicksHeaderValidation
+  StoreAndReadOrdDetailRoundtrip
+  StoreAndReadOrdQueueRoundtrip
+  StoreAndReadTransactionRoundtrip
+  ReadDmbTicksPaths
+  DumpTicksWritesCsvAndSkipsInvalid
+  DumpTicksValidOutputReportsBatchSuccess
+  DumpTicksReportsOneOutputFailureAndContinues
+  DumpTicksReportsShortWriteWithoutSuccess
+  DumpTicksReportsOutputDirectoryCreationFailure
+  DumpTicksReportsInputReadFailure
+  DumpTicksOverwritesWriteOnlyOutput
+  DumpTicksReportsUnenumerableSource
+L05PorterCapiTest.
+  WriteLogWithAndWithoutCategory
+  PushQuoteForUnknownParserIsIgnored
+  RegisterParserCallbacksAcceptsNull
+  DumpersWithoutRegistrationReturnFalse
+  DumpersWithRegistrationDelegateToCallbacks
+  CreateExtDumpersWithUniqueIdsSucceed
+L05ServoCapiTest.
+  VersionStringIsBuilt
+  BarsByRangeNotInitializedReturnsZero
+  BarsByDateRejectsNonMinutePeriod
+  BarsByCountNotInitialized
+  SbarsByDateNotInitialized
+  TicksQueriesNotInitialized
+  ClearCacheWithoutStorageReader
+P09RdmCacheTest.
+  init_with_null_cfg_injects_host_and_skips_check_thread
+  index_bar_by_range_empty_cache_returns_null_and_touches_key
+  index_bar_by_range_trims_window
+  index_bar_by_count_clamps_and_walks_back
+  read_bars_from_cache_by_range_copies_window
+  clear_cache_drops_bars_but_keeps_adj_factors
+  load_adj_factors_from_missing_or_bad_file
+  load_adj_factors_from_json_key_format_and_sort
+  get_adj_factor_by_date_stock_and_non_stock
+  DISABLED_p09_underflow_inputs_from_range_indexers
+P09WindowTest.
+  window_bounds_are_inclusive_on_both_sides
+  range_right_edge_beyond_last_bar_clamps_to_latest
+  range_left_edge_beyond_all_returns_null_for_empty_result
+  seam_between_two_sections_is_returned_whole_without_dedup
+  isday_comparator_collapses_same_day_minute_bars
+  rt_bars_are_never_scanned_by_the_indexers
+  index_bar_by_count_walks_back_from_right_edge
+  index_bar_by_count_zero_returns_null_for_empty_result
+  public_kline_slice_readers_keep_empty_and_nonempty_results
+P09DataReaderTest.
+  init_null_cfg_returns_before_any_dir_config
+  init_single_path_and_his_path_and_adjust_flag
+  init_path_array_and_adjfactor_file_is_loaded
+  load_adj_factors_from_loader_without_loader
+  load_adj_factors_from_file_failures
+  load_adj_factors_key_rules_and_ordering
+  get_adj_factors_loader_receives_complete_dynamic_key_and_cache_hits
+  delayed_loader_key_pointer_survives_return_stack_use_and_other_keys
+  concurrent_readers_keep_different_loader_key_addresses
+  concurrent_distinct_loader_keys_have_independent_stable_addresses
+  get_adj_factor_by_date_branches
+  init_missing_path_returns_without_partial_directories
+  init_null_sinkLeavesReaderNotReady
+  invalidReinitializationClearsPreviousReadyDirectories
+  init_emptyOrInvalidPathReturnsWithoutPartialDirectories
+P10DayDsbTest.
+  NewDayFileWritesRawV2HeaderAndFirstBar
+  AppendNewerDateKeepsOrderAndCount
+  SameDateDifferentValuesReplacesLastBar
+  SameDateIdenticalBarIsNoOp
+  OlderThanLastDateIsIgnored
+  OverOneHundredBarsSwitchesToCompressedV2
+  CompressedFileStaysCompressedAfterAppend
+  ExactlyOneHundredBarsStaysRaw
+  AltCodeFileRenamedBeforeWrite
+  UnwritableBaseDirRejected
+  DumpBarsToFileRejectsNullContract
+  HeaderOnlyDayFileDecodesToEmptyPayload
+  AppendingToHeaderOnlyDayFilePersistsFirstBar
+  DamagedDayFileIsPreservedOnAppend
+P10ProcBlockTest.
+  RawV2BarBlockKeepsHeadUntouched
+  RawV2BarBlockStripsHead
+  CmpV2BarBlockDecompresses
+  CmpV2DecompressKeepHeadRewritesRawV2Header
+  CmpV2LengthMismatchesRejectedInChildren
+  OldBarBlockTransferredToNewStruct
+  OldTickBlockTransferredToNewStruct
+  UnknownVersionPassesThrough
+  BlockFlagMismatchRejectsWithoutMutatingContent
+  OldCompressedBarBlockDecompressesAndUpgradesStruct
+  IsSessionProceededUsesReadyWriterDateState
+  EmptyInputRejectedInChild
+  FourByteInputRejectedInChild
+  OtherIncompleteBaseHeadersRejectedInChildren
+  TruncatedCompressedHeadersRejectedInChildren
+P10RtBlockTest.
+  TickBlockCreatesDmbWithV2Header
+  PipeToTicksWritesBlockAndDiskRoundTrip
+  TickBlockDateSwitchClearsBlock
+  TickBlockCapacityRepairedFromRealFileSize
+  KlineBlocksUseTradingMinutesAsCapacity
+  HftBlocksCreateAndReportTypes
+  NullContractAndNoAutoCreateRejected
+  ReleaseBlockCancelsCachedPair
+  SixBlockMapsSnapshotCloseReopenAndShutdownAreSynchronized
+  ExpiredCheckerCloseWaitsForActiveBlockLease
+  RealCheckerClosesAndReopensAllSixExpiredMappings
+  ReleaseJoinsActiveCheckerBeforeClearingBlockMaps
+  SnapshotOwnsBlockPairAcrossMapClear
+  AsyncFirstOrderDetailInsertInterleavesWithRealCheckerSnapshot
+  AsyncWorkerFirstCreatesAllSixBlocksBeforeRealCheckerSnapshot
+P10TaskQueueTest.
+  PublicOperationsAreClosedBeforeInitialization
+  RealInitializationRejectsConcurrentAndRepeatedInitialization
+  RealInitializationAndReleaseRaceJoinsCreatedChecker
+  FailedRealInitializationCanBeReleasedRepeatedly
+  EnqueueAfterWorkerIsWaitingWakesItAndReleasesOwnership
+  ProcQueueUsesPredicateWaitAndDoesNotLoseNotification
+  ReleaseStopsIdleWorkersIdempotentlyAndRejectsProducers
+  ReleaseDrainsAcceptedTasksAndRejectsConcurrentProducer
+  ReleaseWaitsForSynchronousWriteLeaseAndRejectsLaterCalls
+  PreCloseWriteLeaseMayEnqueueAfterReleaseClosesAdmission
+  TransHisDataLeaseStartsBeforeSinkAccessAndDefersReentrantRelease
+  CallbackCanReenterWriterAndRequestShutdownWithoutSelfJoin
+P12Extract.
+  Minute1ResampleSixBars
+  Minute1TrimsOpenBarWhenExcluded
+  Minute5ResampleAndAligned
+  HourAndHalfResample
+  DayResampleGroupsByCount
+  TickSliceToSecBars
+  MergeKlineDataPaths
+  PrevMinuteRounding
+  SliceAssemblyAcrossBlocks
+  closed_extrema_ranges_reject_end_equal_size
+  DISABLED_OutOfBoundsClass
+P12BarFactory.
+  BarPathParamValidation
+  Minute1Times1JustAppends
+  Minute1Times3BucketAndMerge
+  Minute1RawTimeBarUsesTradingDateSentinel
+  Minute1SessionCloseStaysOnTradingDate
+  Minute1AlignedToSection
+  Minute5Times1And2
+  Minute5AlignedAndSentinel
+  HourResamplePaths
+  HalfResamplePaths
+  ExtractDispatchParameterGuards
+P12TickFactory.
+  ParamValidationOnTickPath
+  Minute1Times1CreatesThenUpdatesInPlace
+  Minute1Times3Bucketing
+  LastMinuteOfSectionGetsRolledBackOneMinute
+  TradingDateRollCreatesNewBarEvenWithSmallerBarTime
+  Minute5TickPath
+  DayPathReturnsDetachedBar
+  SecPathWithTimesAndUnixTime
+  SecPathRejectsZeroSecondsWithoutMutation
+  RefCountPairedWithPoolAllocation
+  DISABLED_CrashClassNotExecuted
+coverage_harness.
+  placeholder
+Q03RdmClearLifetime.
+  HistoricalTickSurvivesClearAndReloads
+  HistoricalQueueSurvivesClearAndReloads
+  HistoricalDetailSurvivesClearAndReloads
+  HistoricalTransSurvivesClearAndReloads
+  RealtimeTickSurvivesClear
+Q03RdmKlineTest.
+  day_dsb_raw_v2_full_range_roundtrip
+  day_etime_zero_is_normalized_to_203012312359
+  day_compressed_v2_roundtrip
+  day_old_struct_versions_are_upgraded
+  day_tail_fragment_is_dropped
+  day_size_check_failure_returns_null_and_logs_error
+  day_missing_file_caches_empty_entry
+  day_window_out_of_range_returns_null
+  day_range_and_count_handle_first_cached_bar_boundaries
+  min1_splices_his_block_with_rt_block
+  min1_rt_only_when_start_inside_rt_block
+  min1_right_window_drops_late_bars
+  empty_rt_blocks_fall_back_to_history_for_range_and_count
+  min1_before_first_rt_bar_falls_back_to_history_for_range_and_count
+  clear_cache_forces_rebuild_from_file
+Q03RdmTickTest.
+  his_tick_raw_v2_roundtrip_field_by_field
+  his_tick_compressed_v2_roundtrip
+  his_tick_old_struct_versions_are_upgraded
+  his_tick_size_check_rejects_short_file
+  his_tick_tail_fragment_is_dropped
+  his_tick_header_only_file_yields_zero_count
+  rt_tick_block_read_back_when_no_his_file
+  rt_tick_block_missing_and_empty
+  rt_tick_capacity_larger_than_size_is_fully_mapped
+  range_splices_two_his_days_plus_rt_block
+  range_clips_left_window_on_begin_trading_date
+  range_clips_right_window_on_end_trading_date
+  range_returns_empty_object_when_no_data_at_all
+  range_skips_missing_middle_day
+  trading_date_override_routes_to_his_branch
+  his_kline_hot_rejects_fragmented_raw_and_cmp_blocks
+  adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp
+Q03RdmTickRangeInclusiveTest.
+  HistoricalAndRealtimeKeepInclusiveExactEndpoints
+  ZeroEndTimeReadsLatestCommittedHistoryAndRealtimeTicks
+WriterTickRangeE2ETest.
+  PublishedWriterTicksAreVisibleThroughPublicRange
+Q03ReaderFileTest.
+  his_tick_raw_v2_roundtrip_and_count_window
+  his_tick_version_matrix
+  his_tick_size_check_and_tail_fragment
+  today_branch_reads_rt_tick_block
+  order_queue_detail_and_transaction_files
+  missing_his_file_returns_null_without_log
+R100RdmCrossDayTest.
+  R100RdmRtHftCrossDateBackoff
+  R100RdmHisHftMissingAndShortFileGuards
+  DISABLED_R100RdmHisHftValidCrossDateFiles
+  DISABLED_R100RdmHisHftEmptyCmpV2Payloads
+  DISABLED_R100RdmQueueDetailTransCachesAreIndependent
+  R100RdmHisTickAndKlineBoundaries
+  R100RdmHisHftExclusiveEndBoundaries
+R100ReaderCrossDayTest.
+  R100ReaderRtHftCrossDateAndMissing
+  R100ReaderHisHftCrossDateShortAndEmpty
+  R100ReaderIntegratedHotLoaderAndAdjustedCatch
+R112RdmResidualTest.
+  R112RdmHftRangeCrossDateComparators
+  R112RdmMissingAndShortFileGuards
+  DISABLED_R112RdmQueueDetailTransCachesAreIndependent
+  R112RdmTickCountsCrossDate
+R112ReaderAdjustedMin5Test.
+  R112ReaderAdjustedMin5ContinuationAndGuards
+R112ReaderResidualTest.
+  R112ReaderHisHftCrossDateAndHotRawCode
+  R112ReaderMissingAndShortHisFiles
+  DISABLED_R112ReaderQueueDetailTransCachesAreIndependent
+R122RdmByRangeTest.
+  R122RdmOrdQueByRangeCrossDateAndMissing
+  R122RdmDtlTransByRangeCrossDateAndMissing
+  R122RdmKlineByCountEmptyResult
+R122ReaderRtBranchesTest.
+  R122ReaderTickRtCrossDateAndFallback
+  R122ReaderOrdQueRtEtimeZeroHotAndMissing
+  R122ReaderOrdDtlRtEtimeZeroHotAndMissing
+  R122ReaderTransRtEtimeZeroHotAndMissing
+R132RdmResidualTest.
+  R132RdmKlineRtBackoffByRangeAndCount
+  R132RdmKlineRangeEndBetweenHisBars
+  R132RdmRtHftComparatorsSeeOlderActionDate
+  R132RdmTickDateEmptyRtBlockReturnsNull
+R132ReaderHisTest.
+  R132ReaderHisTickCrossActionDate
+  R132ReaderHisHftCompressedRoundTrip
+  R132ReaderHisCompressibleQueueExpansion
+  R132AlignedHistoricalSlicesPreserveExclusiveEnd
+  R132AlignedSliceSurvivesOtherCacheInsertions
+  R132HistoricalBadFilesCanBeReplacedAndRetried
+  R132AllocationFailureDoesNotPublishOrInvalidateHeldSlices
+  R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape
+  R132ReaderHisOrderQueueDetailAndTransCachesAreIndependent
+  R132ReaderHisEmptyBlockAndEmptyRecordSet
+  R132ReaderHisMalformedCompressedRecordsAreRejected
+  R132ReaderIntegratedSectionsOverlapHotTail
+R142RdmHftHisTest.
+  R142RdmHisQueueCrossActionDateByRange
+  R142RdmHisDetailTransCrossActionDateByRange
+  R142RdmCompressedExpansionPreservesAllFieldsAndCacheReads
+  R175RdmCmpV2NoGrowthPreservesAllFields
+  R175RdmCmpV2RejectsMalformedPayloadsAndAllowsRetry
+  R142RdmMissingRtAndHisHftFiles
+  R142RdmEmptyQueueBlockSecondCallReturnsNull
+  R142RdmKlineHisEndBetweenBarsBacksOff
+R142ReaderHftHisTest.
+  R142ReaderHisHftCountBacksOffPastLastItem
+  R142ReaderEmptyHisTickBlockSecondCall
+R162ReaderEdgeTest.
+  R162ReaderContinuousCacheNonStdExceptionIsCaught
+  R162ReaderAdjustedStockNonStdExceptionIsCaught
+  R162RdmReaderAllSourcesMissingReturnsEmpty
+  R162RdmReaderHisTransBlocksWithMixedActionDates
+  DISABLED_R162RdmReaderHisTransBlocksWithMixedActionDatesFromFile
+R172RdmMixedDatesTest.
+  R172RdmMixedActionDatesHisHftBlocks
+R172ReaderMixedDatesTest.
+  R172ReaderMixedActionDatesHisHftSlices
+R182RdmRtSlicesTest.
+  R182Min1RangeStartsInsideRtBlock
+  R182Min1CountTakesTailOfRtBlock
+R182ReaderIntegratedTest.
+  R182NoHotFileSplitRejected
+  R182HotSplitReturnsEmptySections
+  R182SectionFileMissingIsSkipped
+  R182ShortSectionFileLogsAndFails
+  R182SectionWindowAfterAllBarsIsSkipped
+  R182SectionWindowBeforeFirstBarBreaks
+  R182SectionWindowSelectsBothBars
+R193StorageReaderTest.
+  R193LoaderUnknownPeriodUsesDayName
+  R193ExrightRangeClipsBarAfterEndTime
+  R193ExrightCountGrowsCacheAndClipsGap
+  R193MissingRealtimeTickBlockYieldsEmptySlice
+R203StorageResidualTest.
+  R203ReaderRejectsShortHistoricalQueueFile
+  R203ReaderReturnsNullForMissingHistoricalDetailAndTrans
+  DISABLED_R203ReaderQueueDetailTransCacheContract
+  R203RdmRejectsShortHistoricalQueueFile
+  R203RdmReturnsNullForMissingHistoricalDetailAndTrans
+  DISABLED_R203RdmQueueDetailTransCacheContract
+  R203RdmPostAdjustedFileScalesBars
+  R203ReaderReversedSectionSkipsWindow
+  R203RdmReversedSectionSkipsWindow
+R212StorageResidualTest.
+  R212RdmHisTickByDateReturnsFileSlice
+  R212RdmHisTickShortFileLogsAndFallsBack
+  R212RdmKlineRangeCoversThreePeriodsAndEmptyRightEdge
+  R212RdmKlineCountCoversMinutePeriods
+  R212ReaderLoaderPeriodNamesAndBars
+ReaderHistoricalCountBoundsTest.
+  SingleRecordBeforeAndAtFirstReturnNullForAllTypes
+  MultiRecordCrossDateMiddleAndTailQueriesStayBounded
+R52ReaderTest.
+  R52HotWrappedFileReadReturnsIntegratedBars
+  R52HotWrappedFileSplicesMonthlySegmentAfterHotTail
+  R52HotWrappedReadFailureClearsCacheAndRetriesSameReader
+  R52HotContinuousMin1AdjustsAndReplaysOnMinuteEnd
+  R52AdjustedStockQfqUsesFactorFileAndAppliesAllFlagBits
+  R52LoaderSuppliesFinalRawBarsAndLazyFactors
+  R52TodayHftBlocksAndCapacityRemap
+R70RdmResidualTest.
+  R70RdmTodayOrderQueueRangeClips
+  R70RdmTodayOrderDetailRangeClips
+  R70RdmTodayTransRangeClips
+  R70RdmHisHftFilesBuildAndReject
+  R70RdmAdjustedStockMin1Continuation
+  R70RdmHotTickCountAndRangeTail
+  R70RdmTodayOrderQueueRangeBoundaries
+  R70RdmTodayOrderDetailRangeBoundaries
+  R70RdmTodayTransactionRangeBoundaries
+R70ReaderResidualTest.
+  R70ReaderIntegratedDaySectionsAndNoRtTail
+  R70ReaderAdjustedStockMin1Continuation
+  R70ReaderHisHftErrorBranches
+  R70ReaderTickSinkClockAndHotRawCode
+  R70ReaderKlineNoRtFallbackAndMin5
+R74RdmHftHotTest.
+  R74RdmHisQueueLoadsClipsAndRejects
+  R74RdmHisDetailCrossDayAndRejects
+  R74RdmHisTransCrossDayAndRejects
+  R74RdmHotDaySectionsEdgeCases
+R74RdmInitAdjTest.
+  R74RdmInitCfgLoadsAdjFactorsAndReplaysQfq
+  R74RdmAdjustedFileSizeGuards
+  R74RdmShortAdjustedFileFallsBackToRawAndLogsError
+  R74RdmShortAdjustedWithoutRawCanRetryWhenRawAppears
+  R74RdmTickRangeRtBoundaries
+  R74RdmHotMalformedTickFileFailsClosedThenReloads
+  R74RdmHotTickCandidatesAndCountWindows
+R74ReaderResidualTest.
+  R74ReaderInitPathAndHisPathArrays
+  R74ReaderHftHisPathsUseSinkClock
+  R74ReaderHotRuleTagSelectsRawCode
+  R74ReaderKlineRtBackoffAndMinuteEnd
+  DISABLED_R74ReaderQueueCacheHidesSameDayDetailAndTrans
+R94RdmBadBlockRetryTest.
+  tick_by_date_rejects_corrupt_block_and_same_reader_retries
+  tick_range_discards_prior_day_slice_and_retries
+  tick_count_rejects_corrupt_history_and_retries
+  absent_tick_history_remains_an_empty_read
+  plain_bar_range_rejects_corruption_and_same_reader_retries
+  plain_bar_count_rejects_corruption_and_same_reader_retries
+  absent_plain_bar_history_is_not_logged_as_corrupt
+  header_only_plain_bar_block_remains_an_empty_read
+  empty_adjusted_layer_falls_back_to_base_bars_for_range
+  empty_adjusted_layer_falls_back_to_base_bars_for_count
+  legacy_empty_cmp_adjusted_layer_falls_back_for_range
+  legacy_empty_cmp_adjusted_layer_falls_back_for_count
+  malformed_legacy_empty_cmp_adjusted_layer_is_rejected
+  continuous_bar_failure_frees_prior_sections_and_retries
+  adjusted_continuation_failure_releases_hot_buffer_and_retries
+R94RdmDayBackoffTest.
+  R94RdmDayRangeAndCountBackOffBeforeRightBoundary
+  DISABLED_R94RdmRangeBeforeFirstBarUnderflowsCacheCursor
+R94RdmEmptyKlineTest.
+  R94RdmCmpAdjustedFileWithZeroSizeIsEmpty
+  R94RdmRawAdjustedFileWithHeaderOnlyIsEmpty
+  R94RdmRawContinuationFileHeaderOnlyKeepsAdjustedBars
+  R94RdmPlainFileHeaderOnlyReturnsFalse
+R94RdmHfqRangeTest.
+  R94RdmHfqRangeMergesRealtimeIntoAdjustedCache
+R94RdmHotHftTest.
+  R94RdmTodayHftUsesCustomRawCode
+R94RdmHotMinuteEdgeTest.
+  R94RdmHotQfqStopsWhenSectionEndsBeforeHotTail
+  R94RdmHotEmptySegmentFileBreaksAssembly
+R94RdmRtRemapTest.
+  R94RdmAllRtBlocksRemapAfterCapacityGrowth
+R94RdmTickCountEdgeTest.
+  R94RdmCountSkipsEmptyAndBeforeFirstHisTick
+R94ReaderHftSizeTest.
+  R94ReaderRejectsShortAndMismatchedHisHftFiles
+R94ReaderLoaderRtTest.
+  R94ReaderLoaderServesMin1AndMin5FinalBars
+  R94ReaderRtKlineRemapThenMinuteEndSkipsMissingBlock
+R12BaseDataMgr.
+  commodity_lookup_by_stdpid_and_two_args
+  contract_lookup_and_attributes
+  contract_lists_size_and_index
+  session_lookup_by_id_and_code
+  holiday_and_trading_date_window
+  trading_date_cursor_set_next_prev
+  calc_trading_date_day_and_night
+  boundary_time_start_and_end
+r12_charconv_utf8tochar.
+  ascii_passthrough_and_empty_inputs
+  unconvertible_input_yields_empty_buffer
+r12_charconv_chartoutf8.
+  ascii_passthrough_and_empty_inputs
+  unconvertible_input_yields_empty_buffer
+r12_charconv_iconv.
+  empty_and_valid_utf8_gb2312_round_trip
+  invalid_incomplete_and_embedded_nul_inputs_are_terminated
+  output_too_small_stays_inside_destination_capacity
+  unavailable_encoding_returns_empty_without_closing_invalid_descriptor
+r12_charconv_encoding_helper.
+  prenum_counts_leading_ones
+  isutf8_valid_sequences
+  isutf8_rejects_broken_sequences
+  isutf8_rejects_sequence_truncated_by_logical_length
+  isutf8_enforces_unicode_scalar_boundaries
+r12_charconv_url.
+  encode_decode_round_trip_on_ascii_subset
+r12_codehelper.
+  extract_std_monthly_code_three_segment
+  extract_std_code_stock_and_exright
+  extract_std_code_hot_and_2nd_suffix
+  extract_std_chn_futopt_per_exchange_branches
+  is_std_chn_futopt_state_machine
+  is_monthly_code_reverse_state_machine
+  index_code_month_and_raw_comm_id
+  raw_month_code_to_std_code
+  raw_flat_code_to_std_code_branches
+  std_code_to_hot_and_2nd_wrappers
+  std_code_to_comm_id_without_delimiters
+  std_code_to_std_comm_id_and_opt_raw
+  code_info_helpers_clear_and_stdcommid
+R12Collection.
+  array_append_at_grab_refcount
+  array_idxof_null_and_missing
+  array_set_replaces_and_releases_old
+  array_append_array_steals_without_retain
+  array_sort_and_iterator
+  array_release_twice_is_noop
+  concurrent_final_release_deletes_each_collection_once
+  final_array_release_reclaims_element_reference_once
+  map_add_get_grab_remove
+  map_find_bounds_and_erase_iterator
+  hashmap_string_key_add_get_remove
+  queue_push_front_back_and_refcount
+  queue_clear_handles_null_slot
+  queue_null_slots_pop_clear_and_release_safely
+  queue_swap_and_clear_release_each_once
+  queue_pop_releases_element_reference
+  queue_pop_releases_transferred_final_reference
+  stack_lifo_top_pop_clear
+  stack_release_destructor_clears_elements
+  stack_push_false_pop_returns_transferred_reference
+  stack_explicit_owned_transferred_borrowed_matrix
+r12_value_array.
+  size_empty_append_and_at
+  negative_index_translates_from_tail
+  maxvalue_minvalue_range_semantics
+  set_resize_and_operator_index
+r12_kline_slice.
+  create_at_and_block_accessors
+  append_block_and_empty_slice
+  create_rejects_invalid_count_or_backing
+  extrema_skip_invalid_price_fields
+  append_block_rejects_count_overflow_without_mutation
+  negative_index_uses_wide_count_across_blocks
+  maxprice_minprice_and_setcode
+  extract_data_per_field_type
+  extract_from_empty_slice_returns_null
+r12_kline_data.
+  property_accessors_and_sized_create
+  field_by_index_accessors
+  append_bar_overwrites_same_time_and_extacts
+  maxprice_minprice_and_release_keeps_slice_refs
+  extrema_skip_invalid_price_fields
+r12_tick_data.
+  create_from_struct_and_field_accessors
+  create_by_code_setcode_and_limit_flag
+  code_creation_and_checked_setter_enforce_capacity
+r12_tick_ref.
+  wraps_external_struct_without_copy
+r12_tick_slice.
+  block_append_insert_and_index
+  empty_create_and_consecutive_append_counts
+r12_detail_slices.
+  orddtl_trans_slice_create_and_at
+r12_pool_data_objects.
+  orddtl_ordque_trans_code_and_contract
+r12_struct_compat.
+  old_bar_and_tick_assignment
+r12_session.
+  create_id_and_offset_accessor
+  offset_time_zero_point_alignment
+  original_time_is_inverse_of_offset
+  get_offset_date_three_branches
+  trading_sections_are_stored_with_raw_and_offset
+  time_to_minutes_multi_section
+  time_to_minutes_auto_adjust_and_empty
+  minute_to_time_round_trip_both_directions
+  night_session_minute_mapping_with_offset
+  seconds_mapping
+  trading_duration_and_seclist
+  in_trading_time_and_section_boundary_flags
+  auction_multi_section_and_update
+r12_trade_error.
+  code_and_message
+r12_trade_entrust.
+  create_defaults_and_field_writers
+  credit_business_and_net_direction
+  extras_string_and_contract_binding
+r12_trade_action.
+  cancel_action_fields
+r12_trade_order.
+  create_from_entrust_copies_fields
+r12_trade_info.
+  fields_and_net_direction
+r12_trade_position.
+  derived_totals_and_frozen
+r12_trade_account.
+  money_fields
+r12_variant_object.
+  append_and_read_each_scalar_type
+  missing_keys_return_defaults
+  overwrite_key_releases_old_value
+  member_names_and_size_of_children
+r12_variant_real.
+  object_and_array_preserve_double_round_trip
+  integer_accessors_truncate_and_saturate_safely
+  formatting_and_parsing_ignore_global_cpp_locale
+  formatting_and_parsing_ignore_c_numeric_locale
+r12_variant_array.
+  append_all_types_and_index_read
+  append_wrong_container_returns_false
+r12_variant_refcount.
+  retain_release_pairing_on_children
+  as_boolean_on_container_and_null_is_safe
+r12_variant_conversions.
+  cross_type_numeric_conversion
+r195_cfg_variant.
+  json_all_number_types_and_nested_containers
+  yaml_nested_map_and_sequence
+  gbk_content_is_converted_before_json_parse
+  base_data_mgr_sessions_null_scalars
+R195ReaderCodeHelperTest.
+  malformed_option_codes_cover_state_machine_rejects
+  valid_option_codes_cover_exchange_formatting
+  plain_and_three_segment_codes_stay_safe
+R195WriterSessionEdgeTest.
+  auction_tick_and_lunch_break_tick
+  night_session_cross_day_offset_and_close_time
+r53_array.
+  resize_sort_and_iterators
+r53_map.
+  bounds_last_and_const_iterators
+  erase_by_key_releases_container_reference
+r53_containers.
+  hashmap_queue_stack_lifecycle
+r53_variant.
+  int64_uint64_and_scalar_getters
+  nested_children_and_member_names
+r53_value_array.
+  const_index_and_bounds
+r53_kline_slice.
+  const_at_and_extract_ranges
+r53_kline_data.
+  extract_remaining_fields_and_volume_overflow
+r53_detail_slices.
+  reject_and_negative_index
+r53_tick_slice.
+  zero_count_block_then_append
+r53_tick_ref.
+  contract_binding_and_invalid_reference
+r53_risk_trade_stat.
+  create_zeroes_counters_and_copies_code
+  stat_info_mutation_drives_all_accessors
+  code_copy_at_max_length_and_refcount
+r53_risk_port_fund.
+  create_defaults_and_sentinels
+  fund_info_mutation_visible_through_accessors
+r53_risk_fund_struct.
+  dyn_bal_pair_and_struct_defaults
+r53_struct_old_bar.
+  ctor_zeroes_and_assignment_copies
+r53_struct_old_tick.
+  ctor_zeroes_all_fields
+r53_struct_tick.
+  ctor_zeroes_and_union_aliases
+  assignment_copies_every_field_and_levels
+  assignment_preserves_maximum_terminated_legacy_strings
+r53_struct_hft.
+  ordque_orddtl_trans_ctor_and_fields
+r53_entrust.
+  buy_action_credit_business_and_mutable_fields
+r53_entrust_action.
+  create_flags_and_business
+  cancel_action_release_uses_allocated_pool
+  pool_release_from_other_threads_and_reuse
+r53_order.
+  offset_flag_mapping_and_buy_action
+  metadata_state_msg_and_bindings
+r53_trade_info.
+  offset_flag_buy_action_and_bindings
+r16_inihelper.
+  load_sets_loaded_flag
+  read_string_int_double_bool_from_loaded_file
+  read_returns_default_when_missing_or_unparsable
+  read_sections_and_key_arrays
+  write_then_save_then_reload_roundtrip
+  save_without_filename_falls_back_to_load_path
+  remove_value_and_remove_section
+  write_overwrites_existing_value
+  load_missing_file_does_not_mark_loaded
+  load_invalid_file_does_not_mark_loaded
+  load_failure_can_be_retried_successfully
+  long_distinct_section_keys_keep_independent_values
+r16_boostfile.
+  fresh_handle_is_invalid_and_close_is_idempotent
+  create_new_file_truncates_to_zero
+  create_new_file_on_existing_clears_content
+  open_existing_missing_returns_false
+  seek_begin_current_end_and_pointer
+  write_after_truncate_shrinks_file
+  read_file_exact_length_true_short_read_false
+  read_exact_chunking_preserves_lengths_above_4gib
+  sparse_file_offsets_above_4gib_preserve_size_seek_and_sentinels
+  read_exact_chunking_retries_short_reads_and_rejects_eof
+  read_from_closed_handle_reports_failure
+  write_to_closed_handle_fails
+  static_write_and_read_file_contents_roundtrip
+  static_read_file_contents_preserves_binary_bytes
+  read_file_contents_false_for_missing_or_empty
+  delete_file_true_then_false
+  create_or_open_keeps_existing_size
+r16_kvcache.
+  uninitialized_object_reports_empty
+  init_creates_file_with_initial_capacity
+  put_get_has_and_overwrite
+  put_if_none_keeps_existing_value
+  oversized_keys_and_values_are_rejected_without_corrupting_records
+  value_at_63_byte_limit_is_readable
+  put_fills_capacity_then_resizes_to_double
+  clear_empties_entries_but_keeps_capacity
+  reopen_with_same_date_restores_entries
+  reopen_with_other_date_resets_and_logs
+  init_exceptions_clear_partial_mapping_and_index
+  new_file_map_exception_leaves_valid_file_for_retry
+  short_header_write_is_rejected_without_deleting_created_file
+  mapped_replacement_file_is_rejected_by_creation_marker
+  exclusive_create_race_does_not_remove_external_file
+  init_rejects_nonterminated_disk_fields_without_mutating_file
+  init_on_unwritable_path_fails_with_log
+  resize_file_and_mapping_failures_preserve_old_mapping
+  resize_rejects_replaced_path_before_reopen
+  resize_rollback_uses_original_handle_after_path_replaced
+  failed_rollback_keeps_old_mapping_but_restart_fails_closed
+  failed_rollback_with_complete_slots_recovers_actual_capacity
+  throwing_logger_does_not_escape_noexcept_insert
+  put_calls_reject_new_record_when_resize_open_fails
+  capacity_doubling_overflow_is_rejected_before_insert
+  rejects_file_smaller_than_cache_header
+  rejects_file_ending_inside_cache_item
+  rejects_file_with_invalid_header_flag
+  truncated_file_same_date_preserves_records_and_repairs_capacity
+  truncated_file_other_date_resets_without_writing_past_mapping
+r16_lmdb.
+  open_fresh_env_sets_handle_and_no_error
+  put_then_get_range_returns_exact_window
+  get_range_compares_variable_length_binary_keys
+  get_uppers_walks_forward_until_count_or_upper
+  get_lowers_walks_backward_then_reverses
+  put_and_commit_variant_persists_without_destructor_commit
+  rollback_drops_uncommitted_writes
+  commit_is_idempotent_and_reuses_dbi
+  error_accessors_reflect_manual_errno_update
+  readonly_env_reports_readonly_and_rejects_put
+  get_looks_up_the_requested_key
+  get_all_returns_each_record_once
+  get_all_on_empty_db_returns_no_records
+  open_failure_updates_member_error
+  mapsize_failure_reports_error_closes_environment_and_can_retry
+r16_wtslogger.
+  init_returns_silently_when_config_file_is_missing
+  init_registers_logger_then_throws_without_root
+  register_handler_accepts_null_and_real_handler
+  log_at_none_level_reaches_uninited_print_path
+  log_dyn_creates_dynamic_logger_and_free_all_drops_it
+  log_dyn_prefix_builds_bracket_prefix
+  log_by_cat_prefix_should_format_the_message
+  log_by_cat_prefix_ignores_null_category
+  log_by_cat_prefix_truncates_long_category_without_overflow
+r16_dllhelper.
+  wrap_module_prefixes_lib_and_dylib
+  wrap_module_moves_leading_non_alpha_before_prefix
+  wrap_module_without_alpha_uses_numeric_prefix
+  wrap_module_without_alpha_inputs_terminate
+  load_missing_library_returns_null_and_helpers_tolerate_it
+r16_modulehelper.
+  get_bin_dir_returns_existing_directory_with_trailing_slash
+r16_strutil.
+  trim_inplace_left_only_keeps_right_ws
+  trim_inplace_right_only_keeps_left_ws
+  trim_inplace_custom_delims
+  trim_cstr_only_right
+  trim_all_chars_removed_yields_empty
+  trimAll_chained_filter_matches_doc
+  trimAll_default_only_whitespace_family
+  find_first_of_nul_returns_length
+  find_first_not_found_is_npos
+  find_last_at_end_and_absent
+  split_respects_max_splits
+  split2_respects_max_splits
+  split2_advances_by_delim_length
+  split_leading_delim_yields_empty_first
+  split_output_version_appends_to_existing_vector
+  split_empty_string_yields_one_empty_item
+  replace_all_occurrences_and_longer_target
+  replace_no_match_keeps_string
+  replace_shrinks_target
+  replace_with_empty_target_removes_matches
+  replace_with_empty_source_and_nonempty_target_is_noop
+  replace_with_empty_source_and_empty_target_is_noop
+  standardise_path_non_dir_no_trailing_slash
+  standardise_path_empty_string
+r16_stdutils.
+  stdlocker_locks_and_releases_on_scope_exit
+  stdlocker_locks_once_and_unlocks_once_on_destroy
+  stdlocker_nested_scopes_lock_twice_unlock_twice
+  stdfile_write_then_read_whole_file
+  stdfile_read_missing_file_throws
+  stdfile_read_offset_beyond_size_throws
+  stdfile_read_offset_equal_size_returns_zero
+  stdfile_read_clamps_length_to_file_end
+  stdfile_read_partial_window
+  stdfile_write_raw_buffer_overwrites_and_reads_back
+  stdfile_write_to_missing_directory_throws
+  stdfile_exists_true_for_file_false_for_missing
+  stdfile_empty_file_read_returns_zero
+r16_timeutils.
+  fasttime_epoch_zero_utc
+  fasttime_matches_libc_for_2023_epoch_with_plus8_zone
+  fasttime_handles_minute_and_second_fields
+  fasttime_negative_timezone_offset
+  fasttime_does_not_fill_week_or_dst_fields
+  fasttime_pre_epoch_seconds_floor_normalize
+  time32_date_and_time_from_local_epoch
+  time32_ctor_from_milliseconds_splits_msec
+  time32_ctor_without_msecs_defaults_to_zero
+  time32_default_state_is_deterministic
+  time32_from_local_time_overwrites_previous_value
+  time32_time_ms_is_time_times_1000_plus_msec
+  time_to_string_returns_empty_for_small_negative_input
+  time_to_string_returns_empty_for_zero
+  time_to_string_without_millisec_has_no_dot
+  time_to_string_with_millisec_appends_dot_msec
+  tz_offset_is_cached_and_in_whole_hours
+R55_codehelper.
+  is_std_chn_fut_opt_code_rejects_each_bad_state
+  extract_std_chn_fut_opt_code_czce_product_appends_side
+  extract_std_code_uses_rule_tag_from_hot_mgr
+  is_monthly_code_six_digits_and_letter_cutoffs
+R55_charconv.
+  utf8_and_gb2312_roundtrip_for_fixed_chinese_input
+  utf8_helpers_handle_empty_inputs
+  null_inputs_keep_null_pointers
+  ascii_helpers_keep_original_pointer_and_convert_operators
+  two_byte_utf8_is_accepted
+  encoding_helper_two_byte_and_gbk_boundaries
+  is_gbk_rejects_invalid_and_truncated_pairs
+R55_inihelper.
+  comments_whitespace_and_empty_section_are_ignored
+  direct_read_write_value_with_dotted_path
+  save_to_explicit_path_does_not_touch_loaded_file
+R55_boostfile.
+  static_size_and_invalid_handle_pointer_queries
+  truncate_growth_zero_fills_and_reads_back
+  read_only_handle_reads_but_rejects_write_and_truncate
+R55_kvcache.
+  put_if_none_resizes_when_capacity_is_full
+  reopen_with_enlarged_file_preserves_persisted_size
+R55_mappingfile.
+  default_state_and_idempotent_close
+  map_missing_file_returns_false
+  read_write_mapping_syncs_modification_to_disk
+  read_only_mapping_exposes_content
+R55_stdutils.
+  exists_long_path_false_and_write_to_directory_throws
+R55_cpuhelper.
+  core_count_and_out_of_range_binding
+R55_timeutils.
+  get_next_date_negative_and_year_boundaries
+  get_next_month_whole_year_and_large_offsets
+  make_time_leap_day_and_end_of_day
+  get_local_time_with_and_without_milliseconds_shape
+  time32_fmt_pads_milliseconds_to_three_digits
+R55_strutil.
+  split2_multichar_leading_and_trailing_delims
+  split_output_max_splits_with_leading_empty
+R1BaseDataMgrTest.
+  loaders_reject_missing_and_broken_files
+  sessions_loaded_and_missing_sections_skipped
+  commodities_lookup_and_missing_session_branches
+  contract_lookup_by_code_fullcode_altcode_and_dates
+  code_list_sorted_by_fullcode_and_index_queries
+  holidays_and_trading_date_arithmetic
+  invalid_dates_fail_closed_for_trading_calendar_queries
+  boundary_time_offsets_and_weekend_shift
+  calc_trading_date_branches
+  missing_commodity_pid_falls_back_to_empty_tpl
+  getTplIDByPID_malformed_and_valid_pid_holiday_semantics
+R1BaseDataMgrOwnership.
+  created_map_values_are_released_with_manager
+  commodity_session_assignment_owns_references
+  reload_and_external_commodity_keep_sessions_alive
+R1BaseDataMgrConfigBoundary.
+  commodity_identity_fields_enforce_caps_and_retain_values
+  contract_identity_fields_enforce_caps_and_retain_values
+  configured_altcode_caps_and_empty_fallback_are_observable
+R1DataDefTest.
+  value_array_append_at_negative_index_and_resize
+  value_array_max_min_with_abs_and_invalid_holes
+  kline_slice_multi_block_at_walks_offsets
+  kline_slice_max_min_price_and_empty_behavior
+  kline_slice_extract_data_all_field_types
+  kline_slice_extract_svolume_big_volume_clamped_branch
+  kline_data_flags_period_and_range_bounds
+  tick_slice_append_insert_and_index_walk
+  his_tick_data_append_tick_applies_adj_factor
+  orddtl_ordque_trans_slice_core_access
+R1RdmHftTest.
+  ordque_his_roundtrip_and_same_day_window
+  ordque_cross_day_window_returns_full_prefix
+  ordque_cache_hit_survives_file_removal
+  ordque_size_check_failures_log_error_and_recover_never
+  ordque_missing_file_returns_null_without_error_log
+  ordque_today_window_without_rt_block_returns_null
+  orddtl_his_first_read_roundtrip
+  trans_his_first_read_roundtrip
+  queue_then_detail_and_trans_use_independent_history_caches
+  detail_and_trans_before_queue_keep_reverse_order_caches_independent
+  trans_size_check_short_file_logs_error
+R1ReaderBarsTest.
+  day_his_raw_v2_tail_window_by_count
+  day_his_cmp_v2_and_old_struct_upgrade
+  day_his_cutoff_excludes_later_bar
+  day_his_cutoff_is_inclusive_and_clamps_to_available_history
+  day_size_check_failure_logs_error_and_returns_empty
+  min5_his_roundtrip_uses_min5_dir
+  min1_his_cutoff_uses_encoded_calendar_time
+  min1_splices_his_tail_with_rt_block_of_today
+  bars_cache_hit_survives_file_deletion
+  missing_his_file_returns_empty_slice_not_null
+  header_only_his_block_returns_empty_slice
+  zero_count_returns_empty_slice_for_nonempty_history
+R22ExtPorterTest.
+  FiveDumpersReturnFalseBeforeAnyRegistration
+  RegisterExtDumperEnablesBarsAndTicksOnly
+  RegisterHftDumperEnablesThreeHftSlotsOnly
+  DumperForwardsPointerIdentityAndCallbackReturnValue
+  ReregisteringDumpersWithNullsClearsEverySlot
+  SixParserEntriesAreSilentBeforeRegistration
+  FourParserEventsMapToPorterDefsConstants
+  SubscribeAndUnsubscribeCarryOneCallbackPerCode
+  SlotsOfTwoRunnersDoNotLeakIntoEachOther
+  ExpParserLifecycleForwardsFourEventsAndReturnsTrue
+  ExpParserSubscribeWalksEveryCodeInSet
+  ExpParserRegisterSpiPullsBaseDataMgrOncePerValidSink
+  CreateExtParserFiresInitThroughExpParserOnSingleton
+  CreateExtDumperRegistersByIdOnSingleton
+  ExtDumperIdIsIndependentOfCreateExtDumperId
+  PushQuoteForUnknownParserLeavesTickUntouched
+  PushQuoteForKnownExtParserStopsAtZeroDates
+  PushQuoteAfterInitResolvesContractAndWrites
+  CApiCreateExtParserAndPushQuoteReachTheRegisteredSlots
+  CApiCreateExtParserRejectsEmptyAndDuplicateIds
+  ParserInitCallbackCanReenterDuplicateCreateWithoutDeadlock
+  ConcurrentCreateAndQuoteLookupUseRegistrySnapshotAndConnectAfterStart
+R22PorterCapiTest.
+  VersionStringIsPlatformPrefixedAndBuiltOnce
+  WriteLogKeepsCallerBuffersUnchanged
+  WriteLogBelowLoggerThresholdIsDropped
+  RegisterExtendedDumperStoresBothBarAndTickSlots
+  ExpParserEventsReachGlobalRunnerNotTheOwningRunner
+  ExpDumperAlwaysForwardsToGlobalRunnerNotOwningRunner
+  CapiInitializeWithAbsentLogFileKeepsLoggerUninited
+  CreateExtDumpersWithUniqueIdsAndDirectDumperCallback
+  WriteLogWritesRawMessagesLiterally
+  DISABLED_write_log_with_null_category_hits_strlen_null
+  DISABLED_capi_start_without_initialization_spawns_lifetime_monitor
+  ConfiguredStartChildChecksStateMonitor
+  CapiStartHonorsConfiguredAlldayModeInIsolatedProcesses
+R22RunnerInitTest.
+  AlldayModeWithScalarBasefilesLoadsContractsAndSkipsParsers
+  NonAlldayModeInitializesStateMonitorAndStillLoadsBasefiles
+  HolidayHotSecondAndCustomRulesSectionsAreLoadedWithoutBreakingBasefiles
+  BasefilesCommodityAndContractAsArraysWalkBothBranches
+  ConfigFileLoadedFromDiskPathWhenCfgFileFlagIsTrue
+  UnparseableContentReturnsBeforeLoadingBasefiles
+  MissingConfigFileReturnsBeforeLoadingBasefiles
+  ActiveShmCasterFailureBlocksInitializationAndStart
+  ActiveShmCasterSuccessDoesNotBlockStart
+  InactiveShmCasterDoesNotBlockStart
+  IndexSectionWithAbsentFileIsReportedAndDoesNotBreakBasefiles
+  ActiveParserModuleFailureBlocksStartup
+  ExistingParserFileActiveModuleFailureBlocksStartup
+  ParsersAsStringPathToMissingFileIsSkipped
+  MissingOrWrongRequiredConfigurationBlocksStart
+  StructurallyValidConfigWithUnavailableWriterStillAllowsParserStart
+  DISABLED_start_sync_branch_never_returns
+  DISABLED_start_async_branch_spawns_state_monitor_thread
+R22WriterStartTest.
+  RealWriterInitAcceptsAndPersistsTick
+  RunnerStartsWithRealWriterAndReleasesItOnScopeExit
+L03WriterSessionDate.
+  InvalidDateRejectedBeforeSynchronousEffectsAndCanRetry
+  InvalidDateRejectedBeforeAsyncAdmission
+  MissingAndMalformedDatesAndMissingSessionRejected
+  AcceptedQueuedTickRecheckedBeforeEffects
+  SynchronousSinkReentryCannotPublishInvalidDate
+  MissingContractKeepsAcceptedNoOpBehavior
+R100WriterTest.
+  R100WriterNullDumperAndUnknownSessionComm
+R112WriterResizeFailureTest.
+  R112WriterTickBlockExpansionFailureIsLogged
+R122WriterBaseInitTest.
+  R122WriterTickCacheUninitializedIsLogged
+R162WriterClosingEdgeTest.
+  R162WriterClosingOpenFailuresAreLogged
+  R162WriterRawMin1BlockHeaderIsStrippedBeforeAppend
+R172WriterClearCacheTest.
+  R172WriterClearCacheRebuildsExpiredCode
+  R172WriterClearCacheKeepsAllLiveCodes
+  R172WriterClearCacheWithEmptyCache
+R193WriterAltCodeTest.
+  DumpBarsRenamesAltCodeFileAndAppends
+R212WriterTailTest.
+  R212WriterTickResizeRejectsTruncatedFile
+  R212WriterKlineZeroLowThenNonZeroLowMerge
+  R212WriterSessionRejectionSkipsAllIntradayBlocks
+R23RdmCountTest.
+  CountWalksBackAcrossDaysUntilSatisfied
+  CountStopsAfterThirtyMissingDays
+  CountTakesRealtimeTailFirstThenOneHisTick
+  CountZeroReturnsEmptySliceWithoutTouchingFiles
+  HisWindowBoundaryKeepsTickExactlyAtEtime
+  RtWindowBoundaryKeepsTickExactlyAtEtime
+  HisEarlierActionDateWithLaterClockStaysBeforeEtime
+  RtEarlierActionDateWithLaterClockStaysBeforeEtime
+  CountSizeCheckFailureCanRecoverAfterFileRepair
+  CountWithNoDataAtAllReturnsEmptySlice
+  KlineCountIsTailWindowOfHisDayBars
+  KlineCountWithZeroEtimeUsesYear2030Sentinel
+  KlineCountSplicesHisTailWithRtMin1Block
+  KlineCountWithNoBarsAnywhereReturnsEmptyResult
+  KlineCountWithEmptyHistoryKeepsRealtimeBars
+R23RdmCountStrictProbe.
+  CountUsesProductAndSafelyRejectsUnknownCommodity
+R23WriterTest.
+  TransHisDataMovesRtTicksToCompressedDsb
+  TransHisDataWritesMarkerThenNextInitSeesSessionProceeded
+  TransHisDataWithUnknownSessionStaysSilent
+  SecondClosingRunAppendsMinBarsAndReplacesDayBar
+  ExtendedDumperReceivesDayMin1Min5BarsAndTicks
+  ExtendedDumperFailureOnlyLogsError
+  DisabledHistorySkipsClosingWorkButStillMarks
+  GetCurTickSeesCacheWrittenBeforeClosing
+  DISABLED_ClearCacheCommandMaySleepThreeHundredSeconds
+  Min1BarIsLabelledWithMinuteEnd
+  SecondTickSameMinuteMergesOhlcAndAmounts
+  Min5BucketsEveryFiveMinutes
+  LastMinuteOfSectionFallsIntoSectionCloseLabel
+  ZeroPriceOpeningTickIsBackfilledByNextTick
+  InvalidActionTimeOnlyWarnsAndKeepsBars
+  SkipNotradeBarSuppressesBarGeneration
+  SkipNotradeTickMergesOnlyTradingTicks
+  MinPriceModeOneWritesBidAskIntoHoldAddUnion
+  OrderQueueWritesRtBlockAndCountsReceipts
+  OrderDetailAndTransactionWriteTheirOwnRtBlocks
+  NullAndDisabledHftWritersAreRejected
+  DisableOrderDetailAndTransactionAreIndependent
+  SessionNotReceivingStopsAllHftWriters
+  InitCreatesCacheDmbSizedByContractCount
+  InitReadsMarkerSectionAndReportsProceededByDate
+  DISABLED_SecondInitOnSameWriterTerminatesProcess
+  LoadCacheReindexesItemsFromExistingFile
+  GetCurTickRejectsEmptyCodeAndUnknownAndUncached
+  WriteTickNullReturnsFalse
+  FirstTickOfTradingdaySeedsCacheAndRaisesNewHighLow
+  ProcFlagOneDerivesIncrementalVolumeTurnoverInterest
+  TickWithOlderTradingdayIsDroppedBeforeAnyWrite
+  NightSessionOffsetDateAheadOfTradingdayAbandonsTick
+  TotalVolumeRollbackAbandonsTick
+  SameOrEarlierTimestampGetsCentisecondBumpChain
+  CacheGrowsByStepWhenCapacityExhausted
+  CacheResizeMapFailurePreservesOldCacheAndAllowsRetry
+  SaveTickLogWritesCommaSeparatedRows
+  DisableTickStillFeedsCacheAndKlines
+  SessionNotReceivingStopsEverythingBeforeCache
+  LogGroupSizeControlsReceiptCounterLogging
+WriterResizeAfterExtendTest.
+  RemapFailureAfterFileExtensionKeepsOldTicksAndCanRetry
+  ShortExtensionWithLegacyOversizedTailDoesNotPublishCapacityAndCanRetry
+  DailyRecordBlocksKeepOldPointerAndRetryAfterRemapFailure
+  ReopenedDailyBlocksPreserveCommittedSizeAcrossExpandedTails
+  MinuteBlocksKeepOldDataAndRetryAfterRemapFailure
+R52RdmTest.
+  R52HotContinuousDayBarsUseSectionsAndHotTail
+  R52HotContinuousMin1SplicesRealtimeBars
+  R52AdjustedStockBarsReadCompressedOldFileAndRawSuffix
+  R52HotContinuousByCountExrightUsesRealtimeCacheBranch
+  R52HotTickCodeProbesCustomRawFileAndRealtimeBlock
+  R52ExrightRealtimeRangeCopiesFirstSingleAndMultipleBars
+  R52ExrightRealtimeRangeSkipsAnEmptyRealtimeBlock
+  R52ExrightRealtimeRangeBoundsBeforeHitAndAfterLast
+  R52ExrightRealtimeCountBoundsBeforeHitAndAfterLast
+R52WriterTest.
+  R52RtBlockDateRolloverResetsAllFourBlocks
+  R52RtBlockCapacityRepairFromFileSize
+  R52Min1Min5BlocksGrowWhenCapacityExhausted
+  R52DayBarAltCodeRenameAndCompressionAfterHundredBars
+R70WriterResidualTest.
+  R70WriterClosingDumpsTransOrderAndQueueHis
+  R70WriterClosingResetsTickCsvStream
+  R70WriterInitCreatesDirAndDefaultCacheName
+  R70WriterAsyncPipelineDrainsAllTypes
+R74WriterResidualTest.
+  R74WriterMinPriceModeUpdatesMergedBars
+  R74WriterNullDumperIsSkippedInAllBarLoops
+  R74WriterClosingWithoutTickSkipsBarDumps
+  R74WriterReopenSeesCachedTickAndOverwritesSlot
+R94WriterMidnightTest.
+  R94WriterMidnightBarWrapsToTradingDate
+ParserLifecycleV2Abi.
+  StructSizesAndCapabilitiesAreExplicit
+  UndersizedOrIncompleteTableCannotReachCreate
+  FactoryPreflightRunsBeforeCreateAndMustSucceed
+  SameMajorMinorExtensionAndUnknownCapabilitiesAreCompatible
+  ModuleDestroyClearsOpaqueHandle
+ws01_strutil.
+  trim_inplace_left_right
+  trim_cstr
+  trim_all
+  find_first_last
+  split_vector
+  split_output_param
+  split2
+  case_conversion
+  starts_with
+  ends_with
+  standardise_path
+  replace
+  is_empty
+ws03_value_array.
+  lifecycle_and_access
+  max_min_range_and_abs
+ws03_kline_slice.
+  blocks_and_access
+  empty_slice
+  extract_data_fields
+  extract_data_rejects_range_after_all_bars
+  extract_data_rejects_disjoint_ranges_and_clips_overlap
+ws03_kline_data.
+  create_period_and_empty
+  accessors_and_bounds
+  append_bar_replaces_same_slot
+  extract_data_fields_and_invalid_range
+ws03_tick_data.
+  create_by_code_and_flags
+  accessors_and_ten_levels
+ws03_tick_ref.
+  reference_semantics
+ws03_order_queue_data.
+  create_and_accessors
+ws03_order_detail_data.
+  create_and_accessors
+ws03_trans_data.
+  create_and_accessors
+ws03_his_tick_data.
+  create_and_append_with_factor
+ws03_tick_slice.
+  blocks_access_and_insert
+ws03_order_detail_slice.
+  create_and_at
+ws03_order_queue_slice.
+  create_and_at
+ws03_trans_slice.
+  create_and_at
+ws05_cfgloader.
+  ParseJsonScalarTypes
+  ParseJsonNestedObjectAndArray
+  RejectJsonTopLevelArray
+  RejectJsonTopLevelScalars
+  RejectJsonInvalidAndEmpty
+  InternalJsonToVariantTypeMismatch
+  ParseYamlMapAndSequence
+  RejectYamlTopLevelSequence
+  RejectYamlTopLevelScalar
+  RejectYamlEmptyAndNull
+  InternalYamlToVariantNullRoot
+  YamlSyntaxErrorThrows
+  ContentUtf8Chinese
+  ContentGbkChineseConverted
+ws05_CfgLoaderFile.
+  MissingFileReturnsNull
+  EmptyFileReturnsNull
+  LoadJsonFile
+  LoadYamlAndYmlFiles
+  UnknownExtensionReturnsNull
+  GbkEncodedFilesAreConverted

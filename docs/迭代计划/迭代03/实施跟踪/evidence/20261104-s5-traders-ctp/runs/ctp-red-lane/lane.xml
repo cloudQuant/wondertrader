@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="74" failures="25" disabled="5" errors="0" time="8.702" timestamp="2026-11-04T17:45:56.388" name="AllTests">
+  <testsuite name="gate_placeholder_TraderCTP" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2026-11-04T17:45:56.388">
+    <testcase name="compiles_with_module_flags" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/gate_placeholder_test.cpp" line="4" status="run" result="completed" time="0." timestamp="2026-11-04T17:45:56.388" classname="gate_placeholder_TraderCTP" />
+  </testsuite>
+  <testsuite name="T25TraderCTPTest" tests="47" failures="9" disabled="4" skipped="0" errors="0" time="8.694" timestamp="2026-11-04T17:45:56.389">
+    <testcase name="plugin_entry_points_build_and_destroy_trader" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="619" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:45:56.389" classname="T25TraderCTPTest" />
+    <testcase name="init_falls_back_to_ctptdflow_and_ignores_non_string_front" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="637" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:45:56.390" classname="T25TraderCTPTest" />
+    <testcase name="init_keeps_trailing_slash_of_given_flowdir" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="654" status="run" result="completed" time="0." timestamp="2026-11-04T17:45:56.392" classname="T25TraderCTPTest" />
+    <testcase name="str_to_time_strips_colons_and_parses_to_uint" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="674" status="run" result="completed" time="0." timestamp="2026-11-04T17:45:56.393" classname="T25TraderCTPTest" />
+    <testcase name="login_rsp_with_error_marks_login_failed_and_never_queries_confirm" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="685" status="run" result="completed" time="0." timestamp="2026-11-04T17:45:56.393" classname="T25TraderCTPTest" />
+    <testcase name="login_rsp_with_null_rspinfo_is_taken_as_success" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="716" status="run" result="completed" time="0." timestamp="2026-11-04T17:45:56.394" classname="T25TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:732&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:732
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:733&#x0A;Expected equality of these values:&#x0A;  7u&#x0A;    Which is: 7&#x0A;  trader_.frontId()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:733
+Expected equality of these values:
+  7u
+    Which is: 7
+  trader_.frontId()
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:734&#x0A;Expected equality of these values:&#x0A;  8u&#x0A;    Which is: 8&#x0A;  trader_.sessionId()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:734
+Expected equality of these values:
+  8u
+    Which is: 8
+  trader_.sessionId()
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:735&#x0A;Expected equality of these values:&#x0A;  50u&#x0A;    Which is: 50&#x0A;  trader_.orderRef()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:735
+Expected equality of these values:
+  50u
+    Which is: 50
+  trader_.orderRef()
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:736&#x0A;Expected equality of these values:&#x0A;  0u&#x0A;    Which is: 0&#x0A;  sink_.n_login_result_&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:736
+Expected equality of these values:
+  0u
+    Which is: 0
+  sink_.n_login_result_
+    Which is: 1
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:737&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  trader_.queryDepth()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:737
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+]]></failure>
+    </testcase>
+    <testcase name="do_login_send_failure_is_logged_without_waiting_for_response" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="743" status="run" result="completed" time="0." timestamp="2026-11-04T17:45:56.394" classname="T25TraderCTPTest" />
+    <testcase name="order_insert_and_action_send_failures_return_error_and_are_logged" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="761" status="run" result="completed" time="0.005" timestamp="2026-11-04T17:45:56.395" classname="T25TraderCTPTest" />
+    <testcase name="authenticate_sync_failure_returns_error_without_waiting_for_login" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="785" status="run" result="completed" time="0." timestamp="2026-11-04T17:45:56.400" classname="T25TraderCTPTest" />
+    <testcase name="order_insert_without_usertag_allocates_identity_and_cache" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="804" status="run" result="completed" time="0.002" timestamp="2026-11-04T17:45:56.400" classname="T25TraderCTPTest" />
+    <testcase name="order_insert_rejects_malformed_entrust_id_when_usertag_set" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="823" status="run" result="completed" time="0.007" timestamp="2026-11-04T17:45:56.403" classname="T25TraderCTPTest" />
+    <testcase name="order_insert_wraps_bestprice_lastprice_and_every_offset" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="839" status="run" result="completed" time="0.008" timestamp="2026-11-04T17:45:56.411" classname="T25TraderCTPTest" />
+    <testcase name="order_insert_direction_flag_is_swapped_for_short_close" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="880" status="run" result="completed" time="0.002" timestamp="2026-11-04T17:45:56.420" classname="T25TraderCTPTest" />
+    <testcase name="order_action_rejects_entrust_id_with_only_one_hash" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="928" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:45:56.422" classname="T25TraderCTPTest" />
+    <testcase name="disconnect_without_worker_only_queues_release" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="951" status="run" result="completed" time="0." timestamp="2026-11-04T17:45:56.423" classname="T25TraderCTPTest" />
+    <testcase name="release_after_ready_clears_api_and_every_container" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="968" status="run" result="completed" time="0.016" timestamp="2026-11-04T17:45:56.424" classname="T25TraderCTPTest" />
+    <testcase name="connect_with_stub_creator_wires_spi_fronts_and_worker_sends_query" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1018" status="run" result="completed" time="1.012" timestamp="2026-11-04T17:45:56.440" classname="T25TraderCTPTest" />
+    <testcase name="settlement_confirm_older_than_trading_day_goes_through_confirm" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1082" status="run" result="completed" time="0.014" timestamp="2026-11-04T17:45:57.452" classname="T25TraderCTPTest" />
+    <testcase name="settlement_confirm_query_with_null_field_or_error_keeps_or_skips_state" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1123" status="run" result="completed" time="0.002" timestamp="2026-11-04T17:45:57.467" classname="T25TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1144&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_CONFIRM_QRYED&#x0A;    Which is: 4&#x0A;  trader_.state()&#x0A;    Which is: 2&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1144
+Expected equality of these values:
+  TraderCTP::WS_CONFIRM_QRYED
+    Which is: 4
+  trader_.state()
+    Which is: 2
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1145&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  api_.n_confirm_.load()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1145
+Expected equality of these values:
+  1
+  api_.n_confirm_.load()
+    Which is: 0
+]]></failure>
+    </testcase>
+    <testcase name="settlement_confirm_rsp_only_acts_in_confirm_qryed_state" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1148" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:45:57.469" classname="T25TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1176&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_ALLREADY&#x0A;    Which is: 6&#x0A;  trader_.state()&#x0A;    Which is: 4&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1176
+Expected equality of these values:
+  TraderCTP::WS_ALLREADY
+    Which is: 6
+  trader_.state()
+    Which is: 4
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1177&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  sink_.n_login_result_&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1177
+Expected equality of these values:
+  1u
+    Which is: 1
+  sink_.n_login_result_
+    Which is: 0
+]]></failure>
+    </testcase>
+    <testcase name="confirm_send_failure_fails_login_without_waiting_for_callback" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1180" status="run" result="completed" time="0.012" timestamp="2026-11-04T17:45:57.470" classname="T25TraderCTPTest" />
+    <testcase name="query_confirm_send_failure_is_logged_inside_worker_item" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1199" status="run" result="completed" time="0.003" timestamp="2026-11-04T17:45:57.483" classname="T25TraderCTPTest" />
+    <testcase name="query_confirm_sync_failure_clears_gate_and_worker_releases" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1209" status="run" result="completed" time="7.564" timestamp="2026-11-04T17:45:57.486" classname="T25TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1223&#x0A;Value of: waitUntil([this]() { return api_.n_qry_confirm_.load() == 1 &amp;&amp; !trader_.inQuery() &amp;&amp; sink_.hasLog(&quot;Sending query of settlement data confirming state failed: 7&quot;); })&#x0A;  Actual: false&#x0A;Expected: true&#x0A;同步拒绝后查询 gate 或失败日志未完成&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1223
+Value of: waitUntil([this]() { return api_.n_qry_confirm_.load() == 1 && !trader_.inQuery() && sink_.hasLog("Sending query of settlement data confirming state failed: 7"); })
+  Actual: false
+Expected: true
+同步拒绝后查询 gate 或失败日志未完成
+]]></failure>
+    </testcase>
+    <testcase name="position_cover_today_short_today_row_subtracts_long_frozen" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1269" status="run" result="completed" time="0.002" timestamp="2026-11-04T17:46:05.050" classname="T25TraderCTPTest" />
+    <testcase name="position_cover_today_history_rows_clamp_negative_availability" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1306" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:46:05.052" classname="T25TraderCTPTest" />
+    <testcase name="position_direct_cover_splits_new_pre_and_both_freeze_sides" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1339" status="run" result="completed" time="0.002" timestamp="2026-11-04T17:46:05.053" classname="T25TraderCTPTest" />
+    <testcase name="position_combination_skips_availability_and_zero_margin_clears_it" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1388" status="run" result="completed" time="0.002" timestamp="2026-11-04T17:46:05.057" classname="T25TraderCTPTest" />
+    <testcase name="position_zero_total_sets_avg_price_to_zero_and_still_pushes" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1412" status="run" result="completed" time="0.003" timestamp="2026-11-04T17:46:05.060" classname="T25TraderCTPTest" />
+    <testcase name="position_error_last_row_pushs_accumulated_then_map_is_reset" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1429" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:46:05.063" classname="T25TraderCTPTest" />
+    <testcase name="usertag_round_trips_from_eid_cache_into_order_then_trade" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1455" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:46:05.065" classname="T25TraderCTPTest" />
+    <testcase name="order_rsp_maps_rejected_submit_status_and_mv_volume_and_reverse_types" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1539" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:46:05.066" classname="T25TraderCTPTest" />
+    <testcase name="entrust_rsp_maps_ioc_cv_to_fok_and_usertag_from_cache" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1592" status="run" result="completed" time="0.002" timestamp="2026-11-04T17:46:05.068" classname="T25TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1623&#x0A;Expected equality of these values:&#x0A;  eid&#x0A;    Which is: &quot;012345#0000000067#001001&quot;&#x0A;  sink_.ent_eid_&#x0A;    Which is: &quot;&quot;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1623
+Expected equality of these values:
+  eid
+    Which is: "012345#0000000067#001001"
+  sink_.ent_eid_
+    Which is: ""
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1624&#x0A;Expected equality of these values:&#x0A;  &quot;TAG-E&quot;&#x0A;  sink_.ent_usertag_&#x0A;    Which is: &quot;&quot;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1624
+Expected equality of these values:
+  "TAG-E"
+  sink_.ent_usertag_
+    Which is: ""
+]]></failure>
+    </testcase>
+    <testcase name="rsp_order_insert_with_unknown_contract_pushes_only_trader_error" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1650" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:46:05.070" classname="T25TraderCTPTest" />
+    <testcase name="rsp_order_action_error_carries_action_fields_and_bare_message" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1679" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:46:05.071" classname="T25TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1711&#x0A;Expected equality of these values:&#x0A;  &quot;TAG-C&quot;&#x0A;  sink_.act_usertag_&#x0A;    Which is: &quot;&quot;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1711
+Expected equality of these values:
+  "TAG-C"
+  sink_.act_usertag_
+    Which is: ""
+]]></failure>
+    </testcase>
+    <testcase name="trade_with_unknown_contract_is_dropped_by_both_channels" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1719" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:46:05.072" classname="T25TraderCTPTest" />
+    <testcase name="qry_order_and_trade_rows_accumulate_and_clear_after_last" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1739" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:46:05.074" classname="T25TraderCTPTest" />
+    <testcase name="settlement_info_concatenates_rows_and_pushes_only_when_non_empty" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1795" status="run" result="completed" time="0.002" timestamp="2026-11-04T17:46:05.075" classname="T25TraderCTPTest" />
+    <testcase name="unsupported_time_condition_keeps_other_order_mappings" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1823" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:46:05.078" classname="T25TraderCTPTest" />
+    <testcase name="front_and_heartbeat_paths_are_quiet_when_sink_is_unregistered" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1879" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.079" classname="T25TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1900&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINFAILED&#x0A;    Which is: 3&#x0A;  trader_.state()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1900
+Expected equality of these values:
+  TraderCTP::WS_LOGINFAILED
+    Which is: 3
+  trader_.state()
+    Which is: 0
+]]></failure>
+    </testcase>
+    <testcase name="front_disconnect_resets_state_and_logout_reports_reason" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1911" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.080" classname="T25TraderCTPTest" />
+    <testcase name="confirm_guard_rejects_when_api_is_gone_or_state_moved_on" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="1983" status="run" result="completed" time="0.001" timestamp="2026-11-04T17:46:05.081" classname="T25TraderCTPTest" />
+    <testcase name="login_warns_and_continues_when_cache_dir_is_not_writable" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="2008" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.082" classname="T25TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2033&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2033
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2034&#x0A;Expected equality of these values:&#x0A;  20240115u&#x0A;    Which is: 20240115&#x0A;  trader_.tradingDate()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2034
+Expected equality of these values:
+  20240115u
+    Which is: 20240115
+  trader_.tradingDate()
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2039&#x0A;Expected: (2) &lt;= (failed_mapping_logs), actual: 2 vs 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2039
+Expected: (2) <= (failed_mapping_logs), actual: 2 vs 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2040&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  trader_.queryDepth()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2040
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+]]></failure>
+    </testcase>
+    <testcase name="order_insert_rejects_when_user_tag_cache_init_failed" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="2046" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.083" classname="T25TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:564&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:564
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2059&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  trader_.queryDepth()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2059
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+]]></failure>
+    </testcase>
+    <testcase name="DISABLED_settlement_info_last_row_without_payload_crashes" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="2091" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="T25TraderCTPTest" />
+    <testcase name="DISABLED_rsp_error_with_null_sink_crashes" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="2109" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="T25TraderCTPTest" />
+    <testcase name="DISABLED_disconnect_hangs_when_no_response_clears_in_query" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="2126" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="T25TraderCTPTest" />
+    <testcase name="DISABLED_plugin_created_trader_has_indeterminate_sink" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp" line="2146" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="T25TraderCTPTest" />
+  </testsuite>
+  <testsuite name="T2TraderCTPTest" tests="26" failures="16" disabled="1" skipped="0" errors="0" time="0.007" timestamp="2026-11-04T17:46:05.083">
+    <testcase name="init_reads_broker_user_and_defaults" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="453" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.083" classname="T2TraderCTPTest" />
+    <testcase name="init_accepts_front_array_and_quick_flag" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="466" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.084" classname="T2TraderCTPTest" />
+    <testcase name="release_without_api_only_marks_stopped" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="486" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.084" classname="T2TraderCTPTest" />
+    <testcase name="connect_rejects_missing_creator_without_starting_worker" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="494" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.084" classname="T2TraderCTPTest" />
+    <testcase name="connect_rejects_null_api_created_by_creator" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="504" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.085" classname="T2TraderCTPTest" />
+    <testcase name="login_logout_and_queries_rejected_without_api" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="514" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.085" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:519&#x0A;Expected equality of these values:&#x0A;  &quot;u2&quot;&#x0A;  trader_.user()&#x0A;    Which is: &quot;88880001&quot;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:519
+Expected equality of these values:
+  "u2"
+  trader_.user()
+    Which is: "88880001"
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:520&#x0A;Expected equality of these values:&#x0A;  &quot;prod2&quot;&#x0A;  trader_.prodInfo()&#x0A;    Which is: &quot;&quot;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:520
+Expected equality of these values:
+  "prod2"
+  trader_.prodInfo()
+    Which is: ""
+]]></failure>
+    </testcase>
+    <testcase name="order_and_query_rejected_when_state_not_ready" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="527" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.086" classname="T2TraderCTPTest" />
+    <testcase name="authenticate_failure_marks_login_failed_and_reports" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="550" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.086" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:568&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINFAILED&#x0A;    Which is: 3&#x0A;  trader_.state()&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:568
+Expected equality of these values:
+  TraderCTP::WS_LOGINFAILED
+    Which is: 3
+  trader_.state()
+    Which is: 1
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:570&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  sink_.n_login_result_&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:570
+Expected equality of these values:
+  1
+  sink_.n_login_result_
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:572&#x0A;Expected equality of these values:&#x0A;  &quot;AuthCode invalid&quot;&#x0A;  sink_.last_msg_&#x0A;    Which is: &quot;&quot;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:572
+Expected equality of these values:
+  "AuthCode invalid"
+  sink_.last_msg_
+    Which is: ""
+]]></failure>
+    </testcase>
+    <testcase name="login_rsp_carries_credentials_and_session_params" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="575" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.087" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:585&#x0A;Value of: trader_.isConnected()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:585
+Value of: trader_.isConnected()
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:586&#x0A;Expected equality of these values:&#x0A;  20240115u&#x0A;    Which is: 20240115&#x0A;  trader_.tradingDate() % 100000000u&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:586
+Expected equality of these values:
+  20240115u
+    Which is: 20240115
+  trader_.tradingDate() % 100000000u
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:587&#x0A;Expected equality of these values:&#x0A;  20240115u&#x0A;    Which is: 20240115&#x0A;  trader_.tradingDate()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:587
+Expected equality of these values:
+  20240115u
+    Which is: 20240115
+  trader_.tradingDate()
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:588&#x0A;Expected equality of these values:&#x0A;  12345u&#x0A;    Which is: 12345&#x0A;  trader_.frontId()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:588
+Expected equality of these values:
+  12345u
+    Which is: 12345
+  trader_.frontId()
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:589&#x0A;Expected equality of these values:&#x0A;  67u&#x0A;    Which is: 67&#x0A;  trader_.sessionId()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:589
+Expected equality of these values:
+  67u
+    Which is: 67
+  trader_.sessionId()
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:590&#x0A;Expected equality of these values:&#x0A;  1000u&#x0A;    Which is: 1000&#x0A;  trader_.orderRef()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:590
+Expected equality of these values:
+  1000u
+    Which is: 1000
+  trader_.orderRef()
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:592&#x0A;Value of: sink_.last_succ_&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:592
+Value of: sink_.last_succ_
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:593&#x0A;Expected equality of these values:&#x0A;  20240115u&#x0A;    Which is: 20240115&#x0A;  sink_.last_tradedate_&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:593
+Expected equality of these values:
+  20240115u
+    Which is: 20240115
+  sink_.last_tradedate_
+    Which is: 0
+]]></failure>
+    </testcase>
+    <testcase name="settlement_unconfirmed_goes_through_confirm" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="596" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.087" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:615&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  trader_.queryDepth()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:615
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:616&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  trader_.drainQueries()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:616
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.drainQueries()
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:617&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  api_.n_qry_confirm_&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:617
+Expected equality of these values:
+  1
+  api_.n_qry_confirm_
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:618&#x0A;Expected equality of these values:&#x0A;  &quot;9999&quot;&#x0A;  std::string(api_.qry_confirm_.BrokerID)&#x0A;    Which is: &quot;&quot;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:618
+Expected equality of these values:
+  "9999"
+  std::string(api_.qry_confirm_.BrokerID)
+    Which is: ""
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:619&#x0A;Expected equality of these values:&#x0A;  &quot;88880001&quot;&#x0A;  std::string(api_.qry_confirm_.InvestorID)&#x0A;    Which is: &quot;&quot;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:619
+Expected equality of these values:
+  "88880001"
+  std::string(api_.qry_confirm_.InvestorID)
+    Which is: ""
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:626&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_CONFIRM_QRYED != trader_.state()&#x0A;    Which is: true&#x0A;  false&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:626
+Expected equality of these values:
+  TraderCTP::WS_CONFIRM_QRYED != trader_.state()
+    Which is: true
+  false
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:628&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  api_.n_confirm_&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:628
+Expected equality of these values:
+  1
+  api_.n_confirm_
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:629&#x0A;Expected equality of these values:&#x0A;  8u&#x0A;    Which is: 8&#x0A;  strlen(api_.confirm_.ConfirmDate)&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:629
+Expected equality of these values:
+  8u
+    Which is: 8
+  strlen(api_.confirm_.ConfirmDate)
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:635&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_ALLREADY&#x0A;    Which is: 6&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:635
+Expected equality of these values:
+  TraderCTP::WS_ALLREADY
+    Which is: 6
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:636&#x0A;Value of: trader_.isConnected()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:636
+Value of: trader_.isConnected()
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:637&#x0A;Value of: sink_.last_succ_&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:637
+Value of: sink_.last_succ_
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="make_entrust_id_is_fixed_width_and_increments_ref" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="640" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.087" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:649&#x0A;Value of: trader_.makeEntrustID(buf, sizeof(buf))&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:649
+Value of: trader_.makeEntrustID(buf, sizeof(buf))
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="make_entrust_id_is_rejected_until_login_session_exists" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="658" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.087" classname="T2TraderCTPTest" />
+    <testcase name="order_insert_maps_types_and_ref_for_shfe" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="671" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.088" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:676&#x0A;Value of: trader_.makeEntrustID(eid, sizeof(eid))&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:676
+Value of: trader_.makeEntrustID(eid, sizeof(eid))
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="order_insert_cffex_anyprice_and_close_offsets" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="722" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.088" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:727&#x0A;Value of: trader_.makeEntrustID(eid, sizeof(eid))&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:727
+Value of: trader_.makeEntrustID(eid, sizeof(eid))
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="order_action_rejects_bad_entrust_id_and_builds_cancel" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="760" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.088" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:775&#x0A;Expected equality of these values:&#x0A;  0&#x0A;  trader_.orderAction(a)&#x0A;    Which is: -1&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:775
+Expected equality of these values:
+  0
+  trader_.orderAction(a)
+    Which is: -1
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:776&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  api_.n_action_&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:776
+Expected equality of these values:
+  1
+  api_.n_action_
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:777&#x0A;Expected equality of these values:&#x0A;  12345&#x0A;  api_.action_.FrontID&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:777
+Expected equality of these values:
+  12345
+  api_.action_.FrontID
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:778&#x0A;Expected equality of these values:&#x0A;  67&#x0A;  api_.action_.SessionID&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:778
+Expected equality of these values:
+  67
+  api_.action_.SessionID
+    Which is: 0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:779&#x0A;Expected equality of these values:&#x0A;  &quot;42&quot;&#x0A;  api_.action_.OrderRef&#x0A;    Which is: &quot;&quot;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:779
+Expected equality of these values:
+  "42"
+  api_.action_.OrderRef
+    Which is: ""
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:780&#x0A;Expected equality of these values:&#x0A;  &apos;0&apos;&#x0A;    Which is: &apos;0&apos; (48, 0x30)&#x0A;  api_.action_.ActionFlag&#x0A;    Which is: &apos;\0&apos;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:780
+Expected equality of these values:
+  '0'
+    Which is: '0' (48, 0x30)
+  api_.action_.ActionFlag
+    Which is: '\0'
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:781&#x0A;Expected equality of these values:&#x0A;  &quot;800042&quot;&#x0A;  api_.action_.OrderSysID&#x0A;    Which is: &quot;&quot;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:781
+Expected equality of these values:
+  "800042"
+  api_.action_.OrderSysID
+    Which is: ""
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:782&#x0A;Expected equality of these values:&#x0A;  kRawCode&#x0A;    Which is: &quot;ag2512&quot;&#x0A;  std::string(api_.action_.InstrumentID)&#x0A;    Which is: &quot;&quot;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:782
+Expected equality of these values:
+  kRawCode
+    Which is: "ag2512"
+  std::string(api_.action_.InstrumentID)
+    Which is: ""
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:785&#x0A;Expected equality of these values:&#x0A;  0&#x0A;  trader_.orderAction(a)&#x0A;    Which is: -1&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:785
+Expected equality of these values:
+  0
+  trader_.orderAction(a)
+    Which is: -1
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:786&#x0A;Expected equality of these values:&#x0A;  &apos;3&apos;&#x0A;    Which is: &apos;3&apos; (51, 0x33)&#x0A;  api_.action_.ActionFlag&#x0A;    Which is: &apos;\0&apos;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:786
+Expected equality of these values:
+  '3'
+    Which is: '3' (51, 0x33)
+  api_.action_.ActionFlag
+    Which is: '\0'
+]]></failure>
+    </testcase>
+    <testcase name="queries_enqueue_then_send_on_drain" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="790" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.088" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:807&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  trader_.queryDepth()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:807
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+]]></failure>
+    </testcase>
+    <testcase name="rtn_order_conversion_maps_state_and_night_date" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="838" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.089" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:899&#x0A;Expected equality of these values:&#x0A;  20240114u&#x0A;    Which is: 20240114&#x0A;  sink_.push_order_date_&#x0A;    Which is: 20240115&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:899
+Expected equality of these values:
+  20240114u
+    Which is: 20240114
+  sink_.push_order_date_
+    Which is: 20240115
+]]></failure>
+    </testcase>
+    <testcase name="rtn_order_untouched_and_known_states_keep_wts_meaning" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="936" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.089" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+    </testcase>
+    <testcase name="queried_order_untouched_and_known_states_keep_wts_meaning" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="951" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.089" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+    </testcase>
+    <testcase name="instrument_statuses_keep_existing_0_to_6_mapping" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="966" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.089" classname="T2TraderCTPTest" />
+    <testcase name="trade_conversion_amount_and_usertag_chain" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="990" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.090" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:995&#x0A;Value of: trader_.makeEntrustID(eid, sizeof(eid))&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:995
+Value of: trader_.makeEntrustID(eid, sizeof(eid))
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="rsp_order_insert_and_action_error_paths" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="1050" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.090" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+    </testcase>
+    <testcase name="rsp_account_position_and_settlement" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="1105" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.090" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:1108&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  trader_.queryDepth()&#x0A;    Which is: 0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:1108
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+]]></failure>
+    </testcase>
+    <testcase name="rsp_qry_order_and_trade_arrays" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="1180" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.090" classname="T2TraderCTPTest">
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441&#x0A;Expected equality of these values:&#x0A;  TraderCTP::WS_LOGINED&#x0A;    Which is: 2&#x0A;  trader_.state()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:1204&#x0A;Value of: trader_.isConnected()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:1204
+Value of: trader_.isConnected()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="front_events_and_logout_and_status_pushes" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="1232" status="run" result="completed" time="0." timestamp="2026-11-04T17:46:05.091" classname="T2TraderCTPTest" />
+    <testcase name="DISABLED_connect_starts_worker_thread_and_needs_real_front" file="/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp" line="1289" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="T2TraderCTPTest" />
+  </testsuite>
+</testsuites>

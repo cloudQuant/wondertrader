@@ -1,0 +1,57 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/TestUnits/coverage/q01_wtcore3/r90_executer_pool_test.cpp	2026-10-30 02:40:33
++++ src/TestUnits/coverage/q01_wtcore3/r90_executer_pool_test.cpp	2026-11-04 19:48:45
+@@ -144,9 +144,19 @@
+     ASSERT_TRUE(local->init(cfg));
+     cfg->release();
+     local->setTrader(&trader);
++    // 迭代02 起 setTrader 只绑定适配器，通道就绪经已注册 sink 的回调送达（与 runner 接线一致）；
++    // 原用例只 setTrader、不 addSink，执行器通道始终未就绪，故不可能下单。
++    trader.addSink(local.get());
+ 
+-    // 单元创建（通道未就绪，创建时不回调）
++    // 单元创建；卡8/P02-002：set_position 为整表目标，下方整表目标不含 ag 会把 ag 清零，
++    // 因此在 ag 目标为 2 时先送一笔 ag 行情，由真实最小冲击单元下单（经池调度）。
+     local->on_position_changed(kCode, 2.0);
++    {
++        WTSTickData* first = tick(kCode, 3500.0, 93059000);
++        ASSERT_NE(nullptr, first);
++        local->on_tick(kCode, first);
++        first->release();
++    }
+ 
+     // 组合匹配 + 池调度 set_position
+     wt_hashmap<std::string, double> targets;
+@@ -178,6 +188,7 @@
+     local->on_position(kCode, true, 1, 1, 1, 1, 20250110);
+ 
+     ASSERT_TRUE(quiesce.quiesceAll());
++    ASSERT_TRUE(trader.removeSink(local.get()));
+     // tick 触发的最小冲击单元至少发出一笔委托
+     EXPECT_GT(traderEnv.api.n_insert, base);
+ }
+@@ -201,8 +212,17 @@
+     ASSERT_TRUE(arbi->init(cfg));
+     cfg->release();
+     arbi->setTrader(&trader);
++    // 迭代02 起 setTrader 只绑定适配器，通道就绪经已注册 sink 的回调送达（与 runner 接线一致）；
++    // 原用例只 setTrader、不 addSink，执行器通道始终未就绪，故不可能下单。
++    trader.addSink(arbi.get());
+ 
+     arbi->on_position_changed(kCode, 2.0);
++    {
++        WTSTickData* first = tick(kCode, 3500.0, 93059000);
++        ASSERT_NE(nullptr, first);
++        arbi->on_tick(kCode, first);
++        first->release();
++    }
+ 
+     wt_hashmap<std::string, double> targets;
+     targets["SHFE.rb.2510"] = 3.0;
+@@ -230,6 +250,7 @@
+     arbi->on_position(kCode, true, 1, 1, 1, 1, 20250110);
+ 
+     ASSERT_TRUE(quiesce.quiesceAll());
++    ASSERT_TRUE(trader.removeSink(arbi.get()));
+     EXPECT_GT(traderEnv.api.n_insert, base);
+ }
+ 

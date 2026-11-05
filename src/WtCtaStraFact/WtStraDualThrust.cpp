@@ -9,8 +9,11 @@
  */
 #include <iostream>
 #include <cmath>
+#include <cctype>
 #include <limits>
 #include <memory>
+#include <locale>
+#include <sstream>
 #include "WtStraDualThrust.h"
 
 #include "../Includes/ICtaStraCtx.h"
@@ -40,6 +43,89 @@ struct WtsRelease
 bool isValidPrice(double value)
 {
 	return value != INVALID_DOUBLE && std::isfinite(value);
+}
+
+bool readNumber(const WTSVariant* value, double& result)
+{
+	if (value == NULL || value->type() == WTSVariant::VT_Boolean ||
+		value->type() == WTSVariant::VT_Null || value->isArray() || value->isObject())
+		return false;
+	std::istringstream input(value->asString());
+	input.imbue(std::locale::classic());
+	if (!(input >> result))
+		return false;
+	input >> std::ws;
+	return input.eof() && isValidPrice(result);
+}
+
+bool readPositiveUInt32(const WTSVariant* value, uint32_t& result)
+{
+	if (value == NULL || value->type() == WTSVariant::VT_Boolean ||
+		value->type() == WTSVariant::VT_Null || value->isArray() || value->isObject())
+		return false;
+	// Decimal/scientific notation is normalized as text, avoiding rounding a
+	// fractional value or overflow into a valid integer near UINT32_MAX.
+	const std::string text = value->asString();
+	size_t pos = 0;
+	while (pos < text.size() && std::isspace(static_cast<unsigned char>(text[pos]))) ++pos;
+	if (pos < text.size() && text[pos] == '+') ++pos;
+	std::string digits;
+	size_t fractional = 0;
+	bool dot = false;
+	while (pos < text.size())
+	{
+		const char c = text[pos];
+		if (c >= '0' && c <= '9')
+		{
+			digits.push_back(c);
+			if (dot) ++fractional;
+		}
+		else if (c == '.' && !dot) dot = true;
+		else break;
+		++pos;
+	}
+	if (digits.empty()) return false;
+	int exponent = 0;
+	if (pos < text.size() && (text[pos] == 'e' || text[pos] == 'E'))
+	{
+		++pos;
+		bool negative = false;
+		if (pos < text.size() && (text[pos] == '+' || text[pos] == '-'))
+			negative = text[pos++] == '-';
+		const size_t start = pos;
+		while (pos < text.size() && text[pos] >= '0' && text[pos] <= '9')
+		{
+			if (exponent > 10000) return false;
+			exponent = exponent * 10 + (text[pos++] - '0');
+		}
+		if (pos == start) return false;
+		if (negative) exponent = -exponent;
+	}
+	while (pos < text.size() && std::isspace(static_cast<unsigned char>(text[pos]))) ++pos;
+	if (pos != text.size()) return false;
+	const size_t first = digits.find_first_not_of('0');
+	if (first == std::string::npos) return false;
+	digits.erase(0, first);
+	if (fractional > static_cast<size_t>((std::numeric_limits<int>::max)())) return false;
+	const int64_t shift = static_cast<int64_t>(exponent) - static_cast<int64_t>(fractional);
+	if (shift < 0)
+	{
+		const uint64_t remove = static_cast<uint64_t>(-shift);
+		if (remove >= digits.size() || digits.find_last_not_of('0') >= digits.size() - remove)
+			return false;
+		digits.resize(digits.size() - static_cast<size_t>(remove));
+	}
+	else if (shift > 0)
+	{
+		if (shift > 10 || digits.size() + static_cast<size_t>(shift) > 10) return false;
+		digits.append(static_cast<size_t>(shift), '0');
+	}
+	if (digits.size() > 10) return false;
+	uint64_t parsed = 0;
+	for (char c : digits) parsed = parsed * 10 + static_cast<unsigned>(c - '0');
+	if (parsed > (std::numeric_limits<uint32_t>::max)()) return false;
+	result = static_cast<uint32_t>(parsed);
+	return true;
 }
 }
 
@@ -100,20 +186,36 @@ const char* WtStraDualThrust::getName()
 bool WtStraDualThrust::init(WTSVariant* cfg)
 {
 	std::cout << "WtStraDualThrust::init begins" << std::endl;
-	if (cfg == NULL)
+	if (cfg == NULL || !cfg->isObject())
 		return false;
 
-	// 读取指标参数
-	_days = cfg->getUInt32("days");
-	_k1 = cfg->getDouble("k1");
-	_k2 = cfg->getDouble("k2");
+	// Validate every parameter before publishing any of the new configuration.
+	// The days field must explicitly provide a positive lookback period.
+	uint32_t days = 0, count = 0;
+	double k1 = 0, k2 = 0;
+	const WTSVariant* daysValue = cfg->get("days");
+	const WTSVariant* k1Value = cfg->get("k1");
+	const WTSVariant* k2Value = cfg->get("k2");
+	const WTSVariant* periodValue = cfg->get("period");
+	const WTSVariant* codeValue = cfg->get("code");
+	if (!readPositiveUInt32(daysValue, days) ||
+		!readPositiveUInt32(cfg->get("count"), count) ||
+		(k1Value != NULL && !readNumber(k1Value, k1)) ||
+		(k2Value != NULL && !readNumber(k2Value, k2)) ||
+		periodValue == NULL || periodValue->type() != WTSVariant::VT_String ||
+		codeValue == NULL || codeValue->type() != WTSVariant::VT_String)
+		return false;
+	const std::string period = periodValue->asString();
+	const std::string code = codeValue->asString();
+	if (period.empty() || code.empty())
+		return false;
 
-	// 读取数据周期和合约信息
-	_period = cfg->getCString("period");
-	_count = cfg->getUInt32("count");
-	_code = cfg->getCString("code");
-
-	// 读取是否为股票标的
+	_days = days;
+	_k1 = k1;
+	_k2 = k2;
+	_period = period;
+	_count = count;
+	_code = code;
 	_isstk = cfg->getBoolean("stock");
 	std::cout << "WtStraDualThrust::init ends" << std::endl;
 	return true;
@@ -176,7 +278,7 @@ void WtStraDualThrust::on_schedule(ICtaStraCtx* ctx, uint32_t /*curDate*/, uint3
 	}
 
 	// The [-days, -2] window needs at least one completed bar plus the
-	// current bar. Keep the initialization contract for days 0/1 unchanged,
+	// current bar. An explicit days of 1 still waits,
 	// but do not produce signals without a representable, complete window.
 	const int32_t count = kline->size();
 	if (count <= 0 || _days < 2 ||

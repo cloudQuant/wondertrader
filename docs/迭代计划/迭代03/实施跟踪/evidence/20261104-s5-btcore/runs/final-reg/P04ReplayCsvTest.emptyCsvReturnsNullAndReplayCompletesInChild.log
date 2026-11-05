@@ -1,0 +1,26 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = P04ReplayCsvTest.emptyCsvReturnsNullAndReplayCompletesInChild
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from P04ReplayCsvTest
+[ RUN      ] P04ReplayCsvTest.emptyCsvReturnsNullAndReplayCompletesInChild
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:672: Failure
+Death test: { struct rlimit noCoreDumps{}; if (::setrlimit(4, &noCoreDumps) != 0) std::_Exit(90); auto writeStage = [](const char* marker, std::size_t length) { const auto written = ::write(2, marker, length); (void)written; }; HisDataReplayer* replayer = new HisDataReplayer(); WTSVariant* cfg = replay_cfg(_root, _base); if (cfg == nullptr) std::_Exit(91); writeStage("INIT_START\n", sizeof("INIT_START\n") - 1); const bool initialized = replayer->init(cfg); cfg->release(); if (!initialized) std::_Exit(92); writeStage("INIT_OK\n", sizeof("INIT_OK\n") - 1); RecordingSink sink; replayer->register_sink(&sink, "p04_emptycsv"); writeStage("PREPARE_START\n", sizeof("PREPARE_START\n") - 1); if (!replayer->prepare()) std::_Exit(93); writeStage("PREPARE_OK\n", sizeof("PREPARE_OK\n") - 1); writeStage("BEFORE_READ\n", sizeof("BEFORE_READ\n") - 1); WTSKlineSlice* headerOnlySlice = replayer->get_kline_slice("SSE.STK.000002", "d", 1, 1, false); WTSKlineSlice* zeroByteSlice = replayer->get_kline_slice("SSE.STK.000003", "d", 1, 1, false); writeStage("AFTER_READ\n", sizeof("AFTER_READ\n") - 1); if (headerOnlySlice != nullptr || zeroByteSlice != nullptr) std::_Exit(1); writeStage("NULL_SLICE_OK\n", sizeof("NULL_SLICE_OK\n") - 1); if (std::filesystem::exists(_base / "his/day/SSE/000002.dsb") || std::filesystem::exists(_base / "his/day/SSE/000003.dsb")) std::_Exit(3); writeStage("BEFORE_RUN\n", sizeof("BEFORE_RUN\n") - 1); replayer->run(false); writeStage("AFTER_RUN\n", sizeof("AFTER_RUN\n") - 1); std::_Exit(sink.replayDoneCalls == 1 && sink.closedDates.empty() ? 0 : 2); }
+    Result: died but not with expected exit code:
+            Exited with exit status 93
+Actual msg:
+[  DEATH   ] INIT_START
+[  DEATH   ] INIT_OK
+[  DEATH   ] PREPARE_START
+[  DEATH   ] 
+
+[  FAILED  ] P04ReplayCsvTest.emptyCsvReturnsNullAndReplayCompletesInChild (11 ms)
+[----------] 1 test from P04ReplayCsvTest (11 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (11 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] P04ReplayCsvTest.emptyCsvReturnsNullAndReplayCompletesInChild
+
+ 1 FAILED TEST

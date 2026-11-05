@@ -1,0 +1,36 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/Includes/WTSSessionInfo.hpp	2026-11-03 15:17:35
++++ src/Includes/WTSSessionInfo.hpp	2026-11-04 18:10:32
+@@ -91,12 +91,32 @@
+ 	static bool isValidSessionTime(uint32_t time)
+ 	{
+ 		return time <= 2400 && time % 100 < 60 && (time / 100 < 24 || time == 2400);
++	}
++
++	// Decision card 2: raw 0-0 is the only full-day section and other equal
++	// endpoints are rejected. A full-day section already covers every minute,
++	// so it cannot be combined with any other section (the aggregate views
++	// would exceed one day). Such a mix is rejected without mutation. Whether
++	// other interior overlaps must also be rejected is not decided yet.
++	bool mixesFullDaySection(uint32_t sTime, uint32_t eTime) const
++	{
++		if (m_tradingTimes.empty())
++			return false;
++		if (sTime == 0 && eTime == 0)
++			return true;
++		for (const TradingSection& section : m_tradingTimes)
++		{
++			if (section.first_raw == 0 && section.second_raw == 0)
++				return true;
++		}
++		return false;
+ 	}
+ 
+ 	bool tryAddTradingSection(uint32_t sTime, uint32_t eTime)
+ 	{
+ 		if (!isValidSessionTime(sTime) || !isValidSessionTime(eTime) ||
+-			((sTime % 2400 == eTime % 2400) && !(sTime == 0 && eTime == 0)))
++			((sTime % 2400 == eTime % 2400) && !(sTime == 0 && eTime == 0)) ||
++			mixesFullDaySection(sTime, eTime))
+ 			return false;
+ 		m_tradingTimes.emplace_back(TradingSection(offsetTime(sTime, true), offsetTime(eTime, false), sTime, eTime));
+ 		_minutes.clear();

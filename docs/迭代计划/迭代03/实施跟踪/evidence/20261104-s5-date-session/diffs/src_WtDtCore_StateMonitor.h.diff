@@ -1,0 +1,19 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/WtDtCore/StateMonitor.h	2026-11-03 18:20:47
++++ src/WtDtCore/StateMonitor.h	2026-11-04 13:33:33
+@@ -256,12 +256,15 @@
+ private:
+ 	friend struct R154StateMonitorTestAccess;
+ 	friend struct Q05StateMonitorConfigTestAccess;
++	friend struct I03MonitorDateTestAccess;
+ 
+ 	// Takes ownership of one config reference returned by WTSCfgLoader.
+ 	bool initializeConfig(WTSVariant* config);
+ 	bool initializeConfig(WTSVariant* config, WTSBaseDataMgr* bdMgr, DataManager* dtMgr);
+ 
+-	// curMin is HHMM; run() supplies wall-clock values and tests supply fixed values.
++	// curMin is HHMM; run() supplies one checked wall-clock snapshot and tests
++	// supply fixed values. An invalid date/time (including date 0) performs no
++	// transition; a session whose offset date cannot be computed is skipped.
+ 	void advanceOnce(uint32_t curDate, uint32_t curMin);
+ 	void setState(StateInfo& state, SimpleState value);
+ 

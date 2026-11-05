@@ -172,6 +172,7 @@ private:
 
 	//! 订单监控器，用于管理本地订单
 	WtOrdMon	_orders_mon;
+	bool		_host_order_identity{ false };	///< host-verified order identity enabled for this unit (cards 5b/5c)
 	//! 当前正在撤销的订单数量
 	uint32_t	_cancel_cnt;
 	//! 撤单次数，用于动态调整下单价格

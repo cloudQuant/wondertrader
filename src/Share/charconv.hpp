@@ -466,8 +466,10 @@ public:
 
 		for (unsigned int i = 0; i < strlen(src); ++i)
 		{  
-			const char cc = src[i];  
-			if (isPureAscii(&cc))  
+			const char cc = src[i];
+			// I03-NEW-108: test this single byte; &cc is not NUL-terminated, so
+			// isPureAscii(&cc) read past the local variable until a stray zero byte.
+			if ((static_cast<unsigned char>(cc) & 0x80) == 0)
 			{  
 				if (cc == ' ')  
 				{  

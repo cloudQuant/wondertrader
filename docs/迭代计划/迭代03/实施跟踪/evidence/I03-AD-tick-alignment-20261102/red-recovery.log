@@ -1,0 +1,26 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.L03AlignedTickCacheRecoveryAndSecondRecordUpdate
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRecoveryAndSecondRecordUpdate
+/tmp/wt-i03-ad-tick-alignment-20261102/src/WtDataStorageAD/WtDataWriterAD.cpp:1239:34: runtime error: reference binding to misaligned address 0x00010631c21c for type 'WTSTickStruct', which requires 8 byte alignment
+0x00010631c21c: note: pointer points here
+  ec d6 34 01 41 4c 47 4e  00 00 00 00 00 00 00 00  00 00 00 00 72 62 30 32  00 00 00 00 00 00 00 00
+              ^ 
+    #0 0x00010478da54 in WtDataWriterAD::getCurTick(char const*, char const*) WtDataWriterAD.cpp:1239
+    #1 0x0001049147f4 in (anonymous namespace)::R4WriterADTest_L03AlignedTickCacheRecoveryAndSecondRecordUpdate_Test::TestBody() l03_ad_tick_alignment_test.cpp:51
+    #2 0x00010561c7e4 in void testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2664
+    #3 0x00010552ffec in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2700
+    #4 0x00010552fce4 in testing::Test::Run() gtest.cc:2739
+    #5 0x0001055332fc in testing::TestInfo::Run() gtest.cc:2885
+    #6 0x00010553789c in testing::TestSuite::Run() gtest.cc:3063
+    #7 0x000105569d08 in testing::internal::UnitTestImpl::RunAllTests() gtest.cc:6054
+    #8 0x000105649d1c in bool testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2664
+    #9 0x0001055681e4 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2700
+    #10 0x000105567d2c in testing::UnitTest::Run() gtest.cc:5594
+    #11 0x00010567101c in RUN_ALL_TESTS() gtest.h:2334
+    #12 0x000105670f40 in main gtest_main.cc:64
+    #13 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-ad-tick-alignment-20261102/src/WtDataStorageAD/WtDataWriterAD.cpp:1239:34 

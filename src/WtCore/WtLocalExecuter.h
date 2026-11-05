@@ -10,6 +10,8 @@
  */
 #pragma once
 #include "ITrdNotifySink.h"
+#include "ExecOwnerModes.h"
+#include "OwnerClaimLease.h"
 #include "IExecCommand.h"
 #include "ExecCommandQuiesce.h"
 #include "ExecUnitInitStatus.h"
@@ -17,6 +19,8 @@
 #include "../Includes/ExecuteDefs.h"
 #include <Share/threadpool.hpp>
 #include "../Share/SpinMutex.hpp"
+#include "../Share/ExecutionGroups.hpp"
+#include "AccountNetPositionLimits.h"
 #include <atomic>
 #include <condition_variable>
 #include <deque>
@@ -63,6 +67,14 @@ public:
 	 * @details 设置执行器的参数，包括放大倍数、严格同步标志、线程池大小、自动清理策略等
 	 */
 	bool init(WTSVariant* params);
+
+	/*!
+	 * \brief Pure eager validation of a complete executer configuration.
+	 * \details Reads only; never retains, allocates runtime state, loads modules or
+	 * creates units. init() runs the same check before any side effect, and runners
+	 * call it for every active entry before constructing any executer (card 8b=A).
+	 */
+	static bool validateConfig(WTSVariant* params, std::string& error);
 
 	/**
 	 * @brief 设置交易适配器
@@ -144,8 +156,7 @@ private:
 	void drainUnitCallbacks(const std::string& code,
 		const std::shared_ptr<UnitLifecycleState>& state);
 	void retainUnitLocked(const ExecuteUnitPtr& unit);
-	void queuePositionTarget(const std::string& code, double target, bool isIncrement,
-		bool bypassOrderLimits = false);
+	void submitTargetBatch(const wt_hashmap<std::string, double>& targets, bool incremental);
 
 	/**
 	 * @brief 获取执行单元
@@ -413,6 +424,10 @@ private:
 	 * @details 用于处理交易请求和回报
 	 */
 	TraderAdapter*		_trader;
+	ExecOwnerModes		_owner_modes;	///< per-contract shared/non-shared owner mode (cards 5b/5c)
+	// I03-NEW-089: returns this owner's contract claims when it is rebound to
+	// another account gate or destroyed (the gate is held weakly).
+	OwnerClaimLease		_owner_claims;
 
 	/**
 	 * @brief 执行器工厂指针
@@ -506,6 +521,9 @@ private:
 	 * @details 存储合约代码到组合的映射关系
 	 */
 	CodeGroups				_code_to_groups;
+	execution_groups::Groups _group_rules;
+	// Card 8 (2026-11-03): per-contract account net-position limit declaration.
+	account_net_limits::Limits _account_limits;
 
 	/**
 	 * @brief 自动清理包含品种集合
@@ -541,6 +559,7 @@ private:
 	// Protects position maps and their snapshots only. Never held during plugin,
 	// executor lookup, or logging/file operations.
 	mutable std::mutex _position_state_mutex;
+	uint64_t _target_revision = 0;
 
 	/**
 	 * @brief 线程池指针类型

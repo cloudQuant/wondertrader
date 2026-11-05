@@ -170,7 +170,8 @@ TEST_F(R162ReaderEdgeTest, R162RdmReaderHisTransBlocksWithMixedActionDates)
 	// 直接把已解压的块挂进历史缓存。正常 .dsb 落盘路径在 2 条记录时会触发
 	// BUG-R175-002 的堆破坏，无法在本用例内安全使用（见下方 DISABLED_ 证据）。
 	const std::string key = "SSE.600000-20240109";
-	auto& quePair = reader._his_ordque_map[key];
+	// 卡11=B：历史块缓存值为共享 owner 指针
+	auto& quePair = *(reader._his_ordque_map[key] = std::make_shared<WtRdmDtReader::HisOrdQueBlockPair>());
 	quePair._buffer.assign(sizeof(HisOrdQueBlock), '\0');
 	quePair._buffer.append(reinterpret_cast<const char*>(queues.data()),
 		queues.size() * sizeof(WTSOrdQueStruct));
@@ -178,13 +179,15 @@ TEST_F(R162ReaderEdgeTest, R162RdmReaderHisTransBlocksWithMixedActionDates)
 
 	// dtl/trans 入口用 _his_ordque_map 判命中（BUG-R74-001），
 	// 先占 key 让它们不再走文件装载，各自使用自己已挂好的块。
-	auto& dtlPair = reader._his_orddtl_map[key];
+	// 卡11=B：历史块缓存值为共享 owner 指针
+	auto& dtlPair = *(reader._his_orddtl_map[key] = std::make_shared<WtRdmDtReader::HisOrdDtlBlockPair>());
 	dtlPair._buffer.assign(sizeof(HisOrdDtlBlock), '\0');
 	dtlPair._buffer.append(reinterpret_cast<const char*>(details.data()),
 		details.size() * sizeof(WTSOrdDtlStruct));
 	dtlPair._block = reinterpret_cast<HisOrdDtlBlock*>(&dtlPair._buffer[0]);
 
-	auto& trPair = reader._his_trans_map[key];
+	// 卡11=B：历史块缓存值为共享 owner 指针
+	auto& trPair = *(reader._his_trans_map[key] = std::make_shared<WtRdmDtReader::HisTransBlockPair>());
 	trPair._buffer.assign(sizeof(HisTransBlock), '\0');
 	trPair._buffer.append(reinterpret_cast<const char*>(trans.data()),
 		trans.size() * sizeof(WTSTransStruct));
@@ -211,12 +214,8 @@ TEST_F(R162ReaderEdgeTest, R162RdmReaderHisTransBlocksWithMixedActionDates)
 	trSlice->release();
 }
 
-/* BUG-R175-002 的可执行证据：三条历史的 V2 装载分支都在
- * `hisBlkPair._buffer.resize(sizeof(His*Block)); _buffer.append(buf);` 之后
- * 通过 resize 前取得的 tBlockV2 指针写 `_version`。append 触发重分配时
- * 该指针已失效，2 条记录的小块会写坏 malloc 元数据，下一次分配 SIGSEGV。
- * 保持与生产 .dsb 完全一致的 CMP_V2 文件输入；启用即崩，故 DISABLED_。 */
-TEST_F(R162ReaderEdgeTest, DISABLED_R162RdmReaderHisTransBlocksWithMixedActionDatesFromFile)
+/* 迭代03 最终验收复核后启用（原禁用：BUG-R175-002 V2 装载头指针失效）。 */
+TEST_F(R162ReaderEdgeTest, R162RdmReaderHisTransBlocksWithMixedActionDatesFromFile)
 {
 	const uint32_t date = 20240109;
 	const uint32_t prev = 20240108;

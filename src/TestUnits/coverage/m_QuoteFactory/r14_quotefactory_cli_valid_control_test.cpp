@@ -173,7 +173,9 @@ QfCliResult run_product_qf_cli(const fs::path& executable, const fs::path& cwd,
 
 	int status = 0;
 	bool child_reaped = false;
-	const auto startup_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+	// I03-NEW-136: the exec'ed QuoteFactory can need well over 5 s to reach parser startup
+	// under ASan and a loaded machine (marker arrived after the old budget). Wait budget only.
+	const auto startup_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(60);
 	while (std::chrono::steady_clock::now() < startup_deadline && !result.startup_seen)
 	{
 		pollfd event = { fds[0], POLLIN | POLLHUP, 0 };
@@ -203,7 +205,7 @@ QfCliResult run_product_qf_cli(const fs::path& executable, const fs::path& cwd,
 
 	if (!child_reaped)
 	{
-		const auto stop_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+		const auto stop_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
 		while (std::chrono::steady_clock::now() < stop_deadline)
 		{
 			append_qf_cli_output(fds[0], result.output);

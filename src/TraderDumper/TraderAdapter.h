@@ -9,6 +9,8 @@
  */
 #pragma once
 #include <atomic>
+#include <mutex>
+#include <type_traits>
 #include <unordered_map>
 #include <boost/noncopyable.hpp>
 
@@ -94,33 +96,50 @@ typedef std::unordered_map<std::string, TraderAdapterPtr>	TraderAdapterMap;
 
 //////////////////////////////////////////////////////////////////////////
 //TraderAdapterMgr
-class TraderAdapterMgr : private boost::noncopyable
+// N-3 / 卡9a：管理器状态（适配器表、存活计数、互斥）放在进程内常驻、永不释放的堆对象中，
+// 管理器本身平凡可析构。全局 g_adapterMgr 因此没有进程退出期析构：供应商线程在静态清理期
+// 回调 decAlive()、Dumper worker 调 refresh() 时状态仍有效，不依赖 SDK 回调排空。
+// 所有状态登记在永不释放的表中（LSan 视为可达）；生产只有一个全局管理器。
+class TraderAdapterMgr
 {
 public:
+	TraderAdapterMgr();
+	TraderAdapterMgr(const TraderAdapterMgr&) = delete;
+	TraderAdapterMgr& operator=(const TraderAdapterMgr&) = delete;
+
 	void	release();
 
 	void	run();
 
-	const TraderAdapterMap& getAdapters() const { return _adapters; }
+	const TraderAdapterMap& getAdapters() const { return _st->adapters; }
 
 	TraderAdapterPtr getAdapter(const char* tname);
 
 	bool	addAdapter(const char* tname, TraderAdapterPtr& adapter);
 
 	bool	isAnyAlive() const {
-		return _live_cnt != 0;
+		return _st->live_cnt != 0;
 	}
 
-	std::size_t size() const { return _adapters.size(); }
+	std::size_t size() const { return _st->adapters.size(); }
 
 	void decAlive();
 
 	void refresh();
 
 private:
-	TraderAdapterMap		_adapters;
-	std::mutex				_mutex;
-	std::atomic<uint32_t>	_live_cnt;
+	struct State
+	{
+		TraderAdapterMap		adapters;
+		std::mutex				mutex;
+		std::atomic<uint32_t>	live_cnt{0};
+	};
+	static State*	retainState();
+
+	State* const	_st;
 };
+
+static_assert(std::is_trivially_destructible<TraderAdapterMgr>::value,
+	"TraderAdapterMgr must not run an exit-time destructor while providers may call back (card 9a)");
 
 NS_WTP_END

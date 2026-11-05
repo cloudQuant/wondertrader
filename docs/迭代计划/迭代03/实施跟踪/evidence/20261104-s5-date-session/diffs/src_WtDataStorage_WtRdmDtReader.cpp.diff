@@ -1,0 +1,620 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/WtDataStorage/WtRdmDtReader.cpp	2026-11-03 21:43:25
++++ src/WtDataStorage/WtRdmDtReader.cpp	2026-11-04 21:21:14
+@@ -10,13 +10,17 @@
+ #include "../Includes/IHotMgr.h"
+ #include "../Includes/WTSDataDef.hpp"
+ #include "../Includes/WTSSessionInfo.hpp"
++#include "../Includes/DateMappingClient.hpp"
+ 
+ #include "../WTSUtils/WTSCmpHelper.hpp"
+ #include "../WTSUtils/WTSCfgLoader.h"
+ 
++#include <cstring>
+ #include <exception>
+ #include <memory>
+ #include <stdexcept>
++#include <type_traits>
++#include <vector>
+ #include <rapidjson/document.h>
+ namespace rj = rapidjson;
+ 
+@@ -48,6 +52,36 @@
+ 	return lhs.action_time < rhs.action_time;
+ }
+ 
++// R132-001: a history block keeps its 12-byte packed header in front of the
++// records, so records left in `_buffer` sit at a 4-byte offset and must not be
++// accessed as T (8-byte fields). Move any pending payload once into the pair's
++// naturally aligned vector, keep only the header in `_buffer`, and serve every
++// read and slice from `_items` (slices own the pair, card 11). A trailing
++// partial record is ignored exactly as the former count arithmetic did.
++template <typename T, typename Pair>
++static bool align_his_items(Pair& pair, std::size_t headerSize)
++{
++	static_assert(std::is_trivially_copyable<T>::value, "history records must be byte-copyable");
++	if (pair._buffer.size() <= headerSize)
++		return true;
++	const std::size_t count = (pair._buffer.size() - headerSize) / sizeof(T);
++	try
++	{
++		std::vector<T> items(count);
++		if (count != 0)
++			std::memcpy(items.data(), pair._buffer.data() + headerSize, count * sizeof(T));
++		pair._items.swap(items);
++		pair._buffer.resize(headerSize);
++		pair._buffer.shrink_to_fit();
++	}
++	catch (const std::exception&)
++	{
++		return false;
++	}
++	pair._block = reinterpret_cast<decltype(pair._block)>(&pair._buffer[0]);
++	return true;
++}
++
+ template <typename T>
+ static bool find_rt_hft_end_index(T* items, std::size_t count, const T& end, std::size_t& endIndex)
+ {
+@@ -75,10 +109,49 @@
+ 	if (sink == NULL)
+ 		return;
+ 
++	// I03-NEW-038: messages can carry caller-supplied codes and configured
++	// paths; bound the formatter writes to the per-thread buffer.
+ 	static thread_local char buffer[512] = { 0 };
+-	fmtutil::format_to(buffer, format, args...);
++	try
++	{
++		const std::size_t max_output_size = sizeof(buffer) - 1;
++		const auto formatted = fmt::format_to_n(buffer, max_output_size, format, args...);
++		if (formatted.size > max_output_size)
++		{
++			constexpr char truncation_marker[] = "...[truncated]";
++			constexpr std::size_t marker_size = sizeof(truncation_marker) - 1;
++			std::memcpy(buffer + max_output_size - marker_size, truncation_marker, marker_size);
++			buffer[max_output_size] = '\0';
++		}
++		else
++		{
++			buffer[formatted.size] = '\0';
++		}
++	}
++	catch (...)
++	{
++		constexpr char fallback[] = "WtRdmDtReader log formatting failed";
++		std::memcpy(buffer, fallback, sizeof(fallback));
++	}
+ 
+ 	sink->reader_log(ll, buffer);
++}
++
++// Decision card 1 (A+C): trading dates come from the typed client over the
++// guarded legacy IBaseDataMgr virtuals. A failure is logged and the caller
++// stops before creating a slice or touching a cache.
++inline bool rdm_trading_date(IRdmDtReaderSink* sink, wtp::DateMappingClient& mapping, const char* stdPID,
++	uint32_t uDate, uint32_t uTime, uint32_t& tradingDate)
++{
++	const wtp::DateMappingResult32 result = mapping.calcTradingDate(stdPID, uDate, uTime, false);
++	if (result.status != wtp::DateMappingStatus::Ok)
++	{
++		pipe_rdmreader_log(sink, LL_ERROR, "Mapping trading date of {} at {}.{} failed: {}",
++			stdPID == NULL ? "" : stdPID, uDate, uTime, wtp::dateMappingStatusName(result.status));
++		return false;
++	}
++	tradingDate = result.value;
++	return true;
+ }
+ 
+ #if defined(WT_RDM_DT_READER_TEST_HOOKS)
+@@ -386,9 +459,18 @@
+ 	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	const char* stdPID = commInfo->getFullPid();
+ 
+-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
++	wtp::DateMappingClient dateMapping(_base_data_mgr);
++	uint32_t curTDate = 0;
++	if (!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
++		return NULL;
+ 	bool isToday = (uDate == curTDate);
+ 
+ 	//这里改成小于等于，主要针对盘后读取的情况
+@@ -469,13 +551,17 @@
+ 			if (tBlkPair._block == NULL)
+ 				break;
+ 
+-			HisTickBlock* tBlock = tBlkPair._block;
++			// R132-001: records are served from the pair's aligned copy, never from
++			// the packed history buffer (12-byte header leaves them misaligned).
++			if (!align_his_items<WTSTickStruct>(tBlkPair, sizeof(HisTickBlock)))
++				break;
++			WTSTickStruct* const hisRecs = tBlkPair._items.data();
+ 
+-			uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisTickBlock)) / sizeof(WTSTickStruct);
++			uint32_t tcnt = (uint32_t)tBlkPair._items.size();
+ 			if (tcnt <= 0)
+ 				break;
+ 
+-			WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks, tcnt);
++			WTSTickSlice* slice = WTSTickSlice::create(stdCode, hisRecs, tcnt);
+ 			if (slice != NULL)
+ 				slice->addOwner(his_owner(_his_tick_map, key));
+ 			return slice;
+@@ -523,6 +609,12 @@
+ 
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	const char* stdPID = commInfo->getFullPid();
+ 
+ 	pipe_rdmreader_log(_sink, LL_DEBUG, "Reading ticks of {} between {} and {}", stdCode, stime, etime);
+@@ -541,9 +633,13 @@
+ 	lTime = (uint32_t)(stime % 1000000000) / 100000;
+ 	lSecs = (uint32_t)(stime % 100000);
+ 
+-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
+-	uint32_t beginTDate = _base_data_mgr->calcTradingDate(stdPID, lDate, lTime, false);
+-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
++	// One client: etime=0 and the current date share one clock snapshot.
++	wtp::DateMappingClient dateMapping(_base_data_mgr);
++	uint32_t endTDate = 0, beginTDate = 0, curTDate = 0;
++	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
++		!rdm_trading_date(_sink, dateMapping, stdPID, lDate, lTime, beginTDate) ||
++		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
++		return NULL;
+ 
+ 	bool hasToday = (endTDate >= curTDate);
+ 
+@@ -647,41 +743,45 @@
+ 			if (tBlkPair._block == NULL)
+ 				break;
+ 
+-			HisTickBlock* tBlock = tBlkPair._block;
++			// R132-001: records are served from the pair's aligned copy, never from
++			// the packed history buffer (12-byte header leaves them misaligned).
++			if (!align_his_items<WTSTickStruct>(tBlkPair, sizeof(HisTickBlock)))
++				break;
++			WTSTickStruct* const hisRecs = tBlkPair._items.data();
+ 
+-			uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisTickBlock)) / sizeof(WTSTickStruct);
++			uint32_t tcnt = (uint32_t)tBlkPair._items.size();
+ 			if (tcnt <= 0)
+ 				break;
+ 
+ 			// The range end is inclusive. upper_bound keeps all ticks sharing the
+ 			// requested timestamp and compares action_date before action_time.
+-			WTSTickStruct* pEnd = std::upper_bound(tBlock->_ticks, tBlock->_ticks + tcnt, eTick,
++			WTSTickStruct* pEnd = std::upper_bound(hisRecs, hisRecs + tcnt, eTick,
+ 				[](const WTSTickStruct& value, const WTSTickStruct& item) {
+ 					return hft_time_less(value, item);
+ 				});
+-			std::size_t eCount = pEnd - tBlock->_ticks;
++			std::size_t eCount = pEnd - hisRecs;
+ 			if (eCount == 0)
+ 				break;
+ 
+ 			if (beginTDate != nowTDate)
+ 			{
+ 				//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
+-				//WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks, eIdx + 1);
++				//WTSTickSlice* slice = WTSTickSlice::create(stdCode, hisRecs, eIdx + 1);
+ 				//ayTicks->append(slice, false);
+-				slice->appendBlock(tBlock->_ticks, eCount);
++				slice->appendBlock(hisRecs, eCount);
+ 				slice->addOwner(his_owner(_his_tick_map, key));
+ 			}
+ 			else
+ 			{
+ 				//如果交易日相同，则查找起始的位置
+-				WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, pEnd, sTick, hft_time_less<WTSTickStruct>);
++				WTSTickStruct* pTick = std::lower_bound(hisRecs, pEnd, sTick, hft_time_less<WTSTickStruct>);
+ 
+-				std::size_t sIdx = pTick - tBlock->_ticks;
+-				//WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks + sIdx, eIdx - sIdx + 1);
++				std::size_t sIdx = pTick - hisRecs;
++				//WTSTickSlice* slice = WTSTickSlice::create(stdCode, hisRecs + sIdx, eIdx - sIdx + 1);
+ 				//ayTicks->append(slice, false);
+ 				if (sIdx < eCount)
+ 				{
+-					slice->appendBlock(tBlock->_ticks + sIdx, eCount - sIdx);
++					slice->appendBlock(hisRecs + sIdx, eCount - sIdx);
+ 					slice->addOwner(his_owner(_his_tick_map, key));
+ 				}
+ 			}
+@@ -778,6 +878,12 @@
+ 
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	const char* stdPID = commInfo->getFullPid();
+ 
+ 	uint32_t rDate, rTime, rSecs;
+@@ -792,9 +898,13 @@
+ 	lTime = (uint32_t)(stime % 1000000000) / 100000;
+ 	lSecs = (uint32_t)(stime % 100000);
+ 
+-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
+-	uint32_t beginTDate = _base_data_mgr->calcTradingDate(stdPID, lDate, lTime, false);
+-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
++	// One client: etime=0 and the current date share one clock snapshot.
++	wtp::DateMappingClient dateMapping(_base_data_mgr);
++	uint32_t endTDate = 0, beginTDate = 0, curTDate = 0;
++	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
++		!rdm_trading_date(_sink, dateMapping, stdPID, lDate, lTime, beginTDate) ||
++		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
++		return NULL;
+ 
+ 	bool isToday = (endTDate == curTDate);
+ 
+@@ -943,16 +1053,20 @@
+ 		if (tBlkPair._block == NULL)
+ 			return NULL;
+ 
+-		HisOrdQueBlock* tBlock = tBlkPair._block;
++		// R132-001: records are served from the pair's aligned copy, never from
++		// the packed history buffer (12-byte header leaves them misaligned).
++		if (!align_his_items<WTSOrdQueStruct>(tBlkPair, sizeof(HisOrdQueBlock)))
++			return NULL;
++		WTSOrdQueStruct* const hisRecs = tBlkPair._items.data();
+ 
+-		uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisOrdQueBlock)) / sizeof(WTSOrdQueStruct);
++		uint32_t tcnt = (uint32_t)tBlkPair._items.size();
+ 		if (tcnt <= 0)
+ 			return NULL;
+ 
+ 		// Historical HFT ranges are end-exclusive. lower_bound also avoids
+ 		// decrementing begin() when the requested end precedes the first item.
+-		WTSOrdQueStruct* pEnd = std::lower_bound(tBlock->_items, tBlock->_items + tcnt, eTick, hft_time_less<WTSOrdQueStruct>);
+-		std::size_t eCount = pEnd - tBlock->_items;
++		WTSOrdQueStruct* pEnd = std::lower_bound(hisRecs, hisRecs + tcnt, eTick, hft_time_less<WTSOrdQueStruct>);
++		std::size_t eCount = pEnd - hisRecs;
+ 		if (eCount == 0)
+ 			return NULL;
+ 
+@@ -960,7 +1074,7 @@
+ 		if (beginTDate != endTDate)
+ 		{
+ 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
+-			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, tBlock->_items, eCount);
++			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, hisRecs, eCount);
+ 			if (slice != NULL)
+ 				slice->addOwner(his_owner(_his_ordque_map, key));
+ 			return slice;
+@@ -968,8 +1082,8 @@
+ 		else
+ 		{
+ 			//如果交易日相同，则查找起始的位置
+-			WTSOrdQueStruct* pStart = std::lower_bound(tBlock->_items, pEnd, sTick, hft_time_less<WTSOrdQueStruct>);
+-			std::size_t sIdx = pStart - tBlock->_items;
++			WTSOrdQueStruct* pStart = std::lower_bound(hisRecs, pEnd, sTick, hft_time_less<WTSOrdQueStruct>);
++			std::size_t sIdx = pStart - hisRecs;
+ 			if (sIdx >= eCount)
+ 				return NULL;
+ 			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, pStart, eCount - sIdx);
+@@ -988,6 +1102,12 @@
+ 
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	const char* stdPID = commInfo->getFullPid();
+ 
+ 	uint32_t rDate, rTime, rSecs;
+@@ -1002,9 +1122,13 @@
+ 	lTime = (uint32_t)(stime % 1000000000) / 100000;
+ 	lSecs = (uint32_t)(stime % 100000);
+ 
+-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
+-	uint32_t beginTDate = _base_data_mgr->calcTradingDate(stdPID, lDate, lTime, false);
+-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
++	// One client: etime=0 and the current date share one clock snapshot.
++	wtp::DateMappingClient dateMapping(_base_data_mgr);
++	uint32_t endTDate = 0, beginTDate = 0, curTDate = 0;
++	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
++		!rdm_trading_date(_sink, dateMapping, stdPID, lDate, lTime, beginTDate) ||
++		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
++		return NULL;
+ 
+ 	bool isToday = (endTDate == curTDate);
+ 
+@@ -1153,23 +1277,27 @@
+ 		if (tBlkPair._block == NULL)
+ 			return NULL;
+ 
+-		HisOrdDtlBlock* tBlock = tBlkPair._block;
++		// R132-001: records are served from the pair's aligned copy, never from
++		// the packed history buffer (12-byte header leaves them misaligned).
++		if (!align_his_items<WTSOrdDtlStruct>(tBlkPair, sizeof(HisOrdDtlBlock)))
++			return NULL;
++		WTSOrdDtlStruct* const hisRecs = tBlkPair._items.data();
+ 
+-		uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisOrdDtlBlock)) / sizeof(WTSOrdDtlStruct);
++		uint32_t tcnt = (uint32_t)tBlkPair._items.size();
+ 		if (tcnt <= 0)
+ 			return NULL;
+ 
+ 		// Historical HFT ranges are end-exclusive. lower_bound also avoids
+ 		// decrementing begin() when the requested end precedes the first item.
+-		WTSOrdDtlStruct* pEnd = std::lower_bound(tBlock->_items, tBlock->_items + tcnt, eTick, hft_time_less<WTSOrdDtlStruct>);
+-		std::size_t eCount = pEnd - tBlock->_items;
++		WTSOrdDtlStruct* pEnd = std::lower_bound(hisRecs, hisRecs + tcnt, eTick, hft_time_less<WTSOrdDtlStruct>);
++		std::size_t eCount = pEnd - hisRecs;
+ 		if (eCount == 0)
+ 			return NULL;
+ 
+ 		if (beginTDate != endTDate)
+ 		{
+ 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
+-			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, tBlock->_items, eCount);
++			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, hisRecs, eCount);
+ 			if (slice != NULL)
+ 				slice->addOwner(his_owner(_his_orddtl_map, key));
+ 			return slice;
+@@ -1177,8 +1305,8 @@
+ 		else
+ 		{
+ 			//如果交易日相同，则查找起始的位置
+-			WTSOrdDtlStruct* pStart = std::lower_bound(tBlock->_items, pEnd, sTick, hft_time_less<WTSOrdDtlStruct>);
+-			std::size_t sIdx = pStart - tBlock->_items;
++			WTSOrdDtlStruct* pStart = std::lower_bound(hisRecs, pEnd, sTick, hft_time_less<WTSOrdDtlStruct>);
++			std::size_t sIdx = pStart - hisRecs;
+ 			if (sIdx >= eCount)
+ 				return NULL;
+ 			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, pStart, eCount - sIdx);
+@@ -1197,6 +1325,12 @@
+ 
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	const char* stdPID = commInfo->getFullPid();
+ 
+ 	uint32_t rDate, rTime, rSecs;
+@@ -1211,9 +1345,13 @@
+ 	lTime = (uint32_t)(stime % 1000000000) / 100000;
+ 	lSecs = (uint32_t)(stime % 100000);
+ 
+-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
+-	uint32_t beginTDate = _base_data_mgr->calcTradingDate(stdPID, lDate, lTime, false);
+-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
++	// One client: etime=0 and the current date share one clock snapshot.
++	wtp::DateMappingClient dateMapping(_base_data_mgr);
++	uint32_t endTDate = 0, beginTDate = 0, curTDate = 0;
++	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
++		!rdm_trading_date(_sink, dateMapping, stdPID, lDate, lTime, beginTDate) ||
++		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
++		return NULL;
+ 
+ 	bool isToday = (endTDate == curTDate);
+ 
+@@ -1362,23 +1500,27 @@
+ 		if (tBlkPair._block == NULL)
+ 			return NULL;
+ 
+-		HisTransBlock* tBlock = tBlkPair._block;
++		// R132-001: records are served from the pair's aligned copy, never from
++		// the packed history buffer (12-byte header leaves them misaligned).
++		if (!align_his_items<WTSTransStruct>(tBlkPair, sizeof(HisTransBlock)))
++			return NULL;
++		WTSTransStruct* const hisRecs = tBlkPair._items.data();
+ 
+-		uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisTransBlock)) / sizeof(WTSTransStruct);
++		uint32_t tcnt = (uint32_t)tBlkPair._items.size();
+ 		if (tcnt <= 0)
+ 			return NULL;
+ 
+ 		// Historical HFT ranges are end-exclusive. lower_bound also avoids
+ 		// decrementing begin() when the requested end precedes the first item.
+-		WTSTransStruct* pEnd = std::lower_bound(tBlock->_items, tBlock->_items + tcnt, eTick, hft_time_less<WTSTransStruct>);
+-		std::size_t eCount = pEnd - tBlock->_items;
++		WTSTransStruct* pEnd = std::lower_bound(hisRecs, hisRecs + tcnt, eTick, hft_time_less<WTSTransStruct>);
++		std::size_t eCount = pEnd - hisRecs;
+ 		if (eCount == 0)
+ 			return NULL;
+ 
+ 		if (beginTDate != endTDate)
+ 		{
+ 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
+-			WTSTransSlice* slice = WTSTransSlice::create(stdCode, tBlock->_items, eCount);
++			WTSTransSlice* slice = WTSTransSlice::create(stdCode, hisRecs, eCount);
+ 			if (slice != NULL)
+ 				slice->addOwner(his_owner(_his_trans_map, key));
+ 			return slice;
+@@ -1386,8 +1528,8 @@
+ 		else
+ 		{
+ 			//如果交易日相同，则查找起始的位置
+-			WTSTransStruct* pStart = std::lower_bound(tBlock->_items, pEnd, sTick, hft_time_less<WTSTransStruct>);
+-			std::size_t sIdx = pStart - tBlock->_items;
++			WTSTransStruct* pStart = std::lower_bound(hisRecs, pEnd, sTick, hft_time_less<WTSTransStruct>);
++			std::size_t sIdx = pStart - hisRecs;
+ 			if (sIdx >= eCount)
+ 				return NULL;
+ 			WTSTransSlice* slice = WTSTransSlice::create(stdCode, pStart, eCount - sIdx);
+@@ -1402,13 +1544,21 @@
+ {
+ 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo->_exchg, cInfo->_product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052
++		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, history bars not loaded", stdCode == NULL ? "" : stdCode);
++		return false;
++	}
+ 	const char* stdPID = cInfo->stdCommID();
+ 
+-	uint32_t curDate = TimeUtils::getCurDate();
+-	uint32_t curTime = TimeUtils::getCurMin() / 100;
++	// One checked clock snapshot for the current trading date and every later
++	// date-zero request of this load (decision card 1, I03-NEW-006).
++	wtp::DateMappingClient dateMapping(_base_data_mgr);
++	uint32_t endTDate = 0;
++	if (!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, endTDate))
++		return false;
+ 
+-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
+-
+ 	std::string pname;
+ 	switch (period)
+ 	{
+@@ -1505,8 +1655,18 @@
+ 			WTSBarStruct sBar, eBar;
+ 			if (period != KP_DAY)
+ 			{
+-				uint64_t sTime = _base_data_mgr->getBoundaryTime(stdPID, leftDt, false, true);
+-				uint64_t eTime = _base_data_mgr->getBoundaryTime(stdPID, rightDt, false, false);
++				const wtp::DateMappingResult64 sBound = dateMapping.getBoundaryTime(stdPID, leftDt, false, true);
++				const wtp::DateMappingResult64 eBound = dateMapping.getBoundaryTime(stdPID, rightDt, false, false);
++				if (sBound.status != wtp::DateMappingStatus::Ok || eBound.status != wtp::DateMappingStatus::Ok)
++				{
++					pipe_rdmreader_log(_sink, LL_ERROR, "Mapping boundaries of {} section {}-{} failed: {}/{}", stdCode, leftDt, rightDt,
++						wtp::dateMappingStatusName(sBound.status), wtp::dateMappingStatusName(eBound.status));
++					releaseBarsSections();
++					_bars_cache.erase(key);
++					return false;
++				}
++				const uint64_t sTime = sBound.value;
++				const uint64_t eTime = eBound.value;
+ 
+ 				sBar.date = leftDt;
+ 				sBar.time = ((uint32_t)(sTime / 10000) - 19900000) * 10000 + (uint32_t)(sTime % 10000);
+@@ -2085,6 +2245,12 @@
+ 	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	const char* stdPID = commInfo->getFullPid();
+ 
+ 	std::string key = fmt::format("{}#{}", stdCode, (uint32_t)period);
+@@ -2105,8 +2271,11 @@
+ 	lDate = (uint32_t)(stime / 10000);
+ 	lTime = (uint32_t)(stime % 10000);
+ 
+-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
+-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
++	wtp::DateMappingClient dateMapping(_base_data_mgr);
++	uint32_t endTDate = 0, curTDate = 0;
++	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
++		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
++		return NULL;
+ 	
+ 	WTSBarStruct* hisHead = NULL;
+ 	WTSBarStruct* rtHead = NULL;
+@@ -2539,6 +2708,12 @@
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	pipe_rdmreader_log(_sink, LL_INFO, "CodeInfo of {}: {},{},{}", stdCode, cInfo._exchg, cInfo._product, cInfo._code);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	const char* stdPID = commInfo->getFullPid();
+ 
+ 	std::string key = fmtutil::format("{}#{}", stdCode, (uint32_t)period);
+@@ -2557,8 +2732,11 @@
+ 	rDate = (uint32_t)(etime / 10000);
+ 	rTime = (uint32_t)(etime % 10000);
+ 
+-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
+-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
++	wtp::DateMappingClient dateMapping(_base_data_mgr);
++	uint32_t endTDate = 0, curTDate = 0;
++	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
++		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
++		return NULL;
+ 
+ 	WTSBarStruct* hisHead = NULL;
+ 	WTSBarStruct* rtHead = NULL;
+@@ -2763,8 +2941,11 @@
+ 	rTime = (uint32_t)(etime % 1000000000) / 100000;
+ 	rSecs = (uint32_t)(etime % 100000);
+ 
+-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
+-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
++	wtp::DateMappingClient dateMapping(_base_data_mgr);
++	uint32_t endTDate = 0, curTDate = 0;
++	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
++		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
++		return NULL;
+ 
+ 	bool hasToday = (endTDate >= curTDate);
+ 
+@@ -2935,20 +3116,24 @@
+ 			if (tBlkPair._block == NULL)
+ 				break;
+ 
+-			HisTickBlock* tBlock = tBlkPair._block;
++			// R132-001: records are served from the pair's aligned copy, never from
++			// the packed history buffer (12-byte header leaves them misaligned).
++			if (!align_his_items<WTSTickStruct>(tBlkPair, sizeof(HisTickBlock)))
++				break;
++			WTSTickStruct* const hisRecs = tBlkPair._items.data();
+ 
+-			uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisTickBlock)) / sizeof(WTSTickStruct);
++			uint32_t tcnt = (uint32_t)tBlkPair._items.size();
+ 			if (tcnt <= 0)
+ 				break;
+ 
+-			WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + (tcnt - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b) {
++			WTSTickStruct* pTick = std::lower_bound(hisRecs, hisRecs + (tcnt - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b) {
+ 				if (a.action_date != b.action_date)
+ 					return a.action_date < b.action_date;
+ 				else
+ 					return a.action_time < b.action_time;
+ 			});
+ 
+-			std::size_t eIdx = pTick - tBlock->_ticks;
++			std::size_t eIdx = pTick - hisRecs;
+ 			if (pTick->action_date > eTick.action_date ||
+ 				(pTick->action_date == eTick.action_date && pTick->action_time > eTick.action_time))
+ 			{
+@@ -2961,7 +3146,7 @@
+ 
+ 			uint32_t thisCnt = min((uint32_t)eIdx + 1, left);
+ 			uint32_t sIdx = eIdx + 1 - thisCnt;
+-			slice->insertBlock(0, tBlock->_ticks + sIdx, thisCnt);
++			slice->insertBlock(0, hisRecs + sIdx, thisCnt);
+ 			slice->addOwner(his_owner(_his_tick_map, key));
+ 			left -= thisCnt;
+ 			break;
+@@ -2978,7 +3163,7 @@
+ 	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+-	if (!commInfo->isStock())
++	if (commInfo == NULL || !commInfo->isStock())	// I03-NEW-052: unknown commodity has no adjustment
+ 		return 1.0;
+ 
+ 	AdjFactor factor = { date, 1.0 };

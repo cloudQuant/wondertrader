@@ -32,6 +32,11 @@
 USING_NS_WTP;
 
 extern WtRtRunner& getRunner();
+TraderAdapterPtr i03s5_register_test_trader(WtRtRunner& runner, const char* id);
+uint32_t i03s5_inject_cta_context(WtRtRunner& runner, const char* name, int32_t slippage);
+uint32_t i03s5_inject_sel_context(WtRtRunner& runner, const char* name, uint32_t date, uint32_t time,
+	TaskPeriodType period, int32_t slippage);
+uint32_t i03s5_inject_hft_context(WtRtRunner& runner, const char* name, const char* trader, int32_t slippage);
 
 namespace {
 
@@ -394,7 +399,7 @@ TEST_F(Q06PorterRunner, InitEventRoutesByEngineType)
 	r.ctx_on_init(11, ET_CTA);
 	r.ctx_on_init(12, ET_HFT);
 	r.ctx_on_init(13, ET_SEL);
-	r.ctx_on_init(14, (EngineType)12345);	// 未定义取值走 default 分支
+	r.ctx_on_init(14, (EngineType)777);	// 未定义取值走 default 分支（I03-NEW-102：12345 超出枚举取值范围属 UB，改用范围内非枚举值）
 
 	EXPECT_EQ(g.init_cta, 1U);
 	EXPECT_EQ(g.init_hft, 1U);
@@ -733,7 +738,11 @@ TEST(Q06PorterRunnerCtxTable, CreatedContextsAreFindableAndUnknownIdsMiss)
 	r.registerSelCallbacks(NULL, NULL, NULL, NULL, NULL);
 	r.registerHftCallbacks(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
-	const uint32_t ctaId = r.createCtaContext("q06_cta_ctx", 2);
+	// I03-NEW-064（迭代03）：create*Context 只在 runner 已配置的引擎上建上下文；未配置的
+	// 进程级 runner 三类均拒绝，句柄表语义改用直接安装验证（.before 见 s5-runners 证据）。
+	EXPECT_EQ(0U, r.createCtaContext("q06_cta_unconfigured", 2));
+	EXPECT_EQ(0U, r.createSelContext("q06_sel_unconfigured", 20240601, 153000, "d", 0));
+	const uint32_t ctaId = i03s5_inject_cta_context(r, "q06_cta_ctx", 2);
 	EXPECT_GT(ctaId, 0U);
 	CtaContextPtr cta = r.getCtaContext(ctaId);
 	ASSERT_NE(cta, nullptr);
@@ -741,18 +750,23 @@ TEST(Q06PorterRunnerCtxTable, CreatedContextsAreFindableAndUnknownIdsMiss)
 	EXPECT_STREQ(cta->name(), "q06_cta_ctx");
 	EXPECT_EQ(cta->stra_get_position("SHFE.au2406", false, ""), 0.0);
 
-	const uint32_t selId = r.createSelContext("q06_sel_ctx", 20240601, 153000, "d", 0);
+	const uint32_t selId = i03s5_inject_sel_context(r, "q06_sel_ctx", 20240601, 153000, TPT_Daily, 0);
 	SelContextPtr sel = r.getSelContext(selId);
 	ASSERT_NE(sel, nullptr);
 	EXPECT_GT(selId, 0U);
 	EXPECT_EQ(sel->name(), std::string("q06_sel_ctx"));
 
-	// 未知周期串走 TPT_None 分支，不应抛异常
+	// 迭代03 合同更新（.before 见 s5-runners 证据）：
+	// BUG-R13-004 验收要求未知周期明确失败、不返回静默无效句柄 → 返回 0、不登记；
 	const uint32_t selId2 = r.createSelContext("q06_sel_bogus", 20240601, 153000, "not-a-period", 0);
-	EXPECT_NE(r.getSelContext(selId2), nullptr);
+	EXPECT_EQ(0U, selId2);
+	EXPECT_EQ(r.getSelContext(selId2), nullptr);
 
-	// trader 未注册 → 记录 error 后仍然返回句柄（绑通道失败的分支）
-	const uint32_t hftId = r.createHftContext("q06_hft_ctx", "TRADER_NOT_EXISTS", false, 1);
+	// BUG-R42-002 门禁：trader 未注册时创建失败（返回 0、不登记上下文）。
+	EXPECT_EQ(0U, r.createHftContext("q06_hft_absent", "TRADER_NOT_EXISTS", false, 1));
+	ASSERT_TRUE(i03s5_register_test_trader(r, "q06_test_trader") != nullptr);
+	EXPECT_EQ(0U, r.createHftContext("q06_hft_unconfigured", "q06_test_trader", false, 1));
+	const uint32_t hftId = i03s5_inject_hft_context(r, "q06_hft_ctx", "q06_test_trader", 1);
 	HftContextPtr hft = r.getHftContext(hftId);
 	ASSERT_NE(hft, nullptr);
 	EXPECT_EQ(hft->id(), hftId);

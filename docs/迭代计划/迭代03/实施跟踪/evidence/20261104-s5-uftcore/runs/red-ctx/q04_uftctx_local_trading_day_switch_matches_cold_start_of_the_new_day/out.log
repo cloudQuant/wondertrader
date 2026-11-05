@@ -1,0 +1,44 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = q04_uftctx_local.trading_day_switch_matches_cold_start_of_the_new_day
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from q04_uftctx_local
+[ RUN      ] q04_uftctx_local.trading_day_switch_matches_cold_start_of_the_new_day
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:339: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  ctx._ctx.stra_get_local_position(kAg)
+    Which is: 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:340: Failure
+Expected equality of these values:
+  cold.stra_get_local_position(kAg)
+    Which is: 2
+  ctx._ctx.stra_get_local_position(kAg)
+    Which is: 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:341: Failure
+Expected equality of these values:
+  cold.stra_get_local_closeprofit(kAg)
+    Which is: 0
+  ctx._ctx.stra_get_local_closeprofit(kAg)
+    Which is: 200
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:342: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  ctx._ctx.stra_get_local_closeprofit(kAg)
+    Which is: 200
+
+[  FAILED  ] q04_uftctx_local.trading_day_switch_matches_cold_start_of_the_new_day (19 ms)
+[----------] 1 test from q04_uftctx_local (19 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (20 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] q04_uftctx_local.trading_day_switch_matches_cold_start_of_the_new_day
+
+ 1 FAILED TEST

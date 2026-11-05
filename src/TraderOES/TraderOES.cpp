@@ -8,6 +8,7 @@
  * \brief 
  */
 #include "TraderOES.h"
+#include "../Share/ProviderRawReport.hpp"
 
 #include "../Includes/IBaseDataMgr.h"
 #include "../Includes/WTSContractInfo.hpp"
@@ -44,6 +45,14 @@ inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, cons
 
 extern "C"
 {
+	// BUG-L01-014 / K42: optional host feature declaration (WT_TRADER_SPI_FEATURES_SYMBOL).
+	EXPORT_FLAG void setTraderSpiFeatures(ITraderApi* trader, uint64_t features)
+	{
+		TraderOES* self = dynamic_cast<TraderOES*>(trader);
+		if (self != NULL)
+			self->setSpiFeatures(features);
+	}
+
 	EXPORT_FLAG ITraderApi* createTrader()
 	{
 		TraderOES *instance = new TraderOES();
@@ -797,6 +806,12 @@ void TraderOES::handle_rpt_message(SMsgHeadT *pMsgHead, void *pMsgItem)
 					_sink->onPushOrder(ordInfo);
 				ordInfo->release();
 			}
+			else
+			{
+				// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+				wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderOES", "order", "order report could not be converted",
+					wt_provider_raw::hexOf("OesOrdCnfmT", &pRptMsg->rptBody.ordCnfm));
+			}
 		}
 		break;
 
@@ -822,6 +837,12 @@ void TraderOES::handle_rpt_message(SMsgHeadT *pMsgHead, void *pMsgItem)
 					_sink->onPushOrder(ordInfo);
 				ordInfo->release();
 			}
+			else
+			{
+				// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+				wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderOES", "order", "order report could not be converted",
+					wt_provider_raw::hexOf("OesOrdCnfmT", &ordReport));
+			}
 
 			WTSTradeInfo* trdInfo = makeTradeInfo(&pRptMsg->rptBody.trdCnfm);
 			if (trdInfo)
@@ -829,6 +850,12 @@ void TraderOES::handle_rpt_message(SMsgHeadT *pMsgHead, void *pMsgItem)
 				if (_sink)
 					_sink->onPushTrade(trdInfo);
 				trdInfo->release();
+			}
+			else
+			{
+				// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+				wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderOES", "trade", "trade report could not be converted",
+					wt_provider_raw::hexOf("OesTrdCnfmT", &pRptMsg->rptBody.trdCnfm));
 			}
 		}
 		/* @note 成交回报中已经包含了委托回报的相关信息, 可以通过辅助接口直接从成交回报中提取和生成委托回报数据
@@ -915,15 +942,32 @@ void TraderOES::handle_rsp_orders(SMsgHeadT *pMsgHead, void *pMsgItem, OesQryCur
 
 	WTSOrderInfo* pRet = makeOrderInfo(pOrdItem);
 	if (pRet == NULL)
-		return;
-
-	_orders->append(pRet, false);
+	{
+		// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the struct); the host pauses the account.
+		wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderOES", "order", "order query row could not be converted",
+			wt_provider_raw::hexOf("OesOrdItemT", pOrdItem));
+		// I03-NEW-101: a dropped row must not swallow the final callback of the query.
+		_qry_orders_dropped = true;
+	}
+	else
+	{
+		_orders->append(pRet, false);
+	}
 
 	if (pQryCursor == NULL || pQryCursor->isEnd)
 	{
-		boost::asio::post(_asyncio, [this] {
+		// K42: a host that understands query completeness learns that a dropped row
+		// makes the snapshot partial; others keep the legacy callback.
+		const uint32_t status = _qry_orders_dropped ? WT_QUERY_STATUS_PARTIAL : WT_QUERY_STATUS_COMPLETE;
+		_qry_orders_dropped = false;
+		boost::asio::post(_asyncio, [this, status] {
 			if (_sink)
-				_sink->onRspOrders(_orders);
+			{
+				if (m_spiFeatures.load() & WT_TRADER_SPI_FEATURE_QUERY_STATUS)
+					_sink->onRspOrdersWithStatus(_orders, status);
+				else
+					_sink->onRspOrders(_orders);
+			}
 
 			if (NULL != _orders)
 				_orders->clear();
@@ -984,9 +1028,16 @@ void TraderOES::handle_rsp_trades(SMsgHeadT *pMsgHead, void *pMsgItem, OesQryCur
 
 	WTSTradeInfo* pRet = makeTradeInfo(pTrdItem);
 	if (pRet == NULL)
-		return;
-
-	_trades->append(pRet, false);
+	{
+		// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the struct); the host pauses the account.
+		wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderOES", "trade", "trade query row could not be converted",
+			wt_provider_raw::hexOf("OesTrdItemT", pTrdItem));
+		// I03-NEW-101: fall through so a dropped last row still delivers the final callback.
+	}
+	else
+	{
+		_trades->append(pRet, false);
+	}
 
 
 	if(pQryCursor == NULL || pQryCursor->isEnd)

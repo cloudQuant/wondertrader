@@ -8,11 +8,18 @@
 #include <string>
 #include <stdint.h>
 #include <unordered_map>
+#include <memory>
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <vector>
 
 #include "DataDefine.h"
 
 #include "../Includes/FasterDefs.h"
 #include "../Includes/IRdmDtReader.h"
+#include "../Includes/DateMappingBinding.h"
+#include "../Includes/WTSDataDef.hpp"
 
 #include "../Share/BoostMappingFile.hpp"
 #include "../Share/StdUtils.hpp"
@@ -178,6 +185,7 @@ private:
 	typedef struct _HisTBlockPair
 	{
 		HisTickBlock*	_block;      ///< 历史Tick数据块指针
+		std::vector<WTSTickStruct>	_items;  ///< R132-001：对齐的记录副本，读取与切片只用它（_buffer 只保留打包头）
 		uint64_t		_date;       ///< 数据日期
 		std::string		_buffer;     ///< 数据缓冲区
 
@@ -192,7 +200,8 @@ private:
 		}
 	} HisTBlockPair;
 
-	typedef std::unordered_map<std::string, HisTBlockPair>	HisTickBlockMap;
+	//卡11=B：历史块以共享 owner 形式缓存，切片持有引用，clearCache 只移除缓存这一份引用
+	typedef std::unordered_map<std::string, std::shared_ptr<HisTBlockPair>>	HisTickBlockMap;
 
 	/**
 	 * @brief 历史成交数据块对结构体
@@ -201,6 +210,7 @@ private:
 	typedef struct _HisTransBlockPair
 	{
 		HisTransBlock*	_block;      ///< 历史成交数据块指针
+		std::vector<WTSTransStruct>	_items;  ///< R132-001：对齐的记录副本，读取与切片只用它（_buffer 只保留打包头）
 		uint64_t		_date;       ///< 数据日期
 		std::string		_buffer;     ///< 数据缓冲区
 
@@ -215,7 +225,7 @@ private:
 		}
 	} HisTransBlockPair;
 
-	typedef std::unordered_map<std::string, HisTransBlockPair>	HisTransBlockMap;
+	typedef std::unordered_map<std::string, std::shared_ptr<HisTransBlockPair>>	HisTransBlockMap;
 
 	/**
 	 * @brief 历史委托明细数据块对结构体
@@ -224,6 +234,7 @@ private:
 	typedef struct _HisOrdDtlBlockPair
 	{
 		HisOrdDtlBlock*	_block;      ///< 历史委托明细数据块指针
+		std::vector<WTSOrdDtlStruct>	_items;  ///< R132-001：对齐的记录副本，读取与切片只用它（_buffer 只保留打包头）
 		uint64_t		_date;       ///< 数据日期
 		std::string		_buffer;     ///< 数据缓冲区
 
@@ -238,7 +249,7 @@ private:
 		}
 	} HisOrdDtlBlockPair;
 
-	typedef std::unordered_map<std::string, HisOrdDtlBlockPair>	HisOrdDtlBlockMap;
+	typedef std::unordered_map<std::string, std::shared_ptr<HisOrdDtlBlockPair>>	HisOrdDtlBlockMap;
 
 	/**
 	 * @brief 历史委托队列数据块对结构体
@@ -247,6 +258,7 @@ private:
 	typedef struct _HisOrdQueBlockPair
 	{
 		HisOrdQueBlock*	_block;      ///< 历史委托队列数据块指针
+		std::vector<WTSOrdQueStruct>	_items;  ///< R132-001：对齐的记录副本，读取与切片只用它（_buffer 只保留打包头）
 		uint64_t		_date;       ///< 数据日期
 		std::string		_buffer;     ///< 数据缓冲区
 
@@ -261,7 +273,7 @@ private:
 		}
 	} HisOrdQueBlockPair;
 
-	typedef std::unordered_map<std::string, HisOrdQueBlockPair>	HisOrdQueBlockMap;
+	typedef std::unordered_map<std::string, std::shared_ptr<HisOrdQueBlockPair>>	HisOrdQueBlockMap;
 
 	HisTickBlockMap		_his_tick_map;    ///< 历史Tick数据映射
 	HisOrdDtlBlockMap	_his_orddtl_map;  ///< 历史委托明细映射
@@ -385,6 +397,9 @@ public:
 	 * 
 	 * @details 根据给定的配置对象初始化数据存储器，设置数据路径和其他相关参数
 	 */
+	/// K31=A：宿主注入 DateMappingV1 表（可选导出 bindRdmDtReaderDateMappingV1 调用；须在 init 前，只接受一次）。
+	bool bindDateMapping(const wtp::DateMappingV1* table) noexcept { return _date_binding.bind(table); }
+
 	virtual void init(WTSVariant* cfg, IRdmDtReaderSink* sink) override;
 
 	/**
@@ -492,9 +507,17 @@ public:
 private:
 	std::string		_base_dir;       ///< 数据文件存放的基础目录
 	IBaseDataMgr*	_base_data_mgr;   ///< 基础数据管理器指针
+	wtp::DateMappingBinding	_date_binding;	///< K31=A：已注入时走路径 A，否则路径 C
 	IHotMgr*		_hot_mgr;        ///< 热点合约管理器指针
 	StdThreadPtr	_thrd_check;     ///< 检查线稍指针，用于定期检查数据状态
-	bool			_stopped;        ///< 线程是否已停止的标志
+	std::atomic<bool>	_stopped;    ///< 线程是否已停止的标志
+	/*
+	 *	卡11=B：缓存映射表锁。所有公开读取接口、clearCache 与巡检线程都在此锁下访问
+	 *	各缓存 map；已返回的切片通过 owner 引用计数保活，不依赖此锁。
+	 */
+	StdRecurMutex	_cache_mtx;
+	std::mutex				_stop_mtx;	///< 巡检线程停止信号锁，析构时可立即唤醒巡检线程
+	std::condition_variable	_stop_cv;
 
 	typedef struct _BarsList
 	{
@@ -506,8 +529,8 @@ private:
 
 		_BarsList():_factor(1.0){}
 
-		std::vector<WTSBarStruct>	_bars;       ///< 历史K线数据缓存
-		std::vector<WTSBarStruct>	_rt_bars;    ///< 实时K线数据缓存，如果是后复权，就需要把实时数据拷贝到这里来
+		WTSSharedBuffer<std::vector<WTSBarStruct>>	_bars;       ///< 历史K线数据缓存（写时复制，切片持有 owner）
+		WTSSharedBuffer<std::vector<WTSBarStruct>>	_rt_bars;    ///< 实时K线数据缓存，如果是后复权，就需要把实时数据拷贝到这里来（写时复制）
 	} BarsList;
 
 	/**

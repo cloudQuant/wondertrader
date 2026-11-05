@@ -1,0 +1,14 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/TestUnits/coverage/r12_headers/r12_base_datamgr_test.cpp	2026-11-01 04:38:33
++++ src/TestUnits/coverage/r12_headers/r12_base_datamgr_test.cpp	2026-11-04 21:06:11
+@@ -47,8 +47,10 @@
+ 		"sections":[{"from":900,"to":1130},{"from":1300,"to":1500}]},
+ 	"R12NIGHT":{"name":"r12夜盘","offset":300,
+ 		"sections":[{"from":2100,"to":2300},{"from":900,"to":1130}]},
+-	"R12EMPTY":{"name":"r12无时段","offset":0}
++	"R12EMPTY":{"name":"r12无时段","offset":0,"sections":[]}
+ })";
++// I03-NEW-053（卡 2 配置整批校验后发布）：会话条目必须带 sections 数组，缺失会使
++// 整份文件被拒；R12EMPTY 的“无时段”语义改用空数组表达（加载器接受空数组）。
+ 
+ const char* kCommodities = R"({
+ 	"SSE":{"STK":{"name":"r12股票","session":"R12DAY","holiday":"CHN","pricetick":0.01,

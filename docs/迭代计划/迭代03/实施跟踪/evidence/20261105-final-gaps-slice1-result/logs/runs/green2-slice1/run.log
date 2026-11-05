@@ -1,0 +1,105 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S1TraderEntryGate.*:S5MainK05EntryLimit.*:S1EngineRunGuard.*:S1K25SelIsolation.*:S5MainK25Sel.*:S5SelScheduleThread.*:S1K24NotifierStop.*:R42CtaPersistTest.*
+[==========] Running 37 tests from 8 test suites.
+[----------] Global test environment set-up.
+[----------] 6 tests from S1TraderEntryGate
+[ RUN      ] S1TraderEntryGate.K05SiblingAdaptersOfOneAccountShareInFlightQuantity
+[       OK ] S1TraderEntryGate.K05SiblingAdaptersOfOneAccountShareInFlightQuantity (7 ms)
+[ RUN      ] S1TraderEntryGate.K05ConcurrentEntriesCannotBothPassTheAccountCheck
+[       OK ] S1TraderEntryGate.K05ConcurrentEntriesCannotBothPassTheAccountCheck (1 ms)
+[ RUN      ] S1TraderEntryGate.K03LiveOrderReportAfterNotSentClosurePausesAccount
+[       OK ] S1TraderEntryGate.K03LiveOrderReportAfterNotSentClosurePausesAccount (1 ms)
+[ RUN      ] S1TraderEntryGate.K03TradeAfterNotSentClosurePausesAccount
+[       OK ] S1TraderEntryGate.K03TradeAfterNotSentClosurePausesAccount (1 ms)
+[ RUN      ] S1TraderEntryGate.K03NotSentWithoutLiveEvidenceKeepsTheAccountOpen
+[       OK ] S1TraderEntryGate.K03NotSentWithoutLiveEvidenceKeepsTheAccountOpen (1 ms)
+[ RUN      ] S1TraderEntryGate.New006ClockFailureRejectsEntryBeforeTheProvider
+[       OK ] S1TraderEntryGate.New006ClockFailureRejectsEntryBeforeTheProvider (1 ms)
+[----------] 6 tests from S1TraderEntryGate (14 ms total)
+
+[----------] 2 tests from S5MainK05EntryLimit
+[ RUN      ] S5MainK05EntryLimit.EntryAboveTheAccountLimitIsRejectedAndReductionsStayAllowed
+[       OK ] S5MainK05EntryLimit.EntryAboveTheAccountLimitIsRejectedAndReductionsStayAllowed (1 ms)
+[ RUN      ] S5MainK05EntryLimit.WithoutADeclaredLimitEntriesAreNotRestricted
+[       OK ] S5MainK05EntryLimit.WithoutADeclaredLimitEntriesAreNotRestricted (1 ms)
+[----------] 2 tests from S5MainK05EntryLimit (2 ms total)
+
+[----------] 2 tests from S1K24NotifierStop
+[ RUN      ] S1K24NotifierStop.BlockedPublisherIsDetachedAfterBoundedWait
+[       OK ] S1K24NotifierStop.BlockedPublisherIsDetachedAfterBoundedWait (706 ms)
+[ RUN      ] S1K24NotifierStop.IdleNotifierDrainsAndDestroysServerOnce
+[       OK ] S1K24NotifierStop.IdleNotifierDrainsAndDestroysServerOnce (0 ms)
+[----------] 2 tests from S1K24NotifierStop (706 ms total)
+
+[----------] 17 tests from R42CtaPersistTest
+[ RUN      ] R42CtaPersistTest.OnInitLoadsPersistedStateAndPreparesOutputs
+[       OK ] R42CtaPersistTest.OnInitLoadsPersistedStateAndPreparesOutputs (8 ms)
+[ RUN      ] R42CtaPersistTest.SaveDataRoundTripAcrossContexts
+[       OK ] R42CtaPersistTest.SaveDataRoundTripAcrossContexts (6 ms)
+[ RUN      ] R42CtaPersistTest.MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions
+[       OK ] R42CtaPersistTest.MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions (21 ms)
+[ RUN      ] R42CtaPersistTest.ExpiredPositionCodesHaveBoundedLogDisplay
+[       OK ] R42CtaPersistTest.ExpiredPositionCodesHaveBoundedLogDisplay (3 ms)
+[ RUN      ] R42CtaPersistTest.ExpiredSignalCodesHaveBoundedLogDisplay
+[       OK ] R42CtaPersistTest.ExpiredSignalCodesHaveBoundedLogDisplay (3 ms)
+[ RUN      ] R42CtaPersistTest.LongRecoveredPositionCodesKeepTheirFullIdentity
+[       OK ] R42CtaPersistTest.LongRecoveredPositionCodesKeepTheirFullIdentity (2 ms)
+[ RUN      ] R42CtaPersistTest.LongRecoveredSignalCodesKeepTheirFullIdentity
+[       OK ] R42CtaPersistTest.LongRecoveredSignalCodesKeepTheirFullIdentity (6 ms)
+[ RUN      ] R42CtaPersistTest.LongDirectTickSubscriptionsKeepTheirFullIdentity
+[       OK ] R42CtaPersistTest.LongDirectTickSubscriptionsKeepTheirFullIdentity (0 ms)
+[ RUN      ] R42CtaPersistTest.MaximumSupportedDetailAndSignalTagsRestoreAndExecute
+[       OK ] R42CtaPersistTest.MaximumSupportedDetailAndSignalTagsRestoreAndExecute (3 ms)
+[ RUN      ] R42CtaPersistTest.LookupFailureWhilePreparingSnapshotDoesNotPublishCandidate
+[       OK ] R42CtaPersistTest.LookupFailureWhilePreparingSnapshotDoesNotPublishCandidate (3 ms)
+[ RUN      ] R42CtaPersistTest.ScheduleEmitsCalculateAndChartWrites
+[       OK ] R42CtaPersistTest.ScheduleEmitsCalculateAndChartWrites (4 ms)
+[ RUN      ] R42CtaPersistTest.ChartApisRejectUseOutsideScheduleAndUnknownNames
+[       OK ] R42CtaPersistTest.ChartApisRejectUseOutsideScheduleAndUnknownNames (0 ms)
+[ RUN      ] R42CtaPersistTest.SessionBeginReleasesFrozenAndPersistsUserData
+[       OK ] R42CtaPersistTest.SessionBeginReleasesFrozenAndPersistsUserData (3 ms)
+[ RUN      ] R42CtaPersistTest.PositionAccountingQueriesReactToTicks
+[       OK ] R42CtaPersistTest.PositionAccountingQueriesReactToTicks (3 ms)
+[ RUN      ] R42CtaPersistTest.LogsSubscriptionsAndMetadataAccessors
+[       OK ] R42CtaPersistTest.LogsSubscriptionsAndMetadataAccessors (2 ms)
+[ RUN      ] R42CtaPersistTest.K45UnknownMembersRejectTheWholeSnapshot
+[       OK ] R42CtaPersistTest.K45UnknownMembersRejectTheWholeSnapshot (7 ms)
+[ RUN      ] R42CtaPersistTest.K45AllocationFailureDuringRestorePropagatesWithoutPartialState
+[       OK ] R42CtaPersistTest.K45AllocationFailureDuringRestorePropagatesWithoutPartialState (3 ms)
+[----------] 17 tests from R42CtaPersistTest (86 ms total)
+
+[----------] 3 tests from S1EngineRunGuard
+[ RUN      ] S1EngineRunGuard.SelSecondRunIsRejectedAndKeepsTheRunningTicker
+[       OK ] S1EngineRunGuard.SelSecondRunIsRejectedAndKeepsTheRunningTicker (1 ms)
+[ RUN      ] S1EngineRunGuard.CtaSecondRunIsRejectedAndKeepsTheRunningTicker
+[       OK ] S1EngineRunGuard.CtaSecondRunIsRejectedAndKeepsTheRunningTicker (0 ms)
+[ RUN      ] S1EngineRunGuard.HftSecondRunIsRejectedAndKeepsTheRunningTicker
+[       OK ] S1EngineRunGuard.HftSecondRunIsRejectedAndKeepsTheRunningTicker (0 ms)
+[----------] 3 tests from S1EngineRunGuard (2 ms total)
+
+[----------] 4 tests from S1K25SelIsolation
+[ RUN      ] S1K25SelIsolation.ThrowingScheduleIsIsolatedAndOtherStrategiesStillRun
+[       OK ] S1K25SelIsolation.ThrowingScheduleIsIsolatedAndOtherStrategiesStillRun (1 ms)
+[ RUN      ] S1K25SelIsolation.ThrowingTickHandlerIsIsolatedAndOtherStrategiesStillReceiveTicks
+[       OK ] S1K25SelIsolation.ThrowingTickHandlerIsIsolatedAndOtherStrategiesStillReceiveTicks (0 ms)
+[ RUN      ] S1K25SelIsolation.ReentrantTicksBetweenTwoStrategiesAreQueuedAndDeliveredOnce
+[       OK ] S1K25SelIsolation.ReentrantTicksBetweenTwoStrategiesAreQueuedAndDeliveredOnce (2 ms)
+[ RUN      ] S1K25SelIsolation.StopFromInsideAStrategyCallbackDoesNotSelfJoin
+[       OK ] S1K25SelIsolation.StopFromInsideAStrategyCallbackDoesNotSelfJoin (7 ms)
+[----------] 4 tests from S1K25SelIsolation (11 ms total)
+
+[----------] 1 test from S5MainK25Sel
+[ RUN      ] S5MainK25Sel.FiredScheduleRunsSynchronouslyOnTheCallingStrand
+[       OK ] S5MainK25Sel.FiredScheduleRunsSynchronouslyOnTheCallingStrand (1 ms)
+[----------] 1 test from S5MainK25Sel (1 ms total)
+
+[----------] 2 tests from S5SelScheduleThread
+[ RUN      ] S5SelScheduleThread.FiredTaskRunsOnceOnItsContextAndIsJoined
+[       OK ] S5SelScheduleThread.FiredTaskRunsOnceOnItsContextAndIsJoined (35 ms)
+[ RUN      ] S5SelScheduleThread.TasksOnSeveralDaysAreAllJoinedByRelease
+[       OK ] S5SelScheduleThread.TasksOnSeveralDaysAreAllJoinedByRelease (34 ms)
+[----------] 2 tests from S5SelScheduleThread (69 ms total)
+
+[----------] Global test environment tear-down
+[==========] 37 tests from 8 test suites ran. (907 ms total)
+[  PASSED  ] 37 tests.

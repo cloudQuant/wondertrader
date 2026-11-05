@@ -371,11 +371,19 @@ TEST_F(P01CtaOrderTest, missing_session_exit_and_tick_preserve_saved_signal)
         })";
     }
 
-    WTSBaseDataMgr realBaseData;
-    ASSERT_TRUE(realBaseData.loadContracts(contractsFile.string().c_str()));
-    WTSCommodityInfo* commodity = realBaseData.getCommodity("DCE", "i2405");
+    // I03-NEW-053（整批校验后发布）：真实加载器现在整份拒绝“rules 自动建品种但 ALLDAY 未加载”的文件，
+    // BUG-P01-001 的入口已在加载器处关闭（改前期望 loadContracts 返回 true）。策略上下文对无时段商品的
+    // 防御行为仍需保持，改用替身基础数据构造同一个无时段商品继续验证。
+    WTSBaseDataMgr loaderProbe;
+    EXPECT_FALSE(loaderProbe.loadContracts(contractsFile.string().c_str()));
+    EXPECT_EQ(nullptr, loaderProbe.getCommodity("DCE", "i2405"));
+    EXPECT_EQ(nullptr, loaderProbe.getContract("i2405", "DCE", 20250110));
+
+    FakeBaseDataMgr realBaseData;
+    WTSCommodityInfo* commodity = p01MakeComm("DCE", "i2405", "ALLDAY", TM_Both);
     ASSERT_NE(nullptr, commodity);
-    ASSERT_EQ(nullptr, commodity->getSessionInfo()); // ALLDAY was not loaded.
+    ASSERT_EQ(nullptr, commodity->getSessionInfo()); // ALLDAY was not registered.
+    realBaseData.regis(commodity, p01MakeCt("DCE", "i2405", "i2405"));
     ASSERT_NE(nullptr, realBaseData.getContract("i2405", "DCE", 20250110));
 
     P01CtaEngine realEngine;

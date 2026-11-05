@@ -1,0 +1,26 @@
+[==========] Running 9 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 9 tests from MwAd
+[ RUN      ] MwAd.SyncDbFailureDoesNotPublishAndSameTickRetrySucceeds
+[       OK ] MwAd.SyncDbFailureDoesNotPublishAndSameTickRetrySucceeds (3 ms)
+[ RUN      ] MwAd.AsyncDbFailureIsObservableAndNotPublished
+[       OK ] MwAd.AsyncDbFailureIsObservableAndNotPublished (3 ms)
+[ RUN      ] MwAd.MinuteBarBeyondUint32KeyIsRefusedNotWrapped
+[       OK ] MwAd.MinuteBarBeyondUint32KeyIsRefusedNotWrapped (1 ms)
+[ RUN      ] MwAd.MinuteBarWithinUint32KeyIsStillWritten
+[       OK ] MwAd.MinuteBarWithinUint32KeyIsStillWritten (3 ms)
+[ RUN      ] MwAd.UnknownKeyLayoutIsQuarantinedUntouched
+[       OK ] MwAd.UnknownKeyLayoutIsQuarantinedUntouched (3 ms)
+[ RUN      ] MwAd.LegacyZeroDateTickKeyIsQuarantined
+[       OK ] MwAd.LegacyZeroDateTickKeyIsQuarantined (2 ms)
+[ RUN      ] MwAd.CurrentKeyLayoutDbKeepsWorking
+[       OK ] MwAd.CurrentKeyLayoutDbKeepsWorking (2 ms)
+[ RUN      ] MwAd.OverlongExchangeRejectedBeforeSideEffects
+[       OK ] MwAd.OverlongExchangeRejectedBeforeSideEffects (1 ms)
+[ RUN      ] MwAd.TwoProcessesShareTickCacheWithoutIndexCollision
+[       OK ] MwAd.TwoProcessesShareTickCacheWithoutIndexCollision (102 ms)
+[----------] 9 tests from MwAd (126 ms total)
+
+[----------] Global test environment tear-down
+[==========] 9 tests from 1 test suite ran. (126 ms total)
+[  PASSED  ] 9 tests.

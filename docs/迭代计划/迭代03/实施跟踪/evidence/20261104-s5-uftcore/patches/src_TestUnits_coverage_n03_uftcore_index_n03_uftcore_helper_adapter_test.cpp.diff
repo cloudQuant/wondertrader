@@ -1,0 +1,82 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-uftcore/before/src/TestUnits/coverage/n03_uftcore_index/n03_uftcore_helper_adapter_test.cpp	2026-10-31 13:37:06
++++ src/TestUnits/coverage/n03_uftcore_index/n03_uftcore_helper_adapter_test.cpp	2026-11-04 18:39:49
+@@ -87,6 +87,11 @@
+ static int g_apiDestructions = 0;
+ static int g_apiConnects = 0;
+ 
++// Card 9 (BUG-R78-001): only a provider confirmation authorizes destroying an
++// external API; without a remover the adapter quarantines it. These tests
++// release quiescent fakes, so they pass a remover confirming the destruction.
++void deleteU3ParserConfirmed(IParserApi*& api);
++
+ //////////////////////////////////////////////////////////////////////////
+ // 假行情接口: 记录注册/订阅/连接调用
+ class U3ParserApi : public IParserApi
+@@ -112,6 +117,13 @@
+ 	uint32_t _subscribed = 999;
+ 	IParserSpi* _spi = nullptr;
+ };
++
++void deleteU3ParserConfirmed(IParserApi*& api)
++{
++	IParserApi* original = api;
++	api = nullptr;
++	delete original;
++}
+ 
+ //////////////////////////////////////////////////////////////////////////
+ // 假回调桩: 记录转发给策略的推送
+@@ -419,7 +431,7 @@
+ 	U3ParserApi* api = new U3ParserApi();
+ 	api->_initRet = true;
+ 	ParserAdapter adapter;
+-	ASSERT_TRUE(adapter.initExt("sse", api, &stub, &bdMgr));
++	ASSERT_TRUE(adapter.initExt("sse", api, &stub, &bdMgr, deleteU3ParserConfirmed));
+ 	EXPECT_TRUE(adapter.hasApi());
+ 	EXPECT_TRUE(adapter.isInitialized());
+ 	EXPECT_STREQ("sse", adapter.id());
+@@ -487,7 +499,7 @@
+ 	api->_initRet = false;
+ 	ParserAdapter adapter;
+ 
+-	EXPECT_FALSE(adapter.initExt("failed", api, &stub, &bdMgr));
++	EXPECT_FALSE(adapter.initExt("failed", api, &stub, &bdMgr, deleteU3ParserConfirmed));
+ 	EXPECT_TRUE(adapter.hasApi());
+ 	EXPECT_FALSE(adapter.isInitialized());
+ 	EXPECT_FALSE(adapter.run());
+@@ -497,7 +509,7 @@
+ 	EXPECT_EQ(0, g_apiDestructions);
+ 
+ 	// Repeating the same raw pointer must not create a second owner.
+-	EXPECT_FALSE(adapter.initExt("failed-again", api, &stub, &bdMgr));
++	EXPECT_FALSE(adapter.initExt("failed-again", api, &stub, &bdMgr, deleteU3ParserConfirmed));
+ 	EXPECT_EQ(0, g_apiReleases);
+ 	EXPECT_EQ(0, g_apiDestructions);
+ 
+@@ -519,7 +531,7 @@
+ 	U3ParserApi* busyCandidate = new U3ParserApi();
+ 	ParserAdapter adapter;
+ 
+-	EXPECT_FALSE(adapter.initExt("missing-bd", missingBaseData, &stub, nullptr));
++	EXPECT_FALSE(adapter.initExt("missing-bd", missingBaseData, &stub, nullptr, deleteU3ParserConfirmed));
+ 	EXPECT_TRUE(adapter.hasApi());
+ 	EXPECT_FALSE(adapter.isInitialized());
+ 	EXPECT_FALSE(adapter.run());
+@@ -528,7 +540,7 @@
+ 
+ 	// A distinct API passed to a busy adapter is also retained; the existing
+ 	// candidate and its borrowed context are not overwritten.
+-	EXPECT_FALSE(adapter.initExt("busy", busyCandidate, &stub, &bdMgr));
++	EXPECT_FALSE(adapter.initExt("busy", busyCandidate, &stub, &bdMgr, deleteU3ParserConfirmed));
+ 	EXPECT_TRUE(adapter.hasApi());
+ 	EXPECT_FALSE(adapter.isInitialized());
+ 	EXPECT_STREQ("missing-bd", adapter.id());
+@@ -556,7 +568,7 @@
+ 	U3ParserStub stub;
+ 	U3ParserApi* api = new U3ParserApi();
+ 	api->_initRet = true;	// 初始化成功，覆盖管理器注册/run/release 流程
+-	ASSERT_TRUE(first->initExt("lost", api, &stub, &bdMgr));
++	ASSERT_TRUE(first->initExt("lost", api, &stub, &bdMgr, deleteU3ParserConfirmed));
+ 
+ 	ASSERT_TRUE(mgr.addAdapter("lost", first));
+ 	EXPECT_EQ(first, mgr.getAdapter("lost"));

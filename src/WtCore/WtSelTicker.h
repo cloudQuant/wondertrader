@@ -14,6 +14,7 @@
 
 #include "../Includes/WTSMarcos.h"
 #include "../Share/StdUtils.hpp"
+#include "TickerDayBoundary.h"
 
 NS_WTP_BEGIN
 class WTSSessionInfo;
@@ -62,7 +63,8 @@ public:
 	 * @brief 启动触发器
 	 * @details 创建并启动一个实时监控线程，监控时间变化并触发分钟结束等事件
 	 */
-	void	run();
+	// I03-NEW-075: false when the ticker cannot start (e.g. no trading session).
+	bool	run();
 
 	/**
 	 * @brief 停止触发器
@@ -79,21 +81,33 @@ private:
 	 */
 	void	trigger_price(WTSTickData* curTick, uint32_t hotFlag = 0);
 
+	/**
+	 * @brief 处理一笔行情（调用方必须是 _strand 的 owner）
+	 */
+	void	handle_tick(WTSTickData* curTick, uint32_t hotFlag);
+
+	/**
+	 * @brief worker 的一轮检查（调用方必须是 _strand 的 owner）
+	 */
+	void	worker_pass();
+
 private:
 	WTSSessionInfo*	_s_info;     ///< 交易时段信息
 	WtSelEngine*	_engine;        ///< 选股策略引擎指针
 	IDataReader*		_store;      ///< 数据读取器指针
 
-	uint32_t	_date;              ///< 当前日期
-	uint32_t	_time;              ///< 当前时间
+	std::atomic<uint32_t>	_date;              ///< 当前日期
+	std::atomic<uint32_t>	_time;              ///< 当前时间
 
 	uint32_t	_cur_pos;           ///< 当前分钟位置
 
-	StdUniqueMutex	_mtx;         ///< 互斥锁，用于线程同步
+	wt_ticker::EventStrand	_strand;	///< 卡9 9d=A：on_tick 与 worker 的串行化/重入排队
 	std::atomic<uint64_t>	_next_check_time;  ///< 下次检查时间，原子类型
 	std::atomic<uint32_t>	_last_emit_pos;    ///< 最后触发的分钟位置，原子类型
 
-	bool			_stopped;           ///< 触发器是否已停止
+	std::atomic<bool>	_stopped;           ///< 触发器是否已停止
+	std::atomic<bool>	_running{ false };	///< worker 已启动
+	StdUniqueMutex	_stop_mtx;	///< 串行化 stop 的 join
 	StdThreadPtr	_thrd;           ///< 监控线程指针
 };
 

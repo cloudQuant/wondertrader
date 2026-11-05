@@ -1,0 +1,132 @@
+{
+ "start": "2026-11-05T11:58:36+08:00",
+ "bin_dir": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/TestUnits",
+ "workers": 6,
+ "timeout": 600.0,
+ "auto_env": {
+  "WT_R66_FAKE_MQ_DIR": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/TestUnits/coverage/r160_fake_mq",
+  "R42_HFT_PLUGIN": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/libWtHftStraFact.dylib"
+ },
+ "binaries": [
+  {
+   "name": "CoverageTests_btcore",
+   "sha256": "2b3ecdddbf69a86f28f9f8237d6585301b29551771c9ed8cf30769cd1ef24416",
+   "list_status": "ok",
+   "enabled": 1,
+   "disabled": 30,
+   "disabled_names": [
+    "CtaMockerStateTest.DISABLED_emptyStateCallsCrashOrHang",
+    "ExecMockerTest.DISABLED_matchSinkCallbacksCrashWithoutExecuterUnit",
+    "P03CtaTradePath.DISABLED_CalcFeeByAmountCrashesWhenCommodityMissing",
+    "R171ReplayFixture.DISABLED_R171Sel_ReplayDoneWithoutScheduleDividesByZero",
+    "R180LoaderFixture.DISABLED_R180Exec_TwapSecondTickReleasesDanglingLastTick",
+    "R72HftUftPaths.DISABLED_UftEnumPositionWithoutStrategyDerefsNull",
+    "R92MockerResidual.DISABLED_HftMarketOrderFirstTickDerefsErasedOrder",
+    "P04ReplayTermTest.DISABLED_taskFrequencyAndOutOfRangeReplayCrash",
+    "P07MinuteReplayTest.DISABLED_emptyMinuteCsvHitsUnsubscriptedBars",
+    "P07TaskScheduleTest.DISABLED_unknownSessionTemplateCrashes",
+    "P07TickLoaderTest.DISABLED_mismatchedTickDateHangsReplayHftDatas",
+    "P08HftOrderCancel.DISABLED_BlockingHookAndNullDerefFamily",
+    "P08UftDispatchT1.DISABLED_TickPointerAndSessionDerefFamily",
+    "P08UftOrderPosition.DISABLED_NullStrategyAndNullCommDerefFamily",
+    "R191MockerFixture.DISABLED_R191Uft_PluginFactoryDestructorCrashes",
+    "R201MockerFixture.DISABLED_R201UftMocker_ShortFrozenIsNotReleasedOnSessionBegin",
+    "R20EventNotifier.DISABLED_InitActiveLoadsMqModuleAndOpensServer",
+    "R20EventNotifier.DISABLED_InitNullConfigDerefsAndCrashes",
+    "R20ExecMocker.DISABLED_TickSwapReleasesPreviousTick",
+    "R20ExecMocker.DISABLED_BuyAfterTickAccumulatesUndone",
+    "R20ExecMocker.DISABLED_SellDecrementsUndone",
+    "R20ExecMocker.DISABLED_CancelByCodeSkipsUnfiredOrders",
+    "R20ExecMocker.DISABLED_SessionEndClearsMatcherAndUndone",
+    "R20ExecMocker.DISABLED_ExecUnitNullDerefFamily",
+    "R20ExecMocker.DISABLED_FireOrdersSinkNullAfterPendingOrderAndSecondTick",
+    "R20HisDataMgr.DISABLED_InitCrashesWhenReaderNullAfterLoadFailure",
+    "Q02CtaDumpTest.DISABLED_NullReplayerDerefAndBlockingHookFamily",
+    "Q02CtaIntegrationTest.DISABLED_RealTickAndBlockingHookFamily",
+    "Q02FactoryTest.DISABLED_RealModuleLoadAndSelDivZeroFamily",
+    "R80TaskBars.DISABLED_DailyTaskSessionEndContractPending"
+   ]
+  },
+  {
+   "name": "CoverageTests_btporter",
+   "sha256": "7c137eb5772a4fe31344c44237af2fea67594222fde991c03bb0866f11e65af0",
+   "list_status": "ok",
+   "enabled": 4,
+   "disabled": 6,
+   "disabled_names": [
+    "Q06BtPorterCapi.DISABLED_BacktestLifecycleNeedsStorageAndThreads",
+    "Q06BtRunner.DISABLED_BacktestRunPathsNeedStorage",
+    "R205BtPorterLevel2.DISABLED_QueueMissPoisonsTransCacheAndHidesLaterTransFile",
+    "R69BtPorterLifecycle.DISABLED_RunBacktestNeedsConfiguredReplayer",
+    "R69BtPorterLifecycle.DISABLED_ReleaseBacktestStopsGlobalLogger",
+    "R9WiredMockerCapi.DISABLED_OrderAndSlicePathsNeedLoadedStorage"
+   ]
+  },
+  {
+   "name": "CoverageTests_m_WtRunner",
+   "sha256": "5ac430a1f240099fcaae731e2ca1bf99b3ad61c4eb16a907917628538ee399fa",
+   "list_status": "ok",
+   "enabled": 2,
+   "disabled": 10,
+   "disabled_names": [
+    "r104_wtrunner_config.DISABLED_run_starts_parsers_traders_engine_and_polls_forever",
+    "r28_wtrunner_entry.DISABLED_stack_allocated_runner_is_sigkilled",
+    "r28_wtrunner_entry.DISABLED_bare_argv_reaches_stack_runner_and_null_engine_run",
+    "r28_wtrunner_entry.DISABLED_unknown_long_option_segv",
+    "r28_wtrunner_config.DISABLED_valid_config_without_basefiles_derefs_null_section",
+    "r28_wtrunner_strategies.DISABLED_active_cta_entry_needs_real_factory_dir",
+    "r6_wtrunner_entry.DISABLED_short_help_returns_zero_before_touching_runner",
+    "r6_wtrunner_entry.DISABLED_long_help_returns_zero",
+    "r6_wtrunner_entry.DISABLED_help_wins_over_config_and_logcfg_words",
+    "r6_wtrunner_config.DISABLED_empty_object_config_derefs_null_basefiles"
+   ]
+  },
+  {
+   "name": "CoverageTests_porter",
+   "sha256": "a317f415d0edec7158c781b99c824d1e2686e9b8fcc7040051418fe249ac7244",
+   "list_status": "ok",
+   "enabled": 3,
+   "disabled": 13,
+   "disabled_names": [
+    "Q06PorterCapi.DISABLED_UninitializedEngineGettersCrash",
+    "Q06PorterWrapper.DISABLED_ExtParserCreationNeedsEngine",
+    "Q06PorterRunner.DISABLED_BlockingAndNullEnginePaths",
+    "R13PorterCtaExport.DISABLED_position_mutation_entries_deref_uninitialized_engine",
+    "R13PorterCtaExport.DISABLED_history_slice_entries_need_a_data_manager_seam",
+    "R13ExpContextBlanks.DISABLED_init_and_session_end_and_hft_trader_paths_need_output_and_trader_seams",
+    "R13PorterSelExport.DISABLED_sel_mutation_and_subscription_need_engine_seam",
+    "R13PorterEngineSeam.DISABLED_engine_direct_getters_deref_null_engine",
+    "R35PorterRunnerLocal.DISABLED_stack_instance_destructor_crashes_after_testbody",
+    "R6PorterNullArgs.DISABLED_ctx_on_tick_null_tickdata_derefs",
+    "R6PorterRawCode.DISABLED_get_raw_stdcode_without_engine_crashes",
+    "R6PorterFeed.DISABLED_feed_adj_factors_without_feeder_jumps_to_garbage",
+    "R6PorterRunRelease.DISABLED_run_without_engine_and_release_global_logger_stop"
+   ]
+  },
+  {
+   "name": "CoverageTests_wtcore",
+   "sha256": "9b0a910e3bb057cbe716da363270b1401418138c550d3e6b6fc8aae2a8deb0e3",
+   "list_status": "ok",
+   "enabled": 3,
+   "disabled": 15,
+   "disabled_names": [
+    "N01ParserAdapter.DISABLED_null_bd_mgr_level2_callback_crash",
+    "N01TraderAdapter.DISABLED_push_report_before_run_dereferences_null_stat_map",
+    "R71DtMgrTest.DISABLED_InitNullCfgCrashes",
+    "N02TickerDisabled.DISABLED_UnverifiedSelHftPreInitPaths",
+    "R101TraderReport.DISABLED_NetShortCloseOverDeductsNewPosition",
+    "R73DtMgrTest.DISABLED_EmptyStoreTickSliceCrashesInReader",
+    "R73HftCtxTest.DISABLED_SellUnknownProductDereferencesNullCommodity",
+    "P02ExecuterCrashClass.DISABLED_ChannelReadyWithoutTraderAndBadPolicyConfigs",
+    "P02EngineCrashClass.DISABLED_NullHotMgrAndUnseededBaseDataPaths",
+    "P11CrashClass.DISABLED_report_paths_that_dereference_null_before_run",
+    "Q01SelPositionTest.DISABLED_SelCrashClass_null_history_mgr",
+    "R192SelEngine.DISABLED_HfqFlagBitsScaleVolumeTurnoverAndInterest",
+    "R211SelEngine.DISABLED_ExpiredTaskTerminatesBeforeSchedule",
+    "R211HftStrategyMgr.DISABLED_CtaPluginTypePunCrashesOnRegistration",
+    "r31_stra_mgr.DISABLED_hft_loads_cta_plugin_via_shared_symbol_name"
+   ]
+  }
+ ],
+ "end": "2026-11-05T11:58:43+08:00"
+}

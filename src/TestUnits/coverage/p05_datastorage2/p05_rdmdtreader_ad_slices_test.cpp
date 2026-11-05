@@ -1643,8 +1643,10 @@ TEST_F(P05RdmReaderADTest, KlineRangeKeepsExistingCacheWhenReloadFindsMalformedV
 	uint64_t before_last = 0;
 	ASSERT_TRUE(WtRdmDtReaderADTestAccess::bar_cache_state(*_reader, cache_key, before_bars, before_last));
 
-	const std::string second_key = key_str(LMDBBarKey("SHFE", "rb2409", bars[1].date));
-	std::string malformed = raw_of(bars[1]);
+	// 决策 K35=C：提交后只读游标（末 bar，含）之后的记录，更早 bar 的损坏/修订在下一次全量校验时才被读到。
+	// 本用例验证“重载遇到损坏记录时保留原缓存、修复后恢复”，改为损坏游标所在的末 bar（改前损坏中间 bar[1]）。
+	const std::string second_key = key_str(LMDBBarKey("SHFE", "rb2409", bars[2].date));
+	std::string malformed = raw_of(bars[2]);
 	malformed.resize(malformed.size() - 1);
 	ASSERT_TRUE(WtRdmDtReaderADTestAccess::replace_record(
 		WtRdmDtReaderADTestAccess::bar_db(*_reader, "SHFE", KP_DAY), second_key, malformed));
@@ -1662,7 +1664,7 @@ TEST_F(P05RdmReaderADTest, KlineRangeKeepsExistingCacheWhenReloadFindsMalformedV
 		EXPECT_DOUBLE_EQ(after_bars[i].open, before_bars[i].open) << i;
 	}
 
-	const WTSBarStruct repaired = make_bar(bars[1].date, bars[1].time, 88.0);
+	const WTSBarStruct repaired = make_bar(bars[2].date, bars[2].time, 88.0);
 	ASSERT_TRUE(WtRdmDtReaderADTestAccess::replace_record(
 		WtRdmDtReaderADTestAccess::bar_db(*_reader, "SHFE", KP_DAY), second_key, raw_of(repaired)));
 	WTSKlineSlice* recovered = _reader->readKlineSliceByRange("SHFE.rb.rb2409", KP_DAY,
@@ -1671,7 +1673,7 @@ TEST_F(P05RdmReaderADTest, KlineRangeKeepsExistingCacheWhenReloadFindsMalformedV
 	ASSERT_EQ(recovered->get_block_size(0), 3u);
 	const WTSBarStruct* recovered_bars = (const WTSBarStruct*)recovered->get_block_addr(0);
 	ASSERT_NE(recovered_bars, nullptr);
-	EXPECT_DOUBLE_EQ(recovered_bars[1].open, repaired.open);
+	EXPECT_DOUBLE_EQ(recovered_bars[2].open, repaired.open);
 	recovered->release();
 }
 
@@ -1690,6 +1692,10 @@ TEST_F(P05RdmReaderADTest, KlineRangeKeepsExistingCacheWhenCheckedQueryFails)
 	std::vector<WTSBarStruct> before_bars;
 	uint64_t before_last = 0;
 	ASSERT_TRUE(WtRdmDtReaderADTestAccess::bar_cache_state(*_reader, cache_key, before_bars, before_last));
+
+	// 迭代03 s5（R21-BUG-07）：LMDB 环境无新提交时同窗口复读复用快照、不再扫描，
+	// 因此先提交一次相同内容，使下一次读取必然走 checked range 失败注入路径；断言不变。
+	put_day_bars("SHFE", "rb2409", bars);
 
 	RdmRangeFailureState failure;
 	failure.fail_on_range = 1;

@@ -1,0 +1,37 @@
+--- src/TestUnits/fixtures/i03_parser_event_contract_20261103/baseline/ParserUDP/ParserUDP.h	2026-11-03 21:49:09
++++ src/ParserUDP/ParserUDP.h	2026-11-03 21:50:04
+@@ -135,6 +135,15 @@
+ 	void	close_sockets();
+ 	// Caller may already hold _mtx_io; only the first close path reports WPE_Close.
+ 	void	emit_close_once();
++	// Card 14a=C event contract, all guarded by _mtx_io:
++	// WPE_Connect = transport established for a channel-pair epoch (both
++	// sockets open, receive armed, subscription dispatched); WPE_Login =
++	// confirmed by the first valid protocol message received in that epoch
++	// (fail-closed: never inferred from a local send completing).
++	void	begin_event_epoch();
++	void	emit_connect_event(uint64_t epoch);
++	void	emit_login_event(uint64_t epoch);
++	void	emit_queued_close(uint64_t epoch);
+ 	void	recover_from_transport_failure(uint32_t& attempts, const char* channel, uint64_t failed_epoch);
+ 	bool	is_worker_thread() const;
+ 	bool	is_callback_thread() const;
+@@ -143,7 +152,7 @@
+ 
+ 	void	subscribe();
+ 
+-	void	extract_buffer(uint32_t length, bool isBroad, const char* buffer_data);
++	void	extract_buffer(uint32_t length, bool isBroad, const char* buffer_data, uint64_t login_epoch = 0);
+ 
+ private:
+ 	void	doOnConnected();
+@@ -176,6 +185,9 @@
+ 	uint64_t			_connection_epoch;
+ 	// Guarded by _mtx_io; reset for each successful connect.
+ 	bool					_close_event_emitted;
++	// Highest epochs for which WPE_Connect / WPE_Login were emitted.
++	uint64_t				_connect_event_epoch = 0;
++	uint64_t				_login_event_epoch = 0;
+ 	inline static constexpr uint32_t MAX_AUTO_RECOVERY_ATTEMPTS = 3;
+ 	uint32_t				_send_recovery_attempts = 0;
+ 	uint32_t				_broadcast_recovery_attempts = 0;

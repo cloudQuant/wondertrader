@@ -1,0 +1,161 @@
+{
+ "binary": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-result-build/build_x64/Debug/bin/TestUnits/CoverageTests_t_ParserCTPMini",
+ "filter": "*",
+ "summary": {
+  "pass": 29,
+  "fail": 1,
+  "skipped": 0
+ },
+ "cases": [
+  {
+   "test": "ParserCTPMiniFactory.create_and_delete_round_trip",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniFactory.lifecycle_calls_without_api_are_safe",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniStrToTime.strips_colons_and_keeps_digits",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniTest.depth_market_data_is_converted_into_a_tick",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniTest.invalid_prices_become_zero",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniTest.czce_turnover_is_scaled_by_volume_multiple",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniTest.missing_action_day_falls_back_to_trading_date",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniTest.unknown_contract_drops_the_tick",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniTest.quote_is_dropped_when_sink_unregistered",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniTest.front_connected_publishes_event_and_survives_missing_api",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniTest.login_response_is_ignored_until_last_packet",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniTest.logout_and_close_events",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniTest.heartbeat_and_sub_response_paths_log_only",
+   "status": "fail",
+   "rc": 1
+  },
+  {
+   "test": "ParserCTPMiniTest.subscribe_before_login_only_caches_the_filter",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "ParserCTPMiniDisabled.callback_before_register_spi_uses_wild_sink",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "gate_placeholder_ParserCTPMini.compiles_with_module_flags",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R105MiniTest.injected_api_connect_login_and_do_subscribe",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R105MiniTest.login_failure_and_inline_subscribe_branches",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R105MiniTest.logged_in_subscribe_handles_500_and_501_codes",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R105MiniTest.pre_login_cache_handles_500_and_501_codes_after_login",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R105MiniTest.subscription_count_guard_rejects_values_above_int_max",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R105MiniTest.init_flowdir_creation_failure_returns_false_before_vendor_module",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R105MiniTest.depth_null_manager_actionday_fallback_and_settlement",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R105MiniTest.night_session_recomputes_action_date",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R105MiniTest.null_sink_and_no_api_guards",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3New130CtpMiniRspError.error_login_last_packet_does_not_enter_success_branch",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3New130CtpMiniRspError.zero_error_id_login_still_succeeds",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3New130CtpMiniRspError.null_rspinfo_login_still_succeeds",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3New130CtpMiniRspError.rejected_login_does_not_block_a_later_successful_login",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3New130CtpMiniRspError.rsp_error_is_logged_only_for_nonzero_error_id",
+   "status": "pass",
+   "rc": 0
+  }
+ ]
+}

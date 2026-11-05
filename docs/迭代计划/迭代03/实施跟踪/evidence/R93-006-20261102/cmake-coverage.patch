@@ -1,0 +1,14 @@
+diff --git a/tmp/wt-i03-r93-006-20261102/coverage-baseline.txt b/tmp/wt-i03-r93-006-20261102/snapshot/src/TestUnits/coverage/CMakeLists.txt
+index a58d5d5a..3a2cd97a 100644
+--- a/tmp/wt-i03-r93-006-20261102/coverage-baseline.txt
++++ b/tmp/wt-i03-r93-006-20261102/snapshot/src/TestUnits/coverage/CMakeLists.txt
+@@ -387,6 +387,9 @@ FOREACH(spec ${WT_COV_SPLIT_TARGETS})
+ 		CONTINUE()
+ 	ENDIF()
+ 
++	IF(suffix STREQUAL "t_TraderYD")
++		SET(srcs "${CMAKE_CURRENT_SOURCE_DIR}/t_TraderYD/r93_traderYD_api_test.cpp")
++	ENDIF()
+ 	WT_COV_ISOLATE_INST_HLP(${tus})
+ 	ADD_EXECUTABLE(CoverageTests_${suffix} ${srcs} ${tus})
+ 	TARGET_INCLUDE_DIRECTORIES(CoverageTests_${suffix} PRIVATE ${WT_COV_INCS})

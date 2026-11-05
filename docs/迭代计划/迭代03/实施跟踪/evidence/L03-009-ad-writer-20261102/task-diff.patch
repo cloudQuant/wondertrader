@@ -1,0 +1,80 @@
+diff --git a/src/WtDataStorageAD/WtDataWriterAD.cpp b/src/WtDataStorageAD/WtDataWriterAD.cpp
+index 5e1cfa52..0f544396 100644
+--- a/src/WtDataStorageAD/WtDataWriterAD.cpp
++++ b/src/WtDataStorageAD/WtDataWriterAD.cpp
+@@ -37,6 +37,18 @@ inline void pipe_writer_log(IDataWriterSink* sink, WTSLogLevel ll, const char* f
+ 	sink->outputLog(ll, buffer);
+ }
+ 
++namespace
++{
++	bool checkedTickSessionDate(IBaseDataMgr* manager, const WTSTickData* tick, uint32_t& date)
++	{
++		// A zero action date in a tick is not a request to substitute wall time.
++		if (manager == NULL || tick == NULL || tick->actiondate() == 0)
++			return false;
++		WTSSessionInfo* session = manager->getSessionByCode(tick->code(), tick->exchg());
++		return session != NULL && session->tryGetOffsetDate(tick->actiondate(), tick->actiontime() / 100000, date);
++	}
++}
++
+ extern "C"
+ {
+ 	EXPORT_FLAG IDataWriter* createWriter()
+@@ -677,6 +689,18 @@ bool WtDataWriterAD::writeTick(WTSTickData* curTick, uint32_t procFlag)
+ 	if (curTick == NULL)
+ 		return false;
+ 
++	// Reject an unverifiable action date before retaining the tick or accepting
++	// an async task. Preserve the existing no-contract no-op behavior.
++	if (curTick->getContractInfo() != NULL)
++	{
++		uint32_t checkedDate = 0;
++		if (_sink == NULL || !checkedTickSessionDate(_bd_mgr, curTick, checkedDate))
++		{
++			pipe_writer_log(_sink, LL_ERROR, "Cannot verify session date for tick {}.{}", curTick->exchg(), curTick->code());
++			return false;
++		}
++	}
++
+ 	curTick->retain();
+ 	std::shared_ptr<WTSTickData> tick_ref(curTick, [](WTSTickData* tick) { tick->release(); });
+ 	return pushTask([this, tick_ref, procFlag](){
+@@ -688,6 +712,15 @@ bool WtDataWriterAD::writeTick(WTSTickData* curTick, uint32_t procFlag)
+ 			if(ct == NULL)
+ 				break;
+ 
++			// A caller may have retained and changed the queued tick. Recheck
++			// immediately before consulting the sink or touching writer state.
++			uint32_t checkedDate = 0;
++			if (!checkedTickSessionDate(_bd_mgr, curTick, checkedDate))
++			{
++				pipe_writer_log(_sink, LL_ERROR, "Cannot verify session date for queued tick {}.{}", curTick->exchg(), curTick->code());
++				break;
++			}
++
+ 			WTSCommodityInfo* commInfo = ct->getCommInfo();
+ 
+ 			//再根据状态过滤
+@@ -1213,6 +1246,12 @@ bool WtDataWriterAD::updateTickCache(WTSContractInfo* /*ct*/, WTSTickData* curTi
+ 		pipe_writer_log(_sink, LL_ERROR, "Tick cache data not initialized");
+ 		return false;
+ 	}
++	uint32_t tdate = 0;
++	if (!checkedTickSessionDate(_bd_mgr, curTick, tdate))
++	{
++		pipe_writer_log(_sink, LL_ERROR, "Cannot verify session date for tick {}.{}", curTick->exchg(), curTick->code());
++		return false;
++	}
+ 
+ 	StdUniqueLock lock(_mtx_tick_cache);
+ 	std::string key = fmtutil::format<64>("{}.{}", curTick->exchg(), curTick->code());
+@@ -1319,8 +1358,6 @@ bool WtDataWriterAD::updateTickCache(WTSContractInfo* /*ct*/, WTSTickData* curTi
+ 	{
+ 		//如果缓存里的数据日期大于最新行情的日期
+ 		//或者缓存里的时间大于等于最新行情的时间,数据就不需要处理
+-		WTSSessionInfo* sInfo = _bd_mgr->getSessionByCode(curTick->code(), curTick->exchg());
+-		uint32_t tdate = sInfo->getOffsetDate(curTick->actiondate(), curTick->actiontime() / 100000);
+ 		if (tdate > curTick->tradingdate())
+ 		{
+ 			pipe_writer_log(_sink, LL_ERROR, "Last tick of {}.{} with time {}.{} has an exception, abandoned", curTick->exchg(), curTick->code(), curTick->actiondate(), curTick->actiontime());

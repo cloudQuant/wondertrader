@@ -1,0 +1,40 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = ExecMockerTest.passiveSellUsesNegativeUndoneSign:R198SelMockerFactory.rejectsUnknownStrategyAndFalseInitThenAllowsRetry
+[==========] Running 2 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from ExecMockerTest
+[ RUN      ] ExecMockerTest.passiveSellUsesNegativeUndoneSign
+[       OK ] ExecMockerTest.passiveSellUsesNegativeUndoneSign (35 ms)
+[----------] 1 test from ExecMockerTest (41 ms total)
+
+[----------] 1 test from R198SelMockerFactory
+[ RUN      ] R198SelMockerFactory.rejectsUnknownStrategyAndFalseInitThenAllowsRetry
+[       OK ] R198SelMockerFactory.rejectsUnknownStrategyAndFalseInitThenAllowsRetry (40 ms)
+[----------] 1 test from R198SelMockerFactory (40 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 2 test suites ran. (82 ms total)
+[  PASSED  ] 2 tests.
+ThreadSanitizer:DEADLYSIGNAL
+==70129==ERROR: ThreadSanitizer: BUS on unknown address (pc 0x000114f996bc bp 0x00016ceb2740 sp 0x00016ceb2710 T8671691)
+==70129==The signal is caused by a READ memory access.
+==70129==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 <null> <null> (0x000114f996bc)
+    #1 __cxa_finalize_ranges <null> (libsystem_c.dylib:arm64e+0x277f0)
+    #2 exit <null> (libsystem_c.dylib:arm64e+0x275f0)
+    #3 dyld4::LibSystemHelpers::exit(int) const <null> (libdyld.dylib:arm64e+0x1d2e0)
+    #4 dyld4::LibSystemHelpersWrapper::exit(int) const <null> (dyld:arm64e+0x1ff08)
+    #5 start <null> (dyld:arm64e+0x1fe2c)
+
+==70129==Register values:
+ x[0] = 0x000000010cfea040   x[1] = 0x0000000114f9a2ac   x[2] = 0x0000000000000000   x[3] = 0x000000010a401d20  
+ x[4] = 0x0000000000000000   x[5] = 0x0000000000000000   x[6] = 0x000000000000006e   x[7] = 0x0000000112c00150  
+ x[8] = 0x0000000114f996bc   x[9] = 0x000000010666d768  x[10] = 0x0000000453e68ab2  x[11] = 0x1000000000000000  
+x[12] = 0x1000000000000000  x[13] = 0x0000000000000000  x[14] = 0x0000000000000000  x[15] = 0x6697373616553657  
+x[16] = 0x00000001883c8c8c  x[17] = 0x00000001f5b8d540  x[18] = 0x0000000000000000  x[19] = 0x000000010a401d20  
+x[20] = 0x000000010cfea040  x[21] = 0x000000010c590000  x[22] = 0x10000000000fffff  x[23] = 0x0000010000000000  
+x[24] = 0x0000000000000008  x[25] = 0x00000001f4558000  x[26] = 0x000000000000000f  x[27] = 0x0000000113602810  
+x[28] = 0x000000000000000e     fp = 0x000000016ceb2740     lr = 0x000000010bb55224     sp = 0x000000016ceb2710  
+ThreadSanitizer can not provide additional info.
+SUMMARY: ThreadSanitizer: BUS (<unknown module>) 
+==70129==ABORTING

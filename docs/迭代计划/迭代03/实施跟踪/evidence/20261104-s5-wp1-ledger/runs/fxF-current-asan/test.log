@@ -1,0 +1,120 @@
+[==========] Running 41 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 41 tests from Wp1Test
+[ RUN      ] Wp1Test.SharedAccountPauseClosesEverySiblingAdapter
+[       OK ] Wp1Test.SharedAccountPauseClosesEverySiblingAdapter (675 ms)
+[ RUN      ] Wp1Test.PausedAccountCancelsOnlyVerifiedIdentities
+[       OK ] Wp1Test.PausedAccountCancelsOnlyVerifiedIdentities (1064 ms)
+[ RUN      ] Wp1Test.MonthCodeContractKeepsThreeToSixDigitsAndRejectsOthers
+[       OK ] Wp1Test.MonthCodeContractKeepsThreeToSixDigitsAndRejectsOthers (378 ms)
+[ RUN      ] Wp1Test.NonDigitMonthTradeIsQuarantinedAndLongMonthKeptIntact
+[       OK ] Wp1Test.NonDigitMonthTradeIsQuarantinedAndLongMonthKeptIntact (357 ms)
+[ RUN      ] Wp1Test.DirectOrderReservesAndDuplicateCancelReleasesOnce
+[       OK ] Wp1Test.DirectOrderReservesAndDuplicateCancelReleasesOnce (358 ms)
+[ RUN      ] Wp1Test.BuySplitDuplicateTradeLateTradeAndDuplicateCancelAreIdempotent
+[       OK ] Wp1Test.BuySplitDuplicateTradeLateTradeAndDuplicateCancelAreIdempotent (370 ms)
+[ RUN      ] Wp1Test.RejectionOfUnknownLocalIdDoesNotConsumeOtherOrders
+[       OK ] Wp1Test.RejectionOfUnknownLocalIdDoesNotConsumeOtherOrders (381 ms)
+[ RUN      ] Wp1Test.StaleSnapshotRowDoesNotResurrectNewerCancel
+[       OK ] Wp1Test.StaleSnapshotRowDoesNotResurrectNewerCancel (329 ms)
+[ RUN      ] Wp1Test.AbsentOrderBecomesRevivableTombstone
+[       OK ] Wp1Test.AbsentOrderBecomesRevivableTombstone (344 ms)
+[ RUN      ] Wp1Test.StalePositionSnapshotRowDoesNotOverwriteNewerTrade
+[       OK ] Wp1Test.StalePositionSnapshotRowDoesNotOverwriteNewerTrade (324 ms)
+[ RUN      ] Wp1Test.FailedSnapshotKeepsLedger
+[       OK ] Wp1Test.FailedSnapshotKeepsLedger (333 ms)
+[ RUN      ] Wp1Test.SnapshotLedgerStatesAndEpoch
+[       OK ] Wp1Test.SnapshotLedgerStatesAndEpoch (362 ms)
+[ RUN      ] Wp1Test.AuditedManualResumeContract
+[       OK ] Wp1Test.AuditedManualResumeContract (355 ms)
+[ RUN      ] Wp1Test.ResumeAcknowledgesUnresolvedJournal
+[       OK ] Wp1Test.ResumeAcknowledgesUnresolvedJournal (341 ms)
+[ RUN      ] Wp1Test.IdentityJournalReservesMonotonicIdsAndVerifiedCancel
+[       OK ] Wp1Test.IdentityJournalReservesMonotonicIdsAndVerifiedCancel (370 ms)
+[ RUN      ] Wp1Test.IdentityJournalWithoutFloorFailsClosed
+[       OK ] Wp1Test.IdentityJournalWithoutFloorFailsClosed (396 ms)
+[ RUN      ] Wp1Test.ChildScenario
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:535: Skipped
+only runs as a spawned child
+
+[  SKIPPED ] Wp1Test.ChildScenario (379 ms)
+[ RUN      ] Wp1Test.CrashDuringSendIsNeverResentAndPausesAccount
+Note: Google Test filter = Wp1Test.ChildScenario
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Wp1Test
+[ RUN      ] Wp1Test.ChildScenario
+[       OK ] Wp1Test.CrashDuringSendIsNeverResentAndPausesAccount (882 ms)
+[ RUN      ] Wp1Test.CrashAfterSendIsRecoveredFromSnapshot
+Note: Google Test filter = Wp1Test.ChildScenario
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Wp1Test
+[ RUN      ] Wp1Test.ChildScenario
+[       OK ] Wp1Test.CrashAfterSendIsRecoveredFromSnapshot (845 ms)
+[ RUN      ] Wp1Test.ConcurrentEntryReportsSnapshotsAndGate
+[       OK ] Wp1Test.ConcurrentEntryReportsSnapshotsAndGate (386 ms)
+[ RUN      ] Wp1Test.OwnerRoutingIsolatesReportsCancelsAndUndone
+[       OK ] Wp1Test.OwnerRoutingIsolatesReportsCancelsAndUndone (334 ms)
+[ RUN      ] Wp1Test.NonSharedOwnerModeForOldAbiOrMissingRouting
+[       OK ] Wp1Test.NonSharedOwnerModeForOldAbiOrMissingRouting (338 ms)
+[ RUN      ] Wp1Test.ContractClaimsSpanAdaptersOfOneAccount
+[       OK ] Wp1Test.ContractClaimsSpanAdaptersOfOneAccount (342 ms)
+[ RUN      ] Wp1Test.DeclaredOwnerIsRegisteredBeforeReadyIsDelivered
+[       OK ] Wp1Test.DeclaredOwnerIsRegisteredBeforeReadyIsDelivered (383 ms)
+[ RUN      ] Wp1Test.ManagerResumeCommandIsAuditedAndGenerationChecked
+[       OK ] Wp1Test.ManagerResumeCommandIsAuditedAndGenerationChecked (1069 ms)
+[ RUN      ] Wp1Test.ExecFactoryInjectsHostIdentityKeyOnlyForCapablePluginAndVerifyingHost
+[       OK ] Wp1Test.ExecFactoryInjectsHostIdentityKeyOnlyForCapablePluginAndVerifyingHost (1781 ms)
+[ RUN      ] Wp1Test.EmptyOrderSnapshotIsAmbiguousAndKeepsLiveOrders
+[       OK ] Wp1Test.EmptyOrderSnapshotIsAmbiguousAndKeepsLiveOrders (330 ms)
+[ RUN      ] Wp1Test.OwnerScopeDoesNotLeakIntoSinkCallbacks
+[       OK ] Wp1Test.OwnerScopeDoesNotLeakIntoSinkCallbacks (331 ms)
+[ RUN      ] Wp1Test.RemovedOwnerSinkDeclarationEndsWithTheSink
+[       OK ] Wp1Test.RemovedOwnerSinkDeclarationEndsWithTheSink (410 ms)
+[ RUN      ] Wp1Test.UnownedEventsNeverReachOwnerSinksUnderRouting
+[       OK ] Wp1Test.UnownedEventsNeverReachOwnerSinksUnderRouting (377 ms)
+[ RUN      ] Wp1Test.UnresolvableOwnerTradeIsQuarantinedUnderRouting
+[       OK ] Wp1Test.UnresolvableOwnerTradeIsQuarantinedUnderRouting (320 ms)
+[ RUN      ] Wp1Test.PositionSnapshotWithoutBaselineAndNewerTradePausesAccount
+[       OK ] Wp1Test.PositionSnapshotWithoutBaselineAndNewerTradePausesAccount (343 ms)
+[ RUN      ] Wp1Test.DuplicateTradePushIsAppliedOnceButSelfMatchSidesAreNot
+[       OK ] Wp1Test.DuplicateTradePushIsAppliedOnceButSelfMatchSidesAreNot (329 ms)
+[ RUN      ] Wp1Test.ThrowingCancelReleasesItsClaim
+[       OK ] Wp1Test.ThrowingCancelReleasesItsClaim (323 ms)
+[ RUN      ] Wp1Test.OldIdentityAbiPluginNeverAutoCancelsAndOwnsContractsExclusively
+[       OK ] Wp1Test.OldIdentityAbiPluginNeverAutoCancelsAndOwnsContractsExclusively (1732 ms)
+[ RUN      ] Wp1Test.ReleaseClosesSpiIngressAndDestructorDrainsBeforeFreeingOrderMap
+[       OK ] Wp1Test.ReleaseClosesSpiIngressAndDestructorDrainsBeforeFreeingOrderMap (487 ms)
+[ RUN      ] Wp1Test.OrderReportThenTradeOfSameFillDeductsOnce
+[       OK ] Wp1Test.OrderReportThenTradeOfSameFillDeductsOnce (475 ms)
+[ RUN      ] Wp1Test.TombstonePruneDuringRejectionKeepsTheRejectedOrdersIdentity
+[       OK ] Wp1Test.TombstonePruneDuringRejectionKeepsTheRejectedOrdersIdentity (3603 ms)
+[ RUN      ] Wp1Test.UnknownCodeChild
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1413: Skipped
+only runs as a spawned child
+
+[  SKIPPED ] Wp1Test.UnknownCodeChild (407 ms)
+[ RUN      ] Wp1Test.BuySellOnUnknownCodeFailClosedWithoutDereferencingNull
+Note: Google Test filter = Wp1Test.UnknownCodeChild
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Wp1Test
+[ RUN      ] Wp1Test.UnknownCodeChild
+[       OK ] Wp1Test.UnknownCodeChild (357 ms)
+[----------] 1 test from Wp1Test (357 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (357 ms total)
+[  PASSED  ] 1 test.
+[       OK ] Wp1Test.BuySellOnUnknownCodeFailClosedWithoutDereferencingNull (897 ms)
+[ RUN      ] Wp1Test.EntrustObserverRunsBeforeProviderCallAndOnlyForItsAdapter
+[       OK ] Wp1Test.EntrustObserverRunsBeforeProviderCallAndOnlyForItsAdapter (376 ms)
+[----------] 41 tests from Wp1Test (24239 ms total)
+
+[----------] Global test environment tear-down
+[==========] 41 tests from 1 test suite ran. (24239 ms total)
+[  PASSED  ] 39 tests.
+[  SKIPPED ] 2 tests, listed below:
+[  SKIPPED ] Wp1Test.ChildScenario
+[  SKIPPED ] Wp1Test.UnknownCodeChild

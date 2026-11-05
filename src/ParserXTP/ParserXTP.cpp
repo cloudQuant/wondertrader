@@ -18,6 +18,8 @@
 #include "../Share/ModuleHelper.hpp"
 #include "../Share/Converter.hpp"
 
+#include <chrono>
+#include <exception>
 #include <filesystem>
 #include <vector>
 namespace fs = std::filesystem;
@@ -41,19 +43,36 @@ extern "C"
 {
 	EXPORT_FLAG IParserApi* createParser()
 	{
-		ParserXTP* parser = new ParserXTP();
-		return parser;
+		try { return new ParserXTP(); } catch (...) { return NULL; }
 	}
 
+	/*
+	 *	卡9 9b：仅当没有回调/接口重入、且本实例从未创建过 SDK 对象时才删除；
+	 *	否则保留指针（不置空），由宿主隔离到进程退出。
+	 */
 	EXPORT_FLAG void deleteParser(IParserApi* &parser)
 	{
 		if (NULL != parser)
 		{
+			ParserXTP* typed = dynamic_cast<ParserXTP*>(parser);
+			if (typed == NULL || !typed->removableLegacy())
+				return;
 			delete parser;
 			parser = NULL;
 		}
 	}
+
+	WT_PARSER_LIFECYCLE_V2_EXPORT const WtParserLifecycleApiV2* WT_PARSER_LIFECYCLE_V2_CALL getParserLifecycleApiV2(uint32_t major)
+	{
+		return wt_vendor_md_v2::Table<ParserXTP>::get(major);
+	}
 };
+
+namespace
+{
+	// 当前线程是哪个 ParserXTP 的 worker（connect 创建的 io_context 线程）
+	thread_local const void* t_xtp_worker = nullptr;
+}
 
 inline uint32_t strToTime(const char* strTime)
 {
@@ -94,11 +113,90 @@ ParserXTP::ParserXTP()
 
 ParserXTP::~ParserXTP()
 {
-	release();
+	// 在自身回调或接口调用内直接析构无法做到安全（栈上仍有本对象帧）：fail-stop。
+	if (wt_vendor_md_v2::Lifecycle::reentered(this))
+		std::terminate();
+	(void)shutdownLegacy();
+}
+
+/*
+ *	Parser lifecycle V2（卡9 9a=A+C）
+ *	XTP 头文件 API/XTP2.2.32.2/xtp_quote_api.h:234-236 对 Release() 只写「删除接口对象本身」，
+ *	RegisterSpi（:258-260）只要求登录前设定；Logout（:390-393）为同步阻塞但未声明之后不再回调；
+ *	头文件未声明回调线程 join 或 Release 返回后不再回调。provider 自有 worker 线程可 join，
+ *	SDK 回调线程不可证明。
+ *	因此一旦创建过 SDK 对象，排空状态不可证明：wait_drained 释放一次 SDK 后返回 ERROR，宿主隔离到进程退出。
+ */
+WtParserLifecycleV2Status ParserXTP::requestStopV2() noexcept
+{
+	return _lc.requestStop();
+}
+
+WtParserLifecycleV2Status ParserXTP::canWaitV2() const noexcept
+{
+	return (wt_vendor_md_v2::Lifecycle::reentered(this) || t_xtp_worker == this) ? WT_PARSER_LIFECYCLE_V2_WOULD_DEADLOCK : WT_PARSER_LIFECYCLE_V2_OK;
+}
+
+WtParserLifecycleV2Status ParserXTP::waitDrainedV2(uint32_t timeoutMs) noexcept
+{
+	return _lc.waitDrained(canWaitV2(), timeoutMs,
+		[this]() { return sdkSeen(); },
+		[this]() { releaseSdk(); },
+		[this]() {
+			std::lock_guard<std::mutex> lock(_sdk_mutex);
+			m_sink = NULL;
+			m_pBaseDataMgr = NULL;
+		});
+}
+
+bool ParserXTP::destroyableV2() const noexcept
+{
+	return _lc.destroyable(canWaitV2()) && !sdkSeen();
+}
+
+bool ParserXTP::removableLegacy() noexcept
+{
+	return shutdownLegacy() && !sdkSeen();
+}
+
+bool ParserXTP::sdkSeen() const noexcept
+{
+	return _lc.sdk_created.load(std::memory_order_acquire) || m_pUserAPI != NULL;
+}
+
+bool ParserXTP::shutdownLegacy() noexcept
+{
+	return _lc.shutdownLegacy(this, t_xtp_worker == this, [this]() { releaseSdk(); });
+}
+
+void ParserXTP::releaseSdk() noexcept
+{
+	// 调用方保证：两道闸门已关闭且已排空，当前线程不在本实例回调/接口帧内
+	std::lock_guard<std::mutex> lock(_sdk_mutex);
+	(void)stopWorker();	// provider 自有 worker：调用线程已确认不是 worker，可 join
+	XTP::API::QuoteApi* api = m_pUserAPI;
+	m_pUserAPI = NULL;
+	if (api == NULL)
+		return;
+	// 曾存在 SDK 对象：不卸载厂商库（无回调线程退出确认，卡9 9a）
+	_lc.sdk_created.store(true, std::memory_order_release);
+	try
+	{
+		api->RegisterSpi(NULL);
+		api->Release();
+	}
+	catch (...)
+	{
+	}
 }
 
 bool ParserXTP::init(WTSVariant* config)
 {
+	auto call = _lc.call(this);
+	// 卡9 9c：重复初始化拒绝并保留原实例；停止后、回调/worker 内或无配置均拒绝
+	if (!call || config == NULL || _init_done || sdkSeen() || _lc.shutDown() || _lc.insideCallback(this) || t_xtp_worker == this)
+		return false;
+
 	if (m_hInst != NULL || m_pUserAPI != NULL)
 	{
 		write_log(m_sink, LL_ERROR, "[ParserXTP] Init rejected while an XTP quote API is already loaded");
@@ -165,6 +263,8 @@ bool ParserXTP::init(WTSVariant* config)
 	}
 
 	m_pUserAPI = m_funcCreator(m_uClientID, path.c_str(), XTP_LOG_LEVEL_DEBUG);
+	if (m_pUserAPI != NULL)
+		_lc.sdk_created.store(true, std::memory_order_release);	// 本实例的排空从此不可证明
 	if (m_pUserAPI == NULL)
 	{
 		write_log(m_sink, LL_ERROR, "[ParserXTP] XTP quote API creator returned null: {}", module.c_str());
@@ -175,17 +275,23 @@ bool ParserXTP::init(WTSVariant* config)
 	}
 
 	m_pUserAPI->RegisterSpi(this);
+	_init_done = true;
 
 	return true;
 }
 
 void ParserXTP::release()
 {
-	disconnect();
+	(void)shutdownLegacy();
 }
 
 bool ParserXTP::connect()
 {
+	auto call = _lc.call(this);
+	// 卡9 9d：SDK 回调或 worker 内同步重入 connect 返回 busy(false)
+	if (!call || _lc.shutDown() || _lc.insideCallback(this) || t_xtp_worker == this)
+		return false;
+
 	if (m_pUserAPI == NULL)
 	{
 		write_log(m_sink, LL_ERROR, "[ParserXTP] Connect rejected because the XTP quote API is not initialized");
@@ -204,10 +310,12 @@ bool ParserXTP::connect()
 	{
 		_worker.reset(new boost::asio::executor_work_guard<boost::asio::io_context::executor_type>(boost::asio::make_work_guard(_asyncio)));
 		_thrd_worker.reset(new StdThread([this]() {
+			t_xtp_worker = this;
 			while (!_worker_stopping.load())
 			{
 				_asyncio.run_one();
 			}
+			t_xtp_worker = nullptr;
 		}));
 	}
 
@@ -216,17 +324,9 @@ bool ParserXTP::connect()
 
 bool ParserXTP::disconnect()
 {
-	if (!stopWorker())
-		return false;
-
-	if(m_pUserAPI)
-	{
-		m_pUserAPI->RegisterSpi(NULL);
-		m_pUserAPI->Release();
-		m_pUserAPI = NULL;
-	}
-
-	return true;
+	// 终止性关闭：SDK 回调、worker 或接口重入时只关闭准入并延后（返回 false，卡9 9d）；
+	// 否则等待已准入回调/接口调用离开，join worker，再注销并释放 SDK
+	return shutdownLegacy();
 }
 
 bool ParserXTP::stopWorker()
@@ -254,6 +354,9 @@ bool ParserXTP::stopWorker()
 
 void ParserXTP::OnError(XTPRI *error_info)
 {
+	auto cb = _lc.callback(this);
+	if (!cb)
+		return;
 	if(IsErrorRspInfo(error_info))
 	{
 		write_log(m_sink, LL_ERROR, "[ParserXTP] Error occured: ({}){}", error_info->error_id, error_info->error_msg);
@@ -262,6 +365,9 @@ void ParserXTP::OnError(XTPRI *error_info)
 
 void ParserXTP::OnDisconnected(int nReason)
 {
+	auto cb = _lc.callback(this);
+	if (!cb)
+		return;
 	if(m_sink)
 	{
 		write_log(m_sink, LL_ERROR, "[ParserXTP] Market data server disconnected: {}...", nReason);
@@ -269,14 +375,27 @@ void ParserXTP::OnDisconnected(int nReason)
 	}
 
 	boost::asio::post(_asyncio, [this]() {
-		write_log(m_sink, LL_WARN, "[ParserXTP] Connection lost, relogin in 2 seconds...");
-		std::this_thread::sleep_for(std::chrono::seconds(2));
+		{
+			auto task = _lc.callback(this);
+			if (!task)
+				return;
+			write_log(m_sink, LL_WARN, "[ParserXTP] Connection lost, relogin in 2 seconds...");
+		}
+		// 可中断等待：关闭后 10ms 内放弃重登，不在等待期间占用回调准入（卡9）
+		for (int i = 0; i < 200 && !_lc.shutDown(); ++i)
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		auto task = _lc.callback(this);
+		if (!task)
+			return;
 		DoLogin();
 	});
 }
 
 void ParserXTP::OnUnSubMarketData(XTPST */*ticker*/, XTPRI */*error_info*/, bool /*is_last*/)
 {
+	auto cb = _lc.callback(this);
+	if (!cb)
+		return;
 
 }
 
@@ -381,6 +500,9 @@ namespace
 
 void ParserXTP::OnTickByTick(XTPTBT *tbt_data)
 {
+	auto cb = _lc.callback(this);
+	if (!cb)
+		return;
 	if (m_pBaseDataMgr == NULL)
 	{
 		return;
@@ -463,6 +585,9 @@ void ParserXTP::OnTickByTick(XTPTBT *tbt_data)
 
 void ParserXTP::OnDepthMarketData(XTPMD *market_data, int64_t bid1_qty[], int32_t bid1_count, int32_t max_bid1_count, int64_t ask1_qty[], int32_t ask1_count, int32_t max_ask1_count)
 {	
+	auto cb = _lc.callback(this);
+	if (!cb)
+		return;
 	if(m_pBaseDataMgr == NULL)
 	{
 		return;
@@ -599,6 +724,9 @@ void ParserXTP::OnDepthMarketData(XTPMD *market_data, int64_t bid1_qty[], int32_
 
 void ParserXTP::OnSubMarketData(XTPST *ticker, XTPRI *error_info, bool /*is_last*/)
 {
+	auto cb = _lc.callback(this);
+	if (!cb)
+		return;
 	if (!IsErrorRspInfo(error_info))
 	{
 
@@ -612,6 +740,9 @@ void ParserXTP::OnSubMarketData(XTPST *ticker, XTPRI *error_info, bool /*is_last
 
 void ParserXTP::OnSubTickByTick(XTPST *ticker, XTPRI *error_info, bool /*is_last*/)
 {
+	auto cb = _lc.callback(this);
+	if (!cb)
+		return;
 	if (!IsErrorRspInfo(error_info))
 	{
 
@@ -641,7 +772,9 @@ void ParserXTP::DoLogin()
 			if(iResult == -1)
 			{
 				boost::asio::post(_asyncio, [this, iResult] {
-					m_sink->handleEvent(WPE_Connect, iResult);
+					auto task = _lc.callback(this);
+					if (task && m_sink)
+						m_sink->handleEvent(WPE_Connect, iResult);
 				});
 
 				write_log(m_sink, LL_ERROR, "[ParserXTP] Connecting server failed: {}", error_info->error_msg);
@@ -650,7 +783,9 @@ void ParserXTP::DoLogin()
 			{
 				m_sink->handleEvent(WPE_Connect, 0);
 				boost::asio::post(_asyncio, [this] {
-					m_sink->handleEvent(WPE_Connect, 0);
+					auto task = _lc.callback(this);
+					if (task && m_sink)
+						m_sink->handleEvent(WPE_Connect, 0);
 				});
 
 				write_log(m_sink, LL_ERROR, "[ParserXTP] Sending login request failed: {}", error_info->error_msg);
@@ -659,9 +794,13 @@ void ParserXTP::DoLogin()
 	}
 	else
 	{
-		m_uTradingDate = strToTime(m_pUserAPI->GetTradingDay());
+		{
+			std::lock_guard<std::recursive_mutex> lock(_data_mutex);
+			m_uTradingDate = strToTime(m_pUserAPI->GetTradingDay());
+		}
 		boost::asio::post(_asyncio, [this] {
-			if (m_sink)
+			auto task = _lc.callback(this);
+			if (task && m_sink)
 			{
 				m_sink->handleEvent(WPE_Connect, 0);
 				m_sink->handleEvent(WPE_Login, 0);
@@ -677,6 +816,7 @@ void ParserXTP::DoLogin()
 
 void ParserXTP::DoSubscribeMD()
 {
+	std::lock_guard<std::recursive_mutex> lock(_data_mutex);
 	CodeSet codeFilter = m_fitSHSubs;
 	if(!codeFilter.empty())
 	{
@@ -772,6 +912,10 @@ bool ParserXTP::IsErrorRspInfo(XTPRI *error_info)
 
 void ParserXTP::subscribe(const CodeSet &vecSymbols)
 {
+	auto call = _lc.call(this);
+	if (!call)
+		return;
+	std::lock_guard<std::recursive_mutex> lock(_data_mutex);
 	if(m_uTradingDate == 0)
 	{
 		for(auto& code : vecSymbols)
@@ -885,6 +1029,10 @@ void ParserXTP::subscribe(const CodeSet &vecSymbols)
 
 void ParserXTP::unsubscribe(const CodeSet &vecSymbols)
 {
+	auto call = _lc.call(this);
+	if (!call)
+		return;
+	std::lock_guard<std::recursive_mutex> lock(_data_mutex);
 	CodeSet setSH, setSZ;
 	for (const auto& code : vecSymbols)
 	{
@@ -939,11 +1087,15 @@ void ParserXTP::unsubscribe(const CodeSet &vecSymbols)
 
 bool ParserXTP::isConnected()
 {
-	return m_pUserAPI!=NULL;
+	auto call = _lc.call(this);
+	return call && m_pUserAPI!=NULL;
 }
 
 void ParserXTP::registerSpi(IParserSpi* listener)
 {
+	auto call = _lc.call(this);
+	if (!call)
+		return;
 	m_sink = listener;
 
 	if(m_sink)

@@ -1,0 +1,128 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before/src/WtCore/TraderAdapter.h	2026-11-04 09:26:07
++++ src/WtCore/TraderAdapter.h	2026-11-04 21:25:27
+@@ -149,6 +149,31 @@
+ 			const TraderAdapter* adapter = nullptr;
+ 			std::string owner;
+ 			bool shared_capable = false;
++			Frame* previous = nullptr;
++		};
++	private:
++		Frame _frame;
++	};
++	/**
++	 * RAII order-entry observer for the current thread (R15-001). For every
++	 * entry made on this adapter inside the scope, observer(localid) runs after
++	 * the local order id is reserved and before the provider call, so per-order
++	 * data can be registered before any synchronous report. It also runs for
++	 * reservations that later fail; buy()/sell() return only accepted ids.
++	 * Neither owner scopes nor observers apply inside sink callbacks: an entry
++	 * made re-entrantly from a callback belongs to its own caller.
++	 */
++	class EntrustObserverScope
++	{
++	public:
++		EntrustObserverScope(TraderAdapter* adapter, const std::function<void(uint32_t)>& observer);
++		~EntrustObserverScope();
++		EntrustObserverScope(const EntrustObserverScope&) = delete;
++		EntrustObserverScope& operator=(const EntrustObserverScope&) = delete;
++		struct Frame
++		{
++			const TraderAdapter* adapter = nullptr;
++			std::function<void(uint32_t)> observer;
+ 			Frame* previous = nullptr;
+ 		};
+ 	private:
+@@ -492,8 +517,9 @@
+ 	bool invokeOwnerSink(const SinkRegistrationPtr& registration, const std::string& owner_id,
+ 		uint64_t generation, const std::function<void(ITrdNotifySink*)>& callback);
+ 	void forEachNonOwnerSink(const std::function<void(ITrdNotifySink*)>& callback);
+-	// Owned events go to the owner sink plus non-owner observers; unowned
+-	// events keep the legacy broadcast.
++	// Without owner routing every event keeps the legacy broadcast. With owner
++	// routing, owned events go to the owner sink plus non-owner observers and
++	// unowned events go to non-owner observers only.
+ 	void dispatchOrderEvent(const std::string& owner, const std::function<void(ITrdNotifySink*)>& callback);
+ 	bool registerOwnerSinkLocked(const std::string& stable_owner_id, ITrdNotifySink* sink,
+ 		OwnerSinkRegistrationToken& token);
+@@ -506,6 +532,33 @@
+ 	static bool isInAnySinkCallback();
+ 	bool sinkCallbacksDrainedLocked() const;
+ 
++	// NEW-052 (card 9a, host side): provider SPI ingress. release() closes it
++	// (callbacks arriving later are dropped without touching adapter state);
++	// the destructor also waits for SPI callbacks already running inside this
++	// adapter before releasing adapter-owned state. ITraderApi has no versioned quiescence capability, so a
++	// callback after the adapter object itself is destroyed stays the
++	// provider's contract (external).
++	class SpiIngress
++	{
++	public:
++		explicit SpiIngress(TraderAdapter* adapter);
++		~SpiIngress();
++		explicit operator bool() const noexcept { return _entered; }
++		SpiIngress(const SpiIngress&) = delete;
++		SpiIngress& operator=(const SpiIngress&) = delete;
++	private:
++		friend class TraderAdapter;
++		TraderAdapter* _adapter;
++		bool _entered;
++		const SpiIngress* _previous;
++	};
++	static thread_local const SpiIngress* s_spi_ingress;	///< SPI callbacks running on this thread
++	// Closes the ingress; with wait, also waits for running callbacks. Returns
++	// true only after such a wait (false when not waiting or when called from
++	// an SPI callback of this adapter, which cannot wait for itself).
++	bool closeSpiIngress(bool wait);
++	void reopenSpiIngress();
++
+ 	void configureUnresolvedJournal(const std::string& path);
+ 	void quarantineTrade(const WTSTradeInfo* trade, const char* reason);
+ 
+@@ -552,12 +605,20 @@
+ 		bool verified = false;			///< identity created/recovered by this adapter boot
+ 		std::string owner_id;
+ 		std::unordered_set<std::string> trade_ids;	///< trade ids already applied to accounted qty
++		// I03-NEW-057: order reports and trade reports carry the same fills
++		// through two streams; accounted = min(order_left, volume - trade_filled).
++		double volume = 0;			///< order volume (provider report, else entrust qty)
++		double order_left = -1;		///< smallest volLeft of order reports (<0: none yet)
++		double trade_filled = 0;	///< sum of distinct trade reports
+ 	};
+ 	// Applies one order report to the ledger. Returns true if the entry made
+ 	// its first transition to Terminal (for one-shot notifications).
+ 	bool ledgerApplyOrderLocked(uint32_t localid, const std::string& stdCode, bool isBuy,
+-		bool alive, double volLeft, uint64_t version);
++		bool alive, double volume, double volLeft, uint64_t version);
++	// May prune old tombstones: erasing from the dense ledger moves another
++	// entry, so callers must not use any _ledger reference or iterator after it.
+ 	void ledgerTombstoneLocked(uint32_t localid, OrderLedgerEntry& entry, OrderLedgerState state);
++	void ledgerRecomputeLocked(OrderLedgerEntry& entry);
+ 	void ledgerSetAccountedLocked(OrderLedgerEntry& entry, double accounted);
+ 	// Pause-aware, owner-aware cancel admission; owner == nullptr is a bare call.
+ 	bool cancelAdmissibleLocked(uint32_t localid, const std::string* owner, bool paused) const;
+@@ -866,6 +927,11 @@
+ 	bool	_sink_notifications_stopping = false;
+ 	std::condition_variable	_sink_notifications_idle;
+ 
++	std::atomic<bool> _spi_closed{false};
++	std::atomic<uint32_t> _spi_inflight{0};
++	std::mutex _spi_mutex;
++	std::condition_variable _spi_idle;
++
+ 	std::atomic<bool> _unresolved_report_paused{false};	///< legacy flag, mirrors pauses of this adapter
+ 	std::shared_ptr<AccountTradingGate> _account_gate;
+ 	std::string _account_id;
+@@ -891,6 +957,13 @@
+ 	uint64_t _orders_snapshot_version = 0;
+ 	uint64_t _positions_query_version = 0;
+ 	std::unordered_map<std::string, uint64_t> _position_event_version;	///< stdCode -> last realtime trade version
++	std::unordered_set<std::string> _position_baseline;	///< stdCodes whose position was set by a snapshot row
++	// NEW-154: trade reports identified by exchange|trade id|order ref|direction.
++	// _pushed_trades: realtime effects applied once; _counted_trades: statistics
++	// counted once across push and query. Cleared when the trading day changes.
++	std::unordered_set<std::string> _pushed_trades;
++	std::unordered_set<std::string> _counted_trades;
++	uint32_t _trade_dedupe_day = 0;
+ 	mutable std::mutex _unresolved_report_mutex;
+ 	std::shared_ptr<UnresolvedReportJournal> _unresolved_journal;
+ 	std::vector<UnresolvedTradeReport> _unresolved_reports;

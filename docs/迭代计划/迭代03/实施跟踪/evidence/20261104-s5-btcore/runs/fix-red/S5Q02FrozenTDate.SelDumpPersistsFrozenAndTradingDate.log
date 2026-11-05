@@ -1,0 +1,41 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5Q02FrozenTDate.SelDumpPersistsFrozenAndTradingDate
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5Q02FrozenTDate
+[ RUN      ] S5Q02FrozenTDate.SelDumpPersistsFrozenAndTradingDate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/s5_sel_hft_frozen_tdate_test.cpp:169: Failure
+Value of: pos.HasMember("frozen")
+  Actual: false
+Expected: true
+{
+    "positions": [
+        {
+            "code": "SSE.STK.000001",
+            "volume": 100.0,
+            "closeprofit": 0.0,
+            "dynprofit": 0.0,
+            "lastentertime": 0,
+            "lastexittime": 0,
+            "details": []
+        }
+    ],
+    "fund": {
+        "total_profit": 0.0,
+        "total_dynprofit": 0.0,
+        "total_fees": 0.0,
+        "tdate": 20200106
+    },
+    "signals": {}
+}
+
+[  FAILED  ] S5Q02FrozenTDate.SelDumpPersistsFrozenAndTradingDate (29 ms)
+[----------] 1 test from S5Q02FrozenTDate (33 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (33 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S5Q02FrozenTDate.SelDumpPersistsFrozenAndTradingDate
+
+ 1 FAILED TEST

@@ -1,0 +1,41 @@
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -c src/WTSUtils/lmdb/mdb.c -o /tmp/wt-i03-lmdb-migration-final3-20261102/asan-mdb.o
+src/WTSUtils/lmdb/mdb.c:1562:2: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+ 1562 |         sprintf(buf, "%.100s:%d: Assertion '%.200s' failed in %.40s()",
+      |         ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+src/WTSUtils/lmdb/mdb.c:4892:3: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+ 4892 |                 sprintf(env->me_txns->mti_rmname, "/MDBr%s", encbuf);
+      |                 ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+src/WTSUtils/lmdb/mdb.c:4893:3: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+ 4893 |                 sprintf(env->me_txns->mti_wmname, "/MDBw%s", encbuf);
+      |                 ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+src/WTSUtils/lmdb/mdb.c:10149:4: warning: 'sprintf' is deprecated: This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead. [-Wdeprecated-declarations]
+ 10149 |                         sprintf(buf, txnid == (txnid_t)-1 ?
+       |                         ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/_stdio.h:278:1: note: 'sprintf' has been explicitly marked deprecated here
+  278 | __deprecated_msg("This function is provided for compatibility reasons only.  Due to security concerns inherent in the design of sprintf(3), it is highly recommended that you use snprintf(3) instead.")
+      | ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include/sys/cdefs.h:227:48: note: expanded from macro '__deprecated_msg'
+  227 |         #define __deprecated_msg(_msg) __attribute__((__deprecated__(_msg)))
+      |                                                       ^
+4 warnings generated.
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -c src/WTSUtils/lmdb/midl.c -o /tmp/wt-i03-lmdb-migration-final3-20261102/asan-midl.o
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined src/TestUnits/fixtures/lmdb_bar_migration/migration_test.cpp /tmp/wt-i03-lmdb-migration-final3-20261102/asan-mdb.o /tmp/wt-i03-lmdb-migration-final3-20261102/asan-midl.o -o /tmp/wt-i03-lmdb-migration-final3-20261102/asan-test
+ld: warning: symbols in __TEXT,text_env (/private/tmp/wt-i03-lmdb-migration-final3-20261102/asan-mdb.o) have unwind information, but it's not a code section (missing 'regular,pure_instructions' section flag)

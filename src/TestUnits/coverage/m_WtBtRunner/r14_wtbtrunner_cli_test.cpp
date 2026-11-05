@@ -196,11 +196,16 @@ TEST(r14_wtbtrunner_cli, selTaskDefaultsAllowRunWhenTemplatesAreOmitted)
 	const std::filesystem::path root = repository_root();
 	const std::filesystem::path sessions = root / "dist/common/sessions.json";
 	ASSERT_TRUE(std::filesystem::exists(sessions));
+	// prepare() 以 checked 日期映射校验起始交易日（卡1 A+C），缺 CHINA 日历时显式失败，
+	// 因此配置需提供日历；本用例验证的是 SEL task 模板缺省，而非日历缺省。
+	const std::filesystem::path holidays = root / "dist/common/holidays.json";
+	ASSERT_TRUE(std::filesystem::exists(holidays));
 
 	const std::string cfg =
 		"{\"replayer\":{\"mode\":\"none\",\"path\":" + json_quote(cwd.path()) + ","
 		"\"stime\":\"202401020930\",\"etime\":\"202401021000\",\"tick\":false,"
-		"\"basefiles\":{\"session\":" + json_quote(sessions.string()) + "}},"
+		"\"basefiles\":{\"session\":" + json_quote(sessions.string()) + ","
+		"\"holiday\":" + json_quote(holidays.string()) + "}},"
 		"\"env\":{\"mocker\":\"sel\",\"slippage\":0},"
 		"\"sel\":{\"name\":\"r14_default_task\",\"module\":" + json_quote(WT_COV_SEL_PLUGIN_PATH) + ","
 		"\"strategy\":{\"name\":\"DualThrustSelection\",\"id\":\"r14_default_task\",\"params\":{"

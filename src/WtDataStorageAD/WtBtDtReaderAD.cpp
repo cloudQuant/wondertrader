@@ -1,5 +1,6 @@
 ﻿#include "WtBtDtReaderAD.h"
 #include "LMDBKeys.h"
+#include "DayBarContractAD.h"
 
 #include "../Includes/WTSStruct.h"
 #include "../Includes/WTSVariant.hpp"
@@ -127,11 +128,59 @@ inline void pipe_btreader_log(IBtDtReaderSink* sink, WTSLogLevel ll, const char*
 	if (sink == NULL)
 		return;
 
+	// Messages can carry caller-supplied codes and configured paths; bound the
+	// formatter writes to the per-thread buffer instead of trusting their size.
 	static thread_local char buffer[512] = { 0 };
-	memset(buffer, 0, 512);
-	fmt::format_to(buffer, format, args...);
+	try
+	{
+		const std::size_t max_output_size = sizeof(buffer) - 1;
+		const auto formatted = fmt::format_to_n(buffer, max_output_size, format, args...);
+		if (formatted.size > max_output_size)
+		{
+			constexpr char truncation_marker[] = "...[truncated]";
+			constexpr std::size_t marker_size = sizeof(truncation_marker) - 1;
+			std::memcpy(buffer + max_output_size - marker_size, truncation_marker, marker_size);
+			buffer[max_output_size] = '\0';
+		}
+		else
+		{
+			buffer[formatted.size] = '\0';
+		}
+	}
+	catch (...)
+	{
+		constexpr char fallback[] = "WtBtDtReaderAD log formatting failed";
+		std::memcpy(buffer, fallback, sizeof(fallback));
+	}
 
 	sink->reader_log(ll, buffer);
+}
+
+// Display at most the bytes the key check inspects; the field may be unterminated.
+static std::string key_field_for_log(const char* field, std::size_t capacity)
+{
+	if (field == NULL)
+		return "(null)";
+	std::size_t length = 0;
+	while (length < capacity && field[length] != '\0')
+		++length;
+	std::string text(field, length);
+	if (length == capacity)
+		text += "...";
+	return text;
+}
+
+// BUG-L04-004: reject identities the fixed LMDB key cannot represent before the
+// database directory is created or opened, and make the rejection observable.
+static bool accept_key_identity(IBtDtReaderSink* sink, const char* exchg, const char* code, const char* entry)
+{
+	if (lmdbKeyIdentityValid(exchg, code))
+		return true;
+	pipe_btreader_log(sink, LL_ERROR,
+		"{} rejected storage identity {}.{}: exchange and code must be non-empty and shorter than {} and {} bytes",
+		entry, key_field_for_log(exchg, MAX_EXCHANGE_LENGTH),
+		key_field_for_log(code, MAX_INSTRUMENT_LENGTH), MAX_EXCHANGE_LENGTH, MAX_INSTRUMENT_LENGTH);
+	return false;
 }
 
 static std::string lmdb_key_hex(const std::string& key, std::size_t max_prefix_bytes)
@@ -214,6 +263,8 @@ void WtBtDtReaderAD::init(WTSVariant* cfg, IBtDtReaderSink* sink)
 
 bool WtBtDtReaderAD::read_raw_bars(const char* exchg, const char* code, WTSKlinePeriod period, std::string& buffer)
 {
+	if (!accept_key_identity(_sink, exchg, code, "read_raw_bars"))
+		return false;
 	//直接从LMDB读取
 	WtLMDBPtr db = get_k_db(exchg, period);
 	if (db == NULL)
@@ -323,11 +374,16 @@ bool WtBtDtReaderAD::read_raw_bars(const char* exchg, const char* code, WTSKline
 		return false;
 	}
 
+	if (period == KP_DAY)
+		wt_ad_daybar::normalizeRaw(buffer);	//卡3 3c=C：旧 day 记录 time=交易日，读端归一为 0
+
 	return true;
 }
 
 bool WtBtDtReaderAD::read_raw_ticks(const char* exchg, const char* code, uint32_t uDate, std::string& buffer)
 {
+	if (!accept_key_identity(_sink, exchg, code, "read_raw_ticks"))
+		return false;
 	//直接从LMDB读取
 	WtLMDBPtr db = get_t_db(exchg, code);
 	if (db == NULL)

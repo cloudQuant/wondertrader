@@ -1,0 +1,43 @@
+perl(45896) MallocStackLogging: could not tag MSL-related memory as no_footprint, so those pages will be included in process footprint - No such file or directory (2)
+perl(45896) MallocStackLogging: recording malloc (and VM allocation) stacks using lite mode
+leaks(45896) MallocStackLogging: could not tag MSL-related memory as no_footprint, so those pages will be included in process footprint - No such file or directory (2)
+leaks(45896) MallocStackLogging: recording malloc (and VM allocation) stacks using lite mode
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q05ResampleTest.DayRangeAfterLastBarFindsNothing
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q05ResampleTest
+[ RUN      ] Q05ResampleTest.DayRangeAfterLastBarFindsNothing
+[       OK ] Q05ResampleTest.DayRangeAfterLastBarFindsNothing (28 ms)
+[----------] 1 test from Q05ResampleTest (28 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (28 ms total)
+[  PASSED  ] 1 test.
+Process 45901 is not debuggable. Due to security restrictions, leaks can only show or save contents of readonly memory of restricted processes.
+
+Process:         CoverageTests_dtcore [45901]
+Path:            /private/tmp/*/CoverageTests_dtcore
+Load Address:    0x104964000
+Identifier:      CoverageTests_dtcore
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  leaks [45896]
+Target Type:     live task
+
+Date/Time:       2026-11-04 19:49:30.053 +0800
+Launch Time:     2026-11-04 19:49:27.036 +0800
+OS Version:      macOS 26.5.1 (25F80)
+Report Version:  7
+Analysis Tool:   /usr/bin/leaks
+
+Physical footprint:         4320K
+Physical footprint (peak):  4656K
+Idle exit:                  untracked
+----
+
+leaks Report Version: 4.0, multi-line stacks
+Process 45901: 239 nodes malloced for 58 KB
+Process 45901: 0 leaks for 0 total leaked bytes.
+

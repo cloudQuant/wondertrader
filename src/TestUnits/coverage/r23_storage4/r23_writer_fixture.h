@@ -33,8 +33,10 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <atomic>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <sstream>
 #include <string>
@@ -257,15 +259,17 @@ public:
 	bool canSessionReceive(const char*) override { return _can_recv; }
 	void set_can_receive(bool v) { _can_recv = v; }
 
+	// I03-NEW-113: the async writer worker calls these sink methods from its own thread
+	// while the test thread polls them; counters are atomic and the log is mutex-guarded.
 	void broadcastTick(WTSTickData*) override { _ticks++; }
 	void broadcastOrdQue(WTSOrdQueData*) override { _queues++; }
 	void broadcastOrdDtl(WTSOrdDtlData*) override { _dtls++; }
 	void broadcastTrans(WTSTransData*) override { _trans++; }
 
-	uint32_t ticks() const { return _ticks; }
-	uint32_t queues() const { return _queues; }
-	uint32_t dtls() const { return _dtls; }
-	uint32_t trans() const { return _trans; }
+	uint32_t ticks() const { return _ticks.load(); }
+	uint32_t queues() const { return _queues.load(); }
+	uint32_t dtls() const { return _dtls.load(); }
+	uint32_t trans() const { return _trans.load(); }
 
 	CodeSet* getSessionComms(const char* sid) override
 	{
@@ -284,6 +288,7 @@ public:
 		LogLine line;
 		line._ll = ll;
 		line._text = message == NULL ? "" : message;
+		std::lock_guard<std::mutex> lock(_log_mtx);
 		_logs.push_back(line);
 		_counts[ll]++;
 		_total++;
@@ -291,15 +296,17 @@ public:
 
 	uint32_t count_of(WTSLogLevel ll) const
 	{
+		std::lock_guard<std::mutex> lock(_log_mtx);
 		auto it = _counts.find(ll);
 		return it == _counts.end() ? 0u : it->second;
 	}
-	uint32_t total() const { return _total; }
-	string last_log() const { return _logs.empty() ? string() : _logs.back()._text; }
+	uint32_t total() const { std::lock_guard<std::mutex> lock(_log_mtx); return _total; }
+	string last_log() const { std::lock_guard<std::mutex> lock(_log_mtx); return _logs.empty() ? string() : _logs.back()._text; }
 
 	// 返回最后一条包含 needle 的日志级别，没有则返回 LL_MAX 之外的哨兵 -1
 	int find_log(const char* needle, WTSLogLevel ll) const
 	{
+		std::lock_guard<std::mutex> lock(_log_mtx);
 		int idx = -1;
 		for (size_t i = 0; i < _logs.size(); i++)
 		{
@@ -317,12 +324,13 @@ private:
 	string			_last_sid;
 	bool			_can_recv = true;
 	bool			_comms_null = false;
-	uint32_t		_ticks = 0;
-	uint32_t		_queues = 0;
-	uint32_t		_dtls = 0;
-	uint32_t		_trans = 0;
+	std::atomic<uint32_t>	_ticks{ 0 };
+	std::atomic<uint32_t>	_queues{ 0 };
+	std::atomic<uint32_t>	_dtls{ 0 };
+	std::atomic<uint32_t>	_trans{ 0 };
 	uint32_t		_tdate = 20240108;
 	uint32_t		_total = 0;
+	mutable std::mutex				_log_mtx;
 	vector<LogLine>					_logs;
 	map<WTSLogLevel, uint32_t>		_counts;
 };
@@ -503,7 +511,12 @@ protected:
 		// 见文件头：init() 起的 _proc_chk 不可 join，delete 会 std::terminate，故只 release 不 delete
 		for (auto& h : _holders)
 		{
-			if (!h._closed)
+			// I03-NEW-113: abandoned writers (went through transHisData) are released too.
+			// The proc_loop lost-wakeup that motivated abandoning them is fixed (takeProcTask
+			// waits with a predicate under _proc_mtx), and release() now waits for and joins
+			// every worker. Leaving proc_loop running let it log into _sink after the sink
+			// below was destroyed (TSan data race / potential use-after-free).
+			if (!h._closed || h._abandoned)
 				h._w->release();
 		}
 		_holders.clear();
@@ -619,6 +632,7 @@ protected:
 		Holder h;
 		h._w = w;
 		h._closed = false;
+		h._abandoned = false;
 		_holders.push_back(h);
 		return w;
 	}
@@ -646,7 +660,10 @@ protected:
 		for (auto& h : _holders)
 		{
 			if (h._w == w)
+			{
 				h._closed = true;
+				h._abandoned = true;
+			}
 		}
 	}
 
@@ -808,6 +825,7 @@ private:
 	{
 		R23Writer*	_w;
 		bool		_closed;
+		bool		_abandoned;
 	};
 
 	vector<WTSTickData*>	_datas;

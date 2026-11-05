@@ -1,0 +1,11 @@
+--- /tmp/i03-bar-fee-provenance-baseline-20261103/HisDataReplayer.h	2026-11-03 17:09:25
++++ src/WtBtCore/HisDataReplayer.h	2026-11-03 17:11:35
+@@ -336,6 +336,8 @@
+ 		bool			_notify_close;	// true only for a series explicitly requested by strategy code
+ 
+ 		std::vector<WTSBarStruct>	_bars;
++		// Optional per-bar physical raw code; empty means provenance unknown.
++		std::vector<std::string> _physical_sources;
+ 		double			_factor;	//最后一条复权因子
+ 
+ 		uint32_t		_untouch_days;	//未用到的天数

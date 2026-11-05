@@ -79,7 +79,8 @@ struct TickEnv
 	TickEnv()
 	{
 		_owner._session = WTSSessionInfo::create("ALLDAY", "r78 allday", 0);
-		_owner._session->addTradingSection(0, 2400);
+		// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；迭代03 第五会话 int2 归因更新。
+		_owner._session->addTradingSection(0, 0);
 		_bd._session = _owner._session;
 		_engine.init(nullptr, &_bd, &_dtMgr, nullptr);
 	}
@@ -101,7 +102,7 @@ WTSTickData* makeTick(uint32_t date, uint32_t hhmmss, double price)
 std::string ctxRoot()
 {
 	static std::string root = []() {
-		std::filesystem::path p = std::filesystem::temp_directory_path() / "r78_uftctx_root";
+		std::filesystem::path p = std::filesystem::temp_directory_path() / ("r78_uftctx_root_" + std::to_string(static_cast<long>(::getpid())));
 		std::error_code ec;
 		std::filesystem::remove_all(p, ec);
 		std::filesystem::create_directories(p, ec);
@@ -211,9 +212,12 @@ TEST(R78UftEngineRun, starts_and_stops_allday_ticker)
 	EXPECT_EQ(env._engine.get_date(), env._engine.get_trading_date());
 }
 
-// UftStraContext.cpp:1044-1058 mannual.yaml 为空 -> load_from_file 返回 NULL
-TEST(R78UftCtxLocal, empty_mannual_file_is_renamed_and_ignored)
+// mannual.yaml 为空。原用例 empty_mannual_file_is_renamed_and_ignored（改名并忽略）按 K08 a=B 改写。
+TEST(R78UftCtxLocal, empty_mannual_file_is_rejected_and_kept)
 {
+	// 决策 K08（2026-11-04 用户裁定）：a=B/b=B 解析失败、缺 details、含未知合约或非法条目的手工文件整份拒绝，
+	// 不导入、不归档、本次切日失败；c=C 先改名归档再应用。改前期望见证据 k08-manual-file/before。
+
 	CtxEnv env("empty");
 	std::error_code ec;
 	std::filesystem::create_directories(env._folder, ec);
@@ -228,13 +232,16 @@ TEST(R78UftCtxLocal, empty_mannual_file_is_renamed_and_ignored)
 	env._ctx.on_channel_ready(20240315);
 
 	EXPECT_DOUBLE_EQ(0.0, env._ctx.stra_get_local_position("SHFE.ag2406"));
-	EXPECT_FALSE(std::filesystem::exists(env.mannual(), ec));
-	EXPECT_TRUE(std::filesystem::exists(env._folder + "/position.membin", ec));
+	EXPECT_TRUE(std::filesystem::exists(env.mannual(), ec));
+	EXPECT_FALSE(std::filesystem::exists(env._folder + "/position.membin", ec));
 }
 
-// UftStraContext.cpp:1059-1061 合法 yaml 但无 details 段 -> break 后仍改名
-TEST(R78UftCtxLocal, mannual_without_details_section_is_ignored)
+// 合法 yaml 但无 details 段。原用例 mannual_without_details_section_is_ignored（改名并忽略）按 K08 a=B 改写。
+TEST(R78UftCtxLocal, mannual_without_details_section_is_rejected_and_kept)
 {
+	// 决策 K08（2026-11-04 用户裁定）：a=B/b=B 解析失败、缺 details、含未知合约或非法条目的手工文件整份拒绝，
+	// 不导入、不归档、本次切日失败；c=C 先改名归档再应用。改前期望见证据 k08-manual-file/before。
+
 	// 新上下文：首次 ready 才触发 load_local_data
 	CtxEnv env2("nodetails2");
 	std::error_code ec;
@@ -246,6 +253,6 @@ TEST(R78UftCtxLocal, mannual_without_details_section_is_ignored)
 	}
 	env2._ctx.on_channel_ready(20240315);
 	EXPECT_DOUBLE_EQ(0.0, env2._ctx.stra_get_local_position("SHFE.ag2406"));
-	EXPECT_FALSE(std::filesystem::exists(env2.mannual(), ec));
-	EXPECT_TRUE(std::filesystem::exists(env2._folder + "/position.membin", ec));
+	EXPECT_TRUE(std::filesystem::exists(env2.mannual(), ec));
+	EXPECT_FALSE(std::filesystem::exists(env2._folder + "/position.membin", ec));
 }

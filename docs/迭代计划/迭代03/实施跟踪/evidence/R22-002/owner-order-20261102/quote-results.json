@@ -1,0 +1,326 @@
+[
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-fsanitize=address,undefined",
+      "-fprofile-instr-generate",
+      "-fno-omit-frame-pointer",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/tmp/wt-r22-owner-20261102/red/Share/fmt_enum_compat.h",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/tmp/wt-r22-owner-20261102/red",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-Dmain=quote_factory_main",
+      "-c",
+      "/tmp/wt-r22-owner-20261102/red/QuoteFactory/main.cpp",
+      "-o",
+      "/tmp/wt-r22-owner-20261102/red-quote-asan.o"
+    ],
+    "exit": 0,
+    "log": "red-quote-asan-compile.log"
+  },
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-fsanitize=address,undefined",
+      "-fprofile-instr-generate",
+      "-fno-omit-frame-pointer",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/tmp/wt-r22-owner-20261102/red/Share/fmt_enum_compat.h",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/tmp/wt-r22-owner-20261102/red",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "/tmp/wt-r22-owner-20261102/red/WtDtCore/StateMonitor.cpp",
+      "/tmp/wt-r22-owner-20261102/red/WtDtCore/DataManager.cpp",
+      "/tmp/wt-r22-owner-20261102/red-quote-asan.o",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_monitor_owner/quote_owner_probe.cpp",
+      "-L/tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs",
+      "-lWtDtCore",
+      "-lWTSTools",
+      "-lWTSUtils",
+      "-L/opt/homebrew/lib",
+      "-Wl,-rpath,/opt/homebrew/lib",
+      "-lboost_filesystem",
+      "-lboost_thread",
+      "/usr/local/lib/libiconv.dylib",
+      "-o",
+      "/tmp/wt-r22-owner-20261102/red-quote-asan"
+    ],
+    "exit": 0,
+    "log": "red-quote-asan-link.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-owner-20261102/red-quote-asan"
+    ],
+    "exit": 9,
+    "log": "red-quote-asan-run.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-owner-20261102/red-quote-asan",
+      "idle"
+    ],
+    "exit": 0,
+    "log": "red-quote-asan-idle.log"
+  },
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-fsanitize=thread",
+      "-fprofile-instr-generate",
+      "-fno-omit-frame-pointer",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/tmp/wt-r22-owner-20261102/red/Share/fmt_enum_compat.h",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/tmp/wt-r22-owner-20261102/red",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-Dmain=quote_factory_main",
+      "-c",
+      "/tmp/wt-r22-owner-20261102/red/QuoteFactory/main.cpp",
+      "-o",
+      "/tmp/wt-r22-owner-20261102/red-quote-tsan.o"
+    ],
+    "exit": 0,
+    "log": "red-quote-tsan-compile.log"
+  },
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-fsanitize=thread",
+      "-fprofile-instr-generate",
+      "-fno-omit-frame-pointer",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/tmp/wt-r22-owner-20261102/red/Share/fmt_enum_compat.h",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/tmp/wt-r22-owner-20261102/red",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "/tmp/wt-r22-owner-20261102/red/WtDtCore/StateMonitor.cpp",
+      "/tmp/wt-r22-owner-20261102/red/WtDtCore/DataManager.cpp",
+      "/tmp/wt-r22-owner-20261102/red-quote-tsan.o",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_monitor_owner/quote_owner_probe.cpp",
+      "-L/tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs",
+      "-lWtDtCore",
+      "-lWTSTools",
+      "-lWTSUtils",
+      "-L/opt/homebrew/lib",
+      "-Wl,-rpath,/opt/homebrew/lib",
+      "-lboost_filesystem",
+      "-lboost_thread",
+      "/usr/local/lib/libiconv.dylib",
+      "-o",
+      "/tmp/wt-r22-owner-20261102/red-quote-tsan"
+    ],
+    "exit": 0,
+    "log": "red-quote-tsan-link.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-owner-20261102/red-quote-tsan"
+    ],
+    "exit": -6,
+    "log": "red-quote-tsan-run.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-owner-20261102/red-quote-tsan",
+      "idle"
+    ],
+    "exit": 0,
+    "log": "red-quote-tsan-idle.log"
+  },
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-fsanitize=address,undefined",
+      "-fprofile-instr-generate",
+      "-fno-omit-frame-pointer",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/tmp/wt-r22-owner-20261102/green/Share/fmt_enum_compat.h",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/tmp/wt-r22-owner-20261102/green",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-Dmain=quote_factory_main",
+      "-c",
+      "/tmp/wt-r22-owner-20261102/green/QuoteFactory/main.cpp",
+      "-o",
+      "/tmp/wt-r22-owner-20261102/green-quote-asan.o"
+    ],
+    "exit": 0,
+    "log": "green-quote-asan-compile.log"
+  },
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-fsanitize=address,undefined",
+      "-fprofile-instr-generate",
+      "-fno-omit-frame-pointer",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/tmp/wt-r22-owner-20261102/green/Share/fmt_enum_compat.h",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/tmp/wt-r22-owner-20261102/green",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "/tmp/wt-r22-owner-20261102/green/WtDtCore/StateMonitor.cpp",
+      "/tmp/wt-r22-owner-20261102/green/WtDtCore/DataManager.cpp",
+      "/tmp/wt-r22-owner-20261102/green-quote-asan.o",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_monitor_owner/quote_owner_probe.cpp",
+      "-L/tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs",
+      "-lWtDtCore",
+      "-lWTSTools",
+      "-lWTSUtils",
+      "-L/opt/homebrew/lib",
+      "-Wl,-rpath,/opt/homebrew/lib",
+      "-lboost_filesystem",
+      "-lboost_thread",
+      "/usr/local/lib/libiconv.dylib",
+      "-o",
+      "/tmp/wt-r22-owner-20261102/green-quote-asan"
+    ],
+    "exit": 0,
+    "log": "green-quote-asan-link.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-owner-20261102/green-quote-asan"
+    ],
+    "exit": 0,
+    "log": "green-quote-asan-run.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-owner-20261102/green-quote-asan",
+      "idle"
+    ],
+    "exit": 0,
+    "log": "green-quote-asan-idle.log"
+  },
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-fsanitize=thread",
+      "-fprofile-instr-generate",
+      "-fno-omit-frame-pointer",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/tmp/wt-r22-owner-20261102/green/Share/fmt_enum_compat.h",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/tmp/wt-r22-owner-20261102/green",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-Dmain=quote_factory_main",
+      "-c",
+      "/tmp/wt-r22-owner-20261102/green/QuoteFactory/main.cpp",
+      "-o",
+      "/tmp/wt-r22-owner-20261102/green-quote-tsan.o"
+    ],
+    "exit": 0,
+    "log": "green-quote-tsan-compile.log"
+  },
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-fsanitize=thread",
+      "-fprofile-instr-generate",
+      "-fno-omit-frame-pointer",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/tmp/wt-r22-owner-20261102/green/Share/fmt_enum_compat.h",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/tmp/wt-r22-owner-20261102/green",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "/tmp/wt-r22-owner-20261102/green/WtDtCore/StateMonitor.cpp",
+      "/tmp/wt-r22-owner-20261102/green/WtDtCore/DataManager.cpp",
+      "/tmp/wt-r22-owner-20261102/green-quote-tsan.o",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_monitor_owner/quote_owner_probe.cpp",
+      "-L/tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs",
+      "-lWtDtCore",
+      "-lWTSTools",
+      "-lWTSUtils",
+      "-L/opt/homebrew/lib",
+      "-Wl,-rpath,/opt/homebrew/lib",
+      "-lboost_filesystem",
+      "-lboost_thread",
+      "/usr/local/lib/libiconv.dylib",
+      "-o",
+      "/tmp/wt-r22-owner-20261102/green-quote-tsan"
+    ],
+    "exit": 0,
+    "log": "green-quote-tsan-link.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-owner-20261102/green-quote-tsan"
+    ],
+    "exit": 0,
+    "log": "green-quote-tsan-run.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-owner-20261102/green-quote-tsan",
+      "idle"
+    ],
+    "exit": 0,
+    "log": "green-quote-tsan-idle.log"
+  }
+]

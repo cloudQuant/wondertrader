@@ -1,0 +1,108 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/WtExeFact/WtTWapExeUnit.cpp	2026-11-04 09:10:21
++++ src/WtExeFact/WtTWapExeUnit.cpp	2026-11-04 18:01:46
+@@ -175,6 +175,34 @@
+ 		return 0.0;
+ 	return std::copysign(quantity, delta);
+ }
++// Card E (BUG-R7-012): every TWAP order is sized in the exchange's minimum
++// legal unit taken from the commodity's lot metadata (lot step and minimum
++// order quantity). The result is the largest legal quantity not above the
++// requested magnitude; 0 means no legal order exists and the remainder stays
++// outstanding. No odd-lot exception is assumed for any market. rulesKnown is
++// false when the metadata is absent or invalid, in which case nothing may be
++// sent because legality cannot be established.
++static double legalTwapLotQuantity(WTSCommodityInfo* comm, double magnitude, bool& rulesKnown)
++{
++	rulesKnown = false;
++	if (comm == NULL)
++		return 0.0;
++	const double lotStep = comm->getLotsTick();
++	const double minLots = comm->getMinLots();
++	if (!std::isfinite(lotStep) || lotStep <= 0.0 || !std::isfinite(minLots) || minLots <= 0.0)
++		return 0.0;
++	rulesKnown = true;
++	if (!std::isfinite(magnitude) || magnitude <= 0.0)
++		return 0.0;
++	// A relative tolerance keeps exact multiples (e.g. 3 x 0.1) from being
++	// rounded down one step by binary floating-point error.
++	const double steps = std::floor(magnitude / lotStep * (1.0 + 1e-12) + 1e-9);
++	const double quantity = steps * lotStep;
++	if (!std::isfinite(quantity) || quantity <= 0.0 || quantity + 1e-9 * minLots < minLots)
++		return 0.0;
++	return std::min(quantity, magnitude);
++}
++
+ /**
+  * @brief 获取所属执行器工厂名称
+  * @details 返回当前执行单元所属的工厂名称，用于执行器的工厂注册和搜寻
+@@ -743,7 +771,20 @@
+ 
+ 	// 如果数量为0，则直接返回
+ 	if (decimal::eq(qty, 0))
++		return;
++
++	// Card E (BUG-R7-012): a retry may only send a legal quantity; the rest of
++	// the canceled slice stays outstanding for the next regular slice.
++	bool lotRulesKnown = false;
++	const double legalQty = legalTwapLotQuantity(_comm_info, std::fabs(qty), lotRulesKnown);
++	if (!lotRulesKnown || legalQty == 0.0)
++	{
++		_ctx->writeLog(fmt::format("TWAP retry of {} for {} held: {}", qty, _code,
++			lotRulesKnown ? "below the minimum legal order unit, remainder kept outstanding" :
++			"lot rules unavailable").c_str());
+ 		return;
++	}
++	qty = std::copysign(legalQty, qty);
+ 
+ 	// 增加行情数据引用计数，防止在使用过程中被释放
+ 	_last_tick->retain();
+@@ -869,7 +910,9 @@
+ 	}
+ 
+ 	// 如果目标仓位与实际仓位相等，则无需发单，直接返回
+-	if (decimal::eq(diffQty, 0))
++	// BUG-R7-004（卡15复核）：清仓指令在净持仓为零时仍可能有锁仓（多空毛仓），
++	// 原先在此直接返回，使下方的清仓分支成为不可达代码；清仓时继续进入该分支。
++	if (decimal::eq(diffQty, 0) && !is_clear(_target_pos))
+ 		return;
+ 	
+ 	// 检查是否有与目标仓位变动方向相反的未完成订单
+@@ -933,6 +976,10 @@
+ 
+ 		// 如果还有多头仓位，则将目标仓位设置为卖出指令，强制触发清仓                      
+ 		newVol = -min(lPos, _order_lots);
++		// The slice below is sized from diffQty; keep it in step with the forced
++		// closing target (net is zero here, so this sells available longs first;
++		// the remaining short is then bought back through the ordinary path).
++		diffQty = newVol - curPos;
+ 		
+ 		// 记录清仓过程触发日志
+ 		_ctx->writeLog(fmtutil::format("Clearing process triggered, target position of {} has been set to {}", _code.c_str(), newVol));
+@@ -988,6 +1035,27 @@
+ 	{
+ 		_ctx->writeLog(fmt::format("No bounded TWAP slice for {}: target difference {} remains outstanding", _code, diffQty).c_str());
+ 		return;
++	}
++	// Card E (BUG-R7-012): round the bounded slice down to the exchange's
++	// minimum legal unit (T+1 sells are already capped by available volume).
++	// A remainder smaller than one legal unit is never sent as an illegal lot;
++	// it stays outstanding and does not consume a TWAP slice.
++	{
++		bool lotRulesKnown = false;
++		const double legalQty = legalTwapLotQuantity(_comm_info, std::fabs(curQty), lotRulesKnown);
++		if (!lotRulesKnown)
++		{
++			_ctx->writeLog(fmt::format("TWAP slice for {} held: lot rules are unavailable, target difference {} remains outstanding",
++				_code, diffQty).c_str());
++			return;
++		}
++		if (legalQty == 0.0)
++		{
++			_ctx->writeLog(fmt::format("TWAP slice for {} held: {} is below the minimum legal order unit, target difference {} remains outstanding",
++				_code, std::fabs(curQty), diffQty).c_str());
++			return;
++		}
++		curQty = std::copysign(legalQty, curQty);
+ 	}
+ 	/***---end---23.5.22---zhaoyk***/
+ 	/***---end---23.5.22---zhaoyk***/

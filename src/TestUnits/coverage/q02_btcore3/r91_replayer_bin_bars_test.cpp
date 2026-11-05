@@ -58,24 +58,39 @@ namespace
 		bool loadRawHisTicks(void*, const char*, uint32_t, FuncReadTicks) override { return false; }
 		bool isAutoTrans() override { return false; }
 
-		bool loadAdjFactors(void* obj, const char* stdCode, FuncReadFactors) override
+		// R2_wtbtcore#2 (slice1 final gaps): each instance gets its own factor for
+		// the key it asked for, so a shared key buffer would publish one instance's
+		// factor under the other instance's key.
+		static constexpr double kFirstFactor = 0.5;
+		static constexpr double kSecondFactor = 0.25;
+		uint32_t firstCalls { 0 };
+		uint32_t secondCalls { 0 };
+
+		bool loadAdjFactors(void* obj, const char* stdCode, FuncReadFactors cb) override
 		{
 			std::unique_lock<std::mutex> lock(_mutex);
+			uint32_t dates[1] = { 20191230u };
 			if (obj == first)
 			{
+				++firstCalls;
 				_firstEntered = true;
 				_cv.notify_all();
 				_cv.wait_for(lock, std::chrono::seconds(5), [this]() { return _secondEntered; });
 				firstKey = stdCode;
-				return false;
+				double factors[1] = { kFirstFactor };
+				cb(obj, stdCode, dates, factors, 1);
+				return true;
 			}
 
 			if (obj == second)
 			{
+				++secondCalls;
 				secondKey = stdCode;
+				double factors[1] = { kSecondFactor };
+				cb(obj, stdCode, dates, factors, 1);
 				_secondEntered = true;
 				_cv.notify_all();
-				return false;
+				return true;
 			}
 
 			return false;
@@ -413,19 +428,47 @@ TEST_F(R91Fixture, R2AdjFactors_IndependentReplayCallsKeepTheirOwnLoaderKey)
 	first._bt_loader = &loader;
 	second._bt_loader = &loader;
 
-	std::thread firstQuery([&]() { first.getAdjFactors("600004", "SSE", "STK"); });
+	HisDataReplayer::AdjFactorList firstResult;
+	HisDataReplayer::AdjFactorList secondResult;
+	std::thread firstQuery([&]() { firstResult = first.getAdjFactors("600004", "SSE", "STK"); });
 	if (!loader.waitForFirstCall())
 	{
 		firstQuery.join();
 		FAIL() << "first independent replayer did not reach loadAdjFactors";
 		return;
 	}
-	std::thread secondQuery([&]() { second.getAdjFactors("600005", "SSE", "STK"); });
+	std::thread secondQuery([&]() { secondResult = second.getAdjFactors("600005", "SSE", "STK"); });
 	firstQuery.join();
 	secondQuery.join();
 
 	EXPECT_EQ("SSE.STK.600004", loader.firstKey);
 	EXPECT_EQ("SSE.STK.600005", loader.secondKey);
+
+	// R2_wtbtcore#2 acceptance: concurrent calls with different keys return their
+	// own results (the default 19900101/1.0 head plus the loader's factor).
+	ASSERT_EQ(2u, firstResult.size());
+	EXPECT_EQ(19900101u, firstResult[0]._date);
+	EXPECT_DOUBLE_EQ(1.0, firstResult[0]._factor);
+	EXPECT_EQ(20191230u, firstResult[1]._date);
+	EXPECT_DOUBLE_EQ(R2AdjFactorRaceLoader::kFirstFactor, firstResult[1]._factor);
+	ASSERT_EQ(2u, secondResult.size());
+	EXPECT_EQ(20191230u, secondResult[1]._date);
+	EXPECT_DOUBLE_EQ(R2AdjFactorRaceLoader::kSecondFactor, secondResult[1]._factor);
+
+	// Each result is cached under its own key: a repeated query is served from the
+	// cache with the same factor and does not reach the loader again.
+	const HisDataReplayer::AdjFactorList& firstAgain = first.getAdjFactors("600004", "SSE", "STK");
+	const HisDataReplayer::AdjFactorList& secondAgain = second.getAdjFactors("600005", "SSE", "STK");
+	EXPECT_EQ(1u, loader.firstCalls);
+	EXPECT_EQ(1u, loader.secondCalls);
+	ASSERT_EQ(2u, firstAgain.size());
+	EXPECT_DOUBLE_EQ(R2AdjFactorRaceLoader::kFirstFactor, firstAgain[1]._factor);
+	ASSERT_EQ(2u, secondAgain.size());
+	EXPECT_DOUBLE_EQ(R2AdjFactorRaceLoader::kSecondFactor, secondAgain[1]._factor);
+	EXPECT_EQ(1u, first._adj_factors.count("SSE.STK.600004"));
+	EXPECT_EQ(0u, first._adj_factors.count("SSE.STK.600005"));
+	EXPECT_EQ(1u, second._adj_factors.count("SSE.STK.600005"));
+	EXPECT_EQ(0u, second._adj_factors.count("SSE.STK.600004"));
 }
 
 /*

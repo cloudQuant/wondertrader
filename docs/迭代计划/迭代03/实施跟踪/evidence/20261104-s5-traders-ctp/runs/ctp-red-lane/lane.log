@@ -1,0 +1,672 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = -I03S5*
+[==========] Running 69 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from gate_placeholder_TraderCTP
+[ RUN      ] gate_placeholder_TraderCTP.compiles_with_module_flags
+[       OK ] gate_placeholder_TraderCTP.compiles_with_module_flags (0 ms)
+[----------] 1 test from gate_placeholder_TraderCTP (0 ms total)
+
+[----------] 43 tests from T25TraderCTPTest
+[ RUN      ] T25TraderCTPTest.plugin_entry_points_build_and_destroy_trader
+[       OK ] T25TraderCTPTest.plugin_entry_points_build_and_destroy_trader (1 ms)
+[ RUN      ] T25TraderCTPTest.init_falls_back_to_ctptdflow_and_ignores_non_string_front
+[       OK ] T25TraderCTPTest.init_falls_back_to_ctptdflow_and_ignores_non_string_front (1 ms)
+[ RUN      ] T25TraderCTPTest.init_keeps_trailing_slash_of_given_flowdir
+[       OK ] T25TraderCTPTest.init_keeps_trailing_slash_of_given_flowdir (0 ms)
+[ RUN      ] T25TraderCTPTest.str_to_time_strips_colons_and_parses_to_uint
+[       OK ] T25TraderCTPTest.str_to_time_strips_colons_and_parses_to_uint (0 ms)
+[ RUN      ] T25TraderCTPTest.login_rsp_with_error_marks_login_failed_and_never_queries_confirm
+[       OK ] T25TraderCTPTest.login_rsp_with_error_marks_login_failed_and_never_queries_confirm (0 ms)
+[ RUN      ] T25TraderCTPTest.login_rsp_with_null_rspinfo_is_taken_as_success
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:732: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:733: Failure
+Expected equality of these values:
+  7u
+    Which is: 7
+  trader_.frontId()
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:734: Failure
+Expected equality of these values:
+  8u
+    Which is: 8
+  trader_.sessionId()
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:735: Failure
+Expected equality of these values:
+  50u
+    Which is: 50
+  trader_.orderRef()
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:736: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  sink_.n_login_result_
+    Which is: 1
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:737: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+
+[  FAILED  ] T25TraderCTPTest.login_rsp_with_null_rspinfo_is_taken_as_success (0 ms)
+[ RUN      ] T25TraderCTPTest.do_login_send_failure_is_logged_without_waiting_for_response
+[       OK ] T25TraderCTPTest.do_login_send_failure_is_logged_without_waiting_for_response (0 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_and_action_send_failures_return_error_and_are_logged
+[       OK ] T25TraderCTPTest.order_insert_and_action_send_failures_return_error_and_are_logged (5 ms)
+[ RUN      ] T25TraderCTPTest.authenticate_sync_failure_returns_error_without_waiting_for_login
+[       OK ] T25TraderCTPTest.authenticate_sync_failure_returns_error_without_waiting_for_login (0 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_without_usertag_allocates_identity_and_cache
+[       OK ] T25TraderCTPTest.order_insert_without_usertag_allocates_identity_and_cache (2 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_rejects_malformed_entrust_id_when_usertag_set
+[       OK ] T25TraderCTPTest.order_insert_rejects_malformed_entrust_id_when_usertag_set (7 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_wraps_bestprice_lastprice_and_every_offset
+[       OK ] T25TraderCTPTest.order_insert_wraps_bestprice_lastprice_and_every_offset (8 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_direction_flag_is_swapped_for_short_close
+[       OK ] T25TraderCTPTest.order_insert_direction_flag_is_swapped_for_short_close (2 ms)
+[ RUN      ] T25TraderCTPTest.order_action_rejects_entrust_id_with_only_one_hash
+[       OK ] T25TraderCTPTest.order_action_rejects_entrust_id_with_only_one_hash (1 ms)
+[ RUN      ] T25TraderCTPTest.disconnect_without_worker_only_queues_release
+[       OK ] T25TraderCTPTest.disconnect_without_worker_only_queues_release (0 ms)
+[ RUN      ] T25TraderCTPTest.release_after_ready_clears_api_and_every_container
+[       OK ] T25TraderCTPTest.release_after_ready_clears_api_and_every_container (16 ms)
+[ RUN      ] T25TraderCTPTest.connect_with_stub_creator_wires_spi_fronts_and_worker_sends_query
+[       OK ] T25TraderCTPTest.connect_with_stub_creator_wires_spi_fronts_and_worker_sends_query (1012 ms)
+[ RUN      ] T25TraderCTPTest.settlement_confirm_older_than_trading_day_goes_through_confirm
+[       OK ] T25TraderCTPTest.settlement_confirm_older_than_trading_day_goes_through_confirm (14 ms)
+[ RUN      ] T25TraderCTPTest.settlement_confirm_query_with_null_field_or_error_keeps_or_skips_state
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1144: Failure
+Expected equality of these values:
+  TraderCTP::WS_CONFIRM_QRYED
+    Which is: 4
+  trader_.state()
+    Which is: 2
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1145: Failure
+Expected equality of these values:
+  1
+  api_.n_confirm_.load()
+    Which is: 0
+
+[  FAILED  ] T25TraderCTPTest.settlement_confirm_query_with_null_field_or_error_keeps_or_skips_state (2 ms)
+[ RUN      ] T25TraderCTPTest.settlement_confirm_rsp_only_acts_in_confirm_qryed_state
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1176: Failure
+Expected equality of these values:
+  TraderCTP::WS_ALLREADY
+    Which is: 6
+  trader_.state()
+    Which is: 4
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1177: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  sink_.n_login_result_
+    Which is: 0
+
+[  FAILED  ] T25TraderCTPTest.settlement_confirm_rsp_only_acts_in_confirm_qryed_state (1 ms)
+[ RUN      ] T25TraderCTPTest.confirm_send_failure_fails_login_without_waiting_for_callback
+[       OK ] T25TraderCTPTest.confirm_send_failure_fails_login_without_waiting_for_callback (12 ms)
+[ RUN      ] T25TraderCTPTest.query_confirm_send_failure_is_logged_inside_worker_item
+[       OK ] T25TraderCTPTest.query_confirm_send_failure_is_logged_inside_worker_item (3 ms)
+[ RUN      ] T25TraderCTPTest.query_confirm_sync_failure_clears_gate_and_worker_releases
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1223: Failure
+Value of: waitUntil([this]() { return api_.n_qry_confirm_.load() == 1 && !trader_.inQuery() && sink_.hasLog("Sending query of settlement data confirming state failed: 7"); })
+  Actual: false
+Expected: true
+同步拒绝后查询 gate 或失败日志未完成
+
+[  FAILED  ] T25TraderCTPTest.query_confirm_sync_failure_clears_gate_and_worker_releases (7564 ms)
+[ RUN      ] T25TraderCTPTest.position_cover_today_short_today_row_subtracts_long_frozen
+[       OK ] T25TraderCTPTest.position_cover_today_short_today_row_subtracts_long_frozen (2 ms)
+[ RUN      ] T25TraderCTPTest.position_cover_today_history_rows_clamp_negative_availability
+[       OK ] T25TraderCTPTest.position_cover_today_history_rows_clamp_negative_availability (1 ms)
+[ RUN      ] T25TraderCTPTest.position_direct_cover_splits_new_pre_and_both_freeze_sides
+[       OK ] T25TraderCTPTest.position_direct_cover_splits_new_pre_and_both_freeze_sides (2 ms)
+[ RUN      ] T25TraderCTPTest.position_combination_skips_availability_and_zero_margin_clears_it
+[       OK ] T25TraderCTPTest.position_combination_skips_availability_and_zero_margin_clears_it (2 ms)
+[ RUN      ] T25TraderCTPTest.position_zero_total_sets_avg_price_to_zero_and_still_pushes
+[       OK ] T25TraderCTPTest.position_zero_total_sets_avg_price_to_zero_and_still_pushes (3 ms)
+[ RUN      ] T25TraderCTPTest.position_error_last_row_pushs_accumulated_then_map_is_reset
+[       OK ] T25TraderCTPTest.position_error_last_row_pushs_accumulated_then_map_is_reset (1 ms)
+[ RUN      ] T25TraderCTPTest.usertag_round_trips_from_eid_cache_into_order_then_trade
+[       OK ] T25TraderCTPTest.usertag_round_trips_from_eid_cache_into_order_then_trade (1 ms)
+[ RUN      ] T25TraderCTPTest.order_rsp_maps_rejected_submit_status_and_mv_volume_and_reverse_types
+[       OK ] T25TraderCTPTest.order_rsp_maps_rejected_submit_status_and_mv_volume_and_reverse_types (1 ms)
+[ RUN      ] T25TraderCTPTest.entrust_rsp_maps_ioc_cv_to_fok_and_usertag_from_cache
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1623: Failure
+Expected equality of these values:
+  eid
+    Which is: "012345#0000000067#001001"
+  sink_.ent_eid_
+    Which is: ""
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1624: Failure
+Expected equality of these values:
+  "TAG-E"
+  sink_.ent_usertag_
+    Which is: ""
+
+[  FAILED  ] T25TraderCTPTest.entrust_rsp_maps_ioc_cv_to_fok_and_usertag_from_cache (2 ms)
+[ RUN      ] T25TraderCTPTest.rsp_order_insert_with_unknown_contract_pushes_only_trader_error
+[       OK ] T25TraderCTPTest.rsp_order_insert_with_unknown_contract_pushes_only_trader_error (1 ms)
+[ RUN      ] T25TraderCTPTest.rsp_order_action_error_carries_action_fields_and_bare_message
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1711: Failure
+Expected equality of these values:
+  "TAG-C"
+  sink_.act_usertag_
+    Which is: ""
+
+[  FAILED  ] T25TraderCTPTest.rsp_order_action_error_carries_action_fields_and_bare_message (1 ms)
+[ RUN      ] T25TraderCTPTest.trade_with_unknown_contract_is_dropped_by_both_channels
+[       OK ] T25TraderCTPTest.trade_with_unknown_contract_is_dropped_by_both_channels (1 ms)
+[ RUN      ] T25TraderCTPTest.qry_order_and_trade_rows_accumulate_and_clear_after_last
+[       OK ] T25TraderCTPTest.qry_order_and_trade_rows_accumulate_and_clear_after_last (1 ms)
+[ RUN      ] T25TraderCTPTest.settlement_info_concatenates_rows_and_pushes_only_when_non_empty
+[       OK ] T25TraderCTPTest.settlement_info_concatenates_rows_and_pushes_only_when_non_empty (2 ms)
+[ RUN      ] T25TraderCTPTest.unsupported_time_condition_keeps_other_order_mappings
+[       OK ] T25TraderCTPTest.unsupported_time_condition_keeps_other_order_mappings (1 ms)
+[ RUN      ] T25TraderCTPTest.front_and_heartbeat_paths_are_quiet_when_sink_is_unregistered
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1900: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINFAILED
+    Which is: 3
+  trader_.state()
+    Which is: 0
+
+[  FAILED  ] T25TraderCTPTest.front_and_heartbeat_paths_are_quiet_when_sink_is_unregistered (0 ms)
+[ RUN      ] T25TraderCTPTest.front_disconnect_resets_state_and_logout_reports_reason
+[       OK ] T25TraderCTPTest.front_disconnect_resets_state_and_logout_reports_reason (0 ms)
+[ RUN      ] T25TraderCTPTest.confirm_guard_rejects_when_api_is_gone_or_state_moved_on
+[       OK ] T25TraderCTPTest.confirm_guard_rejects_when_api_is_gone_or_state_moved_on (1 ms)
+[ RUN      ] T25TraderCTPTest.login_warns_and_continues_when_cache_dir_is_not_writable
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2033: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2034: Failure
+Expected equality of these values:
+  20240115u
+    Which is: 20240115
+  trader_.tradingDate()
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2039: Failure
+Expected: (2) <= (failed_mapping_logs), actual: 2 vs 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2040: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+
+[  FAILED  ] T25TraderCTPTest.login_warns_and_continues_when_cache_dir_is_not_writable (0 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_rejects_when_user_tag_cache_init_failed
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:564: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:2059: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+
+[  FAILED  ] T25TraderCTPTest.order_insert_rejects_when_user_tag_cache_init_failed (0 ms)
+[ DISABLED ] T25TraderCTPTest.DISABLED_settlement_info_last_row_without_payload_crashes
+[ DISABLED ] T25TraderCTPTest.DISABLED_rsp_error_with_null_sink_crashes
+[ DISABLED ] T25TraderCTPTest.DISABLED_disconnect_hangs_when_no_response_clears_in_query
+[ DISABLED ] T25TraderCTPTest.DISABLED_plugin_created_trader_has_indeterminate_sink
+[----------] 43 tests from T25TraderCTPTest (8694 ms total)
+
+[----------] 25 tests from T2TraderCTPTest
+[ RUN      ] T2TraderCTPTest.init_reads_broker_user_and_defaults
+[       OK ] T2TraderCTPTest.init_reads_broker_user_and_defaults (0 ms)
+[ RUN      ] T2TraderCTPTest.init_accepts_front_array_and_quick_flag
+[       OK ] T2TraderCTPTest.init_accepts_front_array_and_quick_flag (0 ms)
+[ RUN      ] T2TraderCTPTest.release_without_api_only_marks_stopped
+[       OK ] T2TraderCTPTest.release_without_api_only_marks_stopped (0 ms)
+[ RUN      ] T2TraderCTPTest.connect_rejects_missing_creator_without_starting_worker
+[       OK ] T2TraderCTPTest.connect_rejects_missing_creator_without_starting_worker (0 ms)
+[ RUN      ] T2TraderCTPTest.connect_rejects_null_api_created_by_creator
+[       OK ] T2TraderCTPTest.connect_rejects_null_api_created_by_creator (0 ms)
+[ RUN      ] T2TraderCTPTest.login_logout_and_queries_rejected_without_api
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:519: Failure
+Expected equality of these values:
+  "u2"
+  trader_.user()
+    Which is: "88880001"
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:520: Failure
+Expected equality of these values:
+  "prod2"
+  trader_.prodInfo()
+    Which is: ""
+
+[  FAILED  ] T2TraderCTPTest.login_logout_and_queries_rejected_without_api (0 ms)
+[ RUN      ] T2TraderCTPTest.order_and_query_rejected_when_state_not_ready
+[       OK ] T2TraderCTPTest.order_and_query_rejected_when_state_not_ready (0 ms)
+[ RUN      ] T2TraderCTPTest.authenticate_failure_marks_login_failed_and_reports
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:568: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINFAILED
+    Which is: 3
+  trader_.state()
+    Which is: 1
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:570: Failure
+Expected equality of these values:
+  1
+  sink_.n_login_result_
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:572: Failure
+Expected equality of these values:
+  "AuthCode invalid"
+  sink_.last_msg_
+    Which is: ""
+
+[  FAILED  ] T2TraderCTPTest.authenticate_failure_marks_login_failed_and_reports (0 ms)
+[ RUN      ] T2TraderCTPTest.login_rsp_carries_credentials_and_session_params
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:585: Failure
+Value of: trader_.isConnected()
+  Actual: false
+Expected: true
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:586: Failure
+Expected equality of these values:
+  20240115u
+    Which is: 20240115
+  trader_.tradingDate() % 100000000u
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:587: Failure
+Expected equality of these values:
+  20240115u
+    Which is: 20240115
+  trader_.tradingDate()
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:588: Failure
+Expected equality of these values:
+  12345u
+    Which is: 12345
+  trader_.frontId()
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:589: Failure
+Expected equality of these values:
+  67u
+    Which is: 67
+  trader_.sessionId()
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:590: Failure
+Expected equality of these values:
+  1000u
+    Which is: 1000
+  trader_.orderRef()
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:592: Failure
+Value of: sink_.last_succ_
+  Actual: false
+Expected: true
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:593: Failure
+Expected equality of these values:
+  20240115u
+    Which is: 20240115
+  sink_.last_tradedate_
+    Which is: 0
+
+[  FAILED  ] T2TraderCTPTest.login_rsp_carries_credentials_and_session_params (0 ms)
+[ RUN      ] T2TraderCTPTest.settlement_unconfirmed_goes_through_confirm
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:615: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:616: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.drainQueries()
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:617: Failure
+Expected equality of these values:
+  1
+  api_.n_qry_confirm_
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:618: Failure
+Expected equality of these values:
+  "9999"
+  std::string(api_.qry_confirm_.BrokerID)
+    Which is: ""
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:619: Failure
+Expected equality of these values:
+  "88880001"
+  std::string(api_.qry_confirm_.InvestorID)
+    Which is: ""
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:626: Failure
+Expected equality of these values:
+  TraderCTP::WS_CONFIRM_QRYED != trader_.state()
+    Which is: true
+  false
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:628: Failure
+Expected equality of these values:
+  1
+  api_.n_confirm_
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:629: Failure
+Expected equality of these values:
+  8u
+    Which is: 8
+  strlen(api_.confirm_.ConfirmDate)
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:635: Failure
+Expected equality of these values:
+  TraderCTP::WS_ALLREADY
+    Which is: 6
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:636: Failure
+Value of: trader_.isConnected()
+  Actual: false
+Expected: true
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:637: Failure
+Value of: sink_.last_succ_
+  Actual: false
+Expected: true
+
+[  FAILED  ] T2TraderCTPTest.settlement_unconfirmed_goes_through_confirm (0 ms)
+[ RUN      ] T2TraderCTPTest.make_entrust_id_is_fixed_width_and_increments_ref
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:649: Failure
+Value of: trader_.makeEntrustID(buf, sizeof(buf))
+  Actual: false
+Expected: true
+
+[  FAILED  ] T2TraderCTPTest.make_entrust_id_is_fixed_width_and_increments_ref (0 ms)
+[ RUN      ] T2TraderCTPTest.make_entrust_id_is_rejected_until_login_session_exists
+[       OK ] T2TraderCTPTest.make_entrust_id_is_rejected_until_login_session_exists (0 ms)
+[ RUN      ] T2TraderCTPTest.order_insert_maps_types_and_ref_for_shfe
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:676: Failure
+Value of: trader_.makeEntrustID(eid, sizeof(eid))
+  Actual: false
+Expected: true
+
+[  FAILED  ] T2TraderCTPTest.order_insert_maps_types_and_ref_for_shfe (0 ms)
+[ RUN      ] T2TraderCTPTest.order_insert_cffex_anyprice_and_close_offsets
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:727: Failure
+Value of: trader_.makeEntrustID(eid, sizeof(eid))
+  Actual: false
+Expected: true
+
+[  FAILED  ] T2TraderCTPTest.order_insert_cffex_anyprice_and_close_offsets (0 ms)
+[ RUN      ] T2TraderCTPTest.order_action_rejects_bad_entrust_id_and_builds_cancel
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:775: Failure
+Expected equality of these values:
+  0
+  trader_.orderAction(a)
+    Which is: -1
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:776: Failure
+Expected equality of these values:
+  1
+  api_.n_action_
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:777: Failure
+Expected equality of these values:
+  12345
+  api_.action_.FrontID
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:778: Failure
+Expected equality of these values:
+  67
+  api_.action_.SessionID
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:779: Failure
+Expected equality of these values:
+  "42"
+  api_.action_.OrderRef
+    Which is: ""
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:780: Failure
+Expected equality of these values:
+  '0'
+    Which is: '0' (48, 0x30)
+  api_.action_.ActionFlag
+    Which is: '\0'
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:781: Failure
+Expected equality of these values:
+  "800042"
+  api_.action_.OrderSysID
+    Which is: ""
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:782: Failure
+Expected equality of these values:
+  kRawCode
+    Which is: "ag2512"
+  std::string(api_.action_.InstrumentID)
+    Which is: ""
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:785: Failure
+Expected equality of these values:
+  0
+  trader_.orderAction(a)
+    Which is: -1
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:786: Failure
+Expected equality of these values:
+  '3'
+    Which is: '3' (51, 0x33)
+  api_.action_.ActionFlag
+    Which is: '\0'
+
+[  FAILED  ] T2TraderCTPTest.order_action_rejects_bad_entrust_id_and_builds_cancel (0 ms)
+[ RUN      ] T2TraderCTPTest.queries_enqueue_then_send_on_drain
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:807: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+
+[  FAILED  ] T2TraderCTPTest.queries_enqueue_then_send_on_drain (0 ms)
+[ RUN      ] T2TraderCTPTest.rtn_order_conversion_maps_state_and_night_date
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:899: Failure
+Expected equality of these values:
+  20240114u
+    Which is: 20240114
+  sink_.push_order_date_
+    Which is: 20240115
+
+[  FAILED  ] T2TraderCTPTest.rtn_order_conversion_maps_state_and_night_date (0 ms)
+[ RUN      ] T2TraderCTPTest.rtn_order_untouched_and_known_states_keep_wts_meaning
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+[  FAILED  ] T2TraderCTPTest.rtn_order_untouched_and_known_states_keep_wts_meaning (0 ms)
+[ RUN      ] T2TraderCTPTest.queried_order_untouched_and_known_states_keep_wts_meaning
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+[  FAILED  ] T2TraderCTPTest.queried_order_untouched_and_known_states_keep_wts_meaning (0 ms)
+[ RUN      ] T2TraderCTPTest.instrument_statuses_keep_existing_0_to_6_mapping
+[       OK ] T2TraderCTPTest.instrument_statuses_keep_existing_0_to_6_mapping (0 ms)
+[ RUN      ] T2TraderCTPTest.trade_conversion_amount_and_usertag_chain
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:995: Failure
+Value of: trader_.makeEntrustID(eid, sizeof(eid))
+  Actual: false
+Expected: true
+
+[  FAILED  ] T2TraderCTPTest.trade_conversion_amount_and_usertag_chain (0 ms)
+[ RUN      ] T2TraderCTPTest.rsp_order_insert_and_action_error_paths
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+[  FAILED  ] T2TraderCTPTest.rsp_order_insert_and_action_error_paths (0 ms)
+[ RUN      ] T2TraderCTPTest.rsp_account_position_and_settlement
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:1108: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+
+[  FAILED  ] T2TraderCTPTest.rsp_account_position_and_settlement (0 ms)
+[ RUN      ] T2TraderCTPTest.rsp_qry_order_and_trade_arrays
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:441: Failure
+Expected equality of these values:
+  TraderCTP::WS_LOGINED
+    Which is: 2
+  trader_.state()
+    Which is: 3
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:1204: Failure
+Value of: trader_.isConnected()
+  Actual: false
+Expected: true
+
+[  FAILED  ] T2TraderCTPTest.rsp_qry_order_and_trade_arrays (0 ms)
+[ RUN      ] T2TraderCTPTest.front_events_and_logout_and_status_pushes
+[       OK ] T2TraderCTPTest.front_events_and_logout_and_status_pushes (0 ms)
+[ DISABLED ] T2TraderCTPTest.DISABLED_connect_starts_worker_thread_and_needs_real_front
+[----------] 25 tests from T2TraderCTPTest (7 ms total)
+
+[----------] Global test environment tear-down
+[==========] 69 tests from 3 test suites ran. (8702 ms total)
+[  PASSED  ] 44 tests.
+[  FAILED  ] 25 tests, listed below:
+[  FAILED  ] T25TraderCTPTest.login_rsp_with_null_rspinfo_is_taken_as_success
+[  FAILED  ] T25TraderCTPTest.settlement_confirm_query_with_null_field_or_error_keeps_or_skips_state
+[  FAILED  ] T25TraderCTPTest.settlement_confirm_rsp_only_acts_in_confirm_qryed_state
+[  FAILED  ] T25TraderCTPTest.query_confirm_sync_failure_clears_gate_and_worker_releases
+[  FAILED  ] T25TraderCTPTest.entrust_rsp_maps_ioc_cv_to_fok_and_usertag_from_cache
+[  FAILED  ] T25TraderCTPTest.rsp_order_action_error_carries_action_fields_and_bare_message
+[  FAILED  ] T25TraderCTPTest.front_and_heartbeat_paths_are_quiet_when_sink_is_unregistered
+[  FAILED  ] T25TraderCTPTest.login_warns_and_continues_when_cache_dir_is_not_writable
+[  FAILED  ] T25TraderCTPTest.order_insert_rejects_when_user_tag_cache_init_failed
+[  FAILED  ] T2TraderCTPTest.login_logout_and_queries_rejected_without_api
+[  FAILED  ] T2TraderCTPTest.authenticate_failure_marks_login_failed_and_reports
+[  FAILED  ] T2TraderCTPTest.login_rsp_carries_credentials_and_session_params
+[  FAILED  ] T2TraderCTPTest.settlement_unconfirmed_goes_through_confirm
+[  FAILED  ] T2TraderCTPTest.make_entrust_id_is_fixed_width_and_increments_ref
+[  FAILED  ] T2TraderCTPTest.order_insert_maps_types_and_ref_for_shfe
+[  FAILED  ] T2TraderCTPTest.order_insert_cffex_anyprice_and_close_offsets
+[  FAILED  ] T2TraderCTPTest.order_action_rejects_bad_entrust_id_and_builds_cancel
+[  FAILED  ] T2TraderCTPTest.queries_enqueue_then_send_on_drain
+[  FAILED  ] T2TraderCTPTest.rtn_order_conversion_maps_state_and_night_date
+[  FAILED  ] T2TraderCTPTest.rtn_order_untouched_and_known_states_keep_wts_meaning
+[  FAILED  ] T2TraderCTPTest.queried_order_untouched_and_known_states_keep_wts_meaning
+[  FAILED  ] T2TraderCTPTest.trade_conversion_amount_and_usertag_chain
+[  FAILED  ] T2TraderCTPTest.rsp_order_insert_and_action_error_paths
+[  FAILED  ] T2TraderCTPTest.rsp_account_position_and_settlement
+[  FAILED  ] T2TraderCTPTest.rsp_qry_order_and_trade_arrays
+
+25 FAILED TESTS
+  YOU HAVE 5 DISABLED TESTS
+

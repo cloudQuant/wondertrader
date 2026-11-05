@@ -1,0 +1,41 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5MainK31*
+[==========] Running 4 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from S5MainK31DateBinding
+[ RUN      ] S5MainK31DateBinding.BindingHolderValidatesOnceAndFallsBackToLegacy
+[       OK ] S5MainK31DateBinding.BindingHolderValidatesOnceAndFallsBackToLegacy (0 ms)
+[ RUN      ] S5MainK31DateBinding.StorageAndXeleModulesExportVersionedBinders
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:132: Failure
+Value of: bindReader != __null
+  Actual: false
+Expected: true
+data reader binder is not exported
+Google Test trace:
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:122: WtDataStorage
+
+[  FAILED  ] S5MainK31DateBinding.StorageAndXeleModulesExportVersionedBinders (310 ms)
+[----------] 2 tests from S5MainK31DateBinding (310 ms total)
+
+[----------] 2 tests from S5MainK31HostChain
+[ RUN      ] S5MainK31HostChain.InjectedTableDrivesTheReaderDateMapping
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:230: Failure
+Expected: (counter.calc_calls.load()) > (0u), actual: 0 vs 0
+the reader did not use the host DateMappingV1 table
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:236: Failure
+Expected: (counter.calc_calls.load()) > (before), actual: 0 vs 0
+
+[  FAILED  ] S5MainK31HostChain.InjectedTableDrivesTheReaderDateMapping (213 ms)
+[ RUN      ] S5MainK31HostChain.WithoutHostTableTheReaderKeepsTheLegacyPath
+[       OK ] S5MainK31HostChain.WithoutHostTableTheReaderKeepsTheLegacyPath (219 ms)
+[----------] 2 tests from S5MainK31HostChain (432 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 2 test suites ran. (744 ms total)
+[  PASSED  ] 2 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] S5MainK31DateBinding.StorageAndXeleModulesExportVersionedBinders
+[  FAILED  ] S5MainK31HostChain.InjectedTableDrivesTheReaderDateMapping
+
+ 2 FAILED TESTS

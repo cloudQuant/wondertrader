@@ -1,0 +1,50 @@
+diff --git a/src/TestUnits/coverage/t_TraderYD/r93_traderYD_api_test.cpp b/tmp/wt-i03-r93-006-20261102/snapshot/src/TestUnits/coverage/t_TraderYD/r93_traderYD_api_test.cpp
+index fb45bd4b..e0dabfa1 100644
+--- a/src/TestUnits/coverage/t_TraderYD/r93_traderYD_api_test.cpp
++++ b/tmp/wt-i03-r93-006-20261102/snapshot/src/TestUnits/coverage/t_TraderYD/r93_traderYD_api_test.cpp
+@@ -727,6 +727,45 @@ namespace
+ 	/* 平仓冻结/释放：CM_OpenCover                                          */
+ 	/* ------------------------------------------------------------------ */
+ 
++	TEST_F(R93YdTest, r93_mixed_yesterday_today_zero_fill_cancel_restores_origin)
++	{
++		comm_->setCoverMode(CM_OpenCover);
++		add_pre_position(YD_PD_Long, 2, 7000.0);
++		login_and_finish();
++		YDTrade open{};
++		open.Direction = YD_D_Buy;
++		open.OffsetFlag = YD_OF_Open;
++		open.Price = 7000.0;
++		open.Volume = 3;
++		open.TradeID = 7201;
++		open.OrderSysID = 7202;
++		api_.notifyTrade(&open, &stub_.instrument_, nullptr);
++		ASSERT_EQ(0, api_.queryPositions());
++		ASSERT_TRUE(api_.runNextQuery());
++		ASSERT_EQ(1u, sink_.positions.size());
++		ASSERT_DOUBLE_EQ(2.0, sink_.positions.back().pre);
++		ASSERT_DOUBLE_EQ(3.0, sink_.positions.back().newPos);
++		ASSERT_DOUBLE_EQ(2.0, sink_.positions.back().availPre);
++		ASSERT_DOUBLE_EQ(3.0, sink_.positions.back().availNew);
++		YDOrder pending = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 4,
++			YD_OS_Queuing, 7203, 7204);
++		api_.notifyOrder(&pending, &stub_.instrument_, nullptr);
++		ASSERT_EQ(0, api_.queryPositions());
++		ASSERT_TRUE(api_.runNextQuery());
++		ASSERT_EQ(2u, sink_.positions.size());
++		EXPECT_DOUBLE_EQ(0.0, sink_.positions.back().availPre);
++		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().availNew);
++		YDOrder canceled = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 4,
++			YD_OS_Canceled, 7203, 7204);
++		canceled.TradeVolume = 0;
++		api_.notifyOrder(&canceled, &stub_.instrument_, nullptr);
++		ASSERT_EQ(0, api_.queryPositions());
++		ASSERT_TRUE(api_.runNextQuery());
++		ASSERT_EQ(3u, sink_.positions.size());
++		EXPECT_DOUBLE_EQ(2.0, sink_.positions.back().availPre);
++		EXPECT_DOUBLE_EQ(3.0, sink_.positions.back().availNew);
++	}
++
+ 	/// CM_OpenCover 按昨仓优先冻结；未成交委托撤销后应恢复冻结来源的可用量。
+ 	/// BUG-R93-006：当前 TraderYD 撤单路径没有恢复这笔昨仓冻结。
+ 	TEST_F(R93YdTest, open_cover_order_freezes_yesterday_available)

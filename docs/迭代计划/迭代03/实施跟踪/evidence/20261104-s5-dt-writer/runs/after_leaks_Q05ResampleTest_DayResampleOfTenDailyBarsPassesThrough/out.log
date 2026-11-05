@@ -1,0 +1,59 @@
+perl(46388) MallocStackLogging: could not tag MSL-related memory as no_footprint, so those pages will be included in process footprint - No such file or directory (2)
+perl(46388) MallocStackLogging: recording malloc (and VM allocation) stacks using lite mode
+leaks(46388) MallocStackLogging: could not tag MSL-related memory as no_footprint, so those pages will be included in process footprint - No such file or directory (2)
+leaks(46388) MallocStackLogging: recording malloc (and VM allocation) stacks using lite mode
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q05ResampleTest.DayResampleOfTenDailyBarsPassesThrough
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q05ResampleTest
+[ RUN      ] Q05ResampleTest.DayResampleOfTenDailyBarsPassesThrough
+/tmp/wt-i03-s5-dt-writer-after/src/TestUnits/coverage/q05_dtsrv/q05_resample_bars_test.cpp:253: Failure
+Expected equality of these values:
+  ret
+    Which is: 0
+  10u
+    Which is: 10
+
+/tmp/wt-i03-s5-dt-writer-after/src/TestUnits/coverage/q05_dtsrv/q05_resample_bars_test.cpp:256: Failure
+Value of: g_cbIsLast
+  Actual: false
+Expected: true
+
+[  FAILED  ] Q05ResampleTest.DayResampleOfTenDailyBarsPassesThrough (5 ms)
+[----------] 1 test from Q05ResampleTest (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (6 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Q05ResampleTest.DayResampleOfTenDailyBarsPassesThrough
+
+ 1 FAILED TEST
+Process 46390 is not debuggable. Due to security restrictions, leaks can only show or save contents of readonly memory of restricted processes.
+
+Process:         CoverageTests_dtcore [46390]
+Path:            /private/tmp/*/CoverageTests_dtcore
+Load Address:    0x100b6c000
+Identifier:      CoverageTests_dtcore
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  leaks [46388]
+Target Type:     live task
+
+Date/Time:       2026-11-04 19:50:29.211 +0800
+Launch Time:     2026-11-04 19:50:25.905 +0800
+OS Version:      macOS 26.5.1 (25F80)
+Report Version:  7
+Analysis Tool:   /usr/bin/leaks
+
+Physical footprint:         4368K
+Physical footprint (peak):  4688K
+Idle exit:                  untracked
+----
+
+leaks Report Version: 4.0, multi-line stacks
+Process 46390: 239 nodes malloced for 58 KB
+Process 46390: 0 leaks for 0 total leaked bytes.
+

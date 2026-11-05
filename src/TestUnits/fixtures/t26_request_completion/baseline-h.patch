@@ -1,0 +1,63 @@
+--- a/CTPLoader/TraderSpi.h
++++ b/CTPLoader/TraderSpi.h
+@@ -13,6 +13,8 @@
+ #include <condition_variable>
+ #include <mutex>
+ #include <queue>
++#include <map>
++#include <chrono>
+ #include <boost/thread.hpp>
+ 
+ using namespace loader;
+@@ -68,8 +70,30 @@
+ 	void LoadFromJson();
+ 
+ 	void AppendQuery(const QueryTask& task);
++	void AppendFeeQuery(const QueryTask& task);
+ 	void RunQueryWorker();
+ 	bool IsQueryQueueEmpty();
++	enum class FeeQueryKind { Instrument, Commission, Margin };
++	struct FeeQueryState
++	{
++		FeeQueryKind kind;
++		bool callReturned = false;
++		bool terminal = false;
++		std::chrono::steady_clock::time_point deadline;
++		std::string code;
++		std::string altcode;
++		std::string product;
++		std::string exchange;
++	};
++	int BeginFeeQuery(FeeQueryKind kind, const Contract* contract = nullptr);
++	void FinishFeeSubmission(int requestId, int result);
++	bool AcceptFeeCallback(int requestId, FeeQueryKind kind, bool responseError);
++	bool FeeCallbackIdentityMatches(int requestId, const std::string& code, const std::string& exchange);
++	bool RememberFeeOrigin(int requestId, std::map<std::string, std::string>& origins, const std::string& code);
++	void FinishFeeCallback(int requestId, bool last);
++	void FinishFeeBatchIfReady();
++	bool FeeQueryExpiredLocked() const;
++	void RunFeeWatchdog();
+ 
+ private:
+ 	friend struct CTraderSpiQueueTestAccess;
+@@ -79,8 +103,20 @@
+ 	std::queue<QueryTask>	_queries;
+ 	std::mutex		_mtx;
+ 	std::condition_variable	_query_ready;
++	std::condition_variable _fee_watchdog_ready;
+ 	std::shared_ptr<boost::thread>	_worker;
++	std::shared_ptr<boost::thread> _fee_watchdog;
+ 	bool			_stopped;
+ 	// A failed fee/margin response remains a failure for this loader instance.
+ 	std::atomic<bool> _fee_response_failed{false};
++	// Guards the callback-owned maps and prevents their mutation after a batch
++	// has been claimed for publication. SDK calls never run under this lock.
++	std::mutex _fee_callback_mutex;
++	std::map<int, FeeQueryState> _fee_requests;
++	std::map<std::string, std::string> _fee_origins;
++	std::map<std::string, std::string> _margin_origins;
++	size_t _fee_queued = 0;
++	bool _fee_batch_active = false;
++	bool _fee_batch_sealed = false;
++	bool _fee_finish_claimed = false;
+ };

@@ -1,0 +1,51 @@
+ninja: Entering directory `green-asan'
+[1/27] Building CXX object CMakeFiles/c3_actday_ParserCTP.dir/c3_actday_test.cpp.o
+[2/27] Building CXX object CMakeFiles/c3_actday_ParserCTPMini.dir/c3_actday_test.cpp.o
+[3/27] Building CXX object CMakeFiles/c3_actday_ParserCTPMini.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/ParserCTPMini/ParserCTPMini.cpp.o
+[4/27] Building CXX object CMakeFiles/c3_actday_ParserCTP.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/ParserCTP/ParserCTP.cpp.o
+[5/27] Building CXX object CMakeFiles/c3_actday_ParserFemas.dir/c3_actday_test.cpp.o
+[6/27] Building CXX object CMakeFiles/c3_actday_ParserFemas.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/ParserFemas/ParserFemas.cpp.o
+[7/27] Building CXX object CMakeFiles/c3_ad_daybar.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtDataStorageAD/WtDataWriterAD.cpp.o
+[8/27] Building CXX object CMakeFiles/c3_ad_daybar.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtDataStorageAD/WtBtDtReaderAD.cpp.o
+[9/27] Building CXX object CMakeFiles/c3_ad_daybar.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtDataStorageAD/WtDataReaderAD.cpp.o
+[10/27] Building CXX object CMakeFiles/c3_ad_daybar.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtDataStorageAD/WtRdmDtReaderAD.cpp.o
+[11/27] Building CXX object CMakeFiles/c3_ad_daybar.dir/c3_ad_daybar_test.cpp.o
+[12/27] Building CXX object CMakeFiles/c3_cta_frozen.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/EventNotifier.cpp.o
+[13/27] Building CXX object CMakeFiles/c3_cta_frozen.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/ExecMocker.cpp.o
+[14/27] Building CXX object CMakeFiles/c3_cta_frozen.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HisDataMgr.cpp.o
+[15/27] Building CXX object CMakeFiles/c3_cta_frozen.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/CtaMocker.cpp.o
+[16/27] Building CXX object CMakeFiles/c3_cta_frozen.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.cpp.o
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.cpp:10:
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.h:985:11: warning: first argument in call to 'memset' is a pointer to non-trivially copyable type 'HftMocker::_OrderInfo' [-Wnontrivial-memcall]
+  985 |                         memset(this, 0, sizeof(_OrderInfo));
+      |                                ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.h:985:11: note: explicitly cast the pointer to silence this warning
+  985 |                         memset(this, 0, sizeof(_OrderInfo));
+      |                                ^
+      |                                (void*)
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.h:995:11: warning: first argument in call to 'memcpy' is a pointer to non-trivially copyable type 'HftMocker::_OrderInfo' [-Wnontrivial-memcall]
+  995 |                         memcpy(this, &rhs, sizeof(_OrderInfo));
+      |                                ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.h:995:11: note: explicitly cast the pointer to silence this warning
+  995 |                         memcpy(this, &rhs, sizeof(_OrderInfo));
+      |                                ^
+      |                                (void*)
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.h:1006:11: warning: first argument in call to 'memcpy' is a pointer to non-trivially copyable type 'HftMocker::_OrderInfo' [-Wnontrivial-memcall]
+ 1006 |                         memcpy(this, &rhs, sizeof(_OrderInfo));
+      |                                ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.h:1006:11: note: explicitly cast the pointer to silence this warning
+ 1006 |                         memcpy(this, &rhs, sizeof(_OrderInfo));
+      |                                ^
+      |                                (void*)
+3 warnings generated.
+[17/27] Building CXX object CMakeFiles/c3_cta_frozen.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/MatchEngine.cpp.o
+[18/27] Building CXX object CMakeFiles/c3_cta_frozen.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/WtHelper.cpp.o
+[19/27] Building CXX object CMakeFiles/c3_cta_frozen.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/SelMocker.cpp.o
+[20/27] Building CXX object CMakeFiles/c3_cta_frozen.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/UftMocker.cpp.o
+[21/27] Linking CXX executable c3_actday_ParserCTP
+[22/27] Linking CXX executable c3_actday_ParserCTPMini
+[23/27] Linking CXX executable c3_actday_ParserFemas
+[24/27] Linking CXX executable c3_ad_daybar
+[25/27] Building CXX object CMakeFiles/c3_cta_frozen.dir/c3_cta_frozen_test.cpp.o
+[26/27] Building CXX object CMakeFiles/c3_cta_frozen.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HisDataReplayer.cpp.o
+[27/27] Linking CXX executable c3_cta_frozen

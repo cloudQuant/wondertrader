@@ -6,6 +6,7 @@
  *  those 走 _cond_calc.wait() 与 while(!_resumed) 忙等，属阻塞路径，全部收入 DISABLED 用例。
  * 撮合成交通过公开虚函数 on_trade() 直接注入，避免依赖 CHisDataReplayer 的 tick 缓存。
  */
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -41,6 +42,13 @@ namespace
 		cInfo->setPriceTick(pxTick);
 		cInfo->setTradingMode(mode);
 		rp._bd_mgr._fullpid_map->add(cInfo->getFullPid(), cInfo, true);
+		// 卡13d（I03-NEW-080）：按实际成交合约计费，夹具须登记物理合约（与 p03 夹具同一模式）。
+		const char* raw = std::strcmp(exchg, "SHFE") == 0 ? "rb2405" : pid;
+		WTSContractInfo* contract = WTSContractInfo::create(raw, raw, exchg, pid);
+		contract->setCommInfo(cInfo);
+		contract->setVolScale(volScale);
+		contract->setDates(20200101, 20301231);
+		rp._bd_mgr._fullcode_map->add(contract->getFullCode(), contract, false);
 		return cInfo;
 	}
 
@@ -52,6 +60,18 @@ namespace
 		f._close = dClose;
 		f._close_today = dCloseToday;
 		f._min_fee = 0.0;
+		// 卡13d：计费只读 _fee_schedule；_fee_map 仅是旧镜像。按已设置的全部品种重建费率表。
+		std::string json = "{";
+		for (const auto& item : rp._fee_map)
+		{
+			if (json.size() > 1) json += ",";
+			json += "\"" + item.first + "\":{\"open\":" + std::to_string(item.second._open) +
+				",\"close\":" + std::to_string(item.second._close) +
+				",\"closetoday\":" + std::to_string(item.second._close_today) + ",\"byvolume\":true}";
+		}
+		json += "}";
+		std::string feeError;
+		ASSERT_TRUE(rp._fee_schedule.loadJson(json, feeError)) << feeError;
 	}
 }
 
@@ -61,7 +81,7 @@ protected:
 	HisDataReplayer _rp;
 	void SetUp() override
 	{
-		auto dir = std::filesystem::temp_directory_path() / "p08_hft_order_cancel";
+		auto dir = std::filesystem::temp_directory_path() / ("p08_hft_order_cancel_" + std::to_string(static_cast<long>(::getpid())));
 		std::filesystem::create_directories(dir);
 		WtHelper::setOutputDir(dir.string().c_str());
 
@@ -80,7 +100,7 @@ protected:
 	{
 		WtHelper::setOutputDir("");
 		std::error_code ec;
-		std::filesystem::remove_all(std::filesystem::temp_directory_path() / "p08_hft_order_cancel", ec);
+		std::filesystem::remove_all(std::filesystem::temp_directory_path() / ("p08_hft_order_cancel_" + std::to_string(static_cast<long>(::getpid()))), ec);
 	}
 };
 

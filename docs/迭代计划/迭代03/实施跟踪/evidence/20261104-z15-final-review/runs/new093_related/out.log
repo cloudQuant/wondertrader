@@ -1,0 +1,132 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = MatchEngineTest.*:R43MatchEngineFlowTest.*:R20ExecMocker.*
+[==========] Running 48 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 20 tests from MatchEngineTest
+[ RUN      ] MatchEngineTest.initIgnoresNullConfig
+[       OK ] MatchEngineTest.initIgnoresNullConfig (0 ms)
+[ RUN      ] MatchEngineTest.buySellWithoutCachedTickReturnEmpty
+[       OK ] MatchEngineTest.buySellWithoutCachedTickReturnEmpty (0 ms)
+[ RUN      ] MatchEngineTest.TickCacheReleasedOnDestruction
+[       OK ] MatchEngineTest.TickCacheReleasedOnDestruction (4 ms)
+[ RUN      ] MatchEngineTest.passiveBuyQueuesBehindBookAndFillsInTwoSteps
+[       OK ] MatchEngineTest.passiveBuyQueuesBehindBookAndFillsInTwoSteps (1 ms)
+[ RUN      ] MatchEngineTest.passiveBuyPartialFillThenBetterPriceFill
+[       OK ] MatchEngineTest.passiveBuyPartialFillThenBetterPriceFill (0 ms)
+[ RUN      ] MatchEngineTest.positiveBuyMatchesAtAskPrice
+[       OK ] MatchEngineTest.positiveBuyMatchesAtAskPrice (0 ms)
+[ RUN      ] MatchEngineTest.passiveSellQueueThenSweep
+[       OK ] MatchEngineTest.passiveSellQueueThenSweep (0 ms)
+[ RUN      ] MatchEngineTest.positiveSellMatchesAtBidPrice
+[       OK ] MatchEngineTest.positiveSellMatchesAtBidPrice (0 ms)
+[ RUN      ] MatchEngineTest.zeroVolumeTickSkipsMatching
+[       OK ] MatchEngineTest.zeroVolumeTickSkipsMatching (0 ms)
+[ RUN      ] MatchEngineTest.zeroAskQuantityDoesNotCreateSyntheticBuyFill
+[       OK ] MatchEngineTest.zeroAskQuantityDoesNotCreateSyntheticBuyFill (0 ms)
+[ RUN      ] MatchEngineTest.zeroBidQuantityDoesNotCreateSyntheticSellFill
+[       OK ] MatchEngineTest.zeroBidQuantityDoesNotCreateSyntheticSellFill (0 ms)
+[ RUN      ] MatchEngineTest.cancelByIdMarksOrderAndReportsCancellation
+[       OK ] MatchEngineTest.cancelByIdMarksOrderAndReportsCancellation (0 ms)
+[ RUN      ] MatchEngineTest.cancelBySideCollectsActiveOrdersOnly
+[       OK ] MatchEngineTest.cancelBySideCollectsActiveOrdersOnly (0 ms)
+[ RUN      ] MatchEngineTest.clearDropsAllOrders
+[       OK ] MatchEngineTest.clearDropsAllOrders (0 ms)
+[ RUN      ] MatchEngineTest.updateLobHandlesEmptyBookWithoutCrash
+[       OK ] MatchEngineTest.updateLobHandlesEmptyBookWithoutCrash (0 ms)
+[ RUN      ] MatchEngineTest.queueReductionAppliesCancelRate
+[       OK ] MatchEngineTest.queueReductionAppliesCancelRate (0 ms)
+[ RUN      ] MatchEngineTest.cancelByCodeAndSideCancelsOnlyMatchingOrdersWhenQuantityIsZero
+[       OK ] MatchEngineTest.cancelByCodeAndSideCancelsOnlyMatchingOrdersWhenQuantityIsZero (0 ms)
+[ RUN      ] MatchEngineTest.cancelPositiveQuantityUsesOldestOrdersUntilRequestedQuantityIsReached
+[       OK ] MatchEngineTest.cancelPositiveQuantityUsesOldestOrdersUntilRequestedQuantityIsReached (0 ms)
+[ RUN      ] MatchEngineTest.cancelPositiveQuantityKeepsTimeOrderAfterMatcherErasesEarlierOrder
+[       OK ] MatchEngineTest.cancelPositiveQuantityKeepsTimeOrderAfterMatcherErasesEarlierOrder (0 ms)
+[ RUN      ] MatchEngineTest.ticksActivateAndMatchOnlyOrdersForTheirOwnContract
+[       OK ] MatchEngineTest.ticksActivateAndMatchOnlyOrdersForTheirOwnContract (0 ms)
+[----------] 20 tests from MatchEngineTest (7 ms total)
+
+[----------] 20 tests from R43MatchEngineFlowTest
+[ RUN      ] R43MatchEngineFlowTest.emptyBookRejectsWithoutSideEffectsAndLaterQuoteAllowsOrders
+[       OK ] R43MatchEngineFlowTest.emptyBookRejectsWithoutSideEffectsAndLaterQuoteAllowsOrders (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.passiveBuyBelowLimitFillsRemainingQty
+[       OK ] R43MatchEngineFlowTest.passiveBuyBelowLimitFillsRemainingQty (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.activeBuyWithZeroAskQtyFillsOneLot
+[       OK ] R43MatchEngineFlowTest.activeBuyWithZeroAskQtyFillsOneLot (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.activeSellWithZeroBidQtyFillsOneLot
+[       OK ] R43MatchEngineFlowTest.activeSellWithZeroBidQtyFillsOneLot (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.zeroDepthFallbackIsScopedToTickContract
+[       OK ] R43MatchEngineFlowTest.zeroDepthFallbackIsScopedToTickContract (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.cancelByQtyWalksOrdersAndDecrementsLeft
+[       OK ] R43MatchEngineFlowTest.cancelByQtyWalksOrdersAndDecrementsLeft (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.cancelBySideSkipsInactiveOrders
+[       OK ] R43MatchEngineFlowTest.cancelBySideSkipsInactiveOrders (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.cancelByIdAcceptsAnUnactivatedOrderOnlyOnce
+[       OK ] R43MatchEngineFlowTest.cancelByIdAcceptsAnUnactivatedOrderOnlyOnce (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.oneSidedBidIsSafeAndDoesNotCreateAFillWithoutAnAsk
+[       OK ] R43MatchEngineFlowTest.oneSidedBidIsSafeAndDoesNotCreateAFillWithoutAnAsk (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.oneSidedAskAndEmptyQuoteSidesAreIteratorSafe
+[       OK ] R43MatchEngineFlowTest.oneSidedAskAndEmptyQuoteSidesAreIteratorSafe (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.bidAndAskDepthUseTheirOwnQuantities
+[       OK ] R43MatchEngineFlowTest.bidAndAskDepthUseTheirOwnQuantities (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.orderSnapshotsPreserveGrossStateAndDisappearAfterTerminalReport
+[       OK ] R43MatchEngineFlowTest.orderSnapshotsPreserveGrossStateAndDisappearAfterTerminalReport (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.ticksActivateAndFillOnlyOrdersForTheirOwnCode
+[       OK ] R43MatchEngineFlowTest.ticksActivateAndFillOnlyOrdersForTheirOwnCode (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.cancelPendingOrderWaitsForItsOwnCodeTick
+[       OK ] R43MatchEngineFlowTest.cancelPendingOrderWaitsForItsOwnCodeTick (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.codeScopedCancelDoesNotMarkAnotherContractsOrder
+[       OK ] R43MatchEngineFlowTest.codeScopedCancelDoesNotMarkAnotherContractsOrder (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.callbacksCanInsertOrdersDuringActivationAndMatching
+[       OK ] R43MatchEngineFlowTest.callbacksCanInsertOrdersDuringActivationAndMatching (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.cancelCallbackCanInsertOrdersWithoutInvalidatingTraversal
+[       OK ] R43MatchEngineFlowTest.cancelCallbackCanInsertOrdersWithoutInvalidatingTraversal (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.tradeCallbackCanCancelCurrentOrderAndDefersCancelReport
+[       OK ] R43MatchEngineFlowTest.tradeCallbackCanCancelCurrentOrderAndDefersCancelReport (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.cancelReportCallbackCanRepeatCancelAndClearMatcher
+[       OK ] R43MatchEngineFlowTest.cancelReportCallbackCanRepeatCancelAndClearMatcher (0 ms)
+[ RUN      ] R43MatchEngineFlowTest.entrustCallbackCanCancelCurrentOrderWithoutReactivatingIt
+[       OK ] R43MatchEngineFlowTest.entrustCallbackCanCancelCurrentOrderWithoutReactivatingIt (0 ms)
+[----------] 20 tests from R43MatchEngineFlowTest (1 ms total)
+
+[----------] 8 tests from R20ExecMocker
+[ RUN      ] R20ExecMocker.DefaultsAfterCtor
+[       OK ] R20ExecMocker.DefaultsAfterCtor (1 ms)
+[ RUN      ] R20ExecMocker.CurTimeDerivedFromReplayerClock
+[       OK ] R20ExecMocker.CurTimeDerivedFromReplayerClock (0 ms)
+[ DISABLED ] R20ExecMocker.DISABLED_TickSwapReleasesPreviousTick
+[ RUN      ] R20ExecMocker.BuySellRefusedBeforeAnyTick
+[       OK ] R20ExecMocker.BuySellRefusedBeforeAnyTick (0 ms)
+[ DISABLED ] R20ExecMocker.DISABLED_BuyAfterTickAccumulatesUndone
+[ DISABLED ] R20ExecMocker.DISABLED_SellDecrementsUndone
+[ RUN      ] R20ExecMocker.CancelByIdDoesNotRestoreUndoneTwice
+/tmp/wt-i03-zreview-20261104/snap/src/TestUnits/coverage/p08_btcore_mockers3/r20_exec_mocker_test.cpp:209: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  rb.size()
+    Which is: 0
+
+[  FAILED  ] R20ExecMocker.CancelByIdDoesNotRestoreUndoneTwice (0 ms)
+[ DISABLED ] R20ExecMocker.DISABLED_CancelByCodeSkipsUnfiredOrders
+[ DISABLED ] R20ExecMocker.DISABLED_SessionEndClearsMatcherAndUndone
+[ RUN      ] R20ExecMocker.NoopEventsAndWriteLogAreSideEffectFree
+[       OK ] R20ExecMocker.NoopEventsAndWriteLogAreSideEffectFree (0 ms)
+[ RUN      ] R20ExecMocker.InitFailsFastWhenModuleMissing
+[       OK ] R20ExecMocker.InitFailsFastWhenModuleMissing (0 ms)
+[ RUN      ] R20ExecMocker.ReplayDoneWritesEmptyTradeCsv
+[       OK ] R20ExecMocker.ReplayDoneWritesEmptyTradeCsv (0 ms)
+[ RUN      ] R20ExecMocker.GetTicksNullWhenTickFeedDisabled
+[       OK ] R20ExecMocker.GetTicksNullWhenTickFeedDisabled (0 ms)
+[ DISABLED ] R20ExecMocker.DISABLED_ExecUnitNullDerefFamily
+[ DISABLED ] R20ExecMocker.DISABLED_FireOrdersSinkNullAfterPendingOrderAndSecondTick
+[----------] 8 tests from R20ExecMocker (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 48 tests from 3 test suites ran. (12 ms total)
+[  PASSED  ] 47 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R20ExecMocker.CancelByIdDoesNotRestoreUndoneTwice
+
+ 1 FAILED TEST
+  YOU HAVE 7 DISABLED TESTS
+

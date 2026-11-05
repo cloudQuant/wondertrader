@@ -10,6 +10,7 @@
  */
 #pragma once
 #include "PorterDefs.h"
+#include "../Includes/ReplayStatusV1.h"
 
 
 #ifdef __cplusplus
@@ -173,9 +174,9 @@ extern "C"
 	 * @brief 初始化选股策略模拟器
 	 * @details 创建并初始化一个选股策略的模拟器实例
 	 * @param name 策略名称
-	 * @param date 交易日期，格式YYYYMMDD
-	 * @param time 交易时间，格式HHMMSS
-	 * @param period 周期类型，如"d1"表示日线
+	 * @param date 调度日（决策 K27=A）：d/min 忽略；w 为星期 0..6；m 为每月第几日 1..31；y 为 MMDD
+	 * @param time 调度时间（决策 K27=A）：HHMM（00:00..23:59）；min 周期为 1..1440 的间隔分钟数
+	 * @param period 周期类型：d/w/m/y/min（d1/w1/m1 等别名不受理）
 	 * @param trdtpl 交易模板，默认为"CHINA"
 	 * @param session 交易时段，默认为"TRADING"
 	 * @param slippage 滑点设置，默认为0
@@ -186,11 +187,25 @@ extern "C"
 
 	/**
 	 * @brief 运行回测
-	 * @details 启动回测引擎并执行回测过程
+	 * @details 启动回测引擎并执行回测过程。EVENT_BACKTEST_END 仅提示回放终止，
+	 *          调用 get_backtest_status_v1 查询结果并检查 FINAL 标志。
 	 * @param bNeedDump 是否需要输出回测结果
 	 * @param bAsync 是否异步运行，true表示异步运行，false表示同步运行
 	 */
 	EXPORT_FLAG	void		run_backtest(bool bNeedDump, bool bAsync);
+
+	/**
+	 * Copy a version 1 replay status into caller-owned storage. Before calling,
+	 * set struct_size to the available byte count and abi_version to 1. The
+	 * storage must be at least sizeof(WtReplayStatusV1); larger buffers are
+	 * accepted and bytes beyond V1 are left unchanged. Returns 0 on success,
+	 * -1 on invalid arguments/version, or -2 if status retrieval throws.
+	 * EVENT_BACKTEST_END is a termination notification. During this callback the
+	 * current generation's state is provisional and FINAL is not set; a later
+	 * snapshot with WT_REPLAY_STATUS_FINAL set is stable for that generation.
+	 * FINAL does not indicate that the runner or its plugins may be destroyed.
+	 */
+	EXPORT_FLAG int32_t get_backtest_status_v1(WtReplayStatusV1* status);
 
 	/**
 	 * @brief 写入日志

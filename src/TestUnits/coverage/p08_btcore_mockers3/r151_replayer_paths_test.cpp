@@ -73,7 +73,7 @@ TEST_F(R151ReplayerPaths, AutoMainKeyFromNonMainSlice)
 	// isMain=false：只装载/缓存，不设置 _main_key
 	WTSKlineSlice* slice = _rp.get_kline_slice(kRb, "d", 10);
 	ASSERT_NE(nullptr, slice);
-	EXPECT_GT(slice->size(), 0u);
+	EXPECT_GT(slice->size(), 0);
 	EXPECT_EQ(20200102u, slice->at(-1)->date);
 	slice->release();
 
@@ -221,7 +221,7 @@ TEST_F(R151ReplayerPaths, CsvLoadReportsEveryThousandBars)
 
 	WTSKlineSlice* slice = _rp.get_kline_slice(kRb, "m", 5, 1, true);
 	ASSERT_NE(nullptr, slice);
-	EXPECT_GT(slice->size(), 0u);
+	EXPECT_GT(slice->size(), 0);
 	slice->release();
 
 	// 装载过程会按约定生成 his/min1 目录

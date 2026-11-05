@@ -96,7 +96,8 @@ void ExpHftMocker::on_trans_updated(const char* stdCode, WTSTransData* newTrans)
 
 void ExpHftMocker::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag)
 {
-	HftMocker::on_trade(localid, stdCode, isBuy, vol, price, userTag);
+	if (!apply_trade(localid, stdCode, isBuy, vol, price, userTag))
+		return;
 
 	getRunner().hft_on_trade(_context_id, localid, stdCode, isBuy, vol, price, userTag);
 }

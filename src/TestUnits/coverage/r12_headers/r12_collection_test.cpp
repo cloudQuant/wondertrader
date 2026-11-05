@@ -424,24 +424,32 @@ TEST_F(R12Collection, map_find_bounds_and_erase_iterator)
 	EXPECT_EQ(map->lower_bound(20)->first, 30);
 	EXPECT_EQ(map->upper_bound(30)->first, 50);
 	EXPECT_TRUE(map->lower_bound(60) == map->end());
-	// 迭代器删除：只移除，元素引用计数不变
-	uint32_t before = rc(i5);
+	// 卡12 12a=A（2026-11-03 裁定）：erase 与 remove/clear 一致，释放容器持有的那份引用。
+	// 旧 oracle 期待“引用计数不变”，会让容器那份引用在节点摘除后无人释放（BUG-R53-002）。
+	// 迭代器删除：2（调用方+容器）→ 1（调用方）
+	EXPECT_EQ(rc(i5), 2u);
 	map->erase(map->find(50));
 	EXPECT_EQ(map->size(), 2u);
-	EXPECT_EQ(rc(i5), before);
+	EXPECT_EQ(rc(i5), 1u);
 	// const 迭代器删除分支
 	const WTSMap<int32_t>* cmap = map;
 	WTSMap<int32_t>::ConstIterator cit = cmap->find(30);
 	ASSERT_TRUE(cit != cmap->end());
 	map->erase(cit);
 	EXPECT_EQ(map->size(), 1u);
+	EXPECT_EQ(rc(i3), 1u);
 	// 按键删除
 	map->erase(10);
 	EXPECT_EQ(map->size(), 0u);
+	EXPECT_EQ(rc(i1), 1u);
+	EXPECT_EQ(Item::s_dtor, 0);
 	i1->release();
 	i3->release();
 	i5->release();
+	// 调用方各释放一次后三者恰好析构，证明无残留容器引用
+	EXPECT_EQ(Item::s_dtor, 3);
 	map->release();
+	EXPECT_EQ(Item::s_dtor, 3);
 }
 
 TEST_F(R12Collection, hashmap_string_key_add_get_remove)
@@ -689,14 +697,17 @@ TEST_F(R12Collection, stack_lifo_top_pop_clear)
 	// top 不改变引用计数
 	EXPECT_EQ(st->top(), i1);
 	EXPECT_EQ(rc(i1), 2u);
-	// pop 出栈即 release 一次，返回裸指针由调用方持有
+	// 卡12 12b=C（2026-11-03 裁定）：pop 返回拥有引用——交出栈持有的那份，不在返回前 release。
+	// 旧 oracle 期待 pop 后计数降为 1，这正是 push(false)+pop 返回悬空指针的根因（BUG-R12-14）。
 	WTSObject* p = st->pop();
 	EXPECT_EQ(p, i1);
-	EXPECT_EQ(rc(i1), 1u);
+	EXPECT_EQ(rc(i1), 2u);
 	EXPECT_EQ(st->size(), 1u);
+	p->release();
+	EXPECT_EQ(rc(i1), 1u);
 	i1->release();
 	EXPECT_EQ(Item::s_dtor, 1);
-	// bAutoRetain=false 入栈不引用
+	// 旧入口 bAutoRetain=false：调用方唯一引用转交给栈，栈不 retain
 	Item* i2 = newItem(3);
 	st->push(i2, false);
 	EXPECT_EQ(rc(i2), 1u);
@@ -724,4 +735,55 @@ TEST_F(R12Collection, stack_release_destructor_clears_elements)
 	EXPECT_EQ(Item::s_dtor, 0);
 	i0->release();
 	EXPECT_EQ(Item::s_dtor, 1);
+}
+
+// BUG-R12-14 / 卡12 12b=C：旧 push(obj,false) 按所有权转移兼容，pop 交还该引用。
+// 旧实现 pop 先 release 再返回，唯一引用转交后返回的是已析构对象（UAF）。
+TEST_F(R12Collection, stack_push_false_pop_returns_transferred_reference)
+{
+	WTSStack* st = WTSStack::create();
+	Item* i0 = newItem(7);
+	st->push(i0, false);
+	EXPECT_EQ(rc(i0), 1u);
+	WTSObject* p = st->pop();
+	ASSERT_EQ(p, i0);
+	EXPECT_EQ(Item::s_dtor, 0);
+	EXPECT_EQ(rc(p), 1u);
+	EXPECT_EQ(static_cast<Item*>(p)->tag(), 7);
+	st->release();
+	EXPECT_EQ(Item::s_dtor, 0);
+	p->release();
+	EXPECT_EQ(Item::s_dtor, 1);
+}
+
+TEST_F(R12Collection, stack_explicit_owned_transferred_borrowed_matrix)
+{
+	WTSStack* st = WTSStack::create();
+	Item* owned = newItem(1);
+	Item* borrowed = newItem(2);
+	Item* moved = newItem(3);
+	st->pushOwned(owned);
+	st->pushTransferred(moved);
+	st->pushBorrowed(borrowed);
+	EXPECT_EQ(rc(owned), 2u);
+	EXPECT_EQ(rc(moved), 1u);
+	EXPECT_EQ(rc(borrowed), 1u);
+	EXPECT_TRUE(st->isTopBorrowed());
+	// 借用元素 pop：retain 后返回拥有引用
+	WTSObject* p = st->pop();
+	EXPECT_EQ(p, borrowed);
+	EXPECT_EQ(rc(borrowed), 2u);
+	p->release();
+	EXPECT_EQ(rc(borrowed), 1u);
+	EXPECT_FALSE(st->isTopBorrowed());
+	// 借用元素 clear/析构不消费外部引用；拥有/转移元素各释放一次
+	st->pushBorrowed(borrowed);
+	st->pushBorrowed(borrowed);
+	st->release();
+	EXPECT_EQ(rc(owned), 1u);
+	EXPECT_EQ(rc(borrowed), 1u);
+	EXPECT_EQ(Item::s_dtor, 1);	// moved 的唯一引用由栈析构释放
+	owned->release();
+	borrowed->release();
+	EXPECT_EQ(Item::s_dtor, 3);
 }

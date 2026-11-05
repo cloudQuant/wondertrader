@@ -33,6 +33,7 @@ USING_NS_WTP;
 
 #ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
 extern "C" void wt_dt_helper_fail_next_close_for_test();
+extern "C" void wt_dt_helper_fail_next_csv_read_close_for_test();
 #endif
 
 namespace {
@@ -740,17 +741,34 @@ TEST_F(L05HelperBarTest, DumpBarsWritesCsvAndSkipsOthers)
 		ignore << "whatever";
 	}
 	std::filesystem::create_directories(_root / "sub_dir");
+	{
+		std::string malformed(sizeof(HisKlineBlock) + 1, '\0');
+		HisKlineBlock* header = reinterpret_cast<HisKlineBlock*>(&malformed[0]);
+		memcpy(header->_blk_flag, BLK_FLAG, FLAG_SIZE);
+		header->_type = BT_HIS_Day;
+		header->_version = BLOCK_VERSION_RAW_V2;
+		std::ofstream out(file("malformed.dsb"), std::ios::binary);
+		out.write(malformed.data(), static_cast<std::streamsize>(malformed.size()));
+	}
 
 	const std::string csvDir = file("csv_out");
 	dump_bars(file("").c_str(), csvDir.c_str(), "", log_cb);
 	// srcFolder 用 standardisePath 归一化，直接传根目录
 	dump_bars(_root.string().c_str(), csvDir.c_str(), "", log_cb);
-	const std::string brokenHeader = "文件" + file("broken.dsb") + "头部校验失败";
-	const std::string secondBrokenHeader = "文件" + file("second_broken.dsb") + "头部校验失败";
-	const std::string nonBarType = "文件" + file("tick_like.dsb") + "不是K线数据，跳过转换";
+	// BUG-L05-002 CSV 数据块识别（2026-11-03，见 fixtures/i03_csv_block_type_20261103）：解码前统一校验
+	// 文件标识/支持版本/K线类型/载荷长度，任一不符输出 "Invalid data block header: <文件>" 并跳过。
+	// 过短文件、非 K 线类型（tick 块）与载荷长度不整除的块都由该诊断报告，且必须带出对应文件名。
+	const std::string invalidHeader = "Invalid data block header: ";
+	const std::string brokenHeader = invalidHeader + file("broken.dsb");
+	const std::string secondBrokenHeader = invalidHeader + file("second_broken.dsb");
+	const std::string nonBarType = invalidHeader + file("tick_like.dsb");
+	const std::string malformedPayload = invalidHeader + file("malformed.dsb");
 	EXPECT_TRUE(any_log_has(brokenHeader.c_str())) << brokenHeader;
 	EXPECT_TRUE(any_log_has(secondBrokenHeader.c_str())) << secondBrokenHeader;
 	EXPECT_TRUE(any_log_has(nonBarType.c_str())) << nonBarType;
+	EXPECT_TRUE(any_log_has(malformedPayload.c_str())) << malformedPayload;
+	// 合法 K 线文件不得被误报
+	EXPECT_FALSE(any_log_has((invalidHeader + file("SHFE.rb2010.dsb")).c_str()));
 
 	const std::string csv = (std::filesystem::path(csvDir) / "SHFE.rb2010.csv").string();
 	ASSERT_TRUE(std::filesystem::exists(csv));
@@ -766,8 +784,186 @@ TEST_F(L05HelperBarTest, DumpBarsWritesCsvAndSkipsOthers)
 	}
 	EXPECT_EQ(dataLines, 3);
 	EXPECT_EQ(line.find("3002"), std::string::npos);
-	EXPECT_TRUE(any_log_has("导出完成"));
+	EXPECT_FALSE(any_log_has("全部导出完成"));
 }
+
+TEST_F(L05HelperBarTest, DumpBarsValidOutputReportsBatchSuccess)
+{
+	std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 3000) };
+	ASSERT_TRUE(store_bars(file("bar.dsb").c_str(), bars.data(), 1, "d", NULL));
+	std::vector<WTSTickStruct> ticks(1);
+	std::memset(ticks.data(), 0, sizeof(WTSTickStruct));
+	ASSERT_TRUE(store_ticks(file("not_bar.dsb").c_str(), ticks.data(), 1, NULL));
+	log_sink().clear();
+	dump_bars(_root.string().c_str(), file("csv").c_str(), "", log_cb);
+	EXPECT_TRUE(any_log_has("写入完成"));
+	// CSV 数据块识别（2026-11-03）：非 K 线类型改为输入错误（部分失败），带文件名的诊断，
+	// 且批次不再报告"全部导出完成"；有效文件仍照常导出。
+	const std::string nonBar = "Invalid data block header: " + file("not_bar.dsb");
+	EXPECT_TRUE(any_log_has(nonBar.c_str())) << nonBar;
+	EXPECT_FALSE(any_log_has("全部导出完成"));
+
+	// 只含有效 K 线输出的批次报告整体成功（本用例原意）。
+	ASSERT_TRUE(std::filesystem::remove(file("not_bar.dsb")));
+	log_sink().clear();
+	dump_bars(_root.string().c_str(), file("csv").c_str(), "", log_cb);
+	EXPECT_TRUE(any_log_has("写入完成"));
+	EXPECT_FALSE(any_log_has("Invalid data block header"));
+	EXPECT_TRUE(any_log_has("全部导出完成"));
+}
+
+TEST_F(L05HelperBarTest, DumpBarsReportsOneOutputFailureAndContinues)
+{
+	std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 3000) };
+	ASSERT_TRUE(store_bars(file("bad.dsb").c_str(), bars.data(), 1, "d", NULL));
+	ASSERT_TRUE(store_bars(file("good.dsb").c_str(), bars.data(), 1, "d", NULL));
+	const auto output = _root / "csv";
+	ASSERT_TRUE(std::filesystem::create_directories(output / "bad.csv"));
+	log_sink().clear();
+	EXPECT_NO_THROW(dump_bars(_root.string().c_str(), output.string().c_str(), "", log_cb));
+	const std::string bad = (output / "bad.csv").string();
+	const std::string good = (output / "good.csv").string();
+	EXPECT_TRUE(any_log_has(bad.c_str()));
+	EXPECT_TRUE(any_log_has("创建失败"));
+	EXPECT_FALSE(any_log_has((bad + "写入完成").c_str()));
+	EXPECT_TRUE(any_log_has((good + "写入完成").c_str()));
+	EXPECT_FALSE(any_log_has("全部导出完成"));
+	std::ifstream input(good);
+	std::string header, row;
+	ASSERT_TRUE(std::getline(input, header));
+	ASSERT_TRUE(std::getline(input, row));
+	EXPECT_NE(row.find("3000"), std::string::npos);
+}
+
+TEST_F(L05HelperBarTest, DumpBarsReportsShortWriteWithoutSuccess)
+{
+	std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 3000) };
+	ASSERT_TRUE(store_bars(file("bar.dsb").c_str(), bars.data(), 1, "d", NULL));
+	const auto output = _root / "csv";
+	ASSERT_TRUE(std::filesystem::create_directories(output));
+	log_sink().clear();
+	{
+		ScopedFileSizeLimit limit;
+		ASSERT_TRUE(limit.active());
+		EXPECT_NO_THROW(dump_bars(_root.string().c_str(), output.string().c_str(), "", log_cb));
+	}
+	// Buffered output may surface a short write only when close flushes it.
+	EXPECT_TRUE(any_log_has("写入失败") || any_log_has("关闭失败"));
+	EXPECT_FALSE(any_log_has("写入完成"));
+	EXPECT_FALSE(any_log_has("全部导出完成"));
+}
+
+TEST_F(L05HelperBarTest, DumpBarsReportsOutputDirectoryCreationFailure)
+{
+	std::ofstream blocker(file("not_directory"));
+	blocker << "file";
+	blocker.close();
+	const auto output = _root / "not_directory" / "csv";
+	EXPECT_NO_THROW(dump_bars(_root.string().c_str(), output.string().c_str(), "", log_cb));
+	EXPECT_TRUE(any_log_has("目录"));
+	EXPECT_TRUE(any_log_has("创建失败"));
+	EXPECT_FALSE(any_log_has("全部导出完成"));
+	log_sink().clear();
+	EXPECT_NO_THROW(dump_bars(_root.string().c_str(), file("not_directory").c_str(), "", log_cb));
+	EXPECT_TRUE(any_log_has("创建失败"));
+	EXPECT_FALSE(any_log_has("全部导出完成"));
+}
+
+TEST_F(L05HelperBarTest, DumpBarsReportsInputReadFailure)
+{
+	if (::geteuid() == 0)
+		GTEST_SKIP() << "root can bypass file permissions";
+	std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 3000) };
+	ASSERT_TRUE(store_bars(file("unreadable.dsb").c_str(), bars.data(), 1, "d", NULL));
+	std::error_code ec;
+	std::filesystem::permissions(file("unreadable.dsb"), std::filesystem::perms::none,
+		std::filesystem::perm_options::replace, ec);
+	ASSERT_FALSE(ec);
+	log_sink().clear();
+	EXPECT_NO_THROW(dump_bars(_root.string().c_str(), file("csv").c_str(), "", log_cb));
+	EXPECT_TRUE(any_log_has("读取数据文件"));
+	EXPECT_TRUE(any_log_has("失败:"));
+	EXPECT_FALSE(any_log_has("全部导出完成"));
+}
+
+TEST_F(L05HelperBarTest, DumpBarsOverwritesWriteOnlyOutput)
+{
+	if (::geteuid() == 0)
+		GTEST_SKIP() << "root can bypass file permissions";
+	std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 3000) };
+	ASSERT_TRUE(store_bars(file("bar.dsb").c_str(), bars.data(), 1, "d", NULL));
+	const auto output = _root / "csv";
+	ASSERT_TRUE(std::filesystem::create_directories(output));
+	const auto destination = output / "bar.csv";
+	std::ofstream(destination.string()) << "old";
+	std::error_code ec;
+	std::filesystem::permissions(destination, std::filesystem::perms::owner_write,
+		std::filesystem::perm_options::replace, ec);
+	ASSERT_FALSE(ec);
+	log_sink().clear();
+	dump_bars(_root.string().c_str(), output.string().c_str(), "", log_cb);
+	EXPECT_TRUE(any_log_has("写入完成"));
+	EXPECT_TRUE(any_log_has("全部导出完成"));
+	std::filesystem::permissions(destination, std::filesystem::perms::owner_read,
+		std::filesystem::perm_options::add, ec);
+	ASSERT_FALSE(ec);
+	std::ifstream input(destination);
+	std::string header, row;
+	ASSERT_TRUE(std::getline(input, header));
+	ASSERT_TRUE(std::getline(input, row));
+	EXPECT_NE(row.find("3000"), std::string::npos);
+}
+
+TEST_F(L05HelperBarTest, DumpBarsReportsUnenumerableSource)
+{
+	if (::geteuid() == 0)
+		GTEST_SKIP() << "root can bypass directory permissions";
+	const auto input = _root / "input";
+	ASSERT_TRUE(std::filesystem::create_directories(input));
+	std::error_code ec;
+	std::filesystem::permissions(input, std::filesystem::perms::none,
+		std::filesystem::perm_options::replace, ec);
+	ASSERT_FALSE(ec);
+	log_sink().clear();
+	EXPECT_NO_THROW(dump_bars(input.string().c_str(), file("csv").c_str(), "", log_cb));
+	EXPECT_TRUE(any_log_has("读取失败"));
+	EXPECT_FALSE(any_log_has("全部导出完成"));
+	std::filesystem::permissions(input, std::filesystem::perms::owner_all,
+		std::filesystem::perm_options::replace, ec);
+	ASSERT_FALSE(ec);
+	std::ofstream(file("source_file")) << "file";
+	log_sink().clear();
+	EXPECT_NO_THROW(dump_bars(file("source_file").c_str(), file("csv").c_str(), "", log_cb));
+	EXPECT_FALSE(any_log_has("全部导出完成"));
+}
+
+#ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
+TEST_F(L05HelperBarTest, DumpBarsReportsInputCloseFailureWithoutSuccess)
+{
+    std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 3000) };
+    ASSERT_TRUE(store_bars(file("bar.dsb").c_str(), bars.data(), 1, "d", NULL));
+    log_sink().clear();
+    wt_dt_helper_fail_next_csv_read_close_for_test();
+    dump_bars(_root.string().c_str(), file("csv").c_str(), "", log_cb);
+    EXPECT_TRUE(any_log_has("读取数据文件"));
+    EXPECT_TRUE(any_log_has("Failed to close input file"));
+    EXPECT_FALSE(any_log_has("写入完成"));
+    EXPECT_FALSE(any_log_has("全部导出完成"));
+    EXPECT_FALSE(std::filesystem::exists(_root / "csv" / "bar.csv"));
+}
+
+TEST_F(L05HelperBarTest, DumpBarsReportsCloseFailureWithoutSuccess)
+{
+	std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 3000) };
+	ASSERT_TRUE(store_bars(file("bar.dsb").c_str(), bars.data(), 1, "d", NULL));
+	log_sink().clear();
+	wt_dt_helper_fail_next_close_for_test();
+	dump_bars(_root.string().c_str(), file("csv").c_str(), "", log_cb);
+	EXPECT_TRUE(any_log_has("关闭失败"));
+	EXPECT_FALSE(any_log_has("写入完成"));
+	EXPECT_FALSE(any_log_has("全部导出完成"));
+}
+#endif
 
 TEST_F(L05HelperBarTest, TransCsvBarsMissingSourceFolder)
 {

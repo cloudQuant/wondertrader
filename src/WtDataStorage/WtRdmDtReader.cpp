@@ -1,4 +1,5 @@
 ﻿#include "WtRdmDtReader.h"
+#include "RTBlockPublish.hpp"
 
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/TimeUtils.hpp"
@@ -10,15 +11,39 @@
 #include "../Includes/IHotMgr.h"
 #include "../Includes/WTSDataDef.hpp"
 #include "../Includes/WTSSessionInfo.hpp"
+#include "../Includes/DateMappingClient.hpp"
 
 #include "../WTSUtils/WTSCmpHelper.hpp"
+#include "../WTSUtils/WTSCmpBudgetConfig.hpp"
 #include "../WTSUtils/WTSCfgLoader.h"
 
+#include <cstring>
 #include <exception>
 #include <memory>
 #include <stdexcept>
+#include <type_traits>
+#include <vector>
 #include <rapidjson/document.h>
 namespace rj = rapidjson;
+
+// 卡11=B：历史块缓存槽位，按需创建共享 owner
+template <typename Map>
+static typename Map::mapped_type::element_type& his_slot(Map& m, const std::string& key)
+{
+	typename Map::mapped_type& ptr = m[key];
+	if (!ptr)
+		ptr = std::make_shared<typename Map::mapped_type::element_type>();
+	return *ptr;
+}
+
+template <typename Map>
+static wtp::WTSSliceOwnerPtr his_owner(Map& m, const std::string& key)
+{
+	auto it = m.find(key);
+	if (it == m.end())
+		return wtp::WTSSliceOwnerPtr();
+	return it->second;
+}
 
 // Compare HFT records by their action timestamp.
 template <typename T>
@@ -27,6 +52,36 @@ static bool hft_time_less(const T& lhs, const T& rhs)
 	if (lhs.action_date != rhs.action_date)
 		return lhs.action_date < rhs.action_date;
 	return lhs.action_time < rhs.action_time;
+}
+
+// R132-001: a history block keeps its 12-byte packed header in front of the
+// records, so records left in `_buffer` sit at a 4-byte offset and must not be
+// accessed as T (8-byte fields). Move any pending payload once into the pair's
+// naturally aligned vector, keep only the header in `_buffer`, and serve every
+// read and slice from `_items` (slices own the pair, card 11). A trailing
+// partial record is ignored exactly as the former count arithmetic did.
+template <typename T, typename Pair>
+static bool align_his_items(Pair& pair, std::size_t headerSize)
+{
+	static_assert(std::is_trivially_copyable<T>::value, "history records must be byte-copyable");
+	if (pair._buffer.size() <= headerSize)
+		return true;
+	const std::size_t count = (pair._buffer.size() - headerSize) / sizeof(T);
+	try
+	{
+		std::vector<T> items(count);
+		if (count != 0)
+			std::memcpy(items.data(), pair._buffer.data() + headerSize, count * sizeof(T));
+		pair._items.swap(items);
+		pair._buffer.resize(headerSize);
+		pair._buffer.shrink_to_fit();
+	}
+	catch (const std::exception&)
+	{
+		return false;
+	}
+	pair._block = reinterpret_cast<decltype(pair._block)>(&pair._buffer[0]);
+	return true;
 }
 
 template <typename T>
@@ -56,10 +111,49 @@ inline void pipe_rdmreader_log(IRdmDtReaderSink* sink, WTSLogLevel ll, const cha
 	if (sink == NULL)
 		return;
 
+	// I03-NEW-038: messages can carry caller-supplied codes and configured
+	// paths; bound the formatter writes to the per-thread buffer.
 	static thread_local char buffer[512] = { 0 };
-	fmtutil::format_to(buffer, format, args...);
+	try
+	{
+		const std::size_t max_output_size = sizeof(buffer) - 1;
+		const auto formatted = fmt::format_to_n(buffer, max_output_size, format, args...);
+		if (formatted.size > max_output_size)
+		{
+			constexpr char truncation_marker[] = "...[truncated]";
+			constexpr std::size_t marker_size = sizeof(truncation_marker) - 1;
+			std::memcpy(buffer + max_output_size - marker_size, truncation_marker, marker_size);
+			buffer[max_output_size] = '\0';
+		}
+		else
+		{
+			buffer[formatted.size] = '\0';
+		}
+	}
+	catch (...)
+	{
+		constexpr char fallback[] = "WtRdmDtReader log formatting failed";
+		std::memcpy(buffer, fallback, sizeof(fallback));
+	}
 
 	sink->reader_log(ll, buffer);
+}
+
+// Decision card 1 (A+C): trading dates come from the typed client over the
+// guarded legacy IBaseDataMgr virtuals. A failure is logged and the caller
+// stops before creating a slice or touching a cache.
+inline bool rdm_trading_date(IRdmDtReaderSink* sink, wtp::DateMappingClient& mapping, const char* stdPID,
+	uint32_t uDate, uint32_t uTime, uint32_t& tradingDate)
+{
+	const wtp::DateMappingResult32 result = mapping.calcTradingDate(stdPID, uDate, uTime, false);
+	if (result.status != wtp::DateMappingStatus::Ok)
+	{
+		pipe_rdmreader_log(sink, LL_ERROR, "Mapping trading date of {} at {}.{} failed: {}",
+			stdPID == NULL ? "" : stdPID, uDate, uTime, wtp::dateMappingStatusName(result.status));
+		return false;
+	}
+	tradingDate = result.value;
+	return true;
 }
 
 #if defined(WT_RDM_DT_READER_TEST_HOOKS)
@@ -118,6 +212,14 @@ extern "C"
 	{
 		if (reader != NULL)
 			delete reader;
+	}
+
+	// K31=A: optional DateMappingV1 injection (see Includes/DateMappingBinding.h).
+	EXPORT_FLAG int bindRdmDtReaderDateMappingV1(IRdmDtReader* reader, const wtp::DateMappingV1* table)
+	{
+		if (reader == NULL)
+			return 0;
+		return static_cast<WtRdmDtReader*>(reader)->bindDateMapping(table) ? 1 : 0;
 	}
 };
 
@@ -178,7 +280,11 @@ WtRdmDtReader::WtRdmDtReader()
 
 WtRdmDtReader::~WtRdmDtReader()
 {
-	_stopped = true;
+	{
+		std::lock_guard<std::mutex> lock(_stop_mtx);
+		_stopped = true;
+	}
+	_stop_cv.notify_all();
 	if (_thrd_check)
 		_thrd_check->join();
 }
@@ -193,6 +299,12 @@ void WtRdmDtReader::init(WTSVariant* cfg, IRdmDtReaderSink* sink)
 	if (cfg == NULL)
 		return ;
 
+	// BUG-R132-001 (K37=B): this module's decompression budget comes from its own store
+	// config (keys next to path); an invalid value fails closed for compressed blocks.
+	std::string budgetError;
+	if (wt_cmp_budget::apply(cfg, budgetError) == wt_cmp_budget::ApplyResult::Invalid)
+		pipe_rdmreader_log(_sink, LL_ERROR, "{}; decompression in this storage module is refused", budgetError);
+
 	_base_dir = cfg->getCString("path");
 	_base_dir = StrUtil::standardisePath(_base_dir);
 
@@ -204,8 +316,13 @@ void WtRdmDtReader::init(WTSVariant* cfg, IRdmDtReaderSink* sink)
 	_thrd_check.reset(new StdThread([this]() {
 		while(!_stopped)
 		{
-			std::this_thread::sleep_for(std::chrono::seconds(5));
+			{
+				std::unique_lock<std::mutex> stopLock(_stop_mtx);
+				if (_stop_cv.wait_for(stopLock, std::chrono::seconds(5), [this]() { return _stopped.load(); }))
+					break;
+			}
 			uint64_t now = TimeUtils::getLocalTimeNow();
+			std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 
 			for(auto& m : _rt_tick_map)
 			{
@@ -355,11 +472,21 @@ bool WtRdmDtReader::loadStkAdjFactorsFromFile(const char* adjfile)
 
 WTSTickSlice* WtRdmDtReader::readTickSliceByDate(const char* stdCode, uint32_t uDate )
 {
+	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
+		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
 	const char* stdPID = commInfo->getFullPid();
 
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t curTDate = 0;
+	if (!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 	bool isToday = (uDate == curTDate);
 
 	//这里改成小于等于，主要针对盘后读取的情况
@@ -413,7 +540,7 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByDate(const char* stdCode, uint32_t u
 					}
 				}
 
-				HisTBlockPair& tBlkPair = _his_tick_map[key];
+				HisTBlockPair& tBlkPair = his_slot(_his_tick_map, key);
 				StdFile::read_file_content(filename.c_str(), tBlkPair._buffer);
 				if (tBlkPair._buffer.size() < sizeof(HisTickBlock))
 				{
@@ -436,17 +563,23 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByDate(const char* stdCode, uint32_t u
 
 		while (bHasHisTick)
 		{
-			HisTBlockPair& tBlkPair = _his_tick_map[key];
+			HisTBlockPair& tBlkPair = his_slot(_his_tick_map, key);
 			if (tBlkPair._block == NULL)
 				break;
 
-			HisTickBlock* tBlock = tBlkPair._block;
+			// R132-001: records are served from the pair's aligned copy, never from
+			// the packed history buffer (12-byte header leaves them misaligned).
+			if (!align_his_items<WTSTickStruct>(tBlkPair, sizeof(HisTickBlock)))
+				break;
+			WTSTickStruct* const hisRecs = tBlkPair._items.data();
 
-			uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisTickBlock)) / sizeof(WTSTickStruct);
+			uint32_t tcnt = (uint32_t)tBlkPair._items.size();
 			if (tcnt <= 0)
 				break;
 
-			WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks, tcnt);
+			WTSTickSlice* slice = WTSTickSlice::create(stdCode, hisRecs, tcnt);
+			if (slice != NULL)
+				slice->addOwner(his_owner(_his_tick_map, key));
 			return slice;
 
 			break;
@@ -474,8 +607,13 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByDate(const char* stdCode, uint32_t u
 
 		StdUniqueLock lock(*tPair->_mtx);
 		RTTickBlock* tBlock = tPair->_block;
-		
-		WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks, tBlock->_size);
+		// Decision K36=A: published records inside this mapping (card 13 visibleRecords).
+		const uint32_t visible = wt_rtpub::visibleRecords(tBlock, tPair->_file->size(), sizeof(RTTickBlock), sizeof(WTSTickStruct));
+		if (visible == 0)
+			break;
+		WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks, visible);
+		if (slice != NULL)
+			slice->addOwner(tPair->_file);
 		return slice;
 	}
 
@@ -484,11 +622,18 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByDate(const char* stdCode, uint32_t u
 
 WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
+	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 	if (etime != 0 && stime > etime)
 		return NULL;
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
+		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
 	const char* stdPID = commInfo->getFullPid();
 
 	pipe_rdmreader_log(_sink, LL_DEBUG, "Reading ticks of {} between {} and {}", stdCode, stime, etime);
@@ -507,13 +652,19 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 	lTime = (uint32_t)(stime % 1000000000) / 100000;
 	lSecs = (uint32_t)(stime % 100000);
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
-	uint32_t beginTDate = _base_data_mgr->calcTradingDate(stdPID, lDate, lTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	// One client: etime=0 and the current date share one clock snapshot.
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, beginTDate = 0, curTDate = 0;
+	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
+		!rdm_trading_date(_sink, dateMapping, stdPID, lDate, lTime, beginTDate) ||
+		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 
 	bool hasToday = (endTDate >= curTDate);
 
 	WTSTickSlice* slice = WTSTickSlice::create(stdCode, NULL, 0);
+	if (slice == NULL)	// I03-NEW-083: rejected (e.g. overlong) code
+		return NULL;
 
 	WTSTickStruct sTick;
 	sTick.action_date = lDate;
@@ -571,7 +722,7 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 					}
 				}
 
-				HisTBlockPair& tBlkPair = _his_tick_map[key];
+				HisTBlockPair& tBlkPair = his_slot(_his_tick_map, key);
 				StdFile::read_file_content(filename.c_str(), tBlkPair._buffer);
 				if (tBlkPair._buffer.size() < sizeof(HisTickBlock))
 				{
@@ -609,43 +760,51 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 				eTick.action_time = sInfo->getCloseTime() * 100000 + 59999;
 			}
 
-			HisTBlockPair& tBlkPair = _his_tick_map[key];
+			HisTBlockPair& tBlkPair = his_slot(_his_tick_map, key);
 			if (tBlkPair._block == NULL)
 				break;
 
-			HisTickBlock* tBlock = tBlkPair._block;
+			// R132-001: records are served from the pair's aligned copy, never from
+			// the packed history buffer (12-byte header leaves them misaligned).
+			if (!align_his_items<WTSTickStruct>(tBlkPair, sizeof(HisTickBlock)))
+				break;
+			WTSTickStruct* const hisRecs = tBlkPair._items.data();
 
-			uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisTickBlock)) / sizeof(WTSTickStruct);
+			uint32_t tcnt = (uint32_t)tBlkPair._items.size();
 			if (tcnt <= 0)
 				break;
 
 			// The range end is inclusive. upper_bound keeps all ticks sharing the
 			// requested timestamp and compares action_date before action_time.
-			WTSTickStruct* pEnd = std::upper_bound(tBlock->_ticks, tBlock->_ticks + tcnt, eTick,
+			WTSTickStruct* pEnd = std::upper_bound(hisRecs, hisRecs + tcnt, eTick,
 				[](const WTSTickStruct& value, const WTSTickStruct& item) {
 					return hft_time_less(value, item);
 				});
-			std::size_t eCount = pEnd - tBlock->_ticks;
+			std::size_t eCount = pEnd - hisRecs;
 			if (eCount == 0)
 				break;
 
 			if (beginTDate != nowTDate)
 			{
 				//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
-				//WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks, eIdx + 1);
+				//WTSTickSlice* slice = WTSTickSlice::create(stdCode, hisRecs, eIdx + 1);
 				//ayTicks->append(slice, false);
-				slice->appendBlock(tBlock->_ticks, eCount);
+				slice->appendBlock(hisRecs, eCount);
+				slice->addOwner(his_owner(_his_tick_map, key));
 			}
 			else
 			{
 				//如果交易日相同，则查找起始的位置
-				WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, pEnd, sTick, hft_time_less<WTSTickStruct>);
+				WTSTickStruct* pTick = std::lower_bound(hisRecs, pEnd, sTick, hft_time_less<WTSTickStruct>);
 
-				std::size_t sIdx = pTick - tBlock->_ticks;
-				//WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks + sIdx, eIdx - sIdx + 1);
+				std::size_t sIdx = pTick - hisRecs;
+				//WTSTickSlice* slice = WTSTickSlice::create(stdCode, hisRecs + sIdx, eIdx - sIdx + 1);
 				//ayTicks->append(slice, false);
 				if (sIdx < eCount)
-					slice->appendBlock(tBlock->_ticks + sIdx, eCount - sIdx);
+				{
+					slice->appendBlock(hisRecs + sIdx, eCount - sIdx);
+					slice->addOwner(his_owner(_his_tick_map, key));
+				}
 			}
 
 			break;
@@ -682,9 +841,11 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 			eTick.action_time = sInfo->getCloseTime() * 100000 + 59999;
 		}
 
-		// RTBlockHeader::_size is the number of records written into this block;
-		// use all entries for both the inclusive finite cutoff and latest sentinel.
-		const std::size_t recordCount = tBlock->_size;
+		// Decision K36=A: all published records inside this mapping are visible (card 13
+		// visibleRecords); use them for both the inclusive finite cutoff and latest sentinel.
+		const std::size_t recordCount = wt_rtpub::visibleRecords(tBlock, tPair->_file->size(), sizeof(RTTickBlock), sizeof(WTSTickStruct));
+		if (recordCount == 0)
+			break;
 		std::size_t eCount = 0;
 		if (etime == 0)
 		{
@@ -709,6 +870,7 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 			//WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks, eIdx + 1);
 			//ayTicks->append(slice, false);
 			slice->appendBlock(tBlock->_ticks, eCount);
+			slice->addOwner(tPair->_file);
 		}
 		else
 		{
@@ -720,7 +882,10 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 			//WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks + sIdx, eIdx - sIdx + 1);
 			//ayTicks->append(slice, false);
 			if (sIdx < eCount)
+			{
 				slice->appendBlock(tBlock->_ticks + sIdx, eCount - sIdx);
+				slice->addOwner(tPair->_file);
+			}
 		}
 		break;
 	}
@@ -730,11 +895,18 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByRange(const char* stdCode, uint64_t 
 
 WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
+	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 	if (etime != 0 && stime > etime)
 		return NULL;
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
+		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
 	const char* stdPID = commInfo->getFullPid();
 
 	uint32_t rDate, rTime, rSecs;
@@ -749,9 +921,13 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 	lTime = (uint32_t)(stime % 1000000000) / 100000;
 	lSecs = (uint32_t)(stime % 100000);
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
-	uint32_t beginTDate = _base_data_mgr->calcTradingDate(stdPID, lDate, lTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	// One client: etime=0 and the current date share one clock snapshot.
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, beginTDate = 0, curTDate = 0;
+	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
+		!rdm_trading_date(_sink, dateMapping, stdPID, lDate, lTime, beginTDate) ||
+		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 
 	bool isToday = (endTDate == curTDate);
 
@@ -779,18 +955,23 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 			return NULL;
 
 		RTOrdQueBlock* rtBlock = tPair->_block;
-		if (rtBlock->_size <= 1)
+		// Decision K36=A (2026-11-04): every published record inside this mapping is
+		// visible (card 13 visibleRecords, the same rule as WtDataReader); no slot is
+		// writer-owned.
+		const std::size_t visible = wt_rtpub::visibleRecords(rtBlock, tPair->_file->size(), sizeof(RTOrdQueBlock), sizeof(WTSOrdQueStruct));
+		if (visible == 0)
 			return NULL;
 
-		// The final slot is still writer-owned; only the preceding entries are visible.
 		std::size_t eIdx = 0;
-		if (!find_rt_hft_end_index(rtBlock->_queues, rtBlock->_size - 1, eTick, eIdx))
+		if (!find_rt_hft_end_index(rtBlock->_queues, visible, eTick, eIdx))
 			return NULL;
 
 		if (beginTDate != endTDate)
 		{
 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
 			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, rtBlock->_queues, eIdx + 1);
+			if (slice != NULL)
+				slice->addOwner(tPair->_file);
 			return slice;
 		}
 		else
@@ -802,6 +983,8 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 
 			std::size_t sIdx = pItem - rtBlock->_queues;
 			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, rtBlock->_queues + sIdx, eIdx - sIdx + 1);
+			if (slice != NULL)
+				slice->addOwner(tPair->_file);
 			return slice;
 		}
 	}
@@ -818,7 +1001,7 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 			if (!StdFile::exists(filename.c_str()))
 				return NULL;
 
-			HisOrdQueBlockPair& hisBlkPair = _his_ordque_map[key];
+			HisOrdQueBlockPair& hisBlkPair = his_slot(_his_ordque_map, key);
 			StdFile::read_file_content(filename.c_str(), hisBlkPair._buffer);
 			if (hisBlkPair._buffer.size() < sizeof(HisOrdQueBlockV2))
 			{
@@ -892,20 +1075,24 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 			hisBlkPair._block = (HisOrdQueBlock*)hisBlkPair._buffer.c_str();
 		}
 
-		HisOrdQueBlockPair& tBlkPair = _his_ordque_map[key];
+		HisOrdQueBlockPair& tBlkPair = his_slot(_his_ordque_map, key);
 		if (tBlkPair._block == NULL)
 			return NULL;
 
-		HisOrdQueBlock* tBlock = tBlkPair._block;
+		// R132-001: records are served from the pair's aligned copy, never from
+		// the packed history buffer (12-byte header leaves them misaligned).
+		if (!align_his_items<WTSOrdQueStruct>(tBlkPair, sizeof(HisOrdQueBlock)))
+			return NULL;
+		WTSOrdQueStruct* const hisRecs = tBlkPair._items.data();
 
-		uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisOrdQueBlock)) / sizeof(WTSOrdQueStruct);
+		uint32_t tcnt = (uint32_t)tBlkPair._items.size();
 		if (tcnt <= 0)
 			return NULL;
 
 		// Historical HFT ranges are end-exclusive. lower_bound also avoids
 		// decrementing begin() when the requested end precedes the first item.
-		WTSOrdQueStruct* pEnd = std::lower_bound(tBlock->_items, tBlock->_items + tcnt, eTick, hft_time_less<WTSOrdQueStruct>);
-		std::size_t eCount = pEnd - tBlock->_items;
+		WTSOrdQueStruct* pEnd = std::lower_bound(hisRecs, hisRecs + tcnt, eTick, hft_time_less<WTSOrdQueStruct>);
+		std::size_t eCount = pEnd - hisRecs;
 		if (eCount == 0)
 			return NULL;
 
@@ -913,17 +1100,21 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 		if (beginTDate != endTDate)
 		{
 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
-			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, tBlock->_items, eCount);
+			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, hisRecs, eCount);
+			if (slice != NULL)
+				slice->addOwner(his_owner(_his_ordque_map, key));
 			return slice;
 		}
 		else
 		{
 			//如果交易日相同，则查找起始的位置
-			WTSOrdQueStruct* pStart = std::lower_bound(tBlock->_items, pEnd, sTick, hft_time_less<WTSOrdQueStruct>);
-			std::size_t sIdx = pStart - tBlock->_items;
+			WTSOrdQueStruct* pStart = std::lower_bound(hisRecs, pEnd, sTick, hft_time_less<WTSOrdQueStruct>);
+			std::size_t sIdx = pStart - hisRecs;
 			if (sIdx >= eCount)
 				return NULL;
 			WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, pStart, eCount - sIdx);
+			if (slice != NULL)
+				slice->addOwner(his_owner(_his_ordque_map, key));
 			return slice;
 		}
 	}
@@ -931,11 +1122,18 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 
 WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
+	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 	if (etime != 0 && stime > etime)
 		return NULL;
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
+		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
 	const char* stdPID = commInfo->getFullPid();
 
 	uint32_t rDate, rTime, rSecs;
@@ -950,9 +1148,13 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 	lTime = (uint32_t)(stime % 1000000000) / 100000;
 	lSecs = (uint32_t)(stime % 100000);
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
-	uint32_t beginTDate = _base_data_mgr->calcTradingDate(stdPID, lDate, lTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	// One client: etime=0 and the current date share one clock snapshot.
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, beginTDate = 0, curTDate = 0;
+	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
+		!rdm_trading_date(_sink, dateMapping, stdPID, lDate, lTime, beginTDate) ||
+		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 
 	bool isToday = (endTDate == curTDate);
 
@@ -980,18 +1182,23 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 			return NULL;
 
 		RTOrdDtlBlock* rtBlock = tPair->_block;
-		if (rtBlock->_size <= 1)
+		// Decision K36=A (2026-11-04): every published record inside this mapping is
+		// visible (card 13 visibleRecords, the same rule as WtDataReader); no slot is
+		// writer-owned.
+		const std::size_t visible = wt_rtpub::visibleRecords(rtBlock, tPair->_file->size(), sizeof(RTOrdDtlBlock), sizeof(WTSOrdDtlStruct));
+		if (visible == 0)
 			return NULL;
 
-		// The final slot is still writer-owned; only the preceding entries are visible.
 		std::size_t eIdx = 0;
-		if (!find_rt_hft_end_index(rtBlock->_details, rtBlock->_size - 1, eTick, eIdx))
+		if (!find_rt_hft_end_index(rtBlock->_details, visible, eTick, eIdx))
 			return NULL;
 
 		if (beginTDate != endTDate)
 		{
 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
 			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, rtBlock->_details, eIdx + 1);
+			if (slice != NULL)
+				slice->addOwner(tPair->_file);
 			return slice;
 		}
 		else
@@ -1003,6 +1210,8 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 
 			std::size_t sIdx = pItem - rtBlock->_details;
 			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, rtBlock->_details + sIdx, eIdx - sIdx + 1);
+			if (slice != NULL)
+				slice->addOwner(tPair->_file);
 			return slice;
 		}
 	}
@@ -1019,7 +1228,7 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 			if (!StdFile::exists(filename.c_str()))
 				return NULL;
 
-			HisOrdDtlBlockPair& hisBlkPair = _his_orddtl_map[key];
+			HisOrdDtlBlockPair& hisBlkPair = his_slot(_his_orddtl_map, key);
 			StdFile::read_file_content(filename.c_str(), hisBlkPair._buffer);
 			if (hisBlkPair._buffer.size() < sizeof(HisOrdDtlBlockV2))
 			{
@@ -1093,37 +1302,45 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 			hisBlkPair._block = (HisOrdDtlBlock*)hisBlkPair._buffer.c_str();
 		}
 
-		HisOrdDtlBlockPair& tBlkPair = _his_orddtl_map[key];
+		HisOrdDtlBlockPair& tBlkPair = his_slot(_his_orddtl_map, key);
 		if (tBlkPair._block == NULL)
 			return NULL;
 
-		HisOrdDtlBlock* tBlock = tBlkPair._block;
+		// R132-001: records are served from the pair's aligned copy, never from
+		// the packed history buffer (12-byte header leaves them misaligned).
+		if (!align_his_items<WTSOrdDtlStruct>(tBlkPair, sizeof(HisOrdDtlBlock)))
+			return NULL;
+		WTSOrdDtlStruct* const hisRecs = tBlkPair._items.data();
 
-		uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisOrdDtlBlock)) / sizeof(WTSOrdDtlStruct);
+		uint32_t tcnt = (uint32_t)tBlkPair._items.size();
 		if (tcnt <= 0)
 			return NULL;
 
 		// Historical HFT ranges are end-exclusive. lower_bound also avoids
 		// decrementing begin() when the requested end precedes the first item.
-		WTSOrdDtlStruct* pEnd = std::lower_bound(tBlock->_items, tBlock->_items + tcnt, eTick, hft_time_less<WTSOrdDtlStruct>);
-		std::size_t eCount = pEnd - tBlock->_items;
+		WTSOrdDtlStruct* pEnd = std::lower_bound(hisRecs, hisRecs + tcnt, eTick, hft_time_less<WTSOrdDtlStruct>);
+		std::size_t eCount = pEnd - hisRecs;
 		if (eCount == 0)
 			return NULL;
 
 		if (beginTDate != endTDate)
 		{
 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
-			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, tBlock->_items, eCount);
+			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, hisRecs, eCount);
+			if (slice != NULL)
+				slice->addOwner(his_owner(_his_orddtl_map, key));
 			return slice;
 		}
 		else
 		{
 			//如果交易日相同，则查找起始的位置
-			WTSOrdDtlStruct* pStart = std::lower_bound(tBlock->_items, pEnd, sTick, hft_time_less<WTSOrdDtlStruct>);
-			std::size_t sIdx = pStart - tBlock->_items;
+			WTSOrdDtlStruct* pStart = std::lower_bound(hisRecs, pEnd, sTick, hft_time_less<WTSOrdDtlStruct>);
+			std::size_t sIdx = pStart - hisRecs;
 			if (sIdx >= eCount)
 				return NULL;
 			WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, pStart, eCount - sIdx);
+			if (slice != NULL)
+				slice->addOwner(his_owner(_his_orddtl_map, key));
 			return slice;
 		}
 	}
@@ -1131,11 +1348,18 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 
 WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
+	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 	if (etime != 0 && stime > etime)
 		return NULL;
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
+		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
 	const char* stdPID = commInfo->getFullPid();
 
 	uint32_t rDate, rTime, rSecs;
@@ -1150,9 +1374,13 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 	lTime = (uint32_t)(stime % 1000000000) / 100000;
 	lSecs = (uint32_t)(stime % 100000);
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
-	uint32_t beginTDate = _base_data_mgr->calcTradingDate(stdPID, lDate, lTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	// One client: etime=0 and the current date share one clock snapshot.
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, beginTDate = 0, curTDate = 0;
+	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
+		!rdm_trading_date(_sink, dateMapping, stdPID, lDate, lTime, beginTDate) ||
+		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 
 	bool isToday = (endTDate == curTDate);
 
@@ -1180,18 +1408,23 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 			return NULL;
 
 		RTTransBlock* rtBlock = tPair->_block;
-		if (rtBlock->_size <= 1)
+		// Decision K36=A (2026-11-04): every published record inside this mapping is
+		// visible (card 13 visibleRecords, the same rule as WtDataReader); no slot is
+		// writer-owned.
+		const std::size_t visible = wt_rtpub::visibleRecords(rtBlock, tPair->_file->size(), sizeof(RTTransBlock), sizeof(WTSTransStruct));
+		if (visible == 0)
 			return NULL;
 
-		// The final slot is still writer-owned; only the preceding entries are visible.
 		std::size_t eIdx = 0;
-		if (!find_rt_hft_end_index(rtBlock->_trans, rtBlock->_size - 1, eTick, eIdx))
+		if (!find_rt_hft_end_index(rtBlock->_trans, visible, eTick, eIdx))
 			return NULL;
 
 		if (beginTDate != endTDate)
 		{
 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
 			WTSTransSlice* slice = WTSTransSlice::create(stdCode, rtBlock->_trans, eIdx + 1);
+			if (slice != NULL)
+				slice->addOwner(tPair->_file);
 			return slice;
 		}
 		else
@@ -1203,6 +1436,8 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 
 			std::size_t sIdx = pItem - rtBlock->_trans;
 			WTSTransSlice* slice = WTSTransSlice::create(stdCode, rtBlock->_trans + sIdx, eIdx - sIdx + 1);
+			if (slice != NULL)
+				slice->addOwner(tPair->_file);
 			return slice;
 		}
 	}
@@ -1219,7 +1454,7 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 			if (!StdFile::exists(filename.c_str()))
 				return NULL;
 
-			HisTransBlockPair& hisBlkPair = _his_trans_map[key];
+			HisTransBlockPair& hisBlkPair = his_slot(_his_trans_map, key);
 			StdFile::read_file_content(filename.c_str(), hisBlkPair._buffer);
 			if (hisBlkPair._buffer.size() < sizeof(HisTransBlockV2))
 			{
@@ -1293,37 +1528,45 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 			hisBlkPair._block = (HisTransBlock*)hisBlkPair._buffer.c_str();
 		}
 
-		HisTransBlockPair& tBlkPair = _his_trans_map[key];
+		HisTransBlockPair& tBlkPair = his_slot(_his_trans_map, key);
 		if (tBlkPair._block == NULL)
 			return NULL;
 
-		HisTransBlock* tBlock = tBlkPair._block;
+		// R132-001: records are served from the pair's aligned copy, never from
+		// the packed history buffer (12-byte header leaves them misaligned).
+		if (!align_his_items<WTSTransStruct>(tBlkPair, sizeof(HisTransBlock)))
+			return NULL;
+		WTSTransStruct* const hisRecs = tBlkPair._items.data();
 
-		uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisTransBlock)) / sizeof(WTSTransStruct);
+		uint32_t tcnt = (uint32_t)tBlkPair._items.size();
 		if (tcnt <= 0)
 			return NULL;
 
 		// Historical HFT ranges are end-exclusive. lower_bound also avoids
 		// decrementing begin() when the requested end precedes the first item.
-		WTSTransStruct* pEnd = std::lower_bound(tBlock->_items, tBlock->_items + tcnt, eTick, hft_time_less<WTSTransStruct>);
-		std::size_t eCount = pEnd - tBlock->_items;
+		WTSTransStruct* pEnd = std::lower_bound(hisRecs, hisRecs + tcnt, eTick, hft_time_less<WTSTransStruct>);
+		std::size_t eCount = pEnd - hisRecs;
 		if (eCount == 0)
 			return NULL;
 
 		if (beginTDate != endTDate)
 		{
 			//如果开始的交易日和当前的交易日不一致，则返回全部的tick数据
-			WTSTransSlice* slice = WTSTransSlice::create(stdCode, tBlock->_items, eCount);
+			WTSTransSlice* slice = WTSTransSlice::create(stdCode, hisRecs, eCount);
+			if (slice != NULL)
+				slice->addOwner(his_owner(_his_trans_map, key));
 			return slice;
 		}
 		else
 		{
 			//如果交易日相同，则查找起始的位置
-			WTSTransStruct* pStart = std::lower_bound(tBlock->_items, pEnd, sTick, hft_time_less<WTSTransStruct>);
-			std::size_t sIdx = pStart - tBlock->_items;
+			WTSTransStruct* pStart = std::lower_bound(hisRecs, pEnd, sTick, hft_time_less<WTSTransStruct>);
+			std::size_t sIdx = pStart - hisRecs;
 			if (sIdx >= eCount)
 				return NULL;
 			WTSTransSlice* slice = WTSTransSlice::create(stdCode, pStart, eCount - sIdx);
+			if (slice != NULL)
+				slice->addOwner(his_owner(_his_trans_map, key));
 			return slice;
 		}
 	}
@@ -1333,12 +1576,20 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 {
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo->_exchg, cInfo->_product);
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052
+		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, history bars not loaded", stdCode == NULL ? "" : stdCode);
+		return false;
+	}
 	const char* stdPID = cInfo->stdCommID();
 
-	uint32_t curDate = TimeUtils::getCurDate();
-	uint32_t curTime = TimeUtils::getCurMin() / 100;
-
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
+	// One checked clock snapshot for the current trading date and every later
+	// date-zero request of this load (decision card 1, I03-NEW-006).
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0;
+	if (!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, endTDate))
+		return false;
 
 	std::string pname;
 	switch (period)
@@ -1436,8 +1687,18 @@ bool WtRdmDtReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key,
 			WTSBarStruct sBar, eBar;
 			if (period != KP_DAY)
 			{
-				uint64_t sTime = _base_data_mgr->getBoundaryTime(stdPID, leftDt, false, true);
-				uint64_t eTime = _base_data_mgr->getBoundaryTime(stdPID, rightDt, false, false);
+				const wtp::DateMappingResult64 sBound = dateMapping.getBoundaryTime(stdPID, leftDt, false, true);
+				const wtp::DateMappingResult64 eBound = dateMapping.getBoundaryTime(stdPID, rightDt, false, false);
+				if (sBound.status != wtp::DateMappingStatus::Ok || eBound.status != wtp::DateMappingStatus::Ok)
+				{
+					pipe_rdmreader_log(_sink, LL_ERROR, "Mapping boundaries of {} section {}-{} failed: {}/{}", stdCode, leftDt, rightDt,
+						wtp::dateMappingStatusName(sBound.status), wtp::dateMappingStatusName(eBound.status));
+					releaseBarsSections();
+					_bars_cache.erase(key);
+					return false;
+				}
+				const uint64_t sTime = sBound.value;
+				const uint64_t eTime = eBound.value;
 
 				sBar.date = leftDt;
 				sBar.time = ((uint32_t)(sTime / 10000) - 19900000) * 10000 + (uint32_t)(sTime % 10000);
@@ -2013,8 +2274,15 @@ uint32_t WtRdmDtReader::readBarsFromCacheByRange(const std::string& key, uint64_
 
 WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlinePeriod period, uint64_t stime, uint64_t etime /* = 0 */)
 {
+	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
+		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
 	const char* stdPID = commInfo->getFullPid();
 
 	std::string key = fmt::format("{}#{}", stdCode, (uint32_t)period);
@@ -2035,11 +2303,16 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 	lDate = (uint32_t)(stime / 10000);
 	lTime = (uint32_t)(stime % 10000);
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, curTDate = 0;
+	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
+		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 	
 	WTSBarStruct* hisHead = NULL;
 	WTSBarStruct* rtHead = NULL;
+	WTSSliceOwnerPtr hisOwner;
+	WTSSliceOwnerPtr rtOwner;
 	uint32_t hisCnt = 0;
 	uint32_t rtCnt = 0;
 
@@ -2091,6 +2364,7 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 			if (kPair != NULL)
 			{
 				StdUniqueLock lock(*kPair->_mtx);
+				rtOwner = kPair->_file;
 				if (kPair->_block != NULL && kPair->_block->_size > 0)
 				{
 					WTSBarStruct* pFirst = &kPair->_block->_bars[0];
@@ -2172,6 +2446,7 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 
 				//最后做一个定位。etime 是包含式上界，转换成 endCount 后再做索引，
 				//避免 lower_bound 返回 begin/end 时进行指针回退或越界解引用。
+				rtOwner = barsList._rt_bars.owner();
 				auto bar_less = [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
 					if (isDay)
 						return a.date < b.date;
@@ -2216,6 +2491,9 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 	if (bNeedHisData)
 	{
 		hisHead = indexBarFromCacheByRange(key, stime, etime, hisCnt, period == KP_DAY);
+		auto hisIt = _bars_cache.find(key);
+		if (hisIt != _bars_cache.end())
+			hisOwner = hisIt->second._bars.owner();
 	}
 
 	if (hisCnt + rtCnt > 0)
@@ -2223,6 +2501,10 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlin
 		WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, 1, hisHead, hisCnt);
 		if (slice == NULL)
 			return NULL;
+		if (hisCnt > 0)
+			slice->addOwner(hisOwner);
+		if (rtCnt > 0)
+			slice->addOwner(rtOwner);
 		if (rtCnt > 0 && !slice->appendBlock(rtHead, rtCnt))
 		{
 			slice->release();
@@ -2454,9 +2736,16 @@ WtRdmDtReader::RTKlineBlockPair* WtRdmDtReader::getRTKilneBlock(const char* exch
 
 WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime /* = 0 */)
 {
+	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	pipe_rdmreader_log(_sink, LL_INFO, "CodeInfo of {}: {},{},{}", stdCode, cInfo._exchg, cInfo._product, cInfo._code);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
+		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
 	const char* stdPID = commInfo->getFullPid();
 
 	std::string key = fmtutil::format("{}#{}", stdCode, (uint32_t)period);
@@ -2475,11 +2764,16 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 	rDate = (uint32_t)(etime / 10000);
 	rTime = (uint32_t)(etime % 10000);
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, curTDate = 0;
+	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
+		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 
 	WTSBarStruct* hisHead = NULL;
 	WTSBarStruct* rtHead = NULL;
+	WTSSliceOwnerPtr hisOwner;
+	WTSSliceOwnerPtr rtOwner;
 	uint32_t hisCnt = 0;
 	uint32_t rtCnt = 0;
 
@@ -2525,6 +2819,7 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 			if (kPair != NULL)
 			{
 				StdUniqueLock lock(*(kPair->_mtx));
+				rtOwner = kPair->_file;
 				if (kPair->_block != NULL && kPair->_block->_size > 0)
 				{
 					WTSBarStruct* pFirst = &kPair->_block->_bars[0];
@@ -2590,6 +2885,7 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 
 				//最后做一个定位。etime 是包含式上界；begin 之前没有 RT 数据，
 				//end 之后则将可用数量限制在缓存实际长度内。
+				rtOwner = barsList._rt_bars.owner();
 				auto bar_less = [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
 					if (isDay)
 						return a.date < b.date;
@@ -2622,6 +2918,9 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 	{
 		hisCnt = count - rtCnt;
 		hisHead = indexBarFromCacheByCount(key, etime, hisCnt, period == KP_DAY);
+		auto hisIt = _bars_cache.find(key);
+		if (hisIt != _bars_cache.end())
+			hisOwner = hisIt->second._bars.owner();
 		if (hisHead == NULL)
 			hisCnt = 0;
 	}
@@ -2633,6 +2932,10 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 		WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, 1, hisHead, hisCnt);
 		if (slice == NULL)
 			return NULL;
+		if (hisCnt > 0)
+			slice->addOwner(hisOwner);
+		if (rtCnt > 0)
+			slice->addOwner(rtOwner);
 		if (rtCnt > 0 && !slice->appendBlock(rtHead, rtCnt))
 		{
 			slice->release();
@@ -2646,6 +2949,7 @@ WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlin
 
 WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
+	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
 	if (commInfo == NULL)
@@ -2669,12 +2973,17 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t 
 	rTime = (uint32_t)(etime % 1000000000) / 100000;
 	rSecs = (uint32_t)(etime % 100000);
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, rDate, rTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, curTDate = 0;
+	if (!rdm_trading_date(_sink, dateMapping, stdPID, rDate, rTime, endTDate) ||
+		!rdm_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 
 	bool hasToday = (endTDate >= curTDate);
 
 	WTSTickSlice* slice = WTSTickSlice::create(stdCode);
+	if (slice == NULL)	// I03-NEW-083: rejected (e.g. overlong) code
+		return NULL;
 
 	uint32_t left = count;
 	while (hasToday)
@@ -2709,7 +3018,11 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t 
 			eTick.action_time = sInfo->getCloseTime() * 100000 + 59999;
 		}
 
-		WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + (tBlock->_size - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b) {
+		// Decision K36=A: published records inside this mapping (card 13 visibleRecords).
+		const uint32_t visible = wt_rtpub::visibleRecords(tBlock, tPair->_file->size(), sizeof(RTTickBlock), sizeof(WTSTickStruct));
+		if (visible == 0)
+			break;
+		WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + (visible - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b) {
 			if (a.action_date != b.action_date)
 				return a.action_date < b.action_date;
 			else
@@ -2732,6 +3045,7 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t 
 		uint32_t thisCnt = min((uint32_t)eIdx + 1, left);
 		uint32_t sIdx = eIdx + 1 - thisCnt;
 		slice->insertBlock(0, tBlock->_ticks + sIdx, thisCnt);
+		slice->addOwner(tPair->_file);
 		left -= thisCnt;
 		break;
 	}
@@ -2797,7 +3111,7 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t 
 
 				missingCnt = 0;
 
-				HisTBlockPair& tBlkPair = _his_tick_map[key];
+				HisTBlockPair& tBlkPair = his_slot(_his_tick_map, key);
 				StdFile::read_file_content(filename.c_str(), tBlkPair._buffer);
 				if (tBlkPair._buffer.size() < sizeof(HisTickBlock))
 				{
@@ -2836,24 +3150,28 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t 
 				eTick.action_time = sInfo->getCloseTime() * 100000 + 59999;
 			}
 
-			HisTBlockPair& tBlkPair = _his_tick_map[key];
+			HisTBlockPair& tBlkPair = his_slot(_his_tick_map, key);
 			if (tBlkPair._block == NULL)
 				break;
 
-			HisTickBlock* tBlock = tBlkPair._block;
+			// R132-001: records are served from the pair's aligned copy, never from
+			// the packed history buffer (12-byte header leaves them misaligned).
+			if (!align_his_items<WTSTickStruct>(tBlkPair, sizeof(HisTickBlock)))
+				break;
+			WTSTickStruct* const hisRecs = tBlkPair._items.data();
 
-			uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisTickBlock)) / sizeof(WTSTickStruct);
+			uint32_t tcnt = (uint32_t)tBlkPair._items.size();
 			if (tcnt <= 0)
 				break;
 
-			WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + (tcnt - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b) {
+			WTSTickStruct* pTick = std::lower_bound(hisRecs, hisRecs + (tcnt - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b) {
 				if (a.action_date != b.action_date)
 					return a.action_date < b.action_date;
 				else
 					return a.action_time < b.action_time;
 			});
 
-			std::size_t eIdx = pTick - tBlock->_ticks;
+			std::size_t eIdx = pTick - hisRecs;
 			if (pTick->action_date > eTick.action_date ||
 				(pTick->action_date == eTick.action_date && pTick->action_time > eTick.action_time))
 			{
@@ -2866,7 +3184,8 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t 
 
 			uint32_t thisCnt = min((uint32_t)eIdx + 1, left);
 			uint32_t sIdx = eIdx + 1 - thisCnt;
-			slice->insertBlock(0, tBlock->_ticks + sIdx, thisCnt);
+			slice->insertBlock(0, hisRecs + sIdx, thisCnt);
+			slice->addOwner(his_owner(_his_tick_map, key));
 			left -= thisCnt;
 			break;
 		}
@@ -2879,9 +3198,10 @@ WTSTickSlice* WtRdmDtReader::readTickSliceByCount(const char* stdCode, uint32_t 
 
 double WtRdmDtReader::getAdjFactorByDate(const char* stdCode, uint32_t date /* = 0 */)
 {
+	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
-	if (!commInfo->isStock())
+	if (commInfo == NULL || !commInfo->isStock())	// I03-NEW-052: unknown commodity has no adjustment
 		return 1.0;
 
 	AdjFactor factor = { date, 1.0 };
@@ -2915,6 +3235,7 @@ double WtRdmDtReader::getAdjFactorByDate(const char* stdCode, uint32_t date /* =
 
 void WtRdmDtReader::clearCache()
 {
+	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 	_bars_cache.clear();
 
 	_rt_min1_map.clear();
@@ -2924,4 +3245,11 @@ void WtRdmDtReader::clearCache()
 	_rt_trans_map.clear();
 	_rt_orddtl_map.clear();
 	_rt_ordque_map.clear();
+
+	//卡11=B：历史 tick/委托队列/委托明细/成交四类缓存同样清理。
+	//缓存只释放自己持有的引用，已返回切片通过 owner 保活，释放后底层缓冲区才回收。
+	_his_tick_map.clear();
+	_his_ordque_map.clear();
+	_his_orddtl_map.clear();
+	_his_trans_map.clear();
 }

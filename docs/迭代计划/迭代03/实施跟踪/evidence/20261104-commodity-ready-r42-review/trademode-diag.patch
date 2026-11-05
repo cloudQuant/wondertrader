@@ -1,0 +1,38 @@
+--- /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/48afafcc-c35d-4a77-8b4c-8588c1b786d6/scratchpad/WTSBaseDataMgr.cpp.before-trademode-diag	2026-11-03 22:45:16
++++ src/WTSTools/WTSBaseDataMgr.cpp	2026-11-03 22:46:02
+@@ -602,6 +602,8 @@
+ 		}
+ 	}
+ 	bool allValid = true;
++	uint32_t defaultTradeModeCnt = 0;
++	std::string defaultTradeModeSample;
+ 
+ 	for(const std::string& exchg : root->memberNames())
+ 	{
+@@ -653,6 +655,15 @@
+ 				continue;
+ 			}
+ 
++			// Card 4 follow-up (2026-11-03): a missing trademode keeps the
++			// documented TM_Both default, but is reported once per file.
++			if (!jPInfo->has("trademode"))
++			{
++				if (defaultTradeModeCnt == 0)
++					defaultTradeModeSample = commInfo->getFullPid();
++				defaultTradeModeCnt++;
++			}
++
+ 			_comm_list->append(commInfo, false);
+ 
+ 			WTSArray* ayInst = (WTSArray*)_pid_map->get(pid);
+@@ -669,6 +680,10 @@
+ 		}
+ 	}
+ 
++	if (defaultTradeModeCnt > 0)
++		WTSLogger::warn("{} commodities in {} have no trademode and default to TM_Both (long and short), e.g. {}",
++			defaultTradeModeCnt, filename, defaultTradeModeSample.c_str());
++
+ 	WTSLogger::info("Commodities configuration file {} loaded", filename);
+ 	root->release();
+ 	return allValid;

@@ -1,0 +1,75 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/TestUnits/coverage/p02_wtcore_engines2/p02_local_arbi_executer_test.cpp	2026-11-01 02:35:35
++++ src/TestUnits/coverage/p02_wtcore_engines2/p02_local_arbi_executer_test.cpp	2026-11-04 13:15:38
+@@ -27,6 +27,7 @@
+ #include "WtCore/WtLocalExecuter.h"
+ #include "WtCore/WtArbiExecuter.h"
+ #include "WtCore/WtExecuterFactory.h"
++#include "WtCore/WtExecMgr.h"
+ #include "WtCore/IExecCommand.h"
+ #include "WtCore/WtHelper.h"
+ #include "Includes/IDataManager.h"
+@@ -37,6 +38,7 @@
+ #include <unistd.h>
+ 
+ #include <cstdio>
++#include <cstdlib>
+ #include <filesystem>
+ #include <fstream>
+ #include <memory>
+@@ -109,6 +111,35 @@
+     WTSSessionInfo* get_sess_info(const char*) override { return NULL; }
+     IHotMgr* get_hot_mon() override { return NULL; }
+     uint32_t get_trading_day() override { return _trading_day; }
++};
++
++/// 卡9（9a=A+C、9b=A）/ 迭代02 Local 宿主合同: WtLocalExecuter 只有在协调 quiesce
++/// 发布完成后才能析构, 否则 ~WtLocalExecuter 以 std::terminate fail-stop.
++/// 本 lane 按值持有宿主, 因此用不拥有所有权的 manager 条目驱动同一套 quiesce.
++bool quiesceBorrowedLocal(WtLocalExecuter& executer)
++{
++    WtExecuterMgr manager;
++    manager.add_executer(ExecCmdPtr(&executer, [](IExecCommand*) {}));
++    WtExecQuiesceCoordinator coordinator({ &manager });
++    return coordinator.quiesce_all() && coordinator.is_complete() && manager.wait_quiesced();
++}
++
++/// 栈上宿主的作用域守卫: 必须声明在宿主之后, 以便先于宿主析构
++class LocalQuiesceScope : private boost::noncopyable
++{
++public:
++    explicit LocalQuiesceScope(WtLocalExecuter& executer) : _executer(executer) {}
++    ~LocalQuiesceScope()
++    {
++        if (!quiesceBorrowedLocal(_executer))
++        {
++            ADD_FAILURE() << "local executer quiesce did not complete";
++            std::abort();
++        }
++    }
++
++private:
++    WtLocalExecuter& _executer;
+ };
+ 
+ /// 工厂只声明不加载任何 dylib -> createXXXExeUnit 必然返回 NULL
+@@ -170,6 +201,12 @@
+ 
+     void TearDown() override
+     {
++        // 成员 _executer 在 TearDown 之后析构; 先完成协调 quiesce (见 quiesceBorrowedLocal)
++        if (!quiesceBorrowedLocal(_executer))
++        {
++            ADD_FAILURE() << "local executer quiesce did not complete";
++            std::abort();
++        }
+         if (_cfg != NULL)
+         {
+             _cfg->release();
+@@ -280,6 +317,7 @@
+         "policy":{"default":{"name":"p02_none.p02_none"}}})json");
+     ASSERT_TRUE(cfg != NULL);
+     WtLocalExecuter cleaner(&_fx.factory, "p02_local_clear", &_fx.reader);
++    LocalQuiesceScope cleanerQuiesce(cleaner);
+     cleaner.setStub(&_fx.stub);
+     ASSERT_TRUE(cleaner.init(cfg));
+     cleaner.on_position("SHFE.ag.2212", true, 0, 0, 1, 1, 20240403);

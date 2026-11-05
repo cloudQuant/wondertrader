@@ -61,6 +61,15 @@ void WtCtaEngine::release()
 
 void WtCtaEngine::run()
 {
+	// BUG-R10-004 (slice1 final gaps): a repeated run() is rejected. Creating a
+	// second ticker would overwrite _tm_ticker and leak the running ticker and
+	// its worker, which would keep driving this engine.
+	if (_tm_ticker != NULL)
+	{
+		WTSLogger::error("CTA engine is already running; repeated run() rejected");
+		return;
+	}
+
 	if (!fee_config_valid())
 	{
 		WTSLogger::error("CTA engine start rejected: fee template configuration is invalid");
@@ -113,7 +122,8 @@ void WtCtaEngine::run()
 		StdFile::write_file_content(filename.c_str(), sb.GetString());
 	}
 
-	_tm_ticker->run();
+	if (!_tm_ticker->run())
+		WTSLogger::error("CTA engine start failed: time ticker could not start (trading session unavailable)");
 
 	if (_risk_mon)
 		_risk_mon->self()->run();
@@ -385,12 +395,21 @@ void WtCtaEngine::on_schedule(uint32_t curDate, uint32_t curTime)
 		append_signal(stdCode.c_str(), pos, true);
 	}
 
-	for(auto& m : _pos_map)
+	// I03-NEW-115: iterate a snapshot taken under _pos_mtx; append_signal may
+	// reach do_set_position, which takes _pos_mtx itself (SpinMutex is not
+	// reentrant), so the map lock must not be held across the loop body.
+	const auto positions = snapshot_positions();
+	for(const auto& m : positions)
 	{
 		const auto& stdCode = m.first;
 		if (target_pos.find(stdCode) == target_pos.end())
 		{
-			if(!decimal::eq(m.second->_volume, 0))
+			double curVolume = 0;
+			{
+				SpinLock posLock(m.second->_mtx);
+				curVolume = m.second->_volume;
+			}
+			if(!decimal::eq(curVolume, 0))
 			{
 				//这里是通知WtEngine去更新组合持仓数据
 				append_signal(stdCode.c_str(), 0, true);
@@ -455,16 +474,9 @@ void WtCtaEngine::handle_pos_change(const char* straName, const char* stdCode, d
 	/*
 	 *	这里必须要算一个总的目标仓位
 	 */
-	{
-		SpinLock lock(_pos_mtx);
-		auto it = _pos_map.find(realCode);
-		if (it == _pos_map.end())
-		{
-			_pos_map[realCode] = std::make_shared<PosInfo>();
-		}
-	}
-
-	PosInfoPtr& pInfo = _pos_map[realCode];
+	// I03-NEW-115: copy the owner under _pos_mtx; a reference into the map
+	// dangles once another insert relocates the map storage.
+	PosInfoPtr pInfo = get_or_create_position(realCode.c_str());
 
 	bool bRiskEnabled = false;
 	if (!decimal::eq(_risk_volscale, 1.0) && _risk_date == _cur_tdate)
@@ -479,9 +491,21 @@ void WtCtaEngine::handle_pos_change(const char* straName, const char* stdCode, d
 		diffPos = decimal::rnd(abs(diffPos)*_risk_volscale)*symbol;
 	}
 
-	double targetPos = pInfo->_volume + diffPos;
-
-	append_signal(realCode.c_str(), targetPos, false);
+	// I03-NEW-124: the pool runs this for several strategies at once. Reading
+	// the base, adding the increment and committing the new target is one step
+	// under _sig_mtx, so concurrent increments on one code are not lost.
+	double targetPos = 0;
+	{
+		SpinLock sigLock(_sig_mtx);
+		double curVolume = 0;
+		{
+			SpinLock posLock(pInfo->_mtx);
+			curVolume = pInfo->_volume;
+		}
+		// K26=B1: accumulate onto a pending target instead of overwriting it.
+		targetPos = pending_target_or(realCode, curVolume) + diffPos;
+		append_signal_locked(realCode.c_str(), targetPos, false);
+	}
 	save_datas();
 
 	/*
@@ -624,7 +648,7 @@ void WtCtaEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 								adjTS.pre_interest /= factor;
 							}
 
-							_price_map[wCode] = adjTS.price;
+							set_cur_price(wCode.c_str(), adjTS.price);
 						}
 
 						if (_pool)
@@ -655,8 +679,8 @@ void WtCtaEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 
 void WtCtaEngine::on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}-{}-{}", stdCode, period, times);
+	// I03-NEW-039: a legal stdCode plus period and times can exceed 64 bytes.
+	const std::string key = fmt::format("{}-{}-{}", stdCode, period, times);
 
 	const SubList& sids = _bar_sub_map[key];
 	for (auto it = sids.begin(); it != sids.end(); it++)

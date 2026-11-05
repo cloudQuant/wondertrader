@@ -1,0 +1,134 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R3TraderTest.cancel_freq_window_denies_cancel_after_boundary
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R3TraderTest
+[ RUN      ] R3TraderTest.cancel_freq_window_denies_cancel_after_boundary
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R3TraderTest.cancel_freq_window_denies_cancel_after_boundary
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R3TraderTest
+[ RUN      ] R3TraderTest.cancel_freq_window_denies_cancel_after_boundary
+==================
+WARNING: ThreadSanitizer: data race (pid=58791)
+  Write of size 4 at 0x0001149073d0 by thread T1 (mutexes: write M0, write M1):
+    #0 wtp::TraderAdapter::onPushOrder(wtp::WTSOrderInfo*) <null> (CoverageTests_wtcore:arm64+0x100c71274)
+    #1 TraderMocker::orderAction(wtp::WTSEntrustAction*)::$_1::operator()() const <null> (libTraderMocker.dylib:arm64+0xd32f8)
+    #2 boost::asio::detail::binder0<TraderMocker::orderAction(wtp::WTSEntrustAction*)::$_1>::operator()() <null> (libTraderMocker.dylib:arm64+0xd2a60)
+    #3 boost::asio::detail::executor_op<boost::asio::detail::binder0<TraderMocker::orderAction(wtp::WTSEntrustAction*)::$_1>, std::__1::allocator<void>, boost::asio::detail::scheduler_operation>::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) <null> (libTraderMocker.dylib:arm64+0xd3e70)
+    #4 boost::asio::detail::scheduler_operation::complete(void*, boost::system::error_code const&, unsigned long) <null> (libTraderMocker.dylib:arm64+0x2c2c0)
+    #5 boost::asio::detail::scheduler::do_run_one(boost::asio::detail::conditionally_enabled_mutex::scoped_lock&, boost::asio::detail::scheduler_thread_info&, boost::system::error_code const&) <null> (libTraderMocker.dylib:arm64+0x2b104)
+    #6 boost::asio::detail::scheduler::run(boost::system::error_code&) <null> (libTraderMocker.dylib:arm64+0x2a90c)
+    #7 boost::asio::io_context::run() <null> (libTraderMocker.dylib:arm64+0xcc808)
+    #8 TraderMocker::connect()::$_0::operator()() const <null> (libTraderMocker.dylib:arm64+0xcc754)
+    #9 std::__1::__invoke_result_impl<void, TraderMocker::connect()::$_0>::type std::__1::__invoke[abi:nqe220108]<TraderMocker::connect()::$_0>(TraderMocker::connect()::$_0&&) <null> (libTraderMocker.dylib:arm64+0xcc660)
+    #10 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderMocker::connect()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderMocker::connect()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (libTraderMocker.dylib:arm64+0xcc584)
+    #11 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderMocker::connect()::$_0>>(void*) <null> (libTraderMocker.dylib:arm64+0xcbe98)
+
+  Previous read of size 4 at 0x0001149073d0 by main thread (mutexes: write M2):
+    #0 wtp::WTSTradeStateInfo::total_cancels() const <null> (CoverageTests_wtcore:arm64+0x100c64034)
+    #1 wtp::TraderAdapter::checkCancelLimits(char const*) <null> (CoverageTests_wtcore:arm64+0x100c63e8c)
+    #2 (anonymous namespace)::R3TraderTest_cancel_freq_window_denies_cancel_after_boundary_Test::TestBody()::$_0::operator()() const <null> (CoverageTests_wtcore:arm64+0x100a24630)
+    #3 int (anonymous namespace)::r3RunInIsolatedProcess<(anonymous namespace)::R3TraderTest_cancel_freq_window_denies_cancel_after_boundary_Test::TestBody()::$_0>(char const*, (anonymous namespace)::R3TraderTest_cancel_freq_window_denies_cancel_after_boundary_Test::TestBody()::$_0&&) <null> (CoverageTests_wtcore:arm64+0x100a237bc)
+    #4 (anonymous namespace)::R3TraderTest_cancel_freq_window_denies_cancel_after_boundary_Test::TestBody() <null> (CoverageTests_wtcore:arm64+0x100a23524)
+    #5 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (CoverageTests_wtcore:arm64+0x101130830)
+
+  Location is heap block of size 232 at 0x000114907350 allocated by thread T1:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x92928)
+    #1 wtp::WTSTradeStateInfo::create(char const*) <null> (CoverageTests_wtcore:arm64+0x100c64898)
+    #2 wtp::TraderAdapter::onPushOrder(wtp::WTSOrderInfo*) <null> (CoverageTests_wtcore:arm64+0x100c71800)
+    #3 TraderMocker::orderInsert(wtp::WTSEntrust*)::$_1::operator()() const <null> (libTraderMocker.dylib:arm64+0x8fd70)
+    #4 boost::asio::detail::binder0<TraderMocker::orderInsert(wtp::WTSEntrust*)::$_1>::operator()() <null> (libTraderMocker.dylib:arm64+0x8e9e4)
+    #5 boost::asio::detail::executor_op<boost::asio::detail::binder0<TraderMocker::orderInsert(wtp::WTSEntrust*)::$_1>, std::__1::allocator<void>, boost::asio::detail::scheduler_operation>::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) <null> (libTraderMocker.dylib:arm64+0x963d8)
+    #6 boost::asio::detail::scheduler_operation::complete(void*, boost::system::error_code const&, unsigned long) <null> (libTraderMocker.dylib:arm64+0x2c2c0)
+    #7 boost::asio::detail::scheduler::do_run_one(boost::asio::detail::conditionally_enabled_mutex::scoped_lock&, boost::asio::detail::scheduler_thread_info&, boost::system::error_code const&) <null> (libTraderMocker.dylib:arm64+0x2b104)
+    #8 boost::asio::detail::scheduler::run(boost::system::error_code&) <null> (libTraderMocker.dylib:arm64+0x2a90c)
+    #9 boost::asio::io_context::run() <null> (libTraderMocker.dylib:arm64+0xcc808)
+    #10 TraderMocker::connect()::$_0::operator()() const <null> (libTraderMocker.dylib:arm64+0xcc754)
+    #11 std::__1::__invoke_result_impl<void, TraderMocker::connect()::$_0>::type std::__1::__invoke[abi:nqe220108]<TraderMocker::connect()::$_0>(TraderMocker::connect()::$_0&&) <null> (libTraderMocker.dylib:arm64+0xcc660)
+    #12 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderMocker::connect()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderMocker::connect()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (libTraderMocker.dylib:arm64+0xcc584)
+    #13 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderMocker::connect()::$_0>>(void*) <null> (libTraderMocker.dylib:arm64+0xcbe98)
+
+  Mutex M0 (0x000115c03368) created at:
+    #0 pthread_mutex_lock <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x33b9c)
+    #1 <null> <null> (libc++.1.dylib:arm64e+0x300c)
+    #2 std::__1::unique_lock<std::__1::mutex>::unique_lock[abi:nqe220108](std::__1::mutex&) <null> (libTraderMocker.dylib:arm64+0x6620)
+    #3 TraderMocker::connect()::$_1::operator()() const <null> (libTraderMocker.dylib:arm64+0xcdf74)
+    #4 boost::asio::detail::binder0<TraderMocker::connect()::$_1>::operator()() <null> (libTraderMocker.dylib:arm64+0xcdd1c)
+    #5 boost::asio::detail::executor_op<boost::asio::detail::binder0<TraderMocker::connect()::$_1>, std::__1::allocator<void>, boost::asio::detail::scheduler_operation>::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) <null> (libTraderMocker.dylib:arm64+0xce378)
+    #6 boost::asio::detail::scheduler_operation::complete(void*, boost::system::error_code const&, unsigned long) <null> (libTraderMocker.dylib:arm64+0x2c2c0)
+    #7 boost::asio::detail::scheduler::do_run_one(boost::asio::detail::conditionally_enabled_mutex::scoped_lock&, boost::asio::detail::scheduler_thread_info&, boost::system::error_code const&) <null> (libTraderMocker.dylib:arm64+0x2b104)
+    #8 boost::asio::detail::scheduler::run(boost::system::error_code&) <null> (libTraderMocker.dylib:arm64+0x2a90c)
+    #9 boost::asio::io_context::run() <null> (libTraderMocker.dylib:arm64+0xcc808)
+    #10 TraderMocker::connect()::$_0::operator()() const <null> (libTraderMocker.dylib:arm64+0xcc754)
+    #11 std::__1::__invoke_result_impl<void, TraderMocker::connect()::$_0>::type std::__1::__invoke[abi:nqe220108]<TraderMocker::connect()::$_0>(TraderMocker::connect()::$_0&&) <null> (libTraderMocker.dylib:arm64+0xcc660)
+    #12 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderMocker::connect()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderMocker::connect()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (libTraderMocker.dylib:arm64+0xcc584)
+    #13 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderMocker::connect()::$_0>>(void*) <null> (libTraderMocker.dylib:arm64+0xcbe98)
+
+  Mutex M1 (0x000115c032b8) created at:
+    #0 pthread_mutex_lock <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x33b9c)
+    #1 <null> <null> (libc++.1.dylib:arm64e+0x300c)
+    #2 std::__1::unique_lock<std::__1::mutex>::unique_lock[abi:nqe220108](std::__1::mutex&) <null> (libTraderMocker.dylib:arm64+0x6620)
+    #3 TraderMocker::connect()::$_1::operator()() const <null> (libTraderMocker.dylib:arm64+0xcdf88)
+    #4 boost::asio::detail::binder0<TraderMocker::connect()::$_1>::operator()() <null> (libTraderMocker.dylib:arm64+0xcdd1c)
+    #5 boost::asio::detail::executor_op<boost::asio::detail::binder0<TraderMocker::connect()::$_1>, std::__1::allocator<void>, boost::asio::detail::scheduler_operation>::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) <null> (libTraderMocker.dylib:arm64+0xce378)
+    #6 boost::asio::detail::scheduler_operation::complete(void*, boost::system::error_code const&, unsigned long) <null> (libTraderMocker.dylib:arm64+0x2c2c0)
+    #7 boost::asio::detail::scheduler::do_run_one(boost::asio::detail::conditionally_enabled_mutex::scoped_lock&, boost::asio::detail::scheduler_thread_info&, boost::system::error_code const&) <null> (libTraderMocker.dylib:arm64+0x2b104)
+    #8 boost::asio::detail::scheduler::run(boost::system::error_code&) <null> (libTraderMocker.dylib:arm64+0x2a90c)
+    #9 boost::asio::io_context::run() <null> (libTraderMocker.dylib:arm64+0xcc808)
+    #10 TraderMocker::connect()::$_0::operator()() const <null> (libTraderMocker.dylib:arm64+0xcc754)
+    #11 std::__1::__invoke_result_impl<void, TraderMocker::connect()::$_0>::type std::__1::__invoke[abi:nqe220108]<TraderMocker::connect()::$_0>(TraderMocker::connect()::$_0&&) <null> (libTraderMocker.dylib:arm64+0xcc660)
+    #12 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderMocker::connect()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderMocker::connect()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (libTraderMocker.dylib:arm64+0xcc584)
+    #13 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderMocker::connect()::$_0>>(void*) <null> (libTraderMocker.dylib:arm64+0xcbe98)
+
+  Mutex M2 (0x00016d5e5ce8) created at:
+    #0 pthread_mutex_lock <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x33b9c)
+    #1 <null> <null> (libc++.1.dylib:arm64e+0x300c)
+    #2 std::__1::lock_guard<std::__1::mutex>::lock_guard[abi:nqe220108](std::__1::mutex&) <null> (CoverageTests_wtcore:arm64+0x100078d80)
+    #3 wtp::TraderAdapter::checkOrderLimits(char const*) <null> (CoverageTests_wtcore:arm64+0x100c60f28)
+    #4 wtp::TraderAdapter::doEntrust(wtp::WTSEntrust*) <null> (CoverageTests_wtcore:arm64+0x100c5e438)
+    #5 wtp::TraderAdapter::openLong(char const*, double, double, int, wtp::WTSContractInfo*) <null> (CoverageTests_wtcore:arm64+0x100c6761c)
+    #6 (anonymous namespace)::R3TraderTest_cancel_freq_window_denies_cancel_after_boundary_Test::TestBody()::$_0::operator()() const <null> (CoverageTests_wtcore:arm64+0x100a2450c)
+    #7 int (anonymous namespace)::r3RunInIsolatedProcess<(anonymous namespace)::R3TraderTest_cancel_freq_window_denies_cancel_after_boundary_Test::TestBody()::$_0>(char const*, (anonymous namespace)::R3TraderTest_cancel_freq_window_denies_cancel_after_boundary_Test::TestBody()::$_0&&) <null> (CoverageTests_wtcore:arm64+0x100a237bc)
+    #8 (anonymous namespace)::R3TraderTest_cancel_freq_window_denies_cancel_after_boundary_Test::TestBody() <null> (CoverageTests_wtcore:arm64+0x100a23524)
+    #9 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (CoverageTests_wtcore:arm64+0x101130830)
+
+  Thread T1 (tid=9715362, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) <null> (libTraderMocker.dylib:arm64+0xcbdfc)
+    #2 std::__1::thread::thread[abi:nqe220108]<TraderMocker::connect()::$_0, 0>(TraderMocker::connect()::$_0&&) <null> (libTraderMocker.dylib:arm64+0xcbb94)
+    #3 std::__1::thread::thread[abi:nqe220108]<TraderMocker::connect()::$_0, 0>(TraderMocker::connect()::$_0&&) <null> (libTraderMocker.dylib:arm64+0xfa40)
+    #4 TraderMocker::connect() <null> (libTraderMocker.dylib:arm64+0xf7fc)
+    #5 wtp::TraderAdapter::run() <null> (CoverageTests_wtcore:arm64+0x100c4a1cc)
+    #6 (anonymous namespace)::R3TraderTest::enableRisk(wtp::TraderAdapter&, unsigned int, unsigned int, bool) <null> (CoverageTests_wtcore:arm64+0x100a1e1e4)
+    #7 (anonymous namespace)::R3TraderTest_cancel_freq_window_denies_cancel_after_boundary_Test::TestBody()::$_0::operator()() const <null> (CoverageTests_wtcore:arm64+0x100a24430)
+    #8 int (anonymous namespace)::r3RunInIsolatedProcess<(anonymous namespace)::R3TraderTest_cancel_freq_window_denies_cancel_after_boundary_Test::TestBody()::$_0>(char const*, (anonymous namespace)::R3TraderTest_cancel_freq_window_denies_cancel_after_boundary_Test::TestBody()::$_0&&) <null> (CoverageTests_wtcore:arm64+0x100a237bc)
+    #9 (anonymous namespace)::R3TraderTest_cancel_freq_window_denies_cancel_after_boundary_Test::TestBody() <null> (CoverageTests_wtcore:arm64+0x100a23524)
+    #10 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (CoverageTests_wtcore:arm64+0x101130830)
+
+SUMMARY: ThreadSanitizer: data race (/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build-tsan/build_x64/Debug/bin/TestUnits/CoverageTests_wtcore:arm64+0x100c71274) in wtp::TraderAdapter::onPushOrder(wtp::WTSOrderInfo*)
+==================
+[       OK ] R3TraderTest.cancel_freq_window_denies_cancel_after_boundary (974 ms)
+[----------] 1 test from R3TraderTest (974 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (976 ms total)
+[  PASSED  ] 1 test.
+ThreadSanitizer: reported 1 warnings
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/tree/src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp:485: Failure
+Expected equality of these values:
+  0
+  result
+    Which is: 134
+
+[  FAILED  ] R3TraderTest.cancel_freq_window_denies_cancel_after_boundary (1942 ms)
+[----------] 1 test from R3TraderTest (1942 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1943 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R3TraderTest.cancel_freq_window_denies_cancel_after_boundary
+
+ 1 FAILED TEST

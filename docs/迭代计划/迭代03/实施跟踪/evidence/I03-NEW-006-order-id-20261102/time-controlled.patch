@@ -1,0 +1,20 @@
+--- /tmp/wt-i03-time-orderid-20261102/TimeUtils.frozen.hpp	2026-11-02 14:55:58
++++ /tmp/wt-i03-time-orderid-20261102/snapshot/Share/TimeUtils.hpp	2026-11-02 14:58:28
+@@ -78,7 +78,7 @@
+ 		if (cached != 99)
+ 			return cached;
+ 
+-		const time_t now = time(NULL);
++		const time_t now = static_cast<time_t>(-1); std::fprintf(stderr,"I03_TIME_FAULT\n"); // isolated failure injection
+ 		if (now == static_cast<time_t>(-1))
+ 			return 99;
+ 		tm tm_gtm{};
+@@ -184,7 +184,7 @@
+ 		 *	clock_gettime比ftime会提升约10%的性能
+ 		 */
+ 		thread_local static struct timespec now;
+-		clock_gettime(CLOCK_REALTIME, &now);
++		now.tv_sec = 1735516800; now.tv_nsec = 0; // isolated 2024-12-30 UTC
+ 		return now.tv_sec * 1000 + now.tv_nsec / 1000000;
+ #endif
+ 	}

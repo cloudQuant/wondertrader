@@ -200,13 +200,35 @@ TEST(r195_cfg_variant, gbk_content_is_converted_before_json_parse)
 	EXPECT_EQ(WTSCfgLoader::load_from_content("- a\n- b\n", true), nullptr);
 }
 
-// 生产入口 WTSBaseDataMgr::loadSessions：JSON 里的 null 标量会让
-// getCString/getInt32/getUInt32 落到 WTSVariant 的 VT_Null 分支；
-// 同时走 WTSSessionInfo::create/addTradingSection 的真实构造路径。
+// 生产入口 WTSBaseDataMgr::loadSessions：JSON 里的 null 标量。
+// 卡1/卡2（I03-NEW-053，整批校验后发布）：offset、时段 from/to 必须是合法整数，null 不再
+// 静默当 0；含 null 数值的文件整份被拒，同文件的合法模板也不发布。name 为 null 仍按空名称处理
+// （getCString 的 VT_Null 分支），走 WTSSessionInfo::create/addTradingSection 的真实构造路径。
 TEST(r195_cfg_variant, base_data_mgr_sessions_null_scalars)
 {
-	const char* json = R"({
+	const char* rejected = R"({
 		"N1": {"name": null, "offset": null, "sections": [{"from": null, "to": 1130}]},
+		"N2": {"name": "night", "offset": 180, "sections": [{"from": 2100, "to": 2300}]}
+	})";
+	const std::string badFile = make_temp_text("sess_bad", rejected);
+	{
+		WTSBaseDataMgr bad;
+		EXPECT_FALSE(bad.loadSessions(badFile.c_str()));
+		EXPECT_EQ(bad.getSession("N1"), nullptr);
+		EXPECT_EQ(bad.getSession("N2"), nullptr);
+	}
+	const char* nullSectionOnly = R"({
+		"N1": {"name": "day", "offset": 0, "sections": [{"from": null, "to": 1130}]}
+	})";
+	const std::string secFile = make_temp_text("sess_sec", nullSectionOnly);
+	{
+		WTSBaseDataMgr bad;
+		EXPECT_FALSE(bad.loadSessions(secFile.c_str()));
+		EXPECT_EQ(bad.getSession("N1"), nullptr);
+	}
+
+	const char* json = R"({
+		"N1": {"name": null, "offset": 0, "sections": [{"from": 0, "to": 1130}]},
 		"N2": {"name": "night", "offset": 180, "sections": [{"from": 2100, "to": 2300}]}
 	})";
 	const std::string file = make_temp_text("sess", json);
@@ -216,6 +238,7 @@ TEST(r195_cfg_variant, base_data_mgr_sessions_null_scalars)
 
 	WTSSessionInfo* s1 = mgr.getSession("N1");
 	ASSERT_NE(s1, nullptr);
+	EXPECT_STREQ(s1->name(), "");
 	EXPECT_EQ(s1->getOffsetMins(), 0);
 	ASSERT_EQ(s1->getSectionCount(), 1u);
 	EXPECT_EQ(s1->getTradingSections()[0].first_raw, 0u);
@@ -229,4 +252,6 @@ TEST(r195_cfg_variant, base_data_mgr_sessions_null_scalars)
 
 	std::error_code ec;
 	std::filesystem::remove_all(std::filesystem::path(file).parent_path(), ec);
+	std::filesystem::remove_all(std::filesystem::path(badFile).parent_path(), ec);
+	std::filesystem::remove_all(std::filesystem::path(secFile).parent_path(), ec);
 }

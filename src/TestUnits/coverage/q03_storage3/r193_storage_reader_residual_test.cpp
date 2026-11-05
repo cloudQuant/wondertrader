@@ -77,7 +77,7 @@ TEST_F(R193StorageReaderTest, R193LoaderUnknownPeriodUsesDayName)
 	WTSKlineSlice* slice = _reader.readKlineSlice("SSE.STK.600030", KP_Tick, 10,
 		202401081500ull);
 	ASSERT_TRUE(slice != NULL);
-	ASSERT_EQ(slice->size(), 1u);
+	ASSERT_EQ(slice->size(), 1);
 	slice->release();
 }
 

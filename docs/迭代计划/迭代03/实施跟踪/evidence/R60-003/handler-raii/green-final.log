@@ -1,0 +1,41 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R60MockerTest.unexecuted_order_requests_release_references_on_destruction:R60MockerTest.ready_requests_remain_deferred_and_run_after_connect:R60MockerTest.stopped_requests_are_rejected_without_retaining:R60MockerTest.stopping_closes_request_admission_before_join:R60MockerTest.release_and_destructor_free_bound_udp_port:R60MockerTest.cancel_unknown_order_before_any_insert_reports_error
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from R60MockerTest
+[ RUN      ] R60MockerTest.release_and_destructor_free_bound_udp_port
+[       OK ] R60MockerTest.release_and_destructor_free_bound_udp_port (6 ms)
+[ RUN      ] R60MockerTest.ready_requests_remain_deferred_and_run_after_connect
+[       OK ] R60MockerTest.ready_requests_remain_deferred_and_run_after_connect (3 ms)
+[ RUN      ] R60MockerTest.stopped_requests_are_rejected_without_retaining
+[TraderMocker] Cannot connect after release
+[       OK ] R60MockerTest.stopped_requests_are_rejected_without_retaining (0 ms)
+[ RUN      ] R60MockerTest.unexecuted_order_requests_release_references_on_destruction
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:914: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  entrust->retainCount()
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp:915: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  action->retainCount()
+    Which is: 2
+
+[  FAILED  ] R60MockerTest.unexecuted_order_requests_release_references_on_destruction (0 ms)
+[ RUN      ] R60MockerTest.stopping_closes_request_admission_before_join
+[       OK ] R60MockerTest.stopping_closes_request_admission_before_join (5 ms)
+[ RUN      ] R60MockerTest.cancel_unknown_order_before_any_insert_reports_error
+[       OK ] R60MockerTest.cancel_unknown_order_before_any_insert_reports_error (5 ms)
+[----------] 6 tests from R60MockerTest (21 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (21 ms total)
+[  PASSED  ] 5 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R60MockerTest.unexecuted_order_requests_release_references_on_destruction
+
+ 1 FAILED TEST

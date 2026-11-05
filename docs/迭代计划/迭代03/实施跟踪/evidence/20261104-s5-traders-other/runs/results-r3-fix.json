@@ -1,0 +1,77 @@
+[
+ {
+  "id": "r3-fix",
+  "name": "XTP-null-entrust",
+  "argv": [
+   "perl",
+   "-e",
+   "alarm 120; exec @ARGV or exit 127",
+   "--",
+   "/tmp/wt-i03-s5-traders-other-bin/fix3/CoverageTests_t_TraderXTP",
+   "--gtest_filter=TraderXTPTest.order_event_error_branch_releases_null_entrust",
+   "--gtest_output=xml:/tmp/wt-i03-s5-traders-other-run/run/r3-fix/XTP-null-entrust/result.xml"
+  ],
+  "cwd": "/tmp/wt-i03-s5-traders-other-run/run/r3-fix/XTP-null-entrust",
+  "exit": 0,
+  "env_overrides": {},
+  "bin_exists": true,
+  "xml": {
+   "tests": "1",
+   "failures": "0",
+   "disabled": "0",
+   "errors": "0",
+   "skipped": null
+  },
+  "skipped_cases": 0
+ },
+ {
+  "id": "r3-fix",
+  "name": "YD-ALL",
+  "argv": [
+   "perl",
+   "-e",
+   "alarm 900; exec @ARGV or exit 127",
+   "--",
+   "/tmp/wt-i03-s5-traders-other-bin/fix3/CoverageTests_t_TraderYD",
+   "--gtest_filter=*",
+   "--gtest_output=xml:/tmp/wt-i03-s5-traders-other-run/run/r3-fix/YD-ALL/result.xml"
+  ],
+  "cwd": "/tmp/wt-i03-s5-traders-other-run/run/r3-fix/YD-ALL",
+  "exit": 0,
+  "env_overrides": {},
+  "bin_exists": true,
+  "xml": {
+   "tests": "54",
+   "failures": "0",
+   "disabled": "2",
+   "errors": "0",
+   "skipped": null
+  },
+  "skipped_cases": 0
+ },
+ {
+  "id": "r3-fix",
+  "name": "XTP-ALL",
+  "argv": [
+   "perl",
+   "-e",
+   "alarm 900; exec @ARGV or exit 127",
+   "--",
+   "/tmp/wt-i03-s5-traders-other-bin/fix3/CoverageTests_t_TraderXTP",
+   "--gtest_filter=*",
+   "--gtest_output=xml:/tmp/wt-i03-s5-traders-other-run/run/r3-fix/XTP-ALL/result.xml"
+  ],
+  "cwd": "/tmp/wt-i03-s5-traders-other-run/run/r3-fix/XTP-ALL",
+  "exit": 0,
+  "env_overrides": {},
+  "bin_exists": true,
+  "xml": {
+   "tests": "58",
+   "failures": "0",
+   "disabled": "2",
+   "errors": "0",
+   "skipped": null
+  },
+  "skipped_cases": 0
+ }
+]

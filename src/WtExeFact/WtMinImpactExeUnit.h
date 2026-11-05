@@ -176,6 +176,7 @@ private:
 
 	/// @brief 订单监控器
 	WtOrdMon	_orders_mon;
+	bool		_host_order_identity{ false };	///< host-verified order identity enabled for this unit (cards 5b/5c)
 	/// @brief 在途撤单数量
 	uint32_t	_cancel_cnt;
 	/// @brief 撤单次数，用于调整价格偏移

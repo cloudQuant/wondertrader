@@ -1,0 +1,572 @@
+{
+ "binary": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-bins/wtcore-green1",
+ "regex": "^(P11|S5Main|S1|R170|R71|P025|R3|R59|R90|N01|R160|R10|R110|R120|R42|R101|R202|R192|R66|R181|S5Sel|R130|R41|R81|R214|R15|R73|Wp1|P02|R220|S4|S3|I03)",
+ "cases": 735,
+ "counts": {
+  "pass": 623,
+  "skipped": 27,
+  "fail": 85
+ },
+ "nonpass": [
+  {
+   "test": "N01TraderAdapter.init_accepts_no_riskmon_inactive_riskmon_and_complete_active_policy",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "N01TraderAdapter.active_riskmon_without_default_rule_is_rejected_before_state_is_committed",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R71DtMgrTest.ReaderInitAdjustingAndKlineDelegation",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71DtMgrTest.RealtimeTickCacheAndNotifyQueueLifecycle",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71DtMgrTest.ResampleCachePathWithEmptyStoreReturnsNull",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.LocalUnitLifecycleAndCallbackDispatch",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.LocalSetPositionGroupsStaleAndStrictSync",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.ArbiUnitDispatchAndSetPosition",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.ArbiInitialTargetReplaySubmitsOnFirstTick",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.ArbiReadyWithoutActionableTargetDoesNotSubmit",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.DiffUnitDispatchAndChannelRecovery",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.LocalFailedInitializationRetriesAfterV2CleanupWithoutQueuedCallbacks",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.ArbiFailedInitializationRetriesAfterV2CleanupAndReplaysOriginalTarget",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.DiffV2FailedInitializationStillRequiresSafeAutomaticRetry",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.K06DiffCleanFailureFollowedBySuccessfulRetryLetsQuiesceComplete",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.K06DiffCleanFailureWithoutSuccessfulRetryKeepsQuiesceIncomplete",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.UnitInitializationStatusIsQueryableAndFailedStatusCanBeCleared",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.ExecManagerRegistrySupportsConcurrentAddsAndSnapshots",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.ConcurrentSameCodeCreationAndPreRegistrationChannelEdges",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.LocalFailedInitializationRequestsCoalesceAndFailClosedAfterReadyCallback",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.ArbiFailedInitializationRequestsReturnBeforeRegistration",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.DiffFailedInitializationWaitersShareOneGeneration",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.SameThreadInitializationReentryFailsWithoutDuplicateUnit",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.ThrowingInitializationChannelCallbackDoesNotBlockConcurrentTargetUpdate",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71ExecTest.AccountFanoutSkipsInitializingUnitUntilReady",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.QuiesceDrainsAcceptedCallbacksAndRejectsNewIngress",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.QuiesceWaitFromPluginCallbackReturnsFalseWithoutBlocking",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.QuiesceWaitsForIngressProducerBeforeDrainingAcceptedTarget",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.NoPoolSynchronousCallbackCanRequestQuiesce",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.SameCodeCallbacksStayFifoAndReentrantCallbackDoesNotWait",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.InitializationCallbackCanSpawnAndJoinSameCodePositionEvent",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.AccountEventQueuedDuringInitializationRunsAfterSuccessfulReady",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.LatestTargetReconciliationPrecedesTickQueuedDuringInitialization",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.TargetReservationCapturesTicksBeforeCreatorStarts",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.StrictSyncUnmanagedHoldBecomesAuthoritativeZeroTarget",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.DifferentContractsCanRunCallbacksInParallel",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.ChannelEventsContinueAfterBlockedReadyCallback",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.ChannelLostTransitionIsDeliveredBeforeQueuedTickAndRecovery",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.RolloverClearDuringFailedTeardownIsRetainedWithoutUnsafeReplay",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.InitializationCallbackFailureCannotRetryWithoutRecoveryContract",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.FailedInitializedUnitStaysOwnedWhileFakePluginWorkerIsActive",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.PreflightFailureBeforePluginEntryCanBeCleared",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R71LocalSerialTest.ReadyCallbackFailureStaysLockedAcrossTargetAndClearRequests",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "S3New072DiffCallbacks.CallbacksDuringCreationReturnPromptlyAndAreDeliveredAfterReady",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "S3New072DiffCallbacks.CallbacksDuringFailedCreationReturnPromptlyAndAreDroppedWithWarning",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "S4OwnerRelease.HftContextReturnsItsClaimsWhenDestroyed",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "S4OwnerRelease.HftContextReturnsClaimsOfThePreviousTraderWhenRebound",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "S4OwnerRelease.LocalExecuterReturnsItsClaimsWhenDestroyed",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "S4OwnerRelease.ArbiExecuterReturnsItsClaimsWhenDestroyed",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "S4TwoDiffOwnerRouting.ReportsCancelsAndSnapshotsStayWithTheSendingExecuter",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "S4TwoDiffOwnerRouting.CachedTargetsRouteExplicitAndAllEntriesToTheirOwnLedgers",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "S4TwoDiffOwnerRouting.WithoutRoutingAFillReachesBothLedgersAsBefore",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "S5MainK31DateBinding.StorageAndXeleModulesExportVersionedBinders",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "S5MainK31HostChain.InjectedTableDrivesTheReaderDateMapping",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "S5MainK31HostChain.WithoutHostTableTheReaderKeepsTheLegacyPath",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R101DtMgrStore.HfqTickCacheGeneratedThenAppended",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R101DtMgrStore.KlineResampleCacheAndBarNotifications",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R101DtMgrStore.DelayedBarNotificationsKeepMutableSlotSnapshots",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R101DtMgrStore.DelayedForcedCacheBarNotificationsKeepMutableSlotSnapshots",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R101DtMgrStore.DelayedResampledNotificationsKeepUpdatedBarSnapshots",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R101DtMgrStore.ReentrantDrainDefersNestedCallbacksButDrainsRequestedBatch",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R101DtMgrStore.ThrowingBarCallbackRetainsFailedAndRemainingNotifications",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R101DtMgrStore.WorkerThreadCanEnqueueDuringEngineCallback",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R101DtMgrStore.WorkerThreadDrainRequestDuringBatchIsNotLost",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R101EventNotifierLoader.IncompatibleModuleRejected",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R120DiffTest.PoolForwardsEveryCallbackAndPersistsDiff",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R120DiffTest.SetPositionMigratesExpiredTargetToZero",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R120Notifier.BurstPublishesEveryPayload",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R120Notifier.NullTradeAndOrderGuardsPlusLatePost",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R120ParserTest.InitParsesFilterAndSubscribesContracts",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R120ParserTest.InitRejectsModuleWithoutCreateParser",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R160EventNotifier.WorkGuardKeepsWorkerAliveForEveryPublishLambda",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R160TraderTest.R160InitLoadsTraderModuleAndParsesNodeConfig",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R160TraderTest.R160ReleaseAfterInitDetachesAndDeletesMocker",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R160TraderTest.R160DisconnectThenReleaseStillJoinsWorkers",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R202HftStrategyFactoryAbi.ManagerAndStrategyDestructWithRepositoryPlugin",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R41EventNotifierTest.ActiveNotifierPublishesAllJsonPayloads",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R41EventNotifierTest.ActiveNotifierSkipsNullTradeAndOrder",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R73DtMgrTest.ReaderInitAndSliceDelegation",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R73DtMgrTest.BarPeriodMappingNotifiesEngine",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R73DtMgrTest.ForcedCacheResampleOnEmptyStore",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R59Exec.diff_stale_target_uses_raw_code_lookup_and_clears_with_real_unit",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R59Exec.diff_stale_target_clears_with_raw_code_only_contract_lookup",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R10HftTest.slippage_shifts_fill_price",
+   "rc": -6,
+   "status": "fail"
+  },
+  {
+   "test": "R10HftTest.report_callbacks_flush_userdata",
+   "rc": -6,
+   "status": "fail"
+  },
+  {
+   "test": "R110ExecEnv.DiffPoolForwardsEverything",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R110ExecEnv.LocalAndArbiNonPoolBranches",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R110EngineRiskMon.InitLoadsRiskMonFactAndCreatesSimpleMonitor",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R110ParserInit.LoadsModuleAndSubscribesWithAndWithoutFilter",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R110ParserInit.HandleQuoteHonoursExchangeFilter",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R110TraderInit.LoadsTraderModuleAndCreatesApi",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R130CtaStrategyMgr.LoadsFactoryAndCreatesStrategies",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R130CtaStrategyMgr.CreateStrategyFailureMatrix",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R130DiffExecuterTail.NonPoolClearOldTargetAndIgnoreZeroLocalId",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R15MgrTest.executer_factory_free_library_when_creator_symbol_absent",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R15MgrTest.cta_strategy_mgr_scan_free_library_path",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R15MgrTest.hft_strategy_mgr_scan_free_library_path",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R3TraderTest.order_freq_window_denies_submission_after_boundary",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R3TraderTest.order_freq_window_precheck_uses_standard_code_after_raw_submission",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R3TraderTest.cancel_freq_window_denies_cancel_after_boundary",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R3TraderTest.cancel_localid_frequency_cache_uses_standardized_contract_code",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R3TraderTest.cancel_localid_rejects_inactive_or_unmapped_order_safely",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R3TraderTest.cancel_localid_risk_rejection_retries_do_not_grow_cache",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R66Fixture.S4EnginePushQuoteWithoutContractSkipsHotFanOut",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R66EventNotifierTest.R66ActiveNotifierPublishesAllChannels",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R66EventNotifierTest.R66ActiveNotifierTradeAndOrderFlags",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R66EventNotifierTest.R66ActiveNotifierSkipsNullTradeAndOrder",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R66EventNotifierTest.R66ActiveNotifierRepeatedInitKeepsWorker",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R90ExecPool.LocalPoolForwardsEverything",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R90ExecPool.ArbiPoolForwardsEverything",
+   "rc": 1,
+   "status": "fail"
+  },
+  {
+   "test": "R90TraderReport.NormalInitWithoutRiskmonAllowsSuccessfulOrder",
+   "rc": 0,
+   "status": "skipped"
+  },
+  {
+   "test": "R90TraderRisk.ModuleWithoutCreateTraderAndRepeatedInit",
+   "rc": 0,
+   "status": "skipped"
+  }
+ ]
+}

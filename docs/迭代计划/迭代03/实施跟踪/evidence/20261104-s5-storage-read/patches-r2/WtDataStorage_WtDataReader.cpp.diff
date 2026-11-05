@@ -1,0 +1,207 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before-r2/src/WtDataStorage/WtDataReader.cpp	2026-11-04 18:12:38
++++ src/WtDataStorage/WtDataReader.cpp	2026-11-04 21:22:17
+@@ -70,6 +70,33 @@
+ 		return true;
+ 	}
+ 
++	// R132-001: move a history tick block's payload out of the packed buffer
++	// (12-byte header -> records at a 4-byte offset) into the pair's aligned
++	// vector once; `_buffer` keeps only the header afterwards.
++	template <typename Pair>
++	bool align_his_tick_items(Pair& pair)
++	{
++		const std::size_t headerSize = sizeof(HisTickBlock);
++		if (pair._buffer.size() <= headerSize)
++			return true;
++		const std::size_t count = (pair._buffer.size() - headerSize) / sizeof(WTSTickStruct);
++		try
++		{
++			std::vector<WTSTickStruct> items(count);
++			if (count != 0)
++				std::memcpy(items.data(), pair._buffer.data() + headerSize, count * sizeof(WTSTickStruct));
++			pair._items.swap(items);
++			pair._buffer.resize(headerSize);
++			pair._buffer.shrink_to_fit();
++		}
++		catch (const std::exception&)
++		{
++			return false;
++		}
++		pair._block = reinterpret_cast<HisTickBlock*>(&pair._buffer[0]);
++		return true;
++	}
++
+ 	template <typename T>
+ 	bool copy_his_items_aligned(const std::string& content, std::vector<T>& output)
+ 	{
+@@ -587,6 +614,12 @@
+ 
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	const char* stdPID = commInfo->getFullPid();
+ 
+ 	uint32_t curDate, curTime, curSecs;
+@@ -665,8 +698,9 @@
+ 	}
+ 	else
+ 	{
+-		thread_local static char key[64] = { 0 };
+-		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
++		// I03-NEW-039: the cache key embeds the caller's stdCode, which may be longer
++		// than a fixed 64-byte buffer; build it as a string.
++		const std::string key = fmt::format("{}-{}", stdCode, endTDate);
+ 
+ 		auto it = _his_tick_map.find(key);
+ 		if(it == _his_tick_map.end())
+@@ -709,20 +743,24 @@
+ 		if (tBlkPair._block == NULL)
+ 			return NULL;
+ 
+-		HisTickBlock* tBlock = tBlkPair._block;
++		// R132-001: records are served from the pair's aligned copy, never from
++		// the packed history buffer (12-byte header leaves them misaligned).
++		if (!align_his_tick_items(tBlkPair))
++			return NULL;
++		WTSTickStruct* const hisTicks = tBlkPair._items.data();
+ 
+-		uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisTickBlock)) / sizeof(WTSTickStruct);
++		uint32_t tcnt = (uint32_t)tBlkPair._items.size();
+ 		if (tcnt <= 0)
+ 			return NULL;
+ 
+-		WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + (tcnt - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b){
++		WTSTickStruct* pTick = std::lower_bound(hisTicks, hisTicks + (tcnt - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b){
+ 			if (a.action_date != b.action_date)
+ 				return a.action_date < b.action_date;
+ 			else
+ 				return a.action_time < b.action_time;
+ 		});
+ 
+-		uint32_t eIdx = pTick - tBlock->_ticks;
++		uint32_t eIdx = pTick - hisTicks;
+ 		if (pTick->action_date > eTick.action_date || pTick->action_time >= eTick.action_time)
+ 		{
+ 			pTick--;
+@@ -731,7 +769,7 @@
+ 
+ 		uint32_t cnt = min(eIdx + 1, count);
+ 		uint32_t sIdx = eIdx + 1 - cnt;
+-		WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks + sIdx, cnt);
++		WTSTickSlice* slice = WTSTickSlice::create(stdCode, hisTicks + sIdx, cnt);
+ 		return slice;
+ 	}
+ }
+@@ -743,6 +781,12 @@
+ 
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	const char* stdPID = commInfo->getFullPid();
+ 
+ 	uint32_t curDate, curTime, curSecs;
+@@ -823,8 +867,9 @@
+ 	{
+ 		try
+ 		{
+-		thread_local static char key[64] = { 0 };
+-		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
++		// I03-NEW-039: the cache key embeds the caller's stdCode, which may be longer
++		// than a fixed 64-byte buffer; build it as a string.
++		const std::string key = fmt::format("{}-{}", stdCode, endTDate);
+ 
+ 		auto it = _his_ordque_map.find(key);
+ 		if (it == _his_ordque_map.end())
+@@ -962,6 +1007,12 @@
+ 
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	const char* stdPID = commInfo->getFullPid();
+ 
+ 	uint32_t curDate, curTime, curSecs;
+@@ -1042,8 +1093,9 @@
+ 	{
+ 		try
+ 		{
+-		thread_local static char key[64] = { 0 };
+-		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
++		// I03-NEW-039: the cache key embeds the caller's stdCode, which may be longer
++		// than a fixed 64-byte buffer; build it as a string.
++		const std::string key = fmt::format("{}-{}", stdCode, endTDate);
+ 
+ 		auto it = _his_orddtl_map.find(key);
+ 		if (it == _his_orddtl_map.end())
+@@ -1181,6 +1233,12 @@
+ 
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
++		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	const char* stdPID = commInfo->getFullPid();
+ 
+ 	uint32_t curDate, curTime, curSecs;
+@@ -1261,8 +1319,9 @@
+ 	{
+ 		try
+ 		{
+-		thread_local static char key[64] = { 0 };
+-		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
++		// I03-NEW-039: the cache key embeds the caller's stdCode, which may be longer
++		// than a fixed 64-byte buffer; build it as a string.
++		const std::string key = fmt::format("{}-{}", stdCode, endTDate);
+ 
+ 		auto it = _his_trans_map.find(key);
+ 		if (it == _his_trans_map.end())
+@@ -2130,6 +2189,12 @@
+ {
+ 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo->_exchg, cInfo->_product);
++	if (commInfo == NULL)
++	{
++		// I03-NEW-052
++		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, history bars not loaded", stdCode == NULL ? "" : stdCode);
++		return false;
++	}
+ 
+ 	// The former current-trading-date mapping here was never used; it is
+ 	// removed so an unchecked clock/mapping cannot affect this load.
+@@ -2304,8 +2369,8 @@
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	const char* stdPID = cInfo.stdCommID();
+ 
+-	thread_local static char key[64] = { 0 };
+-	fmtutil::format_to(key, "{}#{}", stdCode, (uint32_t)period);
++	// I03-NEW-039: caller stdCode may exceed a fixed 64-byte key buffer.
++	const std::string key = fmt::format("{}#{}", stdCode, (uint32_t)period);
+ 	auto it = _bars_cache.find(key);
+ 	bool bHasHisData = false;
+ 	if (it == _bars_cache.end())
+@@ -2958,7 +3023,7 @@
+ {
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+-	if (!commInfo->isStock())
++	if (commInfo == NULL || !commInfo->isStock())	// I03-NEW-052: unknown commodity has no adjustment
+ 		return 1.0;
+ 
+ 	AdjFactor factor = { date, 1.0 };

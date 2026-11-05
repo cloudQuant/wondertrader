@@ -1,0 +1,13 @@
+--- /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-fxbefore/run_fixtures.py.before-slice1	2026-11-05 18:23:54
++++ /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/fixtures/run_fixtures.py	2026-11-05 18:41:06
+@@ -698,7 +698,9 @@
+         raise Blocked('run.sh 以 git HEAD 作历史红控（git rev-parse/git show HEAD:...），需要 --head 与 --repo-git', '夹具问题')
+     rel = 'src/TestUnits/fixtures/cta_factory_quarantine/run.sh'
+     ctx.mirror([(rel, 'git rev-parse HEAD > "$run_dir/head-commit.txt"', 'echo %s > "$run_dir/head-commit.txt"' % ctx.R.head),
+-                (rel, 'git show HEAD:src/WtCore/CtaStrategyMgr.cpp', 'git show %s:src/WtCore/CtaStrategyMgr.cpp' % ctx.R.head)])
++                # slice1 2026-11-05: run.sh now pins its historical control commit itself
++                # (9094fd8e, hash-checked); this rewrite only applies to an older run.sh.
++                (rel, 'git show HEAD:src/WtCore/CtaStrategyMgr.cpp', 'git show %s:src/WtCore/CtaStrategyMgr.cpp' % ctx.R.head, 0)])
+     ctx.note('HEAD 红控固定为冻结 HEAD %s，经 GIT_DIR 只读取对象库' % ctx.R.head)
+     fx = ctx.fxdir()
+     out = ctx.short_dir('short-directory 控制用例要求插件目录 <=128 字符，--out 路径过长')

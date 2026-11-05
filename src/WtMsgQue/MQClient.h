@@ -9,6 +9,7 @@
  */
 #pragma once
 #include "PorterDefs.h"
+#include <atomic>
 #include <queue>
 
 #include "../Includes/WTSMarcos.h"
@@ -134,7 +135,7 @@ private:
 
 	/// @brief 终止标志
 	/// @details 标记客户端是否已请求终止，用于控制接收线程退出
-	bool			m_bTerminated;
+	std::atomic<bool>	m_bTerminated;	///< I03-NEW-116: written by ~MQClient(), read by the receive thread
 
 	/// @brief 最后一次接收数据的时间戳
 	/// @details 用于检测连接超时，单位为毫秒

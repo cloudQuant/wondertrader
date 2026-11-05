@@ -95,6 +95,19 @@ public:
 
 
 //委托回调接口
+/* Decision K42: order-query completeness and the host feature negotiation. */
+#define WT_QUERY_STATUS_UNKNOWN		0u	/* legacy onRspOrders */
+#define WT_QUERY_STATUS_COMPLETE	1u
+#define WT_QUERY_STATUS_PARTIAL		2u
+#define WT_QUERY_STATUS_FAILED		3u
+#define WT_TRADER_SPI_FEATURE_QUERY_STATUS	(UINT64_C(1) << 0)
+/* BUG-L01-014 (card 6): the host accepts onUnresolvedProviderReport. */
+#define WT_TRADER_SPI_FEATURE_RAW_UNRESOLVED	(UINT64_C(1) << 1)
+/* Optional provider export: void setTraderSpiFeatures(ITraderApi* api, uint64_t features).
+ * The host calls it once after createTrader and before init; a provider that does not
+ * export it, or a host that never calls it, keeps the legacy callbacks. */
+#define WT_TRADER_SPI_FEATURES_SYMBOL	"setTraderSpiFeatures"
+
 class ITraderSpi
 {
 public:
@@ -183,6 +196,32 @@ public:
 	 *	合约状态推送
 	 */
 	virtual void onPushInstrumentStatus(const char* /*exchg*/, const char* /*code*/, WTSTradeStatus /*state*/) {}
+
+	/*
+	 *	Decision K42 (2026-11-04, BUG-I02-NEW-154): versioned order-query result, appended
+	 *	to the vtable (existing slots unchanged). status is WT_QUERY_STATUS_COMPLETE (every
+	 *	order of the account is in ayOrders, possibly none), _PARTIAL (some rows only;
+	 *	nothing may be concluded from a missing order) or _FAILED (ayOrders may be NULL).
+	 *	A provider may call it only after the host declared WT_TRADER_SPI_FEATURE_QUERY_STATUS
+	 *	through the provider's optional WT_TRADER_SPI_FEATURES_SYMBOL export; otherwise it
+	 *	keeps calling onRspOrders, which hosts treat conservatively. The default keeps a
+	 *	complete result on the legacy path and ignores the others.
+	 */
+	virtual void onRspOrdersWithStatus(const WTSArray* ayOrders, uint32_t status)
+	{
+		if (status == WT_QUERY_STATUS_COMPLETE)
+			onRspOrders(ayOrders);
+	}
+
+	/*
+	 *	BUG-L01-014 (card 6, appended): a report the provider received but could not turn
+	 *	into a WTS object (unknown or unparseable contract, malformed fields). kind names
+	 *	the report ("order", "trade", "position", ...), reason why it was not converted, raw
+	 *	the provider's own text of every SDK field it has (e.g. JSON). The host keeps it for
+	 *	reconciliation and pauses the account; it is never applied automatically. Call it
+	 *	only after the host declared WT_TRADER_SPI_FEATURE_RAW_UNRESOLVED.
+	 */
+	virtual void onUnresolvedProviderReport(const char* /*kind*/, const char* /*reason*/, const char* /*raw*/) {}
 };
 
 //下单接口管理接口
@@ -285,3 +324,4 @@ NS_WTP_END
 //获取IDataMgr的函数指针类型
 typedef wtp::ITraderApi* (*FuncCreateTrader)();
 typedef void(*FuncDeleteTrader)(wtp::ITraderApi* &trader);
+typedef void(*FuncSetTraderSpiFeatures)(wtp::ITraderApi* trader, uint64_t features);

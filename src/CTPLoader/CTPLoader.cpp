@@ -202,6 +202,22 @@ extern "C"
 }
 #endif
 
+bool ctp_loader_release(CTraderSpi* spi, std::chrono::milliseconds timeout)
+{
+	// I03-NEW-123: stop and wait for the workers before the API goes away; releasing
+	// first let a committed query task call a released (or NULL) pUserApi.
+	if (!spi->WaitWorkersStopped(timeout))
+	{
+		printf("Loader worker still active, API and SPI retained until process exit\r\n");
+		return false;
+	}
+	pUserApi->RegisterSpi(NULL);
+	pUserApi->Release();
+	pUserApi = NULL;
+	delete spi;
+	return true;
+}
+
 int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 {
 #ifdef _WIN32
@@ -209,8 +225,10 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 #endif // _WIN32
 
 	std::string map_files;
+	// I03-NEW-091 / K02=B: run() reports a result code in every mode, so a missing,
+	// unparsable or incomplete configuration is a failure (non-zero), never 0.
 	if (cfgfile == NULL)
-		return 0;
+		return EXIT_FAILURE;
 
 	CTPConfig config;
 
@@ -223,19 +241,19 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 		}
 		catch (...)
 		{
-			return 0;
+			return EXIT_FAILURE;
 		}
 		if (root == NULL)
-			return 0;
+			return EXIT_FAILURE;
 		bool valid = readVariantConfig(root, config);
 		root->release();
 		if (!valid)
-			return 0;
+			return EXIT_FAILURE;
 	}
 	else if(StrUtil::endsWith(cfgfile, ".ini"))
 	{
 		if (!readIniConfig(cfgfile, config))
-			return 0;
+			return EXIT_FAILURE;
 	}
 	else
 	{
@@ -246,20 +264,20 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 		}
 		catch (...)
 		{
-			return 0;
+			return EXIT_FAILURE;
 		}
 		if (root == NULL)
-			return 0;
+			return EXIT_FAILURE;
 		bool valid = readVariantConfig(root, config);
 		root->release();
 		if (!valid)
-			return 0;
+			return EXIT_FAILURE;
 	}
 
 	if (config.front.empty() || config.broker.empty() || config.investor.empty() ||
 		config.password.empty() || config.savepath.empty())
 	{
-		return 0;
+		return EXIT_FAILURE;
 	}
 
 	map_files = config.mapFiles;
@@ -342,7 +360,15 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 
 	std::string flowPath = fmtutil::format("./CTPFlow/{}/{}/", BROKER_ID, INVESTOR_ID);
 	boost::filesystem::create_directories(flowPath.c_str());
+	if (g_ctpCreator == NULL)
+		return EXIT_FAILURE;
+	loader_completion::reset();
 	pUserApi = g_ctpCreator(flowPath.c_str());
+	if (pUserApi == NULL)
+	{
+		printf("CreateFtdcTraderApi returned NULL\r\n");
+		return EXIT_FAILURE;
+	}
 	CTraderSpi* pUserSpi = new CTraderSpi();
 	pUserApi->RegisterSpi((CThostFtdcTraderSpi*)pUserSpi);			// 注册事件类
 	pUserApi->SubscribePublicTopic(THOST_TERT_QUICK);					// 注册公有流
@@ -350,9 +376,13 @@ int run(const char* cfgfile, bool bAsync = false, bool isFile = true)
 	pUserApi->RegisterFront((char*)FRONT_ADDR.c_str());				// connect
 	pUserApi->Init();
 
-    //如果不是异步，则等待API返回
-    if(!bAsync)
-	    pUserApi->Join();
-
-	return 0;
+	// K02=B (2026-11-04): every mode waits for the terminal result on this
+	// (non-callback) thread, then releases the API and returns the result code;
+	// bAsync is kept only for signature compatibility.
+	(void)bAsync;
+	const int result = loader_completion::wait();
+	// Card 9a / I03-NEW-123: a worker still blocked in an SDK call is never joined
+	// or released under; the API and SPI are then retained until process exit.
+	ctp_loader_release(pUserSpi, std::chrono::seconds(5));
+	return result;
 }

@@ -1,0 +1,138 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R5StateMonitorBdtTest.*:R22StateMonitorStop.*:R44StateMonitorLifecycleTest.*
+[==========] Running 18 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 4 tests from R44StateMonitorLifecycleTest
+[ RUN      ] R44StateMonitorLifecycleTest.StopBeforeRunIsSafeAndIdempotent
+[       OK ] R44StateMonitorLifecycleTest.StopBeforeRunIsSafeAndIdempotent (10 ms)
+[ RUN      ] R44StateMonitorLifecycleTest.MissingFileWithNullBdMgrReturnsBeforeDeref
+[       OK ] R44StateMonitorLifecycleTest.MissingFileWithNullBdMgrReturnsBeforeDeref (19 ms)
+[ RUN      ] R44StateMonitorLifecycleTest.EmptyConfigFileReturnsFalse
+[       OK ] R44StateMonitorLifecycleTest.EmptyConfigFileReturnsFalse (1 ms)
+[ RUN      ] R44StateMonitorLifecycleTest.EmptySessionKeyIsSkippedButValidSessionAssembles
+[       OK ] R44StateMonitorLifecycleTest.EmptySessionKeyIsSkippedButValidSessionAssembles (5 ms)
+[ DISABLED ] R44StateMonitorLifecycleTest.DISABLED_ReinitializeSemanticsNeedContract
+[ DISABLED ] R44StateMonitorLifecycleTest.DISABLED_InitializeCrashesWithNullBdMgr
+[----------] 4 tests from R44StateMonitorLifecycleTest (43 ms total)
+
+[----------] 1 test from R22StateMonitorStop
+[ RUN      ] R22StateMonitorStop.RunningWorkerObservesStopAcrossThreads
+[       OK ] R22StateMonitorStop.RunningWorkerObservesStopAcrossThreads (519 ms)
+[----------] 1 test from R22StateMonitorStop (520 ms total)
+
+[----------] 13 tests from R5StateMonitorBdtTest
+[ RUN      ] R5StateMonitorBdtTest.SessionCommsPresentOverwritesSeededTradingDate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.SessionCommsPresentOverwritesSeededTradingDate (6 ms)
+[ RUN      ] R5StateMonitorBdtTest.SessionWithoutCommsKeepsSeededTradingDate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.SessionWithoutCommsKeepsSeededTradingDate (24 ms)
+[ RUN      ] R5StateMonitorBdtTest.TodayAsHolidayDrivesHolidayLogBranchOfInitLoop
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.TodayAsHolidayDrivesHolidayLogBranchOfInitLoop (17 ms)
+[ RUN      ] R5StateMonitorBdtTest.FifteenCharSessionIdFitsStateKeyBuffer
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.FifteenCharSessionIdFitsStateKeyBuffer (19 ms)
+[ RUN      ] R5StateMonitorBdtTest.MissingTimeFieldsDefaultToZeroAndStillAssembleSections
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.MissingTimeFieldsDefaultToZeroAndStillAssembleSections (9 ms)
+[ RUN      ] R5StateMonitorBdtTest.ReinitializeWithExtraSessionGrowsStateTable
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.ReinitializeWithExtraSessionGrowsStateTable (2 ms)
+[ RUN      ] R5StateMonitorBdtTest.SessionWithoutAuctionKeepsOnlyTradingSections
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.SessionWithoutAuctionKeepsOnlyTradingSections (2 ms)
+[ RUN      ] R5StateMonitorBdtTest.InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions (2 ms)
+[ RUN      ] R5StateMonitorBdtTest.CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries (2 ms)
+[ RUN      ] R5StateMonitorBdtTest.CrossMidnightPaddingOverlapCollapsesToFullDay
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.CrossMidnightPaddingOverlapCollapsesToFullDay (2 ms)
+[ RUN      ] R5StateMonitorBdtTest.ZeroStartSectionUsesClampedMidnightPadding
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.ZeroStartSectionUsesClampedMidnightPadding (2 ms)
+[ RUN      ] R5StateMonitorBdtTest.NonObjectEntriesDegradeToDefaultTimes
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.NonObjectEntriesDegradeToDefaultTimes (2 ms)
+[ RUN      ] R5StateMonitorBdtTest.MixedKnownAndUnknownSessionsKeepTableConsistent
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+
+[  FAILED  ] R5StateMonitorBdtTest.MixedKnownAndUnknownSessionsKeepTableConsistent (3 ms)
+[ DISABLED ] R5StateMonitorBdtTest.DISABLED_StateMachineAdvanceNeedsInjectableClockSeam
+[----------] 13 tests from R5StateMonitorBdtTest (98 ms total)
+
+[----------] Global test environment tear-down
+[==========] 18 tests from 3 test suites ran. (664 ms total)
+[  PASSED  ] 5 tests.
+[  FAILED  ] 13 tests, listed below:
+[  FAILED  ] R5StateMonitorBdtTest.SessionCommsPresentOverwritesSeededTradingDate
+[  FAILED  ] R5StateMonitorBdtTest.SessionWithoutCommsKeepsSeededTradingDate
+[  FAILED  ] R5StateMonitorBdtTest.TodayAsHolidayDrivesHolidayLogBranchOfInitLoop
+[  FAILED  ] R5StateMonitorBdtTest.FifteenCharSessionIdFitsStateKeyBuffer
+[  FAILED  ] R5StateMonitorBdtTest.MissingTimeFieldsDefaultToZeroAndStillAssembleSections
+[  FAILED  ] R5StateMonitorBdtTest.ReinitializeWithExtraSessionGrowsStateTable
+[  FAILED  ] R5StateMonitorBdtTest.SessionWithoutAuctionKeepsOnlyTradingSections
+[  FAILED  ] R5StateMonitorBdtTest.InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions
+[  FAILED  ] R5StateMonitorBdtTest.CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries
+[  FAILED  ] R5StateMonitorBdtTest.CrossMidnightPaddingOverlapCollapsesToFullDay
+[  FAILED  ] R5StateMonitorBdtTest.ZeroStartSectionUsesClampedMidnightPadding
+[  FAILED  ] R5StateMonitorBdtTest.NonObjectEntriesDegradeToDefaultTimes
+[  FAILED  ] R5StateMonitorBdtTest.MixedKnownAndUnknownSessionsKeepTableConsistent
+
+13 FAILED TESTS
+  YOU HAVE 3 DISABLED TESTS
+

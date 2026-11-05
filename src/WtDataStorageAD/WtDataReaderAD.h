@@ -9,6 +9,7 @@
 
 #pragma once
 #include <string>
+#include <vector>
 #include <stdint.h>
 #include <boost/circular_buffer.hpp>
 
@@ -17,8 +18,11 @@
 #include "../WTSUtils/WtLMDB.hpp"
 #include "../Includes/FasterDefs.h"
 #include "../Includes/IDataReader.h"
+#include "../Includes/DateMappingBinding.h"
+#include "../Includes/IHotMgr.h"
 
 #include "../Share/StdUtils.hpp"
+#include "../Includes/WTSDataDef.hpp"
 #include "../Share/BoostMappingFile.hpp"
 
 NS_WTP_BEGIN
@@ -57,6 +61,9 @@ public:
 	 * @param sink 数据接收器，用于接收读取器返回的数据和日志
 	 * @param loader 历史数据加载器，可选参数，默认为NULL
 	 */
+	/// K31=A：宿主注入 DateMappingV1 表（可选导出 bindDataReaderDateMappingV1 调用；须在 init 前，只接受一次）。
+	bool bindDateMapping(const wtp::DateMappingV1* table) noexcept { return _date_binding.bind(table); }
+
 	virtual void init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader* loader = NULL) override;
 
 	/**
@@ -91,7 +98,11 @@ public:
 
 private:
 	friend struct WtDataReaderADTestAccess;
+	friend struct WtDataReaderADBoundTestAccess;
 	static void set_test_cursor_get_override(LMDBRangeCursorGetOverride callback, void* context);
+	// R122-002 test hooks: forward K-line update chunk size (0 = default) and an
+	// observer of every staging buffer size. Thread-local; unset in production.
+	static void set_test_staging_hooks(std::size_t barChunk, void (*observer)(void*, std::size_t), void* context);
 
 	/**
 	 * @brief 数据存储的基础目录
@@ -102,6 +113,7 @@ private:
 	 * @brief 基础数据管理器指针，用于获取合约信息
 	 */
 	IBaseDataMgr*	_base_data_mgr;
+	wtp::DateMappingBinding	_date_binding;	// K31=A：已注入时走路径 A，否则路径 C
 
 	/**
 	 * @brief 主力合约管理器指针，用于获取主力合约映射
@@ -204,9 +216,22 @@ private:
 		uint64_t		_last_req_time;
 
 		/**
+		 * @brief K34=A：HOT/custom 规则代码的物理分段拼接缓存
+		 * 规则缓存只从各分段物理合约读取；增量更新跟随最新分段的物理合约，
+		 * 价格按该分段复权因子换算，且只接受该分段起始交易日之后的数据。
+		 */
+		bool			_is_rule = false;
+		std::string		_rule_tag;
+		std::string		_rule_comm_id;
+		std::string		_rule_phys_code;
+		uint32_t		_rule_start_date = 0;
+		double			_rule_factor = 1.0;
+		uint8_t			_rule_exright = 0;
+
+		/**
 		 * @brief K线数据循环缓冲区
 		 */
-		boost::circular_buffer<WTSBarStruct>	_bars;
+		WTSSharedBuffer<boost::circular_buffer<WTSBarStruct>>	_bars;	//卡11=B：写时复制，切片持有 owner
 
 		/**
 		 * @brief 构造函数
@@ -237,7 +262,7 @@ private:
 		/**
 		 * @brief Tick数据循环缓冲区
 		 */
-		boost::circular_buffer<WTSTickStruct>	_ticks;
+		WTSSharedBuffer<boost::circular_buffer<WTSTickStruct>>	_ticks;	//卡11=B：写时复制，切片持有 owner
 
 		/**
 		 * @brief 构造函数
@@ -296,7 +321,32 @@ private:
 	 * @param cutoff 周期对应的包含式 LMDB K 线键上界
 	 */
 	bool	update_cache_from_lmdb(BarsList& barsList, const char* exchg, const char* code,
-		WTSKlinePeriod period, uint32_t& lastBarTime, uint32_t cutoff);
+		WTSKlinePeriod period, uint32_t& lastBarTime, uint32_t cutoff,
+		double factor = 1.0, uint32_t minTradingDate = 0);
+
+	/**
+	 * @brief K34=A：规则代码（HOT/custom）截至 endTDate 的分段，按时间先后排列
+	 */
+	bool	rule_sections(const char* stdCode, const char* ruleTag, const char* stdCommID,
+		uint32_t endTDate, HotSections& secs);
+
+	/**
+	 * @brief K34=A：读取一个物理合约在 [sDate, eDate] 交易日内、不晚于 cutoff 的最新至多 maxCount 根 K 线
+	 */
+	bool	read_section_bars(const char* exchg, const char* code, const char* stdCommID, WTSKlinePeriod period,
+		uint32_t sDate, uint32_t eDate, uint32_t cutoff, uint32_t maxCount, std::vector<WTSBarStruct>& out);
+
+	/**
+	 * @brief K34=A：按规则分段从物理合约拼接 K 线并发布到缓存（全部分段读取成功后才替换缓存）
+	 */
+	bool	cacheRuleBars(const std::string& key, const char* stdCode, const char* exchg, const char* ruleTag,
+		const char* stdCommID, uint8_t exright, WTSKlinePeriod period, uint32_t count, uint32_t cutoff, uint32_t endTDate);
+
+	/**
+	 * @brief K34=A：按规则分段从物理合约拼接 tick（不缓存）
+	 */
+	WTSTickSlice*	readRuleTickSlice(const char* stdCode, const char* exchg, const char* ruleTag,
+		const char* stdCommID, uint32_t count, uint64_t etime, uint32_t endTDate);
 
 	/**
 	 * @brief 将K线数据读入到缓冲区
@@ -318,9 +368,13 @@ private:
 	 * @param exchg 交易所代码
 	 * @param code 合约代码
 	 * @param period K线周期
-	 * @return WTSBarStruct* K线数据结构指针，如果不存在则返回NULL
+	 * @return Found、Absent 或 Error；Found 时 result 为对齐的副本
 	 */
-	WTSBarStruct* get_rt_cache_bar(const char* exchg, const char* code, WTSKlinePeriod period);
+	// Copies packed mapping bytes into caller-owned aligned storage. The result
+	// is not a lease on the writer's mapping and does not provide a cross-process
+	// snapshot protocol.
+	enum class RTBarRead { Found, Absent, Error };
+	RTBarRead get_rt_cache_bar(const char* exchg, const char* code, WTSKlinePeriod period, WTSBarStruct& result);
 
 private:
 	//////////////////////////////////////////////////////////////////////////

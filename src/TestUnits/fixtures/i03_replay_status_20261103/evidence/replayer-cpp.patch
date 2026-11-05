@@ -1,0 +1,760 @@
+--- /tmp/i03-replay-status-baseline-20261103/HisDataReplayer.cpp	2026-11-03 16:49:31
++++ src/WtBtCore/HisDataReplayer.cpp	2026-11-03 17:01:01
+@@ -15,6 +15,7 @@
+ #include <algorithm>
+ #include <cstring>
+ #include <fstream>
++#include <exception>
+ #include <limits>
+ #include <mutex>
+ #include <queue>
+@@ -792,6 +793,7 @@
+ 	_bar_real_tick_codes.clear();
+ 	_last_replay_hft_time = 0;
+ 	_has_last_replay_hft_time = false;
++	_has_dispatched_hft_event = false;
+ 	_replay_completed_natural_date = 0;
+ 	_replay_completed_natural_ranges.clear();
+ 	_has_replay_completed_natural_date = false;
+@@ -820,6 +822,7 @@
+ 	}
+ 	_last_replay_hft_time = 0;
+ 	_has_last_replay_hft_time = false;
++	_has_dispatched_hft_event = false;
+ 	_replay_completed_natural_date = 0;
+ 	_replay_completed_natural_ranges.clear();
+ 	_has_replay_completed_natural_date = false;
+@@ -1029,105 +1032,181 @@
+ 	return static_cast<uint64_t>(closeDate) * 10000 + session->getCloseTime();
+ }
+ 
+-void HisDataReplayer::stop()
++WtReplayStatusV1 HisDataReplayer::replay_status() const
+ {
++	std::lock_guard<std::mutex> lock(_replay_status_mutex);
++	return _replay_status;
++}
++
++void HisDataReplayer::report_replay_error(uint32_t errorCode, const std::string& message)
++{
++	std::lock_guard<std::mutex> lock(_replay_status_mutex);
+ 	if (!_running.load())
+ 	{
+-		WTSLogger::log_raw(LL_ERROR, "Backtesting is not running, no need to stop");
++		// Preserve the legacy abort signal for loader/query helpers invoked
++		// outside a run, without changing an already completed generation.
++		_terminated.store(true);
+ 		return;
+ 	}
+-
+-	if (_terminated.exchange(true))
+-		return;
+-
+-	WTSLogger::log_raw(LL_WARN, "Terminating flag reset to true, backtesting will quit at next round");
++	if (_replay_finishing) return;
++	if (_replay_failure_code == WT_REPLAY_ERROR_NONE)
++	{
++		_replay_failure_code = errorCode == WT_REPLAY_ERROR_NONE ? WT_REPLAY_ERROR_INTERNAL : errorCode;
++		_replay_failure_message = message.empty() ? "Replay failed" : message;
++	}
++	_terminated.store(true);
+ }
+ 
+-bool HisDataReplayer::prepare()
++void HisDataReplayer::finish_replay()
+ {
+-	if (!_time_range_valid)
++	uint32_t terminalState;
+ 	{
+-		WTSLogger::error("Cannot prepare replayer with an invalid time range");
+-		return false;
++		std::lock_guard<std::mutex> lock(_replay_status_mutex);
++		if (_replay_finishing) return;
++		_replay_finishing = true;
++		if (_replay_failure_code != WT_REPLAY_ERROR_NONE)
++			terminalState = WT_REPLAY_FAILED;
++		else if (_replay_stop_requested)
++			terminalState = WT_REPLAY_STOPPED;
++		else if (_terminated.load())
++		{
++			terminalState = WT_REPLAY_FAILED;
++			_replay_failure_code = WT_REPLAY_ERROR_INTERNAL;
++			_replay_failure_message = "Replay terminated internally";
++		}
++		else terminalState = WT_REPLAY_SUCCEEDED;
++		_replay_status.state = terminalState;
++		_replay_status.error_code = _replay_failure_code;
++		const std::string& message = terminalState == WT_REPLAY_STOPPED ? std::string("Stopped by user") : _replay_failure_message;
++		std::snprintf(_replay_status.message, sizeof(_replay_status.message), "%s", message.c_str());
+ 	}
+ 
+-	if (_running.load())
++	std::exception_ptr callbackError;
++	try { if (_listener) _listener->handle_replay_done(); }
++	catch (...) { callbackError = std::current_exception(); }
++	if (callbackError)
+ 	{
+-		WTSLogger::log_raw(LL_ERROR, "Cannot run more than one backtesting task at the same time");
+-		return false;
++		std::lock_guard<std::mutex> lock(_replay_status_mutex);
++		_replay_status.state = WT_REPLAY_FAILED;
++		_replay_status.error_code = WT_REPLAY_ERROR_CALLBACK_EXCEPTION;
++		std::snprintf(_replay_status.message, sizeof(_replay_status.message), "%s", "Replay completion callback threw");
++		terminalState = WT_REPLAY_FAILED;
+ 	}
+-
+-	// The initialization callback is mandatory. Reject before publishing the
+-	// running state, resetting replay data, or emitting BT_START, so callers can
+-	// register a sink and retry after a configuration error.
+-	if (_listener == NULL)
++	try
+ 	{
+-		WTSLogger::error("Cannot prepare replayer without a registered data sink");
+-		return false;
++		if (_notifier)
++			_notifier->notifyEvent(terminalState == WT_REPLAY_SUCCEEDED ? "BT_END" :
++				terminalState == WT_REPLAY_STOPPED ? "BT_STOPPED" : "BT_FAILED");
+ 	}
+-
+-	// Clear the previous run's termination state before publishing that a new
+-	// replay is active. A concurrent stop then cannot be overwritten by prepare.
+-	std::string feeError;
++	catch (...)
+ 	{
+-		std::lock_guard<std::mutex> lock(_fee_error_mutex);
+-		feeError = _fee_error;
+-		if (feeError.empty())
+-		{
+-			_terminated.store(false);
+-			_running.store(true);
+-		}
++		if (!callbackError) callbackError = std::current_exception();
++		std::lock_guard<std::mutex> lock(_replay_status_mutex);
++		_replay_status.state = WT_REPLAY_FAILED;
++		_replay_status.error_code = WT_REPLAY_ERROR_CALLBACK_EXCEPTION;
++		std::snprintf(_replay_status.message, sizeof(_replay_status.message), "%s", "Replay terminal notification threw");
+ 	}
+-	if (!feeError.empty())
+ 	{
+-		WTSLogger::error("Cannot prepare replayer with unresolved fee error: {}", feeError);
+-		return false;
++		std::lock_guard<std::mutex> lock(_replay_status_mutex);
++		_running.store(false);
++		_replay_status.flags = WT_REPLAY_STATUS_FINAL;
+ 	}
+-	reset();
++	if (callbackError) std::rethrow_exception(callbackError);
++}
+ 
+-	_cur_date = _range_begin_date;
+-	_cur_time = _range_begin_hhmm;
+-	_cur_secs = 0;
+-	_cur_tdate = _bd_mgr.calcTradingDate(DEFAULT_SESSIONID, _cur_date, _cur_time, true);
++void HisDataReplayer::stop()
++{
++	std::lock_guard<std::mutex> lock(_replay_status_mutex);
++	if (!_running.load() || _replay_finishing) return;
++	if (!_terminated.exchange(true)) _replay_stop_requested = true;
++}
+ 
++bool HisDataReplayer::prepare()
++{
++	{
++		std::lock_guard<std::mutex> lock(_replay_status_mutex);
++		if (_running.load()) return false;
++		_running.store(true);
++		_terminated.store(false);
++		_replay_finishing = false;
++		_replay_stop_requested = false;
++		_replay_failure_code = WT_REPLAY_ERROR_NONE;
++		_replay_failure_message.clear();
++		++_replay_status.generation;
++		_replay_status.state = WT_REPLAY_PREPARING;
++		_replay_status.error_code = WT_REPLAY_ERROR_NONE;
++		_replay_status.flags = 0;
++		std::memset(_replay_status.message, 0, sizeof(_replay_status.message));
++	}
+ 	try
+ 	{
+-		if (_notifier)
+-			_notifier->notifyEvent("BT_START");
+-
+-		_listener->handle_init();
+-
+-		if (!_tick_enabled)
+-			checkUnbars();
++		if (!_time_range_valid)
++			report_replay_error(WT_REPLAY_ERROR_INVALID_RANGE, "Invalid replay time range");
++		else if (!_listener)
++			report_replay_error(WT_REPLAY_ERROR_NO_LISTENER, "Replay data sink is not registered");
++		else
++		{
++			const std::string feeError = fee_error();
++			if (!feeError.empty()) report_replay_error(WT_REPLAY_ERROR_FEE, feeError);
++		}
++		if (_terminated.load()) { finish_replay(); return false; }
++		reset();
++		_cur_date = _range_begin_date;
++		_cur_time = _range_begin_hhmm;
++		_cur_secs = 0;
++		const auto initialDate = _bd_mgr.checkedCalcTradingDate(DEFAULT_SESSIONID, _cur_date, _cur_time, true);
++		if (initialDate.status != wtp::DateMappingStatus::Ok)
++		{
++			report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING,
++				fmtutil::format("Cannot map initial replay trading date, status {}", static_cast<uint32_t>(initialDate.status)));
++			finish_replay();
++			return false;
++		}
++		_cur_tdate = initialDate.value;
++		if (_notifier) _notifier->notifyEvent("BT_START");
++		if (!_terminated.load()) _listener->handle_init();
++		if (!_terminated.load() && !_tick_enabled) checkUnbars();
++		if (_terminated.load()) { finish_replay(); return false; }
++		{
++			std::lock_guard<std::mutex> lock(_replay_status_mutex);
++			if (!_terminated.load()) _replay_status.state = WT_REPLAY_PREPARED;
++		}
++		if (_terminated.load()) { finish_replay(); return false; }
++		return true;
+ 	}
+ 	catch (...)
+ 	{
+-		// Initialization callbacks are part of the replay lifecycle. Leave the
+-		// replayer retryable when user code throws during prepare().
+-		_terminated = true;
+-		_running = false;
+-		throw;
++		const std::exception_ptr original = std::current_exception();
++		report_replay_error(WT_REPLAY_ERROR_CALLBACK_EXCEPTION, "Replay preparation callback threw");
++		try { finish_replay(); } catch (...) { }
++		std::rethrow_exception(original);
+ 	}
+-
+-	return true;
+ }
+ 
+ void HisDataReplayer::run(bool bNeedDump/* = false*/)
+ {
++	{
++		std::lock_guard<std::mutex> lock(_replay_status_mutex);
++		if (!_running.load() || _replay_finishing || _replay_status.state != WT_REPLAY_PREPARED) return;
++		_replay_status.state = WT_REPLAY_RUNNING;
++	}
++	try
++	{
+ 	const std::string pendingFeeError = fee_error();
+ 	if (!pendingFeeError.empty())
+ 	{
+-		WTSLogger::error("Cannot run replayer with unresolved fee error: {}", pendingFeeError);
++		report_replay_error(WT_REPLAY_ERROR_FEE, pendingFeeError);
++		finish_replay();
+ 		return;
+ 	}
+ 	if (!_time_range_valid)
+ 	{
+-		WTSLogger::error("Cannot run replayer with an invalid time range");
++		report_replay_error(WT_REPLAY_ERROR_INVALID_RANGE, "Invalid replay time range");
++		finish_replay();
+ 		return;
+ 	}
+ 
+-	try
+-	{
++	if (_terminated.load()) { finish_replay(); return; }
+ 	if(_task == NULL)
+ 	{
+ 		// A requested main series is committed only after its bars have loaded.
+@@ -1193,27 +1272,22 @@
+ 		}
+ 		else
+ 		{
+-			WTSLogger::log_raw(LL_INFO, "Main K bars not subscribed and backtesting of tick data not available , replaying done");
+-			_listener->handle_replay_done();
+-			if (_notifier)
+-				_notifier->notifyEvent("BT_END");
++			report_replay_error(WT_REPLAY_ERROR_NO_SOURCE, "No replay data source is configured");
+ 		}
+ 	}
+ 	else //if(_task != NULL)
+ 	{
+ 		run_by_tasks(bNeedDump);
+ 	}
++		finish_replay();
+ 	}
+ 	catch (...)
+ 	{
+-		// Sink callback exceptions abort this replay. Keep the failure visible to
+-		// the caller, and do not leave the replayer permanently marked as running.
+-		_terminated = true;
+-		_running = false;
+-		throw;
++		const std::exception_ptr original = std::current_exception();
++		report_replay_error(WT_REPLAY_ERROR_CALLBACK_EXCEPTION, "Replay callback threw");
++		try { finish_replay(); } catch (...) { }
++		std::rethrow_exception(original);
+ 	}
+-
+-	_running = false;
+ }
+ 
+ void HisDataReplayer::run_by_ticks(bool /*bNeedDump*/ /* = false */)
+@@ -1225,9 +1299,9 @@
+ 	uint32_t endTDate = 0;
+ 	if (!get_hft_trading_date_range(beginTDate, endTDate))
+ 	{
+-		_listener->handle_replay_done();
+-		if (_notifier)
+-			_notifier->notifyEvent("BT_END");
++		const bool empty = _tick_sub_map.empty() && _orddtl_sub_map.empty() && _ordque_sub_map.empty() && _trans_sub_map.empty();
++		report_replay_error(empty ? WT_REPLAY_ERROR_NO_SOURCE : WT_REPLAY_ERROR_DATE_MAPPING,
++			empty ? "No high-frequency subscriptions" : "Cannot map high-frequency trading-date range");
+ 		return;
+ 	}
+ 	_cur_tdate = beginTDate;
+@@ -1244,7 +1318,7 @@
+ 			bool hasReplayableEvents = false;
+ 			if (!resolve_hft_session_begin_clock(_cur_tdate, beginTDate, naturalTime, hasReplayableEvents))
+ 			{
+-				_terminated = true;
++				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 				break;
+ 			}
+ 			_cur_date = static_cast<uint32_t>(naturalTime / 1000000000);
+@@ -1261,7 +1335,7 @@
+ 			if (sessionEnd <= naturalTime)
+ 			{
+ 				WTSLogger::error("Cannot advance pure-tick replay session window for trading date {}", _cur_tdate);
+-				_terminated = true;
++				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 				break;
+ 			}
+ 			_listener->handle_session_begin(_cur_tdate);
+@@ -1273,13 +1347,12 @@
+ 		_cur_tdate = TimeUtils::getNextDate(_cur_tdate);
+ 	}
+ 
++	if (!_has_dispatched_hft_event && !_terminated)
++		report_replay_error(WT_REPLAY_ERROR_NO_SOURCE, "No high-frequency event was dispatched in the replay range");
+ 	if (_terminated)
+ 		WTSLogger::debug("Replaying by ticks terminated forcely");
+ 
+-	WTSLogger::log_raw(LL_INFO, "All back data replayed, replaying done");
+-	_listener->handle_replay_done();
+-	if (_notifier)
+-		_notifier->notifyEvent("BT_END");
++	WTSLogger::log_raw(LL_INFO, "High-frequency replay loop ended");
+ }
+ 
+ bool HisDataReplayer::get_hft_trading_date_range(uint32_t& beginTDate, uint32_t& endTDate)
+@@ -1511,10 +1584,7 @@
+ 	if (_main_key.empty() || mainIt == _bars_cache.end() || mainIt->second == NULL || mainIt->second->_bars.empty())
+ 	{
+ 		WTSLogger::error("Cannot replay unavailable main K bars {}", _main_key.c_str());
+-		if (_listener)
+-			_listener->handle_replay_done();
+-		if (_notifier)
+-			_notifier->notifyEvent("BT_END");
++		report_replay_error(WT_REPLAY_ERROR_NO_SOURCE, "Main bar source is unavailable");
+ 		return;
+ 	}
+ 
+@@ -1523,10 +1593,7 @@
+ 	if (sInfo == NULL)
+ 	{
+ 		WTSLogger::error("Cannot replay main K bars {} without a session", _main_key.c_str());
+-		if (_listener)
+-			_listener->handle_replay_done();
+-		if (_notifier)
+-			_notifier->notifyEvent("BT_END");
++		report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Main bar session is unavailable");
+ 		return;
+ 	}
+ 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(barsList->_code.c_str(), NULL);
+@@ -1570,11 +1637,11 @@
+ 		else
+ 			hasBarRange = 199000000000ull + firstMainBar.time >= _bar_begin_time;
+ 	}
+-	if (!hasBarRange && _tick_enabled)
++	if (!hasBarRange)
+ 	{
+-		// A requested main series may have no close inside the selected range.
+-		// Continue with the exact HFT range without emitting or synthesizing bars.
+-		run_by_ticks(bNeedDump);
++		// A main series without an in-range close can only fall back to HFT.
++		if (_tick_enabled) run_by_ticks(bNeedDump);
++		else report_replay_error(WT_REPLAY_ERROR_NO_SOURCE, "No main bar closes in the replay range");
+ 		return;
+ 	}
+ 	uint32_t total_barcnt = hasBarRange ? eIdx - sIdx + 1 : 0;
+@@ -1699,7 +1766,7 @@
+ 							if (!resolve_hft_session_begin_clock(nextTDate, hftBeginTDate,
+ 								hftNaturalTime, hasHftEvents))
+ 							{
+-								_terminated = true;
++								report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 								break;
+ 							}
+ 							if (!hasHftEvents)
+@@ -1861,7 +1928,7 @@
+ 							if (!resolve_hft_session_begin_clock(flushTDate, beginTDate,
+ 								hftNaturalTime, hasHftEvents))
+ 							{
+-								_terminated = true;
++								report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 								break;
+ 							}
+ 							if (!hasHftEvents)
+@@ -1905,25 +1972,24 @@
+ 		_day_cache.clear();
+ 	}
+ 
++	if (replayed_barcnt == 0 && !_terminated)
++		report_replay_error(WT_REPLAY_ERROR_NO_SOURCE, "No main bar was replayed in the selected range");
+ 	if (_terminated)
+ 		WTSLogger::debug("Replaying by bars terminated forcely");
+ 
+-	notify_state(barsList->_code.c_str(), barsList->_period, barsList->_times, _begin_time, _end_time, 100);
+-	if (_notifier)
+-		_notifier->notifyEvent("BT_END");
+-
++	if (!_terminated)
++		notify_state(barsList->_code.c_str(), barsList->_period, barsList->_times, _begin_time, _end_time, 100);
+ 	if (_closed_tdate != _cur_tdate)
+ 	{
+ 		WTSLogger::debug("Tradingday {} ends", _cur_tdate);
+ 		_listener->handle_session_end(_cur_tdate);
+ 	}
+ 
+-	if (bNeedDump)
++	if (bNeedDump && !_terminated)
+ 	{
+ 		dump_btstate(barsList->_code.c_str(), barsList->_period, barsList->_times, _begin_time, _end_time, 100.0, ticker.nano_seconds());
+ 	}
+ 
+-	_listener->handle_replay_done();
+ }
+ 
+ void HisDataReplayer::run_by_tasks(bool /*bNeedDump*/ /* = false */)
+@@ -1931,10 +1997,6 @@
+ 	if (!_has_bar_minutes)
+ 	{
+ 		WTSLogger::info("Replay range [{},{}] contains no whole minute; task replay is done", _begin_time, _end_time);
+-		if (_listener)
+-			_listener->handle_replay_done();
+-		if (_notifier)
+-			_notifier->notifyEvent("BT_END");
+ 		return;
+ 	}
+ 
+@@ -1949,6 +2011,11 @@
+ 	WTSSessionInfo* sInfo = NULL;
+ 	const char* DEF_SESS = (strlen(_task->_session) == 0) ? DEFAULT_SESSIONID : _task->_session;
+ 	sInfo = _bd_mgr.getSession(DEF_SESS);
++	if (!sInfo || _cur_tdate == 0)
++	{
++		report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Task replay session or trading date is unavailable");
++		return;
++	}
+ 	WTSLogger::info("Start to backtest with task frequency from {}...", _begin_time);
+ 
+ 	//分钟即任务和日级别任务分开写
+@@ -2122,9 +2189,6 @@
+ 				if (_listener)
+ 				{
+ 					_listener->handle_session_end(_cur_tdate);
+-					_listener->handle_replay_done();
+-					if (_notifier)
+-						_notifier->notifyEvent("BT_END");
+ 				}
+ 
+ 				break;
+@@ -2136,10 +2200,7 @@
+ 		if (_task->_time == 0)
+ 		{
+ 			WTSLogger::error("Minute task interval must be greater than zero");
+-			if (_listener)
+-				_listener->handle_replay_done();
+-			if (_notifier)
+-				_notifier->notifyEvent("BT_END");
++			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Minute task interval is zero");
+ 			return;
+ 		}
+ 
+@@ -2191,9 +2252,6 @@
+ 					if (_listener)
+ 					{
+ 						_listener->handle_session_end(_cur_tdate);
+-						_listener->handle_replay_done();
+-						if (_notifier)
+-							_notifier->notifyEvent("BT_END");
+ 					}
+ 					break;
+ 				}
+@@ -2228,9 +2286,6 @@
+ 					if (_listener)
+ 					{
+ 						_listener->handle_session_end(_cur_tdate);
+-						_listener->handle_replay_done();
+-						if (_notifier)
+-							_notifier->notifyEvent("BT_END");
+ 					}
+ 					break;
+ 				}
+@@ -2326,9 +2381,6 @@
+ 				if (_listener)
+ 				{
+ 					_listener->handle_session_end(_cur_tdate);
+-					_listener->handle_replay_done();
+-					if (_notifier)
+-						_notifier->notifyEvent("BT_END");
+ 				}
+ 				break;
+ 			}
+@@ -2867,7 +2919,7 @@
+ 		{
+ 			WTSLogger::error("Cannot replay in-range ticks for {} on trading date {} without a session",
+ 				stdCode, curTDate);
+-			_terminated = true;
++			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 			return UINT64_MAX;
+ 		}
+ 
+@@ -3184,7 +3236,7 @@
+ 		{
+ 			WTSLogger::error("HFT data read failed for {} on {} although a candidate file exists or cannot be inspected; stopping replay",
+ 				stdCode.c_str(), tDate);
+-			_terminated = true;
++			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 			return;
+ 		}
+ 		if (_mode != "bin" && _mode != "csv")
+@@ -3236,7 +3288,7 @@
+ 				{
+ 					WTSLogger::error("Extended HFT loader failed to load {} on {}; stopping replay",
+ 						stdCode.c_str(), tDate);
+-					_terminated = true;
++					report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 					return false;
+ 				}
+ 				else
+@@ -3353,14 +3405,14 @@
+ 			{
+ 				WTSLogger::error("Cannot determine 24-hour HFT session boundary for {} after {} with offset {}",
+ 					code.c_str(), afterTime, session->getOffsetMins());
+-				_terminated = true;
++				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 				return std::numeric_limits<uint64_t>::max();
+ 			}
+ 			if (sessionEnd <= afterTime)
+ 			{
+ 				WTSLogger::error("24-hour HFT session boundary {} for {} did not advance after {}",
+ 					sessionEnd, code.c_str(), afterTime);
+-				_terminated = true;
++				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 				return std::numeric_limits<uint64_t>::max();
+ 			}
+ 			earliest = std::min(earliest, sessionEnd);
+@@ -3370,7 +3422,7 @@
+ 		if (currentTDate == 0)
+ 		{
+ 			WTSLogger::error("Cannot map natural time {} to a trading date for HFT subscription {}", afterTime, code.c_str());
+-			_terminated = true;
++			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 			return std::numeric_limits<uint64_t>::max();
+ 		}
+ 		uint32_t candidate = _bd_mgr.getNextTDate(commId, currentTDate, 1, false);
+@@ -3383,7 +3435,7 @@
+ 			{
+ 				WTSLogger::error("Cannot determine next HFT session boundary for {} on trading date {}",
+ 					code.c_str(), candidate);
+-				_terminated = true;
++				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 				return std::numeric_limits<uint64_t>::max();
+ 			}
+ 			if (natural > afterTime)
+@@ -3394,7 +3446,7 @@
+ 			if (natural <= previousBoundary)
+ 			{
+ 				WTSLogger::error("HFT session boundaries for {} did not advance after {}", code.c_str(), afterTime);
+-				_terminated = true;
++				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 				return std::numeric_limits<uint64_t>::max();
+ 			}
+ 			previousBoundary = natural;
+@@ -3402,7 +3454,7 @@
+ 			if (following <= candidate)
+ 			{
+ 				WTSLogger::error("Trading-date calendar did not advance for HFT subscription {}", code.c_str());
+-				_terminated = true;
++				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 				return std::numeric_limits<uint64_t>::max();
+ 			}
+ 			candidate = following;
+@@ -3410,7 +3462,7 @@
+ 		if (candidate <= currentTDate)
+ 		{
+ 			WTSLogger::error("Trading-date calendar did not advance for HFT subscription {}", code.c_str());
+-			_terminated = true;
++			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 			return std::numeric_limits<uint64_t>::max();
+ 		}
+ 	}
+@@ -3467,7 +3519,7 @@
+ 		static_cast<uint32_t>((etime - 1) / 1000000000ull))
+ 	{
+ 		WTSLogger::error("HFT interval [{}, {}) exceeds its bounded natural-date window", stime, etime);
+-		_terminated = true;
++		report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 		return false;
+ 	}
+ 	const std::set<std::string>& tickCodes = subscriptions.ticks;
+@@ -3490,7 +3542,7 @@
+ 		if (commId == NULL || *commId == '\0' || codeSession == NULL)
+ 		{
+ 			WTSLogger::error("Cannot schedule HFT buckets for {} without a session", code.c_str());
+-			_terminated = true;
++			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 			return false;
+ 		}
+ 		const bool naturalDaySession = codeSession->getTradingMins() == 1440;
+@@ -3513,7 +3565,7 @@
+ 			{
+ 				WTSLogger::error("Cannot map natural replay minute {}{} to a trading date for {}",
+ 					naturalDate, actionTime, code.c_str());
+-				_terminated = true;
++				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 				return false;
+ 			}
+ 			mappedTradingDates.insert(mapped);
+@@ -3527,7 +3579,7 @@
+ 			if (followingMinute <= minuteStart)
+ 			{
+ 				WTSLogger::error("Cannot advance bounded HFT calendar scan for {}", code.c_str());
+-				_terminated = true;
++				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 				return false;
+ 			}
+ 			naturalDate = followingDate;
+@@ -3553,7 +3605,7 @@
+ 			if (previous == 0 || following == 0 || previous >= mapped || following <= mapped)
+ 			{
+ 				WTSLogger::error("Trading-date calendar cannot bound natural replay window for {}", code.c_str());
+-				_terminated = true;
++				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 				return false;
+ 			}
+ 			candidateDates.insert(previous);
+@@ -3562,7 +3614,7 @@
+ 		if (candidateDates.empty())
+ 		{
+ 			WTSLogger::error("Trading-date calendar cannot bound natural replay window for {}", code.c_str());
+-			_terminated = true;
++			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 			return false;
+ 		}
+ 
+@@ -3577,7 +3629,7 @@
+ 				{
+ 					WTSLogger::error("Invalid continuous HFT session boundaries for {} on {} with offset {}",
+ 						code.c_str(), date, codeSession->getOffsetMins());
+-					_terminated = true;
++					report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 					return false;
+ 				}
+ 			}
+@@ -3589,7 +3641,7 @@
+ 			if (sessionBegin == 0 || sessionEnd == 0 || sessionBegin >= sessionEnd)
+ 			{
+ 				WTSLogger::error("Invalid session boundaries for {} on HFT trading date {}", code.c_str(), date);
+-				_terminated = true;
++				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 				return false;
+ 			}
+ 			// Ordinary market sessions include their close timestamp, so a range
+@@ -3689,7 +3741,7 @@
+ 		{
+ 			WTSLogger::error("HFT replay event {} for {} arrived behind the dispatched natural-time watermark {}",
+ 				event.time, event.code.c_str(), _last_replay_hft_time);
+-			_terminated = true;
++			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 			return false;
+ 		}
+ 		_cur_date = static_cast<uint32_t>(event.time / 1000000000ull);
+@@ -3704,14 +3756,14 @@
+ 			auto& list = *static_cast<HftDataList<WTSOrdDtlStruct>*>(event.list);
+ 			WTSOrdDtlStruct item = list._items[event.index]; list._cursor = event.index + 2;
+ 			WTSOrdDtlData* data = WTSOrdDtlData::create(item); WTSReleaseGuard<WTSOrdDtlData> guard(data);
+-			if (data != NULL) { data->setCode(event.code.c_str()); _listener->handle_order_detail(event.code.c_str(), data); }
++			if (data != NULL) { data->setCode(event.code.c_str()); _has_dispatched_hft_event = true; _listener->handle_order_detail(event.code.c_str(), data); }
+ 		}
+ 		else if (event.kind == 1)
+ 		{
+ 			auto& list = *static_cast<HftDataList<WTSTransStruct>*>(event.list);
+ 			WTSTransStruct item = list._items[event.index]; list._cursor = event.index + 2;
+ 			WTSTransData* data = WTSTransData::create(item); WTSReleaseGuard<WTSTransData> guard(data);
+-			if (data != NULL) { data->setCode(event.code.c_str()); _listener->handle_transaction(event.code.c_str(), data); }
++			if (data != NULL) { data->setCode(event.code.c_str()); _has_dispatched_hft_event = true; _listener->handle_transaction(event.code.c_str(), data); }
+ 		}
+ 		else if (event.kind == 2)
+ 		{
+@@ -3738,6 +3790,7 @@
+ 						std::lock_guard<std::mutex> lock(_dispatched_ticks_mutex);
+ 						_last_dispatched_ticks[event.code] = { _cur_tdate, data->getTickStruct(), false, physical ? physical->getCode() : "", physical ? physical->getExchg() : "" };
+ 					}
++					_has_dispatched_hft_event = true;
+ 					_listener->handle_tick(event.code.c_str(), data, 0);
+ 					dispatchedRealTick = true;
+ 				}
+@@ -3748,7 +3801,7 @@
+ 			auto& list = *static_cast<HftDataList<WTSOrdQueStruct>*>(event.list);
+ 			WTSOrdQueStruct item = list._items[event.index]; list._cursor = event.index + 2;
+ 			WTSOrdQueData* data = WTSOrdQueData::create(item); WTSReleaseGuard<WTSOrdQueData> guard(data);
+-			if (data != NULL) { data->setCode(event.code.c_str()); _listener->handle_order_queue(event.code.c_str(), data); }
++			if (data != NULL) { data->setCode(event.code.c_str()); _has_dispatched_hft_event = true; _listener->handle_order_queue(event.code.c_str(), data); }
+ 		}
+ 		if (_terminated) break;
+ 		if (event.kind == 0) enqueue(_replay_orddtl_cache[event.code][event.tDate], event.code, event.tDate, event.kind);
+@@ -3793,7 +3846,7 @@
+ 		{
+ 			WTSLogger::error("HFT replay interval moved back from natural date {} to {}; reset is required before replaying older data",
+ 				_replay_completed_natural_date, naturalDate);
+-			_terminated = true;
++			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 			return dispatchedRealTick;
+ 		}
+ 		const uint32_t nextDate = TimeUtils::getNextDate(naturalDate, 1);
+@@ -3801,7 +3854,7 @@
+ 		if (nextMidnight <= cursor)
+ 		{
+ 			WTSLogger::error("Cannot advance HFT replay natural-date window from {}", cursor);
+-			_terminated = true;
++			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 			return dispatchedRealTick;
+ 		}
+ 		const uint64_t chunkEnd = std::min(etime, nextMidnight);
+@@ -3852,7 +3905,7 @@
+ 			{
+ 				WTSLogger::error("Cannot advance uncovered HFT replay interval from {} to {}",
+ 					segmentBegin, chunkEnd);
+-				_terminated = true;
++				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 				break;
+ 			}
+ 
+@@ -5189,6 +5242,7 @@
+ 		first = _fee_error;
+ 		_terminated.store(true);
+ 	}
++	report_replay_error(WT_REPLAY_ERROR_FEE, first);
+ 	WTSLogger::error("Replay fee error: {}", first);
+ }
+ 
+@@ -5739,7 +5793,7 @@
+ 			stdCode, uDate);
+ 		dataList._items.clear();
+ 		dataList._count = 0;
+-		_terminated = true;
++		report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
+ 		return false;
+ 	}
+ 

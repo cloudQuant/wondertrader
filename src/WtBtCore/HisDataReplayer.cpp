@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file HisDataReplayer.cpp
  * \project	WonderTrader
  *
@@ -15,12 +15,14 @@
 #include <algorithm>
 #include <cstring>
 #include <fstream>
+#include <exception>
 #include <limits>
 #include <mutex>
 #include <queue>
 #include <tuple>
 
 #include "../Includes/WTSVariant.hpp"
+#include "../Includes/DateMappingClient.hpp"
 #include "../Includes/WTSDataDef.hpp"
 #include "../Includes/WTSContractInfo.hpp"
 #include "../Includes/WTSSessionInfo.hpp"
@@ -36,21 +38,27 @@
 #include "../WTSTools/CsvHelper.h"
 
 #include "../WTSUtils/WTSCmpHelper.hpp"
+#include "../WTSUtils/WTSCmpBudgetConfig.hpp"
 #include "../WTSUtils/WTSCfgLoader.h"
 
 #include "../Share/CodeHelper.hpp"
+#include "../WTSUtils/yamlcpp/yaml.h"
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 
 #include <filesystem>
 namespace fs = std::filesystem;
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
+#include "../Includes/SelScheduleRules.hpp"
 namespace rj = rapidjson;
 
 using namespace std;
 
 namespace
 {
+	bool fee_is_continuous(const std::string&, const CodeHelper::CodeInfo&);
 	using wtp::replay::CivilDateTime;
 	using wtp::replay::ReplayTimeRange;
 	using wtp::replay::TimeRangeParseError;
@@ -407,6 +415,19 @@ bool HisDataReplayer::init(WTSVariant* cfg, EventNotifier* notifier /* = NULL */
 		return false;
 	}
 
+	// BUG-R132-001 / K37=B: the replayer decompresses history blocks itself, so the budget
+	// of this module is configured here, from the same section that carries the store path
+	// ("store" when present, otherwise the replayer root). Invalid values fail closed.
+	{
+		WTSVariant* budgetCfg = cfg->has("store") ? cfg->get("store") : cfg;
+		std::string budgetError;
+		if (wt_cmp_budget::apply(budgetCfg, budgetError) == wt_cmp_budget::ApplyResult::Invalid)
+		{
+			WTSLogger::error("Invalid replayer config: {}", budgetError);
+			return false;
+		}
+	}
+
 	_notifier = notifier;
 	_bt_loader = dataLoader;
 
@@ -532,15 +553,68 @@ bool HisDataReplayer::init(WTSVariant* cfg, EventNotifier* notifier /* = NULL */
 		}
 	}
 
-	loadFees(cfg->getCString("fees"));
-	for (const auto& feeEntry : _fee_map)
+	WTSVariant* feeOption = cfg->get("fees");
+	if (feeOption && feeOption->type() != WTSVariant::VT_String)
 	{
-		if (!feeEntry.second._by_volume && _bd_mgr.getCommodity(feeEntry.first.c_str()) == NULL)
+		_fee_schedule = wt_fee::Schedule{};
+		_fee_map.clear();
+		WTSLogger::error("Fees template path must be a string");
+		return false;
+	}
+	const char* feeFile = cfg->getCString("fees");
+	if (feeFile && *feeFile)
+	{
+		const std::string previousFeeError = fee_error();
+		if (!loadFeesChecked(feeFile)) return false;
+		// Preserve the historical initialization gate for amount-based fees.
+		// Initialization has no fill date; validate against loaded metadata
+		// without imposing a current-date restriction on historical contracts.
+		bool feeMetadataValid = true;
+		for (const auto& entry : _fee_schedule.productRates())
 		{
-			WTSLogger::error("Amount-based fee template for {} requires commodity metadata; replayer initialization failed",
-				feeEntry.first.c_str());
+			if (entry.second.by_volume) continue;
+			WTSCommodityInfo* commodity = _bd_mgr.getCommodity(entry.first.c_str());
+			if (!commodity || commodity->getVolScale() == 0)
+			{
+				WTSLogger::error("Amount-based fee template for {} requires valid commodity metadata", entry.first);
+				feeMetadataValid = false;
+			}
+		}
+		for (const auto& entry : _fee_schedule.contractRates())
+		{
+			if (entry.second.by_volume) continue;
+			const std::size_t dot = entry.first.find('.');
+			const std::string exchange = entry.first.substr(0, dot);
+			const std::string rawCode = entry.first.substr(dot + 1);
+			WTSContractInfo* contract = _bd_mgr.getContract(rawCode.c_str(), exchange.c_str());
+			WTSCommodityInfo* commodity = contract ? _bd_mgr.getCommodity(contract->getFullPid()) : NULL;
+			const char* rule = _hot_mgr.getRuleTag(rawCode.c_str());
+			CodeHelper::CodeInfo identity = CodeHelper::extractStdCode(entry.first.c_str(), &_hot_mgr);
+			if (fee_is_continuous(entry.first, identity) || (rule && *rule) ||
+				!contract || !commodity || contract->getCommInfo() != commodity ||
+				std::strcmp(contract->getExchg(), exchange.c_str()) ||
+				std::strcmp(contract->getCode(), rawCode.c_str()) || contract->getVolScale() == 0)
+			{
+				WTSLogger::error("Amount-based fee template for {} requires valid physical contract metadata", entry.first);
+				feeMetadataValid = false;
+			}
+		}
+		if (!feeMetadataValid)
+		{
+			_fee_schedule = wt_fee::Schedule{};
+			_fee_map.clear();
+			if (!previousFeeError.empty())
+			{
+				std::lock_guard<std::mutex> lock(_fee_error_mutex);
+				if (_fee_error.empty()) _fee_error = previousFeeError;
+			}
 			return false;
 		}
+	}
+	else
+	{
+		_fee_schedule = wt_fee::Schedule{};
+		_fee_map.clear();
 	}
 
 	/*
@@ -692,6 +766,13 @@ void HisDataReplayer::register_task(uint32_t taskid, uint32_t date, uint32_t tim
 	else
 		ptype = TPT_None;
 
+	// Decision K27=A: reject schedules that can never fire.
+	if (const char* why = wt_sel_schedule::invalidReason(static_cast<uint32_t>(ptype), date, time))
+	{
+		WTSLogger::error("Timed task registration rejected: {} (date {}, time {})", why, date, time);
+		return;
+	}
+
 	TaskInfoPtr task(new TaskInfo);
 	strcpy(task->_name, "sel");
 	strcpy(task->_trdtpl, trdtpl);
@@ -709,6 +790,10 @@ void HisDataReplayer::register_task(uint32_t taskid, uint32_t date, uint32_t tim
 void HisDataReplayer::clear_cache()
 {
 	_ticks_cache.clear();
+	_tick_query_cache.clear();
+	_orddtl_query_cache.clear();
+	_ordque_query_cache.clear();
+	_trans_query_cache.clear();
 	_orddtl_cache.clear();
 	_ordque_cache.clear();
 	_trans_cache.clear();
@@ -716,6 +801,11 @@ void HisDataReplayer::clear_cache()
 	_replay_orddtl_cache.clear();
 	_replay_ordque_cache.clear();
 	_replay_trans_cache.clear();
+	{
+		std::lock_guard<std::mutex> lock(_dispatched_ticks_mutex);
+		_dispatched_tick_subscriptions.clear();
+		_last_dispatched_ticks.clear();
+	}
 
 	_bars_cache.clear();
 	_unbars_cache.clear();
@@ -730,6 +820,7 @@ void HisDataReplayer::clear_cache()
 	_bar_real_tick_codes.clear();
 	_last_replay_hft_time = 0;
 	_has_last_replay_hft_time = false;
+	_has_dispatched_hft_event = false;
 	_replay_completed_natural_date = 0;
 	_replay_completed_natural_ranges.clear();
 	_has_replay_completed_natural_date = false;
@@ -745,14 +836,27 @@ void HisDataReplayer::clear_cache()
 
 void HisDataReplayer::reset()
 {
+	for (auto& skipped : _hft_out_of_session)
+		skipped.store(0);
+	_hft_out_of_session_logged.clear();
 	// Replay buckets own their vectors. Drop them on reset so reruns restart at
 	// the configured range without touching vectors borrowed by history slices.
 	_replay_ticks_cache.clear();
+	_tick_query_cache.clear();	// P04-011: query buckets may be copies of replay buckets
+	_orddtl_query_cache.clear();
+	_ordque_query_cache.clear();
+	_trans_query_cache.clear();
 	_replay_orddtl_cache.clear();
 	_replay_ordque_cache.clear();
 	_replay_trans_cache.clear();
+	{
+		std::lock_guard<std::mutex> lock(_dispatched_ticks_mutex);
+		_dispatched_tick_subscriptions.clear();
+		_last_dispatched_ticks.clear();
+	}
 	_last_replay_hft_time = 0;
 	_has_last_replay_hft_time = false;
+	_has_dispatched_hft_event = false;
 	_replay_completed_natural_date = 0;
 	_replay_completed_natural_ranges.clear();
 	_has_replay_completed_natural_date = false;
@@ -948,9 +1052,18 @@ uint64_t HisDataReplayer::get_daily_bar_close_time(const BarsListPtr& barsList, 
 
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(barsList->_code.c_str(), &_hot_mgr);
 	const char* commId = codeInfo.stdCommID();
-	const uint64_t boundary = _bd_mgr.getBoundaryTime(commId, bar.date, false, false);
-	if (boundary != 0)
-		return boundary;
+	// BUG-R12-13: a daily bar closes at the mapped session-end boundary. A mapping
+	// failure (for example a missing holiday calendar) stops the replay instead of
+	// falling back to a session-derived close time.
+	const wtp::DateMappingResult64 mapped = _bd_mgr.checkedGetBoundaryTime(commId, bar.date, false, false);
+	if (mapped.status == wtp::DateMappingStatus::Ok)
+		return mapped.value;
+	if (mapped.status != wtp::DateMappingStatus::MissingCommodity)
+	{
+		report_replay_error(WT_REPLAY_ERROR_INTERNAL, fmtutil::format("Cannot map the close of daily bar {} of {}: {}",
+			bar.date, barsList->_code, wtp::dateMappingStatusName(mapped.status)));
+		return UINT64_MAX;
+	}
 
 	WTSSessionInfo* session = get_session_info(barsList->_code.c_str(), true);
 	if (session == NULL)
@@ -962,86 +1075,223 @@ uint64_t HisDataReplayer::get_daily_bar_close_time(const BarsListPtr& barsList, 
 	return static_cast<uint64_t>(closeDate) * 10000 + session->getCloseTime();
 }
 
-void HisDataReplayer::stop()
+uint32_t HisDataReplayer::checked_trading_date(const char* commId, uint32_t date, uint32_t time)
 {
+	const wtp::DateMappingResult32 r = _bd_mgr.checkedCalcTradingDate(commId, date, time, false);
+	if (r.status == wtp::DateMappingStatus::Ok)
+		return r.value;
+	WTSLogger::error("Mapping trading date of {} at {}.{:04d} failed: {}", commId == NULL ? "" : commId, date, time,
+		wtp::dateMappingStatusName(r.status));
+	return 0;
+}
+
+uint64_t HisDataReplayer::checked_boundary_time(const char* commId, uint32_t tradingDate, bool isStart)
+{
+	const wtp::DateMappingResult64 r = _bd_mgr.checkedGetBoundaryTime(commId, tradingDate, false, isStart);
+	if (r.status == wtp::DateMappingStatus::Ok)
+		return r.value;
+	WTSLogger::error("Mapping session {} boundary of {} on trading date {} failed: {}", isStart ? "begin" : "end",
+		commId == NULL ? "" : commId, tradingDate, wtp::dateMappingStatusName(r.status));
+	return 0;
+}
+
+uint32_t HisDataReplayer::checked_next_tdate(const char* commId, uint32_t tradingDate)
+{
+	const wtp::DateMappingResult32 r = _bd_mgr.checkedNextTradingDate(commId, tradingDate, 1, false);
+	if (r.status == wtp::DateMappingStatus::Ok)
+		return r.value;
+	WTSLogger::error("Next trading date of {} after {} failed: {}", commId == NULL ? "" : commId, tradingDate,
+		wtp::dateMappingStatusName(r.status));
+	return 0;
+}
+
+uint32_t HisDataReplayer::checked_prev_tdate(const char* commId, uint32_t tradingDate)
+{
+	const wtp::DateMappingResult32 r = _bd_mgr.checkedPrevTradingDate(commId, tradingDate, 1, false);
+	if (r.status == wtp::DateMappingStatus::Ok)
+		return r.value;
+	WTSLogger::error("Previous trading date of {} before {} failed: {}", commId == NULL ? "" : commId, tradingDate,
+		wtp::dateMappingStatusName(r.status));
+	return 0;
+}
+
+WtReplayStatusV1 HisDataReplayer::replay_status() const
+{
+	std::lock_guard<std::mutex> lock(_replay_status_mutex);
+	return _replay_status;
+}
+
+void HisDataReplayer::report_replay_error(uint32_t errorCode, const std::string& message)
+{
+	std::lock_guard<std::mutex> lock(_replay_status_mutex);
 	if (!_running.load())
 	{
-		WTSLogger::log_raw(LL_ERROR, "Backtesting is not running, no need to stop");
+		// Preserve the legacy abort signal for loader/query helpers invoked
+		// outside a run, without changing an already completed generation.
+		_terminated.store(true);
 		return;
 	}
+	if (_replay_finishing) return;
+	if (_replay_failure_code == WT_REPLAY_ERROR_NONE)
+	{
+		_replay_failure_code = errorCode == WT_REPLAY_ERROR_NONE ? WT_REPLAY_ERROR_INTERNAL : errorCode;
+		_replay_failure_message = message.empty() ? "Replay failed" : message;
+		// I03-NEW-019: make the first recorded failure observable in the log.
+		WTSLogger::error("Replay failed with replay error {}: {}", _replay_failure_code, _replay_failure_message);
+	}
+	_terminated.store(true);
+}
 
-	if (_terminated.exchange(true))
-		return;
+void HisDataReplayer::finish_replay()
+{
+	uint32_t terminalState;
+	{
+		std::lock_guard<std::mutex> lock(_replay_status_mutex);
+		if (_replay_finishing) return;
+		_replay_finishing = true;
+		if (_replay_failure_code != WT_REPLAY_ERROR_NONE)
+			terminalState = WT_REPLAY_FAILED;
+		else if (_replay_stop_requested)
+			terminalState = WT_REPLAY_STOPPED;
+		else if (_terminated.load())
+		{
+			terminalState = WT_REPLAY_FAILED;
+			_replay_failure_code = WT_REPLAY_ERROR_INTERNAL;
+			_replay_failure_message = "Replay terminated internally";
+		}
+		else terminalState = WT_REPLAY_SUCCEEDED;
+		_replay_status.state = terminalState;
+		_replay_status.error_code = _replay_failure_code;
+		const std::string& message = terminalState == WT_REPLAY_STOPPED ? std::string("Stopped by user") : _replay_failure_message;
+		std::snprintf(_replay_status.message, sizeof(_replay_status.message), "%s", message.c_str());
+	}
 
-	WTSLogger::log_raw(LL_WARN, "Terminating flag reset to true, backtesting will quit at next round");
+	std::exception_ptr callbackError;
+	try { if (_listener) _listener->handle_replay_done(); }
+	catch (...) { callbackError = std::current_exception(); }
+	if (callbackError)
+	{
+		std::lock_guard<std::mutex> lock(_replay_status_mutex);
+		_replay_status.state = WT_REPLAY_FAILED;
+		_replay_status.error_code = WT_REPLAY_ERROR_CALLBACK_EXCEPTION;
+		std::snprintf(_replay_status.message, sizeof(_replay_status.message), "%s", "Replay completion callback threw");
+		terminalState = WT_REPLAY_FAILED;
+	}
+	try
+	{
+		if (_notifier)
+			_notifier->notifyEvent(terminalState == WT_REPLAY_SUCCEEDED ? "BT_END" :
+				terminalState == WT_REPLAY_STOPPED ? "BT_STOPPED" : "BT_FAILED");
+	}
+	catch (...)
+	{
+		if (!callbackError) callbackError = std::current_exception();
+		std::lock_guard<std::mutex> lock(_replay_status_mutex);
+		_replay_status.state = WT_REPLAY_FAILED;
+		_replay_status.error_code = WT_REPLAY_ERROR_CALLBACK_EXCEPTION;
+		std::snprintf(_replay_status.message, sizeof(_replay_status.message), "%s", "Replay terminal notification threw");
+	}
+	{
+		std::lock_guard<std::mutex> lock(_replay_status_mutex);
+		_running.store(false);
+		_replay_status.flags = WT_REPLAY_STATUS_FINAL;
+	}
+	if (callbackError) std::rethrow_exception(callbackError);
+}
+
+void HisDataReplayer::stop()
+{
+	std::lock_guard<std::mutex> lock(_replay_status_mutex);
+	if (!_running.load() || _replay_finishing) return;
+	if (!_terminated.exchange(true)) _replay_stop_requested = true;
 }
 
 bool HisDataReplayer::prepare()
 {
-	if (!_time_range_valid)
 	{
-		WTSLogger::error("Cannot prepare replayer with an invalid time range");
-		return false;
+		std::lock_guard<std::mutex> lock(_replay_status_mutex);
+		if (_running.load()) return false;
+		_running.store(true);
+		_terminated.store(false);
+		_replay_finishing = false;
+		_replay_stop_requested = false;
+		_replay_failure_code = WT_REPLAY_ERROR_NONE;
+		_replay_failure_message.clear();
+		++_replay_status.generation;
+		_replay_status.state = WT_REPLAY_PREPARING;
+		_replay_status.error_code = WT_REPLAY_ERROR_NONE;
+		_replay_status.flags = 0;
+		std::memset(_replay_status.message, 0, sizeof(_replay_status.message));
 	}
-
-	if (_running.load())
-	{
-		WTSLogger::log_raw(LL_ERROR, "Cannot run more than one backtesting task at the same time");
-		return false;
-	}
-
-	// The initialization callback is mandatory. Reject before publishing the
-	// running state, resetting replay data, or emitting BT_START, so callers can
-	// register a sink and retry after a configuration error.
-	if (_listener == NULL)
-	{
-		WTSLogger::error("Cannot prepare replayer without a registered data sink");
-		return false;
-	}
-
-	// Clear the previous run's termination state before publishing that a new
-	// replay is active. A concurrent stop then cannot be overwritten by prepare.
-	_terminated.store(false);
-	_running.store(true);
-	reset();
-
-	_cur_date = _range_begin_date;
-	_cur_time = _range_begin_hhmm;
-	_cur_secs = 0;
-	_cur_tdate = _bd_mgr.calcTradingDate(DEFAULT_SESSIONID, _cur_date, _cur_time, true);
-
 	try
 	{
-		if (_notifier)
-			_notifier->notifyEvent("BT_START");
-
-		_listener->handle_init();
-
-		if (!_tick_enabled)
-			checkUnbars();
+		if (!_time_range_valid)
+			report_replay_error(WT_REPLAY_ERROR_INVALID_RANGE, "Invalid replay time range");
+		else if (!_listener)
+			report_replay_error(WT_REPLAY_ERROR_NO_LISTENER, "Replay data sink is not registered");
+		else
+		{
+			const std::string feeError = fee_error();
+			if (!feeError.empty()) report_replay_error(WT_REPLAY_ERROR_FEE, feeError);
+		}
+		if (_terminated.load()) { finish_replay(); return false; }
+		reset();
+		_cur_date = _range_begin_date;
+		_cur_time = _range_begin_hhmm;
+		_cur_secs = 0;
+		const auto initialDate = _bd_mgr.checkedCalcTradingDate(DEFAULT_SESSIONID, _cur_date, _cur_time, true);
+		if (initialDate.status != wtp::DateMappingStatus::Ok)
+		{
+			report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING,
+				fmtutil::format("Cannot map initial replay trading date, status {}", static_cast<uint32_t>(initialDate.status)));
+			finish_replay();
+			return false;
+		}
+		_cur_tdate = initialDate.value;
+		if (_notifier) _notifier->notifyEvent("BT_START");
+		if (!_terminated.load()) _listener->handle_init();
+		if (!_terminated.load() && !_tick_enabled) checkUnbars();
+		if (_terminated.load()) { finish_replay(); return false; }
+		{
+			std::lock_guard<std::mutex> lock(_replay_status_mutex);
+			if (!_terminated.load()) _replay_status.state = WT_REPLAY_PREPARED;
+		}
+		if (_terminated.load()) { finish_replay(); return false; }
+		return true;
 	}
 	catch (...)
 	{
-		// Initialization callbacks are part of the replay lifecycle. Leave the
-		// replayer retryable when user code throws during prepare().
-		_terminated = true;
-		_running = false;
-		throw;
+		const std::exception_ptr original = std::current_exception();
+		report_replay_error(WT_REPLAY_ERROR_CALLBACK_EXCEPTION, "Replay preparation callback threw");
+		try { finish_replay(); } catch (...) { }
+		std::rethrow_exception(original);
 	}
-
-	return true;
 }
 
 void HisDataReplayer::run(bool bNeedDump/* = false*/)
 {
+	{
+		std::lock_guard<std::mutex> lock(_replay_status_mutex);
+		if (!_running.load() || _replay_finishing || _replay_status.state != WT_REPLAY_PREPARED) return;
+		_replay_status.state = WT_REPLAY_RUNNING;
+	}
+	try
+	{
+	const std::string pendingFeeError = fee_error();
+	if (!pendingFeeError.empty())
+	{
+		report_replay_error(WT_REPLAY_ERROR_FEE, pendingFeeError);
+		finish_replay();
+		return;
+	}
 	if (!_time_range_valid)
 	{
-		WTSLogger::error("Cannot run replayer with an invalid time range");
+		report_replay_error(WT_REPLAY_ERROR_INVALID_RANGE, "Invalid replay time range");
+		finish_replay();
 		return;
 	}
 
-	try
-	{
+	if (_terminated.load()) { finish_replay(); return; }
 	if(_task == NULL)
 	{
 		// A requested main series is committed only after its bars have loaded.
@@ -1107,27 +1357,22 @@ void HisDataReplayer::run(bool bNeedDump/* = false*/)
 		}
 		else
 		{
-			WTSLogger::log_raw(LL_INFO, "Main K bars not subscribed and backtesting of tick data not available , replaying done");
-			_listener->handle_replay_done();
-			if (_notifier)
-				_notifier->notifyEvent("BT_END");
+			report_replay_error(WT_REPLAY_ERROR_NO_SOURCE, "No replay data source is configured");
 		}
 	}
 	else //if(_task != NULL)
 	{
 		run_by_tasks(bNeedDump);
 	}
+		finish_replay();
 	}
 	catch (...)
 	{
-		// Sink callback exceptions abort this replay. Keep the failure visible to
-		// the caller, and do not leave the replayer permanently marked as running.
-		_terminated = true;
-		_running = false;
-		throw;
+		const std::exception_ptr original = std::current_exception();
+		report_replay_error(WT_REPLAY_ERROR_CALLBACK_EXCEPTION, "Replay callback threw");
+		try { finish_replay(); } catch (...) { }
+		std::rethrow_exception(original);
 	}
-
-	_running = false;
 }
 
 void HisDataReplayer::run_by_ticks(bool /*bNeedDump*/ /* = false */)
@@ -1139,9 +1384,9 @@ void HisDataReplayer::run_by_ticks(bool /*bNeedDump*/ /* = false */)
 	uint32_t endTDate = 0;
 	if (!get_hft_trading_date_range(beginTDate, endTDate))
 	{
-		_listener->handle_replay_done();
-		if (_notifier)
-			_notifier->notifyEvent("BT_END");
+		const bool empty = _tick_sub_map.empty() && _orddtl_sub_map.empty() && _ordque_sub_map.empty() && _trans_sub_map.empty();
+		report_replay_error(empty ? WT_REPLAY_ERROR_NO_SOURCE : WT_REPLAY_ERROR_DATE_MAPPING,
+			empty ? "No high-frequency subscriptions" : "Cannot map high-frequency trading-date range");
 		return;
 	}
 	_cur_tdate = beginTDate;
@@ -1158,7 +1403,7 @@ void HisDataReplayer::run_by_ticks(bool /*bNeedDump*/ /* = false */)
 			bool hasReplayableEvents = false;
 			if (!resolve_hft_session_begin_clock(_cur_tdate, beginTDate, naturalTime, hasReplayableEvents))
 			{
-				_terminated = true;
+				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 				break;
 			}
 			_cur_date = static_cast<uint32_t>(naturalTime / 1000000000);
@@ -1175,7 +1420,7 @@ void HisDataReplayer::run_by_ticks(bool /*bNeedDump*/ /* = false */)
 			if (sessionEnd <= naturalTime)
 			{
 				WTSLogger::error("Cannot advance pure-tick replay session window for trading date {}", _cur_tdate);
-				_terminated = true;
+				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 				break;
 			}
 			_listener->handle_session_begin(_cur_tdate);
@@ -1187,45 +1432,66 @@ void HisDataReplayer::run_by_ticks(bool /*bNeedDump*/ /* = false */)
 		_cur_tdate = TimeUtils::getNextDate(_cur_tdate);
 	}
 
+	if (!_has_dispatched_hft_event && !_terminated)
+		report_replay_error(WT_REPLAY_ERROR_NO_SOURCE, "No high-frequency event was dispatched in the replay range");
 	if (_terminated)
 		WTSLogger::debug("Replaying by ticks terminated forcely");
 
-	WTSLogger::log_raw(LL_INFO, "All back data replayed, replaying done");
-	_listener->handle_replay_done();
-	if (_notifier)
-		_notifier->notifyEvent("BT_END");
+	WTSLogger::log_raw(LL_INFO, "High-frequency replay loop ended");
 }
 
 bool HisDataReplayer::get_hft_trading_date_range(uint32_t& beginTDate, uint32_t& endTDate)
 {
 	bool hasSubscription = false;
-	beginTDate = UINT32_MAX;
-	endTDate = 0;
-	auto includeSubscriptions = [&](const auto& subscriptions)
+	uint32_t candidateBegin = UINT32_MAX;
+	uint32_t candidateEnd = 0;
+	auto includeSubscriptions = [&](const auto& subscriptions) -> bool
 	{
 		for (const auto& subscription : subscriptions)
 		{
-			CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(subscription.first.c_str(), &_hot_mgr);
-			const char* commId = codeInfo.stdCommID();
-			const char* codeSession = commId == NULL ? "" : commId;
-			const uint32_t codeBegin = _bd_mgr.calcTradingDate(codeSession, _range_begin_date, _range_begin_hhmm, false);
-			const uint32_t codeEnd = _bd_mgr.calcTradingDate(codeSession, _range_end_date, _range_end_hhmm, false);
-			beginTDate = std::min(beginTDate, codeBegin == 0 ? _range_begin_date : codeBegin);
-			endTDate = std::max(endTDate, codeEnd == 0 ? _range_end_date : codeEnd);
 			hasSubscription = true;
+			const char* code = subscription.first.c_str();
+			CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(code, &_hot_mgr);
+			const char* commId = codeInfo.stdCommID();
+			auto mapBoundary = [&](uint32_t date, uint32_t time) -> wtp::DateMappingResult32
+			{
+				// Zero means "current time" to the mapping API, but is never a
+				// valid explicit replay boundary.
+				if (date == 0)
+					return {wtp::DateMappingStatus::InvalidDate, 0};
+				return _bd_mgr.checkedCalcTradingDate(commId, date, time, false);
+			};
+			const auto codeBegin = mapBoundary(_range_begin_date, _range_begin_hhmm);
+			if (codeBegin.status != wtp::DateMappingStatus::Ok)
+			{
+				WTSLogger::error("Cannot map replay range for {}: begin date status {}", code, static_cast<uint32_t>(codeBegin.status));
+				return false;
+			}
+			const auto codeEnd = mapBoundary(_range_end_date, _range_end_hhmm);
+			if (codeEnd.status != wtp::DateMappingStatus::Ok)
+			{
+				WTSLogger::error("Cannot map replay range for {}: end date status {}", code, static_cast<uint32_t>(codeEnd.status));
+				return false;
+			}
+			const uint64_t naturalBegin = static_cast<uint64_t>(_range_begin_date) * 10000 + _range_begin_hhmm;
+			const uint64_t naturalEnd = static_cast<uint64_t>(_range_end_date) * 10000 + _range_end_hhmm;
+			if (naturalEnd < naturalBegin || codeEnd.value < codeBegin.value)
+			{
+				WTSLogger::error("Cannot map replay range for {}: range status {}", code, static_cast<uint32_t>(wtp::DateMappingStatus::OutOfRange));
+				return false;
+			}
+			candidateBegin = std::min(candidateBegin, codeBegin.value);
+			candidateEnd = std::max(candidateEnd, codeEnd.value);
 		}
+		return true;
 	};
-	includeSubscriptions(_tick_sub_map);
-	includeSubscriptions(_orddtl_sub_map);
-	includeSubscriptions(_ordque_sub_map);
-	includeSubscriptions(_trans_sub_map);
+	if (!includeSubscriptions(_tick_sub_map) || !includeSubscriptions(_orddtl_sub_map) ||
+		!includeSubscriptions(_ordque_sub_map) || !includeSubscriptions(_trans_sub_map))
+		return false;
 	if (!hasSubscription)
 		return false;
-	if (beginTDate == UINT32_MAX || endTDate < beginTDate)
-	{
-		WTSLogger::error("Cannot map replay natural-time range to high-frequency trading dates");
-		return false;
-	}
+	beginTDate = candidateBegin;
+	endTDate = candidateEnd;
 	return true;
 }
 
@@ -1307,7 +1573,7 @@ bool HisDataReplayer::resolve_hft_session_begin_clock(uint32_t tradingDate, uint
 			}
 			else
 			{
-				boundary = _bd_mgr.getBoundaryTime(commId, tradingDate, false, true);
+				boundary = checked_boundary_time(commId, tradingDate, true);
 				const uint32_t boundaryDate = static_cast<uint32_t>(boundary / 10000);
 				const uint32_t boundaryTime = static_cast<uint32_t>(boundary % 10000);
 				const uint32_t year = boundaryDate / 10000;
@@ -1324,7 +1590,7 @@ bool HisDataReplayer::resolve_hft_session_begin_clock(uint32_t tradingDate, uint
 					return;
 				}
 
-				if (_bd_mgr.calcTradingDate(commId, boundaryDate, boundaryTime, false) != tradingDate)
+				if (checked_trading_date(commId, boundaryDate, boundaryTime) != tradingDate)
 				{
 					WTSLogger::error("Session-begin boundary {} for {} does not map to trading date {}",
 						boundary, subscription.first.c_str(), tradingDate);
@@ -1403,10 +1669,7 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 	if (_main_key.empty() || mainIt == _bars_cache.end() || mainIt->second == NULL || mainIt->second->_bars.empty())
 	{
 		WTSLogger::error("Cannot replay unavailable main K bars {}", _main_key.c_str());
-		if (_listener)
-			_listener->handle_replay_done();
-		if (_notifier)
-			_notifier->notifyEvent("BT_END");
+		report_replay_error(WT_REPLAY_ERROR_NO_SOURCE, "Main bar source is unavailable");
 		return;
 	}
 
@@ -1415,10 +1678,7 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 	if (sInfo == NULL)
 	{
 		WTSLogger::error("Cannot replay main K bars {} without a session", _main_key.c_str());
-		if (_listener)
-			_listener->handle_replay_done();
-		if (_notifier)
-			_notifier->notifyEvent("BT_END");
+		report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Main bar session is unavailable");
 		return;
 	}
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(barsList->_code.c_str(), NULL);
@@ -1462,11 +1722,11 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 		else
 			hasBarRange = 199000000000ull + firstMainBar.time >= _bar_begin_time;
 	}
-	if (!hasBarRange && _tick_enabled)
+	if (!hasBarRange)
 	{
-		// A requested main series may have no close inside the selected range.
-		// Continue with the exact HFT range without emitting or synthesizing bars.
-		run_by_ticks(bNeedDump);
+		// A main series without an in-range close can only fall back to HFT.
+		if (_tick_enabled) run_by_ticks(bNeedDump);
+		else report_replay_error(WT_REPLAY_ERROR_NO_SOURCE, "No main bar closes in the replay range");
 		return;
 	}
 	uint32_t total_barcnt = hasBarRange ? eIdx - sIdx + 1 : 0;
@@ -1554,7 +1814,17 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 			uint32_t nextTDate = _opened_tdate;
 			if(isDay || (!isDay && sInfo->offsetTime(nextTime, false) != sInfo->getCloseTime(true)))
 			{
-				nextTDate = _bd_mgr.calcTradingDate(commId.c_str(), nextDate, nextTime, false);
+				// Decision card 1: a failed mapping stops the replay before any
+				// session callback or clock change.
+				const wtp::DateMappingResult32 mappedTDate = _bd_mgr.checkedCalcTradingDate(commId.c_str(), nextDate, nextTime, false);
+				if (mappedTDate.status != wtp::DateMappingStatus::Ok)
+				{
+					WTSLogger::error("Cannot map bar time {}.{} of {} to a trading date: status {}", nextDate, nextTime,
+						commId.c_str(), static_cast<uint32_t>(mappedTDate.status));
+					report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Replay trading date mapping failed");
+					break;
+				}
+				nextTDate = mappedTDate.value;
 				if (_opened_tdate != nextTDate)
 				{
 					if(_closed_tdate != _opened_tdate)
@@ -1591,15 +1861,20 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 							if (!resolve_hft_session_begin_clock(nextTDate, hftBeginTDate,
 								hftNaturalTime, hasHftEvents))
 							{
-								_terminated = true;
+								report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 								break;
 							}
 							if (!hasHftEvents)
 							{
-								const uint64_t beginBoundary = _bd_mgr.getBoundaryTime(sInfo->id(), nextTDate, true, true);
+								const wtp::DateMappingResult64 beginBoundary = _bd_mgr.checkedGetBoundaryTime(sInfo->id(), nextTDate, true, true);
+								if (beginBoundary.status != wtp::DateMappingStatus::Ok)
+								{
+									report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Replay session boundary mapping failed");
+									break;
+								}
 								// With an empty HFT bucket, keep the regular session open boundary
 								// while preventing it from preceding the already-published replay clock.
-								hftNaturalTime = std::max(hftNaturalTime, natural_time_from_boundary(beginBoundary));
+								hftNaturalTime = std::max(hftNaturalTime, natural_time_from_boundary(beginBoundary.value));
 							}
 							useHftClock = true;
 							sessionDate = static_cast<uint32_t>(hftNaturalTime / 1000000000);
@@ -1611,9 +1886,14 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 
 					if (!useHftClock)
 					{
-						const uint64_t beginTimeofDay = _bd_mgr.getBoundaryTime(sInfo->id(), nextTDate, true, true);
-						sessionDate = static_cast<uint32_t>(beginTimeofDay / 10000);
-						sessionTime = static_cast<uint32_t>(beginTimeofDay % 10000);
+						const wtp::DateMappingResult64 beginTimeofDay = _bd_mgr.checkedGetBoundaryTime(sInfo->id(), nextTDate, true, true);
+						if (beginTimeofDay.status != wtp::DateMappingStatus::Ok)
+						{
+							report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Replay session boundary mapping failed");
+							break;
+						}
+						sessionDate = static_cast<uint32_t>(beginTimeofDay.value / 10000);
+						sessionTime = static_cast<uint32_t>(beginTimeofDay.value % 10000);
 					}
 					_cur_date = sessionDate;
 					_cur_time = sessionTime;
@@ -1740,9 +2020,14 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 							_day_cache.clear();
 						}
 						_cur_tdate = flushTDate;
-						uint64_t beginTime = _bd_mgr.getBoundaryTime(sInfo->id(), flushTDate, true, true);
-						if (beginTime == 0)
-							beginTime = static_cast<uint64_t>(flushTDate) * 10000 + _range_begin_hhmm;
+						// Decision card 1: no boundary=0 fallback; a failed mapping stops the replay.
+						const wtp::DateMappingResult64 mappedBegin = _bd_mgr.checkedGetBoundaryTime(sInfo->id(), flushTDate, true, true);
+						if (mappedBegin.status != wtp::DateMappingStatus::Ok)
+						{
+							report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Replay session boundary mapping failed");
+							break;
+						}
+						uint64_t beginTime = mappedBegin.value;
 						uint32_t sessionDate = static_cast<uint32_t>(beginTime / 10000);
 						uint32_t sessionTime = static_cast<uint32_t>(beginTime % 10000);
 						uint32_t sessionSecs = 0;
@@ -1753,7 +2038,7 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 							if (!resolve_hft_session_begin_clock(flushTDate, beginTDate,
 								hftNaturalTime, hasHftEvents))
 							{
-								_terminated = true;
+								report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 								break;
 							}
 							if (!hasHftEvents)
@@ -1797,25 +2082,24 @@ void HisDataReplayer::run_by_bars(bool bNeedDump /* = false */)
 		_day_cache.clear();
 	}
 
+	if (replayed_barcnt == 0 && !_terminated)
+		report_replay_error(WT_REPLAY_ERROR_NO_SOURCE, "No main bar was replayed in the selected range");
 	if (_terminated)
 		WTSLogger::debug("Replaying by bars terminated forcely");
 
-	notify_state(barsList->_code.c_str(), barsList->_period, barsList->_times, _begin_time, _end_time, 100);
-	if (_notifier)
-		_notifier->notifyEvent("BT_END");
-
+	if (!_terminated)
+		notify_state(barsList->_code.c_str(), barsList->_period, barsList->_times, _begin_time, _end_time, 100);
 	if (_closed_tdate != _cur_tdate)
 	{
 		WTSLogger::debug("Tradingday {} ends", _cur_tdate);
 		_listener->handle_session_end(_cur_tdate);
 	}
 
-	if (bNeedDump)
+	if (bNeedDump && !_terminated)
 	{
 		dump_btstate(barsList->_code.c_str(), barsList->_period, barsList->_times, _begin_time, _end_time, 100.0, ticker.nano_seconds());
 	}
 
-	_listener->handle_replay_done();
 }
 
 void HisDataReplayer::run_by_tasks(bool /*bNeedDump*/ /* = false */)
@@ -1823,24 +2107,28 @@ void HisDataReplayer::run_by_tasks(bool /*bNeedDump*/ /* = false */)
 	if (!_has_bar_minutes)
 	{
 		WTSLogger::info("Replay range [{},{}] contains no whole minute; task replay is done", _begin_time, _end_time);
-		if (_listener)
-			_listener->handle_replay_done();
-		if (_notifier)
-			_notifier->notifyEvent("BT_END");
 		return;
 	}
 
 	_cur_date = static_cast<uint32_t>(_bar_begin_time / 10000);
 	_cur_time = static_cast<uint32_t>(_bar_begin_time % 10000);
 	_cur_secs = 0;
-	_cur_tdate = _bd_mgr.calcTradingDate(
-		(strlen(_task->_session) == 0) ? DEFAULT_SESSIONID : _task->_session,
-		_cur_date, _cur_time, true);
+	{
+		const wtp::DateMappingResult32 mapped = _bd_mgr.checkedCalcTradingDate(
+			(strlen(_task->_session) == 0) ? DEFAULT_SESSIONID : _task->_session,
+			_cur_date, _cur_time, true);
+		_cur_tdate = mapped.status == wtp::DateMappingStatus::Ok ? mapped.value : 0;
+	}
 
 	//时间调度任务不为空,则按照时间调度任务回放
 	WTSSessionInfo* sInfo = NULL;
 	const char* DEF_SESS = (strlen(_task->_session) == 0) ? DEFAULT_SESSIONID : _task->_session;
 	sInfo = _bd_mgr.getSession(DEF_SESS);
+	if (!sInfo || _cur_tdate == 0)
+	{
+		report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Task replay session or trading date is unavailable");
+		return;
+	}
 	WTSLogger::info("Start to backtest with task frequency from {}...", _begin_time);
 
 	//分钟即任务和日级别任务分开写
@@ -1967,7 +2255,13 @@ void HisDataReplayer::run_by_tasks(bool /*bNeedDump*/ /* = false */)
 					continue;
 				}
 
-				uint32_t newTDate = _bd_mgr.calcTradingDate(DEF_SESS, _cur_date, _cur_time, true);
+				const wtp::DateMappingResult32 mappedTDate = _bd_mgr.checkedCalcTradingDate(DEF_SESS, _cur_date, _cur_time, true);
+				if (mappedTDate.status != wtp::DateMappingStatus::Ok)
+				{
+					report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Task replay trading date mapping failed");
+					break;
+				}
+				uint32_t newTDate = mappedTDate.value;
 
 				if (newTDate != _cur_tdate)
 				{
@@ -2005,7 +2299,15 @@ void HisDataReplayer::run_by_tasks(bool /*bNeedDump*/ /* = false */)
 
 			_cur_date = TimeUtils::getNextDate(_cur_date);
 			_cur_time = endtime;
-			_cur_tdate = _bd_mgr.calcTradingDate(DEF_SESS, _cur_date, _cur_time, true);
+			{
+				const wtp::DateMappingResult32 mappedTDate = _bd_mgr.checkedCalcTradingDate(DEF_SESS, _cur_date, _cur_time, true);
+				if (mappedTDate.status != wtp::DateMappingStatus::Ok)
+				{
+					report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Task replay trading date mapping failed");
+					break;
+				}
+				_cur_tdate = mappedTDate.value;
+			}
 
 			uint64_t nextTime = (uint64_t)_cur_date * 10000 + _cur_time;
 			if (nextTime > _bar_end_time)
@@ -2014,9 +2316,6 @@ void HisDataReplayer::run_by_tasks(bool /*bNeedDump*/ /* = false */)
 				if (_listener)
 				{
 					_listener->handle_session_end(_cur_tdate);
-					_listener->handle_replay_done();
-					if (_notifier)
-						_notifier->notifyEvent("BT_END");
 				}
 
 				break;
@@ -2028,10 +2327,7 @@ void HisDataReplayer::run_by_tasks(bool /*bNeedDump*/ /* = false */)
 		if (_task->_time == 0)
 		{
 			WTSLogger::error("Minute task interval must be greater than zero");
-			if (_listener)
-				_listener->handle_replay_done();
-			if (_notifier)
-				_notifier->notifyEvent("BT_END");
+			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Minute task interval is zero");
 			return;
 		}
 
@@ -2083,9 +2379,6 @@ void HisDataReplayer::run_by_tasks(bool /*bNeedDump*/ /* = false */)
 					if (_listener)
 					{
 						_listener->handle_session_end(_cur_tdate);
-						_listener->handle_replay_done();
-						if (_notifier)
-							_notifier->notifyEvent("BT_END");
 					}
 					break;
 				}
@@ -2120,9 +2413,6 @@ void HisDataReplayer::run_by_tasks(bool /*bNeedDump*/ /* = false */)
 					if (_listener)
 					{
 						_listener->handle_session_end(_cur_tdate);
-						_listener->handle_replay_done();
-						if (_notifier)
-							_notifier->notifyEvent("BT_END");
 					}
 					break;
 				}
@@ -2155,7 +2445,13 @@ void HisDataReplayer::run_by_tasks(bool /*bNeedDump*/ /* = false */)
 			{
 				//换日了
 				mins = std::min(_task->_time, tradingMins);
-				uint32_t nextTDate = _bd_mgr.getNextTDate(_task->_trdtpl, _cur_tdate, 1, true);
+				const wtp::DateMappingResult32 mappedNext = _bd_mgr.checkedNextTradingDate(_task->_trdtpl, _cur_tdate, 1, true);
+				if (mappedNext.status != wtp::DateMappingStatus::Ok)
+				{
+					report_replay_error(WT_REPLAY_ERROR_DATE_MAPPING, "Task replay next trading date mapping failed");
+					break;
+				}
+				uint32_t nextTDate = mappedNext.value;
 
 				if (sInfo->getOffsetMins() != 0)
 				{
@@ -2218,9 +2514,6 @@ void HisDataReplayer::run_by_tasks(bool /*bNeedDump*/ /* = false */)
 				if (_listener)
 				{
 					_listener->handle_session_end(_cur_tdate);
-					_listener->handle_replay_done();
-					if (_notifier)
-						_notifier->notifyEvent("BT_END");
 				}
 				break;
 			}
@@ -2317,7 +2610,8 @@ void HisDataReplayer::simTicks(uint32_t uDate, uint32_t uTime, uint32_t endTDate
 				position_at_or_after_now(entry.second);
 		}
 	};
-	auto dispatch_sim_tick = [&](const char* stdCode, WTSTickData* curTick)
+	auto dispatch_sim_tick = [&](const char* stdCode, WTSTickData* curTick, bool adjustedSource,
+		const BarsListPtr& bars, std::size_t index)
 	{
 		WTSReleaseGuard<WTSTickData> tickGuard(curTick);
 		try
@@ -2325,6 +2619,23 @@ void HisDataReplayer::simTicks(uint32_t uDate, uint32_t uTime, uint32_t endTDate
 			if (curTick != NULL)
 			{
 				_tick_simulated = true;
+				CodeHelper::CodeInfo simCode = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
+				WTSContractInfo* physical = NULL;
+				if (fee_is_continuous(stdCode, simCode))
+				{
+					if (bars && bars->_physical_sources.size() == bars->_bars.size() && index < bars->_physical_sources.size())
+					{
+						const std::string source = bars->_physical_sources[index];
+						if (!source.empty()) physical = resolve_fee_contract(stdCode, source.c_str(), simCode._exchg, _cur_tdate);
+					}
+				}
+				else physical = resolve_fee_contract(stdCode, simCode._code, simCode._exchg, _cur_tdate);
+				curTick->setContractInfo(physical);
+				if (_tick_enabled && _running.load())
+				{
+					std::lock_guard<std::mutex> lock(_dispatched_ticks_mutex);
+					_last_dispatched_ticks[base_tick_code(stdCode)] = { _cur_tdate, curTick->getTickStruct(), adjustedSource, physical ? physical->getCode() : "", physical ? physical->getExchg() : "" };
+				}
 				_listener->handle_tick(stdCode, curTick, pxType);
 			}
 		}
@@ -2406,7 +2717,8 @@ void HisDataReplayer::simTicks(uint32_t uDate, uint32_t uTime, uint32_t endTDate
 								curTS.low = min(curTS.price, curTS.low);
 
 							update_price(barsList->_code.c_str(), curTS.price);
-							dispatch_sim_tick(barsList->_code.c_str(), WTSTickData::create(curTS));
+							dispatch_sim_tick(barsList->_code.c_str(), WTSTickData::create(curTS),
+								base_tick_code(barsList->_code) != barsList->_code, barsList, simCursor);
 						}
 
 						break;
@@ -2466,8 +2778,27 @@ void HisDataReplayer::simTicks(uint32_t uDate, uint32_t uTime, uint32_t endTDate
 
 							curTS.price = newPx;
 							curTS.volume = nextBar.vol;
+
+							// BUG-I02-NEW-109: get_day_price (public "当日价格") reads _day_cache
+							// when ticks are disabled. Accumulate the day's open/high/low/last
+							// from the simulated OHLC sequence, as the minute arm does; the
+							// dispatched simulated tick itself is unchanged.
+							WTSTickStruct& dayTS = _day_cache[barsList->_code];
+							strcpy(dayTS.code, barsList->_code.c_str());
+							dayTS.action_date = _cur_date;
+							dayTS.action_time = curTS.action_time;
+							dayTS.price = newPx;
+							dayTS.volume = nextBar.vol;
+							if (decimal::eq(dayTS.open, 0))
+								dayTS.open = newPx;
+							dayTS.high = max(newPx, dayTS.high);
+							if (decimal::eq(dayTS.low, 0))
+								dayTS.low = newPx;
+							else
+								dayTS.low = min(newPx, dayTS.low);
+
 							update_price(barsList->_code.c_str(), curTS.price);
-							dispatch_sim_tick(realCode.c_str(), WTSTickData::create(curTS));
+							dispatch_sim_tick(realCode.c_str(), WTSTickData::create(curTS), cInfo.isExright(), barsList, barsList->_cursor);
 						}
 
 						break;
@@ -2541,11 +2872,24 @@ void HisDataReplayer::simTickWithUnsubBars(uint64_t stime, uint64_t nowTime, uin
 					: static_cast<uint32_t>(std::min<std::size_t>(saved.cursor, saved.bars->_bars.size()));
 		}
 	};
-	auto dispatch_unsub_tick = [&](const char* stdCode, WTSTickData* curTick)
+	auto dispatch_unsub_tick = [&](const char* stdCode, WTSTickData* curTick, const BarsListPtr& bars, std::size_t index)
 	{
 		WTSReleaseGuard<WTSTickData> tickGuard(curTick);
 		try
 		{
+			if (!curTick) return;
+			CodeHelper::CodeInfo info = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
+			WTSContractInfo* physical = NULL;
+			if (fee_is_continuous(stdCode, info))
+			{
+				if (bars && bars->_physical_sources.size() == bars->_bars.size() && index < bars->_physical_sources.size())
+				{
+					const std::string source = bars->_physical_sources[index];
+					if (!source.empty()) physical = resolve_fee_contract(stdCode, source.c_str(), info._exchg, _cur_tdate);
+				}
+			}
+			else physical = resolve_fee_contract(stdCode, info._code, info._exchg, _cur_tdate);
+			curTick->setContractInfo(physical);
 			_listener->handle_tick(stdCode, curTick, pxType);
 		}
 		catch (...)
@@ -2556,9 +2900,11 @@ void HisDataReplayer::simTickWithUnsubBars(uint64_t stime, uint64_t nowTime, uin
 		restore_event_cursors();
 	};
 
-	for (auto& item : _unbars_cache)
+	std::vector<BarsListPtr> unsubSnapshot;
+	unsubSnapshot.reserve(_unbars_cache.size());
+	for (const auto& item : _unbars_cache) if (item.second) unsubSnapshot.push_back(item.second);
+	for (const BarsListPtr& barsList : unsubSnapshot)
 	{
-		BarsListPtr& barsList = (BarsListPtr&)item.second;
 		if (barsList->_period != KP_DAY)
 		{
 			//如果历史数据指标不在尾部, 说明是回测模式, 要继续回放历史数据
@@ -2606,7 +2952,7 @@ void HisDataReplayer::simTickWithUnsubBars(uint64_t stime, uint64_t nowTime, uin
 
 
 						WTSTickData* curTick = WTSTickData::create(curTS);
-						dispatch_unsub_tick(barsList->_code.c_str(), curTick);
+						dispatch_unsub_tick(barsList->_code.c_str(), curTick, barsList, barsList->_cursor);
 						break;
 					}
 					else if (barTime < nowTime)
@@ -2684,7 +3030,7 @@ void HisDataReplayer::simTickWithUnsubBars(uint64_t stime, uint64_t nowTime, uin
 							curTS.low = min(curTS.price, curTS.low);
 
 						WTSTickData* curTick = WTSTickData::create(curTS);
-						dispatch_unsub_tick(realCode.c_str(), curTick);
+						dispatch_unsub_tick(realCode.c_str(), curTick, barsList, barsList->_cursor);
 
 						break;
 					}
@@ -2749,7 +3095,7 @@ uint64_t HisDataReplayer::getNextTickTime(uint32_t curTDate, uint64_t stime /* =
 		{
 			WTSLogger::error("Cannot replay in-range ticks for {} on trading date {} without a session",
 				stdCode, curTDate);
-			_terminated = true;
+			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 			return UINT64_MAX;
 		}
 
@@ -3066,7 +3412,7 @@ bool HisDataReplayer::loadReplayHftDate(uint32_t tDate, const std::string& stdCo
 		{
 			WTSLogger::error("HFT data read failed for {} on {} although a candidate file exists or cannot be inspected; stopping replay",
 				stdCode.c_str(), tDate);
-			_terminated = true;
+			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 			return;
 		}
 		if (_mode != "bin" && _mode != "csv")
@@ -3118,7 +3464,7 @@ bool HisDataReplayer::loadReplayHftDate(uint32_t tDate, const std::string& stdCo
 				{
 					WTSLogger::error("Extended HFT loader failed to load {} on {}; stopping replay",
 						stdCode.c_str(), tDate);
-					_terminated = true;
+					report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 					return false;
 				}
 				else
@@ -3227,7 +3573,7 @@ uint64_t HisDataReplayer::next_hft_session_boundary(uint32_t /*tradingDate*/, ui
 		const uint32_t actionTime = static_cast<uint32_t>((afterTime % 1000000000ull) / 100000ull);
 		if (session->getTradingMins() == 1440)
 		{
-			const uint32_t currentTDate = _bd_mgr.calcTradingDate(commId, naturalDate, actionTime, false);
+			const uint32_t currentTDate = checked_trading_date(commId, naturalDate, actionTime);
 			uint64_t sessionBegin = 0;
 			uint64_t sessionEnd = 0;
 			if (currentTDate == 0 || !continuous_session_natural_bounds(currentTDate,
@@ -3235,37 +3581,37 @@ uint64_t HisDataReplayer::next_hft_session_boundary(uint32_t /*tradingDate*/, ui
 			{
 				WTSLogger::error("Cannot determine 24-hour HFT session boundary for {} after {} with offset {}",
 					code.c_str(), afterTime, session->getOffsetMins());
-				_terminated = true;
+				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 				return std::numeric_limits<uint64_t>::max();
 			}
 			if (sessionEnd <= afterTime)
 			{
 				WTSLogger::error("24-hour HFT session boundary {} for {} did not advance after {}",
 					sessionEnd, code.c_str(), afterTime);
-				_terminated = true;
+				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 				return std::numeric_limits<uint64_t>::max();
 			}
 			earliest = std::min(earliest, sessionEnd);
 			continue;
 		}
-		uint32_t currentTDate = _bd_mgr.calcTradingDate(commId, naturalDate, actionTime, false);
+		uint32_t currentTDate = checked_trading_date(commId, naturalDate, actionTime);
 		if (currentTDate == 0)
 		{
 			WTSLogger::error("Cannot map natural time {} to a trading date for HFT subscription {}", afterTime, code.c_str());
-			_terminated = true;
+			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 			return std::numeric_limits<uint64_t>::max();
 		}
-		uint32_t candidate = _bd_mgr.getNextTDate(commId, currentTDate, 1, false);
+		uint32_t candidate = checked_next_tdate(commId, currentTDate);
 		uint64_t previousBoundary = 0;
 		while (candidate > currentTDate)
 		{
-			const uint64_t boundary = _bd_mgr.getBoundaryTime(commId, candidate, false, true);
+			const uint64_t boundary = checked_boundary_time(commId, candidate, true);
 			const uint64_t natural = natural_time_from_boundary(boundary);
 			if (natural == 0)
 			{
 				WTSLogger::error("Cannot determine next HFT session boundary for {} on trading date {}",
 					code.c_str(), candidate);
-				_terminated = true;
+				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 				return std::numeric_limits<uint64_t>::max();
 			}
 			if (natural > afterTime)
@@ -3276,15 +3622,15 @@ uint64_t HisDataReplayer::next_hft_session_boundary(uint32_t /*tradingDate*/, ui
 			if (natural <= previousBoundary)
 			{
 				WTSLogger::error("HFT session boundaries for {} did not advance after {}", code.c_str(), afterTime);
-				_terminated = true;
+				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 				return std::numeric_limits<uint64_t>::max();
 			}
 			previousBoundary = natural;
-			const uint32_t following = _bd_mgr.getNextTDate(commId, candidate, 1, false);
+			const uint32_t following = checked_next_tdate(commId, candidate);
 			if (following <= candidate)
 			{
 				WTSLogger::error("Trading-date calendar did not advance for HFT subscription {}", code.c_str());
-				_terminated = true;
+				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 				return std::numeric_limits<uint64_t>::max();
 			}
 			candidate = following;
@@ -3292,7 +3638,7 @@ uint64_t HisDataReplayer::next_hft_session_boundary(uint32_t /*tradingDate*/, ui
 		if (candidate <= currentTDate)
 		{
 			WTSLogger::error("Trading-date calendar did not advance for HFT subscription {}", code.c_str());
-			_terminated = true;
+			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 			return std::numeric_limits<uint64_t>::max();
 		}
 	}
@@ -3318,7 +3664,7 @@ void HisDataReplayer::pruneReplayHftData(uint64_t beforeTime)
 						openBoundary, closeBoundary);
 				}
 				else if (commId != NULL && *commId != '\0')
-					closeBoundary = natural_time_from_boundary(_bd_mgr.getBoundaryTime(commId, dateIt->first, false, false));
+					closeBoundary = natural_time_from_boundary(checked_boundary_time(commId, dateIt->first, false));
 				const std::size_t count = std::min(dateIt->second._count, dateIt->second._items.size());
 				const bool consumed = dateIt->second._cursor != UINT_MAX && dateIt->second._cursor > count;
 				const bool empty = count == 0;
@@ -3349,7 +3695,7 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 		static_cast<uint32_t>((etime - 1) / 1000000000ull))
 	{
 		WTSLogger::error("HFT interval [{}, {}) exceeds its bounded natural-date window", stime, etime);
-		_terminated = true;
+		report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 		return false;
 	}
 	const std::set<std::string>& tickCodes = subscriptions.ticks;
@@ -3372,7 +3718,7 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 		if (commId == NULL || *commId == '\0' || codeSession == NULL)
 		{
 			WTSLogger::error("Cannot schedule HFT buckets for {} without a session", code.c_str());
-			_terminated = true;
+			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 			return false;
 		}
 		const bool naturalDaySession = codeSession->getTradingMins() == 1440;
@@ -3390,12 +3736,12 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 			static_cast<uint64_t>(actionTime) * 100000ull;
 		while (minuteStart < etime)
 		{
-			const uint32_t mapped = _bd_mgr.calcTradingDate(commId, naturalDate, actionTime, false);
+			const uint32_t mapped = checked_trading_date(commId, naturalDate, actionTime);
 			if (mapped == 0)
 			{
 				WTSLogger::error("Cannot map natural replay minute {}{} to a trading date for {}",
 					naturalDate, actionTime, code.c_str());
-				_terminated = true;
+				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 				return false;
 			}
 			mappedTradingDates.insert(mapped);
@@ -3409,7 +3755,7 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 			if (followingMinute <= minuteStart)
 			{
 				WTSLogger::error("Cannot advance bounded HFT calendar scan for {}", code.c_str());
-				_terminated = true;
+				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 				return false;
 			}
 			naturalDate = followingDate;
@@ -3430,12 +3776,12 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 			}
 			if (_bd_mgr.isTradingDate(commId, mapped, false))
 				candidateDates.insert(mapped);
-			const uint32_t previous = _bd_mgr.getPrevTDate(commId, mapped, 1, false);
-			const uint32_t following = _bd_mgr.getNextTDate(commId, mapped, 1, false);
+			const uint32_t previous = checked_prev_tdate(commId, mapped);
+			const uint32_t following = checked_next_tdate(commId, mapped);
 			if (previous == 0 || following == 0 || previous >= mapped || following <= mapped)
 			{
 				WTSLogger::error("Trading-date calendar cannot bound natural replay window for {}", code.c_str());
-				_terminated = true;
+				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 				return false;
 			}
 			candidateDates.insert(previous);
@@ -3444,7 +3790,7 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 		if (candidateDates.empty())
 		{
 			WTSLogger::error("Trading-date calendar cannot bound natural replay window for {}", code.c_str());
-			_terminated = true;
+			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 			return false;
 		}
 
@@ -3459,19 +3805,19 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 				{
 					WTSLogger::error("Invalid continuous HFT session boundaries for {} on {} with offset {}",
 						code.c_str(), date, codeSession->getOffsetMins());
-					_terminated = true;
+					report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 					return false;
 				}
 			}
 			else
 			{
-				sessionBegin = natural_time_from_boundary(_bd_mgr.getBoundaryTime(commId, date, false, true));
-				sessionEnd = natural_time_from_boundary(_bd_mgr.getBoundaryTime(commId, date, false, false));
+				sessionBegin = natural_time_from_boundary(checked_boundary_time(commId, date, true));
+				sessionEnd = natural_time_from_boundary(checked_boundary_time(commId, date, false));
 			}
 			if (sessionBegin == 0 || sessionEnd == 0 || sessionBegin >= sessionEnd)
 			{
 				WTSLogger::error("Invalid session boundaries for {} on HFT trading date {}", code.c_str(), date);
-				_terminated = true;
+				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 				return false;
 			}
 			// Ordinary market sessions include their close timestamp, so a range
@@ -3510,6 +3856,17 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 	auto itemTime = [](const auto& item) {
 		return static_cast<uint64_t>(item.action_date) * 1000000000ull + item.action_time;
 	};
+	auto note_out_of_session = [this](uint32_t kind, const std::string& code, uint32_t date,
+		uint32_t actionDate, uint32_t actionTime)
+	{
+		static const char* const kStreamNames[4] = { "order detail", "transaction", "tick", "order queue" };
+		if (kind >= 4) return;
+		++_hft_out_of_session[kind];
+		const std::string key = fmtutil::format("{}#{}#{}", kind, code.c_str(), date);
+		if (_hft_out_of_session_logged.insert(key).second)
+			WTSLogger::warn("Out-of-session {} record of {} at {}.{} in trading-date bucket {} is not dispatched",
+				kStreamNames[kind], code.c_str(), actionDate, actionTime, date);
+	};
 	auto enqueue = [&](auto& list, const std::string& code, uint32_t date, uint32_t kind)
 	{
 		const std::size_t count = std::min(list._count, list._items.size());
@@ -3525,7 +3882,10 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 			const uint64_t time = itemTime(item);
 			if (time < stime) { ++list._cursor; continue; }
 			if (time >= etime) return;
-			if (kind == 2)
+			// BUG-I02-NEW-029 (E): every HFT stream (tick, order detail, order queue,
+			// transaction) applies the same trading-session/validity filter. A record
+			// outside the session is not dispatched and not reconciled; it is counted
+			// per stream and reported once per stream/code/bucket.
 			{
 				WTSSessionInfo* session = get_session_info(code.c_str(), true);
 				const uint32_t hhmm = item.action_time / 100000;
@@ -3535,7 +3895,11 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 				if (session == NULL || (session->getTradingMins() != 1440 &&
 					(session->offsetTime(minute, false) > session->getCloseTime(true) ||
 						!session->isInTradingTime(minute))) || !validActionTime)
-				{ ++list._cursor; continue; }
+				{
+					note_out_of_session(kind, code, date, item.action_date, item.action_time);
+					++list._cursor;
+					continue;
+				}
 			}
 			std::size_t round = 0;
 			std::size_t previous = list._cursor - 1;
@@ -3571,7 +3935,7 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 		{
 			WTSLogger::error("HFT replay event {} for {} arrived behind the dispatched natural-time watermark {}",
 				event.time, event.code.c_str(), _last_replay_hft_time);
-			_terminated = true;
+			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 			return false;
 		}
 		_cur_date = static_cast<uint32_t>(event.time / 1000000000ull);
@@ -3586,14 +3950,14 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 			auto& list = *static_cast<HftDataList<WTSOrdDtlStruct>*>(event.list);
 			WTSOrdDtlStruct item = list._items[event.index]; list._cursor = event.index + 2;
 			WTSOrdDtlData* data = WTSOrdDtlData::create(item); WTSReleaseGuard<WTSOrdDtlData> guard(data);
-			if (data != NULL) { data->setCode(event.code.c_str()); _listener->handle_order_detail(event.code.c_str(), data); }
+			if (data != NULL) { data->setCode(event.code.c_str()); _has_dispatched_hft_event = true; _listener->handle_order_detail(event.code.c_str(), data); }
 		}
 		else if (event.kind == 1)
 		{
 			auto& list = *static_cast<HftDataList<WTSTransStruct>*>(event.list);
 			WTSTransStruct item = list._items[event.index]; list._cursor = event.index + 2;
 			WTSTransData* data = WTSTransData::create(item); WTSReleaseGuard<WTSTransData> guard(data);
-			if (data != NULL) { data->setCode(event.code.c_str()); _listener->handle_transaction(event.code.c_str(), data); }
+			if (data != NULL) { data->setCode(event.code.c_str()); _has_dispatched_hft_event = true; _listener->handle_transaction(event.code.c_str(), data); }
 		}
 		else if (event.kind == 2)
 		{
@@ -3603,11 +3967,24 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 			if (data != NULL)
 			{
 				WTSReleaseGuard<WTSTickData> guard(data);
+				// Identity is copied and verified before trySetCode overwrites the
+				// event's source code. Missing identity must not suppress market data.
+				WTSContractInfo* physical = NULL;
+				if (std::memchr(item.code, '\0', sizeof(item.code)) && item.code[0] &&
+					std::memchr(item.exchg, '\0', sizeof(item.exchg)) && item.exchg[0] &&
+					item.trading_date != 0 && item.trading_date == event.tDate && event.tDate == _cur_tdate)
+					physical = resolve_fee_contract(event.code.c_str(), item.code, item.exchg, event.tDate);
+				data->setContractInfo(physical);
 				if (data->trySetCode(event.code.c_str()))
 				{
 					update_price(event.code.c_str(), item.price);
 					_bar_real_tick_codes.insert(base_tick_code(event.code));
 					_tick_simulated = false;
+					{
+						std::lock_guard<std::mutex> lock(_dispatched_ticks_mutex);
+						_last_dispatched_ticks[event.code] = { _cur_tdate, data->getTickStruct(), false, physical ? physical->getCode() : "", physical ? physical->getExchg() : "" };
+					}
+					_has_dispatched_hft_event = true;
 					_listener->handle_tick(event.code.c_str(), data, 0);
 					dispatchedRealTick = true;
 				}
@@ -3618,7 +3995,7 @@ bool HisDataReplayer::replayHftInterval(uint64_t stime, uint64_t etime, bool& di
 			auto& list = *static_cast<HftDataList<WTSOrdQueStruct>*>(event.list);
 			WTSOrdQueStruct item = list._items[event.index]; list._cursor = event.index + 2;
 			WTSOrdQueData* data = WTSOrdQueData::create(item); WTSReleaseGuard<WTSOrdQueData> guard(data);
-			if (data != NULL) { data->setCode(event.code.c_str()); _listener->handle_order_queue(event.code.c_str(), data); }
+			if (data != NULL) { data->setCode(event.code.c_str()); _has_dispatched_hft_event = true; _listener->handle_order_queue(event.code.c_str(), data); }
 		}
 		if (_terminated) break;
 		if (event.kind == 0) enqueue(_replay_orddtl_cache[event.code][event.tDate], event.code, event.tDate, event.kind);
@@ -3663,7 +4040,7 @@ bool HisDataReplayer::replayHftDatasNatural(uint64_t stime, uint64_t etime)
 		{
 			WTSLogger::error("HFT replay interval moved back from natural date {} to {}; reset is required before replaying older data",
 				_replay_completed_natural_date, naturalDate);
-			_terminated = true;
+			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 			return dispatchedRealTick;
 		}
 		const uint32_t nextDate = TimeUtils::getNextDate(naturalDate, 1);
@@ -3671,7 +4048,7 @@ bool HisDataReplayer::replayHftDatasNatural(uint64_t stime, uint64_t etime)
 		if (nextMidnight <= cursor)
 		{
 			WTSLogger::error("Cannot advance HFT replay natural-date window from {}", cursor);
-			_terminated = true;
+			report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 			return dispatchedRealTick;
 		}
 		const uint64_t chunkEnd = std::min(etime, nextMidnight);
@@ -3722,7 +4099,7 @@ bool HisDataReplayer::replayHftDatasNatural(uint64_t stime, uint64_t etime)
 			{
 				WTSLogger::error("Cannot advance uncovered HFT replay interval from {} to {}",
 					segmentBegin, chunkEnd);
-				_terminated = true;
+				report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 				break;
 			}
 
@@ -3961,8 +4338,8 @@ void HisDataReplayer::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTD
 
 WTSKlineSlice* HisDataReplayer::get_kline_slice(const char* stdCode, const char* period, uint32_t count, uint32_t times /* = 1 */, bool isMain /* = false */)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}#{}", stdCode, period, times);
+	// I03-NEW-039: caller stdCode is unbounded; no fixed 64-byte key buffer
+	std::string key = fmt::format("{}#{}#{}", stdCode, period, times);
 
 	//if(!_tick_enabled)
 	//不做判断,主要为了防止没有tick数据,而采用第二方案
@@ -4036,7 +4413,7 @@ WTSKlineSlice* HisDataReplayer::get_kline_slice(const char* stdCode, const char*
 		std::string cacheKey = key;
 		if (realTimes != 1)
 		{
-			std::string rawKey = fmtutil::format<64>("{}#{}#{}", stdCode, period, baseTimes);
+			std::string rawKey = fmt::format("{}#{}#{}", stdCode, period, baseTimes);
 			if (_bars_cache.find(rawKey) != _bars_cache.end())
 				bHasHisData = true;
 			else
@@ -4121,8 +4498,9 @@ WTSKlineSlice* HisDataReplayer::get_kline_slice(const char* stdCode, const char*
 	bool isClosed = (sInfo->offsetTime(_cur_time, true) >= sInfo->getCloseTime(true));
 	if (realTimes != 1 && !bHasCache)
 	{	
-		std::string rawKey = fmtutil::format<64>("{}#{}#{}", stdCode, period, baseTimes);
-		BarsListPtr& rawBars = _bars_cache[rawKey];
+		std::string rawKey = fmt::format("{}#{}#{}", stdCode, period, baseTimes);
+		auto rawIt = _bars_cache.find(rawKey);
+		BarsListPtr rawBars = rawIt == _bars_cache.end() ? BarsListPtr() : rawIt->second;
 		if (rawBars == NULL || rawBars->_bars.empty())
 		{
 			WTSLogger::warn("No raw bars cached for resampling {}({})", stdCode, period);
@@ -4138,20 +4516,47 @@ WTSKlineSlice* HisDataReplayer::get_kline_slice(const char* stdCode, const char*
 			return NULL;
 		rawKline->setCode(stdCode);
 
+		WTSReleaseGuard<WTSKlineSlice> rawGuard(rawKline);
 		static WTSDataFactory dataFact;
-		WTSKlineData* kData = dataFact.extractKlineData(rawKline, kp, realTimes, sInfo, true, _align_by_section);
-		rawKline->release();
+		std::vector<WTSDataFactory::BarIndexRange> ranges;
+		WTSKlineData* kData = dataFact.extractKlineDataWithRanges(rawKline, kp, realTimes, sInfo, ranges, true, _align_by_section);
+		WTSReleaseGuard<WTSKlineData> resultGuard(kData);
 
 		if(kData)
 		{
-			_bars_cache[key].reset(new BarsList());
-			BarsListPtr barsList = _bars_cache[key];
+			BarsListPtr barsList(new BarsList());
 			barsList->_code = stdCode;
 			barsList->_period = kp;
 			barsList->_times = realTimes;
 			barsList->_count = kData->size();
 			barsList->_bars.swap(kData->getDataRef());
-			kData->release();
+			// Ranges are half-open indices into the exact raw snapshot used above.
+			// Any inconsistency makes all results unknown; each valid range still
+			// requires one registered physical identity for every constituent.
+			bool validRanges = ranges.size() == barsList->_bars.size() &&
+				rawBars->_physical_sources.size() == rawBars->_bars.size();
+			std::size_t next = 0;
+			for (const auto& range : ranges)
+			{
+				if (range.first != next || range.first >= range.second || range.second > rawBars->_bars.size())
+				{ validRanges = false; break; }
+				next = range.second;
+			}
+			validRanges = validRanges && next == rawBars->_bars.size();
+			if (validRanges)
+			{
+				CodeHelper::CodeInfo info = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
+				barsList->_physical_sources.reserve(ranges.size());
+				for (const auto& range : ranges)
+				{
+					const std::string& source = rawBars->_physical_sources[range.first];
+					bool known = !source.empty() && resolve_fee_contract(stdCode, source.c_str(), info._exchg, 0);
+					for (std::size_t i = range.first + 1; known && i < range.second; ++i)
+						known = rawBars->_physical_sources[i] == source;
+					barsList->_physical_sources.emplace_back(known ? source : std::string());
+				}
+			}
+			_bars_cache[key] = barsList;
 			WTSLogger::info("{} resampled {}{} back kline of {} ready", barsList->_bars.size(), period, times, stdCode);
 		}
 		else
@@ -4321,6 +4726,9 @@ WTSKlineSlice* HisDataReplayer::get_kline_slice(const char* stdCode, const char*
 
 	uint32_t realCnt = kBlkPair->_cursor - sIdx;
 	WTSKlineSlice* kline = WTSKlineSlice::create(stdCode, kp, 1, kBlkPair->_bars.data() + sIdx, realCnt);
+	//卡11=B：切片共享 BarsList 所有权，clear_cache/check_cache_days 淘汰后仍有效
+	if (kline != NULL)
+		kline->addOwner(kBlkPair);
 	return kline;
 }
 
@@ -4329,10 +4737,41 @@ WTSTickSlice* HisDataReplayer::get_tick_slice(const char* stdCode, uint32_t coun
 	if (!_tick_enabled)
 		return NULL;
 
-	if (!checkTicks(stdCode, _cur_tdate))
-		return NULL;
+	uint32_t uDate = _cur_date;
+	uint32_t uTime = _cur_time * 100000 + _cur_secs;
+	if (etime != 0)
+	{
+		uDate = (uint32_t)(etime / 10000);
+		uTime = (uint32_t)(etime % 10000 * 100000);
+	}
 
-	auto& tickList = _ticks_cache[stdCode];
+	// P04-011: the visible history is the instrument's own trading day at the
+	// replay clock. In a mixed-session replay the global trading date can already
+	// be another product's next day, so that bucket is only used when it is the
+	// instrument's day; otherwise a separate query bucket is loaded and the
+	// working copy shared with dispatch (_ticks_cache) is left untouched. The day
+	// is taken from the replay clock, never from etime, so a later cutoff cannot
+	// open a future trading day (etime only bounds records within that day).
+	const uint32_t queryTDate = query_trading_date(stdCode);
+	if (queryTDate == 0)
+		return NULL;	// mapping failure is logged; never fall back to another day
+
+	HftDataList<WTSTickStruct>* source = NULL;
+	if (queryTDate == _cur_tdate)
+	{
+		if (!checkTicks(stdCode, _cur_tdate))
+			return NULL;
+		source = &_ticks_cache[stdCode];
+	}
+	else
+	{
+		HftDataList<WTSTickStruct>& bucket = _tick_query_cache[stdCode];
+		if (bucket._date != queryTDate || bucket._code != stdCode)
+			loadTickQueryBucket(bucket, stdCode, queryTDate);
+		source = &bucket;
+	}
+
+	auto& tickList = *source;
 	if (tickList._items.empty() || tickList._count == 0)
 		return NULL;
 
@@ -4341,15 +4780,6 @@ WTSTickSlice* HisDataReplayer::get_tick_slice(const char* stdCode, uint32_t coun
 	tickList._query_cursor = UINT_MAX;
 	if (tickList._query_cursor == UINT_MAX)
 	{
-		uint32_t uDate = _cur_date;
-		uint32_t uTime = _cur_time * 100000 + _cur_secs;
-
-		if (etime != 0)
-		{
-			uDate = (uint32_t)(etime / 10000);
-			uTime = (uint32_t)(etime % 10000 * 100000);
-		}
-
 		WTSTickStruct curTick;
 		curTick.action_date = uDate;
 		curTick.action_time = uTime;
@@ -4376,6 +4806,9 @@ WTSTickSlice* HisDataReplayer::get_tick_slice(const char* stdCode, uint32_t coun
 	const std::size_t realCnt = visibleCount - sIdx;
 
 	WTSTickSlice* ticks = WTSTickSlice::create(stdCode, tickList._items.data() + sIdx, realCnt);
+	//卡11=B：切片共享当前 tick 缓冲区，跨交易日重载/clear_cache 后仍有效
+	if (ticks != NULL)
+		ticks->addOwner(tickList._items.owner());
 	return ticks;
 }
 
@@ -4384,10 +4817,45 @@ WTSOrdDtlSlice* HisDataReplayer::get_order_detail_slice(const char* stdCode, uin
 	if (count == 0)
 		return NULL;
 
-	if (!checkOrderDetails(stdCode, _cur_tdate))
+	// P04-011: the instrument's own trading day at the replay clock; another day than
+	// the global one is served from a separate query bucket (dispatch caches untouched).
+	const uint32_t queryTDate = query_trading_date(stdCode);
+	if (queryTDate == 0)
 		return NULL;
-
-	auto& dataList = _orddtl_cache[stdCode];
+	HftDataList<WTSOrdDtlStruct>* source = NULL;
+	if (queryTDate == _cur_tdate)
+	{
+		if (!checkOrderDetails(stdCode, _cur_tdate))
+			return NULL;
+		source = &_orddtl_cache[stdCode];
+	}
+	else
+	{
+		HftDataList<WTSOrdDtlStruct>& bucket = _orddtl_query_cache[stdCode];
+		if (bucket._date != queryTDate || bucket._code != stdCode)
+		{
+			bucket._items.clear();
+			bucket._cursor = UINT_MAX;
+			bucket._query_cursor = UINT_MAX;
+			bucket._code = stdCode;
+			bucket._date = queryTDate;
+			bucket._count = 0;
+			if (_mode == "csv")
+			{
+				WTSLogger::error("Cannot use stock level2 data in csv mode!");
+				return NULL;
+			}
+			if (!cacheRawOrdDtlFromBin(bucket, stdCode, queryTDate))
+			{
+				bucket._items.resize(0);
+				bucket._code = stdCode;
+				bucket._date = queryTDate;
+				bucket._count = 0;
+			}
+		}
+		source = &bucket;
+	}
+	auto& dataList = *source;
 	if (dataList._items.empty() || dataList._count == 0)
 		return NULL;
 
@@ -4426,6 +4894,8 @@ WTSOrdDtlSlice* HisDataReplayer::get_order_detail_slice(const char* stdCode, uin
 		return NULL;
 
 	WTSOrdDtlSlice* ticks = WTSOrdDtlSlice::create(stdCode, dataList._items.data() + sIdx, static_cast<uint32_t>(realCnt));
+	if (ticks != NULL)
+		ticks->addOwner(dataList._items.owner());
 	return ticks;
 }
 
@@ -4434,10 +4904,45 @@ WTSOrdQueSlice* HisDataReplayer::get_order_queue_slice(const char* stdCode, uint
 	if (count == 0)
 		return NULL;
 
-	if (!checkOrderQueues(stdCode, _cur_tdate))
+	// P04-011: the instrument's own trading day at the replay clock; another day than
+	// the global one is served from a separate query bucket (dispatch caches untouched).
+	const uint32_t queryTDate = query_trading_date(stdCode);
+	if (queryTDate == 0)
 		return NULL;
-
-	auto& dataList = _ordque_cache[stdCode];
+	HftDataList<WTSOrdQueStruct>* source = NULL;
+	if (queryTDate == _cur_tdate)
+	{
+		if (!checkOrderQueues(stdCode, _cur_tdate))
+			return NULL;
+		source = &_ordque_cache[stdCode];
+	}
+	else
+	{
+		HftDataList<WTSOrdQueStruct>& bucket = _ordque_query_cache[stdCode];
+		if (bucket._date != queryTDate || bucket._code != stdCode)
+		{
+			bucket._items.clear();
+			bucket._cursor = UINT_MAX;
+			bucket._query_cursor = UINT_MAX;
+			bucket._code = stdCode;
+			bucket._date = queryTDate;
+			bucket._count = 0;
+			if (_mode == "csv")
+			{
+				WTSLogger::error("Cannot use stock level2 data in csv mode!");
+				return NULL;
+			}
+			if (!cacheRawOrdQueFromBin(bucket, stdCode, queryTDate))
+			{
+				bucket._items.resize(0);
+				bucket._code = stdCode;
+				bucket._date = queryTDate;
+				bucket._count = 0;
+			}
+		}
+		source = &bucket;
+	}
+	auto& dataList = *source;
 	if (dataList._items.empty() || dataList._count == 0)
 		return NULL;
 
@@ -4476,6 +4981,8 @@ WTSOrdQueSlice* HisDataReplayer::get_order_queue_slice(const char* stdCode, uint
 		return NULL;
 
 	WTSOrdQueSlice* ticks = WTSOrdQueSlice::create(stdCode, dataList._items.data() + sIdx, static_cast<uint32_t>(realCnt));
+	if (ticks != NULL)
+		ticks->addOwner(dataList._items.owner());
 	return ticks;
 }
 
@@ -4484,10 +4991,45 @@ WTSTransSlice* HisDataReplayer::get_transaction_slice(const char* stdCode, uint3
 	if (count == 0)
 		return NULL;
 
-	if (!checkTransactions(stdCode, _cur_tdate))
+	// P04-011: the instrument's own trading day at the replay clock; another day than
+	// the global one is served from a separate query bucket (dispatch caches untouched).
+	const uint32_t queryTDate = query_trading_date(stdCode);
+	if (queryTDate == 0)
 		return NULL;
-
-	auto& dataList = _trans_cache[stdCode];
+	HftDataList<WTSTransStruct>* source = NULL;
+	if (queryTDate == _cur_tdate)
+	{
+		if (!checkTransactions(stdCode, _cur_tdate))
+			return NULL;
+		source = &_trans_cache[stdCode];
+	}
+	else
+	{
+		HftDataList<WTSTransStruct>& bucket = _trans_query_cache[stdCode];
+		if (bucket._date != queryTDate || bucket._code != stdCode)
+		{
+			bucket._items.clear();
+			bucket._cursor = UINT_MAX;
+			bucket._query_cursor = UINT_MAX;
+			bucket._code = stdCode;
+			bucket._date = queryTDate;
+			bucket._count = 0;
+			if (_mode == "csv")
+			{
+				WTSLogger::error("Cannot use stock level2 data in csv mode!");
+				return NULL;
+			}
+			if (!cacheRawTransFromBin(bucket, stdCode, queryTDate))
+			{
+				bucket._items.resize(0);
+				bucket._code = stdCode;
+				bucket._date = queryTDate;
+				bucket._count = 0;
+			}
+		}
+		source = &bucket;
+	}
+	auto& dataList = *source;
 	if (dataList._items.empty() || dataList._count == 0)
 		return NULL;
 
@@ -4526,6 +5068,8 @@ WTSTransSlice* HisDataReplayer::get_transaction_slice(const char* stdCode, uint3
 		return NULL;
 
 	WTSTransSlice* ticks = WTSTransSlice::create(stdCode, dataList._items.data() + sIdx, static_cast<uint32_t>(realCnt));
+	if (ticks != NULL)
+		ticks->addOwner(dataList._items.owner());
 	return ticks;
 }
 
@@ -4789,8 +5333,107 @@ bool HisDataReplayer::checkTicks(const char* stdCode, uint32_t uDate)
 	return true;
 }
 
+uint32_t HisDataReplayer::query_trading_date(const char* stdCode)
+{
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
+	const char* commId = cInfo.stdCommID();
+	if (commId == NULL || *commId == '\0')
+		return _cur_tdate;
+	// From the replay clock, never from a query cutoff: a later etime must not open a future day.
+	const wtp::DateMappingResult32 r = _bd_mgr.checkedCalcTradingDate(commId, _cur_date, _cur_time, false);
+	if (r.status == wtp::DateMappingStatus::Ok)
+		return r.value;
+	// An instrument without commodity metadata has no product calendar; the global
+	// trading day is then the only defined day (as before). Every other mapping
+	// failure (missing calendar/session, invalid clock) is reported and refused.
+	if (r.status == wtp::DateMappingStatus::MissingCommodity)
+		return _cur_tdate;
+	WTSLogger::error("Mapping trading date of {} at {}.{:04d} failed: {}", commId, _cur_date, _cur_time,
+		wtp::dateMappingStatusName(r.status));
+	return 0;
+}
+
+bool HisDataReplayer::loadTickQueryBucket(HftDataList<WTSTickStruct>& list, const char* stdCode, uint32_t uDate)
+{
+	list._items.clear();
+	list._cursor = UINT_MAX;
+	list._query_cursor = UINT_MAX;
+	list._code = stdCode;
+	list._date = uDate;
+	list._count = 0;
+
+	// Same sources and precedence as checkTicks: replay bucket, external loader, CSV, binary.
+	auto replayCode = _replay_ticks_cache.find(stdCode);
+	if (replayCode != _replay_ticks_cache.end())
+	{
+		auto replayDate = replayCode->second.find(uDate);
+		if (replayDate != replayCode->second.end())
+		{
+			const std::size_t count = std::min(replayDate->second._count, replayDate->second._items.size());
+			list._items.assign(replayDate->second._items.begin(), replayDate->second._items.begin() + count);
+			list._count = count;
+			return count > 0;
+		}
+	}
+
+	bool hasTicks = false;
+	if (NULL != _bt_loader)
+		hasTicks = cacheRawTicksFromLoader(list, stdCode, uDate);
+	else if (_mode == "csv")
+		hasTicks = cacheRawTicksFromCSV(list, stdCode, uDate);
+	else
+		hasTicks = cacheRawTicksFromBin(list, stdCode, uDate);
+	if (!hasTicks)
+	{
+		list._items.resize(0);
+		list._cursor = UINT_MAX;
+		list._query_cursor = UINT_MAX;
+		list._code = stdCode;
+		list._date = uDate;
+		list._count = 0;
+	}
+	return hasTicks;
+}
+
 WTSTickData* HisDataReplayer::get_last_tick(const char* stdCode)
 {
+	if (stdCode == nullptr || stdCode[0] == '\0')
+		return NULL;
+
+	// For a live replay subscription, a time-based historical lookup can see a
+	// same-time record that has not been dispatched (or was filtered entirely).
+	// Retain the existing historical lookup for unsubscribed instruments.
+	if (_tick_enabled && _running.load())
+	{
+		std::string subscriptionCode(stdCode);
+		const bool adjusted = subscriptionCode.back() == SUFFIX_QFQ || subscriptionCode.back() == SUFFIX_HFQ;
+		// An adjusted history loader can supply different data from the raw
+		// subscription. Its event identity/adjustment contract is not available
+		// here, so preserve its existing historical lookup instead of returning a
+		// raw tick under an adjusted code.
+		if (!adjusted)
+		{
+			std::lock_guard<std::mutex> lock(_dispatched_ticks_mutex);
+			if (_dispatched_tick_subscriptions.find(subscriptionCode) != _dispatched_tick_subscriptions.end())
+			{
+				auto last = _last_dispatched_ticks.find(subscriptionCode);
+				if (last == _last_dispatched_ticks.end() || last->second.tradingDate != _cur_tdate)
+					return NULL;
+				// A synthetic adjusted bar can be delivered under a suffix-free
+				// code. Its price is not the raw price requested by the caller.
+				if (!last->second.adjustedSource)
+				{
+					WTSTickData* tick = WTSTickData::create(last->second.tick);
+					if (tick) tick->setContractInfo(NULL);
+					if (tick && !last->second.physicalCode.empty() && !last->second.exchange.empty())
+						tick->setContractInfo(resolve_fee_contract(subscriptionCode.c_str(), last->second.physicalCode.c_str(),
+							last->second.exchange.c_str(), last->second.tradingDate));
+					return tick;
+				}
+			}
+		}
+	}
+
 	if (!checkTicks(stdCode, _cur_tdate))
 		return NULL;
 
@@ -4808,22 +5451,35 @@ WTSTickData* HisDataReplayer::get_last_tick(const char* stdCode)
 		curTick.action_date = uDate;
 		curTick.action_time = uTime;
 
-		auto tit = std::lower_bound(tickList._items.begin(), tickList._items.end(), curTick, [](const WTSTickStruct& a, const WTSTickStruct& b){
+		// BUG-R103-002 (E): each record owns the left-closed, right-open interval
+		// [t_i, t_{i+1}); the visible prefix is every record with time <= now and
+		// the query returns its last element. Same-time records keep their stable
+		// load order, so the last inserted one is visible at that time. Before the
+		// first record and strictly after the last record the result is empty.
+		const auto validBegin = tickList._items.begin();
+		const auto validEnd = validBegin + std::min(tickList._count, tickList._items.size());
+		if (validBegin == validEnd)
+			return NULL;
+		auto before = [](const WTSTickStruct& a, const WTSTickStruct& b) {
 			if (a.action_date != b.action_date)
 				return a.action_date < b.action_date;
 			else
 				return a.action_time < b.action_time;
-		});
-		if (tit == tickList._items.end() || tit->action_date > uDate ||
-			(tit->action_date == uDate && tit->action_time > uTime))
+		};
+		const WTSTickStruct& tail = *(validEnd - 1);
+		if (before(tail, curTick))
 			return NULL;
-
-		std::size_t idx = tit - tickList._items.begin();
-		if (idx >= tickList._count || idx >= tickList._items.size())
+		auto tit = std::upper_bound(validBegin, validEnd, curTick, before);
+		if (tit == validBegin)
 			return NULL;
-		tickList._query_cursor = idx + 1;
+		tickList._query_cursor = static_cast<std::size_t>(tit - validBegin);
 	}
 	return WTSTickData::create(tickList._items[tickList._query_cursor - 1]);
+}
+
+uint64_t HisDataReplayer::get_out_of_session_count(uint32_t kind) const
+{
+	return kind < 4 ? _hft_out_of_session[kind].load() : 0;
 }
 
 WTSCommodityInfo* HisDataReplayer::get_commodity_info(const char* stdCode)
@@ -4857,79 +5513,211 @@ WTSSessionInfo* HisDataReplayer::get_session_info(const char* sid, bool isCode /
 	return cInfo->getSessionInfo();
 }
 
-void HisDataReplayer::loadFees(const char* filename)
+namespace
 {
-	if (strlen(filename) == 0)
-		return;
-
-	if (!StdFile::exists(filename))
+	// YAML is retained for existing templates. Preserve duplicate keys for the
+	// schedule parser to reject and preserve scalar text where it is not JSON.
+	bool fee_yaml_json(const YAML::Node& node, rj::Writer<rj::StringBuffer>& out, const std::string& key, unsigned depth)
 	{
-		WTSLogger::error("Fees template file {} not exists", filename);
-		return;
+		if (depth > 8) return false;
+		if (node.IsMap())
+		{
+			out.StartObject();
+			for (const auto& entry : node)
+			{
+				if (!entry.first.IsScalar()) return false;
+				const std::string name = entry.first.Scalar();
+				out.Key(name.c_str(), static_cast<rj::SizeType>(name.size()));
+				if (!fee_yaml_json(entry.second, out, name, depth + 1)) return false;
+			}
+			out.EndObject();
+			return true;
+		}
+		if (!node.IsScalar()) return false;
+		const std::string value = node.Scalar();
+		if (key == "byvolume")
+		{
+			try { out.Bool(node.as<bool>()); return true; } catch (...) { return false; }
+		}
+		rj::Document scalar;
+		scalar.Parse(value.data(), value.size());
+		if (!scalar.HasParseError() && scalar.IsNumber() && node.Tag() != "!")
+			return scalar.Accept(out);
+		out.String(value.c_str(), static_cast<rj::SizeType>(value.size()));
+		return true;
 	}
 
-	WTSVariant* cfg = WTSCfgLoader::load_from_file(filename);
-	if (cfg == NULL)
+	bool fee_is_continuous(const std::string& code, const CodeHelper::CodeInfo& info)
 	{
-		WTSLogger::error("Converting fees template file {} failed", filename);
-		return;
+		if (info.hasRule()) return true;
+		std::string base = base_tick_code(code);
+		const std::size_t dot = base.rfind('.');
+		const std::string tail = dot == std::string::npos ? base : base.substr(dot + 1);
+		return tail == "HOT" || tail == "2ND" || tail == "SECOND";
 	}
-
-	auto keys = cfg->memberNames();
-	for (const std::string& key : keys)
-	{
-		WTSVariant* cfgItem = cfg->get(key.c_str());
-		FeeItem& fItem = _fee_map[key];
-		fItem._by_volume = cfgItem->getBoolean("byvolume");
-		fItem._open = cfgItem->getDouble("open");
-		fItem._close = cfgItem->getDouble("close");
-		fItem._close_today = cfgItem->getDouble("closetoday");
-		// Optional for backward-compatible fee templates.  A missing field is 0.
-		fItem._min_fee = cfgItem->getDouble("minfee");
-	}
-
-	cfg->release();
-
-	WTSLogger::info("{} items of fees template loaded", _fee_map.size());
 }
 
+void HisDataReplayer::loadFees(const char* filename)
+{
+	(void)loadFeesChecked(filename);
+}
+
+bool HisDataReplayer::loadFeesChecked(const char* filename)
+{
+	if (_running.load())
+	{
+		WTSLogger::error("Cannot reload fees during replay");
+		return false;
+	}
+	_fee_schedule = wt_fee::Schedule{};
+	_fee_map.clear();
+	std::string error;
+	try
+	{
+		if (!filename || !*filename) error = "empty fee path";
+		else
+		{
+			std::ifstream input(filename, std::ios::binary);
+			if (!input) error = "cannot open fee file";
+			else
+			{
+				std::string content((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+				if (input.bad()) error = "cannot read fee file";
+				if (content.find('\0') != std::string::npos) error = "embedded NUL in fee file";
+				input.close();
+				if (input.fail() && error.empty()) error = "cannot close fee file";
+				const std::string ext = fs::path(filename).extension().string();
+				if (error.empty() && (ext == ".yaml" || ext == ".yml"))
+				{
+					rj::StringBuffer buffer;
+					rj::Writer<rj::StringBuffer> writer(buffer);
+					if (!fee_yaml_json(YAML::Load(content), writer, "", 0)) error = "invalid YAML fee structure";
+					else content.assign(buffer.GetString(), buffer.GetSize());
+				}
+				if (error.empty() && !_fee_schedule.loadJson(content, error)) { }
+			}
+		}
+	}
+	catch (const std::exception& e) { error = e.what(); }
+	catch (...) { error = "unknown fee load error"; }
+	if (!error.empty() || !_fee_schedule.valid())
+	{
+		_fee_schedule = wt_fee::Schedule{};
+		WTSLogger::error("Fees template {} failed: {}", filename ? filename : "", error);
+		return false;
+	}
+	for (const auto& entry : _fee_schedule.productRates())
+	{
+		FeeItem& item = _fee_map[entry.first];
+		item._open = entry.second.open; item._close = entry.second.close;
+		item._close_today = entry.second.close_today; item._min_fee = entry.second.min_fee;
+		item._by_volume = entry.second.by_volume;
+	}
+	{
+		std::lock_guard<std::mutex> lock(_fee_error_mutex);
+		_fee_error.clear();
+	}
+	WTSLogger::info("Fees template {} loaded", filename);
+	return true;
+}
+
+WTSContractInfo* HisDataReplayer::resolve_fee_contract(const char* stdCode, const char* rawCode, const char* exchange, uint32_t tradingDate)
+{
+	if (!stdCode || !*stdCode || !rawCode || !*rawCode || !exchange || !*exchange) return NULL;
+	CodeHelper::CodeInfo requested = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
+	if (!requested._exchg[0] || !requested._product[0] || std::strcmp(requested._exchg, exchange) != 0) return NULL;
+	WTSContractInfo* contract = _bd_mgr.getContract(rawCode, exchange, tradingDate);
+	WTSCommodityInfo* commodity = _bd_mgr.getCommodity(requested._exchg, requested._product);
+	if (!contract || !commodity || contract->getCommInfo() != commodity ||
+		std::strcmp(contract->getCode(), rawCode) || std::strcmp(contract->getExchg(), exchange) ||
+		std::strcmp(contract->getProduct(), requested._product)) return NULL;
+	if (!fee_is_continuous(stdCode, requested) && std::strcmp(requested._code, rawCode) != 0) return NULL;
+	// A synthetic or malformed raw code cannot establish physical provenance.
+	std::string fullCode = std::string(exchange) + "." + rawCode;
+	CodeHelper::CodeInfo physical = CodeHelper::extractStdCode(fullCode.c_str(), &_hot_mgr);
+	if (fee_is_continuous(fullCode, physical)) return NULL;
+	return contract;
+}
+
+bool HisDataReplayer::prepare_fee_context(const char* stdCode, const WTSContractInfo* fillContract, wt_fee::Context& out, std::string& error)
+{
+	error.clear();
+	if (!stdCode || !*stdCode) { error = "missing subscription code"; return false; }
+	CodeHelper::CodeInfo info = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
+	if (!info._exchg[0] || !info._product[0]) { error = "invalid subscription code"; return false; }
+	const bool continuous = fee_is_continuous(stdCode, info);
+	if (continuous && !fillContract) { error = "continuous subscription requires actual fill contract"; return false; }
+	const char* raw = fillContract ? fillContract->getCode() : info._code;
+	const char* exchange = fillContract ? fillContract->getExchg() : info._exchg;
+	WTSContractInfo* verified = resolve_fee_contract(stdCode, raw, exchange, _cur_tdate);
+	if (!verified || (fillContract && (fillContract != verified || fillContract->getCommInfo() != verified->getCommInfo())))
+	{ error = "fill contract does not match subscription metadata"; return false; }
+	WTSCommodityInfo* commodity = verified->getCommInfo();
+	const double scale = verified->getVolScale();
+	if (!std::isfinite(scale) || scale <= 0) { error = "invalid volume scale"; return false; }
+	wt_fee::Context candidate;
+	candidate.physical_contract = verified->getFullCode();
+	candidate.product = commodity->getFullPid();
+	candidate.volume_scale = scale;
+	const auto found = _fee_schedule.lookup(candidate.physical_contract, candidate.product);
+	if (found.status != wt_fee::LookupStatus::contract && found.status != wt_fee::LookupStatus::product)
+	{ error = "missing or invalid fee schedule for " + candidate.physical_contract; return false; }
+	candidate.rates = found.rates;
+	out = std::move(candidate);
+	return true;
+}
+
+void HisDataReplayer::report_fee_error(const std::string& message)
+{
+	std::string first;
+	{
+		std::lock_guard<std::mutex> lock(_fee_error_mutex);
+		if (_fee_error.empty()) _fee_error = message.empty() ? "unspecified fee error" : message;
+		first = _fee_error;
+		_terminated.store(true);
+	}
+	report_replay_error(WT_REPLAY_ERROR_FEE, first);
+	WTSLogger::error("Replay fee error: {}", first);
+}
+
+std::string HisDataReplayer::fee_error() const
+{
+	std::lock_guard<std::mutex> lock(_fee_error_mutex);
+	return _fee_error;
+}
 
 double HisDataReplayer::calc_fee(const char* stdCode, double price, double qty, uint32_t offset)
 {
-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
-	const char* stdPID = codeInfo.stdCommID();
-	auto it = _fee_map.find(stdPID);
-	if (it == _fee_map.end())
-		return 0.0;
-
-	double ret = 0.0;
-	double rate = 0.0;
-	WTSCommodityInfo* commInfo = _bd_mgr.getCommodity(stdPID);
-	const FeeItem& fItem = it->second;
-	if (fItem._by_volume)
+	wt_fee::Context context;
+	std::string error;
+	WTSContractInfo* physical = NULL;
+	if (stdCode && *stdCode)
 	{
-		switch (offset)
+		CodeHelper::CodeInfo info = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
+		if (fee_is_continuous(stdCode, info) && _running.load())
 		{
-		case 0: rate = fItem._open; ret = rate*qty; break;
-		case 1: rate = fItem._close; ret = rate*qty; break;
-		case 2: rate = fItem._close_today; ret = rate*qty; break;
-		default: ret = 0.0; break;
+			std::lock_guard<std::mutex> lock(_dispatched_ticks_mutex);
+			auto last = _last_dispatched_ticks.find(stdCode);
+			if (_dispatched_tick_subscriptions.count(stdCode) && last != _last_dispatched_ticks.end() &&
+				last->second.tradingDate == _cur_tdate && !last->second.adjustedSource &&
+				!last->second.physicalCode.empty() && !last->second.exchange.empty())
+				physical = resolve_fee_contract(stdCode, last->second.physicalCode.c_str(),
+					last->second.exchange.c_str(), last->second.tradingDate);
 		}
 	}
-	else
+	const bool ok = prepare_fee_context(stdCode, physical, context, error);
+	if (!ok)
 	{
-		double amount = price*qty*commInfo->getVolScale();
-		switch (offset)
-		{
-		case 0: rate = fItem._open; ret = rate*amount; break;
-		case 1: rate = fItem._close; ret = rate*amount; break;
-		case 2: rate = fItem._close_today; ret = rate*amount; break;
-		default: ret = 0.0; break;
-		}
+		WTSLogger::error("Cannot calculate fee for {}: {}", stdCode ? stdCode : "", error);
+		return std::numeric_limits<double>::quiet_NaN();
 	}
-
-	ret = apply_fee_minimum(ret, qty, rate, fItem._min_fee);
-	return (int32_t)(ret * 100 + 0.5) / 100.0;
+	const auto result = wt_fee::calculate(context, price, qty, offset);
+	if (result.status != wt_fee::CalculationStatus::ok)
+	{
+		WTSLogger::error("Cannot calculate fee for {}: invalid calculation", stdCode);
+		return std::numeric_limits<double>::quiet_NaN();
+	}
+	return result.value;
 }
 
 double HisDataReplayer::get_cur_price(const char* stdCode)
@@ -5017,6 +5805,10 @@ void HisDataReplayer::sub_tick(uint32_t sid, const char* stdCode)
 	std::string hitCode(stdCode, length);
 	SubList& sids = _tick_sub_map[hitCode];
 	sids[sid] = std::make_pair(sid, flag);
+	{
+		std::lock_guard<std::mutex> lock(_dispatched_ticks_mutex);
+		_dispatched_tick_subscriptions.insert(hitCode);
+	}
 
 	if (_tick_enabled)
 		return;
@@ -5435,7 +6227,7 @@ bool HisDataReplayer::cacheRawTicksFromLoader(HftDataList<WTSTickStruct>& dataLi
 			stdCode, uDate);
 		dataList._items.clear();
 		dataList._count = 0;
-		_terminated = true;
+		report_replay_error(WT_REPLAY_ERROR_INTERNAL, "Replay terminated due to an internal error");
 		return false;
 	}
 
@@ -5935,10 +6727,14 @@ bool HisDataReplayer::cacheIntegratedFutBarsFromBin(void* codeInfo, const std::s
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
 	const char* stdPID = cInfo->stdCommID();
 
-	uint32_t curDate = TimeUtils::getCurDate();
-	uint32_t curTime = TimeUtils::getCurMin() / 100;
-
-	uint32_t endTDate = _bd_mgr.calcTradingDate(stdPID, curDate, curTime, false);
+	// One checked clock snapshot (decision card 1, I03-NEW-006).
+	const wtp::DateMappingResult32 mappedEnd = _bd_mgr.checkedCalcTradingDate(stdPID, 0, 0, false);
+	if (mappedEnd.status != wtp::DateMappingStatus::Ok)
+	{
+		WTSLogger::error("Cannot map current trading date of {}: status {}", stdPID, static_cast<uint32_t>(mappedEnd.status));
+		return false;
+	}
+	uint32_t endTDate = mappedEnd.value;
 
 	std::string pname;
 	switch (period)
@@ -5948,15 +6744,34 @@ bool HisDataReplayer::cacheIntegratedFutBarsFromBin(void* codeInfo, const std::s
 	default: pname = "day"; break;
 	}
 
-	if(bSubbed)
-		_bars_cache[key].reset(new BarsList());
-	else
-		_unbars_cache[key].reset(new BarsList());
-	BarsListPtr& barsList = bSubbed ? _bars_cache[key] : _unbars_cache[key];
+	BarsCache& cache = bSubbed ? _bars_cache : _unbars_cache;
+	auto previousIt = cache.find(key);
+	const bool hadPrevious = previousIt != cache.end();
+	BarsListPtr previous = hadPrevious ? previousIt->second : BarsListPtr();
+	BarsListPtr barsList(new BarsList());
+	struct CachePublishGuard
+	{
+		BarsCache& cache;
+		std::string key;
+		BarsListPtr staged, previous;
+		bool hadPrevious, committed = false;
+		~CachePublishGuard()
+		{
+			if (committed) return;
+			auto it = cache.find(key);
+			if (it != cache.end() && it->second == staged)
+			{
+				if (hadPrevious) it->second = previous;
+				else cache.erase(it);
+			}
+		}
+	} guard{cache, key, barsList, previous, hadPrevious};
+	cache[key] = barsList;
 	barsList->_code = stdCode;
 	barsList->_period = period;
 
-	std::vector<std::vector<WTSBarStruct>*> barsSections;
+	struct BarSection { std::vector<WTSBarStruct> bars; std::string physicalCode; };
+	std::vector<BarSection> barsSections;
 
 	uint32_t realCnt = 0;
 	bool isDay = (period == KP_DAY);
@@ -5964,7 +6779,7 @@ bool HisDataReplayer::cacheIntegratedFutBarsFromBin(void* codeInfo, const std::s
 	//const char* hot_flag = cInfo.isHot() ? FILE_SUF_HOT : FILE_SUF_2ND;
 	const char* ruleTag = cInfo->_ruletag;
 
-	std::vector<WTSBarStruct>* hotAy = NULL;
+	std::vector<WTSBarStruct> hotBars;
 	uint64_t lastHotTime = 0;
 	do
 	{
@@ -5990,21 +6805,26 @@ bool HisDataReplayer::cacheIntegratedFutBarsFromBin(void* codeInfo, const std::s
 			break;
 		}
 
-		uint32_t barcnt = content.size() / sizeof(WTSBarStruct);
-		if (barcnt <= 0)
-			break;
-
-		hotAy = new std::vector<WTSBarStruct>();
-		hotAy->resize(barcnt);
-		memcpy(hotAy->data(), content.data(), content.size());
-
-		if (period != KP_DAY)
-			lastHotTime = hotAy->at(barcnt - 1).time;
-		else
-			lastHotTime = hotAy->at(barcnt - 1).date;
-
-		uint64_t stime = isDay ? hotAy->at(0).date : hotAy->at(0).time;
-		uint64_t etime = isDay ? hotAy->at(barcnt - 1).date : hotAy->at(barcnt - 1).time;
+		if (content.empty()) break;
+		if (content.size() % sizeof(WTSBarStruct) != 0 || content.size() / sizeof(WTSBarStruct) > INT32_MAX)
+		{
+			WTSLogger::error("Invalid integrated bar block for {}", stdCode);
+			return false;
+		}
+		const std::size_t barcnt = content.size() / sizeof(WTSBarStruct);
+		hotBars.resize(barcnt);
+		memcpy(hotBars.data(), content.data(), content.size());
+		auto before = [isDay](const WTSBarStruct& a, const WTSBarStruct& b) {
+			return isDay ? a.date < b.date : a.time < b.time;
+		};
+		if (!std::is_sorted(hotBars.begin(), hotBars.end(), before))
+		{
+			WTSLogger::error("Unordered integrated bars for {}", stdCode);
+			return false;
+		}
+		lastHotTime = isDay ? hotBars.back().date : hotBars.back().time;
+		uint64_t stime = isDay ? hotBars.front().date : hotBars.front().time;
+		uint64_t etime = lastHotTime;
 
 		WTSLogger::info("{} items of back {} data of hot contract {} directly loaded, from {} to {}", barcnt, pname.c_str(), stdCode, stime, etime);
 
@@ -6048,8 +6868,15 @@ bool HisDataReplayer::cacheIntegratedFutBarsFromBin(void* codeInfo, const std::s
 		WTSBarStruct sBar, eBar;
 		if (period != KP_DAY)
 		{
-			uint64_t sTime = _bd_mgr.getBoundaryTime(stdPID, leftDt, false, true);
-			uint64_t eTime = _bd_mgr.getBoundaryTime(stdPID, rightDt, false, false);
+			const wtp::DateMappingResult64 sBound = _bd_mgr.checkedGetBoundaryTime(stdPID, leftDt, false, true);
+			const wtp::DateMappingResult64 eBound = _bd_mgr.checkedGetBoundaryTime(stdPID, rightDt, false, false);
+			const uint64_t sTime = sBound.value;
+			const uint64_t eTime = eBound.value;
+			if (sBound.status != wtp::DateMappingStatus::Ok || eBound.status != wtp::DateMappingStatus::Ok || sTime > eTime)
+			{
+				WTSLogger::error("Invalid integrated bar section boundary for {}", stdCode);
+				return false;
+			}
 
 			sBar.date = leftDt;
 			sBar.time = ((uint32_t)(sTime / 10000) - 19900000) * 10000 + (uint32_t)(sTime % 10000);
@@ -6091,7 +6918,11 @@ bool HisDataReplayer::cacheIntegratedFutBarsFromBin(void* codeInfo, const std::s
 		if (NULL != _bt_loader)
 		{
 			//分月合约代码
-			std::string wCode = fmtutil::format<64>("{}.{}.{}", cInfo->_exchg, cInfo->_product, curCode + strlen(cInfo->_product));
+			const std::size_t productLength = std::strlen(cInfo->_product);
+			const bool hasProductPrefix = std::strncmp(curCode, cInfo->_product, productLength) == 0 &&
+				std::strlen(curCode) > productLength;
+			std::string wCode = fmtutil::format<64>("{}.{}.{}", cInfo->_exchg, cInfo->_product,
+				hasProductPrefix ? curCode + productLength : curCode);
 			bLoaded = _bt_loader->loadRawHisBars(&buffer, wCode.c_str(), period, [](void* obj, WTSBarStruct* bars, uint32_t count) {
 				std::string* buff = (std::string*)obj;
 				buff->resize(sizeof(WTSBarStruct)*count);
@@ -6113,57 +6944,39 @@ bool HisDataReplayer::cacheIntegratedFutBarsFromBin(void* codeInfo, const std::s
 			}
 		}
 
-		if (buffer.empty())
-			break;
-
-		uint32_t barcnt = buffer.size() / sizeof(WTSBarStruct);
-
-		WTSBarStruct* firstBar = (WTSBarStruct*)buffer.data();
-
-		WTSBarStruct* pBar = std::lower_bound(firstBar, firstBar + (barcnt - 1), sBar, [period](const WTSBarStruct& a, const WTSBarStruct& b) {
-			if (period == KP_DAY)
-			{
-				return a.date < b.date;
-			}
-			else
-			{
-				return a.time < b.time;
-			}
-		});
-
-		std::size_t sIdx = pBar - firstBar;
-		if ((period == KP_DAY && pBar->date < sBar.date) || (period != KP_DAY && pBar->time < sBar.time))	//早于边界时间
+		if (buffer.empty()) break;
+		if (buffer.size() % sizeof(WTSBarStruct) != 0 || buffer.size() / sizeof(WTSBarStruct) > INT32_MAX)
 		{
-			//早于边界时间, 说明没有数据了, 因为lower_bound会返回大于等于目标位置的数据
-			continue;
+			WTSLogger::error("Invalid physical bar block for {}", curCode);
+			return false;
 		}
-
-		pBar = std::lower_bound(firstBar + sIdx, firstBar + (barcnt - 1), eBar, [period](const WTSBarStruct& a, const WTSBarStruct& b) {
-			if (period == KP_DAY)
-			{
-				return a.date < b.date;
-			}
-			else
-			{
-				return a.time < b.time;
-			}
-		});
-		std::size_t eIdx = pBar - firstBar;
-		if ((period == KP_DAY && pBar->date > eBar.date) || (period != KP_DAY && pBar->time > eBar.time))
+		const std::size_t barcnt = buffer.size() / sizeof(WTSBarStruct);
+		std::vector<WTSBarStruct> physicalBars(barcnt);
+		std::memcpy(physicalBars.data(), buffer.data(), buffer.size());
+		WTSBarStruct* firstBar = physicalBars.data();
+		auto before = [period](const WTSBarStruct& a, const WTSBarStruct& b) {
+			return period == KP_DAY ? a.date < b.date : a.time < b.time;
+		};
+		if (!std::is_sorted(firstBar, firstBar + barcnt, before))
 		{
-			pBar--;
-			eIdx--;
+			WTSLogger::error("Unordered physical bars for {}", curCode);
+			return false;
 		}
-
-		if (eIdx < sIdx)
-			continue;
-
-		uint32_t curCnt = eIdx - sIdx + 1;
-
+		WTSBarStruct* first = std::lower_bound(firstBar, firstBar + barcnt, sBar, before);
+		WTSBarStruct* last = std::upper_bound(first, firstBar + barcnt, eBar, before);
+		if (first == last) continue;
+		const std::size_t sIdx = static_cast<std::size_t>(first - firstBar);
+		const std::size_t eIdx = static_cast<std::size_t>(last - firstBar - 1);
+		const std::size_t curCnt = eIdx - sIdx + 1;
+		if (curCnt > static_cast<std::size_t>(INT32_MAX) - realCnt)
+		{
+			WTSLogger::error("Integrated bar count exceeds slice limits for {}", stdCode);
+			return false;
+		}
 		if (cInfo->isExright())
 		{
 			double factor = hotSec._factor / baseFactor;
-			for (uint32_t idx = sIdx; idx <= eIdx; idx++)
+			for (std::size_t idx = sIdx; idx <= eIdx; idx++)
 			{
 				firstBar[idx].open *= factor;
 				firstBar[idx].high *= factor;
@@ -6185,38 +6998,59 @@ bool HisDataReplayer::cacheIntegratedFutBarsFromBin(void* codeInfo, const std::s
 			}
 		}
 
-		std::vector<WTSBarStruct>* tempAy = new std::vector<WTSBarStruct>();
-		tempAy->resize(curCnt);
-		memcpy(tempAy->data(), &firstBar[sIdx], sizeof(WTSBarStruct)*curCnt);
-		realCnt += curCnt;
-
-		barsSections.emplace_back(tempAy);
+		BarSection section;
+		section.bars.assign(firstBar + sIdx, firstBar + eIdx + 1);
+		// The raw loader is asked for this exact physical contract. Keep a value
+		// only if it belongs to the subscribed product in registered metadata.
+		if (resolve_fee_contract(stdCode, curCode, cInfo->_exchg, 0))
+			section.physicalCode = curCode;
+		realCnt += static_cast<uint32_t>(curCnt);
+		barsSections.emplace_back(std::move(section));
 
 		if (bAllCovered)
 			break;
 	}
 
-	if (hotAy)
+	if (!hotBars.empty())
 	{
-		barsSections.emplace_back(hotAy);
-		realCnt += hotAy->size();
+		if (hotBars.size() > static_cast<std::size_t>(INT32_MAX) - realCnt) return false;
+		realCnt += static_cast<uint32_t>(hotBars.size());
+		// Aggregated continuous bars have no physical-contract provenance.
+		barsSections.push_back({std::move(hotBars), std::string()});
 	}
 
 	if (realCnt > 0)
 	{
-		barsList->_bars.resize(realCnt);
-
-		uint32_t curIdx = 0;
-		for (auto it = barsSections.rbegin(); it != barsSections.rend(); it++)
+		barsList->_bars.reserve(realCnt);
+		barsList->_physical_sources.reserve(realCnt);
+		for (auto it = barsSections.rbegin(); it != barsSections.rend(); ++it)
 		{
-			std::vector<WTSBarStruct>* tempAy = *it;
-			memcpy(barsList->_bars.data() + curIdx, tempAy->data(), tempAy->size() * sizeof(WTSBarStruct));
-			curIdx += tempAy->size();
-			delete tempAy;
+			barsList->_bars.insert(barsList->_bars.end(), it->bars.begin(), it->bars.end());
+			barsList->_physical_sources.insert(barsList->_physical_sources.end(), it->bars.size(), it->physicalCode);
 		}
-		barsSections.clear();
+		barsList->_count = realCnt;
+		// Duplicate or out-of-order timestamps cannot establish a unique source.
+		for (std::size_t i = 1; i < barsList->_bars.size(); ++i)
+		{
+			const auto previous = isDay ? barsList->_bars[i-1].date : barsList->_bars[i-1].time;
+			const auto current = isDay ? barsList->_bars[i].date : barsList->_bars[i].time;
+			if (current < previous)
+			{
+				WTSLogger::error("Integrated bar sections are not ordered for {}", stdCode);
+				return false;
+			}
+			if (current == previous) barsList->_physical_sources.clear();
+		}
 	}
 
+	if (realCnt == 0) return false;
+	auto currentEntry = cache.find(key);
+	if (currentEntry == cache.end() || currentEntry->second != barsList)
+	{
+		WTSLogger::error("Integrated bar cache changed during load for {}", stdCode);
+		return false;
+	}
+	guard.committed = true;
 	WTSLogger::info("{} items of back {} data of {} cached", realCnt, pname, stdCode);
 
 	return true;
@@ -6272,12 +7106,7 @@ const HisDataReplayer::AdjFactorList& HisDataReplayer::getAdjFactors(const char*
 bool HisDataReplayer::cacheAdjustedStkBarsFromBin(void* codeInfo, const std::string& key, const char* stdCode, WTSKlinePeriod period, bool /*bSubbed*/ /* = true */)
 {
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
-	const char* stdPID = cInfo->stdCommID();
-
-	uint32_t curDate = TimeUtils::getCurDate();
-	uint32_t curTime = TimeUtils::getCurMin() / 100;
-
-	[[maybe_unused]] uint32_t endTDate = _bd_mgr.calcTradingDate(stdPID, curDate, curTime, false);
+	// The former unused current-trading-date mapping (unchecked clock) was removed.
 
 	_bars_cache[key].reset(new BarsList());
 	BarsListPtr& barsList = _bars_cache[key];
@@ -6521,12 +7350,7 @@ bool HisDataReplayer::cacheRawBarsFromBin(const std::string& key, const char* st
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
 	WTSCommodityInfo* commInfo = _bd_mgr.getCommodity(cInfo._exchg, cInfo._product);
-	const char* stdPID = cInfo.stdCommID();
-
-	uint32_t curDate = TimeUtils::getCurDate();
-	uint32_t curTime = TimeUtils::getCurMin() / 100;
-
-	[[maybe_unused]] uint32_t endTDate = _bd_mgr.calcTradingDate(stdPID, curDate, curTime, false);
+	// The former unused current-trading-date mapping (unchecked clock) was removed.
 
 	[[maybe_unused]] bool isDay = (period == KP_DAY);
 

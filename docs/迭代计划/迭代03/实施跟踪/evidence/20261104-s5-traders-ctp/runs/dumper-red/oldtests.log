@@ -1,0 +1,120 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = -I03S5*
+[==========] Running 29 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from dumper
+[ RUN      ] dumper.forwards_account_record_to_registered_callback
+[       OK ] dumper.forwards_account_record_to_registered_callback (0 ms)
+[ RUN      ] dumper.forwards_order_trade_and_position_records
+[       OK ] dumper.forwards_order_trade_and_position_records (0 ms)
+[ RUN      ] dumper.records_are_dropped_when_no_callback_registered
+[       OK ] dumper.records_are_dropped_when_no_callback_registered (0 ms)
+[ DISABLED ] dumper.DISABLED_run_once_loops_forever_and_run_threaded_spawns_worker
+[----------] 3 tests from dumper (0 ms total)
+
+[----------] 15 tests from TempCwd
+[ RUN      ] TempCwd.dumper_init_with_missing_log_profile_is_a_noop
+[       OK ] TempCwd.dumper_init_with_missing_log_profile_is_a_noop (0 ms)
+[ RUN      ] TempCwd.dumper_config_does_not_register_adapters_when_init_fails
+[       OK ] TempCwd.dumper_config_does_not_register_adapters_when_init_fails (2 ms)
+[ RUN      ] TempCwd.dumper_config_rejects_active_adapter_with_empty_module
+[       OK ] TempCwd.dumper_config_rejects_active_adapter_with_empty_module (0 ms)
+[ RUN      ] TempCwd.dumper_config_rejects_invalid_document_and_missing_or_wrong_required_sections
+[       OK ] TempCwd.dumper_config_rejects_invalid_document_and_missing_or_wrong_required_sections (0 ms)
+[ RUN      ] TempCwd.dumper_config_keeps_optional_config_and_inactive_adapter_compatibility
+[       OK ] TempCwd.dumper_config_keeps_optional_config_and_inactive_adapter_compatibility (0 ms)
+[ RUN      ] TempCwd.dumper_config_rejects_invalid_refresh_span_and_accepts_numeric_yaml_string
+[       OK ] TempCwd.dumper_config_rejects_invalid_refresh_span_and_accepts_numeric_yaml_string (25 ms)
+[ RUN      ] TempCwd.adapter_init_rejects_null_params_and_missing_module
+[       OK ] TempCwd.adapter_init_rejects_null_params_and_missing_module (9 ms)
+[ RUN      ] TempCwd.adapter_date_defaults_to_zero_and_failed_login_refresh_skips_queries
+[       OK ] TempCwd.adapter_date_defaults_to_zero_and_failed_login_refresh_skips_queries (0 ms)
+[ RUN      ] TempCwd.adapter_successful_login_sets_date_and_preserves_queries
+[       OK ] TempCwd.adapter_successful_login_sets_date_and_preserves_queries (0 ms)
+[ RUN      ] TempCwd.adapter_close_event_only_logs_and_connect_failure_marks_done
+dlopen(/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib, 0x0002): tried: '/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib' (no such file), '/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib' (no such file)
+[       OK ] TempCwd.adapter_close_event_only_logs_and_connect_failure_marks_done (0 ms)
+[ RUN      ] TempCwd.adapter_error_report_and_null_guard
+dlopen(/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib, 0x0002): tried: '/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib' (no such file), '/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib' (no such file)
+[       OK ] TempCwd.adapter_error_report_and_null_guard (0 ms)
+[ RUN      ] TempCwd.adapter_forwards_orders_trades_and_positions_to_dumper
+dlopen(/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib, 0x0002): tried: '/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib' (no such file), '/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib' (no such file)
+[       OK ] TempCwd.adapter_forwards_orders_trades_and_positions_to_dumper (12 ms)
+[ RUN      ] TempCwd.adapter_position_list_without_contract_is_skipped
+dlopen(/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib, 0x0002): tried: '/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib' (no such file), '/tmp/wt_dumper_FMpJ6Ptraders/libTraderNotBuiltForTest.dylib' (no such file)
+[       OK ] TempCwd.adapter_position_list_without_contract_is_skipped (0 ms)
+[ RUN      ] TempCwd.extern_c_entries_route_to_the_singleton_dumper
+[       OK ] TempCwd.extern_c_entries_route_to_the_singleton_dumper (0 ms)
+[ RUN      ] TempCwd.cwd_handles_long_paths_and_reports_unavailable_cwd
+[       OK ] TempCwd.cwd_handles_long_paths_and_reports_unavailable_cwd (1 ms)
+[----------] 15 tests from TempCwd (56 ms total)
+
+[----------] 1 test from adapter_mgr
+[ RUN      ] adapter_mgr.add_get_and_duplicate_rules
+[       OK ] adapter_mgr.add_get_and_duplicate_rules (0 ms)
+[----------] 1 test from adapter_mgr (0 ms total)
+
+[----------] 1 test from gate_placeholder_TraderDumper
+[ RUN      ] gate_placeholder_TraderDumper.compiles_with_module_flags
+[       OK ] gate_placeholder_TraderDumper.compiles_with_module_flags (3 ms)
+[----------] 1 test from gate_placeholder_TraderDumper (3 ms total)
+
+[----------] 9 tests from R114DumperFixture
+[ RUN      ] R114DumperFixture.mocker_adapter_forwards_account_position_trade_and_order_push_records
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp:302: Skipped
+libTraderMocker.dylib 不在构建目录，跳过（不访问厂商/柜台）
+
+[  SKIPPED ] R114DumperFixture.mocker_adapter_forwards_account_position_trade_and_order_push_records (5 ms)
+[ RUN      ] R114DumperFixture.adapter_release_with_real_ctp_module_is_safe
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp:477: Skipped
+libTraderCTP.dylib 不在构建目录，跳过（不访问厂商/柜台）
+
+[  SKIPPED ] R114DumperFixture.adapter_release_with_real_ctp_module_is_safe (5 ms)
+[ RUN      ] R114DumperFixture.adapter_mgr_dec_alive_reports_undone_and_refresh_queries_done
+dlopen(/tmp/wt_dummy_mod_dir/traders/libTraderNotBuiltForR114.dylib, 0x0002): tried: '/tmp/wt_dummy_mod_dir/traders/libTraderNotBuiltForR114.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/tmp/wt_dummy_mod_dir/traders/libTraderNotBuiltForR114.dylib' (no such file), '/tmp/wt_dummy_mod_dir/traders/libTraderNotBuiltForR114.dylib' (no such file)
+dlopen(/tmp/wt_dummy_mod_dir/traders/libTraderNotBuiltForR114.dylib, 0x0002): tried: '/tmp/wt_dummy_mod_dir/traders/libTraderNotBuiltForR114.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/tmp/wt_dummy_mod_dir/traders/libTraderNotBuiltForR114.dylib' (no such file), '/tmp/wt_dummy_mod_dir/traders/libTraderNotBuiltForR114.dylib' (no such file)
+dlopen(/tmp/wt_dummy_mod_dir/traders/libTraderNotBuiltForR114.dylib, 0x0002): tried: '/tmp/wt_dummy_mod_dir/traders/libTraderNotBuiltForR114.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/tmp/wt_dummy_mod_dir/traders/libTraderNotBuiltForR114.dylib' (no such file), '/tmp/wt_dummy_mod_dir/traders/libTraderNotBuiltForR114.dylib' (no such file)
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp:529: Skipped
+libTraderMocker.dylib 不在构建目录，跳过 refresh 正向分支
+
+[  SKIPPED ] R114DumperFixture.adapter_mgr_dec_alive_reports_undone_and_refresh_queries_done (1 ms)
+[ RUN      ] R114DumperFixture.dumper_config_accepts_array_basefiles_and_empty_traders
+[       OK ] R114DumperFixture.dumper_config_accepts_array_basefiles_and_empty_traders (35 ms)
+[ RUN      ] R114DumperFixture.dumper_config_registers_successfully_initialized_mocker_without_connecting
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp:585: Skipped
+libTraderMocker.dylib 不在构建目录，跳过本地 fake adapter 配置验证
+
+[  SKIPPED ] R114DumperFixture.dumper_config_registers_successfully_initialized_mocker_without_connecting (0 ms)
+[ RUN      ] R114DumperFixture.dumper_config_rejects_zero_refresh_span_before_initializing_adapter
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp:608: Skipped
+libTraderMocker.dylib 不在构建目录，跳过本地 fake adapter 前置校验
+
+[  SKIPPED ] R114DumperFixture.dumper_config_rejects_zero_refresh_span_before_initializing_adapter (0 ms)
+[ RUN      ] R114DumperFixture.dumper_config_prevalidates_mixed_batch_before_initializing_valid_prefix
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp:628: Skipped
+libTraderMocker.dylib 不在构建目录，跳过本地 fake adapter 前置校验
+
+[  SKIPPED ] R114DumperFixture.dumper_config_prevalidates_mixed_batch_before_initializing_valid_prefix (0 ms)
+[ RUN      ] R114DumperFixture.dumper_config_reports_late_plugin_failure_and_retains_initialized_prefix
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderDumper/r114_dumper_test.cpp:648: Skipped
+libTraderMocker.dylib 不在构建目录，跳过本地 fake mixed batch
+
+[  SKIPPED ] R114DumperFixture.dumper_config_reports_late_plugin_failure_and_retains_initialized_prefix (0 ms)
+[ RUN      ] R114DumperFixture.dumper_run_once_returns_immediately_and_worker_joins
+[       OK ] R114DumperFixture.dumper_run_once_returns_immediately_and_worker_joins (2025 ms)
+[----------] 9 tests from R114DumperFixture (2073 ms total)
+
+[----------] Global test environment tear-down
+[==========] 29 tests from 5 test suites ran. (2134 ms total)
+[  PASSED  ] 22 tests.
+[  SKIPPED ] 7 tests, listed below:
+[  SKIPPED ] R114DumperFixture.mocker_adapter_forwards_account_position_trade_and_order_push_records
+[  SKIPPED ] R114DumperFixture.adapter_release_with_real_ctp_module_is_safe
+[  SKIPPED ] R114DumperFixture.adapter_mgr_dec_alive_reports_undone_and_refresh_queries_done
+[  SKIPPED ] R114DumperFixture.dumper_config_registers_successfully_initialized_mocker_without_connecting
+[  SKIPPED ] R114DumperFixture.dumper_config_rejects_zero_refresh_span_before_initializing_adapter
+[  SKIPPED ] R114DumperFixture.dumper_config_prevalidates_mixed_batch_before_initializing_valid_prefix
+[  SKIPPED ] R114DumperFixture.dumper_config_reports_late_plugin_failure_and_retains_initialized_prefix
+
+  YOU HAVE 3 DISABLED TESTS
+

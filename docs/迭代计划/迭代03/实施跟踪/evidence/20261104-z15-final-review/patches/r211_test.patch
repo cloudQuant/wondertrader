@@ -1,0 +1,63 @@
+diff --git a/src/TestUnits/coverage/q01_wtcore3/r211_wtcore_rest_test.cpp b/src/TestUnits/coverage/q01_wtcore3/r211_wtcore_rest_test.cpp
+index 44b557e3..6b476ce6 100644
+--- a/src/TestUnits/coverage/q01_wtcore3/r211_wtcore_rest_test.cpp
++++ b/src/TestUnits/coverage/q01_wtcore3/r211_wtcore_rest_test.cpp
+@@ -19,6 +19,7 @@
+  */
+ #include <gtest/gtest.h>
+ 
++#include <cstdlib>
+ #include <cstring>
+ #include <filesystem>
+ #include <fstream>
+@@ -233,6 +234,50 @@ TEST(R211Engine, IncompatibleRiskMonModuleIsRejected)
+     // BUG-R211-001：init() 丢弃 init_riskmon 的 false，active 的风控配置会被静默忽略
+ }
+ 
++/* ------------------------------------------------------------------ *
++ * 1b. BUG-R211-001 卡15最终复查：发行的 WtRiskMonFact 对未知 name 的
++ *     createRiskMonotor 返回 NULL。init_riskmon 不得对空监控器调用 init，
++ *     应与不兼容模块分支一致：返回失败且不安装风控包装器。
++ *     子进程执行，旧实现在子进程内崩溃即为红控。
++ * ------------------------------------------------------------------ */
++TEST(R211Engine, UnknownRiskMonNameFromShippedFactoryIsRejectedWithoutCrash)
++{
++    const R211InstDirGuard instDir(binDir());
++    const std::string moduleName = DLLHelper::wrap_module("WtRiskMonFact");
++    const fs::path modulePath = binDir() / moduleName;
++
++    // 前置条件：真实发行模块存在且导出 createRiskMonFact，且走 getInstDir() 回退路径。
++    ASSERT_TRUE(fs::is_regular_file(modulePath)) << modulePath.string();
++    ASSERT_FALSE(fs::exists(fs::path(WtHelper::getCWD()) / moduleName))
++        << "测试必须走 getInstDir() 的回退路径";
++    DllHandle module = DLLHelper::load_library(modulePath.string().c_str());
++    ASSERT_NE(nullptr, module);
++    const bool hasRiskMonFactory = DLLHelper::get_symbol(module, "createRiskMonFact") != nullptr;
++    DLLHelper::free_library(module);
++    ASSERT_TRUE(hasRiskMonFactory);
++
++    GTEST_FLAG_SET(death_test_style, "threadsafe");
++    EXPECT_EXIT(
++        {
++            R211Temp tmp("risk_unknown_name");
++            q01sel::BaseDataMgr bd;
++            q01sel::HotMgr hot;
++            WtDtMgr dm;
++            WTSVariant* cfg = WTSCfgLoader::load_from_content(
++                "{\"product\":{\"session\":\"TRADING\"},\"fees\":\"\",\"filters\":\"\","
++                "\"riskmon\":{\"active\":true,\"module\":\"WtRiskMonFact\","
++                "\"name\":\"R211NoSuchRiskMon\"}}");
++            if (cfg == nullptr)
++                std::_Exit(2);
++            // 与上例相同，WtSelEngine 析构问题（BUG-R42-001）未闭合，堆分配且不回收。
++            R211SelEngine* engine = new R211SelEngine();
++            engine->init(cfg, &bd, &dm, &hot, NULL);
++            cfg->release();
++            std::_Exit(engine->has_riskmon() ? 3 : 0);
++        },
++        ::testing::ExitedWithCode(0), "");
++}
++
+ /* ------------------------------------------------------------------ *
+  * 2. WtExecuterMgr::handle_pos_change：被过滤的执行器收不到信号，
+  *    显式路由（execid==执行器名）走 104-105。

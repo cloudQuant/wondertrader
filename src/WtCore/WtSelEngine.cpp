@@ -60,7 +60,53 @@ void WtSelEngine::release()
 		_tm_ticker = NULL;
 	}
 
+	// The ticker no longer dispatches; wait for tasks already started.
+	join_schedule_workers(false);
+
 	WtEngine::release();
+}
+
+void WtSelEngine::join_schedule_workers(bool onlyFinished)
+{
+	std::vector<ScheduleWorker> workers;
+	{
+		std::lock_guard<std::mutex> lock(_sched_mtx);
+		if (!onlyFinished)
+		{
+			workers.swap(_sched_workers);
+		}
+		else
+		{
+			auto it = _sched_workers.begin();
+			while (it != _sched_workers.end())
+			{
+				if (it->_done->load(std::memory_order_acquire))
+				{
+					workers.push_back(*it);
+					it = _sched_workers.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
+		}
+	}
+
+	for (ScheduleWorker& worker : workers)
+	{
+		if (!worker._thread || !worker._thread->joinable())
+			continue;
+		if (worker._thread->get_id() == std::this_thread::get_id())
+		{
+			// release() called from a task's own on_schedule: it cannot join
+			// itself. The thread owns its context reference; let it finish.
+			WTSLogger::error("SEL engine released from its own schedule task; that task is detached");
+			worker._thread->detach();
+			continue;
+		}
+		worker._thread->join();
+	}
 }
 
 void WtSelEngine::on_session_end()
@@ -79,6 +125,16 @@ void WtSelEngine::on_session_begin()
 
 void WtSelEngine::on_init()
 {
+	// Every registered SEL context receives on_init when the ticker starts
+	// (repeated engine run() is a separate open item, BUG-R10-004), before the initialize event and before any schedule/tick
+	// dispatch (mirrors WtCtaEngine::on_init). Contexts are only registered after
+	// the runner has created and initialized the whole strategy batch.
+	for (auto it = _ctx_map.begin(); it != _ctx_map.end(); it++)
+	{
+		SelContextPtr& ctx = (SelContextPtr&)it->second;
+		ctx->on_init();
+	}
+
 	if (_evt_listener)
 		_evt_listener->on_initialize_event();
 }
@@ -91,8 +147,8 @@ void WtSelEngine::handle_push_quote(WTSTickData* curTick)
 
 void WtSelEngine::on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}-{}-{}", stdCode, period, times);
+	// I03-NEW-039: a legal stdCode plus period and times can exceed 64 bytes.
+	const std::string key = fmt::format("{}-{}-{}", stdCode, period, times);
 
 	const SubList& sids = _bar_sub_map[key];
 	for (auto it = sids.begin(); it != sids.end(); it++)
@@ -164,6 +220,11 @@ void WtSelEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 					SelContextPtr& ctx = (SelContextPtr&)cit->second;
 					uint32_t opt = it->second.second;
 
+					// BUG-R10-004 / K25=A (slice1 final gaps): a strategy whose tick handler
+					// throws is isolated and reported; the other subscribers still get the tick
+					// and the exception never reaches the ticker strand or the market-data thread.
+					try
+					{
 					if (opt == 0)
 					{
 						ctx->on_tick(stdCode, curTick);
@@ -179,6 +240,7 @@ void WtSelEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 						else //(opt == 2)
 						{
 							WTSTickData* newTick = WTSTickData::create(curTick->getTickStruct());
+							struct TickRelease { WTSTickData* tick; ~TickRelease() { if (tick) tick->release(); } } releaseNewTick{ newTick };
 							WTSTickStruct& newTS = newTick->getTickStruct();
 							newTick->setContractInfo(curTick->getContractInfo());
 
@@ -212,11 +274,19 @@ void WtSelEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 								newTS.pre_interest /= factor;
 							}
 
-							_price_map[wCode] = newTS.price;
+							set_cur_price(wCode.c_str(), newTS.price);
 
 							ctx->on_tick(wCode.c_str(), newTick);
-							newTick->release();
 						}
+					}
+					}
+					catch (const std::exception& e)
+					{
+						WTSLogger::error("Tick handler of strategy {} threw on {}: {}", ctx->name(), stdCode, e.what());
+					}
+					catch (...)
+					{
+						WTSLogger::error("Tick handler of strategy {} threw an unknown exception on {}", ctx->name(), stdCode);
 					}
 
 				}
@@ -237,10 +307,15 @@ void WtSelEngine::on_minute_end(uint32_t curDate, uint32_t curTime)
 
 	uint32_t weekDay = TimeUtils::getWeekDay(curDate);
 
+	// I03-NEW-066: reap dispatch threads of earlier tasks that have finished.
+	join_schedule_workers(true);
+
 	for (auto& v : _tasks)
 	{
 		TaskInfoPtr& tInfo = (TaskInfoPtr&)v.second;
-		if (tInfo->_time != nextTime)
+		// Decision K27=A: d/w/m/y fire at the HHMM time; for the min period
+		// _time is the interval in minutes, matched below like the backtest.
+		if (tInfo->_period != TPT_Minute && tInfo->_time != nextTime)
 			continue;
 
 		uint64_t now = (uint64_t)curDate * 10000 + nextTime;
@@ -273,6 +348,7 @@ void WtSelEngine::on_minute_end(uint32_t curDate, uint32_t curTime)
 			bIgnore = false;
 			break;
 		case TPT_Minute:
+			if (sInfo != NULL && tInfo->_time != 0)
 			{
 				uint32_t minutes = sInfo->timeToMinutes(curTime);	//先将时间转换成分钟数
 				if(minutes != 0 && (minutes%tInfo->_time == 0))		//如果分钟数能被整除,且不为0,则可以触发
@@ -284,17 +360,18 @@ void WtSelEngine::on_minute_end(uint32_t curDate, uint32_t curTime)
 		case TPT_Monthly:
 			//if (preTDate % 1000000 < _task->_day && _cur_date % 1000000 >= _task->_day)
 			//	fired = true;
-			if (_cur_date % 1000000 == tInfo->_day)
+			// Decision K27=A: monthly date is the day of month (1..31), as in the backtest.
+			if (_cur_date % 100 == tInfo->_day)
 				bIgnore = false;
 			else if (bHasHoliday)
 			{
 				//上一个交易日在上个月,且当前日期大于触发日期
 				//说明这个月的开始日期在节假日内,顺延到今天
-				if ((preTDate % 10000 / 100 < _cur_date % 10000 / 100) && _cur_date % 1000000 > tInfo->_day)
+				if ((preTDate % 10000 / 100 < _cur_date % 10000 / 100) && _cur_date % 100 > tInfo->_day)
 				{
 					bIgnore = false;
 				}
-				else if (preTDate % 1000000 < tInfo->_day && _cur_date % 1000000 > tInfo->_day)
+				else if (preTDate % 100 < tInfo->_day && _cur_date % 100 > tInfo->_day)
 				{
 					//上一个交易日在同一个月,且小于触发日期,但是今天大于触发日期,说明正确触发日期到节假日内,顺延到今天
 					bIgnore = false;
@@ -333,18 +410,46 @@ void WtSelEngine::on_minute_end(uint32_t curDate, uint32_t curTime)
 			continue;
 
 		//TODO: 回调任务
-		SelContextPtr ctx = getContext(tInfo->_id);
-		StdThreadPtr thrd(new StdThread([ctx, curDate, curTime, nextTime](){
-			if (ctx)
-				ctx->on_schedule(curDate, curTime, nextTime);
-		}));	
-
+		// I03-NEW-066: tasks are registered under the context id (the map key),
+		// not under the task sequence number.
+		SelContextPtr ctx = getContext(v.first);
 		tInfo->_last_exe_time = now;
+		if (!ctx)
+		{
+			WTSLogger::error("Schedule task {} has no context {}", tInfo->_name, v.first);
+			continue;
+		}
+
+		// Decision K25=A (2026-11-04): the schedule runs synchronously on the
+		// ticker strand that delivers on_minute_end, so schedule and tick
+		// callbacks of a context never overlap; re-entrant ticker events are
+		// queued by the strand. Exceptions are isolated per strategy.
+		try
+		{
+			ctx->on_schedule(curDate, curTime, nextTime);
+		}
+		catch (const std::exception& e)
+		{
+			WTSLogger::error("Schedule of strategy {} threw: {}", ctx->name(), e.what());
+		}
+		catch (...)
+		{
+			WTSLogger::error("Schedule of strategy {} threw an unknown exception", ctx->name());
+		}
 	}
 }
 
 void WtSelEngine::run()
 {
+	// BUG-R10-004 (slice1 final gaps): a repeated run() is rejected. Creating a
+	// second ticker would overwrite _tm_ticker and leak the running ticker and
+	// its worker, which would keep driving this engine.
+	if (_tm_ticker != NULL)
+	{
+		WTSLogger::error("SEL engine is already running; repeated run() rejected");
+		return;
+	}
+
 	if (!fee_config_valid())
 	{
 		WTSLogger::error("SEL engine start rejected: fee template configuration is invalid");
@@ -389,7 +494,8 @@ void WtSelEngine::run()
 		StdFile::write_file_content(filename.c_str(), sb.GetString());
 	}
 
-	_tm_ticker->run();
+	if (!_tm_ticker->run())
+		WTSLogger::error("SEL engine start failed: time ticker could not start (trading session unavailable)");
 }
 
 void WtSelEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, IHotMgr* hotMgr, EventNotifier* notifier /* = NULL */)
@@ -468,16 +574,9 @@ void WtSelEngine::handle_pos_change(const char* straName, const char* stdCode, d
 	//	realCode = CodeHelper::rawMonthCodeToStdCode(code.c_str(), cInfo._exchg);
 	//}
 
-	{
-		SpinLock lock(_pos_mtx);
-		auto it = _pos_map.find(realCode);
-		if (it == _pos_map.end())
-		{
-			_pos_map[realCode] = std::make_shared<PosInfo>();
-		}
-	}
-
-	PosInfoPtr& pInfo = _pos_map[realCode];
+	// I03-NEW-115: copy the owner under _pos_mtx; a reference into the map
+	// dangles once another insert relocates the map storage.
+	PosInfoPtr pInfo = get_or_create_position(realCode.c_str());
 
 	bool bRiskEnabled = false;
 	if (!decimal::eq(_risk_volscale, 1.0) && _risk_date == _cur_tdate)
@@ -490,9 +589,20 @@ void WtSelEngine::handle_pos_change(const char* straName, const char* stdCode, d
 		double symbol = diffQty / abs(diffQty);
 		diffQty = decimal::rnd(abs(diffQty)*_risk_volscale)*symbol;
 	}
-	double targetPos = pInfo->_volume + diffQty;
-
-	append_signal(realCode.c_str(), targetPos, false);
+	// I03-NEW-124: read base + increment + commit as one step under _sig_mtx
+	// (same rule as the CTA engine; on_tick consumes signals under it).
+	double targetPos = 0;
+	{
+		SpinLock sigLock(_sig_mtx);
+		double curVolume = 0;
+		{
+			SpinLock posLock(pInfo->_mtx);
+			curVolume = pInfo->_volume;
+		}
+		// K26=B1: accumulate onto a pending target (runs on the ticker strand, K25).
+		targetPos = pending_target_or(realCode, curVolume) + diffQty;
+		append_signal_locked(realCode.c_str(), targetPos, false);
+	}
 	save_datas();
 
 	const auto& exec_ids = _exec_mgr.get_route_by_strategy(straName);

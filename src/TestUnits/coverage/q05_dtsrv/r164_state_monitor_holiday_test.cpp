@@ -88,9 +88,11 @@ TEST_F(R164StateMonitorHolidayTest, AuctionStartedSessionStaysReceiving)
 			"sections": [{"from": 1, "to": 2359}]
 		}
 	})JSON");
+	// I03-NEW-053：卡 4a=A 商品补 pricetick/volscale；卡 1=A+C 加载品种引用的空节假日模板。
 	load_commodities(R"JSON({
-		"SHFE": {"AR": {"name": "竞价品种", "session": "AUCREC", "holiday": "R164_NONE"}}
+		"SHFE": {"AR": {"name": "竞价品种", "session": "AUCREC", "holiday": "R164_NONE", "pricetick": 1, "volscale": 1}}
 	})JSON");
+	load_holidays(R"JSON({"R164_NONE": []})JSON");
 
 	StateMonitor mon;
 	r164::MonitorGuard guard(mon);
@@ -129,7 +131,7 @@ TEST_F(R164StateMonitorHolidayTest, HolidayInstrumentStaysHolidayAcrossSecondRou
 		"HSESS": {"name": "节假日会话", "offset": 0, "sections": [{"from": 1, "to": 2359}]}
 	})JSON");
 	load_commodities(R"JSON({
-		"SHFE": {"HA": {"name": "假日品种", "session": "HSESS", "holiday": "R164_HOL"}}
+		"SHFE": {"HA": {"name": "假日品种", "session": "HSESS", "holiday": "R164_HOL", "pricetick": 1, "volscale": 1}}
 	})JSON");
 
 	const uint32_t today = TimeUtils::getCurDate();

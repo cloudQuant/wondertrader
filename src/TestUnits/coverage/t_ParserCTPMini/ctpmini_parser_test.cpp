@@ -395,7 +395,14 @@ TEST_F(ParserCTPMiniTest, heartbeat_and_sub_response_paths_log_only)
 	EXPECT_NO_THROW(parser.OnRspUnSubMarketData(&spec, &rsp, 5, true));
 	// 这三个回调都不该产生登录/订阅事件
 	EXPECT_TRUE(sink.events.empty());
-	EXPECT_EQ(sink.logs.size(), 1u);
+	// I03-NEW-130（BUG-R105-004）：IsErrorRspInfo 按同族 ParserCTPOpt/ParserFemas 的合同识别
+	// ErrorID != 0，OnRspError 与 OnRspSubMarketData 各写一条错误日志（原断言 logs.size()==1
+	// 固化的是谓词恒 false、错误应答无声的缺陷行为）；退订应答不经谓词，不写日志。
+	ASSERT_EQ(sink.logs.size(), 3u);
+	EXPECT_EQ(sink.logLevels[1], LL_ERROR);
+	EXPECT_EQ(sink.logLevels[2], LL_ERROR);
+	EXPECT_NE(sink.logs[1].find("error id 42"), std::string::npos);
+	EXPECT_NE(sink.logs[2].find("error id 42"), std::string::npos);
 }
 
 TEST_F(ParserCTPMiniTest, subscribe_before_login_only_caches_the_filter)
@@ -420,9 +427,10 @@ TEST_F(ParserCTPMiniTest, subscribe_before_login_only_caches_the_filter)
 /* ------------------------------------------------------------------ */
 
 /*
- * BUG-T4-010：IsErrorRspInfo 是恒返回 false 的桩函数，
- * 于是 OnRspUserLogin 把任何应答（含错误应答）都当成功，
- * 紧接着 m_pUserAPI->GetTradingDay()（ParserCTPMini.cpp:183）→ 未 connect 必崩。
+ * 保持禁用（迭代03 最终验收复核）：BUG-T4-010 已并入 BUG-R105-004（I03-NEW-130，谓词已修）。
+ * 本例在未 connect、m_pUserAPI 为空的 parser 上投递登录应答，不属于 SDK 生命周期内的输入
+ * （同 BUG-T4-004 NOT_BUG 口径）。合法前置（注入 API 会话）下的红绿用例见
+ * s3_new130_ctpmini_rsp_error_test.cpp。
  */
 TEST(ParserCTPMiniDisabled, DISABLED_login_success_branch_dereferences_null_api)
 {
@@ -442,11 +450,8 @@ TEST(ParserCTPMiniDisabled, DISABLED_login_success_branch_dereferences_null_api)
 	EXPECT_TRUE(sink.events.empty());
 }
 
-/*
- * BUG-T4-008：构造函数没有初始化 m_sink / m_pBaseDataMgr，
- * 未 registerSpi 就触发任何回调都是野指针解引用 → 无法稳定断言，只能禁用。
- */
-TEST(ParserCTPMiniDisabled, DISABLED_callback_before_register_spi_uses_wild_sink)
+/* 迭代03 最终验收复核后启用（原禁用：BUG-T4-008 构造未初始化 m_sink）。 */
+TEST(ParserCTPMiniDisabled, callback_before_register_spi_uses_wild_sink)
 {
 	ParserCTPMini parser;
 	parser.OnFrontConnected();

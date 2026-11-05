@@ -1,0 +1,24 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q05DataManagerTest.InitFailsOnMissingModuleButKeepsSinkTargets
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q05DataManagerTest
+[ RUN      ] Q05DataManagerTest.InitFailsOnMissingModuleButKeepsSinkTargets
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q05_dm_58517_0/bin/libq05_no_such_writer_module.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q05_dm_58517_0/bin/libq05_no_such_writer_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q05_dm_58517_0/bin/libq05_no_such_writer_module.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q05_dm_58517_0/bin/libq05_no_such_writer_module.dylib' (no such file)
+/tmp/wt-i03-s5-dt-writer-before/src/TestUnits/coverage/q05_dtsrv/q05_dtcore_datamgr_test.cpp:115: Failure
+Expected equality of these values:
+  dm.getBDMgr()
+    Which is: NULL
+  static_cast<IBaseDataMgr*>(&_bdMgr)
+    Which is: 0x10585c2c8
+
+/tmp/wt-i03-s5-dt-writer-before/src/TestUnits/coverage/q05_dtsrv/q05_dtcore_datamgr_test.cpp:118: Failure
+Value of: dm.canSessionReceive("SSE")
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-dt-writer-before/src/TestUnits/coverage/q05_dtsrv/q05_dtcore_datamgr_test.cpp:119: Failure
+Value of: dm.canSessionReceive("UNKNOWN")
+  Actual: true
+Expected: false
+

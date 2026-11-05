@@ -11,6 +11,7 @@
 #include "../Includes/IBaseDataMgr.h"
 #include "../Includes/WTSCollection.hpp"
 #include "../Includes/FasterDefs.h"
+#include "../Includes/DateMappingV1.h"
 
 USING_NS_WTP;
 
@@ -55,6 +56,13 @@ public:
 	bool		loadContracts(const char* filename);
 
 public:
+	// Versioned checked mapping is opt-in and does not change IBaseDataMgr.
+	wtp::DateMappingV1 getDateMappingV1() noexcept;
+	wtp::DateMappingResult32 checkedCalcTradingDate(const char*, uint32_t, uint32_t, bool = false) noexcept;
+	wtp::DateMappingResult64 checkedGetBoundaryTime(const char*, uint32_t, bool = false, bool = true) noexcept;
+	wtp::DateMappingResult32 checkedGetTradingDate(const char*, uint32_t = 0, uint32_t = 0, bool = false) noexcept;
+	wtp::DateMappingResult32 checkedNextTradingDate(const char*, uint32_t, uint32_t = 1, bool = false) noexcept;
+	wtp::DateMappingResult32 checkedPrevTradingDate(const char*, uint32_t, uint32_t = 1, bool = false) noexcept;
 	uint32_t	getTradingDate(const char* stdPID, uint32_t uOffDate = 0, uint32_t uOffMinute = 0, bool isTpl = false);
 	uint32_t	getNextTDate(const char* stdPID, uint32_t uDate, int days = 1, bool isTpl = false);
 	uint32_t	getPrevTDate(const char* stdPID, uint32_t uDate, int days = 1, bool isTpl = false);
@@ -64,6 +72,7 @@ public:
 	CodeSet*	getSessionComms(const char* sid);
 
 private:
+	wtp::DateMappingStatus dateMappingContext(const char*, bool, bool, WTSSessionInfo*&, TradingDayTpl*&) noexcept;
 	const char* getTplIDByPID(const char* stdPID);
 
 private:

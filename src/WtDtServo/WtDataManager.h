@@ -183,7 +183,7 @@ public:
 	 * @param uDate 交易日期，格式为YYYYMMDD，默认为0（表示当前日期）
 	 * @return K线数据切片指针
 	 * 
-	 * @details 获取指定日期的K线数据。如果日期为0，则使用当前日期。
+	 * @details 日期为0时使用一次校验过的本地日期快照。边界映射失败或无序时返回NULL，且不访问reader或修改缓存。
 	 * 返回的数据切片需要用户调用release方法释放内存
 	 */
 	WTSKlineSlice* get_kline_slice_by_date(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint32_t uDate = 0);
@@ -328,6 +328,12 @@ private:
 	RtBarMap*		_rt_bars;
 	/// @brief 实时K线数据的互斥锁，保证线程安全
 	StdUniqueMutex	_mtx_rtbars;
+
+	//卡11=B：重采样缓存锁；切片通过 owner 持有缓存 K 线对象，不依赖此锁
+	StdUniqueMutex	_mtx_cache;
+
+	void	release_bar_caches();
+	void	detach_bar_cache(BarCache& barCache);
 };
 
 #if defined(WT_P12_BAR_LIFETIME_TEST_HOOKS)

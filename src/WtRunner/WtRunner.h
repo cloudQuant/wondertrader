@@ -14,6 +14,8 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <set>
+#include <string>
 #include <vector>
 
 #include "../Includes/ILogHandler.h"
@@ -33,6 +35,7 @@
 #include "../WtCore/ParserAdapter.h"
 #include "../WtCore/WtDtMgr.h"
 #include "../WtCore/ActionPolicyMgr.h"
+#include "../WtCore/AccountResumeInbox.hpp"
 
 #include "../WTSTools/WTSHotMgr.h"
 #include "../WTSTools/WTSBaseDataMgr.h"
@@ -48,7 +51,7 @@ USING_NS_WTP;
  * @brief WonderTrader运行器类
  * @details 负责管理交易引擎的初始化、配置和运行，包括CTA策略、HFT策略和选股策略的管理
  */
-class WtRunner : public ILogHandler
+class WtRunner final : public ILogHandler // final: owned/deleted by main (I03-NEW-045)
 {
 public:
 	/**
@@ -85,6 +88,29 @@ public:
 	 */
 	void run(bool bAsync = false);
 
+	/** Whether all parser connection commands in the latest start were submitted.
+	 * False includes not yet started, startup in progress, or a rejected command.
+	 * True does not indicate provider connection or readiness.
+	 */
+	bool parserCommandsSubmitted() const { return _parser_commands_submitted.load(); }
+
+	/**
+	 * @brief 卡6 6b=A（BUG-L01-014）：处理恢复目录中的账户恢复请求文件
+	 * @details 每个 `<traderId>.json` 只处理一次，经账户门禁恢复（门禁写持久审计），并改名为
+	 *          .done/.rejected/.invalid；run() 运行期间约每秒调用一次。操作员身份只记录不认证。
+	 * @return 本次处理的请求数
+	 */
+	uint32_t processAccountResumeRequests();
+
+	/** 恢复请求目录：配置项 resume_folder，缺省为生成目录下的 resume/ */
+	const std::string& accountResumeFolder() const { return _resume_folder; }
+	void setAccountResumeFolder(const std::string& folder) { _resume_folder = folder; }
+	/** Whether the accepted run invocation returned normally after startup.
+	 * False includes not started, still running synchronously, early shutdown,
+	 * and an exception. This does not imply parser submission or readiness.
+	 */
+	bool runSucceeded() const { return _run_succeeded.load(std::memory_order_acquire); }
+
 	/**
 	 * @brief Stop this runner and quiesce every executor manager.
 	 * @details Call from a control thread. A false result leaves the runner and
@@ -92,6 +118,14 @@ public:
 	 *          the active callback has returned to retry teardown.
 	 */
 	bool shutdown();
+
+	/**
+	 * @brief I03-NEW-045 / card 9a: whether shutdown is blocked only by parser owners
+	 *        that lack callback-drain proof and are therefore retained (quarantined)
+	 *        until process exit. Such a runner must not be destroyed; the process
+	 *        entry keeps it alive (deliberately leaked) instead of aborting.
+	 */
+	bool parserOwnersRetained() const;
 
 private:
 	/**
@@ -145,6 +179,14 @@ private:
 	 * @return 是否初始化成功
 	 */
 	bool initHftStrategies();
+
+	/**
+	 * @brief Initialize SEL strategies from strategies.sel
+	 * @details Validates, creates and initializes the whole batch before any
+	 *          SEL context is registered; any failure registers nothing.
+	 * @return true when every active SEL strategy is registered
+	 */
+	bool initSelStrategies();
 
 	/**
 	 * @brief 初始化交易行为策略
@@ -205,12 +247,18 @@ private:
 	bool				_is_sel;				//!< 是否为选股模式
 
 	std::atomic<bool> _to_exit;				//!< Exit flag shared by signal and control threads.
+	std::string			_resume_folder;		//!< 卡6 6b=A 账户恢复请求目录
 	mutable std::recursive_mutex _lifecycle_mutex;
 	bool				_configuring = false;
 	bool				_runtime_starting = false;
 	bool				_shutdown_in_progress = false;
+	bool				_runtime_shutdown_complete = false;
 	std::atomic<bool> _runtime_started;	//!< Runtime config is frozen after run begins.
+	std::atomic<bool> _parser_commands_submitted{false}; //!< Command submission, not provider readiness.
+	std::atomic<bool> _run_succeeded{false}; //!< Normal completion of the accepted run invocation.
+	std::atomic<bool> _parser_owners_retained{false}; //!< I03-NEW-045: last shutdown blocked only by undrained parser owners.
 	std::atomic<bool> _shutdown_requested;	//!< Reject config after any shutdown attempt.
 	std::vector<ParserAdapterPtr> _failed_parser_owners; //!< Retain partial parser initializations fail-closed.
+	std::set<std::string> _required_parsers; //!< K13/K14: configured parsers with required (default true).
 };
 

@@ -1,0 +1,39 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q05Resample*
+[==========] Running 13 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 9 tests from Q05ResampleTest
+[ RUN      ] Q05ResampleTest.UnknownPeriodRejected
+[       OK ] Q05ResampleTest.UnknownPeriodRejected (0 ms)
+[ RUN      ] Q05ResampleTest.DayPeriodRejectsMinuteTimestamps
+[       OK ] Q05ResampleTest.DayPeriodRejectsMinuteTimestamps (0 ms)
+[ RUN      ] Q05ResampleTest.MinutePeriodRejectsDateTimestamps
+[       OK ] Q05ResampleTest.MinutePeriodRejectsDateTimestamps (0 ms)
+[ RUN      ] Q05ResampleTest.HourAndHalfSelectorsFallIntoMinuteValidation
+[       OK ] Q05ResampleTest.HourAndHalfSelectorsFallIntoMinuteValidation (0 ms)
+[ RUN      ] Q05ResampleTest.BadSessionTemplateRejected
+[       OK ] Q05ResampleTest.BadSessionTemplateRejected (0 ms)
+[ RUN      ] Q05ResampleTest.MissingFileReadErrorAndShortFileFailsHeadCheck
+[       OK ] Q05ResampleTest.MissingFileReadErrorAndShortFileFailsHeadCheck (0 ms)
+[ RUN      ] Q05ResampleTest.DayResampleOfTenDailyBarsPassesThrough
+[       OK ] Q05ResampleTest.DayResampleOfTenDailyBarsPassesThrough (0 ms)
+[ RUN      ] Q05ResampleTest.DayRangeAfterLastBarFindsNothing
+[       OK ] Q05ResampleTest.DayRangeAfterLastBarFindsNothing (0 ms)
+[ RUN      ] Q05ResampleTest.MinuteResampleReportsConsistentCounts
+[       OK ] Q05ResampleTest.MinuteResampleReportsConsistentCounts (0 ms)
+[----------] 9 tests from Q05ResampleTest (3 ms total)
+
+[----------] 4 tests from Q05ResampleLeakPathsTest
+[ RUN      ] Q05ResampleLeakPathsTest.HeaderOnlyBlockIsEmptyAndReturnsZero
+[       OK ] Q05ResampleLeakPathsTest.HeaderOnlyBlockIsEmptyAndReturnsZero (0 ms)
+[ RUN      ] Q05ResampleLeakPathsTest.RangeAfterLastBarReturnsZero
+[       OK ] Q05ResampleLeakPathsTest.RangeAfterLastBarReturnsZero (0 ms)
+[ RUN      ] Q05ResampleLeakPathsTest.SamePeriodTimesOneFailsWithoutCallback
+[       OK ] Q05ResampleLeakPathsTest.SamePeriodTimesOneFailsWithoutCallback (0 ms)
+[ RUN      ] Q05ResampleLeakPathsTest.SuccessfulDayResampleControl
+[       OK ] Q05ResampleLeakPathsTest.SuccessfulDayResampleControl (0 ms)
+[----------] 4 tests from Q05ResampleLeakPathsTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 13 tests from 2 test suites ran. (5 ms total)
+[  PASSED  ] 13 tests.

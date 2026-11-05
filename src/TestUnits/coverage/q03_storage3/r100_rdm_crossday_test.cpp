@@ -162,11 +162,8 @@ TEST_F(R100RdmCrossDayTest, R100RdmHisHftMissingAndShortFileGuards)
 		20240109090000000ull, 20240109100000000ull) == NULL);
 }
 
-// NOT_RUN: this candidate contains valid multi-record CMP_V2 history files and
-// exercises decompression. The isolated run of the former combined test exited
-// with signal 11 before any assertion and produced no stack; that crash is not
-// attributed to the known post-append V2-header pointer risk described below.
-TEST_F(R100RdmCrossDayTest, DISABLED_R100RdmHisHftValidCrossDateFiles)
+// 迭代03 最终验收复核后启用（原禁用：CMP_V2 历史读端 V2 头指针重分配风险，未运行）。
+TEST_F(R100RdmCrossDayTest, R100RdmHisHftValidCrossDateFiles)
 {
 	// Three valid history files contain prior-night and current-day records ordered by (date,time).
 	ASSERT_TRUE(write_bytes("his/queue/SSE/20240109/610100.dsb",
@@ -195,11 +192,8 @@ TEST_F(R100RdmCrossDayTest, DISABLED_R100RdmHisHftValidCrossDateFiles)
 	tr->release();
 }
 
-// NOT_RUN: empty CMP_V2 payloads still go through uncompress_data. RDM history
-// readers then resize/append their backing string and write via the old V2-header
-// pointer; append may reallocate it. This is a known risk, not the established
-// cause of the signal 11 above (which had no stack and preceded assertions).
-TEST_F(R100RdmCrossDayTest, DISABLED_R100RdmHisHftEmptyCmpV2Payloads)
+// 迭代03 最终验收复核后启用（原禁用：CMP_V2 空载荷经 V2 头指针写入的风险，未运行）。
+TEST_F(R100RdmCrossDayTest, R100RdmHisHftEmptyCmpV2Payloads)
 {
 	// Empty payloads decompress to headers with zero records.
 	ASSERT_TRUE(write_bytes("his/queue/SSE/20240108/610102.dsb",
@@ -216,11 +210,8 @@ TEST_F(R100RdmCrossDayTest, DISABLED_R100RdmHisHftEmptyCmpV2Payloads)
 		20240108090000000ull, 20240108100000000ull) == NULL);
 }
 
-// NOT_RUN: valid-file oracle for the RDM cross-type cache finding (R1_wtdatastorage.md §2).
-// The CMP_V2 reader resizes/appends the backing string and then writes via its old
-// V2-header pointer; append may reallocate it. Keep the real cache-order regression
-// disabled until that reader path can be exercised safely.
-TEST_F(R100RdmCrossDayTest, DISABLED_R100RdmQueueDetailTransCachesAreIndependent)
+// 迭代03 最终验收复核后启用（原禁用：CMP_V2 读端 V2 头指针重分配风险，R1_wtdatastorage.md §2）。
+TEST_F(R100RdmCrossDayTest, R100RdmQueueDetailTransCachesAreIndependent)
 {
 	const uint32_t date = 20240109;
 	const char* const stdCode = "SSE.STK.610103";

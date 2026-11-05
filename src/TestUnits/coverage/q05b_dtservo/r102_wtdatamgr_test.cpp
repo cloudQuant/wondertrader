@@ -482,9 +482,8 @@ TEST_F(R102WtDataManagerTest, IncrementalCountProcessesBarsAfterOverlappingBound
 	});
 }
 
-// 已登记缺陷的复现面：initStore 在插件加载/符号缺失后仍解引用 _reader。
-// 该用例启用即 SIGSEGV，只作缺陷证据保留（BUG-Q05-001 / BUG-R8-002）。
-TEST_F(R102WtDataManagerTest, DISABLED_InitStoreWithoutPluginDerefsNullReader)
+// 迭代03 最终验收复核后启用（原禁用：BUG-Q05-001 / BUG-R8-002）。
+TEST_F(R102WtDataManagerTest, InitStoreWithoutPluginDerefsNullReader)
 {
 	WTSVariant* cfg = WTSCfgLoader::load_from_content(
 		"{\"align_by_section\":false,\"store\":{\"module\":\"r102_no_such_module\",\"path\":\"/tmp/r102_empty/\"}}", false);

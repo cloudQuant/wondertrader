@@ -1,0 +1,66 @@
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before-round2/src/TestUnits/coverage/t_TraderYD/r93_traderYD_api_test.cpp	2026-11-04 17:57:13
++++ src/TestUnits/coverage/t_TraderYD/r93_traderYD_api_test.cpp	2026-11-04 20:19:26
+@@ -362,6 +362,9 @@
+ 			stub_.account_.Withdraw = 1000.0;
+ 
+ 			api_.setApi(&stub_);
++			// The stub plays an API that start()ed this listener: release() calls
++			// startDestroy() and waits for notifyAfterApiDestroy() (ydApi.h).
++			stub_.listener_ = &api_;
+ 		}
+ 
+ 		void TearDown() override
+@@ -447,6 +450,10 @@
+ 		g_r93_yd_stub = &stub_;
+ 		api_.setFactory(&r93_yd_create);
+ 		api_.presetWorker();
++		// Card 9c (s5): connect() keeps an existing API and rejects a repeated
++		// connect. SetUp injected stub_ for the other cases; this case drives the
++		// creator path, so it starts without an injected API.
++		api_.setApi(NULL);
+ 
+ 		api_.connect();
+ 		EXPECT_EQ(1, stub_.n_start_);
+@@ -859,4 +866,42 @@
+ 		EXPECT_DOUBLE_EQ(2.0, sink_.positions.back().availPre);
+ 		EXPECT_DOUBLE_EQ(3.0, sink_.positions.back().availNew);
+ 	}
++	/// 非平今品种平仓成交：先减昨仓、超出部分减今仓（与冻结路径同序，代码注释
++	/// “先减掉昨仓，在调整今仓”）。昨 2、今 3 平 4 成交后应为昨 0/今 1；可用量在
++	/// 冻结时已扣（0/1），成交不再改变。只用单笔成交 Volume，不涉及 TradeVolume。
++	TEST_F(R93YdTest, r93_mixed_close_trade_reduces_yesterday_then_today)
++	{
++		comm_->setCoverMode(CM_OpenCover);
++		add_pre_position(YD_PD_Long, 2, 7000.0);
++		login_and_finish();
++		YDTrade open{};
++		open.Direction = YD_D_Buy;
++		open.OffsetFlag = YD_OF_Open;
++		open.Price = 7000.0;
++		open.Volume = 3;
++		open.TradeID = 7401;
++		open.OrderSysID = 7402;
++		api_.notifyTrade(&open, &stub_.instrument_, nullptr);
++
++		YDOrder pending = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 4,
++			YD_OS_Queuing, 7403, 7404);
++		api_.notifyOrder(&pending, &stub_.instrument_, nullptr);
++
++		YDTrade close{};
++		close.Direction = YD_D_Sell;
++		close.OffsetFlag = YD_OF_Close;
++		close.Price = 7050.0;
++		close.Volume = 4;
++		close.TradeID = 7405;
++		close.OrderSysID = 7403;
++		api_.notifyTrade(&close, &stub_.instrument_, nullptr);
++
++		ASSERT_EQ(0, api_.queryPositions());
++		ASSERT_TRUE(api_.runNextQuery());
++		ASSERT_EQ(1u, sink_.positions.size());
++		EXPECT_DOUBLE_EQ(0.0, sink_.positions.back().pre);
++		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().newPos);
++		EXPECT_DOUBLE_EQ(0.0, sink_.positions.back().availPre);
++		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().availNew);
++	}
+ } // namespace

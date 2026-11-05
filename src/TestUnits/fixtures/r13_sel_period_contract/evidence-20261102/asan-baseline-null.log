@@ -1,0 +1,24 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==21333==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0001013b7e24 bp 0x00016f20eb50 sp 0x00016f20e2e0 T0)
+==21333==The signal is caused by a READ memory access.
+==21333==Hint: address points to the zero page.
+    #0 0x0001013b7e24 in strcasecmp+0x38 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x17e24)
+    #1 0x000100bf09f0 in wt_stricmp(char const*, char const*) test_support.hpp:7
+    #2 0x000100bf09f0 in WtRtRunner::createSelContext(char const*, unsigned int, unsigned int, char const*, int, char const*, char const*) baseline.cpp:5
+    #3 0x000100bf1258 in create_sel_context(char const*, unsigned int, unsigned int, char const*, char const*, char const*, int) baseline.cpp:26
+    #4 0x000100bf45f8 in main check.cpp:26
+    #5 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+==21333==Register values:
+ x[0] = 0x0000000000000001   x[1] = 0x0000000100bf59c0   x[2] = 0x000000000134fdfe   x[3] = 0x0000000000016b48  
+ x[4] = 0x0000000000000000   x[5] = 0x0000000000000000   x[6] = 0x0000000100bf5ba0   x[7] = 0x0000000100bf5bc0  
+ x[8] = 0x0000000000000001   x[9] = 0x0000000100bf5f9b  x[10] = 0x0000000100bf0928  x[11] = 0x0000000000000002  
+x[12] = 0x0000000000000000  x[13] = 0x0000000000000000  x[14] = 0x0000000000000000  x[15] = 0x0000000000000000  
+x[16] = 0x00000001013b7dec  x[17] = 0x00000001f5b8d540  x[18] = 0x0000000000000000  x[19] = 0x0000000100bf59c0  
+x[20] = 0x0000000000000000  x[21] = 0x0000000100bf09f4  x[22] = 0x0000000000000000  x[23] = 0x0000000000000000  
+x[24] = 0x000000016f20ec80  x[25] = 0x000000016f20efd0  x[26] = 0x0000000000000000  x[27] = 0x000000002de41e8b  
+x[28] = 0x0000008000020000     fp = 0x000000016f20eb50     lr = 0x00000001013b7e1c     sp = 0x000000016f20e2e0  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV test_support.hpp:7 in wt_stricmp(char const*, char const*)
+==21333==ABORTING

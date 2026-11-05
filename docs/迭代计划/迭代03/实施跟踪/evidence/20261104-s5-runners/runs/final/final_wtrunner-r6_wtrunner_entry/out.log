@@ -1,0 +1,42 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r6_wtrunner_entry.*
+[==========] Running 3 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 3 tests from r6_wtrunner_entry
+[ DISABLED ] r6_wtrunner_entry.DISABLED_short_help_returns_zero_before_touching_runner
+[ DISABLED ] r6_wtrunner_entry.DISABLED_long_help_returns_zero
+[ DISABLED ] r6_wtrunner_entry.DISABLED_help_wins_over_config_and_logcfg_words
+[ RUN      ] r6_wtrunner_entry.missing_default_config_exits_nonzero_without_starting_runner
+[       OK ] r6_wtrunner_entry.missing_default_config_exits_nonzero_without_starting_runner (9 ms)
+[ RUN      ] r6_wtrunner_entry.missing_explicit_config_exits_nonzero_without_starting_runner
+[       OK ] r6_wtrunner_entry.missing_explicit_config_exits_nonzero_without_starting_runner (5 ms)
+[ RUN      ] r6_wtrunner_entry.valid_config_reaches_engine_run_before_main_blocks
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp:366: Failure
+Expected equality of these values:
+  result.code
+    Which is: 1
+  0
+Fee templates file ./absent_fees.json not exists
+Runner initialization rejected: fee template configuration is invalid
+
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp:367: Failure
+Value of: result.engine_marker_created
+  Actual: false
+Expected: true
+the CTA engine marker is written only after main passes config() and calls run(); output=Fee templates file ./absent_fees.json not exists
+Runner initialization rejected: fee template configuration is invalid
+
+
+[  FAILED  ] r6_wtrunner_entry.valid_config_reaches_engine_run_before_main_blocks (42 ms)
+[----------] 3 tests from r6_wtrunner_entry (57 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 1 test suite ran. (57 ms total)
+[  PASSED  ] 2 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] r6_wtrunner_entry.valid_config_reaches_engine_run_before_main_blocks
+
+ 1 FAILED TEST
+  YOU HAVE 3 DISABLED TESTS
+

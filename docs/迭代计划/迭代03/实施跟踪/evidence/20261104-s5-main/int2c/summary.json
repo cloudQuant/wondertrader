@@ -1,0 +1,247 @@
+{
+ "start": "2026-11-05T00:29:06+08:00",
+ "end": "2026-11-05T00:29:46+08:00",
+ "total": 96,
+ "by_status": {
+  "pass": 60,
+  "fail": 36
+ },
+ "per_binary": {
+  "CoverageTests_btcore": {
+   "pass": 15
+  },
+  "CoverageTests_adstorage": {
+   "pass": 2
+  },
+  "CoverageTests": {
+   "pass": 2
+  },
+  "CoverageTests_dtcore": {
+   "fail": 1
+  },
+  "CoverageTests_btporter": {
+   "fail": 2
+  },
+  "CoverageTests_exefact": {
+   "fail": 13
+  },
+  "CoverageTests_dtservo": {
+   "fail": 4
+  },
+  "CoverageTests_m_WtLatencyHFT": {
+   "pass": 2
+  },
+  "CoverageTests_m_WtLatencyUFT": {
+   "pass": 4
+  },
+  "CoverageTests_porter": {
+   "pass": 5,
+   "fail": 2
+  },
+  "CoverageTests_m_WtRunner": {
+   "pass": 4,
+   "fail": 1
+  },
+  "CoverageTests_t_CTPLoader": {
+   "fail": 9
+  },
+  "CoverageTests_t_CTPLoaderYamlPositive": {
+   "pass": 1
+  },
+  "CoverageTests_uftcore": {
+   "pass": 5,
+   "fail": 1
+  },
+  "CoverageTests_wtcore": {
+   "pass": 20,
+   "fail": 2
+  },
+  "TestUnits": {
+   "fail": 1
+  }
+ },
+ "non_pass": [
+  [
+   "CoverageTests_btporter",
+   "R124BtRunnerRun.StrategyModesRejectMissingNamesAndPropagateFactoryFailure",
+   "fail"
+  ],
+  [
+   "CoverageTests_btporter",
+   "WtBtRunnerShutdown.ImmediateStopWaitsForPrepareThenJoinsTheWorker",
+   "fail"
+  ],
+  [
+   "CoverageTests_dtcore",
+   "Q05ResampleTest.DayResampleOfTenDailyBarsPassesThrough",
+   "fail"
+  ],
+  [
+   "CoverageTests_dtservo",
+   "R45ParserAdapterFakeTest.ExportedConnectStatusCanBeReadDuringStartup",
+   "fail"
+  ],
+  [
+   "CoverageTests_dtservo",
+   "R45ParserAdapterFakeTest.ExportedInitializationStateRemainsVisibleDuringConnect",
+   "fail"
+  ],
+  [
+   "CoverageTests_dtservo",
+   "R45ParserAdapterFakeTest.ExportedStatusReportsConnectSubmissionFailure",
+   "fail"
+  ],
+  [
+   "CoverageTests_dtservo",
+   "R45ParserAdapterFakeTest.ExportedStatusReportsSuccessfulConnectSubmission",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r115_execmon.simpdata_missing_symbol_and_runner_variants",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r24_runner.config_full_chain_returns_true_and_keeps_base_data",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r24_twap.fire_at_once_zero_qty_and_sell_side_floor",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r7_twap.cancel_report_refires_with_cancel_times_price_step",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r7_twap.fire_at_once_mode_1_and_2_pricing",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r7_twap.fire_at_once_unknown_price_mode_has_no_preclose_fallback",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r7_twap.last_slice_showhand_buys_remaining_with_5_tick_premium",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r7_twap.limit_prices_cap_the_order_price",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r7_twap.price_offset_shifts_buy_up_and_sell_down",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r7_twap.sell_side_keeps_sign_and_splits_evenly",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r7_twap.tick_ownership_survives_caller_release_later_tick_and_unit_destruction",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r7_vwap.unrepresentable_session_date_does_not_advance_high_water_or_order",
+   "fail"
+  ],
+  [
+   "CoverageTests_exefact",
+   "r7_vwap_profile.v2_rejects_invalid_unselected_sections_before_counting_values",
+   "fail"
+  ],
+  [
+   "CoverageTests_m_WtRunner",
+   "r28_wtrunner_config.basefiles_session_key_absent_skips_load_sessions",
+   "fail"
+  ],
+  [
+   "CoverageTests_porter",
+   "ExecUnitStatusApiV2Fixture.ParserReleaseCallbackCanJoinChildReleaseWithoutDeadlock",
+   "fail"
+  ],
+  [
+   "CoverageTests_porter",
+   "ExecUnitStatusApiV2Fixture.ParserReleaseCallbackCannotReenterRunnerTeardown",
+   "fail"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_dump.commission_response_with_absolute_feesfile_dumps_to_that_path",
+   "fail"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_dump.default_feesfile_dumps_to_savepath_fees_json",
+   "fail"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_dump.margin_response_dumps_fees_to_configured_relative_name_with_product_fallback",
+   "fail"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_flow.commission_response_switches_between_volume_and_money_modes",
+   "fail"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_flow.concurrent_callbacks_reenter_queue_and_worker_stops_after_drain",
+   "fail"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_flow.fee_filter_only_queues_contracts_matching_code_or_product",
+   "fail"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_flow.last_instrument_response_with_fees_switch_queues_both_rate_requests",
+   "fail"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_flow.margin_response_records_long_short_money_ratios",
+   "fail"
+  ],
+  [
+   "CoverageTests_t_CTPLoader",
+   "t26_ctploader_flow.rate_requests_use_loaded_altcode_when_present",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R133ShareManagerFork.watcher_iterates_committed_sections",
+   "fail"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R211CtaTicker.LastMinuteOfFiniteSessionIsNotClosedByData",
+   "fail"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R90CtaEngine.RunExportsMarkerAndTickerWrappers",
+   "fail"
+  ],
+  [
+   "TestUnits",
+   "test_replayer_fee.loads_optional_minimum_from_json_template",
+   "fail"
+  ]
+ ],
+ "disabled_total": 224,
+ "list_failures": []
+}

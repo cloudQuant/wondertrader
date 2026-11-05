@@ -71,12 +71,8 @@ TEST_F(R94RdmDayBackoffTest, R94RdmDayRangeAndCountBackOffBeforeRightBoundary)
 	count->release();
 }
 
-// BUG-R94-001（待审核）：右界早于缓存首根时，indexBarFromCacheByRange / ByCount
-// 的 `eit->date > eBar.date -> eit--`（:1666-1669 / :1715-1718）没有 begin 守卫；
-// eit 已指向 begin 时自减越界，eIdx 回绕成 SIZE_MAX，随后 lower_bound 的区间
-// first > last，返回的 count 也会溢出。同型的 RT 段 :1880-1884 / :1953-1957 /
-// :2303-2307 / :2360-2364 也有 `pBar--` 无 idx==0 守卫。
-TEST_F(R94RdmDayBackoffTest, DISABLED_R94RdmRangeBeforeFirstBarUnderflowsCacheCursor)
+// 迭代03 最终验收复核后启用（原禁用：BUG-R94-001，主记录 BUG-P05-007）。
+TEST_F(R94RdmDayBackoffTest, R94RdmRangeBeforeFirstBarUnderflowsCacheCursor)
 {
 	WTSKlineSlice* s = _reader.readKlineSliceByRange("SSE.STK.600010", KP_DAY,
 		202312010000ull, 202401011500ull);

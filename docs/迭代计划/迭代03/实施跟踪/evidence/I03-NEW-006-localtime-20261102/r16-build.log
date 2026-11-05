@@ -1,0 +1,16 @@
++++ dirname -- src/TestUnits/fixtures/r22_timezone/build.sh
+++ CDPATH=
+++ cd -- src/TestUnits/fixtures/r22_timezone/../../../..
+++ pwd
++ project_root=/Users/yunjinqi/Documents/new_projects/wondertrader
++ build_dir=/tmp/wt-i03-localtime-r16
++ cxx=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++
++ gtest=/opt/homebrew/Cellar/googletest/1.17.0
++ baseline=$'/Users/yunjinqi/Documents/new_projects/wondertrader/docs/è¿\255ä»£è®¡å\210\222/è¿\255ä»£03/å®\236æ\226½è·\237è¸ª/evidence/R22-timezone-race-20261102/TimeUtils.baseline.hpp'
++ probe=/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_timezone/timezone_probe.cpp
++ mkdir -p /tmp/wt-i03-localtime-r16/baseline
++ cp $'/Users/yunjinqi/Documents/new_projects/wondertrader/docs/è¿\255ä»£è®¡å\210\222/è¿\255ä»£03/å®\236æ\226½è·\237è¸ª/evidence/R22-timezone-race-20261102/TimeUtils.baseline.hpp' /tmp/wt-i03-localtime-r16/baseline/TimeUtils.hpp
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -O1 -g -pthread -fsanitize=thread -I /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_timezone/timezone_probe.cpp -o /tmp/wt-i03-localtime-r16/current-tsan
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -O1 -g -pthread -fsanitize=thread -I /tmp/wt-i03-localtime-r16/baseline /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_timezone/timezone_probe.cpp -o /tmp/wt-i03-localtime-r16/baseline-tsan
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -O1 -g -pthread -fsanitize=address,undefined -I /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_timezone/timezone_probe.cpp -o /tmp/wt-i03-localtime-r16/current-asan
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -O1 -g -pthread -I /Users/yunjinqi/Documents/new_projects/wondertrader/src -I /opt/homebrew/Cellar/googletest/1.17.0/include /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r16_share_tools/r16_timeutils_test.cpp /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest_main.a /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest.a -o /tmp/wt-i03-localtime-r16/r16-existing

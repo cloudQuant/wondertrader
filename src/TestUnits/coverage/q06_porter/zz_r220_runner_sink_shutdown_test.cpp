@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <atomic>
@@ -545,7 +546,7 @@ TEST(r220_wtrt_runner_sink_shutdown, quiesces_all_cta_sel_hosts_and_retries_with
 TEST(r220_wtrt_runner_sink_shutdown, config_ready_callback_defers_release_until_config_unwinds)
 {
 	const std::filesystem::path directory =
-		std::filesystem::temp_directory_path() / "wt_r220_config_ready_release";
+		std::filesystem::temp_directory_path() / ("wt_r220_config_ready_release_" + std::to_string(static_cast<long>(::getpid())));
 	std::error_code ec;
 	std::filesystem::remove_all(directory, ec);
 	ASSERT_TRUE(std::filesystem::create_directories(directory, ec) || !ec);
@@ -558,7 +559,7 @@ TEST(r220_wtrt_runner_sink_shutdown, config_ready_callback_defers_release_until_
 			"    offset: 0\n"
 			"    sections:\n"
 			"        - from: 0\n"
-			"          to: 2400\n";
+			"          to: 0\n";
 		ASSERT_TRUE(sessions.good());
 		std::ofstream actions(actionPath, std::ios::binary | std::ios::trunc);
 		actions << "{\"default\":{}}";
@@ -689,7 +690,7 @@ TEST(r220_wtrt_runner_sink_shutdown, parser_api_failure_keeps_runner_graph_until
 TEST(r220_wtrt_runner_sink_shutdown, missing_config_preflight_keeps_safe_retry_available)
 {
 	const std::filesystem::path directory =
-		std::filesystem::temp_directory_path() / "wt_r220_config_preflight_retry";
+		std::filesystem::temp_directory_path() / ("wt_r220_config_preflight_retry_" + std::to_string(static_cast<long>(::getpid())));
 	std::error_code ec;
 	std::filesystem::remove_all(directory, ec);
 	ASSERT_TRUE(std::filesystem::create_directories(directory, ec) || !ec);
@@ -785,7 +786,7 @@ TEST(r220_wtrt_runner_sink_shutdown, ext_parser_init_callback_can_reenter_quote_
 			"    offset: 0\n"
 			"    sections:\n"
 			"        - from: 0\n"
-			"          to: 2400\n";
+			"          to: 0\n";
 		ASSERT_TRUE(sessions.good());
 		std::ofstream actions(actionPath, std::ios::binary | std::ios::trunc);
 		actions << "{\"default\":{}}";
@@ -842,7 +843,7 @@ TEST(r220_wtrt_runner_sink_shutdown, ext_parser_init_racing_release_is_quarantin
 			"    offset: 0\n"
 			"    sections:\n"
 			"        - from: 0\n"
-			"          to: 2400\n";
+			"          to: 0\n";
 		ASSERT_TRUE(sessions.good());
 		std::ofstream actions(actionPath, std::ios::binary | std::ios::trunc);
 		actions << "{\"default\":{}}";

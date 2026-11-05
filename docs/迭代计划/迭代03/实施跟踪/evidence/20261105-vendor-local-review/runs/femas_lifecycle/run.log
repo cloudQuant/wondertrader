@@ -1,0 +1,43 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R93FemasTest.connect_init_sync_success_can_reenter_query_account:R93FemasTest.connect_init_sync_failed_login_does_not_reenter_query:R93FemasTest.connect_init_without_callback_allows_post_init_async_query:R93FemasTest.connect_init_exception_does_not_start_a_waiting_worker:T4003FemasLifecycle.*
+[==========] Running 13 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 4 tests from R93FemasTest
+[ RUN      ] R93FemasTest.connect_init_sync_success_can_reenter_query_account
+[       OK ] R93FemasTest.connect_init_sync_success_can_reenter_query_account (478 ms)
+[ RUN      ] R93FemasTest.connect_init_sync_failed_login_does_not_reenter_query
+[       OK ] R93FemasTest.connect_init_sync_failed_login_does_not_reenter_query (2 ms)
+[ RUN      ] R93FemasTest.connect_init_without_callback_allows_post_init_async_query
+[       OK ] R93FemasTest.connect_init_without_callback_allows_post_init_async_query (1 ms)
+[ RUN      ] R93FemasTest.connect_init_exception_does_not_start_a_waiting_worker
+[       OK ] R93FemasTest.connect_init_exception_does_not_start_a_waiting_worker (1 ms)
+[----------] 4 tests from R93FemasTest (484 ms total)
+
+[----------] 9 tests from T4003FemasLifecycle
+[ RUN      ] T4003FemasLifecycle.release_joins_worker_and_delete_does_not_terminate
+[       OK ] T4003FemasLifecycle.release_joins_worker_and_delete_does_not_terminate (24 ms)
+[ RUN      ] T4003FemasLifecycle.idle_worker_still_executes_later_query
+[       OK ] T4003FemasLifecycle.idle_worker_still_executes_later_query (106 ms)
+[ RUN      ] T4003FemasLifecycle.release_waits_for_inflight_request_before_api_release
+[       OK ] T4003FemasLifecycle.release_waits_for_inflight_request_before_api_release (204 ms)
+[ RUN      ] T4003FemasLifecycle.release_waits_for_inflight_order_insert_before_api_release
+[       OK ] T4003FemasLifecycle.release_waits_for_inflight_order_insert_before_api_release (205 ms)
+[ RUN      ] T4003FemasLifecycle.release_from_callback_defers_and_external_release_completes
+[       OK ] T4003FemasLifecycle.release_from_callback_defers_and_external_release_completes (4 ms)
+[ RUN      ] T4003FemasLifecycle.delete_trader_from_callback_quarantines
+[TraderFemas] deleteTrader: instance quarantined until process exit (called from a worker or SPI callback thread)
+[       OK ] T4003FemasLifecycle.delete_trader_from_callback_quarantines (106 ms)
+[ RUN      ] T4003FemasLifecycle.admission_closed_after_release_and_repeated_connect_rejected
+[       OK ] T4003FemasLifecycle.admission_closed_after_release_and_repeated_connect_rejected (3 ms)
+[ RUN      ] T4003FemasLifecycle.late_callback_after_release_is_not_delivered
+[       OK ] T4003FemasLifecycle.late_callback_after_release_is_not_delivered (3 ms)
+[ RUN      ] T4003FemasLifecycle.callback_drain_timeout_reports_unquiesced_and_remover_quarantines
+[TraderFemas] release: worker, API calls or callbacks did not drain within 200 ms; instance kept
+[TraderFemas] release: worker, API calls or callbacks did not drain within 200 ms; instance kept
+[TraderFemas] deleteTrader: instance quarantined until process exit (worker, API calls or callbacks did not drain)
+[       OK ] T4003FemasLifecycle.callback_drain_timeout_reports_unquiesced_and_remover_quarantines (555 ms)
+[----------] 9 tests from T4003FemasLifecycle (1214 ms total)
+
+[----------] Global test environment tear-down
+[==========] 13 tests from 2 test suites ran. (1698 ms total)
+[  PASSED  ] 13 tests.

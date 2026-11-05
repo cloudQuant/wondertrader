@@ -325,10 +325,9 @@ TEST_F(R56Logger, UninitializedDynamicLogFallsBackToConsolePath)
 	EXPECT_EQ(nullptr, spdlog::get("r56nolog").get());
 }
 
-// 产品缺陷占位：log_by_cat_prefix 完全忽略 format/args，只输出 "[catName]"，
-// 格式化正文丢失。见 docs/迭代计划/迭代01/bugs/R56.md BUG-R56-002；默认不执行。
+// 迭代03 最终验收复核后启用（原禁用：BUG-R56-002）。
 // WTSLogger.h:335-347
-TEST_F(R56Logger, DISABLED_LogByCatPrefixKeepsFormattedPayload)
+TEST_F(R56Logger, LogByCatPrefixKeepsFormattedPayload)
 {
 	const std::string log = root_file("prefix.log");
 	const std::string file = write_cfg("prefix.json", r56_cfg_root("debug", r56_basic_sink(log)));

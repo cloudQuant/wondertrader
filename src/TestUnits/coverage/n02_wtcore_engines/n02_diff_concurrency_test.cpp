@@ -1326,8 +1326,9 @@ TEST(WtDiffExecuterConcurrencyTest, NewerReentrantTargetBatchWinsWithoutDropping
     EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, "SHFE.ag.2512"), 12.0);
     EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, "SHFE.rb.2510"), 6.0);
     EXPECT_EQ(agUnit->positions(), (std::vector<double>{10.0, 12.0}));
-    EXPECT_EQ(rbUnit->positions(), (std::vector<double>{5.0, 7.0}));
-    EXPECT_EQ(rbUnit->events(), (std::vector<std::string>{"position", "position", "trade"}));
+    // The older batch commits and queues its omitted target before the reentrant batch.
+    EXPECT_EQ(rbUnit->positions(), (std::vector<double>{5.0, 0.0, 7.0}));
+    EXPECT_EQ(rbUnit->events(), (std::vector<std::string>{"position", "position", "position", "trade"}));
     fs::remove(path, ec);
 }
 
@@ -1447,11 +1448,12 @@ TEST(WtDiffExecuterConcurrencyTest, ExplicitTargetBatchPreservesIncrementalUpdat
 
     EXPECT_TRUE(incrementalUpdateRan.load());
     EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::target(executor, firstCode), 10.0);
-    EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::target(executor, secondCode), 4.0);
+    // The batch commits both codes before callbacks; this reentrant increment follows 20.
+    EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::target(executor, secondCode), 22.0);
     EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, firstCode), 10.0);
-    EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, secondCode), 4.0);
+    EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, secondCode), 22.0);
     EXPECT_EQ(firstUnit->positions(), (std::vector<double>{1.0, 10.0}));
-    EXPECT_EQ(secondUnit->positions(), (std::vector<double>{2.0, 4.0}));
+    EXPECT_EQ(secondUnit->positions(), (std::vector<double>{2.0, 20.0, 22.0}));
     fs::remove(path, ec);
 }
 

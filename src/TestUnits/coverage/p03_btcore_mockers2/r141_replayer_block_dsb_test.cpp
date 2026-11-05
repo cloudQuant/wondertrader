@@ -104,7 +104,7 @@ TEST_F(R141ReplayerBlockDsb, OldTickAndBothBarVersions)
 	// 查询日期是 01-03；01-02 的日线已完成，可见切片验证压缩块解码。
 	WTSKlineSlice* rb = _rp.get_kline_slice(kRb, "d", 10, 1, false);
 	ASSERT_NE(nullptr, rb);
-	ASSERT_EQ(1u, rb->size());
+	ASSERT_EQ(1, rb->size());
 	EXPECT_EQ(20200102u, rb->at(0)->date);
 	EXPECT_DOUBLE_EQ(3800.25, rb->at(0)->close);
 	rb->release();
@@ -112,7 +112,7 @@ TEST_F(R141ReplayerBlockDsb, OldTickAndBothBarVersions)
 	// 老版本日线：3 根 WTSBarStructOld 升版，也返回完成的 01-02 记录。
 	WTSKlineSlice* cu = _rp.get_kline_slice(kCu, "d", 10, 1, false);
 	ASSERT_NE(nullptr, cu);
-	ASSERT_EQ(1u, cu->size());
+	ASSERT_EQ(1, cu->size());
 	EXPECT_EQ(20200102u, cu->at(0)->date);
 	EXPECT_DOUBLE_EQ(70000.5, cu->at(0)->close);
 	cu->release();

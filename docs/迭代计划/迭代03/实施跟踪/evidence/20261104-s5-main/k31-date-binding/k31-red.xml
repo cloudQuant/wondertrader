@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="4" failures="2" disabled="0" errors="0" time="0.744" timestamp="2026-11-05T07:15:23.191" name="AllTests">
+  <testsuite name="S5MainK31DateBinding" tests="2" failures="1" disabled="0" skipped="0" errors="0" time="0.31" timestamp="2026-11-05T07:15:23.191">
+    <testcase name="BindingHolderValidatesOnceAndFallsBackToLegacy" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp" line="67" status="run" result="completed" time="0." timestamp="2026-11-05T07:15:23.191" classname="S5MainK31DateBinding" />
+    <testcase name="StorageAndXeleModulesExportVersionedBinders" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp" line="114" status="run" result="completed" time="0.31" timestamp="2026-11-05T07:15:23.191" classname="S5MainK31DateBinding">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:132&#x0A;Value of: bindReader != __null&#x0A;  Actual: false&#x0A;Expected: true&#x0A;data reader binder is not exported&#x0A;Google Test trace:&#x0A;/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:122: WtDataStorage&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:132
+Value of: bindReader != __null
+  Actual: false
+Expected: true
+data reader binder is not exported
+Google Test trace:
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:122: WtDataStorage
+]]></failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="S5MainK31HostChain" tests="2" failures="1" disabled="0" skipped="0" errors="0" time="0.432" timestamp="2026-11-05T07:15:23.502">
+    <testcase name="InjectedTableDrivesTheReaderDateMapping" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp" line="211" status="run" result="completed" time="0.213" timestamp="2026-11-05T07:15:23.502" classname="S5MainK31HostChain">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:230&#x0A;Expected: (counter.calc_calls.load()) &gt; (0u), actual: 0 vs 0&#x0A;the reader did not use the host DateMappingV1 table&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:230
+Expected: (counter.calc_calls.load()) > (0u), actual: 0 vs 0
+the reader did not use the host DateMappingV1 table
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:236&#x0A;Expected: (counter.calc_calls.load()) &gt; (before), actual: 0 vs 0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:236
+Expected: (counter.calc_calls.load()) > (before), actual: 0 vs 0
+]]></failure>
+    </testcase>
+    <testcase name="WithoutHostTableTheReaderKeepsTheLegacyPath" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp" line="241" status="run" result="completed" time="0.219" timestamp="2026-11-05T07:15:23.715" classname="S5MainK31HostChain" />
+  </testsuite>
+</testsuites>

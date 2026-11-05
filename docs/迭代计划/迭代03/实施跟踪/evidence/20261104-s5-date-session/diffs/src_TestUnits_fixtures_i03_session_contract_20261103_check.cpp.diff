@@ -1,0 +1,15 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/TestUnits/fixtures/i03_session_contract_20261103/check.cpp	2026-11-03 15:17:41
++++ src/TestUnits/fixtures/i03_session_contract_20261103/check.cpp	2026-11-04 18:11:11
+@@ -72,6 +72,12 @@
+         EXPECT_FALSE(s->isInTradingTime(invalid));
+         EXPECT_FALSE(s->isInAuctionTime(invalid));
+     }
++    // 2026-11-04 (S5, decision card 2): 0-0 is the full-day section and can no
++    // longer be appended to a session that already has another section (the
++    // old line mixed them). The full-day checks use a separate session.
++    EXPECT_FALSE(s->tryAddTradingSection(0, 0));
++    s->release();
++    s = WTSSessionInfo::create("a", "a", 300);
+     ASSERT_TRUE(s->tryAddTradingSection(0, 0));
+     ASSERT_TRUE(s->trySetAuctionTime(0, 2400));
+     for (uint32_t valid : {0u, 930u, 2359u, 2400u}) {

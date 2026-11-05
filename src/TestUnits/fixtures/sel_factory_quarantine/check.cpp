@@ -10,6 +10,10 @@
 #include <iterator>
 #include <string>
 #include <thread>
+#include <type_traits>
+
+static_assert(std::is_standard_layout<SelStraWrapper>::value, "legacy wrapper stays standard layout");
+static_assert(sizeof(SelStraWrapper)==sizeof(SelStrategy*)+sizeof(ISelStrategyFact*), "legacy wrapper stays two pointers");
 
 namespace {
 int failures = 0;
@@ -43,6 +47,45 @@ int main(int argc, char** argv) {
   check(log.find(expected.message())!=std::string::npos,"filesystem used full path's error");
   std::printf("%s: %s\n",mode.c_str(),failures?"FAIL":"PASS"); return failures?1:0;
  }
+ if (mode == "owner-no-preload" || mode == "owner-final-removal") {
+  const char* markerPath=std::getenv("WT_SEL_MARKER");
+  check(markerPath!=nullptr,"marker path available");
+  SelStrategyPtr first, second, nullStrategy;
+  std::weak_ptr<SelStraWrapper> weak;
+  {
+   SelStrategyMgr manager;
+   check(manager.loadFactories(dir.c_str()),"factory loads without control handle");
+   nullStrategy=manager.createStrategy("stable","missing","null");
+   check(!nullStrategy && !manager.getStrategy("null"),"null strategy is not published");
+   first=manager.createStrategy("stable.unit","null");
+   check(first && first->self(),"same ID can be retried after null strategy");
+   second=manager.createStrategy("stable","unit","second");
+   check(first && first->self() && second && second->self(),"both creation overloads work");
+   weak=second;
+  }
+  if (markerPath) {
+   const auto before=readMarker(markerPath);
+   check(before.find("factory-delete\n")==std::string::npos,"factory outlives manager");
+   check(before.find("unload\n")==std::string::npos,"module outlives manager");
+  }
+  if (first && first->self()) check(std::strcmp(first->self()->getName(),"unit")==0,"strategy still callable");
+  first.reset(); second.reset();
+  if (markerPath) check(countText(readMarker(markerPath),"factory-delete\n")==0,"existing factory remains retained");
+  nullStrategy.reset();
+  if (markerPath) {
+   const auto after=readMarker(markerPath);
+   check(countText(after,"strategy-delete\n")==2,"strategies deleted exactly once");
+   if (mode == "owner-final-removal") {
+    check(countText(after,"factory-delete\n")==1,"factory deleted exactly once before weak pointer release");
+    check(after.rfind("strategy-delete\n")<after.find("factory-delete\n"),"factory deletion follows strategy deletion");
+   } else {
+    check(countText(after,"factory-delete\n")==0,"existing factory remains retained after strategy release");
+   }
+  }
+  check(weak.expired(),"weak pointer expires");
+  weak.reset();
+  std::printf("%s: %s\n",mode.c_str(),failures?"FAIL":"PASS"); return failures?1:0;
+ }
  void* control=dlopen(path.c_str(), RTLD_NOW); check(control != nullptr, "preload fixture"); if (!control) return 91;
  if (mode == "missing-remover") {
   const char* markerPath=std::getenv("WT_SEL_MARKER");
@@ -50,11 +93,13 @@ int main(int argc, char** argv) {
   auto creates=(IntFn)dlsym(control,"fixture_creations");
   check(creates != nullptr,"creator counter available");
   SelStrategyMgr manager;
-  check(manager.loadFactories(dir.c_str()),"missing remover ignored");
+  // Card 4b=A: a versioned SEL table without destroy_factory is invalid and
+  // refused (formerly an ignored module with a missing v1 remover).
+  check(!manager.loadFactories(dir.c_str()),"table without destroy_factory refused");
   check(creates && creates()==0,"creator not called without remover");
   dlclose(control);
   check(readMarker(markerPath).find("unload\n")==std::string::npos,"missing remover module remains resident");
-  check(manager.loadFactories(dir.c_str()),"repeated missing remover ignored");
+  check(!manager.loadFactories(dir.c_str()),"repeated invalid table still refused");
   check(readMarker(markerPath).find("unload\n")==std::string::npos,"repeat did not unload missing remover module");
   std::printf("%s: %s\n",mode.c_str(),failures?"FAIL":"PASS"); return failures?1:0;
  }
@@ -178,6 +223,12 @@ int main(int argc, char** argv) {
   check(manager.loadFactories(dir.c_str()),"healthy loads"); check(names()==1,"getName call count");
   auto strategy=manager.createStrategy("stable","unit","x"); check(strategy && strategy->self(),"healthy strategy created");
   strategy.reset(); check(deletes()==0,"manager retains healthy strategy");
+  if (mode=="long-valid-path") {
+   const char* logPath=std::getenv("WT_SEL_LOG_MARKER");
+   const std::string log=logPath ? readMarker(logPath) : std::string();
+   check(dir.size()>128 && log.find(dir.substr(0,128)+"...")!=std::string::npos,"long valid path diagnostic is bounded");
+   check(log.find(dir)==std::string::npos,"long valid path not printed in full");
+  }
  }
  }
  if (mode=="idempotent-cross-manager") check(deletes()==2,"two managers delete their strategies");
@@ -185,6 +236,7 @@ int main(int argc, char** argv) {
   check(deletes()==(mode=="exception-recovery"?0:1),"first module strategy deletion count");
  dlclose(control);
  std::ifstream marker(std::getenv("WT_SEL_MARKER")); std::string line;
- while (std::getline(marker,line)) check(line!="unload" && line!="factory-delete","retained module/factory after load");
+ while (std::getline(marker,line))
+  if (mode!="old-positive") check(line!="unload","module remains loaded after manager destruction");
  std::printf("%s: %s\n",mode.c_str(),failures?"FAIL":"PASS"); return failures?1:0;
 }

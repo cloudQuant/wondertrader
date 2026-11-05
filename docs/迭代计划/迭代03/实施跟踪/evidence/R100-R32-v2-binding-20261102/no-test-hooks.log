@@ -1,0 +1,5 @@
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -std=c++17 -g -O1 src/TestUnits/fixtures/lmdb_bar_migration/no_test_hooks.cpp /tmp/wt-i03-lmdb-binding-final-20261102/normal-mdb.o /tmp/wt-i03-lmdb-binding-final-20261102/normal-midl.o -o /tmp/wt-i03-lmdb-binding-final-20261102/no-test-hooks
+ld: warning: symbols in __TEXT,text_env (/private/tmp/wt-i03-lmdb-binding-final-20261102/normal-mdb.o) have unwind information, but it's not a code section (missing 'regular,pure_instructions' section flag)
++ /tmp/wt-i03-lmdb-binding-final-20261102/no-test-hooks
++ nm -u /tmp/wt-i03-lmdb-binding-final-20261102/no-test-hooks
++ grep -E 'adjustSourceStatForTest|afterStagedPutForTest' /tmp/wt-i03-lmdb-binding-final-20261102/no-test-hooks-undefined.txt

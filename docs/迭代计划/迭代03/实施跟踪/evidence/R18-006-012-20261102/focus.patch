@@ -1,0 +1,11 @@
+--- /tmp/wt-i03-r18-006-012/coverage-original.txt	2026-11-02 11:49:55
++++ /tmp/wt-i03-r18-006-012/snapshot/src/TestUnits/coverage/CMakeLists.txt	2026-11-02 11:42:07
+@@ -285,7 +285,7 @@
+ 	# WtDtCore 与 WtDtServo 都有一个 class ParserAdapter，但两边形状不同
+ 	# （WtDtCore/ParserAdapter.h:30 构造是 3 参，WtDtServo/ParserAdapter.h:28 是 2 参），
+ 	# 同名不同形 → 不能塞进同一个二进制（不是去重能解决的），所以拆成两个目标。
+-	"dtcore|WtDtCore,WtDtHelper|dir:q05_dtsrv"
++	"dtcore|WtDtCore,WtDtHelper|q05_dtsrv/r18_parser_adapter_test.cpp"
+ 	"dtservo|WtDtServo|dir:q05b_dtservo"
+ 	# 实盘/回测的 C 导出层（WtPorter / WtBtPorter）此前没有任何目标编过它们的 TU，
+ 	# 两块合计 3390 行未覆盖。它们各自定义 extern "C" 入口，所以必须一人一个二进制。

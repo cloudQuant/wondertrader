@@ -1,6 +1,7 @@
 // p10 / WtDataStorage: deterministic task/proc queue wakeup and shutdown tests.
 // Workers are started directly where needed so the test can observe the condition
 // wait state before publishing the task that must wake it.
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <atomic>
@@ -139,7 +140,7 @@ static std::string make_init_test_root()
 	static std::atomic<uint64_t> sequence{0};
 	const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
 	const std::filesystem::path root = std::filesystem::temp_directory_path() /
-		("wtdatawriter_p10_" + std::to_string(stamp) + "_" + std::to_string(sequence++));
+		("wtdatawriter_p10_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(stamp) + "_" + std::to_string(sequence++));
 	std::filesystem::create_directories(root);
 	return root.string() + std::filesystem::path::preferred_separator;
 }

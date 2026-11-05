@@ -1,0 +1,271 @@
+[ RUN      ] Q05StateMonitorTest.InitializeMissingFileReturnsFalse
+[       OK ] Q05StateMonitorTest.InitializeMissingFileReturnsFalse (2 ms)
+[ RUN      ] Q05StateMonitorTest.InitializeMalformedJsonReturnsFalse
+[       OK ] Q05StateMonitorTest.InitializeMalformedJsonReturnsFalse (1 ms)
+[ RUN      ] Q05StateMonitorTest.ConfigReferenceReturnsToObserverAfterEmptyAndPopulatedSuccess
+[       OK ] Q05StateMonitorTest.ConfigReferenceReturnsToObserverAfterEmptyAndPopulatedSuccess (8 ms)
+[ RUN      ] Q05StateMonitorTest.ConfigReferenceReturnsToObserverAfterMidSessionException
+[       OK ] Q05StateMonitorTest.ConfigReferenceReturnsToObserverAfterMidSessionException (3 ms)
+[ RUN      ] Q05StateMonitorTest.InitializeEmptyObjectSucceedsWithNoSessions
+[       OK ] Q05StateMonitorTest.InitializeEmptyObjectSucceedsWithNoSessions (4 ms)
+[ RUN      ] Q05StateMonitorTest.InitializeSkipsUnknownSessionTemplate
+[       OK ] Q05StateMonitorTest.InitializeSkipsUnknownSessionTemplate (1 ms)
+[ RUN      ] Q05StateMonitorTest.InitializeAssemblesOriginalStateForKnownSessions
+[       OK ] Q05StateMonitorTest.InitializeAssemblesOriginalStateForKnownSessions (8 ms)
+[ RUN      ] Q05StateMonitorTest.RepeatedInitializeReplacesNothingButStaysIdempotentTrue
+[       OK ] Q05StateMonitorTest.RepeatedInitializeReplacesNothingButStaysIdempotentTrue (18 ms)
+[ RUN      ] R145StateMonitorRunTest.HolidaySessionWithoutCommoditiesTransitionsToHoliday
+[       OK ] R145StateMonitorRunTest.HolidaySessionWithoutCommoditiesTransitionsToHoliday (40 ms)
+[ RUN      ] R145StateMonitorRunTest.CommodityMarkedHolidayDrivesHolidayBranchOfOriginal
+[       OK ] R145StateMonitorRunTest.CommodityMarkedHolidayDrivesHolidayBranchOfOriginal (71 ms)
+[ RUN      ] R145StateMonitorRunTest.ClosedSessionAfterConfiguredCloseTime
+[       OK ] R145StateMonitorRunTest.ClosedSessionAfterConfiguredCloseTime (110 ms)
+[ RUN      ] R145StateMonitorRunTest.SessionWithoutAuctionReachesInitialized
+[       OK ] R145StateMonitorRunTest.SessionWithoutAuctionReachesInitialized (62 ms)
+[ RUN      ] R145StateMonitorRunTest.AuctionStartedInsideSectionsReachesReceiving
+[       OK ] R145StateMonitorRunTest.AuctionStartedInsideSectionsReachesReceiving (50 ms)
+[ RUN      ] R145StateMonitorRunTest.AuctionStartedOutsideSectionsReachesPaused
+[       OK ] R145StateMonitorRunTest.AuctionStartedOutsideSectionsReachesPaused (400196 ms)
+[ RUN      ] R145StateMonitorRunTest.OutsideSectionsPastMarketCloseStillReceivesSettlement
+[       OK ] R145StateMonitorRunTest.OutsideSectionsPastMarketCloseStillReceivesSettlement (24 ms)
+[ RUN      ] R145StateMonitorRunTest.EmptyMapRunThenStopJoinsWithoutWriter
+[       OK ] R145StateMonitorRunTest.EmptyMapRunThenStopJoinsWithoutWriter (7287 ms)
+[ RUN      ] R154StateMonitorStatesTest.InitializedThenReceivingStaysReceiving
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R154StateMonitorStatesTest.InitializedThenReceivingStaysReceiving (5 ms)
+[ RUN      ] R154StateMonitorStatesTest.InitializedOutsideSectionsTransitionsToPaused
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R154StateMonitorStatesTest.InitializedOutsideSectionsTransitionsToPaused (1 ms)
+[ RUN      ] R154StateMonitorStatesTest.ClosedProcessingProcedThenResetToOriginal
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R154StateMonitorStatesTest.ClosedProcessingProcedThenResetToOriginal (0 ms)
+[ RUN      ] R154StateMonitorStatesTest.ClosedBeforeProcTimeFallsBackToPaused
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R154StateMonitorStatesTest.ClosedBeforeProcTimeFallsBackToPaused (0 ms)
+[ RUN      ] R154StateMonitorStatesTest.HolidaySessionStaysHolidayAcrossSecondRound
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R154StateMonitorStatesTest.HolidaySessionStaysHolidayAcrossSecondRound (0 ms)
+[ RUN      ] R154StateMonitorStatesTest.InitializedWaitsForAuctionStart
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R154StateMonitorStatesTest.InitializedWaitsForAuctionStart (0 ms)
+[ RUN      ] R164StateMonitorHolidayTest.AuctionStartedSessionStaysReceiving
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp:50: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp:104: Failure
+Value of: r164::wait_state(mon, "AUCREC", SS_RECEIVING)
+  Actual: false
+Expected: true
+[  FAILED  ] R164StateMonitorHolidayTest.AuctionStartedSessionStaysReceiving (6011 ms)
+[ RUN      ] R164StateMonitorHolidayTest.HolidayInstrumentStaysHolidayAcrossSecondRound
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp:50: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp:141: Failure
+Value of: _bdMgr.isTradingDate("SHFE.HA", today)
+  Actual: true
+Expected: false
+[  FAILED  ] R164StateMonitorHolidayTest.HolidayInstrumentStaysHolidayAcrossSecondRound (2 ms)
+[ RUN      ] R174StateInfoSectionsTest.HalfOpenBoundsAndEmptySections
+[       OK ] R174StateInfoSectionsTest.HalfOpenBoundsAndEmptySections (0 ms)
+[ RUN      ] R174StateMonitorQueryTest.InitializedMapHitAndMissThroughMemberPointers
+[       OK ] R174StateMonitorQueryTest.InitializedMapHitAndMissThroughMemberPointers (1 ms)
+[ RUN      ] R174StateMonitorEmptyQueryTest.EmptyMapQueriesAreVacuous
+[       OK ] R174StateMonitorEmptyQueryTest.EmptyMapQueriesAreVacuous (0 ms)
+[ RUN      ] R44StateMonitorLifecycleTest.StopBeforeRunIsSafeAndIdempotent
+[       OK ] R44StateMonitorLifecycleTest.StopBeforeRunIsSafeAndIdempotent (1 ms)
+[ RUN      ] R44StateMonitorLifecycleTest.MissingFileWithNullBdMgrReturnsBeforeDeref
+[       OK ] R44StateMonitorLifecycleTest.MissingFileWithNullBdMgrReturnsBeforeDeref (0 ms)
+[ RUN      ] R44StateMonitorLifecycleTest.EmptyConfigFileReturnsFalse
+[       OK ] R44StateMonitorLifecycleTest.EmptyConfigFileReturnsFalse (0 ms)
+[ RUN      ] R44StateMonitorLifecycleTest.EmptySessionKeyIsSkippedButValidSessionAssembles
+[       OK ] R44StateMonitorLifecycleTest.EmptySessionKeyIsSkippedButValidSessionAssembles (1 ms)
+[ RUN      ] R22StateMonitorStop.RunningWorkerObservesStopAcrossThreads
+[       OK ] R22StateMonitorStop.RunningWorkerObservesStopAcrossThreads (300 ms)
+[ RUN      ] R5StateMonitorBdtTest.SessionCommsPresentOverwritesSeededTradingDate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.SessionCommsPresentOverwritesSeededTradingDate (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.SessionWithoutCommsKeepsSeededTradingDate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.SessionWithoutCommsKeepsSeededTradingDate (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.TodayAsHolidayDrivesHolidayLogBranchOfInitLoop
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.TodayAsHolidayDrivesHolidayLogBranchOfInitLoop (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.FifteenCharSessionIdFitsStateKeyBuffer
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.FifteenCharSessionIdFitsStateKeyBuffer (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.MissingTimeFieldsDefaultToZeroAndStillAssembleSections
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.MissingTimeFieldsDefaultToZeroAndStillAssembleSections (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.ReinitializeWithExtraSessionGrowsStateTable
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.ReinitializeWithExtraSessionGrowsStateTable (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.SessionWithoutAuctionKeepsOnlyTradingSections
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.SessionWithoutAuctionKeepsOnlyTradingSections (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.CrossMidnightPaddingOverlapCollapsesToFullDay
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.CrossMidnightPaddingOverlapCollapsesToFullDay (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.ZeroStartSectionUsesClampedMidnightPadding
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.ZeroStartSectionUsesClampedMidnightPadding (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.NonObjectEntriesDegradeToDefaultTimes
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.NonObjectEntriesDegradeToDefaultTimes (0 ms)
+[ RUN      ] R5StateMonitorBdtTest.MixedKnownAndUnknownSessionsKeepTableConsistent
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209: Failure
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R5StateMonitorBdtTest.MixedKnownAndUnknownSessionsKeepTableConsistent (0 ms)
+[ RUN      ] R68StateMonitorInputsTest.JsonNullMemberIsTreatedAsAbsent
+[       OK ] R68StateMonitorInputsTest.JsonNullMemberIsTreatedAsAbsent (1 ms)
+[ RUN      ] R68StateMonitorInputsTest.NumericSessionEntryDefaultsTimesToZero
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r68_state_monitor_inputs_test.cpp:109: Failure
+Value of: mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr)
+  Actual: false
+Expected: true
+[  FAILED  ] R68StateMonitorInputsTest.NumericSessionEntryDefaultsTimesToZero (1 ms)
+[ RUN      ] R68StateMonitorInputsTest.BooleanSessionEntryDefaultsTimesToZero
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r68_state_monitor_inputs_test.cpp:125: Failure
+Value of: mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr)
+  Actual: false
+Expected: true
+[  FAILED  ] R68StateMonitorInputsTest.BooleanSessionEntryDefaultsTimesToZero (0 ms)
+[ RUN      ] R68StateMonitorInputsTest.EmptyFilenameReturnsFalseBeforeConfigLoad
+[       OK ] R68StateMonitorInputsTest.EmptyFilenameReturnsFalseBeforeConfigLoad (0 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetSingleCommodityTodayHoliday
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetSingleCommodityTodayHoliday (0 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetMultipleCommoditiesShareHoliday
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetMultipleCommoditiesShareHoliday (0 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.TwoPositiveSessionsUseIndependentHolidayTemplates
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.TwoPositiveSessionsUseIndependentHolidayTemplates (0 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetAcrossMidnightWithHoliday
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetAcrossMidnightWithHoliday (1 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetNonObjectEntryDefaultsTimes
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetNonObjectEntryDefaultsTimes (1 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetMixedWithUnknownSession
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetMixedWithUnknownSession (0 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetSessionWithoutCommoditiesSkipsDateLoop
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121: Failure
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetSessionWithoutCommoditiesSkipsDateLoop (0 ms)
+[  FAILED  ] 30 tests, listed below:
+[  FAILED  ] R154StateMonitorStatesTest.InitializedThenReceivingStaysReceiving
+[  FAILED  ] R154StateMonitorStatesTest.InitializedOutsideSectionsTransitionsToPaused
+[  FAILED  ] R154StateMonitorStatesTest.ClosedProcessingProcedThenResetToOriginal
+[  FAILED  ] R154StateMonitorStatesTest.ClosedBeforeProcTimeFallsBackToPaused
+[  FAILED  ] R154StateMonitorStatesTest.HolidaySessionStaysHolidayAcrossSecondRound
+[  FAILED  ] R154StateMonitorStatesTest.InitializedWaitsForAuctionStart
+[  FAILED  ] R164StateMonitorHolidayTest.AuctionStartedSessionStaysReceiving
+[  FAILED  ] R164StateMonitorHolidayTest.HolidayInstrumentStaysHolidayAcrossSecondRound
+[  FAILED  ] R5StateMonitorBdtTest.SessionCommsPresentOverwritesSeededTradingDate
+[  FAILED  ] R5StateMonitorBdtTest.SessionWithoutCommsKeepsSeededTradingDate
+[  FAILED  ] R5StateMonitorBdtTest.TodayAsHolidayDrivesHolidayLogBranchOfInitLoop
+[  FAILED  ] R5StateMonitorBdtTest.FifteenCharSessionIdFitsStateKeyBuffer
+[  FAILED  ] R5StateMonitorBdtTest.MissingTimeFieldsDefaultToZeroAndStillAssembleSections
+[  FAILED  ] R5StateMonitorBdtTest.ReinitializeWithExtraSessionGrowsStateTable
+[  FAILED  ] R5StateMonitorBdtTest.SessionWithoutAuctionKeepsOnlyTradingSections
+[  FAILED  ] R5StateMonitorBdtTest.InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions
+[  FAILED  ] R5StateMonitorBdtTest.CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries
+[  FAILED  ] R5StateMonitorBdtTest.CrossMidnightPaddingOverlapCollapsesToFullDay
+[  FAILED  ] R5StateMonitorBdtTest.ZeroStartSectionUsesClampedMidnightPadding
+[  FAILED  ] R5StateMonitorBdtTest.NonObjectEntriesDegradeToDefaultTimes
+[  FAILED  ] R5StateMonitorBdtTest.MixedKnownAndUnknownSessionsKeepTableConsistent
+[  FAILED  ] R68StateMonitorInputsTest.NumericSessionEntryDefaultsTimesToZero
+[  FAILED  ] R68StateMonitorInputsTest.BooleanSessionEntryDefaultsTimesToZero
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetSingleCommodityTodayHoliday
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetMultipleCommoditiesShareHoliday
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.TwoPositiveSessionsUseIndependentHolidayTemplates
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetAcrossMidnightWithHoliday
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetNonObjectEntryDefaultsTimes
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetMixedWithUnknownSession
+[  FAILED  ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetSessionWithoutCommoditiesSkipsDateLoop

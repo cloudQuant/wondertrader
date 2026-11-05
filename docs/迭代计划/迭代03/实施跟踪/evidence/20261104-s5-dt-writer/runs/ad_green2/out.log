@@ -1,0 +1,62 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.I03*:R4WriterADTest.L03AlignedBarCache*:R4WriterADTest.L03AlignedTickCache*:R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects:R4WriterADTest.L03InvalidSessionDateRejectedBeforeAsyncAdmission:R4WriterADTest.L03MissingOrInvalidActionDateIsRejected:R4WriterADTest.L03MissingSessionIsRejected:R4WriterADTest.L03QueuedTickIsRecheckedBeforeProcessing:R4WriterADTest.ProcFlagZeroOverwritesCacheVerbatim:R4WriterADTest.ProcFlagOneTurnsTotalsIntoDeltas:R4WriterADTest.ProcFlagOneZeroPreInterestKeepsFullSnapshot:R4WriterADTest.ProcFlagTwoAccumulatesTotals:R4WriterADTest.WriteTickGuardsNullTickNullContractAndClosedSession:R4WriterADTest.AsyncWriterDrainsAcceptedTicksOnReleaseAndRejectsNewTicks:R4WriterADTest.I03Ad*
+[==========] Running 26 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 26 tests from R4WriterADTest
+[ RUN      ] R4WriterADTest.I03AdReleaseFromWorkerCallbackDoesNotSelfJoin
+[       OK ] R4WriterADTest.I03AdReleaseFromWorkerCallbackDoesNotSelfJoin (121 ms)
+[ RUN      ] R4WriterADTest.I03AdLifecycleV1TableDrainsAsyncWorker
+[       OK ] R4WriterADTest.I03AdLifecycleV1TableDrainsAsyncWorker (137 ms)
+[ RUN      ] R4WriterADTest.I03LongPathFailureLogStaysInsideBuffer
+[       OK ] R4WriterADTest.I03LongPathFailureLogStaysInsideBuffer (17 ms)
+[ RUN      ] R4WriterADTest.I03InvalidStorageIdentityIsRejectedWithDiagnostic
+[       OK ] R4WriterADTest.I03InvalidStorageIdentityIsRejectedWithDiagnostic (40 ms)
+[ RUN      ] R4WriterADTest.I03AsyncAcceptedTickFailingRecheckIsCountedAndLogged
+[       OK ] R4WriterADTest.I03AsyncAcceptedTickFailingRecheckIsCountedAndLogged (45 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCachesFirstWriteAndSameMinuteUpdate
+[       OK ] R4WriterADTest.L03AlignedBarCachesFirstWriteAndSameMinuteUpdate (50 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars
+[       OK ] R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars (166 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCacheRejectsTruncatedFileWithoutMutation
+[       OK ] R4WriterADTest.L03AlignedBarCacheRejectsTruncatedFileWithoutMutation (9 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCacheRejectsMalformedIdentityAndRetries
+[       OK ] R4WriterADTest.L03AlignedBarCacheRejectsMalformedIdentityAndRetries (336 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCacheRejectsSizeBeyondCapacity
+[       OK ] R4WriterADTest.L03AlignedBarCacheRejectsSizeBeyondCapacity (48 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheFirstWriteAndRawDiskLayout
+[       OK ] R4WriterADTest.L03AlignedTickCacheFirstWriteAndRawDiskLayout (33 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRecoveryAndSecondRecordUpdate
+[       OK ] R4WriterADTest.L03AlignedTickCacheRecoveryAndSecondRecordUpdate (117 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRejectsTruncatedRecordWithoutMutation
+[       OK ] R4WriterADTest.L03AlignedTickCacheRejectsTruncatedRecordWithoutMutation (26 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRejectsUnterminatedIdentityAndRetries
+[       OK ] R4WriterADTest.L03AlignedTickCacheRejectsUnterminatedIdentityAndRetries (77 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRejectsSizeBeyondCapacity
+[       OK ] R4WriterADTest.L03AlignedTickCacheRejectsSizeBeyondCapacity (4 ms)
+[ RUN      ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects
+[       OK ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects (171 ms)
+[ RUN      ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeAsyncAdmission
+[       OK ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeAsyncAdmission (23 ms)
+[ RUN      ] R4WriterADTest.L03MissingOrInvalidActionDateIsRejected
+[       OK ] R4WriterADTest.L03MissingOrInvalidActionDateIsRejected (21 ms)
+[ RUN      ] R4WriterADTest.L03MissingSessionIsRejected
+[       OK ] R4WriterADTest.L03MissingSessionIsRejected (20 ms)
+[ RUN      ] R4WriterADTest.L03QueuedTickIsRecheckedBeforeProcessing
+[       OK ] R4WriterADTest.L03QueuedTickIsRecheckedBeforeProcessing (120 ms)
+[ RUN      ] R4WriterADTest.ProcFlagZeroOverwritesCacheVerbatim
+[       OK ] R4WriterADTest.ProcFlagZeroOverwritesCacheVerbatim (35 ms)
+[ RUN      ] R4WriterADTest.ProcFlagOneTurnsTotalsIntoDeltas
+[       OK ] R4WriterADTest.ProcFlagOneTurnsTotalsIntoDeltas (119 ms)
+[ RUN      ] R4WriterADTest.ProcFlagOneZeroPreInterestKeepsFullSnapshot
+[       OK ] R4WriterADTest.ProcFlagOneZeroPreInterestKeepsFullSnapshot (183 ms)
+[ RUN      ] R4WriterADTest.ProcFlagTwoAccumulatesTotals
+[       OK ] R4WriterADTest.ProcFlagTwoAccumulatesTotals (13 ms)
+[ RUN      ] R4WriterADTest.WriteTickGuardsNullTickNullContractAndClosedSession
+[       OK ] R4WriterADTest.WriteTickGuardsNullTickNullContractAndClosedSession (42 ms)
+[ RUN      ] R4WriterADTest.AsyncWriterDrainsAcceptedTicksOnReleaseAndRejectsNewTicks
+[       OK ] R4WriterADTest.AsyncWriterDrainsAcceptedTicksOnReleaseAndRejectsNewTicks (241 ms)
+[----------] 26 tests from R4WriterADTest (2254 ms total)
+
+[----------] Global test environment tear-down
+[==========] 26 tests from 1 test suite ran. (2257 ms total)
+[  PASSED  ] 26 tests.

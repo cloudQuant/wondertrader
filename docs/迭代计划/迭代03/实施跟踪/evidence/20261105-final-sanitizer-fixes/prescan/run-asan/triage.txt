@@ -1,0 +1,195 @@
+[4] skipped
+      CoverageTests::R22PorterCapiTest.ConfiguredStartChildChecksStateMonitor
+      CoverageTests_dtcore::R44ParserAdapterEdgesTest.RepeatedInitExtNeedsContract
+      CoverageTests_mqshare::R19ExecChild.protocol
+[3] AddressSanitizer stack-buffer-overflow @ URLEncode::isPureAscii < URLEncode::URLEncode < URLEncode::URLEncode
+      CoverageTests::l01_charconv.url_encode_ascii
+      CoverageTests::l01_charconv.url_decode_basic
+      CoverageTests::r12_charconv_url.encode_decode_round_trip_on_ascii_subset
+[2] ubsan TestUnits/coverage/q03_storage3/q03_storage3_fixture.h:650 reference binding to misaligned address 0x618000000502 for type 'const uint32_t' (aka 'const unsigned int'), w
+      CoverageTests::Q03RdmTickTest.his_tick_old_struct_versions_are_upgraded
+      CoverageTests::Q03ReaderFileTest.his_tick_version_matrix
+[1] ubsan TestUnits/coverage/l02_wtstools_mq/l02_csv_shareblock_test.cpp:311 reference binding to misaligned address 0x00016db4dd8c for type 'const unsigned long long', which requires 8 b
+      CoverageTests::L02ShareBlock.KeyInfoPackedLayout
+[1] ubsan TestUnits/coverage/l02_wtstools_mq/l02_csv_shareblock_test.cpp:355 store to misaligned address 0x00016f6a8f54 for type 'uint64_t' (aka 'unsigned long long'), which requires 8 by
+      CoverageTests::L02ShareBlock.SectionInfoZeroInitializedAndTypedAccess
+[1] ubsan TestUnits/coverage/l04_datastorage/l04_ad_lmdb_store_test.cpp:198 reference binding to misaligned address 0x6170000007cc for type 'const uint64_t' (aka 'const unsigned long lon
+      CoverageTests::L04ADStoreTest.BarCacheFileRoundTrip
+[1] ubsan TestUnits/coverage/l04_datastorage/l04_ad_lmdb_store_test.cpp:250 reference binding to misaligned address 0x61b00000109c for type 'WTSTickStruct', which requires 8 byte alignme
+      CoverageTests::L04ADStoreTest.TickCacheFileRoundTrip
+[1] ubsan TestUnits/coverage/l04_datastorage/l04_block_header_layout_test.cpp:277 reference binding to misaligned address 0x61d000000c9c for type 'WTSTickStruct', which requires 8 byte alignme
+      CoverageTests::L04BlockFixture.TickCacheBlockFileRoundTrip
+[1] ubsan TestUnits/coverage/l04_datastorage/l04_proc_block_data_test.cpp:288 member access within misaligned address 0x6140000000fc for type 'const WTSBarStruct', which requires 8 byte al
+      CoverageTests::L04ProcBlockData.OldBarsUpgradedKeepHead
+[1] AddressSanitizer heap-use-after-free @ void < bool < main
+      CoverageTests::P09DataReaderTest.get_adj_factor_by_date_branches
+[1] ubsan TestUnits/coverage/p10_storage_writer/p10_day_dsb_dump_test.cpp:284 reference binding to misaligned address 0x00016d7f167c for type 'const unsigned long long', which requires 8 b
+      CoverageTests::P10DayDsbTest.CompressedFileStaysCompressedAfterAppend
+[1] ubsan TestUnits/coverage/p10_storage_writer/p10_day_dsb_dump_test.cpp:261 reference binding to misaligned address 0x00016d2dd7bc for type 'const unsigned long long', which requires 8 b
+      CoverageTests::P10DayDsbTest.OverOneHundredBarsSwitchesToCompressedV2
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016fd10e64 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::P10RtBlockTest.RealCheckerClosesAndReopensAllSixExpiredMappings
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b574e64 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::P10RtBlockTest.AsyncWorkerFirstCreatesAllSixBlocksBeforeRealCheckerSnapshot
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b21ee84 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::WriterTickRangeE2ETest.PublishedWriterTicksAreVisibleThroughPublicRange
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f0ab444 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R195WriterSessionEdgeTest.auction_tick_and_lunch_break_tick
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b387644 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R195WriterSessionEdgeTest.night_session_cross_day_offset_and_close_time
+[1] ubsan TestUnits/coverage/r12_headers/r53_struct_union_test.cpp:84 reference binding to misaligned address 0x00016f8fcc62 for type 'const unsigned int', which requires 4 byte al
+      CoverageTests::r53_struct_old_tick.ctor_zeroes_all_fields
+[1] ubsan WtDataStorage/../Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d099c04 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R22WriterStartTest.RealWriterInitAcceptsAndPersistsTick
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d3cf7c4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::L03WriterSessionDate.InvalidDateRejectedBeforeSynchronousEffectsAndCanRetry
+[1] ubsan WtDataStorage/../Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d2b8904 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R22WriterStartTest.RunnerStartsWithRealWriterAndReleasesItOnScopeExit
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d204e64 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::L03WriterSessionDate.AcceptedQueuedTickRecheckedBeforeEffects
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b777704 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R100WriterTest.R100WriterNullDumperAndUnknownSessionComm
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f7d7344 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R112WriterResizeFailureTest.R112WriterTickBlockExpansionFailureIsLogged
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b892bc4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R162WriterClosingEdgeTest.R162WriterClosingOpenFailuresAreLogged
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f2670c4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R162WriterClosingEdgeTest.R162WriterRawMin1BlockHeaderIsStrippedBeforeAppend
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016fb9ee84 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R172WriterClearCacheTest.R172WriterClearCacheRebuildsExpiredCode
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f17b1c4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R172WriterClearCacheTest.R172WriterClearCacheKeepsAllLiveCodes
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b19aec4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R193WriterAltCodeTest.DumpBarsRenamesAltCodeFileAndAppends
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016af06c84 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R212WriterTailTest.R212WriterTickResizeRejectsTruncatedFile
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d7473c4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R212WriterTailTest.R212WriterKlineZeroLowThenNonZeroLowMerge
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016af7ab84 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.TransHisDataMovesRtTicksToCompressedDsb
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016ce9f404 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.TransHisDataWritesMarkerThenNextInitSeesSessionProceeded
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d22f604 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.TransHisDataWithUnknownSessionStaysSilent
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016cfde184 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.SecondClosingRunAppendsMinBarsAndReplacesDayBar
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016dc92544 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.ExtendedDumperReceivesDayMin1Min5BarsAndTicks
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016bacb104 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.ExtendedDumperFailureOnlyLogsError
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016af3b244 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.DisabledHistorySkipsClosingWorkButStillMarks
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016efa7884 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.GetCurTickSeesCacheWrittenBeforeClosing
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f237104 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.Min1BarIsLabelledWithMinuteEnd
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016ee732c4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.SecondTickSameMinuteMergesOhlcAndAmounts
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f35b084 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.Min5BucketsEveryFiveMinutes
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d44b784 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.LastMinuteOfSectionFallsIntoSectionCloseLabel
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016db7f204 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.ZeroPriceOpeningTickIsBackfilledByNextTick
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f98b5c4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.InvalidActionTimeOnlyWarnsAndKeepsBars
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f7fb344 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.SkipNotradeBarSuppressesBarGeneration
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d2974c4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.SkipNotradeTickMergesOnlyTradingTicks
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f12b784 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.MinPriceModeOneWritesBidAskIntoHoldAddUnion
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016fd573c4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.LoadCacheReindexesItemsFromExistingFile
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016fbd77c4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.GetCurTickRejectsEmptyCodeAndUnknownAndUncached
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016ef52104 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.FirstTickOfTradingdaySeedsCacheAndRaisesNewHighLow
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d14f184 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.ProcFlagOneDerivesIncrementalVolumeTurnoverInterest
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016ee9b484 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.TickWithOlderTradingdayIsDroppedBeforeAnyWrite
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f56f404 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.NightSessionOffsetDateAheadOfTradingdayAbandonsTick
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d9d3704 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.TotalVolumeRollbackAbandonsTick
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f3fb0c4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.SameOrEarlierTimestampGetsCentisecondBumpChain
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d45e404 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.CacheResizeMapFailurePreservesOldCacheAndAllowsRetry
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b05ecc4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.CacheGrowsByStepWhenCapacityExhausted
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b067004 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.SaveTickLogWritesCommaSeparatedRows
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f26f644 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.DisableTickStillFeedsCacheAndKlines
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016ee17984 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R23WriterTest.LogGroupSizeControlsReceiptCounterLogging
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f0aa504 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::WriterResizeAfterExtendTest.RemapFailureAfterFileExtensionKeepsOldTicksAndCanRetry
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016cfddf84 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::WriterResizeAfterExtendTest.ShortExtensionWithLegacyOversizedTailDoesNotPublishCapacityAndCanRetry
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f440844 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::WriterResizeAfterExtendTest.ReopenedDailyBlocksPreserveCommittedSizeAcrossExpandedTails
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b76e804 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::WriterResizeAfterExtendTest.MinuteBlocksKeepOldDataAndRetryAfterRemapFailure
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d78a004 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R52WriterTest.R52RtBlockDateRolloverResetsAllFourBlocks
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d601bc4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R52WriterTest.R52RtBlockCapacityRepairFromFileSize
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016bc61cc4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R52WriterTest.R52DayBarAltCodeRenameAndCompressionAfterHundredBars
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016bb03544 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R52WriterTest.R52Min1Min5BlocksGrowWhenCapacityExhausted
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d1c4e84 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R70WriterResidualTest.R70WriterClosingDumpsTransOrderAndQueueHis
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b487644 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R70WriterResidualTest.R70WriterClosingResetsTickCsvStream
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b384e64 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R70WriterResidualTest.R70WriterAsyncPipelineDrainsAllTypes
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016f6bb184 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R74WriterResidualTest.R74WriterMinPriceModeUpdatesMergedBars
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016dafb384 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R74WriterResidualTest.R74WriterNullDumperIsSkippedInAllBarLoops
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b182fc4 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R74WriterResidualTest.R74WriterReopenSeesCachedTickAndOverwritesSlot
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b49ef04 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests::R94WriterMidnightTest.R94WriterMidnightBarWrapsToTradingDate
+[1] ubsan WtDataStorageAD/WtDataWriterAD.cpp:91 member call on misaligned address 0xbebebebebebebebe for type 'wtp::IBaseDataMgr', which requires 8 byte align
+      CoverageTests_adstorage::R122WriterADErrorsTest.R122WriterADUpdateTickCacheUninitialized
+[1] fail: Failure
+      CoverageTests_m_WtRunner::r28_wtrunner_strategies.real_cta_factory_null_self_is_rejected_and_dual_thrust_configures
+[1] ubsan WtShareHelper/ShareBlocks.cpp:1592 store to misaligned address 0x000106159a5c for type 'unsigned long long', which requires 8 byte alignment
+      CoverageTests_mqshare::n06_shareblock.master_roundtrip_and_error_paths
+[1] ubsan WtShareHelper/ShareBlocks.cpp:1552 store to misaligned address 0x0001086ada5c for type 'long long', which requires 8 byte alignment
+      CoverageTests_mqshare::R19TempDir.r19_capi_master_slave_and_all_type_wrappers
+[1] ubsan WtShareHelper/ShareBlocks.cpp:1552 store to misaligned address 0x000106c8da5c for type 'long long', which requires 8 byte alignment
+      CoverageTests_mqshare::R19TempDir.r19_master_allocate_set_get_exact_roundtrip
+[1] ubsan TestUnits/coverage/r19_mq/r19_shareblock_persist_test.cpp:101 reference binding to misaligned address 0x000105e10074 for type 'const unsigned long long', which requires 8 b
+      CoverageTests_mqshare::R19TempDir.r19_init_master_compacts_dead_sections_and_hides_live_ones
+[1] ubsan WtShareHelper/ShareBlocks.cpp:1552 store to misaligned address 0x00010654f8d4 for type 'long long', which requires 8 byte alignment
+      CoverageTests_mqshare::R19TempDir.r19_clean_exec_slave_observes_commits_deletes_and_refreshes
+[1] ubsan WtShareHelper/ShareBlocks.cpp:1612 store to misaligned address 0x000101d2da9c for type 'double', which requires 8 byte alignment
+      CoverageTests_mqshare::R19TempDir.r19_init_slave_missing_file_false_and_reads_master_kv
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016b379224 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests_t_TraderMocker::R103MockerUdpPacket.ShortFramesDoNotReplaceTheLastCompleteTick
+[1] ubsan Includes/WTSStruct.h:197 constructor call on misaligned address 0x00016d47cd64 for type 'wtp::WTSTickStruct *', which requires 8 byte a
+      CoverageTests_t_TraderMocker::R103Mocker.R103Mocker_UdpUnknownTickAndEmptyDatagram
+[1] ubsan WtUftCore/UftStraContext.cpp:334 reference binding to misaligned address 0x00010818c04c for type 'const double', which requires 8 byte alignmen
+      CoverageTests_uftcore::R54UftCtx.trade_detail_edge_branches
+[1] ubsan WtUftCore/UftStraContext.cpp:334 reference binding to misaligned address 0x000104d9c04c for type 'const double', which requires 8 byte alignmen
+      CoverageTests_uftcore::R54UftCtx.order_trade_callbacks_with_blocks
+[1] ubsan WtUftCore/UftStraContext.cpp:334 reference binding to misaligned address 0x00010adb004c for type 'const double', which requires 8 byte alignmen
+      CoverageTests_uftcore::q04_uftctx_local.trade_reports_advance_position_and_round_profit
+[1] ubsan WtUftCore/UftStraContext.cpp:334 reference binding to misaligned address 0x00010bbf804c for type 'const double', which requires 8 byte alignmen
+      CoverageTests_uftcore::q04_uftctx_local.trading_day_switch_then_close_uses_each_detail_once
+[1] ubsan WtUftCore/UftStraContext.cpp:334 reference binding to misaligned address 0x000106e0804c for type 'const double', which requires 8 byte alignmen
+      CoverageTests_uftcore::q04_uftctx_local.trading_day_switch_matches_cold_start_of_the_new_day
+[1] ubsan WtUftCore/UftStraContext.cpp:334 reference binding to misaligned address 0x00010dbdc04c for type 'const double', which requires 8 byte alignmen
+      CoverageTests_uftcore::q04_uftctx_local.failed_day_switch_keeps_state_and_retries
+[1] ubsan WtShareHelper/ShareBlocks.cpp:1552 store to misaligned address 0x000106d85a5c for type 'long long', which requires 8 byte alignment
+      CoverageTests_uftcore::R11UftCtxParam.numericWatchParamReadsSharedValuesWhenShareOnline
+[1] ubsan WtUftCore/UftStraContext.cpp:334 reference binding to misaligned address 0x000104ef404c for type 'const double', which requires 8 byte alignmen
+      CoverageTests_uftcore::R85UftCtxLocal.zero_volume_position_resets_dynamic_profit
+[1] ubsan TestUnits/test_fmt.cpp:128 index 64 out of bounds for type 'char[32]'
+      TestUnits::test_fmt.test_itos

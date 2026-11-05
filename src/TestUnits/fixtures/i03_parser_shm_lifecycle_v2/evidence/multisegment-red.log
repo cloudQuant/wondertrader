@@ -1,0 +1,28 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = ParserShmTest.subscribe_and_unsubscribe_preserve_multisegment_standard_code
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from ParserShmTest
+[ RUN      ] ParserShmTest.subscribe_and_unsubscribe_preserve_multisegment_standard_code
+/tmp/wt-i03-parser-shm-v2-20261103/baseline-src/t5.cpp:249: Failure
+Expected equality of these values:
+  "IO2013.C.4000@CFFEX"
+  sink_.bd_.calls_[0]
+    Which is: "IO2013@CFFEX"
+
+/tmp/wt-i03-parser-shm-v2-20261103/baseline-src/t5.cpp:254: Failure
+Expected equality of these values:
+  "IO2013.C.4000@CFFEX"
+  sink_.bd_.calls_[1]
+    Which is: "IO2013@CFFEX"
+
+[  FAILED  ] ParserShmTest.subscribe_and_unsubscribe_preserve_multisegment_standard_code (0 ms)
+[----------] 1 test from ParserShmTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] ParserShmTest.subscribe_and_unsubscribe_preserve_multisegment_standard_code
+
+ 1 FAILED TEST

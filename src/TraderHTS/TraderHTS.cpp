@@ -9,6 +9,7 @@
  */
 
 #include "TraderHTS.h"
+#include "../Share/ProviderRawReport.hpp"
 #include <boost/asio/post.hpp>
 #include <API/HTS5.2.43.0/include/scopeguard.hpp>
 
@@ -177,6 +178,14 @@ uint32_t strToTime(const char* strTime)
 
 extern "C"
 {
+	// BUG-L01-014 / K42: optional host feature declaration (WT_TRADER_SPI_FEATURES_SYMBOL).
+	EXPORT_FLAG void setTraderSpiFeatures(ITraderApi* trader, uint64_t features)
+	{
+		TraderHTS* self = dynamic_cast<TraderHTS*>(trader);
+		if (self != NULL)
+			self->setSpiFeatures(features);
+	}
+
 	EXPORT_FLAG ITraderApi* createTrader()
 	{
 		TraderHTS *instance = new TraderHTS();
@@ -432,6 +441,7 @@ void TraderHTS::OnRtnOrder(const char* pMsg)
 	if (document.Parse(pMsg).HasParseError())   //解析失败
 	{
 		write_log(m_traderSink, LL_ERROR, "[TraderHTS]解析订单委托推送信息失败.");
+		wt_provider_raw::report(m_traderSink, m_spiFeatures.load(), "TraderHTS", "order", "order report is not valid JSON", wt_provider_raw::textOf("json", pMsg));
 		return;
 	}
 
@@ -548,6 +558,11 @@ void TraderHTS::OnRtnOrder(const char* pMsg)
 
 		ordInfo->release();
 	}
+	else
+	{
+		// BUG-L01-014: keep the original JSON report for reconciliation.
+		wt_provider_raw::report(m_traderSink, m_spiFeatures.load(), "TraderHTS", "order", "order report could not be converted: unknown contract", wt_provider_raw::textOf("json", pMsg));
+	}
 }
 
 void TraderHTS::OnRtnTrade(const char* pMsg)
@@ -558,6 +573,7 @@ void TraderHTS::OnRtnTrade(const char* pMsg)
 	if (document.Parse(pMsg).HasParseError())   //解析失败
 	{
 		write_log(m_traderSink, LL_ERROR, "[TraderHTS]解析订单成交回报信息失败.");
+		wt_provider_raw::report(m_traderSink, m_spiFeatures.load(), "TraderHTS", "trade", "trade report is not valid JSON", wt_provider_raw::textOf("json", pMsg));
 		return;
 	}
 
@@ -625,6 +641,11 @@ void TraderHTS::OnRtnTrade(const char* pMsg)
 
 		if (m_traderSink)
 			m_traderSink->onPushTrade(trdInfo);
+	}
+	else
+	{
+		// BUG-L01-014: keep the original JSON report for reconciliation.
+		wt_provider_raw::report(m_traderSink, m_spiFeatures.load(), "TraderHTS", "trade", "trade report could not be converted: unknown contract", wt_provider_raw::textOf("json", pMsg));
 	}
 }
 
@@ -1110,6 +1131,12 @@ int TraderHTS::queryPositions()
 
 					ayPositions->append(pInfo, false);
 				}
+				else
+				{
+					// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the SDK struct); the host pauses the account.
+					wt_provider_raw::report(m_traderSink, m_spiFeatures.load(), "TraderHTS", "position", "position query row could not be converted: unknown contract",
+						wt_provider_raw::hexOf("ITPDK_ZQGL", &itr));
+				}
 			}
 
 			if (m_traderSink) m_traderSink->onRspPosition(ayPositions);
@@ -1252,6 +1279,12 @@ int TraderHTS::queryOrders()
 
 					ayOrds->append(ordInfo, false);
 				}
+				else
+				{
+					// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the SDK struct); the host pauses the account.
+					wt_provider_raw::report(m_traderSink, m_spiFeatures.load(), "TraderHTS", "order", "order query row could not be converted: unknown contract",
+						wt_provider_raw::hexOf("ITPDK_DRWT", &itr));
+				}
 			}
 
 
@@ -1358,6 +1391,12 @@ int TraderHTS::queryTrades()
 						trdInfo->setUserTag(usertag.c_str());
 
 					ayTrds->append(trdInfo, false);
+				}
+				else
+				{
+					// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the SDK struct); the host pauses the account.
+					wt_provider_raw::report(m_traderSink, m_spiFeatures.load(), "TraderHTS", "trade", "trade query row could not be converted: unknown contract",
+						wt_provider_raw::hexOf("ITPDK_SSCJ", &itr));
 				}
 			}
 

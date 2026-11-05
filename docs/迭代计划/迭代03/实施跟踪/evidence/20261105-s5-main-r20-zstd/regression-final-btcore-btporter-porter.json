@@ -1,0 +1,117 @@
+{
+ "start": "2026-11-05T11:15:44+08:00",
+ "end": "2026-11-05T11:16:23+08:00",
+ "total": 1098,
+ "by_status": {
+  "pass": 1090,
+  "skipped": 8
+ },
+ "per_binary": {
+  "CoverageTests_btcore": {
+   "pass": 683,
+   "skipped": 1
+  },
+  "CoverageTests_btporter": {
+   "pass": 148,
+   "skipped": 4
+  },
+  "CoverageTests_porter": {
+   "pass": 259,
+   "skipped": 3
+  }
+ },
+ "non_pass": [
+  [
+   "CoverageTests_btcore",
+   "P04ReplayCsvTest.failedBinaryRawBarsLoadCanBeRetriedSafely",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btporter",
+   "R66BtPorterNotifier.FailedConfigRetryAndDuplicateConfigOwnOneServer",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btporter",
+   "S5R20RunnerNotifierRelease.AsyncReplayReleaseJoinsThenDestroysOnce",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btporter",
+   "S5R20RunnerNotifierRelease.IdleReleaseDestroysServerOnceBeforeRunnerDestruction",
+   "skipped"
+  ],
+  [
+   "CoverageTests_btporter",
+   "S5R20RunnerNotifierRelease.SyncReplayThenReleaseDestroysOnceAndStopsPublishing",
+   "skipped"
+  ],
+  [
+   "CoverageTests_porter",
+   "R143PorterBars.cta_get_bars_returns_loaded_blocks",
+   "skipped"
+  ],
+  [
+   "CoverageTests_porter",
+   "R143PorterBars.hft_get_bars_returns_loaded_blocks",
+   "skipped"
+  ],
+  [
+   "CoverageTests_porter",
+   "R143PorterBars.sel_get_bars_returns_loaded_blocks",
+   "skipped"
+  ]
+ ],
+ "disabled_total": 49,
+ "list_failures": [],
+ "external_platform_skipped": [
+  {
+   "id": "BUG-L00-010",
+   "requires": "Windows/MSVC",
+   "rerun": "MSVC 实际构建并运行双 DLL、多 TU、静态初始化与卸载重载测试",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-L01-018",
+   "requires": "Windows/MSVC",
+   "rerun": "MSVC 下运行有效/非法/1969 日期矩阵（weekday helper 合组及日期映射传播用例）",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R160-002",
+   "requires": "Windows/MSVC 签名构建",
+   "rerun": "MSVC 签名构建并验证产物",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R42-001",
+   "requires": "Linux + MSan（或 Valgrind）",
+   "rerun": "MSan 全插桩构建后运行 r41_ticker/r101_sel_ctx_gap/r120_sel_engine_run 等相关用例的未初始化读取检测",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R93-005",
+   "requires": "真实 XTP SDK",
+   "rerun": "真实 XTP SDK 回调排空/Release 合同验证",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R93-006",
+   "requires": "真实 YD 柜台/官方时序",
+   "rerun": "部分成交、首包终态、乱序与 TradeVolume 语义验证",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-P05-010",
+   "requires": "有来源的真实历史 LMDB 键样本及版本说明",
+   "rerun": "以真实样本运行 AD 键兼容读取验证",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R8-003",
+   "requires": "完整 dtservo/生产数据服务环境",
+   "rerun": "完整 dtservo 生产数据服务验收",
+   "status": "skipped(platform)"
+  }
+ ]
+}

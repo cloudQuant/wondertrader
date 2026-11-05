@@ -1,0 +1,21 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -9,6 +9,7 @@
+ 	ENDIF()
+ ENDIF()
+ # 添加boost
++include_directories(BEFORE /opt/homebrew/Cellar/boost/1.88.0/include)
+ find_package(Boost REQUIRED COMPONENTS system filesystem thread)
+ include_directories(${Boost_INCLUDE_DIRS})
+ link_directories(${Boost_LIBRARY_DIRS})
+--- a/src/TestUnits/coverage/CMakeLists.txt
++++ b/src/TestUnits/coverage/CMakeLists.txt
+@@ -278,7 +278,7 @@
+ SET(WT_COV_SPLIT_TARGETS
+ 	"wtcore|WtCore|dir:n01_wtcore_tradepaths,dir:n02_wtcore_engines,dir:p01_wtcore_stractx,dir:p02_wtcore_engines2,dir:p11_wtcore_traderadapter,dir:q01_wtcore3"
+ 	"uftcore|WtUftCore|dir:n03_uftcore_index,dir:p06_uftcore2,dir:q04_uftcore3"
+-	"btcore|WtBtCore|dir:l06_wtbtcore,dir:n04_btcore_mockers,dir:p03_btcore_mockers2,dir:p04_btcore_replayer,dir:p07_btcore_replayer2,dir:p08_btcore_mockers3,dir:q02_btcore3"
++	"btcore|WtBtCore|l06_wtbtcore/l06_replayer_runtime_test.cpp"
+ 	# WtDtCore 是 STATIC 且与 WtCore 有同名 wtp::ParserAdapter/ParserAdapterMgr/WtHelper，
+ 	# 两者一起链进主目标会被静态库惰性抽取静默择一（BUG-L00-005），所以单独立目标；
+ 	# WtDtServo/WtDtHelper 是 hidden SHARED，其 TU 一并编进来才能测内部。

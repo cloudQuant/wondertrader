@@ -1,0 +1,40 @@
+In file included from /tmp/wt-shm-baseline-YLY5mq/ParserShm.cpp:18:
+/opt/homebrew/include/boost/bind.hpp:36:1: warning: The practice of declaring the Bind placeholders (_1, _2, ...) in the global namespace is deprecated. Please use <boost/bind/bind.hpp> + using namespace boost::placeholders, or define BOOST_BIND_GLOBAL_PLACEHOLDERS to retain the current behavior. [-W#pragma-messages]
+   36 | BOOST_PRAGMA_MESSAGE(
+      | ^
+/opt/homebrew/include/boost/config/pragma_message.hpp:24:34: note: expanded from macro 'BOOST_PRAGMA_MESSAGE'
+   24 | # define BOOST_PRAGMA_MESSAGE(x) _Pragma(BOOST_STRINGIZE(message(x)))
+      |                                  ^
+<scratch space>:336:2: note: expanded from here
+  336 |  message("The practice of declaring the Bind placeholders (_1, _2, ...) " "in the global namespace is deprecated. Please use " "<boost/bind/bind.hpp> + using namespace boost::placeholders, " "or define BOOST_BIND_GLOBAL_PLACEHOLDERS to retain the current behavior.")
+      |  ^
+1 warning generated.
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = ParserShmTest.subscribe_and_unsubscribe_preserve_multisegment_standard_code
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from ParserShmTest
+[ RUN      ] ParserShmTest.subscribe_and_unsubscribe_preserve_multisegment_standard_code
+/tmp/wt-shm-baseline-YLY5mq/t5.cpp:249: Failure
+Expected equality of these values:
+  "IO2013.C.4000@CFFEX"
+  sink_.bd_.calls_[0]
+    Which is: "IO2013@CFFEX"
+
+/tmp/wt-shm-baseline-YLY5mq/t5.cpp:254: Failure
+Expected equality of these values:
+  "IO2013.C.4000@CFFEX"
+  sink_.bd_.calls_[1]
+    Which is: "IO2013@CFFEX"
+
+[  FAILED  ] ParserShmTest.subscribe_and_unsubscribe_preserve_multisegment_standard_code (0 ms)
+[----------] 1 test from ParserShmTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] ParserShmTest.subscribe_and_unsubscribe_preserve_multisegment_standard_code
+
+ 1 FAILED TEST
+baseline output directory: /tmp/wt-shm-baseline-YLY5mq; expected failing exit: 1

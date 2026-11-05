@@ -1,0 +1,15 @@
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-main/sign-compare/before/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_cta_ctx_test.cpp:15:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_wtcore_env.h:23:
+/opt/homebrew/include/gtest/gtest.h:1394:11: error: comparison of integers of different signs: 'const int' and 'const unsigned int' [-Werror,-Wsign-compare]
+ 1394 |   if (lhs == rhs) {
+      |       ~~~ ^  ~~~
+/opt/homebrew/include/gtest/gtest.h:1413:12: note: in instantiation of function template specialization 'testing::internal::CmpHelperEQ<int, unsigned int>' requested here
+ 1413 |     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
+      |            ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-main/sign-compare/before/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_cta_ctx_test.cpp:353:5: note: in instantiation of function template specialization 'testing::internal::EqHelper::Compare<int, unsigned int, nullptr>' requested here
+  353 |     EXPECT_EQ(m5->size(), 3u);
+      |     ^
+/opt/homebrew/include/gtest/gtest.h:1885:54: note: expanded from macro 'EXPECT_EQ'
+ 1885 |   EXPECT_PRED_FORMAT2(::testing::internal::EqHelper::Compare, val1, val2)
+      |                                                      ^
+1 error generated.

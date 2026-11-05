@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="15" failures="5" disabled="0" errors="0" time="1.145" timestamp="2026-11-05T07:28:48.734" name="AllTests">
+  <testsuite name="P05RdmReaderADTest" tests="5" failures="0" disabled="0" skipped="0" errors="0" time="0.008" timestamp="2026-11-05T07:28:48.734">
+    <testcase name="KlineRangeRejectsMismatchedCheckedRangeResultsWithoutPartialPublish" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/p05_rdmdtreader_ad_slices_test.cpp" line="1223" status="run" result="completed" time="0.002" timestamp="2026-11-05T07:28:48.734" classname="P05RdmReaderADTest" />
+    <testcase name="KlineRangeRejectsShortAndLongLmdbValues" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/p05_rdmdtreader_ad_slices_test.cpp" line="1464" status="run" result="completed" time="0.001" timestamp="2026-11-05T07:28:48.736" classname="P05RdmReaderADTest" />
+    <testcase name="KlineRangeKeepsExistingCacheWhenReloadFindsMalformedValue" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/p05_rdmdtreader_ad_slices_test.cpp" line="1630" status="run" result="completed" time="0.001" timestamp="2026-11-05T07:28:48.738" classname="P05RdmReaderADTest" />
+    <testcase name="KlineRangeKeepsExistingCacheWhenCheckedQueryFails" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/p05_rdmdtreader_ad_slices_test.cpp" line="1680" status="run" result="completed" time="0.001" timestamp="2026-11-05T07:28:48.739" classname="P05RdmReaderADTest" />
+    <testcase name="KlineRangeRejectsShortAndLongLmdbKeys" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/p05_rdmdtreader_ad_slices_test.cpp" line="1890" status="run" result="completed" time="0.001" timestamp="2026-11-05T07:28:48.741" classname="P05RdmReaderADTest" />
+  </testsuite>
+  <testsuite name="R21ReaderADTest" tests="10" failures="5" disabled="0" skipped="0" errors="0" time="1.136" timestamp="2026-11-05T07:28:48.743">
+    <testcase name="K35AppendAndLastBarRevisionAreReadFromTheCursor" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp" line="58" status="run" result="completed" time="0.001" timestamp="2026-11-05T07:28:48.743" classname="R21ReaderADTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:81&#x0A;Expected equality of these values:&#x0A;  sink()-&gt;count_containing(&quot;Reading back&quot;)&#x0A;    Which is: 2&#x0A;  1u&#x0A;    Which is: 1&#x0A;only the first read scans everything&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:81
+Expected equality of these values:
+  sink()->count_containing("Reading back")
+    Which is: 2
+  1u
+    Which is: 1
+only the first read scans everything
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:82&#x0A;Expected equality of these values:&#x0A;  sink()-&gt;count_containing(&quot;Reading newer&quot;)&#x0A;    Which is: 0&#x0A;  1u&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:82
+Expected equality of these values:
+  sink()->count_containing("Reading newer")
+    Which is: 0
+  1u
+    Which is: 1
+]]></failure>
+    </testcase>
+    <testcase name="K35OlderRevisionBecomesVisibleAfterTheIncrementBound" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp" line="85" status="run" result="completed" time="0.001" timestamp="2026-11-05T07:28:48.744" classname="R21ReaderADTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:96&#x0A;The difference between k35_close_of(s1, 20240102) and 101.0 is 400, which exceeds 1e-9, where&#x0A;k35_close_of(s1, 20240102) evaluates to 501,&#x0A;101.0 evaluates to 101, and&#x0A;1e-9 evaluates to 1.0000000000000001e-09.&#x0A;an older revision stays stale until a full check&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:96
+The difference between k35_close_of(s1, 20240102) and 101.0 is 400, which exceeds 1e-9, where
+k35_close_of(s1, 20240102) evaluates to 501,
+101.0 evaluates to 101, and
+1e-9 evaluates to 1.0000000000000001e-09.
+an older revision stays stale until a full check
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:102&#x0A;The difference between k35_close_of(s2, 20240102) and 101.0 is 400, which exceeds 1e-9, where&#x0A;k35_close_of(s2, 20240102) evaluates to 501,&#x0A;101.0 evaluates to 101, and&#x0A;1e-9 evaluates to 1.0000000000000001e-09.&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:102
+The difference between k35_close_of(s2, 20240102) and 101.0 is 400, which exceeds 1e-9, where
+k35_close_of(s2, 20240102) evaluates to 501,
+101.0 evaluates to 101, and
+1e-9 evaluates to 1.0000000000000001e-09.
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:112&#x0A;Expected equality of these values:&#x0A;  sink()-&gt;count_containing(&quot;Reading back&quot;)&#x0A;    Which is: 4&#x0A;  2u&#x0A;    Which is: 2&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:112
+Expected equality of these values:
+  sink()->count_containing("Reading back")
+    Which is: 4
+  2u
+    Which is: 2
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:113&#x0A;Expected equality of these values:&#x0A;  sink()-&gt;count_containing(&quot;Reading newer&quot;)&#x0A;    Which is: 0&#x0A;  2u&#x0A;    Which is: 2&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:113
+Expected equality of these values:
+  sink()->count_containing("Reading newer")
+    Which is: 0
+  2u
+    Which is: 2
+]]></failure>
+    </testcase>
+    <testcase name="K35OlderRevisionBecomesVisibleAfterTheTimeBound" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp" line="116" status="run" result="completed" time="1.115" timestamp="2026-11-05T07:28:48.746" classname="R21ReaderADTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:127&#x0A;The difference between k35_close_of(s1, 20240102) and 101.0 is 400, which exceeds 1e-9, where&#x0A;k35_close_of(s1, 20240102) evaluates to 501,&#x0A;101.0 evaluates to 101, and&#x0A;1e-9 evaluates to 1.0000000000000001e-09.&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:127
+The difference between k35_close_of(s1, 20240102) and 101.0 is 400, which exceeds 1e-9, where
+k35_close_of(s1, 20240102) evaluates to 501,
+101.0 evaluates to 101, and
+1e-9 evaluates to 1.0000000000000001e-09.
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:136&#x0A;Expected equality of these values:&#x0A;  sink()-&gt;count_containing(&quot;Reading back&quot;)&#x0A;    Which is: 3&#x0A;  2u&#x0A;    Which is: 2&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:136
+Expected equality of these values:
+  sink()->count_containing("Reading back")
+    Which is: 3
+  2u
+    Which is: 2
+]]></failure>
+    </testcase>
+    <testcase name="K35MinuteBarsMergeFromTheCursor" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp" line="139" status="run" result="completed" time="0.004" timestamp="2026-11-05T07:28:49.861" classname="R21ReaderADTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:162&#x0A;Expected equality of these values:&#x0A;  sink()-&gt;count_containing(&quot;Reading newer&quot;)&#x0A;    Which is: 0&#x0A;  1u&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:162
+Expected equality of these values:
+  sink()->count_containing("Reading newer")
+    Which is: 0
+  1u
+    Which is: 1
+]]></failure>
+    </testcase>
+    <testcase name="S5SameWindowWithoutCommitReusesSnapshot" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp" line="28" status="run" result="completed" time="0.003" timestamp="2026-11-05T07:28:49.866" classname="R21ReaderADTest" />
+    <testcase name="S5CommitAfterSnapshotReadsFromCursorAndBoundsRevisionStaleness" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp" line="48" status="run" result="completed" time="0.004" timestamp="2026-11-05T07:28:49.869" classname="R21ReaderADTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp:61&#x0A;The difference between second-&gt;get_block_addr(0)[0].close and 101.0 is 400, which exceeds 1e-9, where&#x0A;second-&gt;get_block_addr(0)[0].close evaluates to 501,&#x0A;101.0 evaluates to 101, and&#x0A;1e-9 evaluates to 1.0000000000000001e-09.&#x0A;an older revision is not read incrementally&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp:61
+The difference between second->get_block_addr(0)[0].close and 101.0 is 400, which exceeds 1e-9, where
+second->get_block_addr(0)[0].close evaluates to 501,
+101.0 evaluates to 101, and
+1e-9 evaluates to 1.0000000000000001e-09.
+an older revision is not read incrementally
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp:75&#x0A;Expected equality of these values:&#x0A;  sink()-&gt;count_containing(&quot;Reading back&quot;)&#x0A;    Which is: 3&#x0A;  2u&#x0A;    Which is: 2&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp:75
+Expected equality of these values:
+  sink()->count_containing("Reading back")
+    Which is: 3
+  2u
+    Which is: 2
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp:76&#x0A;Expected equality of these values:&#x0A;  sink()-&gt;count_containing(&quot;Reading newer&quot;)&#x0A;    Which is: 0&#x0A;  1u&#x0A;    Which is: 1&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp:76
+Expected equality of these values:
+  sink()->count_containing("Reading newer")
+    Which is: 0
+  1u
+    Which is: 1
+]]></failure>
+    </testcase>
+    <testcase name="S5MinuteRangeEndingIn2033DoesNotWrap" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp" line="79" status="run" result="completed" time="0.002" timestamp="2026-11-05T07:28:49.873" classname="R21ReaderADTest" />
+    <testcase name="S5OverlongIdentityRejectedBeforeOpeningDatabases" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp" line="94" status="run" result="completed" time="0." timestamp="2026-11-05T07:28:49.876" classname="R21ReaderADTest" />
+    <testcase name="S5NightSessionTickRangeUsesNaturalTimeForTradingDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp" line="169" status="run" result="completed" time="0.002" timestamp="2026-11-05T07:28:49.876" classname="R21ReaderADTest" />
+    <testcase name="S5UnknownCommodityTickRangeIsRefusedWithoutDereference" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp" line="199" status="run" result="completed" time="0." timestamp="2026-11-05T07:28:49.879" classname="R21ReaderADTest" />
+  </testsuite>
+</testsuites>

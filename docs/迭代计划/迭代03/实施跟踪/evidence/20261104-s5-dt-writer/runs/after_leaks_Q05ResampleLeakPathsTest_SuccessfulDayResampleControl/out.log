@@ -1,0 +1,43 @@
+perl(47555) MallocStackLogging: could not tag MSL-related memory as no_footprint, so those pages will be included in process footprint - No such file or directory (2)
+perl(47555) MallocStackLogging: recording malloc (and VM allocation) stacks using lite mode
+leaks(47555) MallocStackLogging: could not tag MSL-related memory as no_footprint, so those pages will be included in process footprint - No such file or directory (2)
+leaks(47555) MallocStackLogging: recording malloc (and VM allocation) stacks using lite mode
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q05ResampleLeakPathsTest.SuccessfulDayResampleControl
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q05ResampleLeakPathsTest
+[ RUN      ] Q05ResampleLeakPathsTest.SuccessfulDayResampleControl
+[       OK ] Q05ResampleLeakPathsTest.SuccessfulDayResampleControl (1 ms)
+[----------] 1 test from Q05ResampleLeakPathsTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1 ms total)
+[  PASSED  ] 1 test.
+Process 47558 is not debuggable. Due to security restrictions, leaks can only show or save contents of readonly memory of restricted processes.
+
+Process:         CoverageTests_dtcore [47558]
+Path:            /private/tmp/*/CoverageTests_dtcore
+Load Address:    0x102edc000
+Identifier:      CoverageTests_dtcore
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  leaks [47555]
+Target Type:     live task
+
+Date/Time:       2026-11-04 19:52:34.493 +0800
+Launch Time:     2026-11-04 19:52:30.251 +0800
+OS Version:      macOS 26.5.1 (25F80)
+Report Version:  7
+Analysis Tool:   /usr/bin/leaks
+
+Physical footprint:         4336K
+Physical footprint (peak):  4704K
+Idle exit:                  untracked
+----
+
+leaks Report Version: 4.0, multi-line stacks
+Process 47558: 239 nodes malloced for 58 KB
+Process 47558: 0 leaks for 0 total leaked bytes.
+

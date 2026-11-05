@@ -1,0 +1,47 @@
+#include "../../../WtDataStorageAD/LMDBKeys.h"
+#include <cassert>
+#include <cstring>
+#include <stdexcept>
+#include <string>
+#include <type_traits>
+
+template<class F> static void rejects(F f)
+{
+    bool rejected = false;
+    try { f(); } catch (const std::invalid_argument&) { rejected = true; }
+    assert(rejected);
+}
+
+int main()
+{
+    static_assert(sizeof(LMDBBarKey) == MAX_EXCHANGE_LENGTH + MAX_INSTRUMENT_LENGTH + 4, "bar layout changed");
+    static_assert(sizeof(LMDBHftKey) == MAX_EXCHANGE_LENGTH + MAX_INSTRUMENT_LENGTH + 8, "hft layout changed");
+    const std::string exchg(MAX_EXCHANGE_LENGTH - 1, 'E');
+    const std::string code(MAX_INSTRUMENT_LENGTH - 1, 'C');
+    const LMDBBarKey bar(exchg.c_str(), code.c_str(), 0x01020304);
+    const LMDBHftKey hft(exchg.c_str(), code.c_str(), 0x01020304, 0x11223344);
+    assert(std::strcmp(bar._exchg, exchg.c_str()) == 0 && std::strcmp(bar._code, code.c_str()) == 0);
+    assert(std::strcmp(hft._exchg, exchg.c_str()) == 0 && std::strcmp(hft._code, code.c_str()) == 0);
+    const unsigned char* rawBar = reinterpret_cast<const unsigned char*>(&bar);
+    const unsigned char* rawHft = reinterpret_cast<const unsigned char*>(&hft);
+    const size_t offset = MAX_EXCHANGE_LENGTH + MAX_INSTRUMENT_LENGTH;
+    const unsigned char barTail[] = {1, 2, 3, 4};
+    const unsigned char hftTail[] = {1, 2, 3, 4, 0x11, 0x22, 0x33, 0x44};
+    assert(std::memcmp(rawBar + offset, barTail, sizeof(barTail)) == 0);
+    assert(std::memcmp(rawHft + offset, hftTail, sizeof(hftTail)) == 0);
+    const std::string longExchg(MAX_EXCHANGE_LENGTH, 'E');
+    const std::string longCode(MAX_INSTRUMENT_LENGTH, 'C');
+    for (const char* ex : {static_cast<const char*>(nullptr), "", longExchg.c_str()}) {
+        rejects([&] { LMDBBarKey k(ex, code.c_str(), 1); });
+        rejects([&] { LMDBHftKey k(ex, code.c_str(), 1, 1); });
+    }
+    for (const char* co : {static_cast<const char*>(nullptr), "", longCode.c_str()}) {
+        rejects([&] { LMDBBarKey k(exchg.c_str(), co, 1); });
+        rejects([&] { LMDBHftKey k(exchg.c_str(), co, 1, 1); });
+    }
+    // Rejection must not depend on reading beyond fixed-size, non-NUL fields.
+    char noTermExchg[MAX_EXCHANGE_LENGTH]; std::memset(noTermExchg, 'E', sizeof(noTermExchg));
+    char noTermCode[MAX_INSTRUMENT_LENGTH]; std::memset(noTermCode, 'C', sizeof(noTermCode));
+    rejects([&] { LMDBBarKey k(noTermExchg, code.c_str(), 1); });
+    rejects([&] { LMDBHftKey k(exchg.c_str(), noTermCode, 1, 1); });
+}

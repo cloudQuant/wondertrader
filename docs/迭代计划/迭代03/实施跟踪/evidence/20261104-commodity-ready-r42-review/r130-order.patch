@@ -1,0 +1,23 @@
+--- /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/48afafcc-c35d-4a77-8b4c-8588c1b786d6/scratchpad/r130.before	2026-11-03 23:03:48
++++ src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp	2026-11-03 23:03:49
+@@ -469,6 +469,11 @@
+     WtDtMgr dm;
+     TraderAdapterMgr adapterMgr;
+ 
++    // The monitor and its factory must outlive the engine: since BUG-R42-001
++    // the engine destructor stops the risk monitor before releasing fund data.
++    R130RiskMon mon;
++    R130RiskFact fact;
++
+     WtCtaEngine engine;
+     engine.set_adapter_mgr(&adapterMgr);
+     WTSVariant* cfg = sessionCfg();
+@@ -476,8 +481,6 @@
+     engine.init(cfg, &bd, &dm, &hot, NULL);
+     cfg->release();
+ 
+-    R130RiskMon mon;
+-    R130RiskFact fact;
+     WtRiskMonPtr risk(new WtRiskMonWrapper(&mon, &fact));
+     engine.setRiskMonitor(risk);
+ 

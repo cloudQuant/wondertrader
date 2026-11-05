@@ -15,6 +15,7 @@
 
 #include "../Includes/WTSDataDef.hpp"
 #include "../Includes/WTSVariant.hpp"
+#include "../Includes/DateMappingBinding.h"
 #include "../Includes/WTSContractInfo.hpp"
 
 #include "../Share/StrUtil.hpp"
@@ -48,6 +49,7 @@ void wtp::setWtDataManagerBarLifetimeHook(wtp::WtDataManagerBarLifetimeHook hook
 
 WtDataManager::WtDataManager()
 	: _reader(NULL)
+	, _remover(NULL)
 	, _bd_mgr(NULL)
 	, _hot_mgr(NULL)
 	, _runner(NULL)
@@ -58,12 +60,56 @@ WtDataManager::WtDataManager()
 
 WtDataManager::~WtDataManager()
 {
+	//卡11=B / R123：先释放自有缓存（只释放缓存持有的引用，外部切片通过 owner 保活），
+	//再释放实时 K 线 map，最后通过模块提供的 remover 销毁 reader。
+	//reader 所在模块不在此卸载：仍被外部持有的切片的 owner 析构代码可能位于该模块。
+	{
+		StdUniqueLock lock(_mtx_cache);
+		release_bar_caches();
+	}
+
+	{
+		StdUniqueLock lock(_mtx_rtbars);
+		if (_rt_bars != NULL)
+		{
+			_rt_bars->release();
+			_rt_bars = NULL;
+		}
+	}
+
+	if (_reader != NULL)
+	{
+		if (_remover != NULL)
+			_remover(_reader);
+		_reader = NULL;
+		_remover = NULL;
+	}
+}
+
+void WtDataManager::release_bar_caches()
+{
 	for(auto& m : _bars_cache)
 	{
 		if (m.second._bars != NULL)
 			m.second._bars->release();
+		m.second._bars = NULL;
 	}
 	_bars_cache.clear();
+}
+
+void WtDataManager::detach_bar_cache(BarCache& barCache)
+{
+	if (barCache._bars == NULL || barCache._bars->isSingleRefs())
+		return;
+
+	WTSKlineData* oldBars = barCache._bars;
+	WTSKlineData* newBars = WTSKlineData::create(oldBars->code(), 0);
+	newBars->setPeriod(oldBars->period(), oldBars->times());
+	newBars->setClosed(oldBars->isClosed());
+	newBars->setUnixTime(oldBars->isUnixTime());
+	newBars->getDataRef() = oldBars->getDataRef();
+	barCache._bars = newBars;
+	oldBars->release();
 }
 
 bool WtDataManager::initStore(WTSVariant* cfg)
@@ -95,6 +141,19 @@ bool WtDataManager::initStore(WTSVariant* cfg)
 		{
 			_reader = pFuncCreateReader();
 			_remover = pFuncDeleteReader;
+		}
+
+		// K31=A: inject the runner's DateMappingV1 table before init when the module exports the binder.
+		if (_reader != NULL && _runner != NULL)
+		{
+			const int bound = wtp::bindDateMappingV1(DLLHelper::get_symbol(libParser, WT_BIND_RDM_DT_READER_DATE_MAPPING_V1),
+				_reader, _runner->getBaseDataMgr().getDateMappingV1());
+			if (bound == 1)
+				WTSLogger::info("Random data reader module {} bound to the host date mapping table", module);
+			else if (bound == 0)
+				WTSLogger::warn("Random data reader module {} rejected the host date mapping table; it keeps the legacy mapping path", module);
+			else
+				WTSLogger::info("Random data reader module {} has no date mapping binder; it keeps the legacy mapping path", module);
 		}
 
 	}
@@ -209,10 +268,11 @@ WTSKlineSlice* WtDataManager::get_skline_slice_by_date(const char* stdCode, uint
 	if (_reader == NULL)
 		return NULL;
 
-	std::string key = fmtutil::format<64>("{}-{}-s{}", stdCode, uDate, secs);
+	std::string key = fmt::format("{}-{}-s{}", stdCode, uDate, secs);
 
 	//只有非基础周期的会进到下面的步骤
 	WTSSessionInfo* sInfo = get_session_info(stdCode, true);
+	StdUniqueLock cacheLock(_mtx_cache);
 	BarCache& barCache = _bars_cache[key];
 	barCache._period = KP_Tick;
 	barCache._times = secs;
@@ -237,18 +297,38 @@ WTSKlineSlice* WtDataManager::get_skline_slice_by_date(const char* stdCode, uint
 
 	WTSBarStruct* rtHead = barCache._bars->at(0);
 	WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, KP_Tick, secs, rtHead, barCache._bars->size());
+	//卡11=B：切片持有缓存 K 线对象，clear_cache/析构只释放缓存自己的引用
+	if (slice != NULL)
+		slice->addOwner(makeSliceOwner(barCache._bars));
 	return slice;
 }
 
 WTSKlineSlice* WtDataManager::get_kline_slice_by_date(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint32_t uDate /* = 0 */)
 {
-	if (_reader == NULL || _bd_mgr == NULL)
+	if (stdCode == NULL || *stdCode == '\0' || _reader == NULL ||
+		_runner == NULL || _bd_mgr == NULL || _hot_mgr == NULL ||
+		_bd_mgr != &_runner->getBaseDataMgr() || _hot_mgr != &_runner->getHotMgr())
 		return NULL;
 
+	// Snapshot the current date once so both boundaries use the same day.
+	if (uDate == 0)
+	{
+		uint32_t clockTime = 0;
+		if (!TimeUtils::tryGetDateTime(uDate, clockTime))
+			return NULL;
+	}
+
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
-	uint64_t stime = _bd_mgr->getBoundaryTime(codeInfo.stdCommID(), uDate, false, true);
-	uint64_t etime = _bd_mgr->getBoundaryTime(codeInfo.stdCommID(), uDate, false, false);
-	return get_kline_slice_by_range(stdCode, period, times, stime, etime);
+	DateMappingV1 mapping = _runner->getBaseDataMgr().getDateMappingV1();
+	if (mapping.size != sizeof(DateMappingV1) || mapping.version != 1 ||
+		mapping.context != &_runner->getBaseDataMgr() || mapping.getBoundaryTime == NULL)
+		return NULL;
+	const DateMappingResult64 start = mapping.getBoundaryTime(&mapping, codeInfo.stdCommID(), uDate, 0, 1);
+	const DateMappingResult64 end = mapping.getBoundaryTime(&mapping, codeInfo.stdCommID(), uDate, 0, 0);
+	if (start.status != DateMappingStatus::Ok || end.status != DateMappingStatus::Ok ||
+		start.value == 0 || end.value == 0 || start.value > end.value)
+		return NULL;
+	return get_kline_slice_by_range(stdCode, period, times, start.value, end.value);
 }
 
 WTSKlineSlice* WtDataManager::get_kline_slice_by_range(const char* stdCode, WTSKlinePeriod period, uint32_t times,uint64_t stime, uint64_t etime /* = 0 */)
@@ -263,7 +343,8 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_range(const char* stdCode, WTSK
 
 	//只有非基础周期的会进到下面的步骤
 	WTSSessionInfo* sInfo = get_session_info(stdCode, true);
-	std::string key = fmtutil::format<64>("{}-{}-{}", stdCode, (uint32_t)period, times);
+	std::string key = fmt::format("{}-{}-{}", stdCode, (uint32_t)period, times);
+	StdUniqueLock cacheLock(_mtx_cache);
 	BarCache& barCache = _bars_cache[key];
 	barCache._period = period;
 	barCache._times = times;
@@ -305,6 +386,8 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_range(const char* stdCode, WTSK
 		WTSKlineSlice* rawData = _reader->readKlineSliceByRange(stdCode, period, barCache._last_bartime, 0);
 		if (rawData != NULL)
 		{
+			//卡11=B：已借出的切片引用旧对象，增量更新前写时复制
+			detach_bar_cache(barCache);
 			for(int32_t idx = 0; idx < rawData->size(); idx ++)
 			{
 				WTSBarStruct* rawBar = rawData->at(idx);
@@ -390,6 +473,8 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_range(const char* stdCode, WTSK
 	uint32_t rtCnt = eIdx - sIdx + 1;
 	WTSBarStruct* rtHead = barCache._bars->at(sIdx);
 	WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, times, rtHead, rtCnt);
+	if (slice != NULL)
+		slice->addOwner(makeSliceOwner(barCache._bars));
 	return slice;
 }
 
@@ -405,7 +490,8 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_count(const char* stdCode, WTSK
 
 	//只有非基础周期的会进到下面的步骤
 	WTSSessionInfo* sInfo = get_session_info(stdCode, true);
-	std::string key = fmtutil::format<64>("{}-{}-{}", stdCode, (uint32_t)period, times);
+	std::string key = fmt::format("{}-{}-{}", stdCode, (uint32_t)period, times);
+	StdUniqueLock cacheLock(_mtx_cache);
 	BarCache& barCache = _bars_cache[key];
 	barCache._period = period;
 	barCache._times = times;
@@ -460,6 +546,8 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_count(const char* stdCode, WTSK
 		WTSKlineSlice* rawData = _reader->readKlineSliceByRange(stdCode, period, barCache._last_bartime, 0);
 		if (rawData != NULL)
 		{
+			//卡11=B：已借出的切片引用旧对象，增量更新前写时复制
+			detach_bar_cache(barCache);
 			WTSLogger::info("{} {} bars of {} updated, adding to cache...", rawData->size(), tag, stdCode);
 			for (int32_t idx = 0; idx < rawData->size(); idx++)
 			{
@@ -541,6 +629,8 @@ WTSKlineSlice* WtDataManager::get_kline_slice_by_count(const char* stdCode, WTSK
 	uint32_t rtCnt = eIdx - sIdx + 1;
 	WTSBarStruct* rtHead = barCache._bars->at(sIdx);
 	WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, times, rtHead, rtCnt);
+	if (slice != NULL)
+		slice->addOwner(makeSliceOwner(barCache._bars));
 	return slice;
 }
 
@@ -635,10 +725,9 @@ void WtDataManager::clear_subbed_bars()
 
 void WtDataManager::update_bars(const char* stdCode, WTSTickData* newTick)
 {
+	StdUniqueLock lock(_mtx_rtbars);
 	if (_rt_bars == NULL)
 		return;
-
-	StdUniqueLock lock(_mtx_rtbars);
 	auto it = _rt_bars->begin();
 	for(; it != _rt_bars->end(); it++)
 	{
@@ -706,6 +795,18 @@ void WtDataManager::clear_cache()
 	{
 		WTSLogger::warn("DataReader not initialized, clearing canceled");
 		return;
+	}
+
+	//卡11=B / R102：先清理自有的重采样缓存与实时 K 线 map，再清理 reader 缓存。
+	//缓存只释放自己的引用，仍被调用者持有的切片在 release 前保持有效。
+	{
+		StdUniqueLock lock(_mtx_cache);
+		release_bar_caches();
+	}
+	{
+		StdUniqueLock lock(_mtx_rtbars);
+		if (_rt_bars != NULL)
+			_rt_bars->clear();
 	}
 
 	_reader->clearCache();

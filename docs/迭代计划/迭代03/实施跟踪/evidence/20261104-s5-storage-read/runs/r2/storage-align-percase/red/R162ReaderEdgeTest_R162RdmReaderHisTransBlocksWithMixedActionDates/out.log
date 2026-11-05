@@ -1,0 +1,26 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R162ReaderEdgeTest.R162RdmReaderHisTransBlocksWithMixedActionDates
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R162ReaderEdgeTest
+[ RUN      ] R162ReaderEdgeTest.R162RdmReaderHisTransBlocksWithMixedActionDates
+/opt/homebrew/Cellar/llvm/22.1.8/bin/../include/c++/v1/__algorithm/lower_bound.h:40:53: runtime error: reference binding to misaligned address 0x6160000010a4 for type 'wtp::WTSOrdQueStruct', which requires 8 byte alignment
+0x6160000010a4: note: pointer points here
+  3c 00 00 00 53 53 45 00  00 00 00 00 00 00 00 00  00 00 00 00 36 30 30 30  30 32 00 00 00 00 00 00
+              ^ 
+    #0 0x000100db4718 in wtp::WTSOrdQueStruct* std::__1::__lower_bound_bisecting[abi:nqe220108]<std::__1::_ClassicAlgPolicy, wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct, std::__1::__identity, bool (*)(wtp::WTSOrdQueStruct const&, wtp::WTSOrdQueStruct const&)>(wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct const&, std::__1::iterator_traits<wtp::WTSOrdQueStruct*>::difference_type, bool (*&)(wtp::WTSOrdQueStruct const&, wtp::WTSOrdQueStruct const&), std::__1::__identity&)+0x1e4 (s5_storage_align:arm64+0x100180718)
+    #1 0x000100db451c in wtp::WTSOrdQueStruct* std::__1::__lower_bound[abi:nqe220108]<std::__1::_ClassicAlgPolicy, wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct, std::__1::__identity, bool (*)(wtp::WTSOrdQueStruct const&, wtp::WTSOrdQueStruct const&)>(wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct const&, bool (*&)(wtp::WTSOrdQueStruct const&, wtp::WTSOrdQueStruct const&), std::__1::__identity&)+0xdc (s5_storage_align:arm64+0x10018051c)
+    #2 0x000100c5762c in wtp::WTSOrdQueStruct* std::__1::lower_bound[abi:nqe220108]<wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct, bool (*)(wtp::WTSOrdQueStruct const&, wtp::WTSOrdQueStruct const&)>(wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct*, wtp::WTSOrdQueStruct const&, bool (*)(wtp::WTSOrdQueStruct const&, wtp::WTSOrdQueStruct const&))+0x1a8 (s5_storage_align:arm64+0x10002362c)
+    #3 0x000100c547ac in wtp::WtRdmDtReader::readOrdQueSliceByRange(char const*, unsigned long long, unsigned long long)+0x3b80 (s5_storage_align:arm64+0x1000207ac)
+    #4 0x0001011b7b90 in r162r::R162ReaderEdgeTest_R162RdmReaderHisTransBlocksWithMixedActionDates_Test::TestBody()+0x1230 (s5_storage_align:arm64+0x100583b90)
+    #5 0x0001013eae1c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (s5_storage_align:arm64+0x1007b6e1c)
+    #6 0x0001013ead64 in testing::Test::Run()+0xcc (s5_storage_align:arm64+0x1007b6d64)
+    #7 0x0001013eb944 in testing::TestInfo::Run()+0xd0 (s5_storage_align:arm64+0x1007b7944)
+    #8 0x0001013ec3c8 in testing::TestSuite::Run()+0x1c4 (s5_storage_align:arm64+0x1007b83c8)
+    #9 0x0001013f77f0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (s5_storage_align:arm64+0x1007c37f0)
+    #10 0x0001013f719c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (s5_storage_align:arm64+0x1007c319c)
+    #11 0x0001013f7100 in testing::UnitTest::Run()+0x78 (s5_storage_align:arm64+0x1007c3100)
+    #12 0x0001013d8438 in main+0x40 (s5_storage_align:arm64+0x1007a4438)
+    #13 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /opt/homebrew/Cellar/llvm/22.1.8/bin/../include/c++/v1/__algorithm/lower_bound.h:40:53 

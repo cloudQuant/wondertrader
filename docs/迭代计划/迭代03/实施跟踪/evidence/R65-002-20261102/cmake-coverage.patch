@@ -1,0 +1,13 @@
+--- /tmp/wt-i03-r65-002-20261102/original-coverage-cmake.txt	2026-11-02 11:17:05
++++ /tmp/wt-i03-r65-002-20261102/snapshot/src/TestUnits/coverage/CMakeLists.txt	2026-11-02 11:19:28
+@@ -387,6 +387,10 @@
+ 		CONTINUE()
+ 	ENDIF()
+ 
++	IF(suffix STREQUAL "t_TraderCTPOpt")
++		SET(srcs "${CMAKE_CURRENT_SOURCE_DIR}/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp")
++		SET_SOURCE_FILES_PROPERTIES("${CMAKE_CURRENT_SOURCE_DIR}/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp" PROPERTIES COMPILE_OPTIONS "-Wno-error=sign-compare")
++	ENDIF()
+ 	WT_COV_ISOLATE_INST_HLP(${tus})
+ 	ADD_EXECUTABLE(CoverageTests_${suffix} ${srcs} ${tus})
+ 	TARGET_INCLUDE_DIRECTORIES(CoverageTests_${suffix} PRIVATE ${WT_COV_INCS})

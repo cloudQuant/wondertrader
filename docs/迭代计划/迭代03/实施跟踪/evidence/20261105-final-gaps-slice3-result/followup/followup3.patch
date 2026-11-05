@@ -1,0 +1,257 @@
+--- a/src/TraderCTPOpt/TraderCTPOpt.cpp
++++ b/src/TraderCTPOpt/TraderCTPOpt.cpp
+@@ -31,62 +31,7 @@
+ 
+ const char* ENTRUST_SECTION = "entrusts";
+ const char* ORDER_SECTION = "orders";
+-
+-#include <mutex>
+-#include <unordered_map>
+-
+-namespace
+-{
+-	// I03-NEW-133: per-instance settlement query dates (same meaning as TraderCTP's
+-	// m_uSettleDate/m_uSettleQryDate). TraderCTPOpt.h is held by another work package,
+-	// so the state lives here; entries are dropped when a query ends and on destruction.
+-	struct SettleQueryDates
+-	{
+-		uint32_t rowDate = 0;	// date of the latest cached row
+-		uint32_t qryDate = 0;	// date of the outstanding request, 0 when none
+-	};
+-
+-	std::mutex& settleDatesMutex()
+-	{
+-		static std::mutex* m = new std::mutex();	// never destroyed: usable during exit
+-		return *m;
+-	}
+-
+-	std::unordered_map<const void*, SettleQueryDates>& settleDatesTable()
+-	{
+-		static auto* t = new std::unordered_map<const void*, SettleQueryDates>();
+-		return *t;
+-	}
+-
+-	void settleBegin(const void* owner, uint32_t uDate)
+-	{
+-		std::lock_guard<std::mutex> lock(settleDatesMutex());
+-		SettleQueryDates& d = settleDatesTable()[owner];
+-		d.rowDate = 0;
+-		d.qryDate = uDate;
+-	}
+ 
+-	void settleRow(const void* owner, uint32_t rowDate)
+-	{
+-		if (rowDate == 0)
+-			return;
+-		std::lock_guard<std::mutex> lock(settleDatesMutex());
+-		settleDatesTable()[owner].rowDate = rowDate;
+-	}
+-
+-	SettleQueryDates settleEnd(const void* owner)
+-	{
+-		std::lock_guard<std::mutex> lock(settleDatesMutex());
+-		auto& table = settleDatesTable();
+-		auto it = table.find(owner);
+-		if (it == table.end())
+-			return SettleQueryDates();
+-		SettleQueryDates d = it->second;
+-		table.erase(it);
+-		return d;
+-	}
+-}
+-
+ //By Wesley @ 2022.01.05
+ #include "../Share/fmtlib.h"
+ template<typename... Args>
+@@ -361,7 +306,6 @@
+ 	if (m_ayExecOrds) { m_ayExecOrds->release(); m_ayExecOrds = NULL; }
+ 	if (m_ayPosDetail) { m_ayPosDetail->release(); m_ayPosDetail = NULL; }
+ 	if (m_mapPosition) { m_mapPosition->release(); m_mapPosition = NULL; }
+-	settleEnd(this);	// I03-NEW-133
+ }
+ 
+ bool TraderCTPOpt::removableByFactory() const
+@@ -1295,7 +1239,8 @@
+ 	}
+ 
+ 	m_strSettleInfo.clear();
+-	settleBegin(this, uDate);	// I03-NEW-133
++	m_uSettleDate = 0;
++	m_uSettleQryDate = uDate;
+ 	StdUniqueLock lock(m_mtxQuery);
+ 	m_queQuery.push([this, uDate]() {
+ 		CThostFtdcQrySettlementInfoField req;
+@@ -1631,22 +1576,32 @@
+ 
+ 	if (bIsLast && !IsErrorRspInfo(pRspInfo))
+ 	{
+-		WTSAccountInfo* accountInfo = WTSAccountInfo::create();
+-		accountInfo->setPreBalance(pTradingAccount->PreBalance);
+-		accountInfo->setCloseProfit(pTradingAccount->CloseProfit + pTradingAccount->CashIn);
+-		accountInfo->setDynProfit(pTradingAccount->PositionProfit);
+-		accountInfo->setMargin(pTradingAccount->CurrMargin);
+-		accountInfo->setAvailable(pTradingAccount->Available);
+-		accountInfo->setCommission(pTradingAccount->Commission);
+-		accountInfo->setFrozenMargin(pTradingAccount->FrozenMargin);
+-		accountInfo->setFrozenCommission(pTradingAccount->FrozenCommission);
+-		accountInfo->setDeposit(pTradingAccount->Deposit);
+-		accountInfo->setWithdraw(pTradingAccount->Withdraw);
+-		accountInfo->setBalance(accountInfo->getPreBalance() + accountInfo->getCloseProfit() - accountInfo->getCommission() + accountInfo->getDeposit() - accountInfo->getWithdraw());
+-		accountInfo->setCurrency("CNY");
+-
+-		WTSArray * ay = WTSArray::create();
+-		ay->append(accountInfo, false);
++		WTSArray * ay = WTSArray::create();
++		if (pTradingAccount != NULL)
++		{
++			WTSAccountInfo* accountInfo = WTSAccountInfo::create();
++			accountInfo->setPreBalance(pTradingAccount->PreBalance);
++			accountInfo->setCloseProfit(pTradingAccount->CloseProfit + pTradingAccount->CashIn);
++			accountInfo->setDynProfit(pTradingAccount->PositionProfit);
++			accountInfo->setMargin(pTradingAccount->CurrMargin);
++			accountInfo->setAvailable(pTradingAccount->Available);
++			accountInfo->setCommission(pTradingAccount->Commission);
++			accountInfo->setFrozenMargin(pTradingAccount->FrozenMargin);
++			accountInfo->setFrozenCommission(pTradingAccount->FrozenCommission);
++			accountInfo->setDeposit(pTradingAccount->Deposit);
++			accountInfo->setWithdraw(pTradingAccount->Withdraw);
++			accountInfo->setBalance(accountInfo->getPreBalance() + accountInfo->getCloseProfit() - accountInfo->getCommission() + accountInfo->getDeposit() - accountInfo->getWithdraw());
++			accountInfo->setCurrency("CNY");
++			ay->append(accountInfo, false);
++		}
++		else
++		{
++			// I03-NEW-135 (same contract as TraderCTP I03-NEW-134, card 14c): a terminal frame
++			// without payload ends the query with an explicit empty account list; no fund values
++			// are invented.
++			write_log(currentSink(), LL_WARN, "[TraderCTPOpt] Account query ended without payload, reporting an empty account list");
++		}
++
+ 		if (ITraderSpi* sink = currentSink())
+ 			sink->onRspAccount(ay);
+ 
+@@ -1669,7 +1624,9 @@
+ 	if (!isError && pSettlementInfo)
+ 	{
+ 		m_strSettleInfo += pSettlementInfo->Content;
+-		settleRow(this, (uint32_t)atoi(pSettlementInfo->TradingDay));
++		const uint32_t rowDate = (uint32_t)atoi(pSettlementInfo->TradingDay);
++		if (rowDate != 0)
++			m_uSettleDate = rowDate;
+ 	}
+ 
+ 	if (!bIsLast)
+@@ -1680,7 +1637,6 @@
+ 	// are reported once with the latest row date; an outstanding request without any
+ 	// content (no payload, or an empty-content payload) gets an explicit empty result;
+ 	// an error terminal frame with nothing cached still reports nothing.
+-	const SettleQueryDates dates = settleEnd(this);
+ 	bool report = !m_strSettleInfo.empty();
+ 	uint32_t uDate = 0;
+ 	if (pSettlementInfo != NULL)
+@@ -1689,18 +1645,20 @@
+ 	}
+ 	else
+ 	{
+-		uDate = (dates.rowDate != 0) ? dates.rowDate : dates.qryDate;
++		uDate = (m_uSettleDate != 0) ? m_uSettleDate : m_uSettleQryDate;
+ 		write_log(currentSink(), LL_WARN, "[TraderCTPOpt] Settlement query ended without payload, {} bytes cached", m_strSettleInfo.size());
+ 	}
+-	if (!report && !isError && dates.qryDate != 0)
++	if (!report && !isError && m_uSettleQryDate != 0)
+ 	{
+ 		report = true;
+ 		if (uDate == 0)
+-			uDate = dates.qryDate;
++			uDate = m_uSettleQryDate;
+ 	}
+ 
+ 	std::string content;
+ 	content.swap(m_strSettleInfo);
++	m_uSettleDate = 0;
++	m_uSettleQryDate = 0;
+ 
+ 	if (report)
+ 	{
+--- a/src/TraderCTPOpt/TraderCTPOpt.h
++++ b/src/TraderCTPOpt/TraderCTPOpt.h
+@@ -225,6 +225,10 @@
+ 	std::string		m_strUserName;
+ 
+ 	std::string		m_strSettleInfo;
++	// I03-NEW-133: date of the latest cached settlement row, and the date of the
++	// outstanding settlement request (0 when none). Both are reset when a query ends.
++	uint32_t		m_uSettleDate = 0;
++	uint32_t		m_uSettleQryDate = 0;
+ 
+ 	std::atomic<ITraderSpi*>	m_bscSink;
+ 	std::atomic<IOptTraderSpi*>	m_optSink;
+--- a/src/TestUnits/coverage/t_TraderCTPOpt/i03s5_traderctpopt_lifecycle_test.cpp
++++ b/src/TestUnits/coverage/t_TraderCTPOpt/i03s5_traderctpopt_lifecycle_test.cpp
+@@ -727,3 +727,66 @@
+     EXPECT_FALSE(trader_.inQuery());
+     EXPECT_EQ(0u, s.n);
+ }
++
++/* ------------------------------------------------------------------ *
++ * I03-NEW-135（与 TraderCTP 的 I03-NEW-134 同一合同，卡14c）：资金查询的非错误末帧
++ * 不带载荷时不得解引用；结束查询并推送非 NULL 的空资金数组，不伪造资金字段。
++ * 错误末帧仍不推送；非末帧的 NULL 载荷不推送。
++ * ------------------------------------------------------------------ */
++namespace i03s5opt {
++
++class AccountSink : public Sink
++{
++public:
++    uint32_t n = 0;
++    bool last_null = false;
++    uint32_t last_size = 0;
++    void onRspAccount(WTSArray* ay) override
++    {
++        ++n;
++        last_null = (ay == NULL);
++        last_size = (ay == NULL) ? 0 : ay->size();
++    }
++};
++
++}// namespace i03s5opt
++
++TEST_F(I03S5TraderCTPOptLifecycle, S3New135NullAccountLastFrameReportsEmptyAccountList)
++{
++    AccountSink s;
++    SettleScope scope{ trader_, sink_ };
++    trader_.registerSpi(&s);
++    trader_.setApi(&api_);
++    trader_.setReady(5, 6, 0);
++    CThostFtdcRspInfoField ok;
++    std::memset(&ok, 0, sizeof(ok));
++
++    trader_.OnRspQryTradingAccount(NULL, &ok, 1, true);
++    EXPECT_FALSE(trader_.inQuery());
++    ASSERT_EQ(1u, s.n);
++    EXPECT_FALSE(s.last_null);
++    EXPECT_EQ(0u, s.last_size);
++
++    trader_.OnRspQryTradingAccount(NULL, NULL, 2, true);
++    EXPECT_EQ(2u, s.n);
++    EXPECT_FALSE(s.last_null);
++    EXPECT_EQ(0u, s.last_size);
++
++    CThostFtdcRspInfoField err;
++    std::memset(&err, 0, sizeof(err));
++    err.ErrorID = 42;
++    trader_.OnRspQryTradingAccount(NULL, &err, 3, true);
++    EXPECT_EQ(2u, s.n);                                // 错误末帧不推送
++
++    trader_.OnRspQryTradingAccount(NULL, &ok, 4, false);
++    EXPECT_EQ(2u, s.n);                                // 非末帧不推送
++
++    // 对照：带载荷的末帧照常推送一条资金
++    CThostFtdcTradingAccountField acct;
++    std::memset(&acct, 0, sizeof(acct));
++    acct.PreBalance = 1000.0;
++    acct.Available = 800.0;
++    trader_.OnRspQryTradingAccount(&acct, &ok, 5, true);
++    EXPECT_EQ(3u, s.n);
++    EXPECT_EQ(1u, s.last_size);
++}

@@ -44,7 +44,7 @@ const char* kAg = "SHFE.ag2406";
 std::string ctxRoot()
 {
 	static std::string root = []() {
-		fs::path p = fs::temp_directory_path() / "r85_uftctx_root";
+		fs::path p = fs::temp_directory_path() / ("r85_uftctx_root_" + std::to_string(static_cast<long>(::getpid())));
 		std::error_code ec;
 		fs::remove_all(p, ec);
 		fs::create_directories(p, ec);

@@ -20,6 +20,11 @@
 
 extern const char* FACT_NAME;
 
+namespace
+{
+thread_local WtSimpleRiskMon* current_risk_monitor = nullptr;
+}
+
 /**
  * @brief 获取风控模块名称
  * @return const char* 返回风控模块名称"WtSimpleRiskMon"
@@ -83,10 +88,12 @@ void WtSimpleRiskMon::init(WtPortContext* ctx, WTSVariant* cfg)
  */
 void WtSimpleRiskMon::run()
 {
-	if (_thrd)
+	std::lock_guard<std::mutex> lock(_thread_mutex);
+	if (_thrd || _stopped.load())
 		return;
 
 	_thrd.reset(new std::thread([this](){
+		current_risk_monitor = this;
 		while (!_stopped)
 		{
 			if (_ctx && _ctx->isInTrading())
@@ -186,7 +193,13 @@ void WtSimpleRiskMon::run()
  */
 void WtSimpleRiskMon::stop()
 {
-	_stopped = true;
-	if (_thrd)
+	_stopped.store(true);
+	// A callback on the worker can request stop, but cannot join itself or
+	// acquire a mutex held by an external caller that is joining this worker.
+	if (current_risk_monitor == this)
+		return;
+
+	std::lock_guard<std::mutex> lock(_thread_mutex);
+	if (_thrd && _thrd->joinable())
 		_thrd->join();
 }

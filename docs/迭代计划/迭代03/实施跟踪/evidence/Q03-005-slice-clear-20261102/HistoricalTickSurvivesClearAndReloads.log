@@ -1,0 +1,25 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = Q03RdmClearLifetime.HistoricalTickSurvivesClearAndReloads
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q03RdmClearLifetime
+[ RUN      ] Q03RdmClearLifetime.HistoricalTickSurvivesClearAndReloads
+/tmp/wt-i03-q03-lifetime/src/TestUnits/coverage/q03_storage3/q03_rdm_clear_lifetime_test.cpp:24:57: runtime error: member access within misaligned address 0x616000000f8c for type 'const WTSTickStruct', which requires 8 byte alignment
+0x616000000f8c: note: pointer points here
+  18 00 03 00 53 53 45 00  00 00 00 00 00 00 00 00  00 00 00 00 36 30 30 30  30 31 00 00 00 00 00 00
+              ^ 
+    #0 0x000102503768 in q03::Q03RdmClearLifetime_HistoricalTickSurvivesClearAndReloads_Test::TestBody() q03_rdm_clear_lifetime_test.cpp:24
+    #1 0x0001032a2a1c in void testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2664
+    #2 0x0001031b9010 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2700
+    #3 0x0001031b8d08 in testing::Test::Run() gtest.cc:2739
+    #4 0x0001031bc320 in testing::TestInfo::Run() gtest.cc:2885
+    #5 0x0001031c08c0 in testing::TestSuite::Run() gtest.cc:3063
+    #6 0x0001031f2bec in testing::internal::UnitTestImpl::RunAllTests() gtest.cc:6054
+    #7 0x0001032cff54 in bool testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2664
+    #8 0x0001031f10c8 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2700
+    #9 0x0001031f0c10 in testing::UnitTest::Run() gtest.cc:5594
+    #10 0x0001032f7254 in RUN_ALL_TESTS() gtest.h:2334
+    #11 0x0001032f7178 in main gtest_main.cc:64
+    #12 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-q03-lifetime/src/TestUnits/coverage/q03_storage3/q03_rdm_clear_lifetime_test.cpp:24:57 

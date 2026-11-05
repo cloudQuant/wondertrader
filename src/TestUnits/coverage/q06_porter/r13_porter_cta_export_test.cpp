@@ -33,6 +33,8 @@ USING_NS_WTP;
 
 /* WtPorter.cpp:33 的进程单例；本族导出入口全部经它转发 */
 extern WtRtRunner& getRunner();
+// I03-NEW-064（迭代03）：C API 只在 runner 已配置的引擎上建上下文（.before 见 s5-runners 证据）。
+bool i03s5_fresh_configured_porter(const char* engine);
 
 namespace {
 
@@ -117,6 +119,7 @@ protected:
 		g_cta.clear();
 		register_cta_recorder();
 
+		ASSERT_TRUE(i03s5_fresh_configured_porter("cta"));
 		_h = create_cta_context("r13_cta_export", 3);
 		ASSERT_NE(_h, 0U) << "create_cta_context 返回 0 说明上下文没进 _cta_engine 的 _ctx_map";
 		ASSERT_TRUE(getRunner().getCtaContext(_h) != NULL);
@@ -271,15 +274,8 @@ TEST_F(R13PorterCtaExport, fund_data_reads_zeroed_fund_struct_for_every_flag)
 	EXPECT_DOUBLE_EQ(cta_get_fund_data(kBadHandle, 0), 0.0);
 }
 
-/*
- * 崩溃/副作用面，整条关闭。
- * 触发条件：cta_set_position / cta_enter_long / cta_exit_long / cta_enter_short /
- * cta_exit_short 会进 WtEngine::do_set_position（WtCore/WtEngine.cpp:956+），
- * 那里直接解引用未 init 的 _data_mgr/_hot_mgr（本夹具没有 config_porter，
- * 因为 config() 的 L489-494 被 BUG-R6-001/002 卡在空指针上）。
- * 留白行数与接缝需求登记在 manifests/R13_wtporter.md 第四节。
- */
-TEST_F(R13PorterCtaExport, DISABLED_position_mutation_entries_deref_uninitialized_engine)
+/* 迭代03 最终验收复核后启用（原禁用：未 config 引擎上的 cta 仓位变更入口崩溃）。 */
+TEST_F(R13PorterCtaExport, position_mutation_entries_deref_uninitialized_engine)
 {
 	cta_set_position(_h, kMonthCode, 2, "r13", 0, 0);
 	cta_enter_long(_h, kMonthCode, 2, "r13", 0, 0);
@@ -288,13 +284,8 @@ TEST_F(R13PorterCtaExport, DISABLED_position_mutation_entries_deref_uninitialize
 	cta_exit_short(_h, kMonthCode, 1, "r13", 0, 0);
 }
 
-/*
- * 崩溃面，整条关闭。
- * 触发条件：cta_get_bars/cta_get_ticks 在句柄有效时进 WtEngine::get_kline_slice
- * 与 get_tick_slice（WtEngine.cpp:592-644），依赖 _data_mgr；未 config 的引擎里
- * 它是 NULL，导出层虽然包了 catch(...)（WtPorter.cpp:505/551），SIGSEGV 抓不到。
- */
-TEST_F(R13PorterCtaExport, DISABLED_history_slice_entries_need_a_data_manager_seam)
+/* 迭代03 最终验收复核后启用（原禁用：未 config 引擎上的 cta 历史切片入口崩溃）。 */
+TEST_F(R13PorterCtaExport, history_slice_entries_need_a_data_manager_seam)
 {
 	WTSBarStruct bar;
 	memset(&bar, 0, sizeof(bar));

@@ -7,7 +7,9 @@
  * 
  * \brief 
  */
+#include <cmath>
 #include "TraderCTPMini.h"
+#include "../Share/ProviderRawReport.hpp"
 #include <boost/asio/post.hpp>
 
 #include "../Includes/WTSContractInfo.hpp"
@@ -22,6 +24,8 @@
 #include "../Share/Converter.hpp"
 
 #include <cstdio>
+#include <climits>
+#include <cstring>
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -79,16 +83,38 @@ uint32_t strToTime(const char* strTime)
 
 extern "C"
 {
+	// BUG-L01-014 / K42: optional host feature declaration (WT_TRADER_SPI_FEATURES_SYMBOL).
+	EXPORT_FLAG void setTraderSpiFeatures(ITraderApi* trader, uint64_t features)
+	{
+		TraderCTPMini* self = dynamic_cast<TraderCTPMini*>(trader);
+		if (self != NULL)
+			self->setSpiFeatures(features);
+	}
+
 	EXPORT_FLAG ITraderApi* createTrader()
 	{
 		TraderCTPMini *instance = new TraderCTPMini();
 		return instance;
 	}
 
+	/*
+	 *	卡9 9a/9b：仅当本实例从未创建 SDK 对象、无在途准入且当前线程不在本实例回调/调用/
+	 *	worker 内时才删除并置空；否则先发起停止，登记进程级隔离表并钉住本模块，保留指针
+	 *	（不置空）表示实例被隔离到进程退出。
+	 */
 	EXPORT_FLAG void deleteTrader(ITraderApi* &trader)
 	{
 		if (NULL != trader)
 		{
+			TraderCTPMini* mini = dynamic_cast<TraderCTPMini*>(trader);
+			if (mini != NULL && !mini->removableByFactory())
+			{
+				mini->release();
+				wt_vendor_td::quarantine(mini);
+				std::fprintf(stderr, "[TraderCTPMini] deleteTrader retained the instance (stop state: %s); quarantined until process exit\n",
+					wt_vendor_td::stopStateName(mini->lifecycleState()));
+				return;
+			}
 			delete trader;
 			trader = NULL;
 		}
@@ -99,6 +125,10 @@ TraderCTPMini::TraderCTPMini()
 	: m_bQuickStart(false)
 	, m_sink(NULL)
 	, m_uLastQryTime(0)
+	, m_lDate(0)
+	, m_frontID(0)
+	, m_sessionID(0)
+	, m_orderRef(0)
 	, m_wrapperState(WS_NOTLOGIN)
 	, m_pUserAPI(NULL)
 	, m_iRequestID(0)
@@ -118,6 +148,46 @@ TraderCTPMini::TraderCTPMini()
 
 TraderCTPMini::~TraderCTPMini()
 {
+	if (wt_vendor_td::Lifecycle::reentered(this))
+	{
+		std::fprintf(stderr, "[TraderCTPMini] Destroying an instance from its own callback or worker is unsupported\n");
+		std::abort();
+	}
+
+	// Close admission and wait, without a bound, for the worker and every admitted
+	// frame. SDK Release() is not called here (legacy contract: release() first).
+	m_lifecycle.close();
+	m_bStopped = true;
+	if (m_thrdWorker)
+	{
+		if (m_thrdWorker->joinable())
+			m_thrdWorker->join();
+		m_thrdWorker = NULL;
+	}
+	while (!m_lifecycle.quiet())
+		std::this_thread::sleep_for(std::chrono::microseconds(200));
+
+	if (m_ayOrders) { m_ayOrders->release(); m_ayOrders = NULL; }
+	if (m_ayTrades) { m_ayTrades->release(); m_ayTrades = NULL; }
+	if (m_ayPosDetail) { m_ayPosDetail->release(); m_ayPosDetail = NULL; }
+	if (m_ayFunds) { m_ayFunds->release(); m_ayFunds = NULL; }
+	if (m_mapPosition) { m_mapPosition->release(); m_mapPosition = NULL; }
+}
+
+bool TraderCTPMini::removableByFactory() const
+{
+	if (wt_vendor_td::Lifecycle::reentered(this))
+		return false;
+	// The CTPMini SDK header does not document that Release() joins SDK threads.
+	if (m_lifecycle.sdk_created.load(std::memory_order_acquire))
+		return false;
+	return !m_lifecycle.worker_running.load(std::memory_order_acquire) && m_lifecycle.quiet();
+}
+
+std::string TraderCTPMini::invalidTradingDayRaw() const
+{
+	std::lock_guard<std::mutex> lock(m_dateDiagMutex);
+	return m_invalidTradingDay;
 }
 
 bool TraderCTPMini::init(WTSVariant* params)
@@ -126,13 +196,13 @@ bool TraderCTPMini::init(WTSVariant* params)
 	// while its creator or API may still be in use, and reject repeated init.
 	if (m_hInstCTP != NULL)
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Initialization rejected because a CTP module is already initialized");
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Initialization rejected because a CTP module is already initialized");
 		return false;
 	}
 
 	if (params == NULL)
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Initialization rejected because config is null");
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Initialization rejected because config is null");
 		return false;
 	}
 
@@ -144,7 +214,7 @@ bool TraderCTPMini::init(WTSVariant* params)
 	{
 		const char* missingKey = frontParam == NULL ? "front" :
 			brokerParam == NULL ? "broker" : userParam == NULL ? "user" : "pass";
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Initialization rejected because required config key '{}' is missing", missingKey);
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Initialization rejected because required config key '{}' is missing", missingKey);
 		return false;
 	}
 
@@ -153,11 +223,11 @@ bool TraderCTPMini::init(WTSVariant* params)
 	const std::string pass = passParam->asCString();
 	const std::string appID = params->getCString("appid");
 	const std::string authCode = params->getCString("authcode");
-	if (!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcBrokerIDType)>(broker, "broker", m_sink) ||
-		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcUserIDType)>(user, "user", m_sink) ||
-		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcPasswordType)>(pass, "pass", m_sink) ||
-		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcClientAppIDType)>(appID, "appid", m_sink) ||
-		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcAuthCodeType)>(authCode, "authcode", m_sink))
+	if (!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcBrokerIDType)>(broker, "broker", currentSink()) ||
+		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcUserIDType)>(user, "user", currentSink()) ||
+		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcPasswordType)>(pass, "pass", currentSink()) ||
+		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcClientAppIDType)>(appID, "appid", currentSink()) ||
+		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcAuthCodeType)>(authCode, "authcode", currentSink()))
 	{
 		return false;
 	}
@@ -184,7 +254,7 @@ bool TraderCTPMini::init(WTSVariant* params)
 	const char* moduleDir = getBinDir();
 	if ((moduleDir == NULL || *moduleDir == '\0') && !fs::path(moduleFile).is_absolute())
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Cannot locate trader module directory");
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Cannot locate trader module directory");
 		return false;
 	}
 	m_strModule = (moduleDir == NULL ? std::string() : std::string(moduleDir)) + moduleFile;
@@ -192,7 +262,7 @@ bool TraderCTPMini::init(WTSVariant* params)
 	DllHandle candidateHandle = DLLHelper::load_library(m_strModule.c_str());
 	if (candidateHandle == NULL)
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Failed to load CTP trader module '{}'", m_strModule);
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Failed to load CTP trader module '{}'", m_strModule);
 		return false;
 	}
 #ifdef _WIN32
@@ -207,7 +277,7 @@ bool TraderCTPMini::init(WTSVariant* params)
 	CTPCreator candidateCreator = (CTPCreator)DLLHelper::get_symbol(candidateHandle, creatorName);
 	if (candidateCreator == NULL)
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] CTP trader module '{}' is missing its creator symbol", m_strModule);
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] CTP trader module '{}' is missing its creator symbol", m_strModule);
 		// No API was created from this candidate, so no callback can use it.
 		DLLHelper::free_library(candidateHandle);
 		return false;
@@ -225,11 +295,190 @@ bool TraderCTPMini::init(WTSVariant* params)
 
 void TraderCTPMini::release()
 {
-	if (m_pUserAPI)
+	shutdown("release");
+}
+
+void TraderCTPMini::connect()
+{
+	// T3-006: connect() is void; every failure is reported through the
+	// documented WTE_Connect event with a non-zero code plus an error log.
+	auto connectFailed = [this](const char* reason) {
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Connect ignored because {}", reason);
+		if (ITraderSpi* sink = currentSink())
+			sink->handleEvent(WTE_Connect, -1);
+	};
+	auto lease = m_lifecycle.call(this);
+	if (!lease)
 	{
-		//m_pUserAPI->RegisterSpi(NULL);
-		m_pUserAPI->Release();
-		m_pUserAPI = NULL;
+		connectFailed("the instance has been released or is stopping");
+		return;
+	}
+	if (m_pUserAPI != NULL || m_lifecycle.sdk_created.load(std::memory_order_acquire))
+	{
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Repeated connect rejected; the existing CTP trader API is kept");
+		return;
+	}
+	if (m_funcCreator == NULL)
+	{
+		connectFailed("the CTP trader creator is unavailable");
+		return;
+	}
+
+	std::stringstream ss;
+	ss << m_strFlowDir << "flows/" << m_strBroker << "/" << m_strUser << "/";
+	std::error_code ec;
+	fs::create_directories(ss.str().c_str(), ec);
+	if (ec)
+	{
+		connectFailed("the flow directory cannot be created");
+		return;
+	}
+	CThostFtdcTraderApi* api = m_funcCreator(ss.str().c_str());
+	if (api == NULL)
+	{
+		connectFailed("the CTP trader creator returned a null API");
+		return;
+	}
+
+	// From here on the SDK may call this SPI on its own threads (card 9a).
+	m_lifecycle.sdk_created.store(true, std::memory_order_release);
+	m_pUserAPI = api;
+	api->RegisterSpi(this);
+	if (m_bQuickStart)
+	{
+		api->SubscribePublicTopic(THOST_TERT_QUICK);			// 注册公有流
+		api->SubscribePrivateTopic(THOST_TERT_QUICK);		// 注册私有流
+	}
+	else
+	{
+		api->SubscribePublicTopic(THOST_TERT_RESUME);		// 注册公有流
+		api->SubscribePrivateTopic(THOST_TERT_RESUME);		// 注册私有流
+	}
+
+	api->RegisterFront((char*)m_strFront.c_str());
+
+	if (m_thrdWorker == NULL)
+	{
+		m_lifecycle.worker_running.store(true, std::memory_order_release);
+		m_thrdWorker.reset(new StdThread([this]() {
+			wt_vendor_td::WorkerMark mark(this);
+			while (!m_bStopped)
+			{
+				if (m_bInQuery)
+				{
+					std::this_thread::sleep_for(std::chrono::milliseconds(1));
+					continue;
+				}
+
+				CommonExecuter handler;
+				bool waitForInterval = false;
+				{
+					StdUniqueLock lock(m_mtxQuery);
+					if (!m_queQuery.empty())
+					{
+						uint64_t curTime = TimeUtils::getLocalTimeNow();
+						if (curTime - m_lastQryTime < 1000)
+						{
+							waitForInterval = true;
+						}
+						else
+						{
+							handler = m_queQuery.front();
+							m_queQuery.pop();
+							m_bInQuery = true;
+						}
+					}
+				}
+
+				if (!handler)
+				{
+					std::this_thread::sleep_for(std::chrono::milliseconds(waitForInterval ? 50 : 1));
+					continue;
+				}
+
+				{
+					auto requestLease = m_lifecycle.call(this);
+					if (!requestLease)
+					{
+						m_bInQuery = false;
+						break;
+					}
+					handler();
+				}
+
+				m_lastQryTime = TimeUtils::getLocalTimeNow();
+			}
+			m_lifecycle.worker_running.store(false, std::memory_order_release);
+		}));
+	}
+
+	api->Init();
+}
+
+void TraderCTPMini::disconnect()
+{
+	shutdown("disconnect");
+}
+
+void TraderCTPMini::shutdown(const char* reason)
+{
+	using wt_vendor_td::StopState;
+	m_lifecycle.close();
+	m_bStopped = true;
+
+	if (wt_vendor_td::Lifecycle::reentered(this))
+	{
+		if (m_lifecycle.stopState() != StopState::Released)
+			m_lifecycle.setState(StopState::StopDeferred);
+		write_log(currentSink(), LL_WARN, "[TraderCTPMini] {} requested inside a provider callback/worker; admission closed, SDK release deferred to the next lifecycle call from a safe thread", reason);
+		return;
+	}
+
+	std::lock_guard<std::mutex> guard(m_lifecycle.stop_mutex);
+	if (m_lifecycle.stopState() == StopState::Released)
+		return;
+
+	const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(m_stopBoundMs);
+	auto reportUncertain = [&](const char* what) {
+		m_lifecycle.setState(StopState::DrainUncertain);
+		const std::string message = fmtutil::format("[TraderCTPMini] {} could not drain within {} ms ({}); CTP trader API not released, instance must stay alive", reason, m_stopBoundMs, what);
+		if (ITraderSpi* sink = currentSink())
+			sink->handleTraderLog(LL_ERROR, message.c_str());
+		else
+			std::fprintf(stderr, "%s\n", message.c_str());
+	};
+
+	if (m_thrdWorker)
+	{
+		if (m_lifecycle.worker_running.load(std::memory_order_acquire) &&
+			!wt_vendor_td::Lifecycle::waitUntil(deadline, [this]() { return !m_lifecycle.worker_running.load(std::memory_order_acquire); }))
+		{
+			reportUncertain("query worker still inside an SDK request");
+			return;
+		}
+		if (m_thrdWorker->joinable())
+			m_thrdWorker->join();
+		m_thrdWorker = NULL;
+	}
+
+	if (!wt_vendor_td::Lifecycle::waitUntil(deadline, [this]() { return m_lifecycle.quiet(); }))
+	{
+		reportUncertain("host call or SDK callback still active");
+		return;
+	}
+
+	{
+		StdUniqueLock lock(m_mtxQuery);
+		QueryQue().swap(m_queQuery);
+	}
+	m_bInQuery = false;
+
+	CThostFtdcTraderApi* api = m_pUserAPI;
+	m_pUserAPI = NULL;
+	if (api)
+	{
+		//api->RegisterSpi(NULL);
+		api->Release();
 	}
 
 	if (m_ayOrders)
@@ -246,86 +495,130 @@ void TraderCTPMini::release()
 
 	if (m_ayFunds)
 		m_ayFunds->clear();
+
+	m_lifecycle.setState(StopState::Released);
 }
 
-void TraderCTPMini::connect()
+namespace
 {
-	if (m_funcCreator == NULL)
+	// Strict "front#session#ref" parser: decimal digits only, each part <= INT_MAX, ref != 0.
+	bool parseStrictEntrustID(const char* id, size_t capacity, uint32_t& front, uint32_t& session, uint32_t& ref)
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Connect ignored because the CTP trader creator is unavailable");
-		return;
-	}
-
-	std::stringstream ss;
-	ss << m_strFlowDir << "flows/" << m_strBroker << "/" << m_strUser << "/";
-	fs::create_directories(ss.str().c_str());
-	m_pUserAPI = m_funcCreator(ss.str().c_str());
-	if (m_pUserAPI == NULL)
-	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Connect ignored because the CTP trader creator returned a null API");
-		return;
-	}
-
-	m_pUserAPI->RegisterSpi(this);
-	if (m_bQuickStart)
-	{
-		m_pUserAPI->SubscribePublicTopic(THOST_TERT_QUICK);			// 注册公有流
-		m_pUserAPI->SubscribePrivateTopic(THOST_TERT_QUICK);		// 注册私有流
-	}
-	else
-	{
-		m_pUserAPI->SubscribePublicTopic(THOST_TERT_RESUME);		// 注册公有流
-		m_pUserAPI->SubscribePrivateTopic(THOST_TERT_RESUME);		// 注册私有流
-	}
-
-	m_pUserAPI->RegisterFront((char*)m_strFront.c_str());
-
-	m_pUserAPI->Init();
-
-	if (m_thrdWorker == NULL)
-	{
-		m_thrdWorker.reset(new StdThread([this]() {
-			while (!m_bStopped)
+		if (id == NULL)
+			return false;
+		const char* end = static_cast<const char*>(std::memchr(id, '\0', capacity));
+		if (end == NULL)
+			return false;
+		uint32_t parts[3] = { 0, 0, 0 };
+		int part = 0;
+		bool digit = false;
+		for (const char* p = id; p != end; ++p)
+		{
+			if (*p == '#')
 			{
-				if (m_queQuery.empty() || m_bInQuery)
-				{
-					std::this_thread::sleep_for(std::chrono::milliseconds(1));
-					continue;
-				}
-
-				uint64_t curTime = TimeUtils::getLocalTimeNow();
-				if (curTime - m_lastQryTime < 1000)
-				{
-					std::this_thread::sleep_for(std::chrono::milliseconds(50));
-					continue;
-				}
-
-
-				m_bInQuery = true;
-				CommonExecuter& handler = m_queQuery.front();
-				handler();
-
-				{
-					StdUniqueLock lock(m_mtxQuery);
-					m_queQuery.pop();
-				}
-
-				m_lastQryTime = TimeUtils::getLocalTimeNow();
+				if (!digit || part == 2)
+					return false;
+				++part;
+				digit = false;
+				continue;
 			}
-		}));
+			if (*p < '0' || *p > '9')
+				return false;
+			const uint32_t d = static_cast<uint32_t>(*p - '0');
+			if (parts[part] > (static_cast<uint32_t>(INT_MAX) - d) / 10)
+				return false;
+			parts[part] = parts[part] * 10 + d;
+			digit = true;
+		}
+		if (part != 2 || !digit || parts[2] == 0)
+			return false;
+		front = parts[0];
+		session = parts[1];
+		ref = parts[2];
+		return true;
+	}
+
+	// T3-015: CTPMini GetTradingDay() must be exactly YYYYMMDD and a real calendar
+	// date. Anything else (NULL, empty, non-digit, short/long, 0, 20240230, ...)
+	// is rejected instead of being turned into a sentinel by atoi.
+	bool parseTradingDay(const char* text, uint32_t& date)
+	{
+		if (text == NULL)
+			return false;
+		const char* end = static_cast<const char*>(std::memchr(text, '\0', sizeof(TThostFtdcDateType)));
+		if (end == NULL || end - text != 8)
+			return false;
+		uint32_t value = 0;
+		for (const char* p = text; p != end; ++p)
+		{
+			if (*p < '0' || *p > '9')
+				return false;
+			value = value * 10 + static_cast<uint32_t>(*p - '0');
+		}
+		const uint32_t year = value / 10000, month = (value / 100) % 100, day = value % 100;
+		if (year < 1900 || month < 1 || month > 12 || day < 1)
+			return false;
+		static const uint32_t days[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+		const bool leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+		const uint32_t limit = (month == 2 && leap) ? 29 : days[month - 1];
+		if (day > limit)
+			return false;
+		date = value;
+		return true;
 	}
 }
 
-void TraderCTPMini::disconnect()
+bool TraderCTPMini::assignOrderIdentity(WTSEntrust* entrust, uint32_t& orderRef, std::string& tag)
 {
-	m_queQuery.push([this]() {
-		release();
-	});
-
-	if (m_thrdWorker)
+	try
 	{
-		m_thrdWorker->join();
-		m_thrdWorker = NULL;
+		std::lock_guard<std::mutex> lock(m_identityMutex);
+		const uint32_t front = static_cast<uint32_t>(m_frontID);
+		const uint32_t session = static_cast<uint32_t>(m_sessionID);
+		const uint64_t key = (static_cast<uint64_t>(front) << 32) | session;
+		if (key != m_identitySession)
+		{
+			m_submittedRefs.clear();
+			m_identitySession = key;
+		}
+
+		uint32_t ref = 0;
+		if (entrust->getEntrustID()[0] == '\0')
+		{
+			// Missing identity: one atomic allocator shared with makeEntrustID.
+			ref = m_orderRef.fetch_add(1) + 1;
+			if (ref == 0 || ref > static_cast<uint32_t>(INT_MAX))
+				return false;
+			char buffer[64] = { 0 };
+			generateEntrustID(buffer, front, session, ref);
+			entrust->setEntrustID(buffer);
+		}
+		else
+		{
+			uint32_t idFront = 0, idSession = 0;
+			if (!parseStrictEntrustID(entrust->getEntrustID(), sizeof(entrust->m_strEntrustID), idFront, idSession, ref) ||
+				idFront != front || idSession != session)
+				return false;
+			// Keep the legal preallocated reference; later automatic ones stay above it.
+			uint32_t current = m_orderRef.load();
+			while (current < ref && !m_orderRef.compare_exchange_weak(current, ref)) {}
+		}
+
+		if (m_submittedRefs.find(ref) != m_submittedRefs.end())
+			return false;
+		tag = entrust->getUserTag();
+		if (tag.empty())
+			tag = std::string("ctpmini-auto:") + entrust->getEntrustID();
+		if (tag.size() >= sizeof(entrust->m_strUserTag))
+			return false;
+		m_submittedRefs.insert(ref);
+		entrust->setUserTag(tag.c_str());
+		orderRef = ref;
+		return true;
+	}
+	catch (...)
+	{
+		return false;
 	}
 }
 
@@ -351,11 +644,9 @@ bool TraderCTPMini::makeEntrustID(char* buffer, int length)
 
 void TraderCTPMini::registerSpi(ITraderSpi *listener)
 {
-	m_sink = listener;
-	if (m_sink)
-	{
+	if (listener)
 		m_bdMgr = listener->getBaseDataMgr();
-	}
+	m_sink.store(listener, std::memory_order_release);
 }
 
 uint32_t TraderCTPMini::genRequestID()
@@ -365,18 +656,21 @@ uint32_t TraderCTPMini::genRequestID()
 
 int TraderCTPMini::login(const char* user, const char* pass, const char* productInfo)
 {
+	auto lease = m_lifecycle.call(this);
+	if (!lease)
+		return -1;
 	if (user == NULL || pass == NULL || productInfo == NULL)
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Login rejected because a login field is null");
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Login rejected because a login field is null");
 		return -1;
 	}
 
 	const std::string loginUser(user);
 	const std::string loginPass(pass);
 	const std::string loginProductInfo(productInfo);
-	if (!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcUserIDType)>(loginUser, "user", m_sink) ||
-		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcPasswordType)>(loginPass, "pass", m_sink) ||
-		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcProductInfoType)>(loginProductInfo, "productInfo", m_sink))
+	if (!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcUserIDType)>(loginUser, "user", currentSink()) ||
+		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcPasswordType)>(loginPass, "pass", currentSink()) ||
+		!isCtpMiniLoginFieldLengthValid<sizeof(TThostFtdcProductInfoType)>(loginProductInfo, "productInfo", currentSink()))
 	{
 		return -1;
 	}
@@ -399,6 +693,9 @@ int TraderCTPMini::login(const char* user, const char* pass, const char* product
 
 int TraderCTPMini::doLogin()
 {
+	auto lease = m_lifecycle.call(this);
+	if (!lease || m_pUserAPI == NULL)
+		return -1;
 	CThostFtdcReqUserLoginField req;
 	memset(&req, 0, sizeof(req));
 	strcpy(req.BrokerID, m_strBroker.c_str());
@@ -408,7 +705,7 @@ int TraderCTPMini::doLogin()
 	int iResult = m_pUserAPI->ReqUserLogin(&req, genRequestID());
 	if (iResult != 0)
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Sending login request failed: {}", iResult);
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Sending login request failed: {}", iResult);
 	}
 
 	return 0;
@@ -416,7 +713,8 @@ int TraderCTPMini::doLogin()
 
 int TraderCTPMini::logout()
 {
-	if (m_pUserAPI == NULL)
+	auto lease = m_lifecycle.call(this);
+	if (!lease || m_pUserAPI == NULL)
 	{
 		return -1;
 	}
@@ -428,15 +726,25 @@ int TraderCTPMini::logout()
 	int iResult = m_pUserAPI->ReqUserLogout(&req, genRequestID());
 	if (iResult != 0)
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Sending logout request failed: {}", iResult);
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Sending logout request failed: {}", iResult);
 	}
 
 	return 0;
 }
 
+// Card 8 (BUG-P02-005, slice1 final gaps): this provider trades whole lots. A
+// quantity that is not finite, not positive, larger than the SDK int field or
+// fractional is rejected before any order identity is consumed: the strategy
+// rounds, the adapter never truncates through the integer SDK field.
+static bool isWholeLotVolume(double volume)
+{
+	return std::isfinite(volume) && volume >= 1 && volume <= (double)INT_MAX && std::floor(volume) == volume;
+}
+
 int TraderCTPMini::orderInsert(WTSEntrust* entrust)
 {
-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+	auto lease = m_lifecycle.call(this);
+	if (!lease || entrust == NULL || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 	{
 		return -1;
 	}
@@ -452,27 +760,31 @@ int TraderCTPMini::orderInsert(WTSEntrust* entrust)
 
 	strcpy(req.ExchangeID, entrust->getExchg());
 
-	if (strlen(entrust->getUserTag()) == 0)
-	{
-		///报单引用
-		fmt::format_to(req.OrderRef, "{}", m_orderRef.fetch_add(0));
-	}
-	else
-	{
-		uint32_t fid, sid, orderref;
-		extractEntrustID(entrust->getEntrustID(), fid, sid, orderref);
-		///报单引用
-		fmt::format_to(req.OrderRef, "{}", orderref);
-	}
-
-	if (strlen(entrust->getUserTag()) > 0)
-	{
-		m_eidCache.put(entrust->getEntrustID(), entrust->getUserTag(), 0);
-	}
-
 	WTSContractInfo* ct = entrust->getContractInfo();
 	if (ct == NULL)
 		return -1;
+
+	if (!isWholeLotVolume(entrust->getVolume()))
+	{
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Order rejected: quantity {} is not a positive whole number of lots", entrust != NULL ? entrust->getVolume() : 0.0);
+		return -1;
+	}
+
+	// T2-CTP-08 / 卡6d：缺委托 ID 时原子分配唯一 OrderRef，已有合法预分配 ID 原样保留，
+	// 同一引用不重复提交；空 tag 统一补自动 tag 并登记回报关联。
+	uint32_t orderref = 0;
+	std::string usertag;
+	if (!assignOrderIdentity(entrust, orderref, usertag))
+	{
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Order rejected: entrust id {} is malformed, belongs to another session or was already submitted", entrust->getEntrustID());
+		return -1;
+	}
+	///报单引用
+	fmt::format_to(req.OrderRef, "{}", orderref);
+	{
+		std::lock_guard<std::mutex> cacheLock(m_cacheMutex);
+		m_eidCache.put(entrust->getEntrustID(), usertag.c_str(), 0);
+	}
 
 	WTSCommodityInfo* commInfo = ct->getCommInfo();
 
@@ -525,7 +837,7 @@ int TraderCTPMini::orderInsert(WTSEntrust* entrust)
 	int iResult = m_pUserAPI->ReqOrderInsert(&req, genRequestID());
 	if (iResult != 0)
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Order inserting failed: {}", iResult);
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Order inserting failed: {}", iResult);
 	}
 
 	return 0;
@@ -533,7 +845,8 @@ int TraderCTPMini::orderInsert(WTSEntrust* entrust)
 
 int TraderCTPMini::orderAction(WTSEntrustAction* action)
 {
-	if (m_wrapperState != WS_ALLREADY)
+	auto lease = m_lifecycle.call(this);
+	if (!lease || action == NULL || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 		return -1;
 
 	uint32_t frontid, sessionid, orderref;
@@ -564,7 +877,7 @@ int TraderCTPMini::orderAction(WTSEntrustAction* action)
 	int iResult = m_pUserAPI->ReqOrderAction(&req, genRequestID());
 	if (iResult != 0)
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini] Sending cancel request failed: {}", iResult);
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Sending cancel request failed: {}", iResult);
 	}
 
 	return 0;
@@ -572,7 +885,8 @@ int TraderCTPMini::orderAction(WTSEntrustAction* action)
 
 int TraderCTPMini::queryAccount()
 {
-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+	auto lease = m_lifecycle.call(this);
+	if (!lease || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 	{
 		return -1;
 	}
@@ -584,7 +898,13 @@ int TraderCTPMini::queryAccount()
 			memset(&req, 0, sizeof(req));
 			strcpy(req.BrokerID, m_strBroker.c_str());
 			strcpy(req.InvestorID, m_strUser.c_str());
-			m_pUserAPI->ReqQryTradingAccount(&req, genRequestID());
+			const int iResult = m_pUserAPI->ReqQryTradingAccount(&req, genRequestID());
+			if (iResult != 0)
+			{
+				// No final frame follows a synchronous rejection: release the query gate.
+				m_bInQuery = false;
+				write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Sending account query failed: {}", iResult);
+			}
 		});
 	}
 
@@ -595,7 +915,8 @@ int TraderCTPMini::queryAccount()
 
 int TraderCTPMini::queryPositions()
 {
-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+	auto lease = m_lifecycle.call(this);
+	if (!lease || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 	{
 		return -1;
 	}
@@ -607,7 +928,13 @@ int TraderCTPMini::queryPositions()
 			memset(&req, 0, sizeof(req));
 			strcpy(req.BrokerID, m_strBroker.c_str());
 			strcpy(req.InvestorID, m_strUser.c_str());
-			m_pUserAPI->ReqQryInvestorPosition(&req, genRequestID());
+			const int iResult = m_pUserAPI->ReqQryInvestorPosition(&req, genRequestID());
+			if (iResult != 0)
+			{
+				// No final frame follows a synchronous rejection: release the query gate.
+				m_bInQuery = false;
+				write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Sending position query failed: {}", iResult);
+			}
 		});
 	}
 
@@ -618,7 +945,8 @@ int TraderCTPMini::queryPositions()
 
 int TraderCTPMini::queryOrders()
 {
-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+	auto lease = m_lifecycle.call(this);
+	if (!lease || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 	{
 		return -1;
 	}
@@ -630,7 +958,13 @@ int TraderCTPMini::queryOrders()
 			strcpy(req.BrokerID, m_strBroker.c_str());
 			strcpy(req.InvestorID, m_strUser.c_str());
 
-			m_pUserAPI->ReqQryOrder(&req, genRequestID());
+			const int iResult = m_pUserAPI->ReqQryOrder(&req, genRequestID());
+			if (iResult != 0)
+			{
+				// No final frame follows a synchronous rejection: release the query gate.
+				m_bInQuery = false;
+				write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Sending order query failed: {}", iResult);
+			}
 		});
 	}
 
@@ -641,7 +975,8 @@ int TraderCTPMini::queryOrders()
 
 int TraderCTPMini::queryTrades()
 {
-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+	auto lease = m_lifecycle.call(this);
+	if (!lease || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 	{
 		return -1;
 	}
@@ -654,7 +989,13 @@ int TraderCTPMini::queryTrades()
 			strcpy(req.BrokerID, m_strBroker.c_str());
 			strcpy(req.InvestorID, m_strUser.c_str());
 
-			m_pUserAPI->ReqQryTrade(&req, genRequestID());
+			const int iResult = m_pUserAPI->ReqQryTrade(&req, genRequestID());
+			if (iResult != 0)
+			{
+				// No final frame follows a synchronous rejection: release the query gate.
+				m_bInQuery = false;
+				write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Sending trade query failed: {}", iResult);
+			}
 		});
 	}
 
@@ -665,42 +1006,57 @@ int TraderCTPMini::queryTrades()
 
 void TraderCTPMini::OnFrontConnected()
 {
-	if (m_sink)
-		m_sink->handleEvent(WTE_Connect, 0);
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
+	if (ITraderSpi* sink = currentSink())
+		sink->handleEvent(WTE_Connect, 0);
 }
 
 void TraderCTPMini::OnFrontDisconnected(int nReason)
 {
-	//write_log(m_sink, LL_ERROR, "[TraderCTPMini]CTP交易服务器已断开");
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
+	//write_log(currentSink(), LL_ERROR, "[TraderCTPMini]CTP交易服务器已断开");
 	m_wrapperState = WS_NOTLOGIN;
-	if (m_sink)
-		m_sink->handleEvent(WTE_Close, nReason);
+	if (ITraderSpi* sink = currentSink())
+		sink->handleEvent(WTE_Close, nReason);
 }
 
 void TraderCTPMini::OnHeartBeatWarning(int /*nTimeLapse*/)
 {
-	write_log(m_sink, LL_DEBUG, "[TraderCTPMini][{}-{}] Heartbeating...", m_strBroker.c_str(), m_strUser.c_str());
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
+	write_log(currentSink(), LL_DEBUG, "[TraderCTPMini][{}-{}] Heartbeating...", m_strBroker.c_str(), m_strUser.c_str());
 }
 
 void TraderCTPMini::OnRspAuthenticate(CThostFtdcRspAuthenticateField */*pRspAuthenticateField*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	if (!IsErrorRspInfo(pRspInfo))
 	{
 		doLogin();
 	}
 	else
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini][{}-{}] Authentication failed: {}", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg);
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini][{}-{}] Authentication failed: {}", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg);
 		m_wrapperState = WS_LOGINFAILED;
 
-		if (m_sink)
-			m_sink->onLoginResult(false, pRspInfo->ErrorMsg, 0);
+		if (ITraderSpi* sink = currentSink())
+			sink->onLoginResult(false, pRspInfo->ErrorMsg, 0);
 	}
 
 }
 
 void TraderCTPMini::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	if (!IsErrorRspInfo(pRspInfo))
 	{
 		m_wrapperState = WS_LOGINED;
@@ -710,9 +1066,37 @@ void TraderCTPMini::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, C
 		m_sessionID = pRspUserLogin->SessionID;
 		m_orderRef = atoi(pRspUserLogin->MaxOrderRef);
 		///获取当前交易日
-		m_lDate = atoi(m_pUserAPI->GetTradingDay());
+		// T3-015：交易日必须是完整合法的 YYYYMMDD；无效时账户不就绪（fail-closed），
+		// m_lDate 置 0，保留原始串供诊断，后续回报不再以宿主当前日期合成日期。
+		const char* rawTradingDay = m_pUserAPI == NULL ? NULL : m_pUserAPI->GetTradingDay();
+		uint32_t tradingDate = 0;
+		if (!parseTradingDay(rawTradingDay, tradingDate))
+		{
+			std::string raw = "<null>";
+			if (rawTradingDay != NULL)
+			{
+				const char* end = static_cast<const char*>(std::memchr(rawTradingDay, '\0', sizeof(TThostFtdcDateType)));
+				raw.assign(rawTradingDay, end == NULL ? sizeof(TThostFtdcDateType) : static_cast<size_t>(end - rawTradingDay));
+			}
+			{
+				std::lock_guard<std::mutex> lock(m_dateDiagMutex);
+				m_invalidTradingDay = raw.empty() ? std::string("<empty>") : raw;
+			}
+			m_lDate = 0;
+			m_wrapperState = WS_LOGINFAILED;
+			const std::string message = fmtutil::format("CTPMini login rejected: invalid trading day from GetTradingDay [{}]", raw);
+			write_log(currentSink(), LL_ERROR, "[TraderCTPMini][{}-{}] {}", m_strBroker.c_str(), m_strUser.c_str(), message.c_str());
+			if (ITraderSpi* sink = currentSink())
+				sink->onLoginResult(false, message.c_str(), 0);
+			return;
+		}
+		{
+			std::lock_guard<std::mutex> lock(m_dateDiagMutex);
+			m_invalidTradingDay.clear();
+		}
+		m_lDate = tradingDate;
 
-		write_log(m_sink, LL_INFO, "[TraderCTPMini][{}-{}] Login succeed, AppID: {}, Sessionid: {}, login time: {}...",
+		write_log(currentSink(), LL_INFO, "[TraderCTPMini][{}-{}] Login succeed, AppID: {}, Sessionid: {}, login time: {}...",
 			m_strBroker.c_str(), m_strUser.c_str(), m_strAppID.c_str(), m_sessionID, pRspUserLogin->LoginTime);
 
 		{
@@ -723,8 +1107,9 @@ void TraderCTPMini::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, C
 			if (!StdFile::exists(path.c_str()))
 				fs::create_directories(path.c_str());
 			ss << m_strUser << "_eid.sc";
+			std::lock_guard<std::mutex> cacheLock(m_cacheMutex);
 			m_eidCache.init(ss.str().c_str(), m_lDate, [this](const char* message) {
-				write_log(m_sink, LL_WARN, message);
+				write_log(currentSink(), LL_WARN, message);
 			});
 		}
 
@@ -736,44 +1121,51 @@ void TraderCTPMini::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin, C
 			if (!StdFile::exists(path.c_str()))
 				fs::create_directories(path.c_str());
 			ss << m_strUser << "_oid.sc";
+			std::lock_guard<std::mutex> cacheLock(m_cacheMutex);
 			m_oidCache.init(ss.str().c_str(), m_lDate, [this](const char* message) {
-				write_log(m_sink, LL_WARN, message);
+				write_log(currentSink(), LL_WARN, message);
 			});
 		}
 
-		write_log(m_sink, LL_INFO, "[TraderCTPMini][{}-{}] Login succeed, trading date: {}...", m_strBroker.c_str(), m_strUser.c_str(), m_lDate);
+		write_log(currentSink(), LL_INFO, "[TraderCTPMini][{}-{}] Login succeed, trading date: {}...", m_strBroker.c_str(), m_strUser.c_str(), m_lDate);
 
-		write_log(m_sink, LL_INFO, "[TraderCTPMini][{}-{}] Trading channel initialized...", m_strBroker.c_str(), m_strUser.c_str());
+		write_log(currentSink(), LL_INFO, "[TraderCTPMini][{}-{}] Trading channel initialized...", m_strBroker.c_str(), m_strUser.c_str());
 		m_wrapperState = WS_ALLREADY;
-		if (m_sink)
-			m_sink->onLoginResult(true, "", m_lDate);
+		if (ITraderSpi* sink = currentSink())
+			sink->onLoginResult(true, "", m_lDate);
 	}
 	else
 	{
-		write_log(m_sink, LL_ERROR, "[TraderCTPMini][{}-{}] Login failed: {}", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg);
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini][{}-{}] Login failed: {}", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg);
 		m_wrapperState = WS_LOGINFAILED;
 
-		if (m_sink)
-			m_sink->onLoginResult(false, pRspInfo->ErrorMsg, 0);
+		if (ITraderSpi* sink = currentSink())
+			sink->onLoginResult(false, pRspInfo->ErrorMsg, 0);
 	}
 }
 
 void TraderCTPMini::OnRspUserLogout(CThostFtdcUserLogoutField */*pUserLogout*/, CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	m_wrapperState = WS_NOTLOGIN;
-	if (m_sink)
-		m_sink->handleEvent(WTE_Logout, 0);
+	if (ITraderSpi* sink = currentSink())
+		sink->handleEvent(WTE_Logout, 0);
 }
 
 void TraderCTPMini::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	WTSEntrust* entrust = makeEntrust(pInputOrder);
 	if (entrust)
 	{
 		WTSError *err = makeError(pRspInfo);
 		//g_orderMgr.onRspEntrust(entrust, err);
-		if (m_sink)
-			m_sink->onRspEntrust(entrust, err);
+		if (ITraderSpi* sink = currentSink())
+			sink->onRspEntrust(entrust, err);
 		entrust->release();
 		err->release();
 	}
@@ -781,17 +1173,23 @@ void TraderCTPMini::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CTh
 
 void TraderCTPMini::OnRspOrderAction(CThostFtdcInputOrderActionField */*pInputOrderAction*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	if (!IsErrorRspInfo(pRspInfo))
 		return;
 
 	WTSError* error = WTSError::create(WEC_ORDERCANCEL, pRspInfo->ErrorMsg);
-	if (m_sink)
-		m_sink->onTraderError(error);
+	if (ITraderSpi* sink = currentSink())
+		sink->onTraderError(error);
 	error->release();
 }
 
 void TraderCTPMini::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradingAccount, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	if (bIsLast)
 	{
 		m_bInQuery = false;
@@ -822,8 +1220,8 @@ void TraderCTPMini::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradi
 
 	if(bIsLast)
 	{
-		if (m_sink)
-			m_sink->onRspAccount(m_ayFunds);
+		if (ITraderSpi* sink = currentSink())
+			sink->onRspAccount(m_ayFunds);
 
 		m_ayFunds->clear();
 	}
@@ -831,6 +1229,9 @@ void TraderCTPMini::OnRspQryTradingAccount(CThostFtdcTradingAccountField *pTradi
 
 void TraderCTPMini::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInvestorPosition, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	if (bIsLast)
 	{
 		m_bInQuery = false;
@@ -949,6 +1350,12 @@ void TraderCTPMini::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pI
 				pos->setAvailPrePos(0);
 			}
 		}
+		else
+		{
+			// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the struct); the host pauses the account.
+			wt_provider_raw::report(currentSink(), m_spiFeatures.load(), "TraderCTPMini", "position", "position query row could not be converted",
+				wt_provider_raw::hexOf("CThostFtdcInvestorPositionField", pInvestorPosition));
+		}
 	}
 
 	if (bIsLast)
@@ -964,8 +1371,8 @@ void TraderCTPMini::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pI
 			}
 		}
 
-		if (m_sink)
-			m_sink->onRspPosition(ayPos);
+		if (ITraderSpi* sink = currentSink())
+			sink->onRspPosition(ayPos);
 
 		if (m_mapPosition)
 		{
@@ -979,6 +1386,9 @@ void TraderCTPMini::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pI
 
 void TraderCTPMini::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	if (bIsLast)
 	{
 		m_bInQuery = false;
@@ -995,12 +1405,18 @@ void TraderCTPMini::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInf
 		{
 			m_ayTrades->append(trade, false);
 		}
+		else
+		{
+			// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the struct); the host pauses the account.
+			wt_provider_raw::report(currentSink(), m_spiFeatures.load(), "TraderCTPMini", "trade", "trade query row could not be converted",
+				wt_provider_raw::hexOf("CThostFtdcTradeField", pTrade));
+		}
 	}
 
 	if (bIsLast)
 	{
-		if (m_sink)
-			m_sink->onRspTrades(m_ayTrades);
+		if (ITraderSpi* sink = currentSink())
+			sink->onRspTrades(m_ayTrades);
 
 		if (NULL != m_ayTrades)
 			m_ayTrades->clear();
@@ -1009,13 +1425,18 @@ void TraderCTPMini::OnRspQryTrade(CThostFtdcTradeField *pTrade, CThostFtdcRspInf
 
 void TraderCTPMini::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	if (bIsLast)
 	{
 		m_bInQuery = false;
 		//triggerQuery();
 	}
 
-	if (!IsErrorRspInfo(pRspInfo) && pOrder)
+	if (IsErrorRspInfo(pRspInfo))
+		m_qryOrdersFailed = true;
+	else if (pOrder)
 	{
 		if (NULL == m_ayOrders)
 			m_ayOrders = WTSArray::create();
@@ -1025,12 +1446,35 @@ void TraderCTPMini::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInf
 		{
 			m_ayOrders->append(orderInfo, false);
 		}
+		else
+		{
+			m_qryOrdersDropped = true;
+			// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the struct); the host pauses the account.
+			wt_provider_raw::report(currentSink(), m_spiFeatures.load(), "TraderCTPMini", "order", "order query row could not be converted",
+				wt_provider_raw::hexOf("CThostFtdcOrderField", pOrder));
+		}
 	}
 
 	if (bIsLast)
 	{
-		if (m_sink)
-			m_sink->onRspOrders(m_ayOrders);
+		if (ITraderSpi* sink = currentSink())
+		{
+			// K42 / BUG-I02-NEW-154: a host that understands query completeness learns
+			// whether this snapshot is complete; others keep the legacy callback.
+			// The SDK headers define no "no records" error for this query (an empty
+			// result is a last frame without rows), so any error frame is FAILED.
+			if (m_spiFeatures.load(std::memory_order_acquire) & WT_TRADER_SPI_FEATURE_QUERY_STATUS)
+			{
+				if (NULL == m_ayOrders)
+					m_ayOrders = WTSArray::create();
+				sink->onRspOrdersWithStatus(m_ayOrders, m_qryOrdersFailed ? WT_QUERY_STATUS_FAILED
+					: m_qryOrdersDropped ? WT_QUERY_STATUS_PARTIAL : WT_QUERY_STATUS_COMPLETE);
+			}
+			else
+				sink->onRspOrders(m_ayOrders);
+		}
+		m_qryOrdersFailed = false;
+		m_qryOrdersDropped = false;
 
 		if (m_ayOrders)
 			m_ayOrders->clear();
@@ -1039,18 +1483,30 @@ void TraderCTPMini::OnRspQryOrder(CThostFtdcOrderField *pOrder, CThostFtdcRspInf
 
 void TraderCTPMini::OnRspError(CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	[[maybe_unused]] int x = 0;
 }
 
 void TraderCTPMini::OnRtnOrder(CThostFtdcOrderField *pOrder)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	WTSOrderInfo *orderInfo = makeOrderInfo(pOrder);
 	if (orderInfo)
 	{
-		if (m_sink)
-			m_sink->onPushOrder(orderInfo);
+		if (ITraderSpi* sink = currentSink())
+			sink->onPushOrder(orderInfo);
 
 		orderInfo->release();
+	}
+	else if (pOrder != NULL)
+	{
+		// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+		wt_provider_raw::report(currentSink(), m_spiFeatures.load(), "TraderCTPMini", "order", "order report could not be converted",
+			wt_provider_raw::hexOf("CThostFtdcOrderField", pOrder));
 	}
 
 	//ReqQryTradingAccount();
@@ -1058,13 +1514,22 @@ void TraderCTPMini::OnRtnOrder(CThostFtdcOrderField *pOrder)
 
 void TraderCTPMini::OnRtnTrade(CThostFtdcTradeField *pTrade)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	WTSTradeInfo *tRecord = makeTradeRecord(pTrade);
 	if (tRecord)
 	{
-		if (m_sink)
-			m_sink->onPushTrade(tRecord);
+		if (ITraderSpi* sink = currentSink())
+			sink->onPushTrade(tRecord);
 
 		tRecord->release();
+	}
+	else if (pTrade != NULL)
+	{
+		// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+		wt_provider_raw::report(currentSink(), m_spiFeatures.load(), "TraderCTPMini", "trade", "trade report could not be converted",
+			wt_provider_raw::hexOf("CThostFtdcTradeField", pTrade));
 	}
 }
 
@@ -1176,10 +1641,19 @@ WTSTimeCondition TraderCTPMini::wrapTimeCondition(TThostFtdcTimeConditionType ti
 
 WTSOrderState TraderCTPMini::wrapOrderState(TThostFtdcOrderStatusType orderState)
 {
-	if (orderState != THOST_FTDC_OST_Unknown)
-		return (WTSOrderState)orderState;
-	else
+	// I03-NEW (N-1)，与 TraderCTP 已修子项对齐：CTP NotTouched('b') 与 WTS WOS_Cancelling('b')
+	// 同值，必须显式映射到 WOS_Nottouched；Touched('c') 的 WTS 表示待 D-T2-CTP-07 裁定，暂按原值。
+	switch (orderState)
+	{
+	case THOST_FTDC_OST_Unknown:
 		return WOS_Submitting;
+	case THOST_FTDC_OST_NotTouched:
+		return WOS_Nottouched;
+	case THOST_FTDC_OST_Touched:	// K01=B: a triggered conditional order is being submitted
+		return WOS_Submitting;
+	default:
+		return (WTSOrderState)orderState;
+	}
 }
 
 int TraderCTPMini::wrapActionFlag(WTSActionFlag actionFlag)
@@ -1230,6 +1704,14 @@ WTSOrderInfo* TraderCTPMini::makeOrderInfo(CThostFtdcOrderField* orderField)
 	StrUtil::replace(strTime, ":", "");
 	uint32_t uTime = convert::to_uint32(strTime.c_str());
 
+	if (m_lDate == 0)
+	{
+		// T3-015: without a validated login trading day the order date cannot be
+		// derived; never synthesize one from the host clock (getWeekDay(0)).
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Order report {} dropped: no valid trading day (raw insert time {})", orderField->OrderSysID, orderField->InsertTime);
+		pRet->release();
+		return NULL;
+	}
 	uint32_t insertDate = m_lDate;
 	uint32_t uHour = uTime / 10000;
 	//下单时间是夜盘，则直接用交易日倒推下单日期
@@ -1258,6 +1740,7 @@ WTSOrderInfo* TraderCTPMini::makeOrderInfo(CThostFtdcOrderField* orderField)
 	pRet->setStateMsg(orderField->StatusMsg);
 
 
+	std::unique_lock<std::mutex> cacheLock(m_cacheMutex);
 	const char* usertag = m_eidCache.get(pRet->getEntrustID());
 	if (strlen(usertag) == 0)
 	{
@@ -1309,6 +1792,7 @@ WTSEntrust* TraderCTPMini::makeEntrust(CThostFtdcInputOrderField *entrustField)
 	//pRet->setEntrustID(generateEntrustID(m_frontID, m_sessionID, atoi(entrustField->OrderRef)).c_str());
 	generateEntrustID(pRet->getEntrustID(), m_frontID, m_sessionID, atoi(entrustField->OrderRef));
 
+	std::unique_lock<std::mutex> cacheLock(m_cacheMutex);
 	const char* usertag = m_eidCache.get(pRet->getEntrustID());
 	if (strlen(usertag) > 0)
 		pRet->setUserTag(usertag);
@@ -1344,6 +1828,13 @@ WTSTradeInfo* TraderCTPMini::makeTradeRecord(CThostFtdcTradeField *tradeField)
 	 *	By Wesley @ 2021.12.16
 	 *	mini返回的InsertDate是空，所以这里要改成用交易日来重算，但是夜盘很麻烦，只能大概处理一下了
 	 */
+	if (m_lDate == 0)
+	{
+		// T3-015: see makeOrderInfo.
+		write_log(currentSink(), LL_ERROR, "[TraderCTPMini] Trade report {} dropped: no valid trading day (raw trade time {})", tradeField->TradeID, tradeField->TradeTime);
+		pRet->release();
+		return NULL;
+	}
 	uint32_t uDate = m_lDate;
 	uint32_t uHour = uTime / 10000;
 	//下单时间是夜盘，则直接用交易日倒推下单日期
@@ -1371,6 +1862,7 @@ WTSTradeInfo* TraderCTPMini::makeTradeRecord(CThostFtdcTradeField *tradeField)
 	double amount = commInfo->getVolScale()*tradeField->Volume*pRet->getPrice();
 	pRet->setAmount(amount);
 
+	std::unique_lock<std::mutex> cacheLock(m_cacheMutex);
 	const char* usertag = m_oidCache.get(StrUtil::trim(pRet->getRefOrder()).c_str());
 	if (strlen(usertag))
 		pRet->setUserTag(usertag);
@@ -1417,13 +1909,16 @@ bool TraderCTPMini::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)
 
 void TraderCTPMini::OnErrRtnOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo)
 {
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
 	WTSEntrust* entrust = makeEntrust(pInputOrder);
 	if (entrust)
 	{
 		WTSError *err = makeError(pRspInfo);
 		//g_orderMgr.onRspEntrust(entrust, err);
-		if (m_sink)
-			m_sink->onRspEntrust(entrust, err);
+		if (ITraderSpi* sink = currentSink())
+			sink->onRspEntrust(entrust, err);
 		entrust->release();
 		err->release();
 	}
@@ -1431,8 +1926,11 @@ void TraderCTPMini::OnErrRtnOrderInsert(CThostFtdcInputOrderField *pInputOrder, 
 
 void TraderCTPMini::OnRtnInstrumentStatus(CThostFtdcInstrumentStatusField *pInstrumentStatus)
 {
-	if (m_sink)
-		m_sink->onPushInstrumentStatus(pInstrumentStatus->ExchangeID, pInstrumentStatus->InstrumentID, (WTSTradeStatus)pInstrumentStatus->InstrumentStatus);
+	auto cbScope = m_lifecycle.callback(this);
+	if (!cbScope)
+		return;
+	if (ITraderSpi* sink = currentSink())
+		sink->onPushInstrumentStatus(pInstrumentStatus->ExchangeID, pInstrumentStatus->InstrumentID, (WTSTradeStatus)pInstrumentStatus->InstrumentStatus);
 }
 
 bool TraderCTPMini::isConnected()
@@ -1442,6 +1940,9 @@ bool TraderCTPMini::isConnected()
 
 int TraderCTPMini::authenticate()
 {
+	auto lease = m_lifecycle.call(this);
+	if (!lease || m_pUserAPI == NULL)
+		return -1;
 	CThostFtdcReqAuthenticateField req;
 	memset(&req, 0, sizeof(req));
 	strcpy(req.BrokerID, m_strBroker.c_str());

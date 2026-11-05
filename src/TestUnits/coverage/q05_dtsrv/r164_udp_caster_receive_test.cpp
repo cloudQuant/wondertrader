@@ -13,6 +13,7 @@
  * 只使用 127.0.0.1 回环：客户端向 UDPCaster 的临时订阅端口发包；
  * 每个“无回包”的请求后追加一个短包作为屏障，收到错误回包即证明前序请求已处理。
  */
+// 迭代03 第五会话（I03-NEW-053/卡2）：品种须带 pricetick/volscale 才能整批发布；起止相同的非 0–0 时段（旧夹具 1–1）被拒，改为 1–2。仅改测试输入。
 #include <gtest/gtest.h>
 
 #include <cstdint>
@@ -57,7 +58,7 @@ protected:
 			"DAY": {"name": "日盘", "offset": 0, "sections": [{"from": 930, "to": 1500}]}
 		})JSON");
 		r164::write_file(_dir / "commodities.json", R"JSON({
-			"SHFE": {"ag": {"name": "白银", "session": "DAY", "holiday": "R164_NONE"}}
+			"SHFE": {"ag": {"name": "白银", "session": "DAY", "holiday": "R164_NONE", "pricetick": 1, "volscale": 1}}
 		})JSON");
 		r164::write_file(_dir / "contracts.json", R"JSON({
 			"SHFE": {"ag2512": {"name": "ag2512", "exchg": "SHFE", "product": "ag"}}

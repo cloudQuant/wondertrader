@@ -11,6 +11,7 @@
  */
 #include "WtRiskMonFact.h"
 #include "WtSimpRiskMon.h"
+#include "../Includes/IRiskMonPluginV2.h"
 
 /**
  * @brief 风控模块工厂名称
@@ -44,6 +45,27 @@ extern "C"
 	{
 		if (fact != NULL)
 			delete fact;
+	}
+
+	/**
+	 * @brief 版本化表中的工厂销毁函数（按值，I03-NEW-062），不导出、不抛异常
+	 */
+	static void destroyRiskMonFactV2(void* fact)
+	{
+		delete static_cast<IRiskMonitorFact*>(fact);
+	}
+
+	/**
+	 * @brief 版本化能力声明（迭代03 卡9a，BUG-I02-NEW-034）
+	 * @details WtSimpleRiskMon::stop() 在外部线程调用时 join 工作线程，返回后不再访问
+	 *          WtPortContext，也不保留 getFundInfo() 借出的指针，因此声明同步停止能力。
+	 */
+	EXPORT_FLAG const WtRiskMonPluginCapsV2* getRiskMonPluginCapsV2(uint32_t requested_major)
+	{
+		static const WtRiskMonPluginCapsV2 caps = {
+			sizeof(WtRiskMonPluginCapsV2), WT_RISKMON_PLUGIN_V2_ABI_VERSION,
+			WT_RISKMON_PLUGIN_V2_CAP_SYNC_STOP, 0, destroyRiskMonFactV2 };
+		return requested_major == WT_RISKMON_PLUGIN_V2_ABI_MAJOR ? &caps : NULL;
 	}
 }
 

@@ -1,0 +1,36 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R122WriterADErrorsTest.R122WriterADDbOpenFailuresLogged
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R122WriterADErrorsTest
+[ RUN      ] R122WriterADErrorsTest.R122WriterADDbOpenFailuresLogged
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r4_ad_fixture.h:470: Failure
+Value of: _writer->writeTick(tick, procFlag)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r4_ad_fixture.h:470: Failure
+Value of: _writer->writeTick(tick, procFlag)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r122_writer_ad_errors_test.cpp:47: Failure
+Expected equality of these values:
+  _sink->bcast_tick()
+    Which is: 0
+  2u
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r122_writer_ad_errors_test.cpp:49: Failure
+Expected: (_sink->count_containing("Opening day db at")) >= (1u), actual: 0 vs 1
+
+[  FAILED  ] R122WriterADErrorsTest.R122WriterADDbOpenFailuresLogged (3 ms)
+[----------] 1 test from R122WriterADErrorsTest (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R122WriterADErrorsTest.R122WriterADDbOpenFailuresLogged
+
+ 1 FAILED TEST

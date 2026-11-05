@@ -11,6 +11,8 @@
 #pragma once
 #include <thread>
 #include <memory>
+#include <atomic>
+#include <mutex>
 
 #include "../Includes/RiskMonDefs.h"
 
@@ -71,7 +73,8 @@ private:
 	ThreadPtr		_thrd;
 	
 	/** @brief 监控器是否已停止标记 */
-	bool			_stopped;
+	std::atomic<bool>	_stopped;
+	std::mutex		_thread_mutex;
 	
 	/** @brief 交易是否已被限制标记 */
 	bool			_limited;

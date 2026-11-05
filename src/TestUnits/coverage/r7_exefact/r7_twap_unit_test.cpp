@@ -58,7 +58,16 @@ public:
 
 	WTSTickSlice* getTicks(const char*, uint32_t, uint64_t) override { return NULL; }
 	WTSTickData* grabLastTick(const char*) override { return NULL; }
-	double getPosition(const char*, bool = true, int32_t = 3) override { return pos; }
+	// I03-NEW-074：TWAP 读取多/空/净与可用持仓并做一致性检查（多头 >= 0、空头 <= 0 且带符号、净 = 多 + 空），
+	// 旧替身对所有 flag 返回同一值，使检查失败、单元不发单。按 flag 返回一致的分解；可用量与总量相同。
+	double getPosition(const char*, bool = true, int32_t flag = 3) override
+	{
+		if (flag == 1)
+			return pos > 0 ? pos : 0.0;
+		if (flag == 2)
+			return pos < 0 ? pos : 0.0;
+		return pos;
+	}
 	OrderMap* getOrders(const char*) override { return NULL; }
 	double getUndoneQty(const char*) override { return undone; }
 	OrderIDs buy(const char* c, double p, double q, bool) override
@@ -73,7 +82,8 @@ public:
 		OrderIDs ids{ nextId++ };
 		return ids;
 	}
-	bool cancel(uint32_t id) override { byidCancels.push_back(id); return true; }
+	bool cancelByIdRet = true;
+	bool cancel(uint32_t id) override { byidCancels.push_back(id); return cancelByIdRet; }
 	OrderIDs cancel(const char* c, bool isBuy, double = 0) override
 	{
 		bydirCancels.push_back({ c, isBuy });
@@ -879,7 +889,8 @@ TEST(r7_twap, cancel_report_refires_with_cancel_times_price_step)
 	// _cancel_times=1 -> fire_at_once(max(1, 25-0)=25)
 	// price_mode=0 -> 10.50；L508 再 + 0.01*1 = 10.51
 	ASSERT_EQ(ctx.buys.size(), 2u);
-	EXPECT_DOUBLE_EQ(ctx.buys[1].qty, 25.0);
+	// R7-012（有界重发）：撤单重发量不超过本轮目标差且不超过撤单回报的未成交量 leftover=5（改前期望 25）。
+	EXPECT_DOUBLE_EQ(ctx.buys[1].qty, 5.0);
 	EXPECT_DOUBLE_EQ(ctx.buys[1].price, 10.51);
 	EXPECT_TRUE(ctx.hasLog("re_fire will be done"));     // L223
 	ctx.comm->release();
@@ -907,8 +918,9 @@ TEST(r7_twap, fire_at_once_mode_1_and_2_pricing)
 	// L508: + priceTick*_cancel_times(1) = +0.01
 	EXPECT_DOUBLE_EQ(ctx.buys[2].price, 10.50);         // 10.49 + 0.01
 	EXPECT_DOUBLE_EQ(ctx.buys[3].price, 10.52);         // 10.51 + 0.01
-	EXPECT_DOUBLE_EQ(ctx.buys[2].qty, 25.0);            // _this_target = 0 + round(100/4) = 25
-	EXPECT_DOUBLE_EQ(ctx.buys[3].qty, 25.0);
+	// R7-012（有界重发）：撤单重发量不超过本轮目标差且不超过撤单回报的未成交量 leftover=5（改前期望 25）。
+	EXPECT_DOUBLE_EQ(ctx.buys[2].qty, 5.0);             // _this_target = 25，但受撤单未成交量 5 约束
+	EXPECT_DOUBLE_EQ(ctx.buys[3].qty, 5.0);
 	ctx.comm->release();
 }
 
@@ -930,7 +942,8 @@ TEST(r7_twap, fire_at_once_unknown_price_mode_has_no_preclose_fallback)
 	// 再按 L508 加 0.01*_cancel_times(1) -> 报出 0.01 的价
 	ASSERT_EQ(ctx.buys.size(), 2u);
 	EXPECT_DOUBLE_EQ(ctx.buys[1].price, 0.01);
-	EXPECT_DOUBLE_EQ(ctx.buys[1].qty, 25.0);
+	// R7-012（有界重发）：撤单重发量不超过本轮目标差且不超过撤单回报的未成交量 leftover=5（改前期望 25）。
+	EXPECT_DOUBLE_EQ(ctx.buys[1].qty, 5.0);
 	ctx.comm->release();
 }
 
@@ -1102,4 +1115,47 @@ TEST(r7_twap, startup_cancel_before_first_slice_does_not_retry_default_target)
 		EXPECT_TRUE(ctx.sells.empty());
 	}
 	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 迭代03 WP1（卡5/N05-003，2026-11-04）：宿主通过保留配置键声明已按 owner 与不可复用
+// 身份核验撤单时，超时撤单经 ctx->cancel(localid) 发出且同一单只发一次；宿主拒绝核验
+// （cancel 返回 false）即转为持久隔离，不回退裸 ID、不重复撤单。未声明时保持原 fail-closed。
+//////////////////////////////////////////////////////////////////////////
+#include "Includes/IExecPluginV2.h"
+#ifndef WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY
+#define WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY "__wt_host_order_identity"
+#endif
+
+TEST(r7_twap, wp1_timeout_with_host_verified_identity_cancels_once_or_latches)
+{
+	for (int refuse = 0; refuse < 2; ++refuse)
+	{
+		TFakeCtx ctx;
+		ctx.comm = mkTComm();
+		ctx.cancelByIdRet = refuse == 0;
+		{
+			WtTWapExeUnit unit;
+			WTSVariant* cfg = mkTCfg(4, 0, 0, 1.0, 10.0, 1);
+			cfg->append(WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY, (uint32_t)1);
+			unit.init(&ctx, kTCode, cfg);
+			cfg->release();
+			unit.set_position(kTCode, 0);
+			const uint32_t id = 8361;
+			unit._orders_mon.push_order(&id, 1, ctx.curTime);
+			feedTWapTick(unit, mkTTick(kTCode, 100000000, 10.50, 10.49, 10.51));
+			ctx.curTime += 1000;
+			feedTWapTick(unit, mkTTick(kTCode, 100002000, 10.50, 10.49, 10.51));
+			ASSERT_EQ(1u, ctx.byidCancels.size()) << "refuse=" << refuse;
+			EXPECT_EQ(id, ctx.byidCancels[0]);
+			EXPECT_TRUE(unit._orders_mon.has_order(id));
+			EXPECT_EQ(refuse == 1, unit._orders_mon.has_unverified_timeout());
+			EXPECT_EQ(refuse == 0, ctx.countLog("canceled with host-verified identity") == 1u);
+			EXPECT_EQ(refuse == 1, ctx.countLog("host could not verify its identity") == 1u);
+			ctx.curTime += 2000;
+			feedTWapTick(unit, mkTTick(kTCode, 100004000, 10.50, 10.49, 10.51));
+			EXPECT_EQ(1u, ctx.byidCancels.size()) << "claimed or latched order is never re-cancelled";
+		}
+		ctx.comm->release();
+	}
 }

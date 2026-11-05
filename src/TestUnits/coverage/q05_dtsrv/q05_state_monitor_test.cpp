@@ -90,7 +90,7 @@ void write_file(const fs::path& p, const std::string& content)
 }
 
 // 两个会话模板：一个日盘（单段集合竞价）、一个夜盘（多段集合竞价 + 负偏移）
-// sessions.json 缺 sections 的条目会被 loadSessions 静默丢弃（不加入 _session_map）
+// NODATA is intentionally absent; loadSessions validates the whole input atomically.
 const char* kSessionCfg = R"JSON({
 	"SSE": {
 		"name": "上交所",
@@ -114,10 +114,6 @@ const char* kSessionCfg = R"JSON({
 			{"from": 1030, "to": 1130},
 			{"from": 1330, "to": 1500}
 		]
-	},
-	"NODATA": {
-		"name": "缺时段条目",
-		"offset": 0
 	}
 })JSON";
 
@@ -205,8 +201,9 @@ TEST_F(Q05StateMonitorTest, ConfigReferenceReturnsToObserverAfterMidSessionExcep
 	EXPECT_THROW(Q05StateMonitorConfigTestAccess::initializeWithOwnedConfig(
 		monitor, config.get(), &throwingMgr), std::runtime_error);
 	EXPECT_EQ(config->retainCount(), 1u);
-	// The first known session row was processed before the fake throws on row two.
-	EXPECT_TRUE(monitor.isAnyInState(SS_ORIGINAL));
+	// The candidate session map is staged; a later lookup failure must not
+	// publish the first row either.
+	EXPECT_FALSE(monitor.isAnyInState(SS_ORIGINAL));
 }
 
 TEST_F(Q05StateMonitorTest, InitializeEmptyObjectSucceedsWithNoSessions)
@@ -245,7 +242,7 @@ TEST_F(Q05StateMonitorTest, InitializeAssemblesOriginalStateForKnownSessions)
 	// initialize 只装配 StateInfo，_state 保持构造默认值 SS_ORIGINAL
 	EXPECT_TRUE(mon.isInState("SSE", SS_ORIGINAL));
 	EXPECT_TRUE(mon.isInState("SHFE", SS_ORIGINAL));
-	// "NODATA" 在 sessions.json 里没有 sections，被 loadSessions 丢弃（不入库）
+	// "NODATA" 不在合法的 sessions.json 中。
 	EXPECT_FALSE(mon.isInState("NODATA", SS_ORIGINAL));
 
 	EXPECT_TRUE(mon.isAnyInState(SS_ORIGINAL));

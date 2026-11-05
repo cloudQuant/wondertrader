@@ -416,9 +416,8 @@ TEST_F(R162AdReaderTest, R162RdmReaderADKlineDbOpenFailureReturnsNull)
 	EXPECT_NE(error_log.find("SSE failed"), string::npos);
 }
 
-// WtDataWriterAD.cpp:649-652：同一交易日第二笔 tick 合并日线时 vol/money 被累加两次。
-// 产品缺陷 BUG-R162-002，按纪律整条 DISABLED_，断言保留正确口径（1+1=2）。
-TEST_F(R162AdReaderTest, DISABLED_R162WriterADMergedDayBarVolumeIsDoubleCounted)
+// 迭代03 最终验收复核后启用（原禁用：BUG-R162-002 同日第二笔 tick 合并日线量额重复累加）。
+TEST_F(R162AdReaderTest, R162WriterADMergedDayBarVolumeIsDoubleCounted)
 {
 	WtDataWriterAD* w = make_writer();
 	ASSERT_TRUE(w != NULL);

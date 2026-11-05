@@ -1,0 +1,16 @@
+--- /tmp/wt-i03-zreview-20261104/evidence/pre/MatchEngine.cpp	2026-11-04 08:51:49
++++ src/WtBtCore/MatchEngine.cpp	2026-11-04 09:29:11
+@@ -571,6 +571,13 @@
+ 
+ 	update_lob(curTick);
+ 
++	// Firing and matching report every state change through the sink. Without a
++	// registered sink, leave pending orders untouched (they are fired on the first
++	// tick after regisSink) instead of dereferencing NULL. Whether an unsinked
++	// engine should accept orders at all is not decided here.
++	if (_sink == NULL)
++		return;
++
+ 	OrderIDs cancelPendingAtTickStart;
+ 	for (const auto& entry : _orders)
+ 	{

@@ -1,0 +1,41 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R59Buy.I03TimeFailureMustNotSubmitOrChangeUndone
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R59Buy
+[ RUN      ] R59Buy.I03TimeFailureMustNotSubmitOrChangeUndone
+/tmp/wt-i03-time-orderid-20261102/snapshot/TestUnits/coverage/p11_wtcore_traderadapter/r59_trader_buy_test.cpp:254: Failure
+Value of: ids.empty()
+  Actual: false
+Expected: true
+
+/tmp/wt-i03-time-orderid-20261102/snapshot/TestUnits/coverage/p11_wtcore_traderadapter/r59_trader_buy_test.cpp:255: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  api2_.n_insert_
+    Which is: 1
+
+/tmp/wt-i03-time-orderid-20261102/snapshot/TestUnits/coverage/p11_wtcore_traderadapter/r59_trader_buy_test.cpp:256: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  trader.getUndoneQty(kStdCode)
+    Which is: 1
+
+[  FAILED  ] R59Buy.I03TimeFailureMustNotSubmitOrChangeUndone (2 ms)
+[----------] 1 test from R59Buy (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (2 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R59Buy.I03TimeFailureMustNotSubmitOrChangeUndone
+
+ 1 FAILED TEST
+
+STDERR
+I03_TIME_FAULT
+I03_SEED year=20250101 now=1735516800000
+
+EXIT=1

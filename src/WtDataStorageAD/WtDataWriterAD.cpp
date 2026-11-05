@@ -1,5 +1,7 @@
 ﻿#include "WtDataWriterAD.h"
 #include "LMDBKeys.h"
+#include "DayBarContractAD.h"
+#include "../WtDataStorage/RTBlockPublish.hpp"
 
 #include "../Includes/WTSSessionInfo.hpp"
 #include "../Includes/WTSContractInfo.hpp"
@@ -17,6 +19,8 @@
 #include <atomic>
 #endif
 #include <exception>
+#include <cstddef>
+#include <cstring>
 #include <limits>
 namespace fs = boost::filesystem;
 
@@ -30,18 +34,256 @@ inline void pipe_writer_log(IDataWriterSink* sink, WTSLogLevel ll, const char* f
 	if (sink == NULL)
 		return;
 
+	// I03-NEW-038: messages carry configured paths and caller-supplied codes; bound the
+	// formatter to the per-thread buffer (same scheme as the AD readers) instead of
+	// trusting their size.
 	static thread_local char buffer[512] = { 0 };
-	memset(buffer, 0, 512);
-	fmt::format_to(buffer, format, args...);
+	try
+	{
+		const std::size_t max_output_size = sizeof(buffer) - 1;
+		const auto formatted = fmt::format_to_n(buffer, max_output_size, format, args...);
+		if (formatted.size > max_output_size)
+		{
+			constexpr char truncation_marker[] = "...[truncated]";
+			constexpr std::size_t marker_size = sizeof(truncation_marker) - 1;
+			std::memcpy(buffer + max_output_size - marker_size, truncation_marker, marker_size);
+			buffer[max_output_size] = '\0';
+		}
+		else
+		{
+			buffer[formatted.size] = '\0';
+		}
+	}
+	catch (...)
+	{
+		constexpr char fallback[] = "WtDataWriterAD log formatting failed";
+		std::memcpy(buffer, fallback, sizeof(fallback));
+	}
 
 	sink->outputLog(ll, buffer);
+}
+
+namespace
+{
+	// Display at most `capacity` bytes of an identity field; fixed-size tick fields may be
+	// unterminated, and contract strings may exceed the LMDB key capacity.
+	std::string identityFieldForLog(const char* field, std::size_t capacity)
+	{
+		if (field == NULL)
+			return "(null)";
+		std::size_t length = 0;
+		while (length < capacity && field[length] != '\0')
+			++length;
+		std::string text(field, length);
+		if (length == capacity && field[length - 1] != '\0')
+			text += "...";
+		return text;
+	}
+}
+
+namespace
+{
+	bool checkedTickSessionDate(IBaseDataMgr* manager, const WTSTickData* tick, uint32_t& date)
+	{
+		// A zero action date in a tick is not a request to substitute wall time.
+		if (manager == NULL || tick == NULL || tick->actiondate() == 0)
+			return false;
+		WTSSessionInfo* session = manager->getSessionByCode(tick->code(), tick->exchg());
+		return session != NULL && session->tryGetOffsetDate(tick->actiondate(), tick->actiontime() / 100000, date);
+	}
+}
+
+// Writer lifecycle V1 (card 9): admission accounting for this writer's public calls.
+namespace
+{
+	thread_local std::vector<const WtDataWriterAD*> t_ad_operations;
+
+	bool inAdOperation(const WtDataWriterAD* writer)
+	{
+		for (const WtDataWriterAD* active : t_ad_operations)
+		{
+			if (active == writer)
+				return true;
+		}
+		return false;
+	}
+
+	void popAdOperation(const WtDataWriterAD* writer) noexcept
+	{
+		for (auto it = t_ad_operations.rbegin(); it != t_ad_operations.rend(); ++it)
+		{
+			if (*it == writer)
+			{
+				t_ad_operations.erase(std::next(it).base());
+				return;
+			}
+		}
+	}
+}
+
+class AdOperationGuard
+{
+public:
+	AdOperationGuard(WtDataWriterAD& writer, bool admitAfterStop) : _writer(writer)
+	{
+		t_ad_operations.push_back(&writer);
+		StdUniqueLock lock(writer._ops_mtx);
+		if (writer._stop_requested && !admitAfterStop)
+		{
+			lock.unlock();
+			popAdOperation(&writer);
+			return;
+		}
+		++writer._active_ops;
+		_admitted = true;
+	}
+	~AdOperationGuard()
+	{
+		if (!_admitted)
+			return;
+		popAdOperation(&_writer);
+		{
+			StdUniqueLock lock(_writer._ops_mtx);
+			--_writer._active_ops;
+		}
+		_writer._ops_cond.notify_all();
+	}
+	AdOperationGuard(const AdOperationGuard&) = delete;
+	AdOperationGuard& operator=(const AdOperationGuard&) = delete;
+	explicit operator bool() const { return _admitted; }
+private:
+	WtDataWriterAD&	_writer;
+	bool			_admitted = false;
+};
+
+namespace
+{
+	StdUniqueMutex& adWriterRegistryMutex()
+	{
+		static StdUniqueMutex mtx;
+		return mtx;
+	}
+
+	std::set<IDataWriter*>& adWriterRegistry()
+	{
+		static std::set<IDataWriter*> writers;
+		return writers;
+	}
+
+	WtDataWriterAD* registeredAdWriter(void* handle)
+	{
+		if (handle == NULL)
+			return NULL;
+		IDataWriter* writer = static_cast<IDataWriter*>(handle);
+		StdUniqueLock lock(adWriterRegistryMutex());
+		if (adWriterRegistry().count(writer) == 0)
+			return NULL;
+		return static_cast<WtDataWriterAD*>(writer);
+	}
+
+	WtDataWriterLifecycleV1Status adRequestStop(void* handle) noexcept
+	{
+		try
+		{
+			WtDataWriterAD* writer = registeredAdWriter(handle);
+			if (writer == NULL)
+				return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
+			writer->requestStop();
+			return WT_DATA_WRITER_LIFECYCLE_V1_OK;
+		}
+		catch (...)
+		{
+			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;
+		}
+	}
+
+	WtDataWriterLifecycleV1Status adCanWait(void* handle) noexcept
+	{
+		try
+		{
+			WtDataWriterAD* writer = registeredAdWriter(handle);
+			if (writer == NULL)
+				return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
+			return writer->canWaitDrain() ? WT_DATA_WRITER_LIFECYCLE_V1_OK : WT_DATA_WRITER_LIFECYCLE_V1_WOULD_DEADLOCK;
+		}
+		catch (...)
+		{
+			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;
+		}
+	}
+
+	WtDataWriterLifecycleV1Status adWaitDrained(void* handle, uint32_t timeoutMs) noexcept
+	{
+		try
+		{
+			WtDataWriterAD* writer = registeredAdWriter(handle);
+			if (writer == NULL)
+				return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
+			return writer->waitDrained(timeoutMs);
+		}
+		catch (...)
+		{
+			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;
+		}
+	}
+
+	WtDataWriterLifecycleV1Status adAddDumper(void* handle, const char* id, void* dumper) noexcept
+	{
+		try
+		{
+			WtDataWriterAD* writer = registeredAdWriter(handle);
+			if (writer == nullptr)
+				return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
+			return writer->addDumperV1(id, static_cast<IHisDataDumper*>(dumper));
+		}
+		catch (...)
+		{
+			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;
+		}
+	}
+
+	WtDataWriterLifecycleV1Status adRemoveDumper(void* handle, const char* id) noexcept
+	{
+		try
+		{
+			WtDataWriterAD* writer = registeredAdWriter(handle);
+			if (writer == nullptr)
+				return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
+			return writer->removeDumperV1(id);
+		}
+		catch (...)
+		{
+			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;
+		}
+	}
+
+	const WtDataWriterLifecycleApiV1 g_ad_writer_lifecycle_v1 = {
+		(uint32_t)sizeof(WtDataWriterLifecycleApiV1),
+		WT_DATA_WRITER_LIFECYCLE_V1_ABI_VERSION,
+		WT_DATA_WRITER_LIFECYCLE_V1_CAP_DRAIN | WT_DATA_WRITER_LIFECYCLE_V1_CAP_DUMPERS,
+		adRequestStop,
+		adCanWait,
+		adWaitDrained,
+		adAddDumper,
+		adRemoveDumper
+	};
 }
 
 extern "C"
 {
 	EXPORT_FLAG IDataWriter* createWriter()
 	{
-		IDataWriter* ret = new WtDataWriterAD();
+		WtDataWriterAD* ret = new WtDataWriterAD();
+		try
+		{
+			StdUniqueLock lock(adWriterRegistryMutex());
+			adWriterRegistry().insert(ret);
+		}
+		catch (...)
+		{
+			delete ret;
+			return NULL;
+		}
 		return ret;
 	}
 
@@ -49,9 +291,18 @@ extern "C"
 	{
 		if (writer != NULL)
 		{
+			{
+				StdUniqueLock lock(adWriterRegistryMutex());
+				adWriterRegistry().erase(writer);
+			}
 			delete writer;
 			writer = NULL;
 		}
+	}
+
+	EXPORT_FLAG const WtDataWriterLifecycleApiV1* getDataWriterLifecycleApiV1(uint32_t requestedMajor)
+	{
+		return requestedMajor == WT_DATA_WRITER_LIFECYCLE_V1_ABI_MAJOR ? &g_ad_writer_lifecycle_v1 : NULL;
 	}
 };
 
@@ -59,6 +310,112 @@ static const uint32_t CACHE_SIZE_STEP_AD = 400;
 
 namespace
 {
+	// TickCacheItem is a packed disk record whose WTSTickStruct member is not
+	// necessarily aligned. Never construct or bind that packed member; move its
+	// bytes to naturally aligned storage while preserving the on-disk layout.
+	struct AlignedTickCacheItem
+	{
+		uint32_t _date = 0;
+		WTSTickStruct _tick;
+	};
+	static_assert(sizeof(RTTickCache) == sizeof(RTBlockHeader), "unexpected tick cache header layout");
+	static_assert(offsetof(TickCacheItem, _date) == 0 && offsetof(TickCacheItem, _tick) == sizeof(uint32_t),
+		"unexpected tick cache record layout");
+	static_assert(sizeof(TickCacheItem) == sizeof(uint32_t) + sizeof(WTSTickStruct),
+		"unexpected tick cache record size");
+
+	const unsigned char* tickCacheBytes(const RTTickCache* cache, uint32_t index)
+	{
+		return reinterpret_cast<const unsigned char*>(cache) + sizeof(RTTickCache)
+			+ static_cast<std::size_t>(index) * sizeof(TickCacheItem);
+	}
+
+	void loadTickCacheItem(const RTTickCache* cache, uint32_t index, AlignedTickCacheItem& item)
+	{
+		const unsigned char* bytes = tickCacheBytes(cache, index);
+		std::memcpy(&item._date, bytes, sizeof(item._date));
+		std::memcpy(&item._tick, bytes + offsetof(TickCacheItem, _tick), sizeof(item._tick));
+	}
+
+	void storeTickCacheItem(RTTickCache* cache, uint32_t index, const AlignedTickCacheItem& item)
+	{
+		unsigned char* bytes = const_cast<unsigned char*>(tickCacheBytes(cache, index));
+		std::memcpy(bytes, &item._date, sizeof(item._date));
+		std::memcpy(bytes + offsetof(TickCacheItem, _tick), &item._tick, sizeof(item._tick));
+	}
+
+	struct AlignedBarCacheItem
+	{
+		char _exchg[16] = {};
+		char _code[32] = {};
+		WTSBarStruct _bar;
+	};
+	static_assert(sizeof(RTBarCache) == sizeof(RTBlockHeader), "unexpected bar cache header layout");
+	static_assert(offsetof(BarCacheItem, _exchg) == 0 && offsetof(BarCacheItem, _code) == 16 &&
+		offsetof(BarCacheItem, _bar) == 48 && sizeof(BarCacheItem) == 48 + sizeof(WTSBarStruct),
+		"unexpected bar cache record layout");
+
+	const unsigned char* barCacheBytes(const RTBarCache* cache, uint32_t index)
+	{
+		return reinterpret_cast<const unsigned char*>(cache) + sizeof(RTBarCache)
+			+ static_cast<std::size_t>(index) * sizeof(BarCacheItem);
+	}
+
+	void loadBarCacheItem(const RTBarCache* cache, uint32_t index, AlignedBarCacheItem& item)
+	{
+		const unsigned char* bytes = barCacheBytes(cache, index);
+		std::memcpy(item._exchg, bytes + offsetof(BarCacheItem, _exchg), sizeof(item._exchg));
+		std::memcpy(item._code, bytes + offsetof(BarCacheItem, _code), sizeof(item._code));
+		std::memcpy(&item._bar, bytes + offsetof(BarCacheItem, _bar), sizeof(item._bar));
+	}
+
+	void storeBarCacheItem(RTBarCache* cache, uint32_t index, const AlignedBarCacheItem& item)
+	{
+		unsigned char* bytes = const_cast<unsigned char*>(barCacheBytes(cache, index));
+		std::memcpy(bytes + offsetof(BarCacheItem, _exchg), item._exchg, sizeof(item._exchg));
+		std::memcpy(bytes + offsetof(BarCacheItem, _code), item._code, sizeof(item._code));
+		std::memcpy(bytes + offsetof(BarCacheItem, _bar), &item._bar, sizeof(item._bar));
+	}
+
+	// 卡13：持发布锁时创建 RT 缓存文件；其他 writer 已创建则改为打开已有文件（bNew=false）
+	bool createRTCacheFileLocked(const std::string& path, std::size_t recordBytes, bool& bNew, std::string& err,
+		uint16_t version = 1)
+	{
+		if (!bNew)
+			return true;
+		boost::system::error_code ec;
+		if (boost::filesystem::exists(path, ec))
+		{
+			bNew = false;
+			return true;
+		}
+		RTBlockHeader header;
+		memset(&header, 0, sizeof(header));
+		memcpy(header._blk_flag, BLK_FLAG, FLAG_SIZE);
+		header._type = BT_RT_Cache;
+		header._version = version;
+		header._size = 0;
+		header._capacity = CACHE_SIZE_STEP_AD;
+		return wt_rtpub::publishNewBlockFile(path, &header, sizeof(header),
+			sizeof(RTBlockHeader) + (uint64_t)recordBytes * CACHE_SIZE_STEP_AD, err);
+	}
+
+	bool validateBarCacheIdentities(const RTBarCache* cache, IDataWriterSink* sink, const char* period)
+	{
+		for (uint32_t i = 0; i < cache->_size; ++i)
+		{
+			AlignedBarCacheItem item;
+			loadBarCacheItem(cache, i, item);
+			if (std::memchr(item._exchg, '\0', sizeof(item._exchg)) == NULL ||
+				std::memchr(item._code, '\0', sizeof(item._code)) == NULL)
+			{
+				pipe_writer_log(sink, LL_ERROR, "Invalid {} bar cache identity at index {}", period, i);
+				return false;
+			}
+		}
+		return true;
+	}
+
 	bool getRTCacheRequiredSize(uint32_t capacity, std::size_t itemSize, uint64_t& requiredSize)
 	{
 		const uint64_t headerSize = sizeof(RTBlockHeader);
@@ -88,7 +445,8 @@ namespace
 				cacheName, filename, header._type);
 			return false;
 		}
-		if (header._version != 1)
+		//卡3 3c=C：日线缓存接受旧版本 1 与 time=0 合同版本 2，其余缓存只接受版本 1
+		if (!wt_ad_daybar::isAcceptedRTCacheVersion(header._version, std::strcmp(cacheName, "day") == 0))
 		{
 			pipe_writer_log(sink, LL_ERROR, "Invalid {} cache file {}: unsupported version {}",
 				cacheName, filename, header._version);
@@ -209,7 +567,8 @@ extern "C" void wt_data_writer_ad_set_cache_pre_map_hook_for_test(void (*hook)(c
 
 
 WtDataWriterAD::WtDataWriterAD()
-	: _tick_cache_block(nullptr)
+	: _bd_mgr(nullptr)	// I03-NEW-111: was left indeterminate until init()
+	, _tick_cache_block(nullptr)
 	, _async_task(false)
 	, _log_group_size(1000)
 	, _terminated(false)
@@ -225,10 +584,137 @@ WtDataWriterAD::WtDataWriterAD()
 
 WtDataWriterAD::~WtDataWriterAD()
 {
+	// Never destroy a joinable worker: drain from a safe context. A host that deletes the
+	// writer from its own callback/worker violates the V1 contract (DRAINED first).
+	if (canWaitDrain())
+		release();
+}
+
+ExtDumpers WtDataWriterAD::snapshotDumpers() const
+{
+	std::lock_guard<std::mutex> lock(_dumper_mtx);
+	return _dumpers;
+}
+
+WtDataWriterLifecycleV1Status WtDataWriterAD::addDumperV1(const char* id, IHisDataDumper* dumper)
+{
+	if (id == NULL || id[0] == '\0' || dumper == NULL)
+		return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
+	{
+		StdUniqueLock opsLock(_ops_mtx);
+		if (_stop_requested)
+			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;
+	}
+	std::lock_guard<std::mutex> lock(_dumper_mtx);
+	if (_dumpers.find(id) != _dumpers.end())
+		return WT_DATA_WRITER_LIFECYCLE_V1_DUPLICATE;	// the original registration is kept
+	_dumpers[id] = dumper;
+	return WT_DATA_WRITER_LIFECYCLE_V1_OK;
+}
+
+WtDataWriterLifecycleV1Status WtDataWriterAD::removeDumperV1(const char* id)
+{
+	if (id == NULL || id[0] == '\0')
+		return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
+	std::lock_guard<std::mutex> lock(_dumper_mtx);
+	auto it = _dumpers.find(id);
+	if (it == _dumpers.end())
+		return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
+	_dumpers.erase(it);
+	return WT_DATA_WRITER_LIFECYCLE_V1_OK;
+}
+
+void WtDataWriterAD::requestStop()
+{
+	{
+		StdUniqueLock opsLock(_ops_mtx);
+		_stop_requested = true;
+	}
+	{
+		StdUniqueLock taskLock(_task_mtx);
+		_terminated = true;	// the worker finishes its accepted queue, then exits
+	}
+	_task_cond.notify_all();
+	_ops_cond.notify_all();
+}
+
+bool WtDataWriterAD::canWaitDrain()
+{
+	if (inAdOperation(this))
+		return false;
+	StdUniqueLock taskLock(_task_mtx);
+	return _task_worker_id != std::this_thread::get_id();
+}
+
+WtDataWriterLifecycleV1Status WtDataWriterAD::waitDrained(uint32_t timeout_ms)
+{
+	if (!canWaitDrain())
+		return WT_DATA_WRITER_LIFECYCLE_V1_WOULD_DEADLOCK;
+	const bool forever = (timeout_ms == WT_DATA_WRITER_LIFECYCLE_V1_WAIT_FOREVER);
+	const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(forever ? 0 : timeout_ms);
+
+	StdThreadPtr worker;
+	{
+		StdUniqueLock taskLock(_task_mtx);
+		worker = _task_thrd;
+	}
+
+	StdUniqueLock opsLock(_ops_mtx);
+	if (!_stop_requested)
+		return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;	// request_stop must come first
+	auto drained = [this, &worker]() {
+		return _active_ops == 0 && (worker == NULL || _task_exited || _task_joined);
+	};
+	if (forever)
+		_ops_cond.wait(opsLock, drained);
+	else if (!_ops_cond.wait_until(opsLock, deadline, drained))
+		return WT_DATA_WRITER_LIFECYCLE_V1_PENDING;
+	if (worker != NULL && !_task_joined)
+	{
+		_task_joined = true;
+		opsLock.unlock();
+		if (worker->joinable())
+			worker->join();	// the loop has returned; this only reaps the thread
+	}
+	return WT_DATA_WRITER_LIFECYCLE_V1_DRAINED;
 }
 
 bool WtDataWriterAD::init(WTSVariant* params, IDataWriterSink* sink)
 {
+	{
+		// Lifecycle V1 / card 9c: a stopped writer is never re-initialized.
+		StdUniqueLock opsLock(_ops_mtx);
+		if (_stop_requested)
+			return false;
+	}
+	// A fresh instance may be retried after a failed initialization. Until the
+	// first init succeeds, no partially loaded mapping may survive and be reused
+	// for a later init with a different base directory. Existing initialized
+	// instances keep their previous behavior; concurrent init is not supported.
+	const bool fresh = !_tick_cache_file && !_m1_cache._file_ptr && !_m5_cache._file_ptr &&
+		!_d1_cache._file_ptr && !_task_thrd;
+	struct FreshInitRollback
+	{
+		std::function<void()> cleanup;
+		bool committed = false;
+		~FreshInitRollback() { if (!committed) cleanup(); }
+	} rollback{[this, fresh]() {
+		if (!fresh)
+			return;
+		_tick_cache_idx.clear();
+		_tick_cache_scanned = 0;
+		_tick_cache_block = NULL;
+		_tick_cache_file.reset();
+		for (RTBarCacheWrapper* cache : {&_m1_cache, &_m5_cache, &_d1_cache})
+		{
+			cache->_idx.clear();
+			cache->_cache_block = NULL;
+			cache->_file_ptr.reset();
+		}
+		_bd_mgr = NULL;
+		_sink = NULL;
+	}};
+
 	IDataWriter::init(params, sink);
 
 	_bd_mgr = sink->getBDMgr();
@@ -280,6 +766,22 @@ bool WtDataWriterAD::init(WTSVariant* params, IDataWriterSink* sink)
 		try
 		{
 			_task_thrd.reset(new StdThread([this]() {
+				{
+					StdUniqueLock taskLock(_task_mtx);
+					_task_worker_id = std::this_thread::get_id();
+				}
+				struct ExitMark
+				{
+					WtDataWriterAD* writer;
+					~ExitMark()
+					{
+						{
+							StdUniqueLock opsLock(writer->_ops_mtx);
+							writer->_task_exited = true;
+						}
+						writer->_ops_cond.notify_all();
+					}
+				} exitMark{ this };
 				for (;;)
 				{
 					TaskInfo task;
@@ -319,20 +821,18 @@ bool WtDataWriterAD::init(WTSVariant* params, IDataWriterSink* sink)
 		}
 	}
 
+	rollback.committed = true;
 	return true;
 }
 
 void WtDataWriterAD::release()
 {
-	{
-		StdUniqueLock lck(_task_mtx);
-		_terminated = true;
-	}
-	_task_cond.notify_all();
-	if (_task_thrd && _task_thrd->joinable())
-	{
-		_task_thrd->join();
-	}
+	requestStop();
+	// From a sink/dumper callback or the worker itself only request the stop; the owner
+	// drains later from a safe context (no self-join).
+	if (!canWaitDrain())
+		return;
+	waitDrained(WT_DATA_WRITER_LIFECYCLE_V1_WAIT_FOREVER);
 }
 
 bool WtDataWriterAD::loadCache()
@@ -360,16 +860,41 @@ bool WtDataWriterAD::loadCache()
 
 	if (_tick_cache_file == NULL)
 	{
+		// 卡13：tick 缓存的创建、映射与首次扫描在跨进程发布锁与结构性日志内完成
+		wt_rtpub::PublishLock publishLock;
+		if (!publishLock.acquire(tickFilename))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "{}", publishLock.error());
+			return false;
+		}
+		wt_rtpub::StructuralGuard structural(publishLock, CACHE_SIZE_STEP_AD);
+		if (!structural.begun())
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot journal structural change of {}", tickFilename);
+			return false;
+		}
+		if (bNewTick)
+		{
+			boost::system::error_code existsEc;
+			if (boost::filesystem::exists(tickFilename, existsEc))
+				bNewTick = false;	// another writer created it while this one validated
+		}
 		if (bNewTick)
 		{
 			uint64_t uSize = sizeof(RTTickCache) + sizeof(TickCacheItem) * CACHE_SIZE_STEP_AD;
-			BoostFile bf;
-			if (!bf.create_new_file(tickFilename.c_str()) || !bf.truncate_file((std::size_t)uSize))
+			RTBlockHeader header;
+			memset(&header, 0, sizeof(header));
+			memcpy(header._blk_flag, BLK_FLAG, FLAG_SIZE);
+			header._type = BT_RT_Cache;
+			header._version = 1;
+			header._size = 0;
+			header._capacity = CACHE_SIZE_STEP_AD;
+			std::string publishErr;
+			if (!wt_rtpub::publishNewBlockFile(tickFilename, &header, sizeof(header), uSize, publishErr))
 			{
-				pipe_writer_log(_sink, LL_ERROR, "Cannot create tick cache file {}", tickFilename);
+				pipe_writer_log(_sink, LL_ERROR, "Cannot create tick cache file {}: {}", tickFilename, publishErr);
 				return false;
 			}
-			bf.close_file();
 		}
 
 		_tick_cache_file.reset(new BoostMappingFile);
@@ -409,27 +934,46 @@ bool WtDataWriterAD::loadCache()
 		}
 		else
 		{
+			// Reject malformed identities before publishing any rebuilt index.
 			for (uint32_t i = 0; i < _tick_cache_block->_size; i++)
 			{
-				const TickCacheItem& item = _tick_cache_block->_items[i];
+				AlignedTickCacheItem item;
+				loadTickCacheItem(_tick_cache_block, i, item);
+				if (std::memchr(item._tick.exchg, '\0', sizeof(item._tick.exchg)) == NULL ||
+					std::memchr(item._tick.code, '\0', sizeof(item._tick.code)) == NULL)
+				{
+					pipe_writer_log(_sink, LL_ERROR, "Invalid tick cache identity at index {}", i);
+					_tick_cache_block = NULL;
+					_tick_cache_file.reset();
+					return false;
+				}
+			}
+			for (uint32_t i = 0; i < _tick_cache_block->_size; i++)
+			{
+				AlignedTickCacheItem item;
+				loadTickCacheItem(_tick_cache_block, i, item);
 				std::string key = fmtutil::format<64>("{}.{}", item._tick.exchg, item._tick.code);
 				_tick_cache_idx[key] = i;
 			}
 		}
+		_tick_cache_scanned = wt_rtpub::publishedSize(_tick_cache_block);
 	}
 
 	if (_m1_cache.empty())
 	{
-		if (bNewM1)
+		// 卡13：创建/映射/首次扫描在跨进程发布锁与结构性日志内完成，不截断其他 writer 已创建的文件
+		wt_rtpub::PublishLock m1Lock;
+		if (!m1Lock.acquire(m1Filename))
 		{
-			uint64_t uSize = sizeof(RTBarCache) + sizeof(BarCacheItem) * CACHE_SIZE_STEP_AD;
-			BoostFile bf;
-			if (!bf.create_new_file(m1Filename.c_str()) || !bf.truncate_file((std::size_t)uSize))
-			{
-				pipe_writer_log(_sink, LL_ERROR, "Cannot create m1 cache file {}", m1Filename);
-				return false;
-			}
-			bf.close_file();
+			pipe_writer_log(_sink, LL_ERROR, "{}", m1Lock.error());
+			return false;
+		}
+		wt_rtpub::StructuralGuard m1Structural(m1Lock, CACHE_SIZE_STEP_AD);
+		std::string m1Err;
+		if (!m1Structural.begun() || !createRTCacheFileLocked(m1Filename, sizeof(BarCacheItem), bNewM1, m1Err))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot create m1 cache file {} {}", m1Filename, m1Err);
+			return false;
 		}
 
 		_m1_cache._file_ptr.reset(new BoostMappingFile);
@@ -469,27 +1013,38 @@ bool WtDataWriterAD::loadCache()
 		}
 		else
 		{
+			if (!validateBarCacheIdentities(_m1_cache._cache_block, _sink, "m1"))
+			{
+				_m1_cache._cache_block = NULL;
+				_m1_cache._file_ptr.reset();
+				return false;
+			}
 			for (uint32_t i = 0; i < _m1_cache._cache_block->_size; i++)
 			{
-				const BarCacheItem& item = _m1_cache._cache_block->_items[i];
+				AlignedBarCacheItem item;
+				loadBarCacheItem(_m1_cache._cache_block, i, item);
 				std::string key = fmtutil::format<64>("{}.{}", item._exchg, item._code);
 				_m1_cache._idx[key] = i;
 			}
 		}
+		_m1_cache._scanned = wt_rtpub::publishedSize(_m1_cache._cache_block);
 	}
 
 	if (_m5_cache.empty())
 	{
-		if (bNewM5)
+		// 卡13：创建/映射/首次扫描在跨进程发布锁与结构性日志内完成，不截断其他 writer 已创建的文件
+		wt_rtpub::PublishLock m5Lock;
+		if (!m5Lock.acquire(m5Filename))
 		{
-			uint64_t uSize = sizeof(RTBarCache) + sizeof(BarCacheItem) * CACHE_SIZE_STEP_AD;
-			BoostFile bf;
-			if (!bf.create_new_file(m5Filename.c_str()) || !bf.truncate_file((std::size_t)uSize))
-			{
-				pipe_writer_log(_sink, LL_ERROR, "Cannot create m5 cache file {}", m5Filename);
-				return false;
-			}
-			bf.close_file();
+			pipe_writer_log(_sink, LL_ERROR, "{}", m5Lock.error());
+			return false;
+		}
+		wt_rtpub::StructuralGuard m5Structural(m5Lock, CACHE_SIZE_STEP_AD);
+		std::string m5Err;
+		if (!m5Structural.begun() || !createRTCacheFileLocked(m5Filename, sizeof(BarCacheItem), bNewM5, m5Err))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot create m5 cache file {} {}", m5Filename, m5Err);
+			return false;
 		}
 
 		_m5_cache._file_ptr.reset(new BoostMappingFile);
@@ -529,27 +1084,38 @@ bool WtDataWriterAD::loadCache()
 		}
 		else
 		{
+			if (!validateBarCacheIdentities(_m5_cache._cache_block, _sink, "m5"))
+			{
+				_m5_cache._cache_block = NULL;
+				_m5_cache._file_ptr.reset();
+				return false;
+			}
 			for (uint32_t i = 0; i < _m5_cache._cache_block->_size; i++)
 			{
-				const BarCacheItem& item = _m5_cache._cache_block->_items[i];
+				AlignedBarCacheItem item;
+				loadBarCacheItem(_m5_cache._cache_block, i, item);
 				std::string key = fmtutil::format<64>("{}.{}", item._exchg, item._code);
 				_m5_cache._idx[key] = i;
 			}
 		}
+		_m5_cache._scanned = wt_rtpub::publishedSize(_m5_cache._cache_block);
 	}
 
 	if (_d1_cache.empty())
 	{
-		if (bNewD1)
+		// 卡13：创建/映射/首次扫描在跨进程发布锁与结构性日志内完成，不截断其他 writer 已创建的文件
+		wt_rtpub::PublishLock d1Lock;
+		if (!d1Lock.acquire(d1Filename))
 		{
-			uint64_t uSize = sizeof(RTBarCache) + sizeof(BarCacheItem) * CACHE_SIZE_STEP_AD;
-			BoostFile bf;
-			if (!bf.create_new_file(d1Filename.c_str()) || !bf.truncate_file((std::size_t)uSize))
-			{
-				pipe_writer_log(_sink, LL_ERROR, "Cannot create day cache file {}", d1Filename);
-				return false;
-			}
-			bf.close_file();
+			pipe_writer_log(_sink, LL_ERROR, "{}", d1Lock.error());
+			return false;
+		}
+		wt_rtpub::StructuralGuard d1Structural(d1Lock, CACHE_SIZE_STEP_AD);
+		std::string d1Err;
+		if (!d1Structural.begun() || !createRTCacheFileLocked(d1Filename, sizeof(BarCacheItem), bNewD1, d1Err, BLOCK_VERSION_DAY_T0))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot create day cache file {} {}", d1Filename, d1Err);
+			return false;
 		}
 
 		_d1_cache._file_ptr.reset(new BoostMappingFile);
@@ -584,18 +1150,39 @@ bool WtDataWriterAD::loadCache()
 			_d1_cache._cache_block->_capacity = CACHE_SIZE_STEP_AD;
 			_d1_cache._cache_block->_type = BT_RT_Cache;
 			_d1_cache._cache_block->_size = 0;
-			_d1_cache._cache_block->_version = 1;
+			_d1_cache._cache_block->_version = BLOCK_VERSION_DAY_T0;
 			strcpy(_d1_cache._cache_block->_blk_flag, BLK_FLAG);
 		}
 		else
 		{
+			if (!validateBarCacheIdentities(_d1_cache._cache_block, _sink, "day"))
+			{
+				_d1_cache._cache_block = NULL;
+				_d1_cache._file_ptr.reset();
+				return false;
+			}
+			//卡3 3c=C：版本 1 的旧日线缓存在发布锁与结构性日志内原地迁移为 time=0，最后提升版本标记
+			const bool migrateDay = _d1_cache._cache_block->_version != BLOCK_VERSION_DAY_T0;
 			for (uint32_t i = 0; i < _d1_cache._cache_block->_size; i++)
 			{
-				const BarCacheItem& item = _d1_cache._cache_block->_items[i];
+				AlignedBarCacheItem item;
+				loadBarCacheItem(_d1_cache._cache_block, i, item);
+				if (migrateDay && item._bar.time != 0)
+				{
+					wt_ad_daybar::normalize(item._bar);
+					storeBarCacheItem(_d1_cache._cache_block, i, item);
+				}
 				std::string key = fmtutil::format<64>("{}.{}", item._exchg, item._code);
 				_d1_cache._idx[key] = i;
 			}
+			if (migrateDay)
+			{
+				_d1_cache._cache_block->_version = BLOCK_VERSION_DAY_T0;
+				pipe_writer_log(_sink, LL_INFO, "Day cache {} migrated from version 1 to {} (day.time=0), {} items",
+					d1Filename, BLOCK_VERSION_DAY_T0, _d1_cache._cache_block->_size);
+			}
 		}
+		_d1_cache._scanned = wt_rtpub::publishedSize(_d1_cache._cache_block);
 	}
 	return true;
 }
@@ -653,7 +1240,8 @@ bool WtDataWriterAD::resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount)
 		}
 
 		// Publish the new capacity only after the file has been extended and remapped.
-		newBlock->_capacity = nCount;
+		// 卡13：以 release 存储发布，供其他进程按协议读取
+		wt_rtpub::publishCapacity(newBlock, nCount);
 		mfPtr.swap(newMf);
 		return true;
 	}
@@ -671,15 +1259,45 @@ bool WtDataWriterAD::resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount)
 
 bool WtDataWriterAD::writeTick(WTSTickData* curTick, uint32_t procFlag)
 {
+	AdOperationGuard operation(*this, false);
+	if (!operation)
+		return false;	// stopped: admission closed (lifecycle V1)
+
 	if (_log_group_size == 0)
 		return false;
 
 	if (curTick == NULL)
 		return false;
 
+	// Reject an unverifiable action date before retaining the tick or accepting
+	// an async task. Preserve the existing no-contract no-op behavior.
+	if (curTick->getContractInfo() != NULL)
+	{
+		WTSContractInfo* ct = curTick->getContractInfo();
+		if (!lmdbKeyIdentityValid(ct->getExchg(), ct->getCode()) ||
+			!lmdbKeyIdentityValid(curTick->exchg(), curTick->code()))
+		{
+			// L04-004: admission rejection is observable; nothing was cached, stored or queued.
+			pipe_writer_log(_sink, LL_ERROR, "Rejected tick before any side effect: storage identity {}.{} (tick {}.{}) "
+				"does not fit the LMDB key (exchange < {} bytes, code < {} bytes, both non-empty)",
+				identityFieldForLog(ct->getExchg(), 64), identityFieldForLog(ct->getCode(), 64),
+				identityFieldForLog(curTick->exchg(), MAX_EXCHANGE_LENGTH), identityFieldForLog(curTick->code(), MAX_INSTRUMENT_LENGTH),
+				MAX_EXCHANGE_LENGTH, MAX_INSTRUMENT_LENGTH);
+			return false;
+		}
+		uint32_t checkedDate = 0;
+		if (_sink == NULL || !checkedTickSessionDate(_bd_mgr, curTick, checkedDate))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot verify session date for tick {}.{}", curTick->exchg(), curTick->code());
+			return false;
+		}
+	}
+
 	curTick->retain();
 	std::shared_ptr<WTSTickData> tick_ref(curTick, [](WTSTickData* tick) { tick->release(); });
-	return pushTask([this, tick_ref, procFlag](){
+	// 卡13：同步模式把持久化结果回传给调用方；异步模式只表示已接收，失败经计数与日志观察
+	auto persisted = std::make_shared<std::atomic<bool>>(true);
+	const bool accepted = pushTask([this, tick_ref, procFlag, persisted](){
 		WTSTickData* curTick = tick_ref.get();
 
 		do
@@ -687,6 +1305,29 @@ bool WtDataWriterAD::writeTick(WTSTickData* curTick, uint32_t procFlag)
 			WTSContractInfo* ct = curTick->getContractInfo();
 			if(ct == NULL)
 				break;
+			if (!lmdbKeyIdentityValid(ct->getExchg(), ct->getCode()) ||
+				!lmdbKeyIdentityValid(curTick->exchg(), curTick->code()))
+			{
+				// L04-004: accepted (async true) but not processed -> counted and logged, never silent.
+				_tick_rejected_after_accept.fetch_add(1, std::memory_order_acq_rel);
+				persisted->store(false, std::memory_order_release);
+				pipe_writer_log(_sink, LL_ERROR, "Dropped accepted tick: storage identity {}.{} (tick {}.{}) no longer fits the LMDB key",
+					identityFieldForLog(ct->getExchg(), 64), identityFieldForLog(ct->getCode(), 64),
+					identityFieldForLog(curTick->exchg(), MAX_EXCHANGE_LENGTH), identityFieldForLog(curTick->code(), MAX_INSTRUMENT_LENGTH));
+				break;
+			}
+
+			// A caller may have retained and changed the queued tick. Recheck
+			// immediately before consulting the sink or touching writer state.
+			uint32_t checkedDate = 0;
+			if (!checkedTickSessionDate(_bd_mgr, curTick, checkedDate))
+			{
+				_tick_rejected_after_accept.fetch_add(1, std::memory_order_acq_rel);
+				persisted->store(false, std::memory_order_release);
+				pipe_writer_log(_sink, LL_ERROR, "Cannot verify session date for queued tick {}.{}",
+					identityFieldForLog(curTick->exchg(), MAX_EXCHANGE_LENGTH), identityFieldForLog(curTick->code(), MAX_INSTRUMENT_LENGTH));
+				break;
+			}
 
 			WTSCommodityInfo* commInfo = ct->getCommInfo();
 
@@ -694,11 +1335,28 @@ bool WtDataWriterAD::writeTick(WTSTickData* curTick, uint32_t procFlag)
 			if (!_sink->canSessionReceive(commInfo->getSession()))
 				break;
 
-			//先更新缓存
-			if (!updateTickCache(ct, curTick, procFlag))
+			// 卡13（13a=A）：先在缓存锁内准备缓存项，LMDB 提交成功后才发布缓存；
+			// 提交失败时缓存、K线、广播与外部 dumper 均不推进，同一 tick 可原样重试
+			bool persistFailed = false;
+			auto commit = [this, ct, curTick, &persistFailed]() -> bool {
+				if (_disable_tick)
+					return true;
+				if (commitTickToDb(ct, curTick))
+					return true;
+				persistFailed = true;
+				return false;
+			};
+			if (!updateTickCache(ct, curTick, procFlag, commit))
+			{
+				if (persistFailed)
+				{
+					_tick_persist_failures.fetch_add(1, std::memory_order_acq_rel);
+					persisted->store(false, std::memory_order_release);
+				}
 				break;
+			}
 
-			//写到tick缓存
+			//LMDB 已提交，再写外部 dumper
 			if(!_disable_tick)
 				pipeToTicks(ct, curTick);
 
@@ -720,6 +1378,9 @@ bool WtDataWriterAD::writeTick(WTSTickData* curTick, uint32_t procFlag)
 			}
 		} while (false);
 	});
+	if (!accepted)
+		return false;
+	return _async_task ? true : persisted->load(std::memory_order_acquire);
 }
 
 bool WtDataWriterAD::pushTask(TaskInfo task)
@@ -740,26 +1401,46 @@ bool WtDataWriterAD::pushTask(TaskInfo task)
 	return true;
 }
 
-void WtDataWriterAD::pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick)
+bool WtDataWriterAD::commitTickToDb(WTSContractInfo* ct, WTSTickData* curTick)
 {
+	if (ct == NULL || curTick == NULL || !lmdbKeyIdentityValid(ct->getExchg(), ct->getCode()))
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Cannot persist tick with invalid LMDB identity");
+		return false;
+	}
 	//直接落地
 	WtLMDBPtr db = get_t_db(ct->getExchg(), ct->getCode());
-	if (db)
+	if (!db)
 	{
-		//这里要把时间转成便宜时间，并用交易日作为date
-		//这样可以根据交易日筛选历史tick数据
-		uint32_t actTime = curTick->actiontime();
-		uint32_t offTime = ct->getCommInfo()->getSessionInfo()->offsetTime(actTime / 100000, true) * 100000 + actTime % 100000;
-
-		LMDBHftKey key(ct->getExchg(), ct->getCode(), curTick->tradingdate(), offTime);
-		WtLMDBQuery query(*db);
-		if (!query.put_and_commit((void*)&key, sizeof(key), &curTick->getTickStruct(), sizeof(WTSTickStruct)))
-		{
-			pipe_writer_log(_sink, LL_ERROR, "pipe tick of {} to db failed: {}", ct->getFullCode(), db->errmsg());
-		}
+		pipe_writer_log(_sink, LL_ERROR, "Tick db of {} unavailable; tick is not published", ct->getFullCode());
+		return false;
 	}
 
-	for(auto& item : _dumpers)
+	//这里要把时间转成便宜时间，并用交易日作为date
+	//这样可以根据交易日筛选历史tick数据
+	uint32_t actTime = curTick->actiontime();
+	uint32_t offTime = ct->getCommInfo()->getSessionInfo()->offsetTime(actTime / 100000, true) * 100000 + actTime % 100000;
+
+	LMDBHftKey key(ct->getExchg(), ct->getCode(), curTick->tradingdate(), offTime);
+	WtLMDBQuery query(*db);
+	if (!query.put_and_commit((void*)&key, sizeof(key), &curTick->getTickStruct(), sizeof(WTSTickStruct)))
+	{
+		pipe_writer_log(_sink, LL_ERROR, "pipe tick of {} to db failed: {}", ct->getFullCode(), db->errmsg());
+		return false;
+	}
+	return true;
+}
+
+void WtDataWriterAD::pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick)
+{
+	if (ct == NULL || curTick == NULL || !lmdbKeyIdentityValid(ct->getExchg(), ct->getCode()))
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Cannot persist tick with invalid LMDB identity");
+		return;
+	}
+
+	const ExtDumpers dumperSnapshot = snapshotDumpers();	// K20: call dumpers outside the registry lock
+	for (auto& item : dumperSnapshot)
 	{
 		const char* id = item.first.c_str();
 		IHisDataDumper* dumper = item.second;
@@ -776,6 +1457,11 @@ void WtDataWriterAD::pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick)
 
 void WtDataWriterAD::pipeToDayBars(WTSContractInfo* ct, const WTSBarStruct& bar)
 {
+	if (ct == NULL || !lmdbKeyIdentityValid(ct->getExchg(), ct->getCode()))
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Cannot persist day bar with invalid LMDB identity");
+		return;
+	}
 	//直接落地
 	WtLMDBPtr db = get_k_db(ct->getExchg(), KP_DAY);
 	if (db)
@@ -792,7 +1478,8 @@ void WtDataWriterAD::pipeToDayBars(WTSContractInfo* ct, const WTSBarStruct& bar)
 		}
 	}
 
-	for (auto& item : _dumpers)
+	const ExtDumpers dumperSnapshot = snapshotDumpers();	// K20: call dumpers outside the registry lock
+	for (auto& item : dumperSnapshot)
 	{
 		const char* id = item.first.c_str();
 		IHisDataDumper* dumper = item.second;
@@ -809,8 +1496,18 @@ void WtDataWriterAD::pipeToDayBars(WTSContractInfo* ct, const WTSBarStruct& bar)
 
 void WtDataWriterAD::pipeToM1Bars(WTSContractInfo* ct, const WTSBarStruct& bar)
 {
+	if (ct == NULL || !lmdbKeyIdentityValid(ct->getExchg(), ct->getCode()))
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Cannot persist m1 bar with invalid LMDB identity");
+		return;
+	}
 	//直接落地
-	WtLMDBPtr db = get_k_db(ct->getExchg(), KP_Minute1);
+	// 卡13/R32-003/R100-003：v1 LMDB 分钟键为 uint32，迁移合同落地前拒绝不可表示的时间，不得静默回绕
+	WtLMDBPtr db;
+	if (bar.time > (uint64_t)UINT32_MAX)
+		pipe_writer_log(_sink, LL_ERROR, "m1 bar time {} of {} is not representable in the v1 LMDB key; db write refused", bar.time, ct->getFullCode());
+	else
+		db = get_k_db(ct->getExchg(), KP_Minute1);
 	if(db)
 	{
 		LMDBBarKey key(ct->getExchg(), ct->getCode(), (uint32_t)bar.time);
@@ -825,7 +1522,8 @@ void WtDataWriterAD::pipeToM1Bars(WTSContractInfo* ct, const WTSBarStruct& bar)
 		}
 	}
 
-	for (auto& item : _dumpers)
+	const ExtDumpers dumperSnapshot = snapshotDumpers();	// K20: call dumpers outside the registry lock
+	for (auto& item : dumperSnapshot)
 	{
 		const char* id = item.first.c_str();
 		IHisDataDumper* dumper = item.second;
@@ -842,8 +1540,18 @@ void WtDataWriterAD::pipeToM1Bars(WTSContractInfo* ct, const WTSBarStruct& bar)
 
 void WtDataWriterAD::pipeToM5Bars(WTSContractInfo* ct, const WTSBarStruct& bar)
 {
+	if (ct == NULL || !lmdbKeyIdentityValid(ct->getExchg(), ct->getCode()))
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Cannot persist m5 bar with invalid LMDB identity");
+		return;
+	}
 	//直接落地
-	WtLMDBPtr db = get_k_db(ct->getExchg(), KP_Minute5);
+	// 卡13/R32-003/R100-003：v1 LMDB 分钟键为 uint32，迁移合同落地前拒绝不可表示的时间，不得静默回绕
+	WtLMDBPtr db;
+	if (bar.time > (uint64_t)UINT32_MAX)
+		pipe_writer_log(_sink, LL_ERROR, "m5 bar time {} of {} is not representable in the v1 LMDB key; db write refused", bar.time, ct->getFullCode());
+	else
+		db = get_k_db(ct->getExchg(), KP_Minute5);
 	if (db)
 	{
 		LMDBBarKey key(ct->getExchg(), ct->getCode(), (uint32_t)bar.time);
@@ -858,7 +1566,8 @@ void WtDataWriterAD::pipeToM5Bars(WTSContractInfo* ct, const WTSBarStruct& bar)
 		}
 	}
 
-	for (auto& item : _dumpers)
+	const ExtDumpers dumperSnapshot = snapshotDumpers();	// K20: call dumpers outside the registry lock
+	for (auto& item : dumperSnapshot)
 	{
 		const char* id = item.first.c_str();
 		IHisDataDumper* dumper = item.second;
@@ -893,16 +1602,75 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 
 	std::string key = fmtutil::format<64>("{}.{}", curTick->exchg(), curTick->code());
 	auto prepareBarCacheItem = [this, &key](RTBarCacheWrapper& cache, const char* period,
-		uint32_t& idx, bool& bNewCode) -> bool {
+		uint32_t& idx, bool& bNewCode, wt_rtpub::PublishLock& publishLock) -> bool {
 		bNewCode = false;
+		// 卡13：持跨进程发布锁；同步其他 writer 的扩容映射并补扫其新增缓存项
+		if (cache._file_ptr != NULL)
+		{
+			if (!publishLock.acquire(cache._file_ptr->filename()))
+			{
+				pipe_writer_log(_sink, LL_ERROR, "{} bar cache publish lock unavailable: {}", period, publishLock.error());
+				return false;
+			}
+			if (publishLock.recovered())
+			{
+				boost::system::error_code sizeEc;
+				const uintmax_t physical = boost::filesystem::file_size(cache._file_ptr->filename(), sizeEc);
+				if (sizeEc)
+					return false;
+				const uint32_t physRecords = wt_rtpub::mappedRecords((uint64_t)physical, sizeof(RTBarCache), sizeof(BarCacheItem));
+				if (wt_rtpub::publishedCapacity(cache._cache_block) > physRecords)
+					wt_rtpub::publishCapacity(cache._cache_block, physRecords);
+				if (wt_rtpub::publishedSize(cache._cache_block) > wt_rtpub::publishedCapacity(cache._cache_block))
+					wt_rtpub::publishSize(cache._cache_block, wt_rtpub::publishedCapacity(cache._cache_block));
+				pipe_writer_log(_sink, LL_WARN, "{} bar cache recovered after an interrupted structural change by pid {}", period, publishLock.recoveredPid());
+				if (!publishLock.endStructural())
+					return false;
+			}
+			if (wt_rtpub::publishedCapacity(cache._cache_block) >
+				wt_rtpub::mappedRecords(cache._file_ptr->size(), sizeof(RTBarCache), sizeof(BarCacheItem)))
+			{
+				BoostMFPtr fresh(new BoostMappingFile());
+				if (!fresh->map(cache._file_ptr->filename()) || fresh->addr() == NULL ||
+					wt_rtpub::mappedRecords(fresh->size(), sizeof(RTBarCache), sizeof(BarCacheItem)) < wt_rtpub::publishedCapacity(fresh->addr()))
+				{
+					pipe_writer_log(_sink, LL_ERROR, "Cannot remap {} bar cache grown by another writer", period);
+					return false;
+				}
+				cache._file_ptr.swap(fresh);
+				cache._cache_block = (RTBarCache*)cache._file_ptr->addr();
+			}
+			const uint32_t published = std::min(wt_rtpub::publishedSize(cache._cache_block), wt_rtpub::publishedCapacity(cache._cache_block));
+			for (uint32_t i = cache._scanned; i < published; i++)
+			{
+				AlignedBarCacheItem foreign;
+				loadBarCacheItem(cache._cache_block, i, foreign);
+				if (std::memchr(foreign._exchg, '\0', sizeof(foreign._exchg)) == NULL ||
+					std::memchr(foreign._code, '\0', sizeof(foreign._code)) == NULL)
+				{
+					pipe_writer_log(_sink, LL_ERROR, "Invalid {} bar cache identity at index {} published by another writer", period, i);
+					return false;
+				}
+				std::string foreignKey = fmtutil::format<64>("{}.{}", foreign._exchg, foreign._code);
+				if (cache._idx.find(foreignKey) == cache._idx.end())
+					cache._idx[foreignKey] = i;
+			}
+			if (published > cache._scanned)
+				cache._scanned = published;
+		}
 		wt_hashmap<std::string, uint32_t>::iterator found = cache._idx.find(key);
 		if (found != cache._idx.end())
 		{
 			idx = found->second;
+			if (idx >= cache._cache_block->_size || idx >= cache._cache_block->_capacity)
+			{
+				pipe_writer_log(_sink, LL_ERROR, "Invalid {} bar cache index {} for {}", period, idx, key);
+				return false;
+			}
 			return true;
 		}
 
-		idx = cache._cache_block->_size;
+		idx = wt_rtpub::publishedSize(cache._cache_block);
 		if (idx == UINT32_MAX)
 		{
 			pipe_writer_log(_sink, LL_ERROR, "{} bar cache size is exhausted; skipping {}", period, key);
@@ -920,7 +1688,8 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 			}
 
 			const uint32_t newCapacity = capacity + CACHE_SIZE_STEP_AD;
-			if (!resizeRTBlock<RTBarCache, BarCacheItem>(cache._file_ptr, newCapacity))
+			wt_rtpub::StructuralGuard structural(publishLock, newCapacity);
+			if (!structural.begun() || !resizeRTBlock<RTBarCache, BarCacheItem>(cache._file_ptr, newCapacity))
 			{
 				pipe_writer_log(_sink, LL_ERROR, "{} bar cache expansion failed; skipping {}", period, key);
 				return false;
@@ -940,15 +1709,18 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 	if (!_disable_day && _d1_cache._cache_block)
 	{
 		StdUniqueLock lock(_d1_cache._mtx);
+		wt_rtpub::PublishLock barPublishLock;
 		uint32_t idx = 0;
 		bool bNewCode = false;
-		if (!prepareBarCacheItem(_d1_cache, "day", idx, bNewCode))
+		if (!prepareBarCacheItem(_d1_cache, "day", idx, bNewCode, barPublishLock))
 		{
 			// Keep this stream unchanged and continue updating the other bar caches.
 		}
 		else
 		{
-		BarCacheItem& item = (BarCacheItem&)_d1_cache._cache_block->_items[idx];
+		AlignedBarCacheItem item;
+		if (!bNewCode)
+			loadBarCacheItem(_d1_cache._cache_block, idx, item);
 		if (bNewCode)
 		{
 			strcpy(item._exchg, curTick->exchg());
@@ -976,7 +1748,7 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 			}
 
 			newBar->date = curTick->tradingdate();
-			newBar->time = barDate;
+			newBar->time = 0;	//卡3 3c=C：日线 time=0，date 为交易日
 			newBar->open = curTick->price();
 			newBar->high = curTick->price();
 			newBar->low = curTick->price();
@@ -1011,8 +1783,12 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 			newBar->add += curTick->additional();
 		}
 
+		storeBarCacheItem(_d1_cache._cache_block, idx, item);
 		if (bNewCode)
-			_d1_cache._cache_block->_size = idx + 1;
+		{
+			wt_rtpub::publishSize(_d1_cache._cache_block, idx + 1);
+			_d1_cache._scanned = idx + 1;
+		}
 		}
 	}
 
@@ -1020,15 +1796,18 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 	if (!_disable_min1 && _m1_cache._cache_block)
 	{
 		StdUniqueLock lock(_m1_cache._mtx);
+		wt_rtpub::PublishLock barPublishLock;
 		uint32_t idx = 0;
 		bool bNewCode = false;
-		if (!prepareBarCacheItem(_m1_cache, "m1", idx, bNewCode))
+		if (!prepareBarCacheItem(_m1_cache, "m1", idx, bNewCode, barPublishLock))
 		{
 			// Keep this stream unchanged and continue updating the other bar caches.
 		}
 		else
 		{
-		BarCacheItem& item = (BarCacheItem&)_m1_cache._cache_block->_items[idx];
+		AlignedBarCacheItem item;
+		if (!bNewCode)
+			loadBarCacheItem(_m1_cache._cache_block, idx, item);
 		if(bNewCode)
 		{
 			strcpy(item._exchg, curTick->exchg());
@@ -1107,8 +1886,12 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 			newBar->add += curTick->additional();
 		}
 
+		storeBarCacheItem(_m1_cache._cache_block, idx, item);
 		if (bNewCode)
-			_m1_cache._cache_block->_size = idx + 1;
+		{
+			wt_rtpub::publishSize(_m1_cache._cache_block, idx + 1);
+			_m1_cache._scanned = idx + 1;
+		}
 		}
 	}
 
@@ -1116,15 +1899,18 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 	if (!_disable_min5 && _m5_cache._cache_block)
 	{
 		StdUniqueLock lock(_m5_cache._mtx);
+		wt_rtpub::PublishLock barPublishLock;
 		uint32_t idx = 0;
 		bool bNewCode = false;
-		if (!prepareBarCacheItem(_m5_cache, "m5", idx, bNewCode))
+		if (!prepareBarCacheItem(_m5_cache, "m5", idx, bNewCode, barPublishLock))
 		{
 			// Keep this stream unchanged and continue processing the current tick.
 		}
 		else
 		{
-		BarCacheItem& item = (BarCacheItem&)_m5_cache._cache_block->_items[idx];
+		AlignedBarCacheItem item;
+		if (!bNewCode)
+			loadBarCacheItem(_m5_cache._cache_block, idx, item);
 		if (bNewCode)
 		{
 			strcpy(item._exchg, curTick->exchg());
@@ -1180,15 +1966,21 @@ void WtDataWriterAD::updateBarCache(WTSContractInfo* ct, WTSTickData* curTick)
 			newBar->add += curTick->additional();
 		}
 
+		storeBarCacheItem(_m5_cache._cache_block, idx, item);
 		if (bNewCode)
-			_m5_cache._cache_block->_size = idx + 1;
+		{
+			wt_rtpub::publishSize(_m5_cache._cache_block, idx + 1);
+			_m5_cache._scanned = idx + 1;
+		}
 		}
 	}
 }
 
 WTSTickData* WtDataWriterAD::getCurTick(const char* code, const char* exchg/* = ""*/)
 {
-	if (strlen(code) == 0)
+	// Reads stay available after stop (mappings live until destruction) but are counted.
+	AdOperationGuard operation(*this, true);
+	if (code == NULL || strlen(code) == 0)
 		return NULL;
 
 	WTSContractInfo* ct = _bd_mgr->getContract(code, exchg);
@@ -1202,27 +1994,163 @@ WTSTickData* WtDataWriterAD::getCurTick(const char* code, const char* exchg/* = 
 		return NULL;
 
 	uint32_t idx = it->second;
-	TickCacheItem& item = _tick_cache_block->_items[idx];
+	if (_tick_cache_block == NULL || idx >= _tick_cache_block->_size || idx >= _tick_cache_block->_capacity)
+		return NULL;
+	AlignedTickCacheItem item;
+	loadTickCacheItem(_tick_cache_block, idx, item);
 	return WTSTickData::create(item._tick);
 }
 
-bool WtDataWriterAD::updateTickCache(WTSContractInfo* /*ct*/, WTSTickData* curTick, uint32_t procFlag)
+bool WtDataWriterAD::checkLmdbKeyLayout(WtLMDB& db, const std::string& path, std::size_t keySize, bool isTick)
+{
+	MDB_txn* txn = NULL;
+	int rc = mdb_txn_begin(db.env(), NULL, MDB_RDONLY, &txn);
+	if (rc != MDB_SUCCESS)
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Cannot probe LMDB key layout at {}: {}", path, mdb_strerror(rc));
+		return false;
+	}
+	const MDB_dbi dbi = db.update_dbi(txn);
+	if (db.has_error())
+	{
+		mdb_txn_abort(txn);
+		pipe_writer_log(_sink, LL_ERROR, "Cannot open LMDB at {} for key layout probe: {}", path, db.errmsg());
+		return false;
+	}
+
+	bool ok = true;
+	std::string reason;
+	MDB_cursor* cursor = NULL;
+	rc = mdb_cursor_open(txn, dbi, &cursor);
+	if (rc != MDB_SUCCESS)
+	{
+		ok = false;
+		reason = mdb_strerror(rc);
+	}
+	else
+	{
+		const MDB_cursor_op ops[2] = { MDB_FIRST, MDB_LAST };
+		for (const MDB_cursor_op op : ops)
+		{
+			MDB_val key, val;
+			rc = mdb_cursor_get(cursor, &key, &val, op);
+			if (rc == MDB_NOTFOUND)
+				break;	// empty database: nothing to migrate
+			if (rc != MDB_SUCCESS)
+			{
+				ok = false;
+				reason = mdb_strerror(rc);
+				break;
+			}
+			if (key.mv_size != keySize)
+			{
+				ok = false;
+				reason = "key size " + std::to_string(key.mv_size) + " differs from current " + std::to_string(keySize);
+				break;
+			}
+			if (isTick && op == MDB_FIRST)
+			{
+				// Keys of one contract sort by big-endian trading date; a zero date sorts first.
+				uint32_t date = 0;
+				memcpy(&date, static_cast<const char*>(key.mv_data) + MAX_EXCHANGE_LENGTH + MAX_INSTRUMENT_LENGTH, sizeof(date));
+				if (date == 0)
+				{
+					ok = false;
+					reason = "legacy tick key with zero trading date (records may have overwritten each other)";
+					break;
+				}
+			}
+		}
+		mdb_cursor_close(cursor);
+	}
+	// A read-only commit keeps the dbi handle opened above for later writes.
+	mdb_txn_commit(txn);
+	if (!ok)
+		pipe_writer_log(_sink, LL_ERROR, "LMDB at {} quarantined, unknown key format (13c fail-closed): {}", path, reason);
+	return ok;
+}
+
+bool WtDataWriterAD::updateTickCache(WTSContractInfo* /*ct*/, WTSTickData* curTick, uint32_t procFlag,
+	const std::function<bool()>& commitBeforePublish)
 {
 	if (curTick == NULL || _tick_cache_block == NULL)
 	{
 		pipe_writer_log(_sink, LL_ERROR, "Tick cache data not initialized");
 		return false;
 	}
+	uint32_t tdate = 0;
+	if (!checkedTickSessionDate(_bd_mgr, curTick, tdate))
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Cannot verify session date for tick {}.{}", curTick->exchg(), curTick->code());
+		return false;
+	}
 
 	StdUniqueLock lock(_mtx_tick_cache);
+	// 卡13：缓存读改写在跨进程发布锁内完成；先同步其他 writer 的扩容并补扫其新增的缓存项
+	wt_rtpub::PublishLock publishLock;
+	if (_tick_cache_file == NULL || !publishLock.acquire(_tick_cache_file->filename()))
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Tick cache publish lock unavailable: {}", publishLock.error());
+		return false;
+	}
+	if (publishLock.recovered())
+	{
+		boost::system::error_code sizeEc;
+		const uintmax_t physical = boost::filesystem::file_size(_tick_cache_file->filename(), sizeEc);
+		if (sizeEc)
+			return false;
+		const uint32_t physRecords = wt_rtpub::mappedRecords((uint64_t)physical, sizeof(RTTickCache), sizeof(TickCacheItem));
+		if (wt_rtpub::publishedCapacity(_tick_cache_block) > physRecords)
+			wt_rtpub::publishCapacity(_tick_cache_block, physRecords);
+		if (wt_rtpub::publishedSize(_tick_cache_block) > wt_rtpub::publishedCapacity(_tick_cache_block))
+			wt_rtpub::publishSize(_tick_cache_block, wt_rtpub::publishedCapacity(_tick_cache_block));
+		pipe_writer_log(_sink, LL_WARN, "Tick cache recovered after an interrupted structural change by pid {}", publishLock.recoveredPid());
+		if (!publishLock.endStructural())
+			return false;
+	}
+	if (wt_rtpub::publishedCapacity(_tick_cache_block) >
+		wt_rtpub::mappedRecords(_tick_cache_file->size(), sizeof(RTTickCache), sizeof(TickCacheItem)))
+	{
+		BoostMFPtr fresh(new BoostMappingFile());
+		if (!fresh->map(_tick_cache_file->filename()) || fresh->addr() == NULL ||
+			wt_rtpub::mappedRecords(fresh->size(), sizeof(RTTickCache), sizeof(TickCacheItem)) < wt_rtpub::publishedCapacity(fresh->addr()))
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Cannot remap tick cache grown by another writer");
+			return false;
+		}
+		_tick_cache_file.swap(fresh);
+		_tick_cache_block = (RTTickCache*)_tick_cache_file->addr();
+	}
+	{
+		const uint32_t published = std::min(wt_rtpub::publishedSize(_tick_cache_block), wt_rtpub::publishedCapacity(_tick_cache_block));
+		for (uint32_t i = _tick_cache_scanned; i < published; i++)
+		{
+			AlignedTickCacheItem foreign;
+			loadTickCacheItem(_tick_cache_block, i, foreign);
+			if (std::memchr(foreign._tick.exchg, '\0', sizeof(foreign._tick.exchg)) == NULL ||
+				std::memchr(foreign._tick.code, '\0', sizeof(foreign._tick.code)) == NULL)
+			{
+				pipe_writer_log(_sink, LL_ERROR, "Invalid tick cache identity at index {} published by another writer", i);
+				return false;
+			}
+			std::string foreignKey = fmtutil::format<64>("{}.{}", foreign._tick.exchg, foreign._tick.code);
+			if (_tick_cache_idx.find(foreignKey) == _tick_cache_idx.end())
+				_tick_cache_idx[foreignKey] = i;
+		}
+		if (published > _tick_cache_scanned)
+			_tick_cache_scanned = published;
+	}
+	// 保存预处理前的 tick；持久化失败时恢复，保证同一 tick 可原样重试
+	const WTSTickStruct originalTick = curTick->getTickStruct();
+
 	std::string key = fmtutil::format<64>("{}.{}", curTick->exchg(), curTick->code());
 	uint32_t idx = 0;
 	bool bNewCode = false;
-	TickCacheItem pendingItem = {};
+	AlignedTickCacheItem item;
 	wt_hashmap<std::string, uint32_t>::iterator found = _tick_cache_idx.find(key);
 	if (found == _tick_cache_idx.end())
 	{
-		idx = _tick_cache_block->_size;
+		idx = wt_rtpub::publishedSize(_tick_cache_block);
 		if (idx == UINT32_MAX)
 		{
 			pipe_writer_log(_sink, LL_ERROR, "Tick cache size is exhausted; skipping {}", key);
@@ -1239,7 +2167,8 @@ bool WtDataWriterAD::updateTickCache(WTSContractInfo* /*ct*/, WTSTickData* curTi
 				return false;
 			}
 
-			if (!resizeRTBlock<RTTickCache, TickCacheItem>(_tick_cache_file, capacity + CACHE_SIZE_STEP_AD))
+			wt_rtpub::StructuralGuard structural(publishLock, (uint64_t)capacity + CACHE_SIZE_STEP_AD);
+			if (!structural.begun() || !resizeRTBlock<RTTickCache, TickCacheItem>(_tick_cache_file, capacity + CACHE_SIZE_STEP_AD))
 			{
 				pipe_writer_log(_sink, LL_ERROR, "Tick cache expansion failed; skipping {}", key);
 				return false;
@@ -1255,7 +2184,15 @@ bool WtDataWriterAD::updateTickCache(WTSContractInfo* /*ct*/, WTSTickData* curTi
 		idx = found->second;
 	}
 
-	TickCacheItem& item = bNewCode ? pendingItem : _tick_cache_block->_items[idx];
+	if (!bNewCode)
+	{
+		if (idx >= _tick_cache_block->_size || idx >= _tick_cache_block->_capacity)
+		{
+			pipe_writer_log(_sink, LL_ERROR, "Invalid tick cache index {} for {}", idx, key);
+			return false;
+		}
+		loadTickCacheItem(_tick_cache_block, idx, item);
+	}
 	if (curTick->tradingdate() < item._date)
 	{
 		pipe_writer_log(_sink, LL_INFO, "Tradingday[{}] of {} is less than cached tradingday[{}]", curTick->tradingdate(), curTick->code(), item._date);
@@ -1319,8 +2256,6 @@ bool WtDataWriterAD::updateTickCache(WTSContractInfo* /*ct*/, WTSTickData* curTi
 	{
 		//如果缓存里的数据日期大于最新行情的日期
 		//或者缓存里的时间大于等于最新行情的时间,数据就不需要处理
-		WTSSessionInfo* sInfo = _bd_mgr->getSessionByCode(curTick->code(), curTick->exchg());
-		uint32_t tdate = sInfo->getOffsetDate(curTick->actiondate(), curTick->actiontime() / 100000);
 		if (tdate > curTick->tradingdate())
 		{
 			pipe_writer_log(_sink, LL_ERROR, "Last tick of {}.{} with time {}.{} has an exception, abandoned", curTick->exchg(), curTick->code(), curTick->actiondate(), curTick->actiontime());
@@ -1380,12 +2315,22 @@ bool WtDataWriterAD::updateTickCache(WTSContractInfo* /*ct*/, WTSTickData* curTi
 		}
 	}
 
+	// 卡13（13a=A）：缓存项已完整准备；先由调用方提交持久化，成功后才发布索引/内容/_size
+	if (commitBeforePublish && !commitBeforePublish())
+	{
+		curTick->getTickStruct() = originalTick;
+		return false;
+	}
 	if (bNewCode)
 	{
 		// Commit data, index, and size only after the cache entry has been fully prepared.
 		_tick_cache_idx[key] = idx;
-		_tick_cache_block->_items[idx] = pendingItem;
-		_tick_cache_block->_size = idx + 1;
+	}
+	storeTickCacheItem(_tick_cache_block, idx, item);
+	if (bNewCode)
+	{
+		wt_rtpub::publishSize(_tick_cache_block, idx + 1);
+		_tick_cache_scanned = idx + 1;
 	}
 
 	return true;
@@ -1424,10 +2369,23 @@ WtDataWriterAD::WtLMDBPtr WtDataWriterAD::get_k_db(const char* exchg, WTSKlinePe
 
 	WtLMDBPtr dbPtr(new WtLMDB(false));
 	std::string path = fmtutil::format("{}{}/{}/", _base_dir.c_str(), subdir.c_str(), exchg);
-	boost::filesystem::create_directories(path);
+	if (_quarantined_dbs.count(path) != 0)
+		return WtLMDBPtr();
+	boost::system::error_code ec;
+	boost::filesystem::create_directories(path, ec);
+	if (ec)
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Cannot create {} db directory {}: {}", subdir, path, ec.message());
+		return WtLMDBPtr();
+	}
 	if(!dbPtr->open(path.c_str(), _kline_mapsize))
 	{
 		if (_sink) pipe_writer_log(_sink, LL_ERROR, "Opening {} db at {} failed: {}", subdir, path, dbPtr->errmsg());
+		return WtLMDBPtr();
+	}
+	if (!checkLmdbKeyLayout(*dbPtr, path, sizeof(LMDBBarKey), false))
+	{
+		_quarantined_dbs.insert(path);
 		return WtLMDBPtr();
 	}
 
@@ -1452,10 +2410,23 @@ WtDataWriterAD::WtLMDBPtr WtDataWriterAD::get_t_db(const char* exchg, const char
 
 	WtLMDBPtr dbPtr(new WtLMDB(false));
 	std::string path = fmtutil::format("{}ticks/{}/{}", _base_dir.c_str(), exchg, code);
-	boost::filesystem::create_directories(path);
+	if (_quarantined_dbs.count(path) != 0)
+		return WtLMDBPtr();
+	boost::system::error_code ec;
+	boost::filesystem::create_directories(path, ec);
+	if (ec)
+	{
+		pipe_writer_log(_sink, LL_ERROR, "Cannot create tick db directory {}: {}", path, ec.message());
+		return WtLMDBPtr();
+	}
 	if (!dbPtr->open(path.c_str(), _tick_mapsize))
 	{
 		if (_sink) pipe_writer_log(_sink, LL_ERROR, "Opening tick db at {} failed: {}", path, dbPtr->errmsg());
+		return WtLMDBPtr();
+	}
+	if (!checkLmdbKeyLayout(*dbPtr, path, sizeof(LMDBHftKey), true))
+	{
+		_quarantined_dbs.insert(path);
 		return WtLMDBPtr();
 	}
 

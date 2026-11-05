@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="22" failures="2" disabled="2" errors="0" time="1.394" timestamp="2026-11-04T20:46:24.860" name="AllTests">
+  <testsuite name="R44DataManagerEdgesTest" tests="7" failures="2" disabled="1" skipped="0" errors="0" time="1.041" timestamp="2026-11-04T20:46:24.860">
+    <testcase name="InitFailsOnExistingButCorruptDefaultModuleFile" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp" line="166" status="run" result="completed" time="0.225" timestamp="2026-11-04T20:46:24.860" classname="R44DataManagerEdgesTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:175&#x0A;Expected equality of these values:&#x0A;  dm.getBDMgr()&#x0A;    Which is: NULL&#x0A;  static_cast&lt;IBaseDataMgr*&gt;(&amp;_bdMgr)&#x0A;    Which is: 0x1076b3c60&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:175
+Expected equality of these values:
+  dm.getBDMgr()
+    Which is: NULL
+  static_cast<IBaseDataMgr*>(&_bdMgr)
+    Which is: 0x1076b3c60
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:177&#x0A;Value of: dm.canSessionReceive(&quot;DAY0&quot;)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:177
+Value of: dm.canSessionReceive("DAY0")
+  Actual: true
+Expected: false
+]]></failure>
+    </testcase>
+    <testcase name="InitFailsWhenDefaultModuleNameIsDirectory" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp" line="183" status="run" result="completed" time="0.039" timestamp="2026-11-04T20:46:25.090" classname="R44DataManagerEdgesTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:191&#x0A;Expected equality of these values:&#x0A;  dm.getBDMgr()&#x0A;    Which is: NULL&#x0A;  static_cast&lt;IBaseDataMgr*&gt;(&amp;_bdMgr)&#x0A;    Which is: 0x1076b49b0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:191
+Expected equality of these values:
+  dm.getBDMgr()
+    Which is: NULL
+  static_cast<IBaseDataMgr*>(&_bdMgr)
+    Which is: 0x1076b49b0
+]]></failure>
+    </testcase>
+    <testcase name="DuplicateCasterIsFannedOutTwice" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp" line="196" status="run" result="completed" time="0.023" timestamp="2026-11-04T20:46:25.129" classname="R44DataManagerEdgesTest" />
+    <testcase name="FourBroadcastOverloadsReachCaster" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp" line="212" status="run" result="completed" time="0.023" timestamp="2026-11-04T20:46:25.152" classname="R44DataManagerEdgesTest" />
+    <testcase name="ReleaseWithoutWriterIsIdempotent" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp" line="244" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:46:25.176" classname="R44DataManagerEdgesTest" />
+    <testcase name="SessionCommsExposeCommodityFullPids" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp" line="258" status="run" result="completed" time="0.721" timestamp="2026-11-04T20:46:25.180" classname="R44DataManagerEdgesTest" />
+    <testcase name="DISABLED_NullBaseDataManagerIsAnInvalidDependencyProbe" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp" line="303" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="R44DataManagerEdgesTest" />
+  </testsuite>
+  <testsuite name="R5StateMonitorBdtTest" tests="15" failures="0" disabled="1" skipped="0" errors="0" time="0.353" timestamp="2026-11-04T20:46:25.901">
+    <testcase name="SessionCommsPresentOverwritesSeededTradingDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="235" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:46:25.901" classname="R5StateMonitorBdtTest" />
+    <testcase name="SessionWithoutCommsKeepsSeededTradingDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="262" status="run" result="completed" time="0.056" timestamp="2026-11-04T20:46:25.905" classname="R5StateMonitorBdtTest" />
+    <testcase name="TodayAsHolidayDrivesHolidayLogBranchOfInitLoop" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="289" status="run" result="completed" time="0.021" timestamp="2026-11-04T20:46:25.961" classname="R5StateMonitorBdtTest" />
+    <testcase name="FifteenCharSessionIdFitsStateKeyBuffer" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="307" status="run" result="completed" time="0.054" timestamp="2026-11-04T20:46:25.996" classname="R5StateMonitorBdtTest" />
+    <testcase name="MissingTimeFieldsDefaultToZeroAndStillAssembleSections" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="325" status="run" result="completed" time="0.036" timestamp="2026-11-04T20:46:26.051" classname="R5StateMonitorBdtTest" />
+    <testcase name="ReinitializeWithExtraSessionGrowsStateTable" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="341" status="run" result="completed" time="0.029" timestamp="2026-11-04T20:46:26.087" classname="R5StateMonitorBdtTest" />
+    <testcase name="SessionWithoutAuctionKeepsOnlyTradingSections" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="360" status="run" result="completed" time="0.006" timestamp="2026-11-04T20:46:26.117" classname="R5StateMonitorBdtTest" />
+    <testcase name="InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="375" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:46:26.123" classname="R5StateMonitorBdtTest" />
+    <testcase name="CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="440" status="run" result="completed" time="0.024" timestamp="2026-11-04T20:46:26.127" classname="R5StateMonitorBdtTest" />
+    <testcase name="CrossMidnightPaddingOverlapCollapsesToFullDay" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="478" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:46:26.152" classname="R5StateMonitorBdtTest" />
+    <testcase name="InvalidSessionEntriesRejectWholeFile" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="519" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:46:26.154" classname="R5StateMonitorBdtTest" />
+    <testcase name="ZeroStartSectionUsesClampedMidnightPadding" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="544" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:46:26.157" classname="R5StateMonitorBdtTest" />
+    <testcase name="NonObjectEntriesDegradeToDefaultTimes" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="597" status="run" result="completed" time="0.043" timestamp="2026-11-04T20:46:26.161" classname="R5StateMonitorBdtTest" />
+    <testcase name="MixedKnownAndUnknownSessionsKeepTableConsistent" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="625" status="run" result="completed" time="0.05" timestamp="2026-11-04T20:46:26.204" classname="R5StateMonitorBdtTest" />
+    <testcase name="DISABLED_StateMachineAdvanceNeedsInjectableClockSeam" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="654" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="R5StateMonitorBdtTest" />
+  </testsuite>
+</testsuites>

@@ -14,6 +14,7 @@
 
 #include <fstream>
 #include <memory>
+#include <new>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -154,6 +155,7 @@ class R42ThrowingBaseDataMgr : public FakeBaseDataMgr
 {
 public:
     bool throwOnAg = false;
+    bool badAllocOnAg = false;	// K45: simulates an allocation failure in the middle of a restore
     bool acceptAnyCode = false;
     WTSContractInfo* getContract(const char* code, const char* exchg = "", uint32_t date = 0) override
     {
@@ -161,7 +163,23 @@ public:
             return FakeBaseDataMgr::getContract("rb2510", "SHFE", date);
         if (throwOnAg && std::string(code) == "ag2512")
             throw std::runtime_error("injected contract lookup failure");
+        if (badAllocOnAg && std::string(code) == "ag2512")
+            throw std::bad_alloc();
         return FakeBaseDataMgr::getContract(code, exchg, date);
+    }
+};
+
+// K45 (BUG-P01-004): the hot manager is consulted for every restored position
+// before the candidate is published; it can simulate an allocation failure there.
+class R42ThrowingHotMgr : public FakeHotMgr
+{
+public:
+    bool badAllocOnRuleTag = false;
+    const char* getRuleTag(const char* stdCode) override
+    {
+        if (badAllocOnRuleTag)
+            throw std::bad_alloc();
+        return FakeHotMgr::getRuleTag(stdCode);
     }
 };
 
@@ -170,7 +188,7 @@ class R42CtaPersistTest : public ::testing::Test
 protected:
     P01TempEnv env { "cta_persist" };
     R42ThrowingBaseDataMgr bd;
-    FakeHotMgr hot;
+    R42ThrowingHotMgr hot;
     P01CtaEngine engine;
     std::unique_ptr<R42CtaCtx> ctx;
 
@@ -808,6 +826,153 @@ TEST_F(R42CtaPersistTest, LogsSubscriptionsAndMetadataAccessors)
     EXPECT_EQ(ctx->stra_get_tdate(), 20250110u);
     EXPECT_EQ(ctx->stra_get_date(), 20250110u);
     EXPECT_EQ(ctx->stra_get_time(), 931u);
+}
+
+// 决策 K45（2026-11-04 用户裁定）：快照只兼容当前形状与已知可缺省字段；任一层出现写端从不产生的成员
+// 即为未知形状，整份拒绝，不发布任何候选状态或订阅。
+TEST_F(R42CtaPersistTest, K45UnknownMembersRejectTheWholeSnapshot)
+{
+    const char* baseline = R"json({
+      "fund":{"total_profit":1,"total_dynprofit":2,"total_fees":3,"tdate":20250110},
+      "positions":[{"code":"SHFE.rb.2510","volume":2,"closeprofit":1,"dynprofit":2,
+        "lastentertime":1,"lastexittime":0,"details":[{"long":true,"price":3000,"volume":2,
+        "opentime":1,"profit":2,"maxprofit":3,"maxloss":-1,"opentag":"initial"}]}],
+      "conditions":{"settime":111,"items":{"SHFE.rb.2510":[{"usertag":"initial",
+        "field":0,"alg":0,"target":3500,"qty":2,"action":0}]}},
+      "signals":{"SHFE.rb.2510":{"usertag":"initial","volume":3,"sigprice":3000,"gentime":2}},
+      "utils":{"lastbarno":7}
+    })json";
+    ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"), baseline));
+    ctx->on_init();
+    ASSERT_EQ(ctx->position_count(), 1u);
+    ASSERT_EQ(ctx->signal_count(), 1u);
+
+    const char* candidate = R"json({
+      "fund":{"total_profit":8,"total_dynprofit":9,"total_fees":10,"tdate":20250111},
+      "positions":[{"code":"SHFE.ag.2512","volume":4,"closeprofit":8,"dynprofit":9,
+        "lastentertime":10,"lastexittime":11,
+        "details":[{"long":true,"price":3000,"volume":4,"opentime":10,"profit":9,
+          "maxprofit":10,"maxloss":-1,"opentag":"candidate"}]}],
+      "conditions":{"settime":222,"items":{"SHFE.ag.2512":[{"code":"SHFE.ag.2512","usertag":"candidate",
+        "field":0,"alg":0,"target":3500,"qty":4,"action":0}]}},
+      "signals":{"SHFE.ag.2512":{"usertag":"candidate","volume":5,"sigprice":3000,"gentime":2}},
+      "utils":{"lastbarno":8}
+    })json";
+    struct UnknownCase { const char* name; const char* path; std::function<rapidjson::Value&(rapidjson::Document&)> target; };
+    const std::vector<UnknownCase> cases = {
+        {"root", "$.<unknown:", [](rapidjson::Document& d) -> rapidjson::Value& { return d; }},
+        {"fund", "$.fund.<unknown:", [](rapidjson::Document& d) -> rapidjson::Value& { return d["fund"]; }},
+        {"position", "$.positions[0].<unknown:", [](rapidjson::Document& d) -> rapidjson::Value& { return d["positions"][0]; }},
+        {"detail", "$.positions[0].details[0].<unknown:", [](rapidjson::Document& d) -> rapidjson::Value& { return d["positions"][0]["details"][0]; }},
+        {"conditions", "$.conditions.<unknown:", [](rapidjson::Document& d) -> rapidjson::Value& { return d["conditions"]; }},
+        {"condition_item", ".<code>[0].<unknown:", [](rapidjson::Document& d) -> rapidjson::Value& { return d["conditions"]["items"]["SHFE.ag.2512"][0]; }},
+        {"signal", "$.signals[SHFE.ag.2512].<unknown:", [](rapidjson::Document& d) -> rapidjson::Value& { return d["signals"]["SHFE.ag.2512"]; }},
+        {"utils", "$.utils.<unknown:", [](rapidjson::Document& d) -> rapidjson::Value& { return d["utils"]; }},
+    };
+    for (const UnknownCase& tc : cases)
+    {
+        SCOPED_TRACE(tc.name);
+        rapidjson::Document d;
+        d.Parse(candidate);
+        ASSERT_FALSE(d.HasParseError());
+        tc.target(d).AddMember("k45_future_field", 1, d.GetAllocator());
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        ASSERT_TRUE(d.Accept(writer));
+        ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"), buffer.GetString()));
+        ctx->errorCount = 0;
+        ctx->lastError.clear();
+        ctx->on_init();
+        ASSERT_EQ(ctx->errorCount, 1u);
+        EXPECT_NE(ctx->lastError.find(tc.path), std::string::npos) << ctx->lastError;
+        EXPECT_NE(ctx->lastError.find("k45_future_field"), std::string::npos);
+        EXPECT_EQ(ctx->position_count(), 1u);
+        EXPECT_DOUBLE_EQ(ctx->stored_position(kR42Code), 2.0);
+        EXPECT_EQ(ctx->signal_count(), 1u);
+        EXPECT_DOUBLE_EQ(ctx->stored_signal(kR42Code), 3.0);
+        EXPECT_EQ(ctx->condition_time(), 111u);
+        EXPECT_EQ(ctx->last_bar(), 7u);
+        EXPECT_DOUBLE_EQ(ctx->stra_get_fund_data(3), 3.0);
+        EXPECT_FALSE(engine.has_tick_subscription(kR42T1Code));
+    }
+
+    // 不带未知成员的同一候选（含写端会产生的条件 code 字段）仍可整体恢复
+    ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"), candidate));
+    ctx->errorCount = 0;
+    ctx->on_init();
+    EXPECT_EQ(ctx->errorCount, 0u);
+    EXPECT_EQ(ctx->condition_time(), 222u);
+    EXPECT_EQ(ctx->last_bar(), 8u);
+}
+
+// 决策 K45（2026-11-04 用户裁定）第二部分：恢复期内存分配失败视为 context 致命错误向上传播，
+// 不吞异常、不部分运行。这里在候选状态准备的两个不同阶段（第一个持仓的主力规则查询、第二个持仓的
+// 合约查询）由替身抛出 std::bad_alloc 模拟分配失败：on_init 必须把 std::bad_alloc 原样传出，
+// 已发布状态与订阅保持基线；注入解除后同一候选可完整恢复（证明失败没有留下半成品）。
+// 说明：没有替换全局 operator new 做真实堆耗尽注入，以免影响同一二进制中其他用例与 sanitizer 运行时。
+TEST_F(R42CtaPersistTest, K45AllocationFailureDuringRestorePropagatesWithoutPartialState)
+{
+    const char* baseline = R"json({
+      "fund":{"total_profit":1,"total_dynprofit":2,"total_fees":3,"tdate":20250110},
+      "positions":[{"code":"SHFE.rb.2510","volume":2,"closeprofit":1,"dynprofit":2,
+        "lastentertime":1,"lastexittime":0,"details":[{"long":true,"price":3000,"volume":2,
+        "opentime":1,"profit":2,"maxprofit":3,"maxloss":-1,"opentag":"initial"}]}],
+      "conditions":{"settime":111,"items":{"SHFE.rb.2510":[{"usertag":"initial",
+        "field":0,"alg":0,"target":3500,"qty":2,"action":0}]}},
+      "signals":{"SHFE.rb.2510":{"usertag":"initial","volume":3,"sigprice":3000,"gentime":2}},
+      "utils":{"lastbarno":7}
+    })json";
+    ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"), baseline));
+    ctx->on_init();
+    ASSERT_EQ(ctx->errorCount, 0u);
+    ASSERT_EQ(ctx->position_count(), 1u);
+    ASSERT_TRUE(engine.has_tick_subscription(kR42Code));
+
+    const char* candidate = R"json({
+      "fund":{"total_profit":8,"total_dynprofit":9,"total_fees":10,"tdate":20250111},
+      "positions":[
+        {"code":"SHFE.rb.2510","volume":8,"closeprofit":8,"dynprofit":9,
+         "lastentertime":10,"lastexittime":11,"details":[]},
+        {"code":"SHFE.ag.2512","volume":4,"closeprofit":8,"dynprofit":9,
+         "lastentertime":10,"lastexittime":11,"details":[]}],
+      "conditions":{"settime":222,"items":{}},
+      "signals":{"SHFE.ag.2512":{"usertag":"candidate","volume":5,"sigprice":3000,"gentime":2}},
+      "utils":{"lastbarno":8}
+    })json";
+    ASSERT_TRUE(r42_write_file(data_file("r42_cta_persist"), candidate));
+
+    auto expectBaselineKept = [&]() {
+        EXPECT_EQ(ctx->position_count(), 1u);
+        EXPECT_DOUBLE_EQ(ctx->stored_position(kR42Code), 2.0);
+        EXPECT_EQ(ctx->signal_count(), 1u);
+        EXPECT_DOUBLE_EQ(ctx->stored_signal(kR42Code), 3.0);
+        EXPECT_EQ(ctx->condition_count(), 1u);
+        EXPECT_EQ(ctx->condition_time(), 111u);
+        EXPECT_EQ(ctx->last_bar(), 7u);
+        EXPECT_DOUBLE_EQ(ctx->stra_get_fund_data(3), 3.0);
+        EXPECT_FALSE(engine.has_tick_subscription(kR42T1Code));
+    };
+
+    // 阶段一：第一个持仓的规则查询即失败（候选为空）
+    hot.badAllocOnRuleTag = true;
+    EXPECT_THROW(ctx->on_init(), std::bad_alloc);
+    hot.badAllocOnRuleTag = false;
+    expectBaselineKept();
+
+    // 阶段二：第一个持仓已进入候选后，第二个持仓的合约查询失败
+    bd.badAllocOnAg = true;
+    EXPECT_THROW(ctx->on_init(), std::bad_alloc);
+    bd.badAllocOnAg = false;
+    expectBaselineKept();
+
+    // 注入解除后同一候选完整恢复：失败没有留下影响后续恢复的半成品
+    ctx->errorCount = 0;
+    ctx->on_init();
+    EXPECT_EQ(ctx->errorCount, 0u);
+    EXPECT_DOUBLE_EQ(ctx->stored_position(kR42Code), 8.0);
+    EXPECT_DOUBLE_EQ(ctx->stored_position(kR42T1Code), 4.0);
+    EXPECT_EQ(ctx->condition_time(), 222u);
+    EXPECT_EQ(ctx->last_bar(), 8u);
 }
 
 } // namespace

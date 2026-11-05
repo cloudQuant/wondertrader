@@ -1,0 +1,350 @@
+[ RUN      ] Q03RdmClearLifetime.HistoricalTickSurvivesClearAndReloads
+[       OK ] Q03RdmClearLifetime.HistoricalTickSurvivesClearAndReloads (3 ms)
+[ RUN      ] Q03RdmClearLifetime.HistoricalQueueSurvivesClearAndReloads
+[       OK ] Q03RdmClearLifetime.HistoricalQueueSurvivesClearAndReloads (2 ms)
+[ RUN      ] Q03RdmClearLifetime.HistoricalDetailSurvivesClearAndReloads
+[       OK ] Q03RdmClearLifetime.HistoricalDetailSurvivesClearAndReloads (2 ms)
+[ RUN      ] Q03RdmClearLifetime.HistoricalTransSurvivesClearAndReloads
+[       OK ] Q03RdmClearLifetime.HistoricalTransSurvivesClearAndReloads (1 ms)
+[ RUN      ] Q03RdmClearLifetime.RealtimeTickSurvivesClear
+[       OK ] Q03RdmClearLifetime.RealtimeTickSurvivesClear (2 ms)
+[ RUN      ] Q03RdmKlineTest.day_dsb_raw_v2_full_range_roundtrip
+[       OK ] Q03RdmKlineTest.day_dsb_raw_v2_full_range_roundtrip (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_etime_zero_is_normalized_to_203012312359
+[       OK ] Q03RdmKlineTest.day_etime_zero_is_normalized_to_203012312359 (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_compressed_v2_roundtrip
+[       OK ] Q03RdmKlineTest.day_compressed_v2_roundtrip (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_old_struct_versions_are_upgraded
+[       OK ] Q03RdmKlineTest.day_old_struct_versions_are_upgraded (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_tail_fragment_is_dropped
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_kline_file_test.cpp:196: Failure
+Value of: slice != __null
+  Actual: false
+Expected: true
+[  FAILED  ] Q03RdmKlineTest.day_tail_fragment_is_dropped (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_size_check_failure_returns_null_and_logs_error
+[       OK ] Q03RdmKlineTest.day_size_check_failure_returns_null_and_logs_error (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_missing_file_caches_empty_entry
+[       OK ] Q03RdmKlineTest.day_missing_file_caches_empty_entry (0 ms)
+[ RUN      ] Q03RdmKlineTest.day_window_out_of_range_returns_null
+[       OK ] Q03RdmKlineTest.day_window_out_of_range_returns_null (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_range_and_count_handle_first_cached_bar_boundaries
+[       OK ] Q03RdmKlineTest.day_range_and_count_handle_first_cached_bar_boundaries (1 ms)
+[ RUN      ] Q03RdmKlineTest.min1_splices_his_block_with_rt_block
+[       OK ] Q03RdmKlineTest.min1_splices_his_block_with_rt_block (2 ms)
+[ RUN      ] Q03RdmKlineTest.min1_rt_only_when_start_inside_rt_block
+[       OK ] Q03RdmKlineTest.min1_rt_only_when_start_inside_rt_block (2 ms)
+[ RUN      ] Q03RdmKlineTest.min1_right_window_drops_late_bars
+[       OK ] Q03RdmKlineTest.min1_right_window_drops_late_bars (2 ms)
+[ RUN      ] Q03RdmKlineTest.empty_rt_blocks_fall_back_to_history_for_range_and_count
+[       OK ] Q03RdmKlineTest.empty_rt_blocks_fall_back_to_history_for_range_and_count (7 ms)
+[ RUN      ] Q03RdmKlineTest.min1_before_first_rt_bar_falls_back_to_history_for_range_and_count
+[       OK ] Q03RdmKlineTest.min1_before_first_rt_bar_falls_back_to_history_for_range_and_count (2 ms)
+[ RUN      ] Q03RdmKlineTest.clear_cache_forces_rebuild_from_file
+[       OK ] Q03RdmKlineTest.clear_cache_forces_rebuild_from_file (1 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_raw_v2_roundtrip_field_by_field
+[       OK ] Q03RdmTickTest.his_tick_raw_v2_roundtrip_field_by_field (1 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_compressed_v2_roundtrip
+[       OK ] Q03RdmTickTest.his_tick_compressed_v2_roundtrip (2 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_old_struct_versions_are_upgraded
+[       OK ] Q03RdmTickTest.his_tick_old_struct_versions_are_upgraded (2 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_size_check_rejects_short_file
+[       OK ] Q03RdmTickTest.his_tick_size_check_rejects_short_file (2 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_tail_fragment_is_dropped
+[       OK ] Q03RdmTickTest.his_tick_tail_fragment_is_dropped (1 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_header_only_file_yields_zero_count
+[       OK ] Q03RdmTickTest.his_tick_header_only_file_yields_zero_count (1 ms)
+[ RUN      ] Q03RdmTickTest.rt_tick_block_read_back_when_no_his_file
+[       OK ] Q03RdmTickTest.rt_tick_block_read_back_when_no_his_file (9 ms)
+[ RUN      ] Q03RdmTickTest.rt_tick_block_missing_and_empty
+[       OK ] Q03RdmTickTest.rt_tick_block_missing_and_empty (1 ms)
+[ RUN      ] Q03RdmTickTest.rt_tick_capacity_larger_than_size_is_fully_mapped
+[       OK ] Q03RdmTickTest.rt_tick_capacity_larger_than_size_is_fully_mapped (4 ms)
+[ RUN      ] Q03RdmTickTest.range_splices_two_his_days_plus_rt_block
+[       OK ] Q03RdmTickTest.range_splices_two_his_days_plus_rt_block (3 ms)
+[ RUN      ] Q03RdmTickTest.range_clips_left_window_on_begin_trading_date
+[       OK ] Q03RdmTickTest.range_clips_left_window_on_begin_trading_date (2 ms)
+[ RUN      ] Q03RdmTickTest.range_clips_right_window_on_end_trading_date
+[       OK ] Q03RdmTickTest.range_clips_right_window_on_end_trading_date (56 ms)
+[ RUN      ] Q03RdmTickTest.range_returns_empty_object_when_no_data_at_all
+[       OK ] Q03RdmTickTest.range_returns_empty_object_when_no_data_at_all (0 ms)
+[ RUN      ] Q03RdmTickTest.range_skips_missing_middle_day
+[       OK ] Q03RdmTickTest.range_skips_missing_middle_day (2 ms)
+[ RUN      ] Q03RdmTickTest.trading_date_override_routes_to_his_branch
+[       OK ] Q03RdmTickTest.trading_date_override_routes_to_his_branch (82 ms)
+[ RUN      ] Q03RdmTickTest.his_kline_hot_rejects_fragmented_raw_and_cmp_blocks
+[       OK ] Q03RdmTickTest.his_kline_hot_rejects_fragmented_raw_and_cmp_blocks (3 ms)
+[ RUN      ] Q03RdmTickTest.adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp
+[       OK ] Q03RdmTickTest.adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp (11 ms)
+[ RUN      ] Q03RdmTickRangeInclusiveTest.HistoricalAndRealtimeKeepInclusiveExactEndpoints
+[       OK ] Q03RdmTickRangeInclusiveTest.HistoricalAndRealtimeKeepInclusiveExactEndpoints (3 ms)
+[ RUN      ] Q03RdmTickRangeInclusiveTest.ZeroEndTimeReadsLatestCommittedHistoryAndRealtimeTicks
+[       OK ] Q03RdmTickRangeInclusiveTest.ZeroEndTimeReadsLatestCommittedHistoryAndRealtimeTicks (3 ms)
+[ RUN      ] Q03ReaderFileTest.his_tick_raw_v2_roundtrip_and_count_window
+[       OK ] Q03ReaderFileTest.his_tick_raw_v2_roundtrip_and_count_window (4 ms)
+[ RUN      ] Q03ReaderFileTest.his_tick_version_matrix
+[       OK ] Q03ReaderFileTest.his_tick_version_matrix (2 ms)
+[ RUN      ] Q03ReaderFileTest.his_tick_size_check_and_tail_fragment
+[       OK ] Q03ReaderFileTest.his_tick_size_check_and_tail_fragment (9 ms)
+[ RUN      ] Q03ReaderFileTest.today_branch_reads_rt_tick_block
+[       OK ] Q03ReaderFileTest.today_branch_reads_rt_tick_block (3 ms)
+[ RUN      ] Q03ReaderFileTest.order_queue_detail_and_transaction_files
+[       OK ] Q03ReaderFileTest.order_queue_detail_and_transaction_files (4 ms)
+[ RUN      ] Q03ReaderFileTest.missing_his_file_returns_null_without_log
+[       OK ] Q03ReaderFileTest.missing_his_file_returns_null_without_log (0 ms)
+[ RUN      ] R100RdmCrossDayTest.R100RdmRtHftCrossDateBackoff
+[       OK ] R100RdmCrossDayTest.R100RdmRtHftCrossDateBackoff (2 ms)
+[ RUN      ] R100RdmCrossDayTest.R100RdmHisHftMissingAndShortFileGuards
+[       OK ] R100RdmCrossDayTest.R100RdmHisHftMissingAndShortFileGuards (1 ms)
+[ RUN      ] R100RdmCrossDayTest.R100RdmHisTickAndKlineBoundaries
+[       OK ] R100RdmCrossDayTest.R100RdmHisTickAndKlineBoundaries (6 ms)
+[ RUN      ] R100RdmCrossDayTest.R100RdmHisHftExclusiveEndBoundaries
+[       OK ] R100RdmCrossDayTest.R100RdmHisHftExclusiveEndBoundaries (126 ms)
+[ RUN      ] R100ReaderCrossDayTest.R100ReaderRtHftCrossDateAndMissing
+[       OK ] R100ReaderCrossDayTest.R100ReaderRtHftCrossDateAndMissing (8 ms)
+[ RUN      ] R100ReaderCrossDayTest.R100ReaderHisHftCrossDateShortAndEmpty
+[       OK ] R100ReaderCrossDayTest.R100ReaderHisHftCrossDateShortAndEmpty (9 ms)
+[ RUN      ] R100ReaderCrossDayTest.R100ReaderIntegratedHotLoaderAndAdjustedCatch
+[       OK ] R100ReaderCrossDayTest.R100ReaderIntegratedHotLoaderAndAdjustedCatch (1 ms)
+[ RUN      ] R112RdmResidualTest.R112RdmHftRangeCrossDateComparators
+[       OK ] R112RdmResidualTest.R112RdmHftRangeCrossDateComparators (9 ms)
+[ RUN      ] R112RdmResidualTest.R112RdmMissingAndShortFileGuards
+[       OK ] R112RdmResidualTest.R112RdmMissingAndShortFileGuards (1 ms)
+[ RUN      ] R112RdmResidualTest.R112RdmTickCountsCrossDate
+[       OK ] R112RdmResidualTest.R112RdmTickCountsCrossDate (41 ms)
+[ RUN      ] R112ReaderAdjustedMin5Test.R112ReaderAdjustedMin5ContinuationAndGuards
+[       OK ] R112ReaderAdjustedMin5Test.R112ReaderAdjustedMin5ContinuationAndGuards (7 ms)
+[ RUN      ] R112ReaderResidualTest.R112ReaderHisHftCrossDateAndHotRawCode
+[       OK ] R112ReaderResidualTest.R112ReaderHisHftCrossDateAndHotRawCode (28 ms)
+[ RUN      ] R112ReaderResidualTest.R112ReaderMissingAndShortHisFiles
+[       OK ] R112ReaderResidualTest.R112ReaderMissingAndShortHisFiles (10 ms)
+[ RUN      ] R122RdmByRangeTest.R122RdmOrdQueByRangeCrossDateAndMissing
+[       OK ] R122RdmByRangeTest.R122RdmOrdQueByRangeCrossDateAndMissing (2 ms)
+[ RUN      ] R122RdmByRangeTest.R122RdmDtlTransByRangeCrossDateAndMissing
+[       OK ] R122RdmByRangeTest.R122RdmDtlTransByRangeCrossDateAndMissing (5 ms)
+[ RUN      ] R122RdmByRangeTest.R122RdmKlineByCountEmptyResult
+[       OK ] R122RdmByRangeTest.R122RdmKlineByCountEmptyResult (0 ms)
+[ RUN      ] R122ReaderRtBranchesTest.R122ReaderTickRtCrossDateAndFallback
+[       OK ] R122ReaderRtBranchesTest.R122ReaderTickRtCrossDateAndFallback (1 ms)
+[ RUN      ] R122ReaderRtBranchesTest.R122ReaderOrdQueRtEtimeZeroHotAndMissing
+[       OK ] R122ReaderRtBranchesTest.R122ReaderOrdQueRtEtimeZeroHotAndMissing (66 ms)
+[ RUN      ] R122ReaderRtBranchesTest.R122ReaderOrdDtlRtEtimeZeroHotAndMissing
+[       OK ] R122ReaderRtBranchesTest.R122ReaderOrdDtlRtEtimeZeroHotAndMissing (1 ms)
+[ RUN      ] R122ReaderRtBranchesTest.R122ReaderTransRtEtimeZeroHotAndMissing
+[       OK ] R122ReaderRtBranchesTest.R122ReaderTransRtEtimeZeroHotAndMissing (1 ms)
+[ RUN      ] R132RdmResidualTest.R132RdmKlineRtBackoffByRangeAndCount
+[       OK ] R132RdmResidualTest.R132RdmKlineRtBackoffByRangeAndCount (2 ms)
+[ RUN      ] R132RdmResidualTest.R132RdmKlineRangeEndBetweenHisBars
+[       OK ] R132RdmResidualTest.R132RdmKlineRangeEndBetweenHisBars (1 ms)
+[ RUN      ] R132RdmResidualTest.R132RdmRtHftComparatorsSeeOlderActionDate
+[       OK ] R132RdmResidualTest.R132RdmRtHftComparatorsSeeOlderActionDate (2 ms)
+[ RUN      ] R132RdmResidualTest.R132RdmTickDateEmptyRtBlockReturnsNull
+[       OK ] R132RdmResidualTest.R132RdmTickDateEmptyRtBlockReturnsNull (1 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisTickCrossActionDate
+[       OK ] R132ReaderHisTest.R132ReaderHisTickCrossActionDate (1 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisHftCompressedRoundTrip
+[       OK ] R132ReaderHisTest.R132ReaderHisHftCompressedRoundTrip (3 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisCompressibleQueueExpansion
+[       OK ] R132ReaderHisTest.R132ReaderHisCompressibleQueueExpansion (1 ms)
+[ RUN      ] R132ReaderHisTest.R132AlignedHistoricalSlicesPreserveExclusiveEnd
+[       OK ] R132ReaderHisTest.R132AlignedHistoricalSlicesPreserveExclusiveEnd (3 ms)
+[ RUN      ] R132ReaderHisTest.R132AlignedSliceSurvivesOtherCacheInsertions
+[       OK ] R132ReaderHisTest.R132AlignedSliceSurvivesOtherCacheInsertions (201 ms)
+[ RUN      ] R132ReaderHisTest.R132HistoricalBadFilesCanBeReplacedAndRetried
+[       OK ] R132ReaderHisTest.R132HistoricalBadFilesCanBeReplacedAndRetried (14 ms)
+[ RUN      ] R132ReaderHisTest.R132AllocationFailureDoesNotPublishOrInvalidateHeldSlices
+[       OK ] R132ReaderHisTest.R132AllocationFailureDoesNotPublishOrInvalidateHeldSlices (8 ms)
+[ RUN      ] R132ReaderHisTest.R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape
+[       OK ] R132ReaderHisTest.R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape (127 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisOrderQueueDetailAndTransCachesAreIndependent
+[       OK ] R132ReaderHisTest.R132ReaderHisOrderQueueDetailAndTransCachesAreIndependent (5 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisEmptyBlockAndEmptyRecordSet
+[       OK ] R132ReaderHisTest.R132ReaderHisEmptyBlockAndEmptyRecordSet (58 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisMalformedCompressedRecordsAreRejected
+[       OK ] R132ReaderHisTest.R132ReaderHisMalformedCompressedRecordsAreRejected (55 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderIntegratedSectionsOverlapHotTail
+[       OK ] R132ReaderHisTest.R132ReaderIntegratedSectionsOverlapHotTail (3 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmHisQueueCrossActionDateByRange
+[       OK ] R142RdmHftHisTest.R142RdmHisQueueCrossActionDateByRange (2 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmHisDetailTransCrossActionDateByRange
+[       OK ] R142RdmHftHisTest.R142RdmHisDetailTransCrossActionDateByRange (2 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmCompressedExpansionPreservesAllFieldsAndCacheReads
+[       OK ] R142RdmHftHisTest.R142RdmCompressedExpansionPreservesAllFieldsAndCacheReads (33 ms)
+[ RUN      ] R142RdmHftHisTest.R175RdmCmpV2NoGrowthPreservesAllFields
+[       OK ] R142RdmHftHisTest.R175RdmCmpV2NoGrowthPreservesAllFields (82 ms)
+[ RUN      ] R142RdmHftHisTest.R175RdmCmpV2RejectsMalformedPayloadsAndAllowsRetry
+[       OK ] R142RdmHftHisTest.R175RdmCmpV2RejectsMalformedPayloadsAndAllowsRetry (231 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmMissingRtAndHisHftFiles
+[       OK ] R142RdmHftHisTest.R142RdmMissingRtAndHisHftFiles (0 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmEmptyQueueBlockSecondCallReturnsNull
+[       OK ] R142RdmHftHisTest.R142RdmEmptyQueueBlockSecondCallReturnsNull (2 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmKlineHisEndBetweenBarsBacksOff
+[       OK ] R142RdmHftHisTest.R142RdmKlineHisEndBetweenBarsBacksOff (1 ms)
+[ RUN      ] R142ReaderHftHisTest.R142ReaderHisHftCountBacksOffPastLastItem
+[       OK ] R142ReaderHftHisTest.R142ReaderHisHftCountBacksOffPastLastItem (5 ms)
+[ RUN      ] R142ReaderHftHisTest.R142ReaderEmptyHisTickBlockSecondCall
+[       OK ] R142ReaderHftHisTest.R142ReaderEmptyHisTickBlockSecondCall (4 ms)
+[ RUN      ] R162ReaderEdgeTest.R162ReaderContinuousCacheNonStdExceptionIsCaught
+[       OK ] R162ReaderEdgeTest.R162ReaderContinuousCacheNonStdExceptionIsCaught (3 ms)
+[ RUN      ] R162ReaderEdgeTest.R162ReaderAdjustedStockNonStdExceptionIsCaught
+[       OK ] R162ReaderEdgeTest.R162ReaderAdjustedStockNonStdExceptionIsCaught (4 ms)
+[ RUN      ] R162ReaderEdgeTest.R162RdmReaderAllSourcesMissingReturnsEmpty
+[       OK ] R162ReaderEdgeTest.R162RdmReaderAllSourcesMissingReturnsEmpty (1 ms)
+[ RUN      ] R162ReaderEdgeTest.R162RdmReaderHisTransBlocksWithMixedActionDates
+[       OK ] R162ReaderEdgeTest.R162RdmReaderHisTransBlocksWithMixedActionDates (8 ms)
+[ RUN      ] R172RdmMixedDatesTest.R172RdmMixedActionDatesHisHftBlocks
+[       OK ] R172RdmMixedDatesTest.R172RdmMixedActionDatesHisHftBlocks (19 ms)
+[ RUN      ] R172ReaderMixedDatesTest.R172ReaderMixedActionDatesHisHftSlices
+[       OK ] R172ReaderMixedDatesTest.R172ReaderMixedActionDatesHisHftSlices (8 ms)
+[ RUN      ] R182RdmRtSlicesTest.R182Min1RangeStartsInsideRtBlock
+[       OK ] R182RdmRtSlicesTest.R182Min1RangeStartsInsideRtBlock (14 ms)
+[ RUN      ] R182RdmRtSlicesTest.R182Min1CountTakesTailOfRtBlock
+[       OK ] R182RdmRtSlicesTest.R182Min1CountTakesTailOfRtBlock (13 ms)
+[ RUN      ] R182ReaderIntegratedTest.R182NoHotFileSplitRejected
+[       OK ] R182ReaderIntegratedTest.R182NoHotFileSplitRejected (1 ms)
+[ RUN      ] R182ReaderIntegratedTest.R182HotSplitReturnsEmptySections
+[       OK ] R182ReaderIntegratedTest.R182HotSplitReturnsEmptySections (0 ms)
+[ RUN      ] R182ReaderIntegratedTest.R182SectionFileMissingIsSkipped
+[       OK ] R182ReaderIntegratedTest.R182SectionFileMissingIsSkipped (0 ms)
+[ RUN      ] R182ReaderIntegratedTest.R182ShortSectionFileLogsAndFails
+[       OK ] R182ReaderIntegratedTest.R182ShortSectionFileLogsAndFails (2 ms)
+[ RUN      ] R182ReaderIntegratedTest.R182SectionWindowAfterAllBarsIsSkipped
+[       OK ] R182ReaderIntegratedTest.R182SectionWindowAfterAllBarsIsSkipped (2 ms)
+[ RUN      ] R182ReaderIntegratedTest.R182SectionWindowBeforeFirstBarBreaks
+[       OK ] R182ReaderIntegratedTest.R182SectionWindowBeforeFirstBarBreaks (30 ms)
+[ RUN      ] R182ReaderIntegratedTest.R182SectionWindowSelectsBothBars
+[       OK ] R182ReaderIntegratedTest.R182SectionWindowSelectsBothBars (2 ms)
+[ RUN      ] R193StorageReaderTest.R193LoaderUnknownPeriodUsesDayName
+[       OK ] R193StorageReaderTest.R193LoaderUnknownPeriodUsesDayName (6 ms)
+[ RUN      ] R193StorageReaderTest.R193ExrightRangeClipsBarAfterEndTime
+[       OK ] R193StorageReaderTest.R193ExrightRangeClipsBarAfterEndTime (1 ms)
+[ RUN      ] R193StorageReaderTest.R193ExrightCountGrowsCacheAndClipsGap
+[       OK ] R193StorageReaderTest.R193ExrightCountGrowsCacheAndClipsGap (7 ms)
+[ RUN      ] R193StorageReaderTest.R193MissingRealtimeTickBlockYieldsEmptySlice
+[       OK ] R193StorageReaderTest.R193MissingRealtimeTickBlockYieldsEmptySlice (1 ms)
+[ RUN      ] R203StorageResidualTest.R203ReaderRejectsShortHistoricalQueueFile
+[       OK ] R203StorageResidualTest.R203ReaderRejectsShortHistoricalQueueFile (9 ms)
+[ RUN      ] R203StorageResidualTest.R203ReaderReturnsNullForMissingHistoricalDetailAndTrans
+[       OK ] R203StorageResidualTest.R203ReaderReturnsNullForMissingHistoricalDetailAndTrans (0 ms)
+[ RUN      ] R203StorageResidualTest.R203RdmRejectsShortHistoricalQueueFile
+[       OK ] R203StorageResidualTest.R203RdmRejectsShortHistoricalQueueFile (1 ms)
+[ RUN      ] R203StorageResidualTest.R203RdmReturnsNullForMissingHistoricalDetailAndTrans
+[       OK ] R203StorageResidualTest.R203RdmReturnsNullForMissingHistoricalDetailAndTrans (0 ms)
+[ RUN      ] R203StorageResidualTest.R203RdmPostAdjustedFileScalesBars
+[       OK ] R203StorageResidualTest.R203RdmPostAdjustedFileScalesBars (6 ms)
+[ RUN      ] R203StorageResidualTest.R203ReaderReversedSectionSkipsWindow
+[       OK ] R203StorageResidualTest.R203ReaderReversedSectionSkipsWindow (3 ms)
+[ RUN      ] R203StorageResidualTest.R203RdmReversedSectionSkipsWindow
+[       OK ] R203StorageResidualTest.R203RdmReversedSectionSkipsWindow (35 ms)
+[ RUN      ] R212StorageResidualTest.R212RdmHisTickByDateReturnsFileSlice
+[       OK ] R212StorageResidualTest.R212RdmHisTickByDateReturnsFileSlice (2 ms)
+[ RUN      ] R212StorageResidualTest.R212RdmHisTickShortFileLogsAndFallsBack
+[       OK ] R212StorageResidualTest.R212RdmHisTickShortFileLogsAndFallsBack (3 ms)
+[ RUN      ] R212StorageResidualTest.R212RdmKlineRangeCoversThreePeriodsAndEmptyRightEdge
+[       OK ] R212StorageResidualTest.R212RdmKlineRangeCoversThreePeriodsAndEmptyRightEdge (2 ms)
+[ RUN      ] R212StorageResidualTest.R212RdmKlineCountCoversMinutePeriods
+[       OK ] R212StorageResidualTest.R212RdmKlineCountCoversMinutePeriods (2 ms)
+[ RUN      ] R212StorageResidualTest.R212ReaderLoaderPeriodNamesAndBars
+[       OK ] R212StorageResidualTest.R212ReaderLoaderPeriodNamesAndBars (0 ms)
+[ RUN      ] R52ReaderTest.R52HotWrappedFileReadReturnsIntegratedBars
+[       OK ] R52ReaderTest.R52HotWrappedFileReadReturnsIntegratedBars (1 ms)
+[ RUN      ] R52ReaderTest.R52HotWrappedFileSplicesMonthlySegmentAfterHotTail
+[       OK ] R52ReaderTest.R52HotWrappedFileSplicesMonthlySegmentAfterHotTail (2 ms)
+[ RUN      ] R52ReaderTest.R52HotWrappedReadFailureClearsCacheAndRetriesSameReader
+[       OK ] R52ReaderTest.R52HotWrappedReadFailureClearsCacheAndRetriesSameReader (2 ms)
+[ RUN      ] R52ReaderTest.R52HotContinuousMin1AdjustsAndReplaysOnMinuteEnd
+[       OK ] R52ReaderTest.R52HotContinuousMin1AdjustsAndReplaysOnMinuteEnd (2 ms)
+[ RUN      ] R52ReaderTest.R52AdjustedStockQfqUsesFactorFileAndAppliesAllFlagBits
+[       OK ] R52ReaderTest.R52AdjustedStockQfqUsesFactorFileAndAppliesAllFlagBits (4 ms)
+[ RUN      ] R52ReaderTest.R52LoaderSuppliesFinalRawBarsAndLazyFactors
+[       OK ] R52ReaderTest.R52LoaderSuppliesFinalRawBarsAndLazyFactors (0 ms)
+[ RUN      ] R52ReaderTest.R52TodayHftBlocksAndCapacityRemap
+[       OK ] R52ReaderTest.R52TodayHftBlocksAndCapacityRemap (6 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayOrderQueueRangeClips
+[       OK ] R70RdmResidualTest.R70RdmTodayOrderQueueRangeClips (1 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayOrderDetailRangeClips
+[       OK ] R70RdmResidualTest.R70RdmTodayOrderDetailRangeClips (1 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayTransRangeClips
+[       OK ] R70RdmResidualTest.R70RdmTodayTransRangeClips (1 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmHisHftFilesBuildAndReject
+[       OK ] R70RdmResidualTest.R70RdmHisHftFilesBuildAndReject (35 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmAdjustedStockMin1Continuation
+[       OK ] R70RdmResidualTest.R70RdmAdjustedStockMin1Continuation (5 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmHotTickCountAndRangeTail
+[       OK ] R70RdmResidualTest.R70RdmHotTickCountAndRangeTail (5 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayOrderQueueRangeBoundaries
+[       OK ] R70RdmResidualTest.R70RdmTodayOrderQueueRangeBoundaries (6 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayOrderDetailRangeBoundaries
+[       OK ] R70RdmResidualTest.R70RdmTodayOrderDetailRangeBoundaries (5 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayTransactionRangeBoundaries
+[       OK ] R70RdmResidualTest.R70RdmTodayTransactionRangeBoundaries (3 ms)
+[ RUN      ] R70ReaderResidualTest.R70ReaderIntegratedDaySectionsAndNoRtTail
+[       OK ] R70ReaderResidualTest.R70ReaderIntegratedDaySectionsAndNoRtTail (4 ms)
+[ RUN      ] R70ReaderResidualTest.R70ReaderAdjustedStockMin1Continuation
+[       OK ] R70ReaderResidualTest.R70ReaderAdjustedStockMin1Continuation (4 ms)
+[ RUN      ] R70ReaderResidualTest.R70ReaderHisHftErrorBranches
+[       OK ] R70ReaderResidualTest.R70ReaderHisHftErrorBranches (36 ms)
+[ RUN      ] R70ReaderResidualTest.R70ReaderTickSinkClockAndHotRawCode
+[       OK ] R70ReaderResidualTest.R70ReaderTickSinkClockAndHotRawCode (2 ms)
+[ RUN      ] R70ReaderResidualTest.R70ReaderKlineNoRtFallbackAndMin5
+[       OK ] R70ReaderResidualTest.R70ReaderKlineNoRtFallbackAndMin5 (5 ms)
+[ RUN      ] R74RdmHftHotTest.R74RdmHisQueueLoadsClipsAndRejects
+[       OK ] R74RdmHftHotTest.R74RdmHisQueueLoadsClipsAndRejects (10 ms)
+[ RUN      ] R74RdmHftHotTest.R74RdmHisDetailCrossDayAndRejects
+[       OK ] R74RdmHftHotTest.R74RdmHisDetailCrossDayAndRejects (81 ms)
+[ RUN      ] R74RdmHftHotTest.R74RdmHisTransCrossDayAndRejects
+[       OK ] R74RdmHftHotTest.R74RdmHisTransCrossDayAndRejects (16 ms)
+[ RUN      ] R74RdmHftHotTest.R74RdmHotDaySectionsEdgeCases
+[       OK ] R74RdmHftHotTest.R74RdmHotDaySectionsEdgeCases (22 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmInitCfgLoadsAdjFactorsAndReplaysQfq
+[       OK ] R74RdmInitAdjTest.R74RdmInitCfgLoadsAdjFactorsAndReplaysQfq (11 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmAdjustedFileSizeGuards
+[       OK ] R74RdmInitAdjTest.R74RdmAdjustedFileSizeGuards (7 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmShortAdjustedFileFallsBackToRawAndLogsError
+[       OK ] R74RdmInitAdjTest.R74RdmShortAdjustedFileFallsBackToRawAndLogsError (3 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmShortAdjustedWithoutRawCanRetryWhenRawAppears
+[       OK ] R74RdmInitAdjTest.R74RdmShortAdjustedWithoutRawCanRetryWhenRawAppears (5 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmTickRangeRtBoundaries
+[       OK ] R74RdmInitAdjTest.R74RdmTickRangeRtBoundaries (4 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmHotMalformedTickFileFailsClosedThenReloads
+[       OK ] R74RdmInitAdjTest.R74RdmHotMalformedTickFileFailsClosedThenReloads (6 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmHotTickCandidatesAndCountWindows
+[       OK ] R74RdmInitAdjTest.R74RdmHotTickCandidatesAndCountWindows (22 ms)
+[ RUN      ] R74ReaderResidualTest.R74ReaderInitPathAndHisPathArrays
+[       OK ] R74ReaderResidualTest.R74ReaderInitPathAndHisPathArrays (9 ms)
+[ RUN      ] R74ReaderResidualTest.R74ReaderHftHisPathsUseSinkClock
+[       OK ] R74ReaderResidualTest.R74ReaderHftHisPathsUseSinkClock (6 ms)
+[ RUN      ] R74ReaderResidualTest.R74ReaderHotRuleTagSelectsRawCode
+[       OK ] R74ReaderResidualTest.R74ReaderHotRuleTagSelectsRawCode (5 ms)
+[ RUN      ] R74ReaderResidualTest.R74ReaderKlineRtBackoffAndMinuteEnd
+[       OK ] R74ReaderResidualTest.R74ReaderKlineRtBackoffAndMinuteEnd (2 ms)
+[----------] 1 test from R112WriterResizeFailureTest
+[ RUN      ] R112WriterResizeFailureTest.R112WriterTickBlockExpansionFailureIsLogged
+[       OK ] R112WriterResizeFailureTest.R112WriterTickBlockExpansionFailureIsLogged (1483 ms)
+[----------] 1 test from R112WriterResizeFailureTest (1483 ms total)
+[ RUN      ] R122WriterBaseInitTest.R122WriterTickCacheUninitializedIsLogged
+[       OK ] R122WriterBaseInitTest.R122WriterTickCacheUninitializedIsLogged (1 ms)
+[ RUN      ] R172WriterClearCacheTest.R172WriterClearCacheRebuildsExpiredCode
+[       OK ] R172WriterClearCacheTest.R172WriterClearCacheRebuildsExpiredCode (18 ms)
+[ RUN      ] R172WriterClearCacheTest.R172WriterClearCacheKeepsAllLiveCodes
+[       OK ] R172WriterClearCacheTest.R172WriterClearCacheKeepsAllLiveCodes (17 ms)
+[ RUN      ] R172WriterClearCacheTest.R172WriterClearCacheWithEmptyCache
+[       OK ] R172WriterClearCacheTest.R172WriterClearCacheWithEmptyCache (8 ms)
+[ RUN      ] R70WriterResidualTest.R70WriterClosingDumpsTransOrderAndQueueHis
+[       OK ] R70WriterResidualTest.R70WriterClosingDumpsTransOrderAndQueueHis (106 ms)
+[ RUN      ] R70WriterResidualTest.R70WriterClosingResetsTickCsvStream
+[       OK ] R70WriterResidualTest.R70WriterClosingResetsTickCsvStream (17 ms)
+[ RUN      ] R70WriterResidualTest.R70WriterInitCreatesDirAndDefaultCacheName
+[       OK ] R70WriterResidualTest.R70WriterInitCreatesDirAndDefaultCacheName (2 ms)
+[ RUN      ] R70WriterResidualTest.R70WriterAsyncPipelineDrainsAllTypes
+[       OK ] R70WriterResidualTest.R70WriterAsyncPipelineDrainsAllTypes (37 ms)
+[ RUN      ] R74WriterResidualTest.R74WriterMinPriceModeUpdatesMergedBars
+[       OK ] R74WriterResidualTest.R74WriterMinPriceModeUpdatesMergedBars (12 ms)
+[ RUN      ] R74WriterResidualTest.R74WriterNullDumperIsSkippedInAllBarLoops
+[       OK ] R74WriterResidualTest.R74WriterNullDumperIsSkippedInAllBarLoops (24 ms)
+[ RUN      ] R74WriterResidualTest.R74WriterClosingWithoutTickSkipsBarDumps
+[       OK ] R74WriterResidualTest.R74WriterClosingWithoutTickSkipsBarDumps (39 ms)
+[ RUN      ] R74WriterResidualTest.R74WriterReopenSeesCachedTickAndOverwritesSlot
+[       OK ] R74WriterResidualTest.R74WriterReopenSeesCachedTickAndOverwritesSlot (37 ms)
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Q03RdmKlineTest.day_tail_fragment_is_dropped

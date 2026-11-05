@@ -12,3 +12,4 @@ void WTSLogger::print_message(const char* message) {
 }
 void WTSLogger::info_imp(SpdLoggerPtr, const char*) {}
 void WTSLogger::error_imp(SpdLoggerPtr, const char*) {}
+void WTSLogger::warn_imp(SpdLoggerPtr, const char*) {}

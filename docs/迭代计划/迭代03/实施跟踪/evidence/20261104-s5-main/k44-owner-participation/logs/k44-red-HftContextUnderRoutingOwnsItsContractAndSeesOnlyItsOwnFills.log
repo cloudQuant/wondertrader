@@ -1,0 +1,46 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5MainK44OwnerParticipation.HftContextUnderRoutingOwnsItsContractAndSeesOnlyItsOwnFills
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5MainK44OwnerParticipation
+[ RUN      ] S5MainK44OwnerParticipation.HftContextUnderRoutingOwnsItsContractAndSeesOnlyItsOwnFills
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k44_owner_participation_test.cpp:173: Failure
+Value of: trader.buyAsOwner("exec:k44", true, "SHFE.ag.2512", 3500.0, 1.0, 0, false).empty()
+  Actual: false
+Expected: true
+an executer may not trade a contract the HFT context holds
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k44_owner_participation_test.cpp:175: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  trader.openLong("SHFE.ag.2512", 3500.0, 1.0, 0)
+    Which is: 1332414502
+neither may a manual entry
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k44_owner_participation_test.cpp:178: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  ctx.booked["SHFE.au.2212"]
+    Which is: 2
+I03-NEW-088: an executer's fill is not accounted into the HFT context
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k44_owner_participation_test.cpp:180: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  ctx.stra_enter_long("SHFE.au.2212", 400.0, 1.0, "k44", 0)
+    Which is: 1332414504
+direct HFT entries also respect the executer's claim
+
+[  FAILED  ] S5MainK44OwnerParticipation.HftContextUnderRoutingOwnsItsContractAndSeesOnlyItsOwnFills (2 ms)
+[----------] 1 test from S5MainK44OwnerParticipation (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (4 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S5MainK44OwnerParticipation.HftContextUnderRoutingOwnsItsContractAndSeesOnlyItsOwnFills
+
+ 1 FAILED TEST

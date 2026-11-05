@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="3" failures="2" disabled="0" errors="0" time="0.019" timestamp="2026-11-05T13:04:51.919" name="AllTests">
+  <testsuite name="I03R132WriterBudgetTest" tests="3" failures="2" disabled="0" skipped="0" errors="0" time="0.019" timestamp="2026-11-05T13:04:51.919">
+    <testcase name="ConfiguredBudgetReachesTheWriterModule" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp" line="41" status="run" result="completed" time="0.014" timestamp="2026-11-05T13:04:51.919" classname="I03R132WriterBudgetTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:45&#x0A;Expected equality of these values:&#x0A;  8192u&#x0A;    Which is: 8192&#x0A;  WTSCmpHelper::uncompress_max_bytes()&#x0A;    Which is: 1073741824&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:45
+Expected equality of these values:
+  8192u
+    Which is: 8192
+  WTSCmpHelper::uncompress_max_bytes()
+    Which is: 1073741824
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:46&#x0A;Expected equality of these values:&#x0A;  7u&#x0A;    Which is: 7&#x0A;  WTSCmpHelper::uncompress_max_ratio()&#x0A;    Which is: 1000&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:46
+Expected equality of these values:
+  7u
+    Which is: 7
+  WTSCmpHelper::uncompress_max_ratio()
+    Which is: 1000
+]]></failure>
+    </testcase>
+    <testcase name="InvalidBudgetFailsInitialization" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp" line="51" status="run" result="completed" time="0.002" timestamp="2026-11-05T13:04:51.933" classname="I03R132WriterBudgetTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:54&#x0A;Value of: init_with(&quot;\&quot;uncompress_max_ratio\&quot;:-3&quot;, w)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;an invalid uncompress budget must not be silently ignored&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:54
+Value of: init_with("\"uncompress_max_ratio\":-3", w)
+  Actual: true
+Expected: false
+an invalid uncompress budget must not be silently ignored
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:56&#x0A;Value of: _sink-&gt;has_log(&quot;uncompress_max_ratio&quot;, LL_ERROR)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:56
+Value of: _sink->has_log("uncompress_max_ratio", LL_ERROR)
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:57&#x0A;Value of: _sink-&gt;has_log(&quot;WtDataWriter initialized&quot;, LL_INFO)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:57
+Value of: _sink->has_log("WtDataWriter initialized", LL_INFO)
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:58&#x0A;Value of: WTSCmpHelper::uncompress_refused()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:58
+Value of: WTSCmpHelper::uncompress_refused()
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="AbsentBudgetKeepsDefaults" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp" line="63" status="run" result="completed" time="0.001" timestamp="2026-11-05T13:04:51.936" classname="I03R132WriterBudgetTest" />
+  </testsuite>
+</testsuites>

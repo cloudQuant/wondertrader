@@ -1,0 +1,49 @@
+--->>> Name confirmed automatically: SHFE.rb2510
+--->>> warning: No session configured for SHFE.rb
+--->>> Name confirmed automatically: SHFE.au2512
+--->>> warning: No session configured for SHFE.au
+--->>> 2 commodities dumped into : /tmp/wt-i03-t26-fees-units-r5/baseline-missing_fee/commodities.json
+--->>> 2 contracts dumped into : /tmp/wt-i03-t26-fees-units-r5/baseline-missing_fee/contracts.json
+=================================================================
+==27985==ERROR: AddressSanitizer: global-buffer-overflow on address 0x0001027e45d8 at pc 0x0001025aa270 bp 0x00016d880630 sp 0x00016d880628
+READ of size 1 at 0x0001027e45d8 thread T0
+    #0 0x0001025aa26c in CTraderSpi::DumpFees() TraderSpi.cpp:925
+    #1 0x0001025aa864 in CTraderSpi::OnRspQryInstrumentMarginRate(CThostFtdcInstrumentMarginRateField*, CThostFtdcRspInfoField*, int, bool) TraderSpi.cpp:796
+    #2 0x000102581d78 in main fee_probe.cpp:176
+    #3 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x0001027e45d8 is located 40 bytes before global variable 'prod_set' defined in '/tmp/wt-i03-t26-fees-units-r5/baseline/CTPLoader/TraderSpi.cpp' (0x0001027e4600) of size 24
+0x0001027e45d8 is located 0 bytes after global variable '_margins' defined in '/tmp/wt-i03-t26-fees-units-r5/baseline/CTPLoader/TraderSpi.cpp' (0x0001027e45c0) of size 24
+SUMMARY: AddressSanitizer: global-buffer-overflow TraderSpi.cpp:925 in CTraderSpi::DumpFees()
+Shadow bytes around the buggy address:
+  0x0001027e4300: 00 00 00 f9 f9 f9 f9 f9 01 f9 f9 f9 01 f9 f9 f9
+  0x0001027e4380: 01 f9 f9 f9 04 f9 f9 f9 00 00 00 f9 f9 f9 f9 f9
+  0x0001027e4400: 00 00 00 f9 f9 f9 f9 f9 00 00 00 f9 f9 f9 f9 f9
+  0x0001027e4480: 00 00 00 00 04 f9 f9 f9 04 f9 f9 f9 00 05 f9 f9
+  0x0001027e4500: 00 00 00 f9 f9 f9 f9 f9 00 00 00 f9 f9 f9 f9 f9
+=>0x0001027e4580: 00 00 00 f9 f9 f9 f9 f9 00 00 00[f9]f9 f9 f9 f9
+  0x0001027e4600: 00 00 00 f9 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x0001027e4680: 00 00 00 00 04 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x0001027e4700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0001027e4780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x0001027e4800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==27985==ABORTING

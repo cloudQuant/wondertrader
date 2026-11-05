@@ -55,7 +55,7 @@ TEST_F(R112ReaderADKlineTest, R112ReaderADKlineUpdateThenArrayTwoTail)
 	// 第一次：容量 0<2 -> 回源 get_lowers 取 09:31/09:32
 	WTSKlineSlice* s1 = _reader->readKlineSlice("EXKU.rb2301", KP_Minute1, 2, 20230103093200000ull);
 	ASSERT_TRUE(s1 != NULL);
-	ASSERT_EQ(s1->size(), 2u);
+	ASSERT_EQ(s1->size(), 2);
 	EXPECT_EQ(s1->get_block_addr(0)[0].time, (uint64_t)3301030931ull);
 	EXPECT_EQ(s1->get_block_addr(0)[1].time, (uint64_t)3301030932ull);
 	s1->release();
@@ -64,7 +64,7 @@ TEST_F(R112ReaderADKlineTest, R112ReaderADKlineUpdateThenArrayTwoTail)
 	// 环形缓冲 capacity=2 已被第三条写满，array_two 直接给出 1 条
 	WTSKlineSlice* s2 = _reader->readKlineSlice("EXKU.rb2301", KP_Minute1, 1, 20230103093300000ull);
 	ASSERT_TRUE(s2 != NULL);
-	ASSERT_EQ(s2->size(), 1u);
+	ASSERT_EQ(s2->size(), 1);
 	EXPECT_EQ(s2->get_block_addr(0)[0].time, (uint64_t)3301030933ull);
 	s2->release();
 	EXPECT_EQ(_sink->bar_calls(), 1u);
@@ -84,7 +84,7 @@ TEST_F(R112ReaderADKlineTest, R112ReaderADKlineUpdateThenArrayTwoTail)
 	// cache_m1.dmb 不存在 -> wrapper 索引为空，get_rt_cache_bar 返回 NULL
 	WTSKlineSlice* s3 = _reader->readKlineSlice("EXKV.rb2301", KP_Minute1, 2, 20230103093500000ull);
 	ASSERT_TRUE(s3 != NULL);
-	ASSERT_EQ(s3->size(), 1u);
+	ASSERT_EQ(s3->size(), 1);
 	EXPECT_EQ(s3->get_block_addr(0)[0].time, (uint64_t)3301030931ull);
 	s3->release();
 }

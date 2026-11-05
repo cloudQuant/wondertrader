@@ -6,7 +6,11 @@ USING_NS_WTP;
 TEST(test_session, test_allday)
 {
 	WTSSessionInfo* sInfo = WTSSessionInfo::create("ALLDAY", "ALLDAY", 0);
-	sInfo->addTradingSection(0, 2400);
+	// Decision card 2 (iteration 03): raw 0-0 is the only full-day section; 2400 is not a valid
+	// HHMM start/end and the legacy 0-2400 form is rejected without mutation.
+	EXPECT_FALSE(sInfo->tryAddTradingSection(0, 2400));
+	EXPECT_EQ(sInfo->getSectionCount(), 0u);
+	ASSERT_TRUE(sInfo->tryAddTradingSection(0, 0));
 
 	EXPECT_EQ(sInfo->timeToMinutes(0), 0);
 	EXPECT_EQ(sInfo->minuteToTime(0), 0);

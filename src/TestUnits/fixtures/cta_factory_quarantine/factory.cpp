@@ -52,3 +52,19 @@ extern "C" int fixture_deletes() { return deletes.load(); }
 extern "C" int fixture_entered() { return entered.load(std::memory_order_acquire); }
 extern "C" void fixture_proceed() { proceed.store(1, std::memory_order_release); }
 extern "C" void fixture_set_callback(void (*fn)()) { callback = fn; }
+
+// Card 4b=A (iteration 03 s5): current hosts only use the versioned table.
+// create_factory forwards to the legacy creator so every failure mode above
+// (throw/null/reentrant/concurrent) still reaches the host unchanged.
+#include "../../../Includes/IStrategyPluginV2.h"
+namespace {
+void* WT_STRA_PLUGIN_V2_CALL fx_create_v2() { return static_cast<void*>(createStrategyFact()); }
+void WT_STRA_PLUGIN_V2_CALL fx_destroy_v2(void* f) { delete static_cast<ICtaStrategyFact*>(f); }
+const WtStrategyPluginApiV2 fx_api = {
+ sizeof(WtStrategyPluginApiV2), WT_STRA_PLUGIN_V2_ABI_VERSION, WT_STRA_PLUGIN_V2_FAMILY_CTA,
+ WT_STRA_PLUGIN_V2_OBJECT_REVISION,
+ WT_STRA_PLUGIN_V2_CAP_SYNC_TEARDOWN,
+ {0, 0, 0}, fx_create_v2, fx_destroy_v2};
+}
+extern "C" __attribute__((visibility("default"))) const WtStrategyPluginApiV2* getCtaStrategyPluginApiV2(uint32_t major)
+{ return major == WT_STRA_PLUGIN_V2_ABI_MAJOR ? &fx_api : nullptr; }

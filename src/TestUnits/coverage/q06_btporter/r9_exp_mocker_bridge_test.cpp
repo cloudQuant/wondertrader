@@ -20,6 +20,7 @@
  * 异步 stop 回归使用本地 Runner 和系统 temp 目录中的临时 CSV，不依赖全局 C 导出状态。
  * 缺陷见 docs/迭代计划/迭代01/bugs/R9_wtbtporter.md。
  */
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <algorithm>
@@ -328,7 +329,7 @@ namespace {
 		{
 			_base = std::filesystem::temp_directory_path() /
 				("r9_hft_period_csv_" +
-					std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+					std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
 			_output = _base / "output";
 
 			std::error_code ec;
@@ -415,6 +416,8 @@ namespace {
 		WTSVariant* basefiles = WTSVariant::createObject();
 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
 		basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
+		// 卡1：初始交易日映射须有交易日历（CHINA），缺失即 MissingCalendar 使 prepare 失败。
+		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
 		cfg->append("basefiles", basefiles);
 		basefiles->release();
 		return cfg;
@@ -442,6 +445,8 @@ namespace {
 			r9_json_escape((root / "dist/common/sessions.json").string()) +
 			"\",\"commodity\":\"" +
 			r9_json_escape((root / "dist/common/stk_comms.json").string()) +
+			"\",\"holiday\":\"" +	// 卡1：日期映射须有交易日历（CHINA）
+			r9_json_escape((root / "dist/common/holidays.json").string()) +
 			"\"}},\"env\":{\"mocker\":\"none\"}}";
 	}
 
@@ -820,13 +825,13 @@ TEST_F(R9Wired, HftEntrustOrderTradeArgsPassthrough)
 	EXPECT_DOUBLE_EQ(g9.p1, 104.0);		// 3 + 1 + 100
 	EXPECT_DOUBLE_EQ(g9.p2, 1.0);			// isBuy=true, isCanceled=false
 
+	// 卡13d（I03-NEW-080）：ExpHftMocker::on_trade 只在 apply_trade 成功后透传；本夹具的 runner 回放器未加载
+	// SHFE.cu 品种/合约/费率，成交无法确定计费合约，必须不入账、不透传给策略回调（旧期望是无条件透传）。
+	// runner→hft 回调的实参透传由 q06_btporter_runner_mocker_test.cpp（hft_on_trade）覆盖。
 	g9.clear();
 	hft.on_trade(4103, "SHFE.cu2406", false, 2.0, 70.25, "ttag");
-	ASSERT_EQ(g9.trd, 1U);
-	EXPECT_EQ(g9.last_date, 4103U);
-	EXPECT_EQ(g9.last_code, "SHFE.cu2406");
-	EXPECT_DOUBLE_EQ(g9.p1, 72.25);		// 2 + 70.25
-	EXPECT_DOUBLE_EQ(g9.p2, 0.0);
+	EXPECT_EQ(g9.trd, 0U);
+	EXPECT_EQ(g9.last_code, "");
 }
 
 /* 交易日事件同时打 ctx_on_session_event(ET_HFT) 和全局事件（ExpHftMocker.cpp:53-67） */

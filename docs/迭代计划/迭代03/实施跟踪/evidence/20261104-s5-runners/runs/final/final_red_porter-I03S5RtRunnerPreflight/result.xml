@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="6" failures="5" disabled="0" errors="0" time="0.066" timestamp="2026-11-04T21:54:54.555" name="AllTests">
+  <testsuite name="I03S5RtRunnerPreflight" tests="6" failures="5" disabled="0" skipped="0" errors="0" time="0.066" timestamp="2026-11-04T21:54:54.555">
+    <testcase name="InvalidExecuterInMiddleRejectsBeforeMutationAndConfigIsRetryable" file="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp" line="190" status="run" result="completed" time="0.044" timestamp="2026-11-04T21:54:54.555" classname="I03S5RtRunnerPreflight">
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:196&#x0A;Value of: runner-&gt;config(config(dir, &quot;cta&quot;, bad, &quot;&quot;).c_str(), false)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:196
+Value of: runner->config(config(dir, "cta", bad, "").c_str(), false)
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:197&#x0A;Expected equality of these values:&#x0A;  nullptr&#x0A;    Which is: NULL&#x0A;  runner-&gt;_config&#x0A;    Which is: 0x9030102e0&#x0A;a pure preflight rejection must keep config() retryable&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:197
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner->_config
+    Which is: 0x9030102e0
+a pure preflight rejection must keep config() retryable
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:198&#x0A;Expected equality of these values:&#x0A;  nullptr&#x0A;    Which is: NULL&#x0A;  runner-&gt;_cta_engine.findExecuter(&quot;i03s5_ok_a&quot;).get()&#x0A;    Which is: 0x1069c8b40&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:198
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner->_cta_engine.findExecuter("i03s5_ok_a").get()
+    Which is: 0x1069c8b40
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:200&#x0A;Expected equality of these values:&#x0A;  nullptr&#x0A;    Which is: NULL&#x0A;  runner-&gt;_engine&#x0A;    Which is: 0x1069c3d88&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:200
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner->_engine
+    Which is: 0x1069c3d88
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:201&#x0A;Expected equality of these values:&#x0A;  WtRtRunner::LifecycleState::UNCONFIGURED&#x0A;    Which is: 1-byte object &lt;00&gt;&#x0A;  state_of(*runner)&#x0A;    Which is: 1-byte object &lt;02&gt;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:201
+Expected equality of these values:
+  WtRtRunner::LifecycleState::UNCONFIGURED
+    Which is: 1-byte object <00>
+  state_of(*runner)
+    Which is: 1-byte object <02>
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:204&#x0A;Value of: runner-&gt;config(config(dir, &quot;cta&quot;, good, &quot;&quot;).c_str(), false)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:204
+Value of: runner->config(config(dir, "cta", good, "").c_str(), false)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="UnknownExecuterKindIsRejectedInsteadOfBecomingDist" file="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp" line="211" status="run" result="completed" time="0.004" timestamp="2026-11-04T21:54:54.600" classname="I03S5RtRunnerPreflight">
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:216&#x0A;Value of: runner-&gt;config(config(dir, &quot;cta&quot;, list, &quot;&quot;).c_str(), false)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:216
+Value of: runner->config(config(dir, "cta", list, "").c_str(), false)
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:217&#x0A;Expected equality of these values:&#x0A;  nullptr&#x0A;    Which is: NULL&#x0A;  runner-&gt;_cta_engine.findExecuter(&quot;i03s5_kind&quot;).get()&#x0A;    Which is: 0x1069caad0&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:217
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner->_cta_engine.findExecuter("i03s5_kind").get()
+    Which is: 0x1069caad0
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:218&#x0A;Expected equality of these values:&#x0A;  nullptr&#x0A;    Which is: NULL&#x0A;  runner-&gt;_config&#x0A;    Which is: 0x903010a60&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:218
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner->_config
+    Which is: 0x903010a60
+]]></failure>
+    </testcase>
+    <testcase name="MissingExecuterSidecarFailsConfig" file="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp" line="222" status="run" result="completed" time="0.002" timestamp="2026-11-04T21:54:54.604" classname="I03S5RtRunnerPreflight">
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:227&#x0A;Value of: runner-&gt;config(config(dir, &quot;cta&quot;, sidecar, &quot;&quot;).c_str(), false)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:227
+Value of: runner->config(config(dir, "cta", sidecar, "").c_str(), false)
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:228&#x0A;Expected equality of these values:&#x0A;  nullptr&#x0A;    Which is: NULL&#x0A;  runner-&gt;_config&#x0A;    Which is: 0x903010c40&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:228
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner->_config
+    Which is: 0x903010c40
+]]></failure>
+    </testcase>
+    <testcase name="SidecarExecutersAndRoutersAreValidatedAndLoaded" file="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp" line="232" status="run" result="completed" time="0.002" timestamp="2026-11-04T21:54:54.607" classname="I03S5RtRunnerPreflight" />
+    <testcase name="InvalidRouterRuleFailsConfig" file="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp" line="243" status="run" result="completed" time="0.004" timestamp="2026-11-04T21:54:54.609" classname="I03S5RtRunnerPreflight">
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:250&#x0A;Value of: runner-&gt;config(config(dir, &quot;cta&quot;, &quot;\&quot;&quot; + dir.file(&quot;executers.json&quot;) + &quot;\&quot;&quot;, &quot;&quot;).c_str(), false)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:250
+Value of: runner->config(config(dir, "cta", "\"" + dir.file("executers.json") + "\"", "").c_str(), false)
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:252&#x0A;Expected: (WtRtRunner::LifecycleState::RUNNING) != (state_of(*runner)), actual: 1-byte object &lt;04&gt; vs 1-byte object &lt;04&gt;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:252
+Expected: (WtRtRunner::LifecycleState::RUNNING) != (state_of(*runner)), actual: 1-byte object <04> vs 1-byte object <04>
+]]></failure>
+    </testcase>
+    <testcase name="DiffInitFailureAfterValidationFailsConfigAndRetainsHostForQuiesce" file="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp" line="256" status="run" result="completed" time="0.007" timestamp="2026-11-04T21:54:54.613" classname="I03S5RtRunnerPreflight">
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:267&#x0A;Value of: runner-&gt;config(config(dir, &quot;cta&quot;, list, &quot;&quot;).c_str(), false)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:267
+Value of: runner->config(config(dir, "cta", list, "").c_str(), false)
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:270&#x0A;Expected: (nullptr) != (runner-&gt;_cta_engine.findExecuter(&quot;i03s5_bad_diff&quot;).get()), actual: (nullptr) vs NULL&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:270
+Expected: (nullptr) != (runner->_cta_engine.findExecuter("i03s5_bad_diff").get()), actual: (nullptr) vs NULL
+]]></failure>
+      <failure message="/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:272&#x0A;Expected: (WtRtRunner::LifecycleState::RUNNING) != (state_of(*runner)), actual: 1-byte object &lt;04&gt; vs 1-byte object &lt;04&gt;&#x0A;" type=""><![CDATA[/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:272
+Expected: (WtRtRunner::LifecycleState::RUNNING) != (state_of(*runner)), actual: 1-byte object <04> vs 1-byte object <04>
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,41 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before-round3/src/TraderXTP/TraderXTP.cpp	2026-11-04 20:08:37
++++ src/TraderXTP/TraderXTP.cpp	2026-11-04 21:24:45
+@@ -385,7 +385,26 @@
+ 	{
+ 		std::fprintf(stderr, "[TraderXTP] Destroyed before SDK callbacks/API calls drained; use deleteTrader\n");
+ 		std::abort();
++	}
++
++	// I03-NEW-067: the result containers are created lazily by SDK callbacks and
++	// owned by this instance; release() only clears them. Callbacks and API calls
++	// are proven drained above, so return ownership exactly once.
++	if (_positions != NULL)
++	{
++		_positions->release();
++		_positions = NULL;
++	}
++	if (_trades != NULL)
++	{
++		_trades->release();
++		_trades = NULL;
+ 	}
++	if (_orders != NULL)
++	{
++		_orders->release();
++		_orders = NULL;
++	}
+ }
+ 
+ bool TraderXTP::isCallbackContext() const
+@@ -649,7 +668,10 @@
+ 			sink->onRspEntrust(entrust, error);
+ 		error->release();
+ 
+-		entrust->release();
++		// I03-NEW-068: makeEntrust() returns NULL for an unregistered contract;
++		// the host still receives the error (it rejects a NULL entrust itself).
++		if (entrust != NULL)
++			entrust->release();
+ 	}
+ 	else
+ 	{

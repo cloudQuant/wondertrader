@@ -1,0 +1,436 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-dt-writer/before/src/WtDataStorageAD/WtDataWriterAD.cpp	2026-11-04 08:02:50
++++ src/WtDataStorageAD/WtDataWriterAD.cpp	2026-11-04 20:50:10
+@@ -34,15 +34,55 @@
+ 	if (sink == NULL)
+ 		return;
+ 
++	// I03-NEW-038: messages carry configured paths and caller-supplied codes; bound the
++	// formatter to the per-thread buffer (same scheme as the AD readers) instead of
++	// trusting their size.
+ 	static thread_local char buffer[512] = { 0 };
+-	memset(buffer, 0, 512);
+-	fmt::format_to(buffer, format, args...);
++	try
++	{
++		const std::size_t max_output_size = sizeof(buffer) - 1;
++		const auto formatted = fmt::format_to_n(buffer, max_output_size, format, args...);
++		if (formatted.size > max_output_size)
++		{
++			constexpr char truncation_marker[] = "...[truncated]";
++			constexpr std::size_t marker_size = sizeof(truncation_marker) - 1;
++			std::memcpy(buffer + max_output_size - marker_size, truncation_marker, marker_size);
++			buffer[max_output_size] = '\0';
++		}
++		else
++		{
++			buffer[formatted.size] = '\0';
++		}
++	}
++	catch (...)
++	{
++		constexpr char fallback[] = "WtDataWriterAD log formatting failed";
++		std::memcpy(buffer, fallback, sizeof(fallback));
++	}
+ 
+ 	sink->outputLog(ll, buffer);
+ }
+ 
+ namespace
+ {
++	// Display at most `capacity` bytes of an identity field; fixed-size tick fields may be
++	// unterminated, and contract strings may exceed the LMDB key capacity.
++	std::string identityFieldForLog(const char* field, std::size_t capacity)
++	{
++		if (field == NULL)
++			return "(null)";
++		std::size_t length = 0;
++		while (length < capacity && field[length] != '\0')
++			++length;
++		std::string text(field, length);
++		if (length == capacity && field[length - 1] != '\0')
++			text += "...";
++		return text;
++	}
++}
++
++namespace
++{
+ 	bool checkedTickSessionDate(IBaseDataMgr* manager, const WTSTickData* tick, uint32_t& date)
+ 	{
+ 		// A zero action date in a tick is not a request to substitute wall time.
+@@ -50,14 +90,168 @@
+ 			return false;
+ 		WTSSessionInfo* session = manager->getSessionByCode(tick->code(), tick->exchg());
+ 		return session != NULL && session->tryGetOffsetDate(tick->actiondate(), tick->actiontime() / 100000, date);
++	}
++}
++
++// Writer lifecycle V1 (card 9): admission accounting for this writer's public calls.
++namespace
++{
++	thread_local std::vector<const WtDataWriterAD*> t_ad_operations;
++
++	bool inAdOperation(const WtDataWriterAD* writer)
++	{
++		for (const WtDataWriterAD* active : t_ad_operations)
++		{
++			if (active == writer)
++				return true;
++		}
++		return false;
++	}
++
++	void popAdOperation(const WtDataWriterAD* writer) noexcept
++	{
++		for (auto it = t_ad_operations.rbegin(); it != t_ad_operations.rend(); ++it)
++		{
++			if (*it == writer)
++			{
++				t_ad_operations.erase(std::next(it).base());
++				return;
++			}
++		}
++	}
++}
++
++class AdOperationGuard
++{
++public:
++	AdOperationGuard(WtDataWriterAD& writer, bool admitAfterStop) : _writer(writer)
++	{
++		t_ad_operations.push_back(&writer);
++		StdUniqueLock lock(writer._ops_mtx);
++		if (writer._stop_requested && !admitAfterStop)
++		{
++			lock.unlock();
++			popAdOperation(&writer);
++			return;
++		}
++		++writer._active_ops;
++		_admitted = true;
++	}
++	~AdOperationGuard()
++	{
++		if (!_admitted)
++			return;
++		popAdOperation(&_writer);
++		{
++			StdUniqueLock lock(_writer._ops_mtx);
++			--_writer._active_ops;
++		}
++		_writer._ops_cond.notify_all();
++	}
++	AdOperationGuard(const AdOperationGuard&) = delete;
++	AdOperationGuard& operator=(const AdOperationGuard&) = delete;
++	explicit operator bool() const { return _admitted; }
++private:
++	WtDataWriterAD&	_writer;
++	bool			_admitted = false;
++};
++
++namespace
++{
++	StdUniqueMutex& adWriterRegistryMutex()
++	{
++		static StdUniqueMutex mtx;
++		return mtx;
++	}
++
++	std::set<IDataWriter*>& adWriterRegistry()
++	{
++		static std::set<IDataWriter*> writers;
++		return writers;
++	}
++
++	WtDataWriterAD* registeredAdWriter(void* handle)
++	{
++		if (handle == NULL)
++			return NULL;
++		IDataWriter* writer = static_cast<IDataWriter*>(handle);
++		StdUniqueLock lock(adWriterRegistryMutex());
++		if (adWriterRegistry().count(writer) == 0)
++			return NULL;
++		return static_cast<WtDataWriterAD*>(writer);
++	}
++
++	WtDataWriterLifecycleV1Status adRequestStop(void* handle) noexcept
++	{
++		try
++		{
++			WtDataWriterAD* writer = registeredAdWriter(handle);
++			if (writer == NULL)
++				return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
++			writer->requestStop();
++			return WT_DATA_WRITER_LIFECYCLE_V1_OK;
++		}
++		catch (...)
++		{
++			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;
++		}
++	}
++
++	WtDataWriterLifecycleV1Status adCanWait(void* handle) noexcept
++	{
++		try
++		{
++			WtDataWriterAD* writer = registeredAdWriter(handle);
++			if (writer == NULL)
++				return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
++			return writer->canWaitDrain() ? WT_DATA_WRITER_LIFECYCLE_V1_OK : WT_DATA_WRITER_LIFECYCLE_V1_WOULD_DEADLOCK;
++		}
++		catch (...)
++		{
++			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;
++		}
++	}
++
++	WtDataWriterLifecycleV1Status adWaitDrained(void* handle, uint32_t timeoutMs) noexcept
++	{
++		try
++		{
++			WtDataWriterAD* writer = registeredAdWriter(handle);
++			if (writer == NULL)
++				return WT_DATA_WRITER_LIFECYCLE_V1_INVALID_ARGUMENT;
++			return writer->waitDrained(timeoutMs);
++		}
++		catch (...)
++		{
++			return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;
++		}
+ 	}
++
++	const WtDataWriterLifecycleApiV1 g_ad_writer_lifecycle_v1 = {
++		(uint32_t)sizeof(WtDataWriterLifecycleApiV1),
++		WT_DATA_WRITER_LIFECYCLE_V1_ABI_VERSION,
++		WT_DATA_WRITER_LIFECYCLE_V1_CAP_DRAIN,
++		adRequestStop,
++		adCanWait,
++		adWaitDrained
++	};
+ }
+ 
+ extern "C"
+ {
+ 	EXPORT_FLAG IDataWriter* createWriter()
+ 	{
+-		IDataWriter* ret = new WtDataWriterAD();
++		WtDataWriterAD* ret = new WtDataWriterAD();
++		try
++		{
++			StdUniqueLock lock(adWriterRegistryMutex());
++			adWriterRegistry().insert(ret);
++		}
++		catch (...)
++		{
++			delete ret;
++			return NULL;
++		}
+ 		return ret;
+ 	}
+ 
+@@ -65,10 +259,19 @@
+ 	{
+ 		if (writer != NULL)
+ 		{
++			{
++				StdUniqueLock lock(adWriterRegistryMutex());
++				adWriterRegistry().erase(writer);
++			}
+ 			delete writer;
+ 			writer = NULL;
+ 		}
+ 	}
++
++	EXPORT_FLAG const WtDataWriterLifecycleApiV1* getDataWriterLifecycleApiV1(uint32_t requestedMajor)
++	{
++		return requestedMajor == WT_DATA_WRITER_LIFECYCLE_V1_ABI_MAJOR ? &g_ad_writer_lifecycle_v1 : NULL;
++	}
+ };
+ 
+ static const uint32_t CACHE_SIZE_STEP_AD = 400;
+@@ -348,10 +551,75 @@
+ 
+ WtDataWriterAD::~WtDataWriterAD()
+ {
++	// Never destroy a joinable worker: drain from a safe context. A host that deletes the
++	// writer from its own callback/worker violates the V1 contract (DRAINED first).
++	if (canWaitDrain())
++		release();
++}
++
++void WtDataWriterAD::requestStop()
++{
++	{
++		StdUniqueLock opsLock(_ops_mtx);
++		_stop_requested = true;
++	}
++	{
++		StdUniqueLock taskLock(_task_mtx);
++		_terminated = true;	// the worker finishes its accepted queue, then exits
++	}
++	_task_cond.notify_all();
++	_ops_cond.notify_all();
++}
++
++bool WtDataWriterAD::canWaitDrain()
++{
++	if (inAdOperation(this))
++		return false;
++	StdUniqueLock taskLock(_task_mtx);
++	return _task_worker_id != std::this_thread::get_id();
++}
++
++WtDataWriterLifecycleV1Status WtDataWriterAD::waitDrained(uint32_t timeout_ms)
++{
++	if (!canWaitDrain())
++		return WT_DATA_WRITER_LIFECYCLE_V1_WOULD_DEADLOCK;
++	const bool forever = (timeout_ms == WT_DATA_WRITER_LIFECYCLE_V1_WAIT_FOREVER);
++	const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(forever ? 0 : timeout_ms);
++
++	StdThreadPtr worker;
++	{
++		StdUniqueLock taskLock(_task_mtx);
++		worker = _task_thrd;
++	}
++
++	StdUniqueLock opsLock(_ops_mtx);
++	if (!_stop_requested)
++		return WT_DATA_WRITER_LIFECYCLE_V1_ERROR;	// request_stop must come first
++	auto drained = [this, &worker]() {
++		return _active_ops == 0 && (worker == NULL || _task_exited || _task_joined);
++	};
++	if (forever)
++		_ops_cond.wait(opsLock, drained);
++	else if (!_ops_cond.wait_until(opsLock, deadline, drained))
++		return WT_DATA_WRITER_LIFECYCLE_V1_PENDING;
++	if (worker != NULL && !_task_joined)
++	{
++		_task_joined = true;
++		opsLock.unlock();
++		if (worker->joinable())
++			worker->join();	// the loop has returned; this only reaps the thread
++	}
++	return WT_DATA_WRITER_LIFECYCLE_V1_DRAINED;
+ }
+ 
+ bool WtDataWriterAD::init(WTSVariant* params, IDataWriterSink* sink)
+ {
++	{
++		// Lifecycle V1 / card 9c: a stopped writer is never re-initialized.
++		StdUniqueLock opsLock(_ops_mtx);
++		if (_stop_requested)
++			return false;
++	}
+ 	// A fresh instance may be retried after a failed initialization. Until the
+ 	// first init succeeds, no partially loaded mapping may survive and be reused
+ 	// for a later init with a different base directory. Existing initialized
+@@ -431,6 +699,22 @@
+ 		try
+ 		{
+ 			_task_thrd.reset(new StdThread([this]() {
++				{
++					StdUniqueLock taskLock(_task_mtx);
++					_task_worker_id = std::this_thread::get_id();
++				}
++				struct ExitMark
++				{
++					WtDataWriterAD* writer;
++					~ExitMark()
++					{
++						{
++							StdUniqueLock opsLock(writer->_ops_mtx);
++							writer->_task_exited = true;
++						}
++						writer->_ops_cond.notify_all();
++					}
++				} exitMark{ this };
+ 				for (;;)
+ 				{
+ 					TaskInfo task;
+@@ -476,15 +760,12 @@
+ 
+ void WtDataWriterAD::release()
+ {
+-	{
+-		StdUniqueLock lck(_task_mtx);
+-		_terminated = true;
+-	}
+-	_task_cond.notify_all();
+-	if (_task_thrd && _task_thrd->joinable())
+-	{
+-		_task_thrd->join();
+-	}
++	requestStop();
++	// From a sink/dumper callback or the worker itself only request the stop; the owner
++	// drains later from a safe context (no self-join).
++	if (!canWaitDrain())
++		return;
++	waitDrained(WT_DATA_WRITER_LIFECYCLE_V1_WAIT_FOREVER);
+ }
+ 
+ bool WtDataWriterAD::loadCache()
+@@ -911,6 +1192,10 @@
+ 
+ bool WtDataWriterAD::writeTick(WTSTickData* curTick, uint32_t procFlag)
+ {
++	AdOperationGuard operation(*this, false);
++	if (!operation)
++		return false;	// stopped: admission closed (lifecycle V1)
++
+ 	if (_log_group_size == 0)
+ 		return false;
+ 
+@@ -924,7 +1209,15 @@
+ 		WTSContractInfo* ct = curTick->getContractInfo();
+ 		if (!lmdbKeyIdentityValid(ct->getExchg(), ct->getCode()) ||
+ 			!lmdbKeyIdentityValid(curTick->exchg(), curTick->code()))
++		{
++			// L04-004: admission rejection is observable; nothing was cached, stored or queued.
++			pipe_writer_log(_sink, LL_ERROR, "Rejected tick before any side effect: storage identity {}.{} (tick {}.{}) "
++				"does not fit the LMDB key (exchange < {} bytes, code < {} bytes, both non-empty)",
++				identityFieldForLog(ct->getExchg(), 64), identityFieldForLog(ct->getCode(), 64),
++				identityFieldForLog(curTick->exchg(), MAX_EXCHANGE_LENGTH), identityFieldForLog(curTick->code(), MAX_INSTRUMENT_LENGTH),
++				MAX_EXCHANGE_LENGTH, MAX_INSTRUMENT_LENGTH);
+ 			return false;
++		}
+ 		uint32_t checkedDate = 0;
+ 		if (_sink == NULL || !checkedTickSessionDate(_bd_mgr, curTick, checkedDate))
+ 		{
+@@ -947,14 +1240,25 @@
+ 				break;
+ 			if (!lmdbKeyIdentityValid(ct->getExchg(), ct->getCode()) ||
+ 				!lmdbKeyIdentityValid(curTick->exchg(), curTick->code()))
++			{
++				// L04-004: accepted (async true) but not processed -> counted and logged, never silent.
++				_tick_rejected_after_accept.fetch_add(1, std::memory_order_acq_rel);
++				persisted->store(false, std::memory_order_release);
++				pipe_writer_log(_sink, LL_ERROR, "Dropped accepted tick: storage identity {}.{} (tick {}.{}) no longer fits the LMDB key",
++					identityFieldForLog(ct->getExchg(), 64), identityFieldForLog(ct->getCode(), 64),
++					identityFieldForLog(curTick->exchg(), MAX_EXCHANGE_LENGTH), identityFieldForLog(curTick->code(), MAX_INSTRUMENT_LENGTH));
+ 				break;
++			}
+ 
+ 			// A caller may have retained and changed the queued tick. Recheck
+ 			// immediately before consulting the sink or touching writer state.
+ 			uint32_t checkedDate = 0;
+ 			if (!checkedTickSessionDate(_bd_mgr, curTick, checkedDate))
+ 			{
+-				pipe_writer_log(_sink, LL_ERROR, "Cannot verify session date for queued tick {}.{}", curTick->exchg(), curTick->code());
++				_tick_rejected_after_accept.fetch_add(1, std::memory_order_acq_rel);
++				persisted->store(false, std::memory_order_release);
++				pipe_writer_log(_sink, LL_ERROR, "Cannot verify session date for queued tick {}.{}",
++					identityFieldForLog(curTick->exchg(), MAX_EXCHANGE_LENGTH), identityFieldForLog(curTick->code(), MAX_INSTRUMENT_LENGTH));
+ 				break;
+ 			}
+ 
+@@ -1603,7 +1907,9 @@
+ 
+ WTSTickData* WtDataWriterAD::getCurTick(const char* code, const char* exchg/* = ""*/)
+ {
+-	if (strlen(code) == 0)
++	// Reads stay available after stop (mappings live until destruction) but are counted.
++	AdOperationGuard operation(*this, true);
++	if (code == NULL || strlen(code) == 0)
+ 		return NULL;
+ 
+ 	WTSContractInfo* ct = _bd_mgr->getContract(code, exchg);

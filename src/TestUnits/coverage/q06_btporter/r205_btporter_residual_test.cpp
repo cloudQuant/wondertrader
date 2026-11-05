@@ -105,6 +105,7 @@ const char* kContracts =
 void write_min_basefiles(const std::string& dir)
 {
 	write_text(dir + "/sessions.json", kSessions);
+	write_text(dir + "/holidays.json", "{\"CHINA\":[]}");
 	write_text(dir + "/commodities.json", kCommodities);
 	write_text(dir + "/contracts.json", kContracts);
 }
@@ -516,11 +517,8 @@ TEST(R205BtPorterLevel2, HftOrderQueueQueryAfterLastStoredRecordDoesNotOvercount
 	EXPECT_EQ(1U, g_ordque_cnt);
 }
 
-/* 产品缺陷 BUG-R205-003：HisDataReplayer::checkOrderQueues 失败时把空记录写进
- * `_trans_cache`（checkOrderDetails 同样），污染逐笔成交缓存。启用本用例即可看到
- * 一次 ordque 缺失查询之后，随后写入的 trans 文件被 `_count == 0` 的脏缓存挡住。
- * 当前实现返回 0，故保持 DISABLED_，不改产品代码换取通过。 */
-TEST(R205BtPorterLevel2, DISABLED_QueueMissPoisonsTransCacheAndHidesLaterTransFile)
+/* 迭代03 最终验收复核后启用（原禁用：BUG-R205-003）。 */
+TEST(R205BtPorterLevel2, QueueMissPoisonsTransCacheAndHidesLaterTransFile)
 {
 	const std::string dir = prepare_dir("l2_poison");
 	ASSERT_FALSE(dir.empty());
@@ -603,6 +601,7 @@ TEST(R205BtRunnerAsync, BacktestEndThrowIsCaughtInsideWorker)
 		"\"tick\":false,"
 		"\"basefiles\":{"
 		"\"session\":\"" + dir + "/sessions.json\","
+		"\"holiday\":\"" + dir + "/holidays.json\","	// 卡1：日期映射须有交易日历（CHINA）
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
 		"\"env\":{\"mocker\":\"none\"}}";
@@ -645,6 +644,7 @@ TEST(R205BtRunnerAsync, HftMockerAsyncHookAndStepTick)
 		"\"tick\":false,"
 		"\"basefiles\":{"
 		"\"session\":\"" + dir + "/sessions.json\","
+		"\"holiday\":\"" + dir + "/holidays.json\","	// 卡1：日期映射须有交易日历（CHINA）
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
 		"\"env\":{\"mocker\":\"none\"}}";

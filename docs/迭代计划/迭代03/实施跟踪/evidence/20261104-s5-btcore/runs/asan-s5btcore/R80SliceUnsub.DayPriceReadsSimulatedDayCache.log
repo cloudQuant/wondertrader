@@ -1,0 +1,38 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R80SliceUnsub.DayPriceReadsSimulatedDayCache
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R80SliceUnsub
+[ RUN      ] R80SliceUnsub.DayPriceReadsSimulatedDayCache
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSUtils/zstdlib/zstd_compress.c:1326:46: runtime error: applying non-zero offset 1 to null pointer
+    #0 0x0001032e852c in ZSTD_reset_matchState zstd_compress.c:1326
+    #1 0x0001032e5d00 in ZSTD_resetCCtx_internal zstd_compress.c:1527
+    #2 0x0001032d3b3c in ZSTD_compressBegin_internal zstd_compress.c:2946
+    #3 0x0001032d642c in ZSTD_compress_advanced_internal zstd_compress.c:3120
+    #4 0x0001032d6784 in ZSTD_compress_usingDict zstd_compress.c:3135
+    #5 0x0001032d68c4 in ZSTD_compressCCtx zstd_compress.c:3145
+    #6 0x0001032d6ab0 in ZSTD_compress zstd_compress.c:3155
+    #7 0x000100fdf1cc in WTSCmpHelper::compress_data(void const*, unsigned long, unsigned int) WTSCmpHelper.hpp:44
+    #8 0x00010285d38c in HisDataReplayer::cacheRawBarsFromCSV(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, char const*, wtp::tagKlinePeriod, bool) HisDataReplayer.cpp:6445
+    #9 0x000102848b70 in HisDataReplayer::get_kline_slice(char const*, char const*, unsigned int, unsigned int, bool) HisDataReplayer.cpp:4372
+    #10 0x0001021ef2d4 in R80SliceUnsub_DayPriceReadsSimulatedDayCache_Test::TestBody()::$_0::operator()() const r80_replayer_slice_unsub_test.cpp:233
+    #11 0x0001021ef1dc in std::__1::__invoke_result_impl<void, R80SliceUnsub_DayPriceReadsSimulatedDayCache_Test::TestBody()::$_0&>::type std::__1::__invoke[abi:nqe220108]<R80SliceUnsub_DayPriceReadsSimulatedDayCache_Test::TestBody()::$_0&>(R80SliceUnsub_DayPriceReadsSimulatedDayCache_Test::TestBody()::$_0&) invoke.h:90
+    #12 0x0001021ef178 in void std::__1::__invoke_void_return_wrapper<void, true>::__call[abi:nqe220108]<R80SliceUnsub_DayPriceReadsSimulatedDayCache_Test::TestBody()::$_0&>(R80SliceUnsub_DayPriceReadsSimulatedDayCache_Test::TestBody()::$_0&) invoke.h:350
+    #13 0x0001021ef114 in void std::__1::__invoke_r[abi:nqe220108]<void, R80SliceUnsub_DayPriceReadsSimulatedDayCache_Test::TestBody()::$_0&>(R80SliceUnsub_DayPriceReadsSimulatedDayCache_Test::TestBody()::$_0&) invoke.h:356
+    #14 0x0001021eedb4 in std::__1::__function::__func<R80SliceUnsub_DayPriceReadsSimulatedDayCache_Test::TestBody()::$_0, void ()>::operator()() function.h:172
+    #15 0x00010109f344 in std::__1::__function::__value_func<void ()>::operator()[abi:nqe220108]() const function.h:273
+    #16 0x00010109f0f4 in std::__1::function<void ()>::operator()() const function.h:754
+    #17 0x00010218957c in r80::Sink::handle_init() r80_common.h:235
+    #18 0x0001027d5b3c in HisDataReplayer::prepare() HisDataReplayer.cpp:1172
+    #19 0x0001021d154c in R80SliceUnsub_DayPriceReadsSimulatedDayCache_Test::TestBody() r80_replayer_slice_unsub_test.cpp:247
+    #20 0x00010373d848 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (CoverageTests_btcore:arm64+0x102c31848)
+    #21 0x00010373d790 in testing::Test::Run()+0xcc (CoverageTests_btcore:arm64+0x102c31790)
+    #22 0x00010373e370 in testing::TestInfo::Run()+0xd0 (CoverageTests_btcore:arm64+0x102c32370)
+    #23 0x00010373edf4 in testing::TestSuite::Run()+0x1c4 (CoverageTests_btcore:arm64+0x102c32df4)
+    #24 0x00010374a21c in testing::internal::UnitTestImpl::RunAllTests()+0x52c (CoverageTests_btcore:arm64+0x102c3e21c)
+    #25 0x000103749bc8 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (CoverageTests_btcore:arm64+0x102c3dbc8)
+    #26 0x000103749b2c in testing::UnitTest::Run()+0x78 (CoverageTests_btcore:arm64+0x102c3db2c)
+    #27 0x000102db8224 in main+0x40 (CoverageTests_btcore:arm64+0x1022ac224)
+    #28 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSUtils/zstdlib/zstd_compress.c:1326:46 

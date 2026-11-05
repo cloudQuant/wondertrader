@@ -1,0 +1,161 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R120Notifier.BurstPublishesEveryPayload
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R120Notifier
+[ RUN      ] R120Notifier.BurstPublishesEveryPayload
+==================
+WARNING: ThreadSanitizer: data race (pid=57823)
+  Read of size 8 at 0x000117602220 by thread T3:
+    #0 std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::empty[abi:nqe220108]() const <null> (libWtMsgQue.dylib:arm64+0x60f70)
+    #1 wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0::operator()() const <null> (libWtMsgQue.dylib:arm64+0x60cbc)
+    #2 std::__1::__invoke_result_impl<void, wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0>::type std::__1::__invoke[abi:nqe220108]<wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0>(wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0&&) <null> (libWtMsgQue.dylib:arm64+0x60238)
+    #3 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (libWtMsgQue.dylib:arm64+0x601e0)
+    #4 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0>>(void*) <null> (libWtMsgQue.dylib:arm64+0x5fddc)
+
+  Previous write of size 8 at 0x000117602220 by thread T2:
+    #0 std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::__swap_layouts[abi:nqe220108](std::__1::__split_buffer<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>, std::__1::__split_buffer_pointer_layout>&) <null> (libWtMsgQue.dylib:arm64+0x5eb40)
+    #1 std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::__swap_out_circular_buffer(std::__1::__split_buffer<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>, std::__1::__split_buffer_pointer_layout>&) <null> (libWtMsgQue.dylib:arm64+0x5e008)
+    #2 wtp::MQServer::_PubData* std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::__emplace_back_slow_path<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&) <null> (libWtMsgQue.dylib:arm64+0x5dbd8)
+    #3 wtp::MQServer::_PubData& std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::emplace_back<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&)::'lambda0'()::operator()() const <null> (libWtMsgQue.dylib:arm64+0x5d45c)
+    #4 void std::__1::__if_likely_else[abi:nqe220108]<wtp::MQServer::_PubData& std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::emplace_back<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&)::'lambda'(), wtp::MQServer::_PubData& std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::emplace_back<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&)::'lambda0'()>(bool, wtp::MQServer::_PubData& std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::emplace_back<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&)::'lambda'(), wtp::MQServer::_PubData& std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::emplace_back<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&)::'lambda0'()) <null> (libWtMsgQue.dylib:arm64+0x5d31c)
+    #5 wtp::MQServer::_PubData& std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::emplace_back<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&) <null> (libWtMsgQue.dylib:arm64+0x5bd78)
+    #6 wtp::MQServer::publish(char const*, void const*, unsigned int) <null> (libWtMsgQue.dylib:arm64+0x5ba58)
+    #7 wtp::MQManager::publish_message(unsigned int, char const*, void const*, unsigned int) <null> (libWtMsgQue.dylib:arm64+0x4c3ec)
+    #8 publish_message <null> (libWtMsgQue.dylib:arm64+0x63b90)
+    #9 wtp::EventNotifier::Core::publish(char const*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) const <null> (CoverageTests_wtcore:arm64+0x100b98bf8)
+    #10 wtp::EventNotifier::notify(char const*, unsigned int, char const*, wtp::WTSTradeInfo*)::$_1::operator()() const <null> (CoverageTests_wtcore:arm64+0x100ba034c)
+    #11 void wtp::EventNotifier::postHandler<wtp::EventNotifier::notify(char const*, unsigned int, char const*, wtp::WTSTradeInfo*)::$_1>(char const*, wtp::EventNotifier::notify(char const*, unsigned int, char const*, wtp::WTSTradeInfo*)::$_1&&)::'lambda'()::operator()() <null> (CoverageTests_wtcore:arm64+0x100ba0088)
+    #12 boost::asio::detail::binder0<void wtp::EventNotifier::postHandler<wtp::EventNotifier::notify(char const*, unsigned int, char const*, wtp::WTSTradeInfo*)::$_1>(char const*, wtp::EventNotifier::notify(char const*, unsigned int, char const*, wtp::WTSTradeInfo*)::$_1&&)::'lambda'()>::operator()() <null> (CoverageTests_wtcore:arm64+0x100b9fd5c)
+    #13 boost::asio::detail::executor_op<boost::asio::detail::binder0<void wtp::EventNotifier::postHandler<wtp::EventNotifier::notify(char const*, unsigned int, char const*, wtp::WTSTradeInfo*)::$_1>(char const*, wtp::EventNotifier::notify(char const*, unsigned int, char const*, wtp::WTSTradeInfo*)::$_1&&)::'lambda'()>, std::__1::allocator<void>, boost::asio::detail::scheduler_operation>::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) <null> (CoverageTests_wtcore:arm64+0x100ba0708)
+    #14 boost::asio::detail::scheduler_operation::complete(void*, boost::system::error_code const&, unsigned long) <null> (CoverageTests_wtcore:arm64+0x100584b38)
+    #15 boost::asio::detail::scheduler::do_run_one(boost::asio::detail::conditionally_enabled_mutex::scoped_lock&, boost::asio::detail::scheduler_thread_info&, boost::system::error_code const&) <null> (CoverageTests_wtcore:arm64+0x100583b2c)
+    #16 boost::asio::detail::scheduler::run(boost::system::error_code&) <null> (CoverageTests_wtcore:arm64+0x100b91554)
+    #17 boost::asio::io_context::run() <null> (CoverageTests_wtcore:arm64+0x100b95a28)
+    #18 wtp::EventNotifier::init(wtp::WTSVariant*)::$_0::operator()() const <null> (CoverageTests_wtcore:arm64+0x100b95948)
+    #19 std::__1::__invoke_result_impl<void, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>::type std::__1::__invoke[abi:nqe220108]<wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>(wtp::EventNotifier::init(wtp::WTSVariant*)::$_0&&) <null> (CoverageTests_wtcore:arm64+0x100b95888)
+    #20 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (CoverageTests_wtcore:arm64+0x100b95830)
+    #21 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>>(void*) <null> (CoverageTests_wtcore:arm64+0x100b9523c)
+
+  Location is heap block of size 136 at 0x0001176021c0 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x92928)
+    #1 wtp::MQManager::create_server(char const*, bool) <null> (libWtMsgQue.dylib:arm64+0x4b880)
+    #2 create_server <null> (libWtMsgQue.dylib:arm64+0x63a68)
+    #3 wtp::EventNotifier::init(wtp::WTSVariant*) <null> (CoverageTests_wtcore:arm64+0x100b7f714)
+    #4 (anonymous namespace)::R120Notifier_BurstPublishesEveryPayload_Test::TestBody() <null> (CoverageTests_wtcore:arm64+0x10054ce40)
+    #5 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (CoverageTests_wtcore:arm64+0x101130830)
+
+  Thread T3 (tid=9711375, running) created by thread T2 at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) <null> (libWtMsgQue.dylib:arm64+0x48804)
+    #2 std::__1::thread::thread[abi:nqe220108]<wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0, 0>(wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0&&) <null> (libWtMsgQue.dylib:arm64+0x5fbb8)
+    #3 std::__1::thread::thread[abi:nqe220108]<wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0, 0>(wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0&&) <null> (libWtMsgQue.dylib:arm64+0x5c0e4)
+    #4 wtp::MQServer::publish(char const*, void const*, unsigned int) <null> (libWtMsgQue.dylib:arm64+0x5bb0c)
+    #5 wtp::MQManager::publish_message(unsigned int, char const*, void const*, unsigned int) <null> (libWtMsgQue.dylib:arm64+0x4c3ec)
+    #6 publish_message <null> (libWtMsgQue.dylib:arm64+0x63b90)
+    #7 wtp::EventNotifier::Core::publish(char const*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) const <null> (CoverageTests_wtcore:arm64+0x100b98bf8)
+    #8 wtp::EventNotifier::notify_log(char const*, char const*)::$_0::operator()() const <null> (CoverageTests_wtcore:arm64+0x100b9885c)
+    #9 void wtp::EventNotifier::postHandler<wtp::EventNotifier::notify_log(char const*, char const*)::$_0>(char const*, wtp::EventNotifier::notify_log(char const*, char const*)::$_0&&)::'lambda'()::operator()() <null> (CoverageTests_wtcore:arm64+0x100b984c4)
+    #10 boost::asio::detail::binder0<void wtp::EventNotifier::postHandler<wtp::EventNotifier::notify_log(char const*, char const*)::$_0>(char const*, wtp::EventNotifier::notify_log(char const*, char const*)::$_0&&)::'lambda'()>::operator()() <null> (CoverageTests_wtcore:arm64+0x100b97c6c)
+    #11 boost::asio::detail::executor_op<boost::asio::detail::binder0<void wtp::EventNotifier::postHandler<wtp::EventNotifier::notify_log(char const*, char const*)::$_0>(char const*, wtp::EventNotifier::notify_log(char const*, char const*)::$_0&&)::'lambda'()>, std::__1::allocator<void>, boost::asio::detail::scheduler_operation>::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) <null> (CoverageTests_wtcore:arm64+0x100b9aad4)
+    #12 boost::asio::detail::scheduler_operation::complete(void*, boost::system::error_code const&, unsigned long) <null> (CoverageTests_wtcore:arm64+0x100584b38)
+    #13 boost::asio::detail::scheduler::do_run_one(boost::asio::detail::conditionally_enabled_mutex::scoped_lock&, boost::asio::detail::scheduler_thread_info&, boost::system::error_code const&) <null> (CoverageTests_wtcore:arm64+0x100583b2c)
+    #14 boost::asio::detail::scheduler::run(boost::system::error_code&) <null> (CoverageTests_wtcore:arm64+0x100b91554)
+    #15 boost::asio::io_context::run() <null> (CoverageTests_wtcore:arm64+0x100b95a28)
+    #16 wtp::EventNotifier::init(wtp::WTSVariant*)::$_0::operator()() const <null> (CoverageTests_wtcore:arm64+0x100b95948)
+    #17 std::__1::__invoke_result_impl<void, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>::type std::__1::__invoke[abi:nqe220108]<wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>(wtp::EventNotifier::init(wtp::WTSVariant*)::$_0&&) <null> (CoverageTests_wtcore:arm64+0x100b95888)
+    #18 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (CoverageTests_wtcore:arm64+0x100b95830)
+    #19 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>>(void*) <null> (CoverageTests_wtcore:arm64+0x100b9523c)
+
+  Thread T2 (tid=9711373, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) <null> (CoverageTests_wtcore:arm64+0x10008e44c)
+    #2 std::__1::thread::thread[abi:nqe220108]<wtp::EventNotifier::init(wtp::WTSVariant*)::$_0, 0>(wtp::EventNotifier::init(wtp::WTSVariant*)::$_0&&) <null> (CoverageTests_wtcore:arm64+0x100b95018)
+    #3 std::__1::thread::thread[abi:nqe220108]<wtp::EventNotifier::init(wtp::WTSVariant*)::$_0, 0>(wtp::EventNotifier::init(wtp::WTSVariant*)::$_0&&) <null> (CoverageTests_wtcore:arm64+0x100b7fdbc)
+    #4 wtp::EventNotifier::init(wtp::WTSVariant*) <null> (CoverageTests_wtcore:arm64+0x100b7fa3c)
+    #5 (anonymous namespace)::R120Notifier_BurstPublishesEveryPayload_Test::TestBody() <null> (CoverageTests_wtcore:arm64+0x10054ce40)
+    #6 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (CoverageTests_wtcore:arm64+0x101130830)
+
+SUMMARY: ThreadSanitizer: data race (/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build-tsan/build_x64/Debug/bin/libWtMsgQue.dylib:arm64+0x60f70) in std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::empty[abi:nqe220108]() const
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=57823)
+  Read of size 8 at 0x000117602228 by thread T3:
+    #0 std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::empty[abi:nqe220108]() const <null> (libWtMsgQue.dylib:arm64+0x60f84)
+    #1 wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0::operator()() const <null> (libWtMsgQue.dylib:arm64+0x60cbc)
+    #2 std::__1::__invoke_result_impl<void, wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0>::type std::__1::__invoke[abi:nqe220108]<wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0>(wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0&&) <null> (libWtMsgQue.dylib:arm64+0x60238)
+    #3 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (libWtMsgQue.dylib:arm64+0x601e0)
+    #4 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0>>(void*) <null> (libWtMsgQue.dylib:arm64+0x5fddc)
+
+  Previous write of size 8 at 0x000117602228 by thread T2:
+    #0 std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::_ConstructTransaction::~_ConstructTransaction[abi:nqe220108]() <null> (libWtMsgQue.dylib:arm64+0x5da3c)
+    #1 std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::_ConstructTransaction::~_ConstructTransaction[abi:nqe220108]() <null> (libWtMsgQue.dylib:arm64+0x5d6bc)
+    #2 void std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::__emplace_back_assume_capacity[abi:nqe220108]<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&) <null> (libWtMsgQue.dylib:arm64+0x5d558)
+    #3 wtp::MQServer::_PubData& std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::emplace_back<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&)::'lambda'()::operator()() const <null> (libWtMsgQue.dylib:arm64+0x5d3a4)
+    #4 void std::__1::__if_likely_else[abi:nqe220108]<wtp::MQServer::_PubData& std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::emplace_back<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&)::'lambda'(), wtp::MQServer::_PubData& std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::emplace_back<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&)::'lambda0'()>(bool, wtp::MQServer::_PubData& std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::emplace_back<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&)::'lambda'(), wtp::MQServer::_PubData& std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::emplace_back<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&)::'lambda0'()) <null> (libWtMsgQue.dylib:arm64+0x5d30c)
+    #5 wtp::MQServer::_PubData& std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::emplace_back<wtp::MQServer::_PubData>(wtp::MQServer::_PubData&&) <null> (libWtMsgQue.dylib:arm64+0x5bd78)
+    #6 wtp::MQServer::publish(char const*, void const*, unsigned int) <null> (libWtMsgQue.dylib:arm64+0x5ba58)
+    #7 wtp::MQManager::publish_message(unsigned int, char const*, void const*, unsigned int) <null> (libWtMsgQue.dylib:arm64+0x4c3ec)
+    #8 publish_message <null> (libWtMsgQue.dylib:arm64+0x63b90)
+    #9 wtp::EventNotifier::Core::publish(char const*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) const <null> (CoverageTests_wtcore:arm64+0x100b98bf8)
+    #10 wtp::EventNotifier::notify_trade(char const*, char const*, bool, bool, unsigned long long, double, char const*)::$_0::operator()() const <null> (CoverageTests_wtcore:arm64+0x100ba7bc4)
+    #11 void wtp::EventNotifier::postHandler<wtp::EventNotifier::notify_trade(char const*, char const*, bool, bool, unsigned long long, double, char const*)::$_0>(char const*, wtp::EventNotifier::notify_trade(char const*, char const*, bool, bool, unsigned long long, double, char const*)::$_0&&)::'lambda'()::operator()() <null> (CoverageTests_wtcore:arm64+0x100ba7714)
+    #12 boost::asio::detail::binder0<void wtp::EventNotifier::postHandler<wtp::EventNotifier::notify_trade(char const*, char const*, bool, bool, unsigned long long, double, char const*)::$_0>(char const*, wtp::EventNotifier::notify_trade(char const*, char const*, bool, bool, unsigned long long, double, char const*)::$_0&&)::'lambda'()>::operator()() <null> (CoverageTests_wtcore:arm64+0x100ba73e8)
+    #13 boost::asio::detail::executor_op<boost::asio::detail::binder0<void wtp::EventNotifier::postHandler<wtp::EventNotifier::notify_trade(char const*, char const*, bool, bool, unsigned long long, double, char const*)::$_0>(char const*, wtp::EventNotifier::notify_trade(char const*, char const*, bool, bool, unsigned long long, double, char const*)::$_0&&)::'lambda'()>, std::__1::allocator<void>, boost::asio::detail::scheduler_operation>::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) <null> (CoverageTests_wtcore:arm64+0x100ba8004)
+    #14 boost::asio::detail::scheduler_operation::complete(void*, boost::system::error_code const&, unsigned long) <null> (CoverageTests_wtcore:arm64+0x100584b38)
+    #15 boost::asio::detail::scheduler::do_run_one(boost::asio::detail::conditionally_enabled_mutex::scoped_lock&, boost::asio::detail::scheduler_thread_info&, boost::system::error_code const&) <null> (CoverageTests_wtcore:arm64+0x100583b2c)
+    #16 boost::asio::detail::scheduler::run(boost::system::error_code&) <null> (CoverageTests_wtcore:arm64+0x100b91554)
+    #17 boost::asio::io_context::run() <null> (CoverageTests_wtcore:arm64+0x100b95a28)
+    #18 wtp::EventNotifier::init(wtp::WTSVariant*)::$_0::operator()() const <null> (CoverageTests_wtcore:arm64+0x100b95948)
+    #19 std::__1::__invoke_result_impl<void, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>::type std::__1::__invoke[abi:nqe220108]<wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>(wtp::EventNotifier::init(wtp::WTSVariant*)::$_0&&) <null> (CoverageTests_wtcore:arm64+0x100b95888)
+    #20 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (CoverageTests_wtcore:arm64+0x100b95830)
+    #21 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>>(void*) <null> (CoverageTests_wtcore:arm64+0x100b9523c)
+
+  Location is heap block of size 136 at 0x0001176021c0 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x92928)
+    #1 wtp::MQManager::create_server(char const*, bool) <null> (libWtMsgQue.dylib:arm64+0x4b880)
+    #2 create_server <null> (libWtMsgQue.dylib:arm64+0x63a68)
+    #3 wtp::EventNotifier::init(wtp::WTSVariant*) <null> (CoverageTests_wtcore:arm64+0x100b7f714)
+    #4 (anonymous namespace)::R120Notifier_BurstPublishesEveryPayload_Test::TestBody() <null> (CoverageTests_wtcore:arm64+0x10054ce40)
+    #5 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (CoverageTests_wtcore:arm64+0x101130830)
+
+  Thread T3 (tid=9711375, running) created by thread T2 at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) <null> (libWtMsgQue.dylib:arm64+0x48804)
+    #2 std::__1::thread::thread[abi:nqe220108]<wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0, 0>(wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0&&) <null> (libWtMsgQue.dylib:arm64+0x5fbb8)
+    #3 std::__1::thread::thread[abi:nqe220108]<wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0, 0>(wtp::MQServer::publish(char const*, void const*, unsigned int)::$_0&&) <null> (libWtMsgQue.dylib:arm64+0x5c0e4)
+    #4 wtp::MQServer::publish(char const*, void const*, unsigned int) <null> (libWtMsgQue.dylib:arm64+0x5bb0c)
+    #5 wtp::MQManager::publish_message(unsigned int, char const*, void const*, unsigned int) <null> (libWtMsgQue.dylib:arm64+0x4c3ec)
+    #6 publish_message <null> (libWtMsgQue.dylib:arm64+0x63b90)
+    #7 wtp::EventNotifier::Core::publish(char const*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) const <null> (CoverageTests_wtcore:arm64+0x100b98bf8)
+    #8 wtp::EventNotifier::notify_log(char const*, char const*)::$_0::operator()() const <null> (CoverageTests_wtcore:arm64+0x100b9885c)
+    #9 void wtp::EventNotifier::postHandler<wtp::EventNotifier::notify_log(char const*, char const*)::$_0>(char const*, wtp::EventNotifier::notify_log(char const*, char const*)::$_0&&)::'lambda'()::operator()() <null> (CoverageTests_wtcore:arm64+0x100b984c4)
+    #10 boost::asio::detail::binder0<void wtp::EventNotifier::postHandler<wtp::EventNotifier::notify_log(char const*, char const*)::$_0>(char const*, wtp::EventNotifier::notify_log(char const*, char const*)::$_0&&)::'lambda'()>::operator()() <null> (CoverageTests_wtcore:arm64+0x100b97c6c)
+    #11 boost::asio::detail::executor_op<boost::asio::detail::binder0<void wtp::EventNotifier::postHandler<wtp::EventNotifier::notify_log(char const*, char const*)::$_0>(char const*, wtp::EventNotifier::notify_log(char const*, char const*)::$_0&&)::'lambda'()>, std::__1::allocator<void>, boost::asio::detail::scheduler_operation>::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) <null> (CoverageTests_wtcore:arm64+0x100b9aad4)
+    #12 boost::asio::detail::scheduler_operation::complete(void*, boost::system::error_code const&, unsigned long) <null> (CoverageTests_wtcore:arm64+0x100584b38)
+    #13 boost::asio::detail::scheduler::do_run_one(boost::asio::detail::conditionally_enabled_mutex::scoped_lock&, boost::asio::detail::scheduler_thread_info&, boost::system::error_code const&) <null> (CoverageTests_wtcore:arm64+0x100583b2c)
+    #14 boost::asio::detail::scheduler::run(boost::system::error_code&) <null> (CoverageTests_wtcore:arm64+0x100b91554)
+    #15 boost::asio::io_context::run() <null> (CoverageTests_wtcore:arm64+0x100b95a28)
+    #16 wtp::EventNotifier::init(wtp::WTSVariant*)::$_0::operator()() const <null> (CoverageTests_wtcore:arm64+0x100b95948)
+    #17 std::__1::__invoke_result_impl<void, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>::type std::__1::__invoke[abi:nqe220108]<wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>(wtp::EventNotifier::init(wtp::WTSVariant*)::$_0&&) <null> (CoverageTests_wtcore:arm64+0x100b95888)
+    #18 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (CoverageTests_wtcore:arm64+0x100b95830)
+    #19 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::EventNotifier::init(wtp::WTSVariant*)::$_0>>(void*) <null> (CoverageTests_wtcore:arm64+0x100b9523c)
+
+  Thread T2 (tid=9711373, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) <null> (CoverageTests_wtcore:arm64+0x10008e44c)
+    #2 std::__1::thread::thread[abi:nqe220108]<wtp::EventNotifier::init(wtp::WTSVariant*)::$_0, 0>(wtp::EventNotifier::init(wtp::WTSVariant*)::$_0&&) <null> (CoverageTests_wtcore:arm64+0x100b95018)
+    #3 std::__1::thread::thread[abi:nqe220108]<wtp::EventNotifier::init(wtp::WTSVariant*)::$_0, 0>(wtp::EventNotifier::init(wtp::WTSVariant*)::$_0&&) <null> (CoverageTests_wtcore:arm64+0x100b7fdbc)
+    #4 wtp::EventNotifier::init(wtp::WTSVariant*) <null> (CoverageTests_wtcore:arm64+0x100b7fa3c)
+    #5 (anonymous namespace)::R120Notifier_BurstPublishesEveryPayload_Test::TestBody() <null> (CoverageTests_wtcore:arm64+0x10054ce40)
+    #6 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (CoverageTests_wtcore:arm64+0x101130830)
+
+SUMMARY: ThreadSanitizer: data race (/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build-tsan/build_x64/Debug/bin/libWtMsgQue.dylib:arm64+0x60f84) in std::__1::vector<wtp::MQServer::_PubData, std::__1::allocator<wtp::MQServer::_PubData>>::empty[abi:nqe220108]() const
+==================
+[       OK ] R120Notifier.BurstPublishesEveryPayload (259 ms)
+[----------] 1 test from R120Notifier (260 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (265 ms total)
+[  PASSED  ] 1 test.
+ThreadSanitizer: reported 2 warnings

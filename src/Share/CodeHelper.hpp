@@ -315,25 +315,25 @@ public:
 		if (pid.empty() || pid.size() >= rawCode.size())
 			return "";
 
+		// Month-code contract (decision card 6c = A): the suffix must be 3-6
+		// ASCII digits. Three digits keep the established CZCE decade
+		// expansion; 4-6 digits are kept intact. Anything else (non-digit,
+		// fewer than 3 or more than 6 digits) is rejected with an empty
+		// result and is never truncated into a pseudo standard code.
 		const std::size_t monthLen = rawCode.size() - pid.size();
 		const char* month = rawCode.c_str() + pid.size();
-		if (monthLen == 4)
-		{
-			result.append(pid);
-			result.push_back('.');
-			result.append(month, 4);
-		}
-		else if (monthLen >= 3)
-		{
-			result.append(pid);
-			result.push_back('.');
-			result.push_back(month[0] > '5' ? '1' : '2');
-			result.append(month, 3);
-		}
-		else
-		{
+		if (monthLen < 3 || monthLen > 6)
 			return "";
+		for (std::size_t i = 0; i < monthLen; i++)
+		{
+			if (month[i] < '0' || month[i] > '9')
+				return "";
 		}
+		result.append(pid);
+		result.push_back('.');
+		if (monthLen == 3)
+			result.push_back(month[0] > '5' ? '1' : '2');
+		result.append(month, monthLen);
 
 		return result;
 	}

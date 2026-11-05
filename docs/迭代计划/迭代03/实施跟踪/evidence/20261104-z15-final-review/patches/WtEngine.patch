@@ -1,0 +1,30 @@
+--- /tmp/wt-i03-zreview-20261104/evidence/pre/WtEngine.cpp	2026-11-04 08:51:49
++++ src/WtCore/WtEngine.cpp	2026-11-04 08:53:19
+@@ -1519,10 +1519,25 @@
+ 	_risk_fact._creator = creator;
+ 	_risk_fact._remover = (FuncDeleteRiskMonFact)DLLHelper::get_symbol(hInst, "deleteRiskMonFact");
+ 	_risk_fact._fact = _risk_fact._creator();
++	if (_risk_fact._fact == NULL)
++	{
++		// The module stays resident with the other retained plugin owners; no
++		// factory exists, so no monitor or wrapper can be installed.
++		WTSLogger::log_by_cat("risk", LL_ERROR, "Riskmon module {} returned no factory", module.c_str());
++		return false;
++	}
+ 
+ 	const char* name = cfg->getCString("name");
+-	
+-	_risk_mon.reset(new WtRiskMonWrapper(_risk_fact._fact->createRiskMonotor(name), _risk_fact._fact));
++	WtRiskMonitor* monitor = _risk_fact._fact->createRiskMonotor(name);
++	if (monitor == NULL)
++	{
++		// Same failure contract as an incompatible module: report false and keep
++		// the engine without a risk wrapper instead of calling init on NULL.
++		WTSLogger::log_by_cat("risk", LL_ERROR, "Riskmon {} is not provided by module {}", name, module.c_str());
++		return false;
++	}
++
++	_risk_mon.reset(new WtRiskMonWrapper(monitor, _risk_fact._fact));
+ 	_risk_mon->self()->init(this, cfg);
+ 
+ 	return true;

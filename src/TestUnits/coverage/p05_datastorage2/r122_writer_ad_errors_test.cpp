@@ -37,15 +37,33 @@ TEST_F(R122WriterADErrorsTest, R122WriterADDbOpenFailuresLogged)
 
 	WTSTickStruct s1 = make_tick("EXC", "rb2301", 20230103, 20230103, 93000000,
 		3900.0, 10.0, 39000.0, 500.0, 0.0, 100.0, 390000.0);
-	write_or_fail(tick_of(ct, s1), 0);
-
-	// 换交易日：先把 20230103 的日线转储到 day/EXC，触发 get_k_db 打开失败
 	WTSTickStruct s2 = make_tick("EXC", "rb2301", 20230104, 20230104, 93000000,
 		3910.0, 10.0, 39100.0, 500.0, 0.0, 110.0, 429000.0);
+
+	// 卡13（13a=A，用户裁定 2026-11-03）：tick 库打不开 = LMDB 提交失败 → 该 tick 不发布
+	// 缓存、不广播，同步 writeTick 返回 false，失败计数可观察（旧合同"仍缓存并广播"已废止）。
+	for (WTSTickStruct* s : { &s1, &s2 })
+	{
+		WTSTickData* t = tick_of(ct, *s);
+		EXPECT_FALSE(_writer->writeTick(t, 0));
+		t->release();
+	}
+	EXPECT_EQ(_sink->bcast_tick(), 0u);
+	EXPECT_EQ(_writer->tickPersistFailures(), 2u);
+	WTSTickData* cur = _writer->getCurTick("rb2301", "EXC");
+	EXPECT_TRUE(cur == NULL);
+	if (cur) cur->release();
+	EXPECT_GE(_sink->count_containing("Opening tick db at"), 1u);
+
+	// 日线库打开失败的日志：未发布的 tick 不会推进 K 线，因此改用不落 tick 库的 writer
+	// （disabletick=true）走到换交易日的日线转储，触发 get_k_db 打开失败。
+	_writer->release();
+	init_writer(make_writer_cfg(_root.string(), 1000, true, false, false, false));
+	write_or_fail(tick_of(ct, s1), 0);
+	// 换交易日：先把 20230103 的日线转储到 day/EXC，触发 get_k_db 打开失败
 	write_or_fail(tick_of(ct, s2), 0);
 
 	EXPECT_EQ(_sink->bcast_tick(), 2u);
-	EXPECT_GE(_sink->count_containing("Opening tick db at"), 1u);
 	EXPECT_GE(_sink->count_containing("Opening day db at"), 1u);
 }
 
@@ -63,11 +81,13 @@ TEST_F(R122WriterADErrorsTest, R122WriterADUpdateTickCacheUninitialized)
 		3800.0, 5.0, 19000.0, 300.0, 0.0, 50.0, 190000.0);
 	WTSTickData* tick = tick_of(ct, s);
 	ASSERT_TRUE(tick != NULL);
-	EXPECT_TRUE(_writer->writeTick(tick, 0));
+	// 卡1（DateMappingV1）：只做基类 init 的写端没有基础数据，无法核验 tick 的会话日期，
+	// 在任何副作用前拒绝（改前期望：接受并在更新缓存时记录 “Tick cache data not initialized”）。
+	EXPECT_FALSE(_writer->writeTick(tick, 0));
 	tick->release();
 
 	EXPECT_EQ(_sink->bcast_tick(), 0u);
-	EXPECT_EQ(_sink->count_containing("Tick cache data not initialized"), 1u);
+	EXPECT_EQ(_sink->count_containing("Cannot verify session date"), 1u);
 	EXPECT_EQ(_sink->log_count(LL_ERROR), 1u);
 	// 没有缓存块，也不应该创建任何 LMDB 目录
 	EXPECT_FALSE(std::filesystem::exists(_root / "ticks"));}

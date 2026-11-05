@@ -1,0 +1,68 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R76ParserUDPTest.*:t6_parserudp_factory.*:t6_parserudp_init.valid*:t6_parserudp_init.explicit*:t6_parserudp_init.non_numeric*:t6_parserudp_init.missing*:t6_parserudp_init.repeated*:t6_parserudp_spi.*:t6_parserudp_subs.*:t6_parserudp_state.*:ParserUDPShutdownTest.ExternalReleaseWaitsForActiveSpiCallbackAndBlocksLaterDispatch:ParserUDPShutdownTest.ActiveUdpDisconnectEmitsOneCloseAndReconnectStartsNewEventEpoch
+[==========] Running 20 tests from 7 test suites.
+[----------] Global test environment set-up.
+[----------] 6 tests from R76ParserUDPTest
+[ RUN      ] R76ParserUDPTest.InitAcceptsIpv6HostAndZeroPorts
+[       OK ] R76ParserUDPTest.InitAcceptsIpv6HostAndZeroPorts (0 ms)
+[ RUN      ] R76ParserUDPTest.InitRejectsRepeatWithoutOverwritingEndpoints
+[       OK ] R76ParserUDPTest.InitRejectsRepeatWithoutOverwritingEndpoints (0 ms)
+[ RUN      ] R76ParserUDPTest.RegisterSpiNullMakesNextRegistrationSilent
+[       OK ] R76ParserUDPTest.RegisterSpiNullMakesNextRegistrationSilent (0 ms)
+[ RUN      ] R76ParserUDPTest.SubscribeAcceptsMixedCodeShapesWithoutCallbacks
+[       OK ] R76ParserUDPTest.SubscribeAcceptsMixedCodeShapesWithoutCallbacks (0 ms)
+[ RUN      ] R76ParserUDPTest.DisconnectBeforeAndAfterRegisterSpiIsIdempotent
+[       OK ] R76ParserUDPTest.DisconnectBeforeAndAfterRegisterSpiIsIdempotent (0 ms)
+[ RUN      ] R76ParserUDPTest.FactoryDeleteWithRegisteredSinkIsSafe
+[       OK ] R76ParserUDPTest.FactoryDeleteWithRegisteredSinkIsSafe (0 ms)
+[----------] 6 tests from R76ParserUDPTest (0 ms total)
+
+[----------] 2 tests from t6_parserudp_factory
+[ RUN      ] t6_parserudp_factory.createParser_returns_api_and_delete_clears_pointer
+[       OK ] t6_parserudp_factory.createParser_returns_api_and_delete_clears_pointer (0 ms)
+[ RUN      ] t6_parserudp_factory.deleteParser_accepts_null_without_touching_anything
+[       OK ] t6_parserudp_factory.deleteParser_accepts_null_without_touching_anything (0 ms)
+[----------] 2 tests from t6_parserudp_factory (0 ms total)
+
+[----------] 5 tests from t6_parserudp_init
+[ RUN      ] t6_parserudp_init.valid_multicast_host_without_gpsize_falls_back_to_default
+[       OK ] t6_parserudp_init.valid_multicast_host_without_gpsize_falls_back_to_default (0 ms)
+[ RUN      ] t6_parserudp_init.explicit_gpsize_and_unicast_host_accepted
+[       OK ] t6_parserudp_init.explicit_gpsize_and_unicast_host_accepted (0 ms)
+[ RUN      ] t6_parserudp_init.non_numeric_host_reports_initialization_failure
+[       OK ] t6_parserudp_init.non_numeric_host_reports_initialization_failure (0 ms)
+[ RUN      ] t6_parserudp_init.missing_host_reports_initialization_failure
+[       OK ] t6_parserudp_init.missing_host_reports_initialization_failure (0 ms)
+[ RUN      ] t6_parserudp_init.repeated_init_is_rejected
+[       OK ] t6_parserudp_init.repeated_init_is_rejected (0 ms)
+[----------] 5 tests from t6_parserudp_init (0 ms total)
+
+[----------] 2 tests from t6_parserudp_spi
+[ RUN      ] t6_parserudp_spi.first_register_is_silent_and_second_one_warns
+[       OK ] t6_parserudp_spi.first_register_is_silent_and_second_one_warns (0 ms)
+[ RUN      ] t6_parserudp_spi.handle_event_is_not_emitted_without_io_context
+[       OK ] t6_parserudp_spi.handle_event_is_not_emitted_without_io_context (0 ms)
+[----------] 2 tests from t6_parserudp_spi (0 ms total)
+
+[----------] 2 tests from t6_parserudp_subs
+[ RUN      ] t6_parserudp_subs.subscribe_is_idempotent_and_duplicate_codes_are_dropped
+[       OK ] t6_parserudp_subs.subscribe_is_idempotent_and_duplicate_codes_are_dropped (0 ms)
+[ RUN      ] t6_parserudp_subs.single_code_subscribe_helper_adds_one_entry
+[       OK ] t6_parserudp_subs.single_code_subscribe_helper_adds_one_entry (0 ms)
+[----------] 2 tests from t6_parserudp_subs (0 ms total)
+
+[----------] 1 test from t6_parserudp_state
+[ RUN      ] t6_parserudp_state.release_and_disconnect_without_connect_are_safe
+[       OK ] t6_parserudp_state.release_and_disconnect_without_connect_are_safe (0 ms)
+[----------] 1 test from t6_parserudp_state (0 ms total)
+
+[----------] 2 tests from ParserUDPShutdownTest
+[ RUN      ] ParserUDPShutdownTest.ExternalReleaseWaitsForActiveSpiCallbackAndBlocksLaterDispatch
+[       OK ] ParserUDPShutdownTest.ExternalReleaseWaitsForActiveSpiCallbackAndBlocksLaterDispatch (26 ms)
+[ RUN      ] ParserUDPShutdownTest.ActiveUdpDisconnectEmitsOneCloseAndReconnectStartsNewEventEpoch
+[       OK ] ParserUDPShutdownTest.ActiveUdpDisconnectEmitsOneCloseAndReconnectStartsNewEventEpoch (85 ms)
+[----------] 2 tests from ParserUDPShutdownTest (111 ms total)
+
+[----------] Global test environment tear-down
+[==========] 20 tests from 7 test suites ran. (116 ms total)
+[  PASSED  ] 20 tests.

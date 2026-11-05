@@ -229,14 +229,14 @@ TEST_F(R180LoaderFixture, R180His_LoaderM5AutoTransThenDsbReuse)
 
 	WTSKlineSlice* k = rp.get_kline_slice(kStk1, "m", 5, 5);
 	ASSERT_NE(nullptr, k);
-	EXPECT_GT(k->size(), 0u);
+	EXPECT_GT(k->size(), 0);
 	k->release();
 	EXPECT_EQ(1u, loader.finalCalls);
 	EXPECT_TRUE(r180::fs::exists(_base / "his" / "min5" / "SSE" / "000001.dsb"));
 
 	WTSKlineSlice* k2 = rp.get_kline_slice(kStk1, "m", 6, 5);
 	ASSERT_NE(nullptr, k2);
-	EXPECT_GT(k2->size(), 0u);
+	EXPECT_GT(k2->size(), 0);
 	k2->release();
 	EXPECT_EQ(1u, loader.finalCalls);
 }
@@ -267,7 +267,7 @@ TEST_F(R180LoaderFixture, R180His_CorruptAutoTransDsbRebuiltFromLoader)
 
 	WTSKlineSlice* k = rp.get_kline_slice(kStk1, "d", 1);
 	ASSERT_NE(nullptr, k);
-	EXPECT_GT(k->size(), 0u);
+	EXPECT_GT(k->size(), 0);
 	k->release();
 	EXPECT_EQ(1u, loader.finalCalls);
 	EXPECT_GT(r180::fs::file_size(dsb), static_cast<uintmax_t>(20));
@@ -300,7 +300,7 @@ TEST_F(R180LoaderFixture, R180His_CheckUnbarsMinute5UsesUnbarsCache)
 
 	WTSKlineSlice* main = rp.get_kline_slice(kCu, "m", 2, 5, true);
 	ASSERT_NE(nullptr, main);
-	EXPECT_EQ(1u, main->size());
+	EXPECT_EQ(1, main->size());
 	main->release();
 
 	// 复权代码：loader 没有该 key -> 空切片；原始代码进入 _unsubbed_in_need。
@@ -313,9 +313,8 @@ TEST_F(R180LoaderFixture, R180His_CheckUnbarsMinute5UsesUnbarsCache)
 }
 
 // 生产: HisDataReplayer.cpp:4624-4627（check_cache_days 的 codes 逗号拼接）
-// 主 K 线之外再缓存两只合约，cache_clear_days=2：第二个交易日同时淘汰两者，
-// 第二个 key 进入 codes 非空分支。三个合约均有前一交易日已完成日线以供初始查询；
-// 淘汰后再次查询 A 必须重新走 loader。
+// 主 K 线之外再缓存两只合约，cache_clear_days=2。K39：被订阅序列每日被标记为在用，不淘汰；
+// 三个合约均有前一交易日已完成日线以供初始查询；回放后再次查询 A 命中缓存。
 TEST_F(R180LoaderFixture, R180His_CacheClearJoinsMultipleCodes)
 {
 	const char* const kExtraA = "DCE.i.2409";
@@ -361,13 +360,25 @@ TEST_F(R180LoaderFixture, R180His_CacheClearJoinsMultipleCodes)
 	EXPECT_GE(sink.beginCalls, 2u);
 	EXPECT_EQ(1u, sink.doneCalls);
 
-	// 两只缓存都已在第二个交易日被淘汰；再查询 A 会重新回调 loader。
-	// run 结束后 _cur_tdate 已越过 A 的最后一根日线，切片可能为 NULL，
-	// 但 loader 调用次数必须 +1。
+	// K39（2026-11-04 用户裁定，BUG-I02-NEW-096）：被订阅并逐日回放的序列视为在用，
+	// 每日 mark() 清零未用天数，cache_clear_days=2 下不淘汰；再查询 A 命中缓存、不再回调 loader。
+	// 原断言（第二个交易日淘汰、loader 2 次）见证据 before/。
 	WTSKlineSlice* reload = rp.get_kline_slice(kExtraA, "d", 5, 1);
 	if (reload != nullptr)
 		reload->release();
-	EXPECT_EQ(2u, loader.calls[kExtraA]);
+	EXPECT_EQ(1u, loader.calls[kExtraA]);
+	EXPECT_EQ(1u, loader.calls[kExtraB]);
+
+	// BUG-I02-NEW-096（2026-11-05 补测）：两只非主合约都重新查询。B 原先从未在回放后被访问，
+	// 上面 B 的计数在 B 被淘汰时也成立；这里重查 B 并断言两只都命中缓存、仍返回非空切片。
+	WTSKlineSlice* reloadA = rp.get_kline_slice(kExtraA, "d", 5, 1);
+	ASSERT_NE(nullptr, reloadA);
+	reloadA->release();
+	WTSKlineSlice* reloadB = rp.get_kline_slice(kExtraB, "d", 5, 1);
+	ASSERT_NE(nullptr, reloadB);
+	reloadB->release();
+	EXPECT_EQ(1u, loader.calls[kExtraA]) << "in-use series A is not evicted";
+	EXPECT_EQ(1u, loader.calls[kExtraB]) << "in-use series B is not evicted";
 }
 
 // 生产: HftMocker.cpp:561（stra_cancel(localid) 队列任务把 _left 置 0）

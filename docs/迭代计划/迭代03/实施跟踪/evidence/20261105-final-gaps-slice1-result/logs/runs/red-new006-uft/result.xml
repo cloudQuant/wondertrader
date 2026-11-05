@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="2" failures="2" disabled="0" errors="0" time="0.003" timestamp="2026-11-05T14:52:37.739" name="AllTests">
+  <testsuite name="S1New006UftOrderClock" tests="2" failures="2" disabled="0" skipped="0" errors="0" time="0.003" timestamp="2026-11-05T14:52:37.739">
+    <testcase name="ClockFailureRejectsEntryBeforeTheProvider" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp" line="66" status="run" result="completed" time="0.002" timestamp="2026-11-05T14:52:37.739" classname="S1New006UftOrderClock">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:73&#x0A;Expected equality of these values:&#x0A;  (2147483647 *2U +1U)&#x0A;    Which is: 4294967295&#x0A;  env.adapter.openLong(kS1UftCode, 5000.0, 1.0, 0)&#x0A;    Which is: 1333237850&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:73
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  env.adapter.openLong(kS1UftCode, 5000.0, 1.0, 0)
+    Which is: 1333237850
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:74&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  g_s1_uft_clock_calls.load()&#x0A;    Which is: 0&#x0A;every UFT entry takes one checked clock snapshot&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:74
+Expected equality of these values:
+  1u
+    Which is: 1
+  g_s1_uft_clock_calls.load()
+    Which is: 0
+every UFT entry takes one checked clock snapshot
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:75&#x0A;Value of: env.api._entrusts.empty()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;no request reaches the provider without a valid clock&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:75
+Value of: env.api._entrusts.empty()
+  Actual: false
+Expected: true
+no request reaches the provider without a valid clock
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:76&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  env.adapter.getUndoneQty(kS1UftCode)&#x0A;    Which is: 1&#x0A;nothing is reserved for a rejected entry&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:76
+Expected equality of these values:
+  0.0
+    Which is: 0
+  env.adapter.getUndoneQty(kS1UftCode)
+    Which is: 1
+nothing is reserved for a rejected entry
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:82&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  env.api._entrusts.size()&#x0A;    Which is: 2&#x0A;the next entry retries once the clock is available&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:82
+Expected equality of these values:
+  1u
+    Which is: 1
+  env.api._entrusts.size()
+    Which is: 2
+the next entry retries once the clock is available
+]]></failure>
+    </testcase>
+    <testcase name="EveryDirectionIsGatedAndTheDefaultClockIsRestored" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp" line="87" status="run" result="completed" time="0." timestamp="2026-11-05T14:52:37.742" classname="S1New006UftOrderClock">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:94&#x0A;Expected equality of these values:&#x0A;  (2147483647 *2U +1U)&#x0A;    Which is: 4294967295&#x0A;  env.adapter.openLong(kS1UftCode, 5000.0, 1.0, 0)&#x0A;    Which is: 1333237852&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:94
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  env.adapter.openLong(kS1UftCode, 5000.0, 1.0, 0)
+    Which is: 1333237852
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:95&#x0A;Expected equality of these values:&#x0A;  (2147483647 *2U +1U)&#x0A;    Which is: 4294967295&#x0A;  env.adapter.openShort(kS1UftCode, 5000.0, 1.0, 0)&#x0A;    Which is: 1333237853&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:95
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  env.adapter.openShort(kS1UftCode, 5000.0, 1.0, 0)
+    Which is: 1333237853
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:96&#x0A;Expected equality of these values:&#x0A;  (2147483647 *2U +1U)&#x0A;    Which is: 4294967295&#x0A;  env.adapter.closeLong(kS1UftCode, 5000.0, 1.0, false, 0)&#x0A;    Which is: 1333237854&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:96
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  env.adapter.closeLong(kS1UftCode, 5000.0, 1.0, false, 0)
+    Which is: 1333237854
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:97&#x0A;Expected equality of these values:&#x0A;  (2147483647 *2U +1U)&#x0A;    Which is: 4294967295&#x0A;  env.adapter.closeShort(kS1UftCode, 5000.0, 1.0, false, 0)&#x0A;    Which is: 1333237855&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:97
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  env.adapter.closeShort(kS1UftCode, 5000.0, 1.0, false, 0)
+    Which is: 1333237855
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:98&#x0A;Expected equality of these values:&#x0A;  4u&#x0A;    Which is: 4&#x0A;  g_s1_uft_clock_calls.load()&#x0A;    Which is: 0&#x0A;all four actions reach the clock gate&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:98
+Expected equality of these values:
+  4u
+    Which is: 4
+  g_s1_uft_clock_calls.load()
+    Which is: 0
+all four actions reach the clock gate
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:99&#x0A;Value of: env.api._entrusts.empty()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:99
+Value of: env.api._entrusts.empty()
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:100&#x0A;Expected equality of these values:&#x0A;  0.0&#x0A;    Which is: 0&#x0A;  env.adapter.getUndoneQty(kS1UftCode)&#x0A;    Which is: 4&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:100
+Expected equality of these values:
+  0.0
+    Which is: 0
+  env.adapter.getUndoneQty(kS1UftCode)
+    Which is: 4
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:107&#x0A;Expected equality of these values:&#x0A;  1u&#x0A;    Which is: 1&#x0A;  env.api._entrusts.size()&#x0A;    Which is: 5&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/s1_new006_uft_order_clock_test.cpp:107
+Expected equality of these values:
+  1u
+    Which is: 1
+  env.api._entrusts.size()
+    Which is: 5
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

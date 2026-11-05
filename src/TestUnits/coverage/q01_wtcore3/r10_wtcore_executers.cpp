@@ -221,17 +221,22 @@ protected:
      * policy.default.name 必须存在：getUnit() 在 policy 里既没有 commID 也没有
      * "default" 时会 cfg->getCString 解引用 NULL（BUG-R10-001），
      * 所以本 lane 所有启用用例都显式给出 default。
+     *
+     * 卡8b=A（eager 全量校验，BUG-R10-001/P02-002 已落地）：init 前校验 scale 为有限正数、
+     * policy 条目 name 严格为 "<factory>.<unit>"。原夹具缺 scale（旧实现读成 0，目标被清零）
+     * 且 name 无工厂段，按新合同补齐；工厂仍未加载，单元创建照旧失败。
      */
-    WTSVariant* policyCfg(const char* unitName = "R10Unit")
+    WTSVariant* policyCfg(const char* unitName = "R10Fact.R10Unit")
     {
         Cfg c;
         WTSVariant* policy = Cfg::addObject(c.root(), "policy");
         WTSVariant* def = Cfg::addObject(policy, "default");
         def->append("name", unitName);
+        c.real("scale", 1.0);
         return c.root();
     }
 
-    WTSVariant* policyCfgWithScale(double scale, const char* unitName = "R10Unit")
+    WTSVariant* policyCfgWithScale(double scale, const char* unitName = "R10Fact.R10Unit")
     {
         Cfg c;
         WTSVariant* policy = Cfg::addObject(c.root(), "policy");
@@ -352,7 +357,7 @@ TEST_F(R10ExecuterTest, arbi_set_position_group_math_emits_nothing_without_unit)
     Cfg c;
     WTSVariant* policy = Cfg::addObject(c.root(), "policy");
     WTSVariant* def = Cfg::addObject(policy, "default");
-    def->append("name", "R10Unit");
+    def->append("name", "R10Fact.R10Unit");
     // groups.spread: 两条腿各 2 手，目标 5/5 => 组合可凑 1 组，余 3/3
     WTSVariant* groups = Cfg::addObject(c.root(), "groups");
     WTSVariant* spread = Cfg::addObject(groups, "spread");
@@ -381,10 +386,11 @@ TEST_F(R10ExecuterTest, arbi_strict_sync_scans_channel_holds)
     Cfg c;
     WTSVariant* policy = Cfg::addObject(c.root(), "policy");
     WTSVariant* def = Cfg::addObject(policy, "default");
-    def->append("name", "R10Unit");
+    def->append("name", "R10Fact.R10Unit");
     c.boolean("strict_sync", true);
     WTSVariant* clear = Cfg::addObject(c.root(), "clear");
     clear->append("active", false);      // 只登记通道持仓，不做清理
+    c.real("scale", 1.0);                // 卡8b=A：scale 必填
     ASSERT_TRUE(exe.init(c.root()));
 
     // on_position 先写 _channel_holds（L823），再因 _auto_clear==false 早退（L830-831）
@@ -448,11 +454,12 @@ TEST_F(R10ExecuterTest, arbi_autoclear_matrix_exclude_list)
     Cfg c;
     WTSVariant* policy = Cfg::addObject(c.root(), "policy");
     WTSVariant* def = Cfg::addObject(policy, "default");
-    def->append("name", "R10Unit");
+    def->append("name", "R10Fact.R10Unit");
     WTSVariant* clear = Cfg::addObject(c.root(), "clear");
     clear->append("active", true);
     // excludes 用字符串形态（L117-118）
     clear->append("excludes", "SHFE.ag");
+    c.real("scale", 1.0);                // 卡8b=A：scale 必填
     ASSERT_TRUE(exe.init(c.root()));
 
     // ag2512 就是上一期主力 => 命中排除列表，L853-858 返回
@@ -469,13 +476,14 @@ TEST_F(R10ExecuterTest, arbi_autoclear_matrix_include_list_miss)
     Cfg c;
     WTSVariant* policy = Cfg::addObject(c.root(), "policy");
     WTSVariant* def = Cfg::addObject(policy, "default");
-    def->append("name", "R10Unit");
+    def->append("name", "R10Fact.R10Unit");
     WTSVariant* clear = Cfg::addObject(c.root(), "clear");
     clear->append("active", true);
     // includes 用数组形态（L119-124），且不含 SHFE.ag
     WTSVariant* inc = Cfg::addArray(clear, "includes");
     inc->append("CFFEX.IF");
     inc->append("DCE.m");
+    c.real("scale", 1.0);                // 卡8b=A：scale 必填
     ASSERT_TRUE(exe.init(c.root()));
 
     exe.on_position(kStdAg, true, 0, 0, 4, 4, 20250110);
@@ -491,11 +499,12 @@ TEST_F(R10ExecuterTest, arbi_autoclear_matrix_will_clear_but_no_unit)
     Cfg c;
     WTSVariant* policy = Cfg::addObject(c.root(), "policy");
     WTSVariant* def = Cfg::addObject(policy, "default");
-    def->append("name", "R10Unit");
+    def->append("name", "R10Fact.R10Unit");
     WTSVariant* clear = Cfg::addObject(c.root(), "clear");
     clear->append("active", true);
     WTSVariant* inc = Cfg::addArray(clear, "includes");
     inc->append("SHFE.ag");          // 命中包含列表 => 走到 L873-888
+    c.real("scale", 1.0);                // 卡8b=A：scale 必填
     ASSERT_TRUE(exe.init(c.root()));
 
     exe.on_position(kStdAg, true, 0, 0, 4, 4, 20250110);
@@ -542,7 +551,7 @@ TEST_F(R10ExecuterTest, diff_stub_queries_and_data_forwarding)
     Cfg c;
     WTSVariant* policy = Cfg::addObject(c.root(), "policy");
     WTSVariant* def = Cfg::addObject(policy, "default");
-    def->append("name", "R10DiffUnit");
+    def->append("name", "R10Fact.R10DiffUnit");
     c.real("scale", 3.0);
     ASSERT_TRUE(exe.init(c.root()));
 
@@ -605,7 +614,7 @@ TEST_F(R10ExecuterTest, diff_set_position_on_missing_file_persists_target_withou
     WtDiffExecuter exe(&_factory, "diff_fresh", &_dm, &_bdm);
     exe.setStub(&_stub);
     ASSERT_TRUE(exe.init(policyCfgWithScale(1.0)));   // A missing snapshot is a valid first-run state.
-    ASSERT_EQ(_factory.createDiffExeUnit("R10Unit"), nullptr);
+    ASSERT_EQ(_factory.createDiffExeUnit("R10Fact.R10Unit"), nullptr);
 
     wt_hashmap<std::string, double> targets;
     targets[kStdAg] = 4;
@@ -627,32 +636,67 @@ TEST_F(R10ExecuterTest, diff_set_position_on_missing_file_persists_target_withou
     EXPECT_EQ(_dm.n_tick_slice, 0u);
 }
 
-TEST_F(R10ExecuterTest, diff_load_data_broken_json_and_empty_file_are_ignored)
+// 迭代02 起 Diff 快照先整体按 schema 校验再发布（HEAD ccaad010 WtDiffExecuter::load_data
+// “Rejected Diff snapshot”），与 R15 SEL 快照“损坏快照拒绝”同一合同，亦符合卡13c=A
+// “未知/损坏格式 fail-closed、不猜测”。原用例期待语法损坏与空文件被静默忽略并以空账本覆盖，
+// 会丢失可能仍有效的目标/差额；按已落地合同改为：init 拒绝、不保留配置、不改写原文件。
+TEST_F(R10ExecuterTest, diff_load_data_broken_json_and_empty_file_are_rejected_without_overwrite)
 {
+    const std::string badPayload = "{\"targets\": [ {\"code\"";   // 语法不完整 => HasParseError
     {
         std::ofstream bad(execFile("diff_bad").c_str());
-        bad << "{\"targets\": [ {\"code\"";        // 语法不完整 => HasParseError（L132-133）
+        bad << badPayload;
     }
     {
         std::ofstream empt(execFile("diff_empty").c_str());
-        empt << "";                                 // 空内容 => L126-127
+        empt << "";                                 // 空内容同样无法通过 schema 校验
     }
 
     WtDiffExecuter exeBad(&_factory, "diff_bad", &_dm, &_bdm);
     exeBad.setStub(&_stub);
-    ASSERT_TRUE(exeBad.init(policyCfg()));
+    WTSVariant* badCfg = policyCfg();
+    EXPECT_FALSE(exeBad.init(badCfg));
 
     WtDiffExecuter exeEmpty(&_factory, "diff_empty", &_dm, &_bdm);
     exeEmpty.setStub(&_stub);
-    ASSERT_TRUE(exeEmpty.init(policyCfg()));
+    WTSVariant* emptyCfg = policyCfg();
+    EXPECT_FALSE(exeEmpty.init(emptyCfg));
 
+    // 拒绝后的宿主不持有配置，也不得用空账本覆盖待人工核对的原快照。
     wt_hashmap<std::string, double> empty;
     exeBad.set_position(empty);
     exeEmpty.set_position(empty);
+    EXPECT_EQ(slurp(execFile("diff_bad")), badPayload);
+    EXPECT_EQ(slurp(execFile("diff_empty")), std::string());
+    EXPECT_EQ(badCfg->retainCount(), 1u);
+    EXPECT_EQ(emptyCfg->retainCount(), 1u);
+    badCfg->release();
+    emptyCfg->release();
+}
 
-    // 两个「读失败」的执行器落盘后都应当是空账本
-    EXPECT_EQ(slurp(execFile("diff_bad")).find("SHFE.ag.2512"), std::string::npos);
-    EXPECT_EQ(slurp(execFile("diff_empty")).find("SHFE.ag.2512"), std::string::npos);
+// I03-NEW-070：初始化因快照损坏失败后，非空目标与增量都不得被接受，也不得覆盖被拒绝的快照。
+TEST_F(R10ExecuterTest, diff_failed_init_rejects_nonempty_targets_and_keeps_rejected_snapshot)
+{
+    const std::string badPayload = "{\"targets\": [ {\"code\"";
+    {
+        std::ofstream bad(execFile("diff_bad_nonempty").c_str());
+        bad << badPayload;
+    }
+
+    WtDiffExecuter exe(&_factory, "diff_bad_nonempty", &_dm, &_bdm);
+    exe.setStub(&_stub);
+    WTSVariant* cfg = policyCfg();
+    EXPECT_FALSE(exe.init(cfg));
+
+    wt_hashmap<std::string, double> targets;
+    targets.emplace(kStdAg, 3.0);
+    exe.set_position(targets);
+    exe.on_position_changed(kStdAg, 2.0);
+
+    EXPECT_EQ(slurp(execFile("diff_bad_nonempty")), badPayload);
+    EXPECT_DOUBLE_EQ(exe.getPosition(kStdAg), 0.0);
+    EXPECT_EQ(_dm.n_grab, 0u);
+    cfg->release();
 }
 
 TEST_F(R10ExecuterTest, diff_channel_ready_recovers_loaded_diffs)

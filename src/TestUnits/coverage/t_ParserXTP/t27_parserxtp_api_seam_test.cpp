@@ -20,6 +20,9 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#ifndef _WIN32
+#include <unistd.h>
+#endif
 
 #include "t27_seam.hpp"
 
@@ -145,6 +148,30 @@ TEST_F(XtpLoginF, login_minus_one_pump_delivers_connect_event_carrying_the_raw_c
 	ASSERT_EQ(1u, sink.events.size());
 	EXPECT_EQ(WPE_Connect, sink.events[0].first);
 	EXPECT_EQ(-1, sink.events[0].second);
+}
+
+// Run the pending callback in a bounded child: the current implementation may
+// dereference a null sink, which must not crash the parent test process.
+TEST_F(XtpLoginF, pending_login_failure_rechecks_unregistered_sink)
+{
+#ifndef _WIN32
+	for (const int loginResult : { -1, 2 })
+	{
+		EXPECT_EXIT({
+			::alarm(3);
+			api.loginRet = loginResult;
+			api.setErrMsg("test login failure");
+			if (!parser.connect())
+				::_exit(2);
+			const std::size_t before = sink.events.size();
+			parser.registerSpi(nullptr);
+			const auto handled = pump();
+			::_exit(handled == 1 && sink.events.size() == before ? 0 : 3);
+		}, ::testing::ExitedWithCode(0), "") << "login result " << loginResult;
+	}
+#else
+	GTEST_SKIP() << "POSIX subprocess timeout is required for this regression";
+#endif
 }
 
 TEST_F(XtpLoginF, login_other_failure_sends_one_sync_and_one_posted_connect_event)
@@ -746,13 +773,8 @@ TEST_F(XtpLoginF, DISABLED_init_dereferences_null_creator_when_vendor_dylib_is_a
 	cfg->release();
 }
 
-/*
- * L462-464 / L471-473 两个 post 的 lambda 直接 `m_sink->handleEvent(...)`，
- * 而 L482-488 那个成功分支的 lambda 外面包了 `if (m_sink)`。
- * 登录失败时 m_sink 判定为真 → 入队；handler 真正执行前若被 registerSpi(nullptr) 摘掉 sink，
- * worker 线程跑这个 handler 就是解引用 NULL → SIGSEGV（启用即崩，故 DISABLED）。
- */
-TEST_F(XtpLoginF, DISABLED_posted_login_handlers_deref_sink_nulled_after_post)
+/* 迭代03 最终验收复核后启用（原禁用：登录失败 post 的 handler 在 sink 摘除后解引用）。 */
+TEST_F(XtpLoginF, posted_login_handlers_deref_sink_nulled_after_post)
 {
 	api.loginRet = -1;
 	api.setErrMsg("tcp refused");

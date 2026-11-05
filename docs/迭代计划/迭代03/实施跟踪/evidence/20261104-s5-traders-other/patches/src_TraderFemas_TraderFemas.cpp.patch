@@ -1,0 +1,799 @@
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before/src/TraderFemas/TraderFemas.cpp	2026-11-04 08:04:22
++++ src/TraderFemas/TraderFemas.cpp	2026-11-04 19:30:28
+@@ -20,8 +20,12 @@
+ #include "../Share/Converter.hpp"
+ 
+ #include <filesystem>
++#include <chrono>
++#include <cstdio>
++#include <cstdlib>
+ #include <cstring>
+ #include <string>
++#include <vector>
+ namespace fs = std::filesystem;
+ 
+  //By Wesley @ 2022.01.05
+@@ -36,6 +40,46 @@
+ 	sink->handleTraderLog(ll, buffer);
+ }
+ 
++namespace
++{
++	// BUG-T4-003 (card 9d): identifies the TraderFemas whose worker runs on the
++	// current thread, and the innermost TraderFemas SPI callback on this thread.
++	// release()/destruction issued from either context must not block or join.
++	thread_local const TraderFemas* t_femas_worker_owner = NULL;
++	thread_local const TraderFemas* t_femas_callback_owner = NULL;
++
++	// Card 9a/9b: an instance whose quiescence cannot be confirmed is kept alive
++	// until process exit together with this module. The registry is never
++	// destroyed so retained objects stay reachable.
++	void pin_own_module()
++	{
++#ifdef _WIN32
++		HMODULE self = NULL;
++		::GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_PIN,
++			reinterpret_cast<LPCSTR>(&pin_own_module), &self);
++#else
++		Dl_info info;
++		if (::dladdr(reinterpret_cast<void*>(&pin_own_module), &info) != 0 && info.dli_fname != NULL)
++		{
++			// The handle is intentionally never closed: it pins the module.
++			(void)::dlopen(info.dli_fname, RTLD_NOW | RTLD_NODELETE);
++		}
++#endif
++	}
++
++	void quarantine_femas(TraderFemas* trader, const char* reason)
++	{
++		static std::mutex* mtx = new std::mutex();
++		static std::vector<TraderFemas*>* retained = new std::vector<TraderFemas*>();
++		{
++			std::lock_guard<std::mutex> lock(*mtx);
++			retained->push_back(trader);
++		}
++		pin_own_module();
++		std::fprintf(stderr, "[TraderFemas] deleteTrader: instance quarantined until process exit (%s)\n", reason);
++	}
++}
++
+ extern "C"
+ {
+ 	EXPORT_FLAG ITraderApi* createTrader()
+@@ -48,12 +92,81 @@
+ 	{
+ 		if (NULL != trader)
+ 		{
++			TraderFemas* femas = dynamic_cast<TraderFemas*>(trader);
++			if (femas != NULL)
++			{
++				if (femas->isCallbackContext())
++				{
++					// Card 9d/9b: the worker or an SPI callback cannot confirm its own
++					// exit. Close admission, request stop and keep the instance.
++					femas->release();
++					femas->detachForQuarantine();
++					quarantine_femas(femas, "called from a worker or SPI callback thread");
++					trader = NULL;
++					return;
++				}
++				femas->release();
++				if (!femas->isQuiesced())
++				{
++					// Card 9a: requests or callbacks did not drain within the bound.
++					femas->detachForQuarantine();
++					quarantine_femas(femas, "worker, API calls or callbacks did not drain");
++					trader = NULL;
++					return;
++				}
++			}
+ 			delete trader;
+ 			trader = NULL;
+ 		}
+ 	}
+ };
+ 
++class TraderFemas::ApiLease
++{
++public:
++	explicit ApiLease(TraderFemas* owner) : _owner(owner), _held(owner->acquireApiLease()) {}
++	~ApiLease() { if (_held) _owner->releaseApiLease(); }
++	ApiLease(const ApiLease&) = delete;
++	ApiLease& operator=(const ApiLease&) = delete;
++	explicit operator bool() const { return _held; }
++
++private:
++	TraderFemas*	_owner;
++	bool			_held;
++};
++
++class TraderFemas::CallbackScope
++{
++public:
++	explicit CallbackScope(TraderFemas* owner)
++		: _owner(owner)
++		, _previous(t_femas_callback_owner)
++	{
++		t_femas_callback_owner = owner;
++		_admitted = owner->enterCallback();
++	}
++	~CallbackScope()
++	{
++		_owner->leaveCallback();
++		t_femas_callback_owner = _previous;
++	}
++	CallbackScope(const CallbackScope&) = delete;
++	CallbackScope& operator=(const CallbackScope&) = delete;
++	bool admitted() const { return _admitted; }
++
++private:
++	TraderFemas*		_owner;
++	const TraderFemas*	_previous;
++	bool				_admitted = false;
++};
++
++// Every SPI callback counts itself while inside this wrapper and delivers
++// nothing once release() has been requested (card 9 isolation).
++#define FEMAS_CALLBACK_SCOPE() \
++	CallbackScope femasCallbackScope(this); \
++	if (!femasCallbackScope.admitted()) \
++		return
++
+ inline uint32_t strToTime(const char* strTime)
+ {
+ 	std::string str;
+@@ -120,6 +233,11 @@
+ 	, m_bQryOnline(false)
+ 	, m_bStopped(false)
+ 	, m_strandIO(NULL)
++	, m_apiLeases(0)
++	, m_activeCallbacks(0)
++	, m_workerExited(true)
++	, m_lifecycle(LS_IDLE)
++	, m_drainTimeoutMs(5000)
+ 	, m_bInQuery(false)
+ 	, m_lastQryTime(0)
+ 	, m_hInstCTP(NULL)
+@@ -130,6 +248,23 @@
+ 
+ TraderFemas::~TraderFemas()
+ {
++	if (isCallbackContext())
++	{
++		// Card 9b/9d: destroying the object from its own worker or from one of
++		// its SPI callbacks would free memory the running thread still uses and
++		// cannot join it. deleteTrader quarantines such a request instead.
++		std::fprintf(stderr, "[TraderFemas] Direct delete on a worker/callback thread is unsupported; use deleteTrader\n");
++		std::abort();
++	}
++	release();
++	if (!isQuiesced())
++	{
++		// Card 9a: the worker, an outbound API call or an SPI callback is still
++		// running inside this object; freeing it now is a use-after-free.
++		std::fprintf(stderr, "[TraderFemas] Destroyed before callbacks and API calls drained; use deleteTrader\n");
++		std::abort();
++	}
++
+ 	// I03-NEW-016: the query containers are created lazily by SDK callbacks and are
+ 	// owned by this instance. release() may run on the worker (disconnect()) while a
+ 	// vendor callback cannot be proven quiescent (card 9a), so it only clears them.
+@@ -225,22 +360,186 @@
+ 	return true;
+ }
+ 
+-void TraderFemas::release()
++TraderFemas::LifecycleState TraderFemas::lifecycleState() const
+ {
+-	m_bStopped = true;
++	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++	return m_lifecycle;
++}
+ 
+-	if(m_pUserAPI)
++bool TraderFemas::isCallbackContext() const
++{
++	return t_femas_worker_owner == this || t_femas_callback_owner == this;
++}
++
++bool TraderFemas::isQuiesced() const
++{
++	return lifecycleState() == LS_RELEASED;
++}
++
++void TraderFemas::detachForQuarantine()
++{
++	// Never block: an external release() holding the lock completes the join.
++	std::unique_lock<std::mutex> releaseLock(m_mtxRelease, std::try_to_lock);
++	if (!releaseLock.owns_lock())
++		return;
++	StdThreadPtr worker;
+ 	{
+-		m_pUserAPI->RegisterSpi(NULL);
+-		m_pUserAPI->Release();
+-		m_pUserAPI = NULL;
++		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++		worker = m_thrdWorker;
+ 	}
++	if (worker && worker->joinable())
++		worker->detach();
++}
+ 
+-	if (m_thrdWorker)
++bool TraderFemas::acquireApiLease()
++{
++	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++	if (m_bStopped.load(std::memory_order_acquire))
++		return false;
++	++m_apiLeases;
++	return true;
++}
++
++void TraderFemas::releaseApiLease()
++{
++	// Notify under the lock: a releaser may destroy this object as soon as it
++	// observes zero leases and reacquires the mutex.
++	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++	if (m_apiLeases > 0)
++		--m_apiLeases;
++	m_cvLifecycle.notify_all();
++}
++
++bool TraderFemas::enterCallback()
++{
++	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++	++m_activeCallbacks;
++	return !m_bStopped.load(std::memory_order_acquire);
++}
++
++void TraderFemas::leaveCallback()
++{
++	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++	if (m_activeCallbacks > 0)
++		--m_activeCallbacks;
++	m_cvLifecycle.notify_all();
++}
++
++void TraderFemas::requestStop()
++{
++	// Close admission first: no request, API call or callback delivery starts
++	// after this point. The worker leaves run() once its current handler returns.
+ 	{
+-		m_asyncIO.stop();
++		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++		m_bStopped.store(true, std::memory_order_release);
++		if (m_lifecycle == LS_IDLE || m_lifecycle == LS_RUNNING)
++			m_lifecycle = LS_STOP_REQUESTED;
++		m_workGuard.reset();
+ 	}
++	m_wrapperState = WS_NOTLOGIN;
++	m_asyncIO.stop();
++}
+ 
++void TraderFemas::workerMain()
++{
++	{
++		// Barrier: connect() publishes m_thrdWorker under this mutex.
++		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++	}
++	t_femas_worker_owner = this;
++	try
++	{
++		m_asyncIO.run();
++	}
++	catch (...)
++	{
++		std::fprintf(stderr, "[TraderFemas] Worker stopped by an exception from a query handler\n");
++	}
++	t_femas_worker_owner = NULL;
++	// Notify under the lock; the external releaser joins this thread afterwards.
++	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++	m_workerExited = true;
++	m_cvLifecycle.notify_all();
++}
++
++void TraderFemas::release()
++{
++	if (isCallbackContext())
++	{
++		// Card 9d: from the worker or an SPI callback only request stop. The join,
++		// drain and API Release are completed by a later external release(), the
++		// destructor, or never (deleteTrader quarantines the instance).
++		requestStop();
++		return;
++	}
++
++	// Concurrent external release()/disconnect()/destructor calls are serialized.
++	std::lock_guard<std::mutex> releaseLock(m_mtxRelease);
++	requestStop();
++	{
++		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++		if (m_lifecycle == LS_RELEASED)
++			return;
++	}
++
++	const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(m_drainTimeoutMs);
++	bool drained = true;
++
++	// 1. Outbound API calls started before admission closed (lease holders),
++	// including a connect() that is still creating the API or the worker.
++	{
++		std::unique_lock<std::mutex> lock(m_mtxLifecycle);
++		if (!m_cvLifecycle.wait_until(lock, deadline, [this]() { return m_apiLeases == 0; }))
++			drained = false;
++	}
++
++	// 2. The worker: join only from a non-worker thread after it left run().
++	StdThreadPtr worker;
++	{
++		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++		worker = m_thrdWorker;
++	}
++	if (drained && worker && worker->joinable())
++	{
++		std::unique_lock<std::mutex> lock(m_mtxLifecycle);
++		const bool exited = m_cvLifecycle.wait_until(lock, deadline, [this]() { return m_workerExited; });
++		lock.unlock();
++		if (exited)
++			worker->join();
++		else
++			drained = false;
++	}
++
++	CUstpFtdcTraderApi* api = m_pUserAPI;
++	if (drained && api != NULL)
++		api->RegisterSpi(NULL);
++
++	// 3. SPI callbacks that already entered this wrapper.
++	{
++		std::unique_lock<std::mutex> lock(m_mtxLifecycle);
++		if (!m_cvLifecycle.wait_until(lock, deadline, [this]() { return m_activeCallbacks == 0; }))
++			drained = false;
++	}
++
++	if (!drained)
++	{
++		// Card 9a: keep the API and the query state; the instance must not be
++		// destroyed (deleteTrader quarantines it). A later release() retries.
++		{
++			std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++			m_lifecycle = LS_UNQUIESCED;
++		}
++		std::fprintf(stderr, "[TraderFemas] release: worker, API calls or callbacks did not drain within %u ms; instance kept\n",
++			m_drainTimeoutMs);
++		return;
++	}
++
++	if (api != NULL)
++	{
++		api->Release();
++		m_pUserAPI = NULL;
++	}
++
+ 	if(m_ayOrders)
+ 		m_ayOrders->clear();
+ 
+@@ -252,6 +551,11 @@
+ 
+ 	if(m_ayTrades)
+ 		m_ayTrades->clear();
++
++	{
++		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++		m_lifecycle = LS_RELEASED;
++	}
+ }
+ 
+ void TraderFemas::connect()
+@@ -262,6 +566,28 @@
+ 		return;
+ 	}
+ 
++	{
++		// Card 9c: a released instance is terminal and a connected instance keeps
++		// its API; reconnecting uses a new TraderFemas instance.
++		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++		if (m_bStopped.load(std::memory_order_acquire))
++		{
++			write_log(m_sink, LL_ERROR, "[TraderFemas] Cannot connect after release");
++			return;
++		}
++		if (m_pUserAPI != NULL || m_lifecycle != LS_IDLE)
++		{
++			write_log(m_sink, LL_ERROR, "[TraderFemas] Repeated connect rejected; the existing API is kept");
++			return;
++		}
++		m_lifecycle = LS_RUNNING;
++	}
++
++	// API setup is an outbound call: release() waits for it to finish.
++	ApiLease lease(this);
++	if (!lease)
++		return;
++
+ 	std::stringstream ss;
+ 	ss << m_strFlowDir << "flows/" << m_strBroker << "/" << m_strUser << "/";
+ 	std::string path = ss.str();
+@@ -270,6 +596,9 @@
+ 	if (userAPI == NULL)
+ 	{
+ 		write_log(m_sink, LL_ERROR, "[TraderFemas] Trader API creator returned null; connection aborted");
++		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++		if (m_lifecycle == LS_RUNNING)
++			m_lifecycle = LS_IDLE;
+ 		return;
+ 	}
+ 	m_pUserAPI = userAPI;
+@@ -277,7 +606,17 @@
+ 	// can synchronously reenter queryAccount(), whose triggerQuery() posts to this
+ 	// strand, so publish the strand before registering the SPI or starting the API.
+ 	if (m_strandIO == NULL)
+-		m_strandIO = new boost::asio::io_context::strand(m_asyncIO);
++	{
++		m_ownedStrand.reset(new boost::asio::io_context::strand(m_asyncIO));
++		m_strandIO = m_ownedStrand.get();
++	}
++	{
++		// BUG-T4-003: a persistent work guard keeps the worker serving queries
++		// while idle (run() would otherwise return and stop the context).
++		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++		if (!m_bStopped.load(std::memory_order_acquire) && !m_workGuard)
++			m_workGuard.reset(new WorkGuard(boost::asio::make_work_guard(m_asyncIO)));
++	}
+ 
+ 	m_pUserAPI->RegisterSpi(this);
+ 	if(m_bQuickStart)
+@@ -304,25 +643,21 @@
+ 
+ 	// Start dispatching only after Init() returns. A callback invoked on the Init()
+ 	// stack may queue a query, which the worker will process after API setup ends.
+-	if (m_thrdWorker == NULL)
++	if (m_thrdWorker == NULL && !m_bStopped.load(std::memory_order_acquire))
+ 	{
+-		auto work = boost::asio::make_work_guard(m_asyncIO);
+-		m_thrdWorker.reset(new StdThread([this](){
+-			while (true)
+-			{
+-				std::this_thread::sleep_for(std::chrono::milliseconds(2));
+-				m_asyncIO.run_one();
+-				//m_asyncIO.run();
+-			}
+-		}));
++		// Publish the thread object before the worker runs any handler: a handler
++		// may reach deleteTrader()/release(), which read m_thrdWorker.
++		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
++		m_workerExited = false;
++		m_thrdWorker.reset(new StdThread([this]() { workerMain(); }));
+ 	}
+ }
+ 
+ void TraderFemas::disconnect()
+ {
+-	boost::asio::post(m_asyncIO, [this](){
+-		release();
+-	});
++	// BUG-T4-003: disconnect ends this instance like release(); from a callback or
++	// the worker it only requests stop (card 9d).
++	release();
+ }
+ 
+ bool TraderFemas::makeEntrustID(char* buffer, int length)
+@@ -385,6 +720,10 @@
+ 
+ int TraderFemas::doLogin()
+ {
++	ApiLease lease(this);
++	if (!lease || m_pUserAPI == NULL)
++		return -1;
++
+ 	CUstpFtdcReqUserLoginField req;
+ 	memset(&req, 0, sizeof(req));
+ 	strcpy(req.BrokerID, m_strBroker.c_str());
+@@ -406,7 +745,8 @@
+ 	m_strPass = pass;
+ 	m_strProduct = productInfo;
+ 
+-	if(m_pUserAPI == NULL)
++	ApiLease lease(this);
++	if(!lease || m_pUserAPI == NULL)
+ 	{
+ 		return -1;
+ 	}
+@@ -419,7 +759,8 @@
+ 
+ int TraderFemas::logout()
+ {
+-	if (m_pUserAPI == NULL)
++	ApiLease lease(this);
++	if (!lease || m_pUserAPI == NULL)
+ 	{
+ 		return -1;
+ 	}
+@@ -439,7 +780,8 @@
+ 
+ int TraderFemas::orderInsert(WTSEntrust* entrust)
+ {
+-	if (entrust == NULL || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
++	ApiLease lease(this);
++	if (!lease || entrust == NULL || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+ 	{
+ 		return -1;
+ 	}
+@@ -518,7 +860,8 @@
+ 
+ int TraderFemas::orderAction( WTSEntrustAction* action )
+ {
+-	if (action == NULL || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
++	ApiLease lease(this);
++	if (!lease || action == NULL || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+ 		return -1;
+ 
+ 	//uint32_t frontid, sessionid, orderref;
+@@ -569,7 +912,7 @@
+ 
+ int TraderFemas::queryAccount()
+ {
+-	if(m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
++	if(m_bStopped.load(std::memory_order_acquire) || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+ 	{
+ 		return -1;
+ 	}
+@@ -581,7 +924,11 @@
+ 		strcpy(req.BrokerID, m_strBroker.c_str());
+ 		strcpy(req.InvestorID, m_strUser.c_str());
+ 		strcpy(req.UserID, m_strUser.c_str());
+-		m_pUserAPI->ReqQryInvestorAccount(&req, genRequestID());
++		// BUG-T4-003: the request runs only while admission is open and holds a
++		// lease, so release() never calls Release() under an in-flight request.
++		ApiLease lease(this);
++		if (lease && m_pUserAPI != NULL)
++			m_pUserAPI->ReqQryInvestorAccount(&req, genRequestID());
+ 	});
+ 
+ 	triggerQuery();
+@@ -591,7 +938,7 @@
+ 
+ int TraderFemas::queryPositions()
+ {
+-	if(m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
++	if(m_bStopped.load(std::memory_order_acquire) || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+ 	{
+ 		return -1;
+ 	}
+@@ -604,7 +951,9 @@
+ 			strcpy(req.BrokerID, m_strBroker.c_str());
+ 			strcpy(req.UserID, m_strUser.c_str());
+ 			strcpy(req.InvestorID, m_strUser.c_str());
+-			m_pUserAPI->ReqQryInvestorPosition(&req, genRequestID());
++			ApiLease lease(this);
++			if (lease && m_pUserAPI != NULL)
++				m_pUserAPI->ReqQryInvestorPosition(&req, genRequestID());
+ 		});
+ 	}
+ 
+@@ -615,7 +964,7 @@
+ 
+ int TraderFemas::queryOrders()
+ {
+-	if(m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
++	if(m_bStopped.load(std::memory_order_acquire) || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+ 	{
+ 		return -1;
+ 	}
+@@ -629,7 +978,9 @@
+ 			strcpy(req.UserID, m_strUser.c_str());
+ 			strcpy(req.InvestorID, m_strUser.c_str());
+ 
+-			m_pUserAPI->ReqQryOrder(&req, genRequestID());
++			ApiLease lease(this);
++			if (lease && m_pUserAPI != NULL)
++				m_pUserAPI->ReqQryOrder(&req, genRequestID());
+ 		});
+ 	}
+ 
+@@ -640,7 +991,7 @@
+ 
+ int TraderFemas::queryTrades()
+ {
+-	if(m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
++	if(m_bStopped.load(std::memory_order_acquire) || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+ 	{
+ 		return -1;
+ 	}
+@@ -654,7 +1005,9 @@
+ 			strcpy(req.UserID, m_strUser.c_str());
+ 			strcpy(req.InvestorID, m_strUser.c_str());
+ 
+-			m_pUserAPI->ReqQryTrade(&req, genRequestID());
++			ApiLease lease(this);
++			if (lease && m_pUserAPI != NULL)
++				m_pUserAPI->ReqQryTrade(&req, genRequestID());
+ 		});
+ 	}
+ 
+@@ -665,12 +1018,14 @@
+ 
+ void TraderFemas::OnFrontConnected()
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	if(m_sink)
+ 		m_sink->handleEvent(WTE_Connect, 0);
+ }
+ 
+ void TraderFemas::OnQryFrontConnected()
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	//m_bQryOnline = true;
+ 
+ 	//if (m_wrapperState == WS_ALLREADY)
+@@ -682,6 +1037,7 @@
+ 
+ void TraderFemas::OnFrontDisconnected( int nReason )
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	m_bQryOnline = false;
+ 	m_wrapperState = WS_NOTLOGIN;
+ 	if(m_sink)
+@@ -690,16 +1046,19 @@
+ 
+ void TraderFemas::OnQryFrontDisconnected(int /*nReason*/)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	m_bQryOnline = false;
+ }
+ 
+ void TraderFemas::OnHeartBeatWarning( int /*nTimeLapse*/ )
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	write_log(m_sink,LL_DEBUG, "[TraderFemas][{}-{}] Heartbeating...", m_strBroker.c_str(), m_strUser.c_str());
+ }
+ 
+ void TraderFemas::OnRspQueryUserLogin(CUstpFtdcRspUserLoginField */*pRspUserLogin*/, CUstpFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	m_bQryOnline = true;
+ 
+ 	if (m_wrapperState == WS_LOGINED)
+@@ -708,6 +1067,7 @@
+ 
+ void TraderFemas::OnRspDSUserCertification(CUstpFtdcDSUserCertRspDataField */*pDSUserCertRspData*/, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	if (pRspInfo->ErrorID == 0)
+ 	{
+ 		doLogin();
+@@ -724,6 +1084,7 @@
+ 
+ void TraderFemas::OnRspUserLogin( CUstpFtdcRspUserLoginField *pRspUserLogin, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	if(!IsErrorRspInfo(pRspInfo))
+ 	{
+ 		m_wrapperState = WS_LOGINED;
+@@ -733,7 +1094,12 @@
+ 		StrUtil::trim(m_strSessionID, "0", false, true);
+ 		
+ 		///获取当前交易日
+-		m_lDate = atoi(m_pUserAPI->GetTradingDay());
++		{
++			ApiLease lease(this);
++			if (!lease || m_pUserAPI == NULL)
++				return;
++			m_lDate = atoi(m_pUserAPI->GetTradingDay());
++		}
+ 
+ 		write_log(m_sink,LL_INFO,"[TraderFemas][{}-{}] Login succeed...", m_strBroker.c_str(), m_strUser.c_str());
+ 
+@@ -754,6 +1120,7 @@
+ 
+ void TraderFemas::OnRspUserLogout(CUstpFtdcRspUserLogoutField */*pRspUserLogout*/, CUstpFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	m_wrapperState = WS_NOTLOGIN;
+ 	if(m_sink)
+ 		m_sink->handleEvent(WTE_Logout, 0);
+@@ -761,6 +1128,7 @@
+ 
+ void TraderFemas::OnRspOrderInsert( CUstpFtdcInputOrderField *pInputOrder, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/ )
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	WTSEntrust* entrust = makeEntrust(pInputOrder);
+ 	if(entrust)
+ 	{
+@@ -777,6 +1145,7 @@
+ 
+ void TraderFemas::OnRspOrderAction(CUstpFtdcOrderActionField */*pOrderAction*/, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	if(!IsErrorRspInfo(pRspInfo))
+ 	{
+ 
+@@ -791,6 +1160,7 @@
+ 
+ void TraderFemas::OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *pRspInvestorAccount, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	if (bIsLast)
+ 	{
+ 		m_bInQuery = false;
+@@ -824,6 +1194,7 @@
+ 
+ void TraderFemas::OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *pRspInvestorPosition, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	if (bIsLast)
+ 	{
+ 		m_bInQuery = false;
+@@ -904,6 +1275,7 @@
+ 
+ void TraderFemas::OnRspQryTrade(CUstpFtdcTradeField *pTrade, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	if (bIsLast)
+ 	{
+ 		m_bInQuery = false;
+@@ -934,6 +1306,7 @@
+ 
+ void TraderFemas::OnRspQryOrder(CUstpFtdcOrderField *pOrder, CUstpFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	if (bIsLast)
+ 	{
+ 		m_bInQuery = false;
+@@ -972,12 +1345,14 @@
+ 
+ void TraderFemas::OnRspError( CUstpFtdcRspInfoField *pRspInfo, int nRequestID, bool /*bIsLast*/ )
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	if (m_sink)
+ 		write_log(m_sink,LL_ERROR, "[TraderFemas][{}-{}] Error occured: {}, request id: {}", m_strBroker.c_str(), m_strUser.c_str(), pRspInfo->ErrorMsg, nRequestID);
+ }
+ 
+ void TraderFemas::OnRtnOrder( CUstpFtdcOrderField *pOrder )
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	WTSOrderInfo *orderInfo = makeOrderInfo(pOrder);
+ 	if(orderInfo)
+ 	{
+@@ -990,6 +1365,7 @@
+ 
+ void TraderFemas::OnRtnTrade( CUstpFtdcTradeField *pTrade )
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	WTSTradeInfo *tRecord = makeTradeRecord(pTrade);
+ 	if(tRecord)
+ 	{
+@@ -1310,16 +1686,19 @@
+ 
+ void TraderFemas::OnErrRtnOrderInsert(CUstpFtdcInputOrderField */*pInputOrder*/, CUstpFtdcRspInfoField */*pRspInfo*/)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 
+ }
+ 
+ void TraderFemas::OnErrRtnOrderAction(CUstpFtdcOrderActionField */*pOrderAction*/, CUstpFtdcRspInfoField */*pRspInfo*/)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 
+ }
+ 
+ void TraderFemas::OnRtnInstrumentStatus(CUstpFtdcInstrumentStatusField *pInstrumentStatus)
+ {
++	FEMAS_CALLBACK_SCOPE();
+ 	if (m_sink)
+ 		m_sink->onPushInstrumentStatus(pInstrumentStatus->ExchangeID, pInstrumentStatus->InstrumentID, (WTSTradeStatus)pInstrumentStatus->InstrumentStatus);
+ }
+@@ -1339,8 +1718,12 @@
+ 
+ void TraderFemas::triggerQuery()
+ {
++	// BUG-T4-003: nothing is scheduled once release() was requested; a query
++	// queued before connect() published the strand is picked up by a later trigger.
++	if (m_strandIO == NULL || m_bStopped.load(std::memory_order_acquire))
++		return;
+ 	boost::asio::post(*m_strandIO, [this](){
+-		if (m_queQuery.empty() || m_bInQuery)
++		if (m_bStopped.load(std::memory_order_acquire) || m_queQuery.empty() || m_bInQuery)
+ 			return;
+ 
+ 		uint64_t curTime = TimeUtils::getLocalTimeNow();

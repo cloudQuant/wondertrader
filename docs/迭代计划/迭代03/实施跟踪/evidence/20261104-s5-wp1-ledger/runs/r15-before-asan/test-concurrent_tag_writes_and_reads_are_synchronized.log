@@ -1,0 +1,85 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R15CtxTest.concurrent_tag_writes_and_reads_are_synchronized
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R15CtxTest
+[ RUN      ] R15CtxTest.concurrent_tag_writes_and_reads_are_synchronized
+=================================================================
+==43911==ERROR: AddressSanitizer: heap-use-after-free on address 0x6040000021d0 at pc 0x000103266174 bp 0x00016dc12330 sp 0x00016dc11ae0
+READ of size 40 at 0x6040000021d0 thread T0
+    #0 0x000103266170 in __asan_memmove+0x324 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x52170)
+    #1 0x000102315134 in R15CtxTest_concurrent_tag_writes_and_reads_are_synchronized_Test::TestBody()+0x3e0 (test:arm64+0x100129134)
+    #2 0x00010235c5d4 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (test:arm64+0x1001705d4)
+    #3 0x00010235c51c in testing::Test::Run()+0xcc (test:arm64+0x10017051c)
+    #4 0x00010235d0fc in testing::TestInfo::Run()+0xd0 (test:arm64+0x1001710fc)
+    #5 0x00010235db80 in testing::TestSuite::Run()+0x1c4 (test:arm64+0x100171b80)
+    #6 0x000102368fa4 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (test:arm64+0x10017cfa4)
+    #7 0x000102368950 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (test:arm64+0x10017c950)
+    #8 0x0001023688b4 in testing::UnitTest::Run()+0x78 (test:arm64+0x10017c8b4)
+    #9 0x000102349cb4 in main+0x40 (test:arm64+0x10015dcb4)
+    #10 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x6040000021d0 is located 0 bytes inside of 48-byte region [0x6040000021d0,0x604000002200)
+freed by thread T1 here:
+    #0 0x0001032794d0 in _ZdlPv+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x654d0)
+    #1 0x0001023246f0 in std::__1::__tree<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::__map_value_compare<unsigned int, std::__1::pair<unsigned int const, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::less<unsigned int>>, std::__1::allocator<std::__1::pair<unsigned int const, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>>::erase(std::__1::__tree_const_iterator<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::__tree_node<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, void*>*, long>)+0xac (test:arm64+0x1001386f0)
+    #2 0x000102342c60 in void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, R15CtxTest_concurrent_tag_writes_and_reads_are_synchronized_Test::TestBody()::$_0>>(void*)+0x28c (test:arm64+0x100156c60)
+    #3 0x0001032656d4 in asan_thread_start(void*)+0x48 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x516d4)
+    #4 0x0001883cdc54 in _pthread_start+0x84 (libsystem_pthread.dylib:arm64e+0x6c54)
+    #5 0x0001883c8c18 in thread_start+0x4 (libsystem_pthread.dylib:arm64e+0x1c18)
+
+previously allocated by thread T1 here:
+    #0 0x0001032790e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x0001882e1060 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*)+0xb0 (libc++.1.dylib:arm64e+0x4060)
+    #2 0x0001882f64bc in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__assign_external(char const*, unsigned long)+0x68 (libc++.1.dylib:arm64e+0x194bc)
+    #3 0x000102342be0 in void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, R15CtxTest_concurrent_tag_writes_and_reads_are_synchronized_Test::TestBody()::$_0>>(void*)+0x20c (test:arm64+0x100156be0)
+    #4 0x0001032656d4 in asan_thread_start(void*)+0x48 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x516d4)
+    #5 0x0001883cdc54 in _pthread_start+0x84 (libsystem_pthread.dylib:arm64e+0x6c54)
+    #6 0x0001883c8c18 in thread_start+0x4 (libsystem_pthread.dylib:arm64e+0x1c18)
+
+Thread T1 created by T0 here:
+    #0 0x00010325f7bc in pthread_create+0x58 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x4b7bc)
+    #1 0x000102315000 in R15CtxTest_concurrent_tag_writes_and_reads_are_synchronized_Test::TestBody()+0x2ac (test:arm64+0x100129000)
+    #2 0x00010235c5d4 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (test:arm64+0x1001705d4)
+    #3 0x00010235c51c in testing::Test::Run()+0xcc (test:arm64+0x10017051c)
+    #4 0x00010235d0fc in testing::TestInfo::Run()+0xd0 (test:arm64+0x1001710fc)
+    #5 0x00010235db80 in testing::TestSuite::Run()+0x1c4 (test:arm64+0x100171b80)
+    #6 0x000102368fa4 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (test:arm64+0x10017cfa4)
+    #7 0x000102368950 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (test:arm64+0x10017c950)
+    #8 0x0001023688b4 in testing::UnitTest::Run()+0x78 (test:arm64+0x10017c8b4)
+    #9 0x000102349cb4 in main+0x40 (test:arm64+0x10015dcb4)
+    #10 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: heap-use-after-free (test:arm64+0x100129134) in R15CtxTest_concurrent_tag_writes_and_reads_are_synchronized_Test::TestBody()+0x3e0
+Shadow bytes around the buggy address:
+  0x604000001f00: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+  0x604000001f80: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+  0x604000002000: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+  0x604000002080: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+  0x604000002100: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+=>0x604000002180: fa fa fd fd fd fd fd fd fa fa[fd]fd fd fd fd fd
+  0x604000002200: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+  0x604000002280: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+  0x604000002300: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+  0x604000002380: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+  0x604000002400: fa fa fd fd fd fd fd fd fa fa fd fd fd fd fd fd
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==43911==ABORTING

@@ -1,0 +1,5301 @@
+{
+ "binary": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-red-build/build_x64/Debug/bin/TestUnits/CoverageTests_wtcore",
+ "filter": "*",
+ "summary": {
+  "pass": 1045,
+  "fail": 12,
+  "skipped": 1
+ },
+ "cases": [
+  {
+   "test": "L00PublicHeaderTest.ExecMgrHeaderIsSelfContained",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "L00PublicHeaderTest.ScopeGuardHeaderIsSelfContained",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "L00PublicHeaderTest.TraderAdapterHeaderIsSelfContained",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ActionPolicy.actionRule_defaults_are_zeroed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ActionPolicy.init_parses_default_group_and_maps_every_action",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ActionPolicy.init_action_name_is_case_insensitive",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ActionPolicy.init_skips_unrecognized_action",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ActionPolicy.init_tolerates_missing_or_non_array_order",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ActionPolicy.filters_route_commodity_to_named_group",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ActionPolicy.init_absent_limit_fields_become_zero",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ActionPolicy.init_returns_false_on_missing_file",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ActionPolicy.init_returns_false_on_broken_file",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ActionPolicy.first_init_without_default_is_rejected_and_lookup_is_safe",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ActionPolicy.repeated_init_remains_additive_without_requiring_default_again",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.default_constructed_has_no_wiring",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.init_rejects_null_cfg_and_null_api",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.init_ext_defaults_time_check_off_and_delivers_quote",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.run_reports_connection_command_submission",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.manager_reports_partial_submission_and_keeps_owners",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.init_without_module_still_wires_the_stub",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.init_with_check_time_drops_future_ticks",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.handle_quote_guards_before_any_lookup",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.handle_quote_drops_unknown_contract",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.handle_quote_uses_category_specific_stdcode",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.level2_channels_bail_out_on_empty_dates",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.handle_parser_log_is_safe_before_and_after_release",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.mgr_rejects_null_and_duplicate_and_empty_id",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ParserAdapter.mgr_run_and_release_drains_the_table",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01StraRegistry.cta_mgr_empty_registry_lookups_miss",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01StraRegistry.hft_mgr_empty_registry_lookups_miss",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01StraRegistry.sel_mgr_empty_registry_lookups_miss",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01StraRegistry.single_segment_name_never_reaches_the_factory_table",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01StraRegistry.load_factories_tolerates_empty_and_missing_directories",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01StraRegistry.wrappers_expose_self_and_guard_null_strategy",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ExecCommand.name_and_stub_accessors",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01ExecCommand.default_hooks_are_callable_noops",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TrdNotifySink.default_optional_callbacks_are_noops",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TrdNotifySink.default_on_order_is_called_through_base_reference",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.ready_replay_is_idempotent_and_close_clears_ready",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.subscribe_ready_and_close_race_keeps_fifo_order",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.callback_can_reenter_subscribe_and_close",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.callback_can_unregister_without_waiting_on_itself",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.reentrant_remove_of_idle_sink_allows_ready_resubscribe",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.remove_sink_waits_for_in_flight_broadcast",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.concurrent_account_broadcasts_use_safe_sink_snapshots",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.request_stop_is_idempotent_and_waits_for_broadcast",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.request_stop_waits_for_channel_drain_and_drops_queued_events",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.wait_from_own_callback_requests_stop_and_returns_false",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.manager_requests_all_before_waiting_for_all_adapters",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.manager_callback_wait_failure_preserves_all_adapters",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapterSubscribe.manager_callback_query_is_thread_local_nonblocking_and_read_only",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.fresh_adapter_is_not_logged_in",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.init_rejects_null_params_without_touching_state",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.init_accepts_no_riskmon_inactive_riskmon_and_complete_active_policy",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.active_riskmon_without_default_rule_is_rejected_before_state_is_committed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.active_riskmon_without_policy_is_rejected_before_state_is_committed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.active_riskmon_with_non_object_policy_is_rejected_before_state_is_committed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.init_ext_rejects_null_api",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.init_ext_failure_releases_partial_api_state_once",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.release_unregisters_only_a_registered_spi_and_is_idempotent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.missing_module_failure_releases_retained_config",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.run_and_release_and_queryfund_are_api_null_safe",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.empty_lookups_return_neutral_values",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.risk_gates_pass_when_riskmon_disabled",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.null_payloads_on_response_callbacks_are_ignored",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.add_sink_is_idempotent_set_membership",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.local_order_id_concurrent_first_call_is_unique",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.local_order_id_is_monotonic",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.mgr_rejects_null_and_empty_names",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.mgr_registers_unique_names_and_rejects_duplicates",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N01TraderAdapter.mgr_run_release_and_refresh_funds_without_api",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "RetryProofExecuterTest.ArbiRetriesOnlyAfterProvenV2CleanupWithoutQueuedCallbacks",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "RetryProofExecuterTest.ArbiKeepsRetryBlockedWhenChannelCallbacksWereQueuedDuringFailure",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.SameCodePositionsAreFifoAndNeverOverlap",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.OlderPositionBatchCannotClearNewerTargetSnapshots",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.PublicSetPositionAppliesGroupTargetsAndClearsOnEmptyInput",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.OverlappingGroupsUseConfiguredOrder",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.OlderTargetBatchCannotWriteAfterNewerBatchStarts",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.DifferentCodesCanRunInParallel",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.ReadyAndLostCallbacksRemainOrdered",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.RepeatedReadyAndNullTraderAssignmentAreIdempotent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.ReadyCallbackAfterTraderBindingIsObservableAndIdempotent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.QueuedReadyRecoveryIsDiscardedAfterChannelEpochChanges",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.LostEventRemainsObservableAcrossReadyLostReadyBurst",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.ReentrantPositionCallbackQueuesWithoutDeadlock",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.NoPoolBusyCallerReturnsAfterEnqueue",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.PublicSetPositionQueuesTargetBeforeJoinedTickDuringInitialization",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.ChannelReadyCallbackCanJoinSameCodeSubmission",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.AccountUpdateDuringInitializationIsDeliveredAfterRegistration",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.InitialDrainReservationRejectsCompetingReservedCaller",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.SupersededQueuedTargetIsSkippedButLaterEventsRemain",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.StartingNewBatchInvalidatesQueuedTargetBeforeApply",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.PublicSetPositionConcurrentClearLeavesLatestTarget",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.ReadyCallbackFailureDisablesUnitAndReportsStatus",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.StartupCallbackFailureDiscardsRetainedTickAndStaysFailed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.PluginInitializationFailureCanRetryAfterEnvironmentRecovers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.InitializedV21PluginOwnerIsRetainedUntilItsHooksQuiesce",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.QuiesceWaitsForAcceptedFifoAndRejectsNewIngress",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.UnsupportedPluginBackgroundThreadKeepsOwnerPinned",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.QuiesceFailsWhenCallbackDropsAcceptedQueuedEvent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.SynchronousFallbackCallbackCannotWaitForItself",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.EmptyExecutorCanCompleteHostQuiescence",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtArbiExecuterSerialization.PreflightAllowsOtherThreadIngressAndDrainWaits",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71CtaTest.LoadDataOptionalDefaultsAndZeroVolumeQueries",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71CtaTest.TickConditionsCoverAllAlgorithmsAndActions",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71CtaTest.CloseReverseSlippageAndEarlyExitsWriteLogs",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71CtaTest.ScheduleEmitsTwentyTimesAndPersistsCondition",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71CtaTest.BarsTicksPricesAndChartDump",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71CtaTest.ExitAndSetPositionConditionBranches",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71DtMgrTest.ReaderInitAdjustingAndKlineDelegation",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71DtMgrTest.RealtimeTickCacheAndNotifyQueueLifecycle",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71DtMgrTest.ResampleCachePathWithEmptyStoreReturnsNull",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.LocalUnitLifecycleAndCallbackDispatch",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.LocalSetPositionGroupsStaleAndStrictSync",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.ArbiUnitDispatchAndSetPosition",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.ArbiInitialTargetReplaySubmitsOnFirstTick",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.ArbiReadyWithoutActionableTargetDoesNotSubmit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.DiffUnitDispatchAndChannelRecovery",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.LocalFailedInitializationRetriesAfterV2CleanupWithoutQueuedCallbacks",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.ArbiFailedInitializationRetriesAfterV2CleanupAndReplaysOriginalTarget",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.DiffV2FailedInitializationStillRequiresSafeAutomaticRetry",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.K06DiffCleanFailureFollowedBySuccessfulRetryLetsQuiesceComplete",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.K06DiffCleanFailureWithoutSuccessfulRetryKeepsQuiesceIncomplete",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.UnitInitializationStatusIsQueryableAndFailedStatusCanBeCleared",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.ExecManagerRegistrySupportsConcurrentAddsAndSnapshots",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.ConcurrentSameCodeCreationAndPreRegistrationChannelEdges",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.LocalFailedInitializationRequestsCoalesceAndFailClosedAfterReadyCallback",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.ArbiFailedInitializationRequestsReturnBeforeRegistration",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.DiffFailedInitializationWaitersShareOneGeneration",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.SameThreadInitializationReentryFailsWithoutDuplicateUnit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.ThrowingInitializationChannelCallbackDoesNotBlockConcurrentTargetUpdate",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecTest.AccountFanoutSkipsInitializingUnitUntilReady",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71ExecScheduleTest.RejectedChannelDrainRunsFallbackSynchronously",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71HftTest.TradingMethodsForwardToTraderAdapter",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71HftTest.CustomRuleMappingAndTradingGuards",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71HftTest.TradeAccountingAndDynProfitExtremes",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71HftTest.HistoricalSlicesAndL2Subscriptions",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.QuiesceDrainsAcceptedCallbacksAndRejectsNewIngress",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.QuiesceWaitFromPluginCallbackReturnsFalseWithoutBlocking",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.QuiesceWaitsForIngressProducerBeforeDrainingAcceptedTarget",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.NoPoolSynchronousCallbackCanRequestQuiesce",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.SameCodeCallbacksStayFifoAndReentrantCallbackDoesNotWait",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.InitializationCallbackCanSpawnAndJoinSameCodePositionEvent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.AccountEventQueuedDuringInitializationRunsAfterSuccessfulReady",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.LatestTargetReconciliationPrecedesTickQueuedDuringInitialization",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.TargetReservationCapturesTicksBeforeCreatorStarts",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.StrictSyncUnmanagedHoldBecomesAuthoritativeZeroTarget",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.DifferentContractsCanRunCallbacksInParallel",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.ChannelEventsContinueAfterBlockedReadyCallback",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.ChannelLostTransitionIsDeliveredBeforeQueuedTickAndRecovery",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.RolloverClearDuringFailedTeardownIsRetainedWithoutUnsafeReplay",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.InitializationCallbackFailureCannotRetryWithoutRecoveryContract",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.FailedInitializedUnitStaysOwnedWhileFakePluginWorkerIsActive",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.PreflightFailureBeforePluginEntryCanBeCleared",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R71LocalSerialTest.ReadyCallbackFailureStaysLockedAcrossTargetAndClearRequests",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1TraderEntryGate.K05SiblingAdaptersOfOneAccountShareInFlightQuantity",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1TraderEntryGate.K05ConcurrentEntriesCannotBothPassTheAccountCheck",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1TraderEntryGate.K03LiveOrderReportAfterNotSentClosurePausesAccount",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1TraderEntryGate.K03TradeAfterNotSentClosurePausesAccount",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1TraderEntryGate.K03NotSentWithoutLiveEvidenceKeepsTheAccountOpen",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1TraderEntryGate.New006ClockFailureRejectsEntryBeforeTheProvider",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3New072DiffCallbacks.CallbacksDuringCreationReturnPromptlyAndAreDeliveredAfterReady",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3New072DiffCallbacks.CallbacksDuringFailedCreationReturnPromptlyAndAreDroppedWithWarning",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S4OwnerRelease.HftContextReturnsItsClaimsWhenDestroyed",
+   "status": "fail",
+   "rc": 1
+  },
+  {
+   "test": "S4OwnerRelease.HftContextReturnsClaimsOfThePreviousTraderWhenRebound",
+   "status": "fail",
+   "rc": 1
+  },
+  {
+   "test": "S4OwnerRelease.LocalExecuterReturnsItsClaimsWhenDestroyed",
+   "status": "fail",
+   "rc": 1
+  },
+  {
+   "test": "S4OwnerRelease.ArbiExecuterReturnsItsClaimsWhenDestroyed",
+   "status": "fail",
+   "rc": 1
+  },
+  {
+   "test": "S4OwnerRelease.ManualClaimIsNotReleasedByAnExecuterTeardown",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S4ParserAdapterNullComm.QuoteForContractWithoutCommodityIsDroppedWithoutCrash",
+   "status": "fail",
+   "rc": -11
+  },
+  {
+   "test": "S4ParserAdapterNullComm.OrderQueueForContractWithoutCommodityIsDroppedWithoutCrash",
+   "status": "fail",
+   "rc": -11
+  },
+  {
+   "test": "S4ParserAdapterNullComm.OrderDetailForContractWithoutCommodityIsDroppedWithoutCrash",
+   "status": "fail",
+   "rc": -11
+  },
+  {
+   "test": "S4ParserAdapterNullComm.TransactionForContractWithoutCommodityIsDroppedWithoutCrash",
+   "status": "fail",
+   "rc": -11
+  },
+  {
+   "test": "S4TwoDiffOwnerRouting.ReportsCancelsAndSnapshotsStayWithTheSendingExecuter",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S4TwoDiffOwnerRouting.CachedTargetsRouteExplicitAndAllEntriesToTheirOwnLedgers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S4TwoDiffOwnerRouting.WithoutRoutingAFillReachesBothLedgersAsBefore",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK05EntryLimit.EntryAboveTheAccountLimitIsRejectedAndReductionsStayAllowed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK05EntryLimit.WithoutADeclaredLimitEntriesAreNotRestricted",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK07dSyncReport.AcceptedThenCanceledDuringInsertKeepsTheOrder",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK07dSyncReport.RejectedWithoutAcceptanceDuringInsertFails",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK31DateBinding.BindingHolderValidatesOnceAndFallsBackToLegacy",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK31DateBinding.StorageAndXeleModulesExportVersionedBinders",
+   "status": "fail",
+   "rc": 1
+  },
+  {
+   "test": "S5MainK31HostChain.InjectedTableDrivesTheReaderDateMapping",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK31HostChain.WithoutHostTableTheReaderKeepsTheLegacyPath",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK44OwnerParticipation.ManualEntryUnderRoutingClaimsTheContractExclusively",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK44OwnerParticipation.ExecuterOwnedContractRejectsManualEntryUnderRouting",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK44OwnerParticipation.WithoutRoutingManualAndHftEntriesDoNotClaim",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK44OwnerParticipation.HftContextUnderRoutingOwnsItsContractAndSeesOnlyItsOwnFills",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainL01014ResumeInbox.EachRequestIsTakenExactlyOnceAndArchivedByOutcome",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainL01014ResumeInbox.RealGateResumesOnlyWithTheReviewedGenerationAndAudits",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOrderOwnershipJournalV1.PersistsOwnerLedgerAndActiveOrdersAcrossRestart",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOrderOwnershipJournalV1.TargetBaselineAndTradeReplayInOneSequence",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOrderOwnershipJournalV1.LocalOrderHighWaterAndUnresolvedIntentSurviveRestart",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOrderOwnershipJournalV1.RequiresDurableLegacyLocalIdFloorBeforeReservingOrder",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOrderOwnershipJournalV1.RepeatedRejectAndPartialCancelProgressStayIdempotentAfterReplay",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOrderOwnershipJournalV1.LateTradeAdvancesSameTerminalProgressOnceAcrossReplay",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOrderOwnershipJournalV1.UInt32LocalOrderIdExhaustionFailsWithoutWrapping",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOrderOwnershipJournalV1.RejectsUnknownOrdersAndConflictingTradeKeysFailClosed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOrderOwnershipJournalV1.TruncatedAndChecksumDamagedWalFailClosed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOrderOwnershipJournalV1.FailingIntentWriteBlocksFurtherMutations",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOrderOwnershipJournalV1.FlushFailureReturnsBeforeSendCommitAndBlocksJournal",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOrderOwnershipJournalV1.ExclusiveOpenAndConcurrentIntentsAreSerialized",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOwnerSinkRegistry.DisabledByDefaultAndRoutesOnlyMatchingOwner",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOwnerSinkRegistry.ConcurrentRemoveWaitsForOwnerCallback",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOwnerSinkRegistry.ReentrantUnregisterAndRemoveDoNotHoldRoutingLocks",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "DiffOwnerSinkDelivery.CallbackExceptionPropagatesAndReleasesReservation",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03New112WtCoreCwd.LongWorkingDirectoryIsReturnedInFull",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03New112WtCoreCwd.RemovedWorkingDirectoryFallsBackToDot",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.SameCodeCallbacksAreFifoAndReentryDoesNotDeadlock",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.NoPoolCrossThreadReentryQueuesWithoutDeadlock",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.DifferentCodesCanRunCallbacksInParallel",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.ReadyPrecedesRecoveryAndOldReadyEpochIsSkipped",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.RecoveryUsesDiffCapturedBeforeQueuedTrade",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.ReadyTraderBindingWaitsForExplicitPostRegistrationReady",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.RuntimeReadyExceptionFailsUnitAndSkipsRecovery",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.InitialReadyExceptionBlocksRetryBeforeCreationCompletes",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.RuntimeFailureAfterPartialTradeBlocksTargetReplay",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.PositionChangedTargetAndDiffSurviveReload",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.TradeAndTargetUseConsistentPersistedSnapshot",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.OmittedTargetZeroUsesSignedTargetDelta",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.OmittedTargetThreeToZeroUsesRawCodeAndExchangeAndPersists",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.MissingMatchingExchangeRetainsOmittedTargetAndReportsError",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.NewerReentrantTargetBatchWinsWithoutDroppingTrade",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.OmittedSweepPreservesIncrementalTargetUpdatedAfterBatchStart",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.ExplicitTargetBatchPreservesIncrementalUpdateForUnprocessedCode",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.SnapshotFailureBlocksPositionDispatchAndPersistsTombstoneWhenWritable",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.QuiesceDrainsAcceptedPoolFifoAndRejectsNewIngress",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.QuiesceDefersPluginWorkerWaitUntilCoordinatorPhase",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.CoordinatorPendingAndPluginWaitFailureRetainUnitOwner",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.RealV2DiffPluginInitializesAndDirectHookCanShutdown",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.QuiescePreflightRejectsSynchronousCallbackSelfWait",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.QuiesceStaysIncompleteWhenCallbackDropsQueuedEvent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.QueuedOlderSaveCannotOverwriteFailureTombstone",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.FailedAtomicReplacementKeepsRevisionRetryable",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.QuiesceIgnoresBroadcastReportsForUnownedCodes",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.BroadcastReportsOnlyUpdateTheOwningExecuterCode",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.QuiesceMarksLostReportsForOwnedLedgerCodeIncomplete",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.QuiesceMarksUnitStateInvalidationDuringOrderOrEntrustIncomplete",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtDiffExecuterConcurrencyTest.RejectedPoolScheduleRunsFallbackSynchronously",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.RunsEveryPhaseAcrossManagersBeforeAdvancing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.SharedFactoryAndUnitOwnersDeduplicateAndRetryAcrossManagers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.UnknownInitializedFactoryWrapperFailsClosedAndStaysOwned",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.UninitializedDirectFactoryWrapperIsRetainedButNotWaited",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.GlobalHostPreflightFailurePreventsEveryDrain",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.StableFactoryPreflightFailureSendsNoUnitRequest",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.FactoryOperationWaitFailurePreservesHostsAndRetries",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.FactorySnapshotFailureRetainsHostOwnerAndRetries",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.PartialSnapshotOwnersStayRetainedForRetry",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.PluginWaitPreflightFailureStartsNoWait",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.RetriesEveryPluginWaitAndRetainsOwnersAfterFailedWait",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.OldWaitCannotReportSuccessBeforeAllAcksSucceed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.OverlappingManagerClaimsBindAtomicallyAndCanRetry",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.ConcurrentRetryIsRejectedUntilCurrentRoundReturns",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.MissingStageSupportFailsClosedAndRetainsOwners",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtExecMgrQuiesceCoordinator.CallbackThreadPreflightReturnsBeforeAnyHostDrain",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.AddAndEnumExecuters",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.HandleTickBroadcastsToEveryExecuter",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.SetPositionsWithoutFilterGivesEveryExecuterTheSameMap",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.SetPositionsDropsIgnoredCodeAndAppliesRedirect",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.SetPositionsSkipsExecuterBannedByFilter",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.HandlePosChangeWithAllReachesEveryUnroutedExecuter",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.HandlePosChangeSkipsRoutedExecutersWhenExecidIsAll",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.HandlePosChangeWithExplicitExecidHitsRoutedExecuter",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.HandlePosChangeHonoursCodeAndExecuterFilters",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.CacheAccumulatesAndCommitSendsAllGroup",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.CommitScalesAndKeepsSignAndSkipsZero",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.CommitPrefersOwnGroupAndIgnoresUnmatchedGroups",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.CommitAppliesFiltersAndClearsCache",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.LoadRouterRulesRejectsNullAndNonArray",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.LoadRouterRulesAcceptsStringAndArrayExecuters",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.RouteOfUnknownStrategyFallsBackToAll",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.RouterRuleWithoutExecuterNodeIsRejected",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.MalformedRouterRulesDoNotPartiallyReplaceExistingRoutes",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecMgrTest.RouterRuleWithoutStrategyIsRejected",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.LoadFactoriesFromMissingDirectoryReturnsFalse",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.LoadFactoriesFromEmptyDirectoryReturnsTrue",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.LoadFactoriesSkipsDirectoriesAndForeignExtensions",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.LoadFactoriesWithRegularFileReturnsFalseWithoutThrowing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.LoadFactoriesWithUnreadableDirectoryReturnsFalseWithoutThrowing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.CreatePlainUnitFailsForUnknownFactory",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.CreateDiffUnitFailsForUnknownFactory",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.CreateArbiUnitFailsForUnknownFactory",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.SingleNameOverloadRejectsNameWithoutFactoryDot",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.ThreeSegmentNameTakesFirstTwoParts",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.WrapperExposesUnitAndReleasesItThroughFact",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.WrapperReleasesExactlyOnceForSharedOwner",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.WrapperWithNullUnitDoesNotTouchFact",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.FakeUnitCallbacksAreReachableThroughBasePointer",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02ExecuterFactoryTest.FactCanReturnNullForUnknownUnitName",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.LoadWithoutAnyFileReturnsImmediately",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.LoadMissingFileIsLoggedAndSkipped",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.NullStrategyFiltersSectionIsIgnored",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.StrategyIgnoreFilterDropsPosition",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.StrategyRedirectFilterRewritesPosition",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.StrategyFilterDropsAnyDiffPosition",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.UnrecognizedAndMissingStrategyPassThrough",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.CodeFilterMatchesExactStdCode",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.CodeFilterFallsBackToCommodityId",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.CodeFilterLeavesUnconfiguredCodesAlone",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.ExecuterFilterHonoursBooleanFlag",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.SecondLoadWithSameTimestampIsSkipped",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.ReloadPicksUpNewContentAfterFileTimeAdvances",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.FailedReloadPreservesRulesAndAllowsRetryAtSameTimestamp",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.FailedFirstLoadDoesNotBlockValidRetryAtSameTimestamp",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.NonObjectJsonRootsPreserveRulesAndDoNotAdvanceTimestamp",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.InvalidSectionAndItemTypesPreserveRulesUntilValidRetry",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.MalformedYamlReloadIsSafeAndStringScalarsRemainCompatible",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02FilterMgrTest.ScalarYamlRootReloadPreservesRulesAndAllowsRetry",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02WtHelperTest.CwdIsStandardisedAbsolutePath",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02WtHelperTest.ModulePathIsBuiltFromCwdByDefault",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02WtHelperTest.ModulePathFallsBackToInstDirWhenNotCwd",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02WtHelperTest.TimeStateIsRoundTrippedNotWallClock",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02WtHelperTest.GenerateDirectoriesAreCreatedOnDemand",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02DistExecuterTest.NameAccessorsComeFromIExecCommand",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02DistExecuterTest.InitRejectsNullParams",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02DistExecuterTest.InitRetainsConfigurationOnceAndReleasesItOnDestruction",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02DistExecuterTest.InitSucceedsWithoutScaleNode",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02DistExecuterTest.OnPositionChangedAppliesScaleAndHandlesUnchangedValue",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02DistExecuterTest.SetPositionHandlesWholeMap",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02DistExecuterTest.OnTickIsDocumentedNoOp",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02DistExecuterTest.StagedQuiesceDrainsSynchronousWorkWithoutFactoryOwners",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02DistExecuterTest.InFlightCallbackBlocksWaitAndQuiesceRejectsNewIngress",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02DistExecuterTest.ExecuterIsUsableThroughIExecCommandBase",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtCoreParserAdapterInitFailure.falseResultCannotRunApi",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtCoreParserAdapterInitFailure.exceptionCannotRunApi",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtCoreParserAdapterInitFailure.nullManagerRetainsTransferredApiWithoutCallingProvider",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "WtCoreParserAdapterInitFailure.missingModuleIsSafePreApiFailure",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02CtaTickerTest.ConstructsWithoutAnyEngine",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02CtaTickerTest.StopBeforeRunIsIdempotent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02CtaTickerTest.PreInitQueriesUseFallback",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02SelTickerTest.ConstructsWithoutAnyEngine",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02SelTickerTest.StopBeforeRunIsIdempotent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02HftTickerTest.ConstructsWithoutAnyEngine",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "N02HftTickerTest.StopBeforeRunIsIdempotent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101CtaEngineHot.OnInitAndScheduleMapHotCode",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101CtaEngineHot.PooledScheduleMapsHotCode",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101DtMgrStore.HfqTickCacheGeneratedThenAppended",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101DtMgrStore.KlineResampleCacheAndBarNotifications",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101DtMgrStore.DelayedBarNotificationsKeepMutableSlotSnapshots",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101DtMgrStore.DelayedForcedCacheBarNotificationsKeepMutableSlotSnapshots",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101DtMgrStore.DelayedResampledNotificationsKeepUpdatedBarSnapshots",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101DtMgrStore.ReentrantDrainDefersNestedCallbacksButDrainsRequestedBatch",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101DtMgrStore.ThrowingBarCallbackRetainsFailedAndRemainingNotifications",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101DtMgrStore.WorkerThreadCanEnqueueDuringEngineCallback",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101DtMgrStore.WorkerThreadDrainRequestDuringBatchIsNotLost",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101EngineGap.FundSettlementAndZeroDetailClose",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101EngineGap.FeeFileErrorAndMissingCommodity",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101EventNotifierLoader.IncompatibleModuleRejected",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101SelCtx.SignalAccountingAndQueryFallbacks",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101SelCtx.UserDataAndScheduleFlush",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R101TraderReport.AutoCancelErrorAndShortCloseBranches",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10EventNotifier.MissingRegisterExportUnloadsCandidateAndPreservesActiveNotifier",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10EventNotifier.MissingCreateServerExportUnloadsWithoutStartingWorker",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R120QfqSubscriptionDispatchesThroughPool",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R120QfqSubscriptionDispatchesDirectlyWithoutPool",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41OnInitEnumeratesContextPosition",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41OnInitAppliesRiskScaleToCachedTargets",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41OnScheduleWithoutPoolSubmitsContextTarget",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41OnScheduleWithPoolUsesThreadPool",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41OnTickDispatchesRawAndHfqAdjusted",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41PlainQfqSubscriptionDispatchesFrontAdjusted",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41AdjustedTickDispatchMatchesDirectAndPoolModes",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41UnruledStockAdjustmentDispatchMatchesDirectAndPoolModes",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41OnBarDispatchesToSubscribedContext",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41SessionEventsReachContextAndListener",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41ExecuterStubAccessors",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41InitWithoutRiskMonCreatesOutputFiles",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41InitLoadsFeeTemplatesAndToleratesMissingFile",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41LoadsPersistedPortfolioAndAppliesRiskScale",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41PositionLifecycleOpenReverseAndFlatten",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41StandbySignalFiresOnNextTick",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R58LegacyPositionWithoutSessionKeepsStandbySignalPending",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41PriceSessionAndKlineAccessors",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41SessionBeginEndSettlesFundAndNotifiesListener",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41RiskMonConfigBranchesDoNotBreakInit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41CalcFeeUsesLoadedTemplateAndDefaultsWithoutOne",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41OnScheduleWithPoolCommitsLeftoverPositionToZero",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41CtaTickerInitWithSession",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41CtaTickerToleratesMissingSession",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41CtaTickerOnTickFeedsEngine",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41HftTickerOnTickFeedsHftEngine",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41SelTickerOnTickFeedsSelEngine",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.R41HftTickerInitWithMissingSession",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.S5CtaTickerRunWithoutSessionStartsNothing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.S5SelTickerRunWithoutSessionStartsNothing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.S5HftTickerRunWithoutSessionStartsNothing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EngineFixture.S5TickerRunWithoutSessionReportsFailure",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R120DiffTest.PoolForwardsEveryCallbackAndPersistsDiff",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R120DiffTest.SetPositionMigratesExpiredTargetToZero",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R120Notifier.BurstPublishesEveryPayload",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R120Notifier.NullTradeAndOrderGuardsPlusLatePost",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R120ParserTest.InitParsesFilterAndSubscribesContracts",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R120ParserTest.InitRejectsModuleWithoutCreateParser",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R120ParserTest.StrategyManagersScanDirectoriesAndMiss",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R120SelFixture.RunWritesStrategyAndChannelMarkers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R120SelFixture.MinuteEndSkipsTaskOnHoliday",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160DtMgrTest.R160HfqTickCacheUsesEngineClockAndStepsBackOneTick",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160DtMgrTest.R160HfqTickCacheRetriesNullSliceAndOwnsCopiedData",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160DtMgrTest.R160HfqTickCacheRetriesEmptySliceWhenDataArrives",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160DtMgrTest.R160OnBarClosesCachedMinute5HourAndHalfBars",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160DtMgrTest.R160KlineReaderExceptionsAreCaughtAndPeriodsFormatted",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160EventNotifier.FakeModuleObservesExactServerAndPublishAbi",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160EventNotifier.WorkGuardKeepsWorkerAliveForEveryPublishLambda",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160EventNotifier.DiscardedOrderHandlerReleasesRetainedReference",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160EventNotifier.AsyncOrderHandlerDestroysObjectOnceAfterPublisherReturns",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160EventNotifier.DiscardedOrderHandlerDestroysLastReferenceOnce",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160EventNotifier.ThrowingOrderPublisherDestroysLastReferenceOnce",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160EventNotifier.WorkerFinishesPendingOrderBeforeDestructorReturns",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160EventNotifier.DiscardedTradeHandlerReleasesRetainedReference",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160EventNotifier.ThrowingTradePublisherReleasesRetainedReference",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160EventNotifier.DeliversAfterIdleWithoutExternalWorkGuard",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160EventNotifier.ThrowingPublisherIsReportedAndLaterItemRuns",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160EventNotifier.ConcurrentStopDrainsAcceptedItemsAndRejectsLaterItems",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160HftTickerTest.AutoCloseKeepsDaySessionTimeEncodingForNextPass",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160HftTickerTest.ConcurrentRunCallsStartOnlyOneWorker",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160HftTickerTest.StartupStopSkipsSessionBeginAndWorkerCreation",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160HftTickerTest.WorkerStopBeforeTargetRunSkipsTargetCallbacks",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160HftTickerTest.MidnightRolloverAndConcurrentWorkerStopAreSafe",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160TraderTest.R160InitLoadsTraderModuleAndParsesNodeConfig",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160TraderTest.R160ReleaseAfterInitDetachesAndDeletesMocker",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160TraderTest.R160DisconnectThenReleaseStillJoinsWorkers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160TraderTest.R160RspEntrustErrorsCoverMonthlyFlatAndCloseToday",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R160TraderTest.R160CanceledCloseShortTodayOrderAndDeadCancelPaths",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202HftStrategyFactoryAbi.ManagerAndStrategyDestructWithRepositoryPlugin",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R214EngineTaskShutdown.releaseCannotLoseWakeBetweenIdleCheckAndWait",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R214EngineTaskShutdown.externalReleaseDrainsAcceptedTasksAndSerializesCallers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R214EngineTaskShutdown.stoppedEngineDoesNotRunTaskAndReleasesCapture",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R214EngineTaskShutdown.taskCanRequestStopAndOwnerLaterJoinsWorker",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EventNotifierTest.DefaultConstructorInitializesMqHooksToNull",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EventNotifierTest.InactiveNotifierShortCircuitsEveryNotify",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EventNotifierTest.MissingMqModuleFailsInit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EventNotifierTest.ActiveNotifierPublishesAllJsonPayloads",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EventNotifierTest.InactiveNotifierRejectsNonNullTradeAndOrder",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R41EventNotifierTest.ActiveNotifierSkipsNullTradeAndOrder",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73CtaCtxTest.LoadToleratesBadJsonAndRestoresUserData",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73CtaCtxTest.SignalHeldOutsideSessionThenExecutedWhenTriggered",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73CtaCtxTest.ScheduleWaitsForMainBarCloseAndRespectsCloseTime",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73CtaCtxTest.MainBarsExpireConditionsAndNullSlicesAreGuarded",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73CtaCtxTest.PositionQueriesCoverTagsAndFundFlags",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73CtaCtxTest.OutputsAreIdempotentAndChartApisGuardState",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73DtMgrTest.ReaderInitAndSliceDelegation",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73DtMgrTest.BarPeriodMappingNotifiesEngine",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73DtMgrTest.ForcedCacheResampleOnEmptyStore",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73ExecTest.LocalAccessorsAndGuards",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73ExecTest.LocalAutoClearEarlyExits",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73ExecTest.ArbiAccessorsQueriesAndAutoClear",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73ExecTest.DiffAccessorsAndSlices",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73HftCtxTest.PositionLifecycleCoversCloseAndReverse",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73HftCtxTest.DynProfitUsesBidAskAndWritesFunds",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73HftCtxTest.NullSlicesAreGuarded",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73HftCtxTest.DirtyUserDataAndNonAgentCallbacks",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73TraderReportTest.OptionReportsAndPushes",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73TraderReportTest.StockAndFlatCodeConversions",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73TraderReportTest.CancelAcrossContractCategories",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R73TraderReportTest.ReportTolerantItemsAndPreReadyQueries",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1K24NotifierStop.BlockedPublisherIsDetachedAfterBoundedWait",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1K24NotifierStop.IdleNotifierDrainsAndDestroysServerOnce",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3New063SelOpenFee.SameDirectionAddIsChargedOnTheOpenedIncrement",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5EngineUninitMetadata.ZeroInitializedSelEngineReportsNoMetadata",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5EngineUninitMetadata.IndeterminateStorageSelEngineReportsNoMetadata",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5EngineUninitMetadata.ZeroInitializedCtaAndHftEnginesReportNoMetadata",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5LiveFeeSchedule.ContractRateWinsOverProductRate",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5LiveFeeSchedule.ProductRateIsTheFallback",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5LiveFeeSchedule.ExplicitZeroRateIsAValidFee",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5LiveFeeSchedule.MissingFeeIsAnObservableError",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5LiveFeeSchedule.ContinuousCodeIsPricedWithItsMappedContract",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5LiveFeeSchedule.FillIsKeptWhenItsFeeIsMissing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5LiveFeeSchedule.PortfolioFeeIsChargedOnTheOpenedIncrement",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5LiveFeeSchedule.InvalidVersionedTemplateBlocksStart",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5LiveFeeSchedule.VersionedYamlTemplateIsAccepted",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.MissingOpenDoesNotBootstrapAndFreshRecordSurvivesRestart",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.BootstrapCannotBeImplicitlyRepeated",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.BootstrapRejectsOrphanArtifactsWithoutCreatingOthers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.BootstrapProbeErrorDoesNotCreateArtifacts",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.MissingWalWithOtherJournalArtifactsRequiresRecovery",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.AckRequiresExactPendingHighWaterAndPersistsAuditFields",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.SerializedShortWritesCompleteTheFrame",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.ConcurrentThreadAppendsReceiveUniqueOrderedSequences",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.LockContentionIsRejectedAcrossProcesses",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.TruncatedPrimaryExportsCompletePrefixAndFirstBadOffset",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.CorruptPrimaryChecksumPreservesBytesAndForensicPrefix",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.TruncatedGuardPreservesItsGoodPrefix",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.InterruptedPrimaryAppendAfterProcessExitExportsForensicPrefix",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.EveryWriteAndCleanupFailureRequiresRecovery",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.ComponentProbeErrorFailsClosedWithoutTreatingPathAsMissing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.MarkerPermissionFailureRetainsImmediateAndRestartEvidence",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.AckMarkerPermissionFailurePreservesPendingEvidence",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.CleanupComponentProbeErrorFailsClosedWithoutTreatingPathAsMissing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.FailedAckCommitImmediatelyExposesPriorReportsAndAckEvidence",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.AmbiguousAckCommitRemainsRecoveryRequiredAfterProcessExit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.AmbiguousAckPrimaryFlushRemainsRecoveryRequiredAfterProcessExit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.MarkerRemovalDirectoryFlushFailurePersistsCleanupUncertainty",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.AckCleanupFailuresExposeReportAndMatchedCommitBeforeAndAfterReopen",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.SymlinkAndVisiblePathReplacementFailClosed",
+   "status": "skipped",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.VisiblePathAndLockReplacementFailClosed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.SystemLinkInDirectoryPathIsCanonicalizedToOneJournal",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.GenuineExtendedAclOnJournalFileIsRejected",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.UnsafeDirectoryPermissionsAreRejected",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.ExistingWalGuardAndLockPermissionsAreValidated",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.ReplacedContainingDirectoryIsDetectedBeforeMutation",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.PayloadAndAuditFieldLimitsAreRejected",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "UnresolvedReportJournal.SequenceExhaustionPoisonsInstanceBeforeWriting",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaQueryTest.identity_and_clock_passthrough",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaQueryTest.comminfo_and_rawcode_lookup",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaQueryTest.empty_book_lookups_return_neutral_values",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaQueryTest.fund_data_flags_are_consistent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaQueryTest.on_tick_fills_price_map_and_respects_emit_flag",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaQueryTest.on_bar_notifies_only_after_subscribing_bar_events",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaQueryTest.sub_ticks_is_idempotent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaQueryTest.user_data_store_and_default_value",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaQueryTest.log_levels_are_forwarded",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.unknown_contract_is_rejected_without_any_state",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.short_is_rejected_on_non_shortable_product",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.exit_on_flat_book_is_noop",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.exit_long_ignored_when_position_is_short",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.exit_short_ignored_when_position_is_long",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.enter_long_accumulates_on_top_of_current_qty",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.enter_short_accumulates_below_zero",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.exit_long_cuts_at_most_the_available_qty",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.exit_short_cuts_at_most_the_available_qty",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.limit_price_registers_condition_without_signal",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.stop_price_registers_reverse_comparison",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.short_condition_orders_are_registered_symmetrically",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.set_position_condition_is_skipped_when_target_equals_current",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.set_position_rejects_missing_commodity_without_side_effects",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.set_position_without_engine_has_no_side_effects",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.valid_session_tick_consumes_pending_signal",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.tick_can_be_emitted_to_strategy_after_condition_handling",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P01CtaOrderTest.missing_session_exit_and_tick_preserve_saved_signal",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.OnInitLoadsPersistedStateAndPreparesOutputs",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.SaveDataRoundTripAcrossContexts",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.ExpiredPositionCodesHaveBoundedLogDisplay",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.ExpiredSignalCodesHaveBoundedLogDisplay",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.LongRecoveredPositionCodesKeepTheirFullIdentity",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.LongRecoveredSignalCodesKeepTheirFullIdentity",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.LongDirectTickSubscriptionsKeepTheirFullIdentity",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.MaximumSupportedDetailAndSignalTagsRestoreAndExecute",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.LookupFailureWhilePreparingSnapshotDoesNotPublishCandidate",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.ScheduleEmitsCalculateAndChartWrites",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.ChartApisRejectUseOutsideScheduleAndUnknownNames",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.SessionBeginReleasesFrozenAndPersistsUserData",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.PositionAccountingQueriesReactToTicks",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.LogsSubscriptionsAndMetadataAccessors",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.K45UnknownMembersRejectTheWholeSnapshot",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42CtaPersistTest.K45AllocationFailureDuringRestorePropagatesWithoutPartialState",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.InitRejectsNullParams",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.InitSucceedsWhenSnapshotIsMissing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.InitRejectsMalformedSnapshot",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.LoadDataRejectsMalformedSnapshotsWithoutPartialRestore",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.LoadDataAcceptsCurrentArrayAndHistoricalObjectMap",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.PartialWriteFlushAndCloseFailuresPreserveLastGoodAndRetry",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.LoadDataSkipsContractsWithUnknownTicker",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.SaveDataCreatesFileWhenNothingLoaded",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.GetUnitUsesDefaultPolicyWhenProductMissing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.ContextReadsGuardedWhenTraderMissing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.OrderCallsRejectedBeforeChannelReady",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.PositionTargetsSkippedWhenUnitMissing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.ReportForwardingAndChannelToggleAreNoOps",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02DiffExecuterTest.ScaleAppliedOnlyAfterUnitExists",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02LocalExecuterTest.InitRejectsNullParams",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02LocalExecuterTest.InitParsesScaleClearListAndGroups",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02LocalExecuterTest.ContextReadsFallBackWhenTraderMissing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02LocalExecuterTest.TradingCallsRejectedBeforeChannelReady",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02LocalExecuterTest.ReportForwardingIsNoOpWithoutUnits",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02LocalExecuterTest.ChannelStateToggleWithEmptyUnitMap",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02LocalExecuterTest.PositionReportTracksChannelHolds",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02LocalExecuterTest.SetAndDeltaPositionWithoutExecutableUnits",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02LocalExecuterTest.InitWithoutClearGroupsAndPoolKeepsDefaults",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02ArbiExecuterTest.InitRejectsNullAndParsesFullConfig",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02ArbiExecuterTest.GuardsAndForwardersWithNoTraderAndNoUnits",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02EngineTest.DateTimeGettersMirrorTheValuesSet",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02EngineTest.PortContextQueriesWithoutInit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02EngineTest.InitBuildsPortFundAndReadsNoFiles",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02EngineTest.AdjustingFlagPropagatesDataManagerValues",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02EngineTest.AdjustingFlagDefaultsToZeroWithoutDataManager",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02EngineTest.PriceLookupsReturnZeroWithoutTicks",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02EngineTest.LoadDatasParsesFundPositionsAndRiskMon",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02EngineTest.LoadDatasToleratesBrokenAndEmptyFiles",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02EngineTest.LoadDatasWithoutRiskMonSection",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P02EngineTest.AppendSignalIsHeldWhenNoPriceYet",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42DtMgrTest.InitReportsStoreFailures",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42DtMgrTest.ForwardersAndReaderGuards",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42DtMgrTest.PushQuoteUpdatesRealtimeCache",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42DtMgrTest.BarCallbacksWithoutSubscriptionAreNoop",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42HftCtxTest.DataAgentInitCreatesOutputFilesIdempotently",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42HftCtxTest.NonDataAgentInitSkipsOutputs",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42HftCtxTest.UserDataFlushedByCallbacksAndReloaded",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42HftCtxTest.LogsSubscriptionsMetadataAndSessionEnd",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42ParserAdapterTest.InitRejectsNullOrMissingModule",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42ParserAdapterTest.InitExtHandlesApiStates",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42ParserAdapterTest.BusyInitExtRetainsAndDeduplicatesTransferredApis",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42ParserAdapterTest.ReleaseExceptionFailsClosedWithoutRetry",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42ParserAdapterTest.RemoverExceptionPreservesOwnerAndFailsClosed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42ParserAdapterTest.ParserAdapterMgrRetainsFailedOwner",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42ParserAdapterTest.ParserAdapterMgrRetriesDeferredRemoverWithoutLosingOwner",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42ParserAdapterTest.ManagerReleaseStopsRetainedSuccessfulAdapter",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42ParserAdapterTest.HandleQuoteConvertsMonthlyCodeAndFiltersInvalid",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42ParserAdapterTest.OrderAndTradeDataForwarding",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42ParserAdapterTest.AdapterManagerAddGetRunRelease",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42SelCtxTest.OnInitRestoresPersistedPositionsAndSignals",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42SelCtxTest.SaveDataRoundTripAndSetPositionGuards",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42SelCtxTest.ScheduleEmitsAutoExitAndPeriodicStats",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42SelCtxTest.TickAccountingAndSessionBeginReleasesFrozen",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42SelCtxTest.MetadataLogsAndDetailQueries",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42SelEngineLifecycle.FreshAutomaticStorageDestructionIsSafe",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42SelEngineLifecycle.ReleaseThenAutomaticStorageDestructionIsSafe",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42SelEngineLifecycle.InvalidFeeInitializationCanRunFailClosedAndReleaseConfig",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R42SelEngineLifecycle.SuccessfulInitializationReleasesConfigAfterDestruction",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R81CtaTest.LoadOptionalFieldsAndZeroVolumeQueries",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R81CtaTest.ConditionAlgorithmsActionsAndNoMatchCode",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R81CtaTest.ConditionRecoveryRejectsWholeMalformedSnapshotAndRestoresValidSnapshot",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R81CtaTest.ScheduleTwentiethEmitPersistsUserDataAndConditions",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R81CtaTest.ExitConditionsAndPositionAccountingBranches",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R81CtaTest.NullEnginePriceAccessorsReturnZero",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R81HftTest.RiskRejectsCancelBuyAndSellBranches",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R81HftTest.RuleCodeQueriesAndMissingContractSell",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R81HftTest.UserDataEmptyFileAndTradeAccounting",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11CrashClass.error_and_log_paths_are_safe",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11CrashClass.mgr_holds_two_channels_with_own_apis",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PreOrderRisk.entrust_fields_are_rewritten_before_sending",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PreOrderRisk.submit_failure_returns_max_id",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PreOrderRisk.cancel_paths",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PreOrderRisk.cancel_of_dead_order_is_rejected",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PreOrderRisk.risk_params_loaded_by_init_and_cancel_limit_blocks",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PreOrderRisk.order_frequency_window_rejects_standard_code_after_successful_orders",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PreOrderRisk.inactive_riskmon_short_circuits_before_stat_map",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PreOrderRisk.init_rejects_null_params_and_second_cfg",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushNotify.push_order_first_time_and_repeat",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushNotify.push_order_claims_avail_across_new_and_old",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushNotify.external_orders_do_not_touch_undone",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushNotify.first_local_canceled_push_is_not_returned_as_alive",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushNotify.push_trade_updates_position_and_undone",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushNotify.push_trade_net_mode",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushNotify.self_match_via_push_trade",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushNotify.entrust_error_updates_undone_once",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushPersist.init_ext_creates_csv_headers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushPersist.trade_and_order_reports_are_appended",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushPersist.save_data_writes_position_and_fund_snapshot",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushPersist.reopened_csv_keeps_header_and_appends",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11PushPersist.channel_events_do_not_change_state",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11SyncReport.login_result_drives_query_chain",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11SyncReport.position_report_writes_table_and_skips_unknown_contract",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11SyncReport.order_report_rebuilds_table_and_undone",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11SyncReport.trade_report_stats_and_self_match_guard",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11SyncReport.k42_complete_empty_snapshot_retires_absent_live_orders",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11SyncReport.k42_partial_snapshot_never_retires_missing_orders",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11SyncReport.k42_failed_query_changes_nothing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11SyncReport.l01014_raw_provider_report_is_kept_and_pauses_the_account",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11TraderTest.init_rejects_overlong_ids_and_keeps_empty_id_accepted",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11TraderTest.init_ext_rejects_long_ids_before_touching_api_or_files",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P11TraderTest.longest_representable_id_produces_a_terminated_user_tag",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R54TraderContractLookup.query_trade_lookup_updates_open_risk_statistics",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R54TraderContractLookup.pushed_trade_lookup_updates_position_and_notifies_standard_code",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Exec.local_auto_clear_checks_hot_code_and_filters",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Exec.arbi_auto_clear_checks_hot_code_and_filters",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Exec.null_data_manager_and_pool_lifecycle",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Exec.diff_loads_valid_targets_and_recovers_on_channel_ready",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Exec.set_trader_forwards_orders_only_while_channel_ready",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Exec.diff_stale_target_uses_raw_code_lookup_and_clears_with_real_unit",
+   "status": "fail",
+   "rc": 1
+  },
+  {
+   "test": "R59Exec.diff_stale_target_clears_with_raw_code_only_contract_lookup",
+   "status": "fail",
+   "rc": 1
+  },
+  {
+   "test": "R59Buy.open_splits_by_limit_volume_and_handles_market_price",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Buy.open_skips_when_long_or_total_limit_reached",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Buy.open_caps_quantity_by_remaining_long_and_total_limits",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Buy.close_today_uses_cover_mode_and_pure_guard",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Buy.close_yestoday_pure_guard_and_force_close",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Buy.close_splits_pre_then_new_and_self_match_blocks_buy",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Misc.init_ext_guards_and_run_without_api",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Misc.connect_event_uses_cfg_credentials",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Misc.init_ext_connect_event_reports_state_without_login",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Misc.null_report_arrays_advance_state_machine",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Misc.push_trade_without_contract_is_ignored",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Misc.manager_rejects_bad_channels_and_refreshes_ready_funds",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Misc.net_mode_sell_clamps_long_new_and_opens_only_remainder",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Misc.net_mode_buy_clamps_short_new_and_opens_only_remainder",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Sell.open_splits_by_limit_volume_and_handles_market_price",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Sell.open_skips_when_short_or_total_limit_reached",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Sell.open_caps_quantity_by_remaining_short_and_total_limits",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Sell.close_today_uses_cover_mode_and_pure_guard",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Sell.close_yestoday_pure_guard_and_force_close",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R59Sell.close_splits_pre_then_new_and_self_match_blocks_sell",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK43TraderResidency.ReleasedModuleProviderAndModuleStayResident",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK43TraderResidency.ProviderWithoutCallbackChannelIsStillDeletedAndUnloaded",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK43TraderResidency.ManagerKeepsReleasedModuleAdapterObjects",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03New014DiffConfig.UninitializedHostRejectsUnitCreationBeforeReadingConfig",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P025AccountNetLimit.executers_on_one_account_share_the_contract_limit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P025AccountNetLimit.different_contracts_are_limited_separately_and_net_by_sign",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P025AccountNetLimit.group_limit_and_account_limit_both_apply",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P025AccountNetLimit.strictest_declaration_wins_and_reduction_is_allowed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P025AccountNetLimit.local_arbi_and_diff_share_one_account",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P025AccountNetLimit.account_identity_follows_the_shared_account_gate",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "P025AccountNetLimit.invalid_account_limits_are_rejected_eagerly",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01HftCtxTest.id_name_and_time_passthrough",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01HftCtxTest.init_with_data_agent_creates_files",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01HftCtxTest.init_without_data_agent_creates_nothing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01HftCtxTest.data_callbacks_only_flush_userdata",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01HftCtxTest.get_inner_code_unmapped_returns_input",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01HftCtxTest.stra_buy_unknown_contract_returns_empty",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01HftCtxTest.user_data_roundtrip_across_ctx",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01HftCtxTest.log_paths_do_not_throw",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelCallbackTest.on_bar_null_early_return",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelCallbackTest.on_bar_close_assembles_period",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelCallbackTest.on_tick_emits_update_but_no_trigger_without_trading_time",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelCallbackTest.on_schedule_reads_sched_time_and_autoexits",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelCallbackTest.session_begin_releases_frozen",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelCallbackTest.session_end_writes_and_saves",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelCallbackTest.sub_ticks_is_idempotent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelPositionTest.set_position_rejects_unknown_commodity",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelPositionTest.set_position_rejects_short_when_cannot_short",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelPositionTest.set_position_records_signal",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelPositionTest.set_position_equal_target_is_noop",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelQueryTest.id_and_date_time_passthrough",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelQueryTest.get_price_hits_local_map_after_tick",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelQueryTest.comminfo_rawcode_sessinfo",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelQueryTest.fund_data_flags_on_empty_book",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelQueryTest.user_data_roundtrip_in_memory",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelQueryTest.log_paths_do_not_throw",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelQueryTest.position_getters_zero_on_empty_book",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelPersistTest.on_init_creates_outputs_and_missing_files_return",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelPersistTest.signal_saved_then_recovered",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelPersistTest.load_full_position_fixture",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "Q01SelPersistTest.userdata_saved_then_loaded",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.fresh_manager_has_no_reader_and_queries_return_null",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.init_without_store_sets_engine_and_returns_false",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.init_forwards_loader_registered_before_init",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.adjusting_factor_and_flag_fall_back_without_reader",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.no_reader_call_does_not_cache_flag_for_later_reader",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.alternating_managers_read_their_own_reader_flags",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.flag_tracks_reader_reconfiguration",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.handle_push_quote_null_tick_is_ignored",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.handle_push_quote_caches_and_grab_retains",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.destructor_releases_rt_tick_cache",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.on_bar_without_subscription_and_without_cache_returns_early",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.on_bar_other_periods_also_return_early",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.reader_log_passes_every_level",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10DtMgrTest.kline_slice_null_reader_for_every_period",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.arbi_init_null_and_null_trader_guards",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.arbi_stub_backed_context_queries",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.arbi_getunit_creates_nothing_and_callbacks_early_return",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.arbi_set_position_group_math_emits_nothing_without_unit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.arbi_strict_sync_scans_channel_holds",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.arbi_channel_events_over_empty_unit_map",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.arbi_autoclear_matrix_not_monthly_code",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.arbi_autoclear_matrix_not_prev_hot",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.arbi_autoclear_matrix_exclude_list",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.arbi_autoclear_matrix_include_list_miss",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.arbi_autoclear_matrix_will_clear_but_no_unit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.arbi_write_log_and_set_trader_null",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.diff_init_null_and_guards_without_trader_or_data",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.diff_stub_queries_and_data_forwarding",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.diff_load_data_then_set_position_roundtrip",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.diff_set_position_on_missing_file_persists_target_without_unit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.diff_load_data_broken_json_and_empty_file_are_rejected_without_overwrite",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.diff_failed_init_rejects_nonempty_targets_and_keeps_rejected_snapshot",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.diff_channel_ready_recovers_loaded_diffs",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10ExecuterTest.diff_callbacks_without_unit_early_return",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10HftTest.on_trade_opens_position_then_avgpx_is_volume_weighted",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10HftTest.on_trade_close_is_fifo_and_leaves_the_last_detail",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10HftTest.update_dyn_profit_uses_bid_price_and_vol_scale",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10HftTest.volume_zero_position_resets_dynprofit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10HftTest.slippage_shifts_fill_price",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10HftTest.report_callbacks_flush_userdata",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10HftTest.session_end_writes_fund_line_when_agent_on",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10HftTest.close_and_trade_logs_stay_empty_without_trades",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10HftTest.price_query_falls_back_to_engine",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10EvtTest.init_inactive_returns_false",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10EvtTest.init_without_mq_module_returns_false",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10EvtTest.every_notify_returns_before_enqueue",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10EvtTest.null_trade_and_order_infos_are_guarded",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.not_ready_until_session_begin",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.comm_sess_and_real_time_from_engine_members",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.add_context_registers_and_duplicate_is_rejected",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.on_bar_without_subscription_only_logs",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.on_bar_dispatches_only_to_subscribed_context",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.on_tick_pushes_data_and_dispatches_raw_code",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.on_tick_adjusting_suffixes_for_qfq_and_hfq",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.on_tick_ignored_before_ready_flag",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.minute_end_skips_tasks_by_time_and_holiday",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.minute_end_holiday_task_is_skipped",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.minute_end_period_branches_that_do_not_fire",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.handle_pos_change_creates_pos_and_signal",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R10SelEngineTest.minute_end_fires_task_without_terminating_process",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R110CtaRule.RulesAndFiltersOnInitScheduleAndPosChange",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R110CtaRule.RunExportsListsAndPoolForwardsQfqTick",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R110ExecEnv.DiffPoolForwardsEverything",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R110ExecEnv.LocalAndArbiNonPoolBranches",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R110EngineRiskMon.InitLoadsRiskMonFactAndCreatesSimpleMonitor",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R110ParserInit.LoadsModuleAndSubscribesWithAndWithoutFilter",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R110ParserInit.HandleQuoteHonoursExchangeFilter",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R110SelEngine.RunExportsMarkerAndForwardsQuoteThroughTicker",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R110SelEngine.MinuteEndCoversCalendarBranchesWithoutFiring",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R110SelEngine.HandlePosChangeFilterRuleTagAndRiskScale",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R110TraderInit.LoadsTraderModuleAndCreatesApi",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130CtaStrategyMgr.MissingDirectoryFailsAndEmptyDirectorySucceeds",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130CtaStrategyMgr.LoadsFactoryAndCreatesStrategies",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130CtaStrategyMgr.CreateStrategyFailureMatrix",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130DiffExecuterTail.NonPoolClearOldTargetAndIgnoreZeroLocalId",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130EngineFee.ByVolumeOffsetsAndRounding",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130EngineFee.ByAmountOffsetsUseVolumeScale",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130EngineFee.LoadFeesMakesTemplateAvailableForEngineCalculation",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130EngineFee.MalformedKeysRejectInitializationWithoutApplyingValidPrefix",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130EngineFee.ByAmountFeesLoadThroughInitAndMatchCommodityCalculation",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130EngineFee.YAMLFeeTemplatePreservesNumericAndBooleanScalarCompatibility",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130MiscTail.ParserInitFailsWhenModuleCannotBeLoaded",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130MiscTail.ParserSuccessfulInitReleaseAndRepeatReleaseBalanceCfgRetain",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130MiscTail.ParserOrdinaryInitFalsePropagatesAndRetainsApiUntilQuiescent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130MiscTail.ParserOrdinaryInitSuccessSubscribesContractsAndConnects",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130MiscTail.ParserOrdinaryInitRejectsNullBaseDataManagerBeforeProviderWork",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130MiscTail.SelMinuteEndSkipsTaskOnHoliday",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130MiscTail.CtaRunStartsRiskMonitor",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130CtxWrapper.CtaForwardsEveryCallbackToStrategy",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130CtxWrapper.SelForwardsEveryCallbackToStrategy",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130TickerOnTick.CtaTickerDrivesEngineThroughMinuteClose",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130TickerOnTick.SelTickerDrivesEngineThroughMinuteClose",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R130TickerOnTick.HftTickerDrivesEngineThroughMinuteClose",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R140EngineFee.ByVolumeOffsetsAndRounding",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R140EngineFee.ByAmountOffsetsUseVolumeScale",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.strategy_pointer_roundtrip",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.null_strategy_events_only_touch_base",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.on_init_and_session_callbacks_forward_to_strategy",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.session_end_forwards_date_then_base_writes_fund_line",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.on_tick_without_subscription_skips_strategy",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.on_tick_subscribed_forwards_same_pointer",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.on_bar_forwards_code_period_times_and_bar",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.ordque_orddtl_trans_forward_when_strategy_set",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.on_trade_forwards_inner_code_and_order_tag",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.on_order_and_entrust_forward_tag_and_cancel_flag",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.on_position_forwards_only_to_strategy",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.channel_events_forward_and_flush_userdata_only_when_dirty",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.order_tag_default_capacity_preserves_registered_tag",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.order_tag_set_get_erase_with_default_context",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.order_tag_lookup_miss_does_not_match_or_erase_neighbor",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.order_tags_keep_unordered_ids_and_replace_exact_duplicate",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.order_tags_do_not_silently_evict_or_truncate",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.registered_order_tag_reaches_callbacks_and_remains_after_terminal_order",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.order_tags_survive_open_close_and_reverse_without_truncation",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.unbound_trader_actions_fail_before_engine_or_mapping_side_effects",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.fresh_context_starts_without_a_trader",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.unbound_trader_reentrant_diagnostic_cannot_submit_actions",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.bound_trader_still_handles_queries_and_unknown_cancel",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.bound_trader_sends_order_only_to_fake_api",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.unbinding_a_previously_bound_trader_rejects_actions",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.reentrant_bind_during_unbound_diagnostic_does_not_submit_outer_order",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.trader_unbound_during_rule_callback_rejects_outer_order",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.trader_replaced_during_rule_callback_rejects_outer_order",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.trader_unbound_then_rebound_during_rule_callback_rejects_outer_order",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.each_entry_and_exit_rejects_reentrant_unbind_from_rule_lookup",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.trader_unbound_during_custom_code_lookup_rejects_outer_order",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.trader_unbound_during_contract_lookup_rejects_outer_buy",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.trader_unbound_during_commodity_lookup_rejects_outer_sell",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.trader_unbound_during_sell_position_lookup_rejects_outer_sell",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.bound_long_only_sell_uses_existing_position_semantics",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.bound_long_only_sell_keeps_custom_position_mapping",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.synchronous_report_sees_tag_registered_before_provider_call",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.rejected_reservation_does_not_keep_a_tag",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.terminal_tags_retire_in_a_bounded_window_and_live_tags_never_evict",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.tag_pointer_survives_reentrant_erase_and_replacement",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.concurrent_tag_writes_and_reads_are_synchronized",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.unbound_queries_return_zero_with_diagnostic_instead_of_dereferencing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.live_fees_come_from_the_engine_fee_schedule",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15CtxTest.missing_live_fee_is_observable_and_the_fill_is_kept",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15MgrTest.executer_factory_missing_dir_returns_false",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15MgrTest.executer_factory_scan_skips_dirs_text_and_unloadable_libs",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15MgrTest.executer_factory_free_library_when_creator_symbol_absent",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15MgrTest.cta_strategy_mgr_missing_dir_and_name_shapes",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15MgrTest.cta_strategy_mgr_scan_free_library_path",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15MgrTest.hft_strategy_mgr_scan_free_library_path",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15MgrTest.parser_adapter_initext_guard_and_log_forward",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15MgrTest.local_executer_null_init_and_empty_channel_events",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15MgrTest.local_and_arbi_executer_write_log_bounds",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15MgrTest.arbi_write_log_bounds_and_null_are_observable",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15MgrTest.local_executer_on_tick_is_safe_with_empty_unit_state_map",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.init_outputs_reopen_keeps_single_header",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.userdata_flushed_by_callback_then_reloaded_on_init",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.load_userdata_missing_file_returns_early",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.empty_session_end_writes_zero_fund_line_and_three_sections",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.dynprofit_update_saved_into_json_and_csv",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.saved_dynprofit_reloaded_into_fund",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.stra_set_position_appends_signal_and_persists",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.signal_recovered_from_file_and_saved_back",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.signal_of_expired_contract_is_skipped",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.fund_fees_restored_only_when_tdate_matches_engine",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.load_data_rejects_valid_json_with_invalid_schema",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.duplicate_signal_code_rejects_the_whole_snapshot",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.malformed_later_row_does_not_partially_apply_snapshot",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.load_data_keeps_reader_tolerated_legacy_optional_fields",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.load_userdata_rejects_wrong_root_or_value_without_partial_update",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.expired_position_zeroed_but_closeprofit_counted",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.broken_json_and_empty_file_are_ignored",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.frozen_position_released_on_next_session_begin",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.on_schedule_saves_state_and_emits_autoexit_signal",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R15SelTest.four_log_levels_do_not_touch_strategy_files",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R170DtMgrTick.AdjustedCacheSkipsUnknownAndZeroVolumeTicks",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R170EventNotifier.NullTradeAndOrderSerializeAsEmptyObject",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R170EventNotifier.PublishesOnlyCompleteJsonForFiniteTradeAndOrderValues",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R170TickerRun.CtaAutoCloseAdvancesMinute",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R170TickerRun.SelAutoCloseAdvancesMinute",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R170TraderRisk.OrderWindowRejectsAtBoundaryAndRecovers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R170TraderRisk.CancelWindowRejectsAtBoundaryAndRecovers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R170TraderRisk.SecondCanceledShortTodayPushRestoresAvail",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R170TraderRisk.OptionEntrustErrorUsesOptionStdCode",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R181TraderCloseYest.BuyShortPrePositionUsesCloseNotCloseToday",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R181TraderCloseYest.SellLongPrePositionUsesCloseNotCloseToday",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R181TraderCloseYest.BuyClampsToPreAvail",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R181TraderCloseYest.SellClampsToPreAvail",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R181TraderCloseYest.ZeroQtyDoesNotReachApi",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R181TickerRun.CtaStoreGetsMinuteEndAndSecondRunReturns",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R181TickerRun.SelStoreGetsMinuteEndAndSecondRunReturns",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R181TickerRun.HftStoreGetsMinuteEnd",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R192CtaTicker.RunRollsDateAtMidnight",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R192CtaTicker.RunEndsSessionAtLastMinute",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R192CtaTicker.RunForcedCloseAfterMissedLastMinute",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R192SelTicker.RunRollsDateAtMidnight",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R192SelTicker.RunEndsSessionAtLastMinute",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R192HftTicker.RunRollsDateAtMidnight",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R192HftTicker.RunForcedCloseAfterMissedLastMinute",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202StraWrapper.NullStrategyLifecycleIsSafe",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202CtaTicker.ConstructAndStopWithoutEngine",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202CtaTicker.FullDayMidnightCloseEndsSessionAndStoresTradingDate",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202CtaTicker.OrdinaryCloseStillEndsSessionAndStoresTradingDate",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202SelEngine.InlineStubAccessorsAndExecuterRegistration",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202TraderAdapter.PublicStateAfterInitExt",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202TraderAdapter.PublicTradeSwitchIsExternallyCallable",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202HftTicker.DataDrivenMinuteCloseReachesStore",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202HftTicker.FullDayMidnightCloseEndsSessionOnce",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202HftTicker.OrdinaryCloseStillEndsSession",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202HftTicker.FullDaySessionCloseLabelAndClockOffsetAreDistinct",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202SelTicker.FullDayMidnightCloseEndsSessionOnce",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202SelTicker.OrdinaryCloseStillEndsSession",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R202SelTicker.FullDaySessionKeepsExplicitMidnightCloseLabel",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R211Engine.IncompatibleRiskMonModuleIsRejected",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R211Engine.UnknownRiskMonNameFromShippedFactoryIsRejectedWithoutCrash",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R211ExecMgr.ExecuterFilterAndExplicitRouteDispatch",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R211SelEngine.AdjustingFlagPropagatesDataManagerValue",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R211StrategyMgr.NonPluginDirectoryLoadsNothing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R211CtaTicker.LastMinuteOfFiniteSessionIsNotClosedByData",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_exe_fact.product_dylib_on_disk_exports_the_entry_symbols",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_exe_fact.loadfactories_with_real_dylib_reaches_creator_and_registers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_exe_fact.registered_factory_creates_every_plain_unit_name",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_exe_fact.registered_factory_creates_diff_unit_and_never_arbi",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_exe_fact.dotted_name_overloads_hit_the_registered_factory",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_exe_fact.unknown_factory_name_still_misses_after_success",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_exe_fact.mixed_directory_scans_success_and_skips_alongside",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_exe_fact.reloading_same_directory_overwrites_the_entry",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_exe_fact.wrapper_from_loaded_factory_releases_through_plugin",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_exe_fact.arbi_unit_ptr_stays_empty_and_wrapper_not_built",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.cta_plugins_export_create_strategy_fact_entry",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.sel_real_plugin_exports_and_accepts_the_by_value_deleter_abi",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.sel_manager_loads_real_sel_plugin_and_creates_strategy",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.sel_manager_handles_duplicate_factory_name_plugins",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.cta_load_reaches_creator_and_registers_real_factory",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.cta_two_plugins_in_one_dir_register_under_their_own_names",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.cta_dotted_name_overload_creates_and_registers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.cta_registered_factory_with_unknown_unit_wraps_null",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.cta_mixed_dir_interleaves_success_with_three_continue_branches",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.cta_reload_same_dir_overwrites_the_factory_entry",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.sel_manager_skips_non_sel_factory_plugins",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.sel_mixed_dir_with_unloadable_and_text_files_still_returns_true",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "r31_stra_mgr.hft_refuses_cta_plugin_before_creator",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.init_outputs_writes_seven_headers_then_appends_on_reopen",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.flat_signal_on_tick_opens_detail_and_pushes_portfolio_delta",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.same_direction_signal_appends_second_detail_and_keeps_avg_price",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.partial_close_splits_detail_and_books_closeprofit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.set_position_through_zero_reverses_side_with_single_detail",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.t1_entry_freezes_position_until_next_session_begin",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.enum_position_for_execute_marks_signal_triggered_and_skips_portfolio",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.condition_ol_and_cl_fire_on_matching_tick",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.condition_os_cs_and_sp_fire_on_matching_tick",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.on_schedule_after_main_bar_close_clears_conditions_and_stamps_settime",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.save_then_load_roundtrip_restores_positions_signals_conditions_userdata",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.broken_and_empty_data_files_are_ignored_without_state_change",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.dyn_profit_tracks_best_and_worst_price_of_each_detail",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.chart_apis_reject_outside_schedule_and_dump_chart_info_writes_json",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.modified_userdata_is_flushed_on_tick_and_session_begin",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.on_bar_marks_tag_closed_and_only_notifies_subscribed_keys",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.full_close_drops_all_details_and_zeroes_dynprofit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.slippage_shifts_entry_up_and_exit_down",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3CtaTest.close_consumes_details_fifo_and_eroses_finished_ones",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.order_freq_window_denies_submission_after_boundary",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.order_freq_window_precheck_uses_standard_code_after_raw_submission",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.cancel_freq_window_denies_cancel_after_boundary",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.cancel_localid_frequency_cache_uses_standardized_contract_code",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.cancel_localid_rejects_inactive_or_unmapped_order_safely",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.cancel_localid_risk_rejection_retries_do_not_grow_cache",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.cancel_localid_synchronous_api_failure_is_not_cached",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.save_data_writes_long_short_positions_and_fund_block",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.four_wrappers_stamp_direction_offset_price_and_flag",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.cancel_empty_code_cancels_all_buy_orders_without_crashing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.cancel_standard_code_only_cancels_matching_contract",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.cancel_empty_code_filters_sell_orders_across_contracts",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.cancel_empty_code_stops_after_positive_quantity",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.buy_splits_by_rule_cap_and_single_order_max_volume",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.buy_skips_open_rule_when_daily_cap_already_consumed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.position_and_order_tables_read_seeded_state",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R3TraderTest.get_orders_supports_standard_and_bare_codes_across_exchanges",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66CtaEngineEmptyInitSessionAndNotify",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66CtaEngineOnTickWithoutSubscriptions",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66CtaEngineOnBarWithoutSubscription",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66HftEngineEmptyPushHandlersAndSlices",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66HftEngineDispatchesSubscriptions",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66HftEngineL2SubscriptionsAndDispatch",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66SelEngineContextGuardsAndSessionEvents",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66SelEngineOnTickWithoutSubscriptions",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66CtaTickerThreadedSameMinuteDispatch",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66CtaTickerThreadedMinuteCloseSchedulesAndReplays",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66CtaTickerSectionEndTickDoesNotCloseEarly",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66HftTickerThreadedMinuteCloseReplays",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66HftTickerSectionEndAndStaleTick",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66SelTickerThreadedMinuteCloseReplays",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66SelTickerFlatContractSkipsHotLoop",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.R66SelTickerSectionEndAndStaleTick",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.S4SelTickerTickWithoutContractSkipsHotFanOut",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.S4HftTickerTickWithoutContractSkipsHotFanOut",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66Fixture.S4EnginePushQuoteWithoutContractSkipsHotFanOut",
+   "status": "fail",
+   "rc": 1
+  },
+  {
+   "test": "R66EventNotifierTest.R66ActiveNotifierPublishesAllChannels",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66EventNotifierTest.R66ActiveNotifierTradeAndOrderFlags",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66EventNotifierTest.R66ActiveNotifierSkipsNullTradeAndOrder",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66EventNotifierTest.R66InactiveNotifierShortCircuitsAllNotify",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R66EventNotifierTest.R66ActiveNotifierRepeatedInitKeepsWorker",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R7VwapV2LocalIntegration.MatchingDynamicProfilesRegisterFutureAndStockUnits",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R7VwapV2LocalIntegration.SessionMismatchedProfileFailsAndDoesNotRegisterUnit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R7VwapV2LocalIntegration.StockSessionMismatchedProfileFailsAndDoesNotRegisterUnit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R7VwapV2LocalIntegration.InvalidStockConfigurationFailsAndDoesNotRegisterUnit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R7VwapV2LocalIntegration.MissingCommodityOrSessionFailsClosedForAllV2Units",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R7VwapV2LocalIntegration.MatchingTwapCommodityAndSessionRegisterUnit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R7VwapV2LocalIntegration.LocalGroupTargetsDispatchStablyAndClearOnEmptyInput",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R7VwapV2LocalIntegration.OverlappingGroupsUseConfiguredOrder",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90CtaEngine.FilterRedirectIgnoreAndRiskScale",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90CtaEngine.PooledTickAndBarDispatch",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90CtaEngine.RunExportsMarkerAndTickerWrappers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90ExecPool.LocalPoolForwardsEverything",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90ExecPool.ArbiPoolForwardsEverything",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90SelCtx.LoadDefaultsFrozenAndSessionFlush",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90SelCtx.SignalExecutionOpenReverseAndFlat",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90SelCtx.CloseLoggingIsSafeBeforeOutputHandlesAreInitialized",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90TraderReport.OrderReportStatsAndStateNames",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90TraderReport.ShortCloseCancelAndNetTrades",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90TraderReport.InactiveNotifierGuardsAndMarketCloses",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90TraderReport.NormalInitWithoutRiskmonAllowsSuccessfulOrder",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90TraderRisk.FrequencyWindowsRejectStandardCodeAfterRawCodeEvents",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R90TraderRisk.ModuleWithoutCreateTraderAndRepeatedInit",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1EngineRunGuard.SelSecondRunIsRejectedAndKeepsTheRunningTicker",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1EngineRunGuard.CtaSecondRunIsRejectedAndKeepsTheRunningTicker",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1EngineRunGuard.HftSecondRunIsRejectedAndKeepsTheRunningTicker",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1K25SelIsolation.ThrowingScheduleIsIsolatedAndOtherStrategiesStillRun",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1K25SelIsolation.ThrowingTickHandlerIsIsolatedAndOtherStrategiesStillReceiveTicks",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1K25SelIsolation.ReentrantTicksBetweenTwoStrategiesAreQueuedAndDeliveredOnce",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S1K25SelIsolation.StopFromInsideAStrategyCallbackDoesNotSelfJoin",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3K27SelPeriodFire.WeeklyTaskFiresOnTargetWeekdayOnceAtItsMinute",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3K27SelPeriodFire.MonthlyTaskUsesTheDayOfMonth",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3K27SelPeriodFire.MonthlyTargetDayInsideHolidaysIsCarriedForward",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3K27SelPeriodFire.YearlyTaskUsesMonthAndDay",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3K27SelPeriodFire.MinuteTaskFiresOnSessionMinuteMultiplesOfItsInterval",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S3K27SelPeriodFire.MinuteTaskWithoutSessionNeverFires",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK25Sel.FiredScheduleRunsSynchronouslyOnTheCallingStrand",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainK26Sel.SecondIncrementAccumulatesOntoPendingTarget",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5MainR1213TickerDate.CtaTickerRefusesToStartWhenTradingDateCannotBeMapped",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5SelScheduleThread.FiredTaskRunsOnceOnItsContextAndIsJoined",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "S5SelScheduleThread.TasksOnSeveralDaysAreAllJoinedByRelease",
+   "status": "pass",
+   "rc": 0
+  }
+ ]
+}

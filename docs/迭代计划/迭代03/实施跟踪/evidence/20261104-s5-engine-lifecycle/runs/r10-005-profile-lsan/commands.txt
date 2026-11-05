@@ -1,0 +1,7 @@
+L=/opt/homebrew/Cellar/llvm/22.1.8/bin
+$L/clang++ -std=c++17 -fPIC -dynamiclib -fprofile-instr-generate -fcoverage-mapping mod.cpp -o libmod_cov.dylib
+$L/clang++ -std=c++17 -fPIC -dynamiclib mod.cpp -o libmod_plain.dylib
+$L/clang++ -std=c++17 -g -fsanitize=address -fno-omit-frame-pointer host.cpp -o host
+# each run: ASAN_OPTIONS=detect_leaks=1 perl -e 'alarm 30; exec @ARGV' ./host $PWD/libmod_<cov|plain>.dylib
+# profile=set: LLVM_PROFILE_FILE=/tmp/wt-i03-s5-engine-lifecycle-run/r10005/prof/abcdefghij-%p.profraw (69 chars, +1 NUL = 70)
+# results: cov+set exit=1 (LSan 70 bytes, strdup in unloaded module initializer); cov+unset exit=0; plain+set exit=0; plain+unset exit=0

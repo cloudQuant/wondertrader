@@ -295,6 +295,7 @@ private:
 	/// @brief 执行参数
 	/// @brief 订单监控器，管理所有活动订单
 	WtOrdMon		_orders_mon;
+	bool		_host_order_identity{ false };	///< host-verified order identity enabled for this unit (cards 5b/5c)
 	/// @brief 撤单次数统计
 	uint32_t		_cancel_cnt;
 	/// @brief VWAP目标数组，按分钟记录目标总报单量

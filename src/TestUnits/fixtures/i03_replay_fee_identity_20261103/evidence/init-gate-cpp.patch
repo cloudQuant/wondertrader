@@ -1,0 +1,55 @@
+--- /tmp/i03-replay-fee-gate-baseline-20261103/HisDataReplayer.cpp	2026-11-03 16:21:10
++++ src/WtBtCore/HisDataReplayer.cpp	2026-11-03 16:24:53
+@@ -547,7 +547,52 @@
+ 	const char* feeFile = cfg->getCString("fees");
+ 	if (feeFile && *feeFile)
+ 	{
++		const std::string previousFeeError = fee_error();
+ 		if (!loadFeesChecked(feeFile)) return false;
++		// Preserve the historical initialization gate for amount-based fees.
++		// Initialization has no fill date; validate against loaded metadata
++		// without imposing a current-date restriction on historical contracts.
++		bool feeMetadataValid = true;
++		for (const auto& entry : _fee_schedule.productRates())
++		{
++			if (entry.second.by_volume) continue;
++			WTSCommodityInfo* commodity = _bd_mgr.getCommodity(entry.first.c_str());
++			if (!commodity || commodity->getVolScale() == 0)
++			{
++				WTSLogger::error("Amount-based fee template for {} requires valid commodity metadata", entry.first);
++				feeMetadataValid = false;
++			}
++		}
++		for (const auto& entry : _fee_schedule.contractRates())
++		{
++			if (entry.second.by_volume) continue;
++			const std::size_t dot = entry.first.find('.');
++			const std::string exchange = entry.first.substr(0, dot);
++			const std::string rawCode = entry.first.substr(dot + 1);
++			WTSContractInfo* contract = _bd_mgr.getContract(rawCode.c_str(), exchange.c_str());
++			WTSCommodityInfo* commodity = contract ? _bd_mgr.getCommodity(contract->getFullPid()) : NULL;
++			const char* rule = _hot_mgr.getRuleTag(rawCode.c_str());
++			CodeHelper::CodeInfo identity = CodeHelper::extractStdCode(entry.first.c_str(), &_hot_mgr);
++			if (fee_is_continuous(entry.first, identity) || (rule && *rule) ||
++				!contract || !commodity || contract->getCommInfo() != commodity ||
++				std::strcmp(contract->getExchg(), exchange.c_str()) ||
++				std::strcmp(contract->getCode(), rawCode.c_str()) || contract->getVolScale() == 0)
++			{
++				WTSLogger::error("Amount-based fee template for {} requires valid physical contract metadata", entry.first);
++				feeMetadataValid = false;
++			}
++		}
++		if (!feeMetadataValid)
++		{
++			_fee_schedule = wt_fee::Schedule{};
++			_fee_map.clear();
++			if (!previousFeeError.empty())
++			{
++				std::lock_guard<std::mutex> lock(_fee_error_mutex);
++				if (_fee_error.empty()) _fee_error = previousFeeError;
++			}
++			return false;
++		}
+ 	}
+ 	else
+ 	{

@@ -57,7 +57,7 @@ TEST_F(R182RdmRtSlicesTest, R182Min1RangeStartsInsideRtBlock)
 	WTSKlineSlice* slice = _reader.readKlineSliceByRange("SSE.STK.600000", KP_Minute1,
 		(uint64_t)kDate * 10000ull + 931ull, (uint64_t)kDate * 10000ull + 932ull);
 	ASSERT_TRUE(slice != NULL);
-	ASSERT_EQ(slice->size(), 2u);
+	ASSERT_EQ(slice->size(), 2);
 	EXPECT_EQ(slice->at(0)->time, r52::min_bar_time(kDate, 931));
 	EXPECT_EQ(slice->at(1)->time, r52::min_bar_time(kDate, 932));
 	EXPECT_DOUBLE_EQ(slice->at(0)->open, 12.0);	// make_bar(seq=2) -> 10.0+2
@@ -70,7 +70,7 @@ TEST_F(R182RdmRtSlicesTest, R182Min1CountTakesTailOfRtBlock)
 	WTSKlineSlice* slice = _reader.readKlineSliceByCount("SSE.STK.600000", KP_Minute1, 2,
 		(uint64_t)kDate * 10000ull + 932ull);
 	ASSERT_TRUE(slice != NULL);
-	ASSERT_EQ(slice->size(), 2u);
+	ASSERT_EQ(slice->size(), 2);
 	EXPECT_EQ(slice->at(0)->time, r52::min_bar_time(kDate, 931));
 	EXPECT_EQ(slice->at(1)->time, r52::min_bar_time(kDate, 932));
 	slice->release();

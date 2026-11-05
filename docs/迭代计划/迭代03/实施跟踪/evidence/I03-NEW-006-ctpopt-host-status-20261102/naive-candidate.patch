@@ -1,0 +1,47 @@
+--- /tmp/wt-i03-ctpopt-host-status-20261102/src/TraderCTPOpt/TraderCTPOpt.cpp	2026-11-02 14:37:40
++++ /tmp/wt-i03-ctpopt-host-naive-20261102/src/TraderCTPOpt/TraderCTPOpt.cpp	2026-11-02 15:29:36
+@@ -28,17 +28,17 @@
+ const char* ENTRUST_SECTION = "entrusts";
+ const char* ORDER_SECTION = "orders";
+ 
+-//By Wesley @ 2022.01.05
+-#include "../Share/fmtlib.h"
+-template<typename... Args>
+-inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, const Args&... args)
+-{
+-	if (sink == NULL)
+-		return;
+-
+-	const char* buffer = fmtutil::format(format, args...);
+-
+-	sink->handleTraderLog(ll, buffer);
++//By Wesley @ 2022.01.05
++#include "../Share/fmtlib.h"
++template<typename... Args>
++inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, const Args&... args)
++{
++	if (sink == NULL)
++		return;
++
++	const char* buffer = fmtutil::format(format, args...);
++
++	sink->handleTraderLog(ll, buffer);
+ }
+ 
+ uint32_t strToTime(const char* strTime)
+@@ -1036,13 +1036,13 @@
+ 				m_wrapperState = WS_CONFIRM_QRYED;
+ 
+ 				write_log(m_bscSink, LL_INFO, "[TraderCTPOpt][{}-{}] Confirming settlement data...", m_strBroker.c_str(), m_strUser.c_str());
+-				confirm();
++				if (confirm() < 0) { m_wrapperState = WS_LOGINFAILED; if (m_bscSink) m_bscSink->onLoginResult(false, "confirm failed", 0); }
+ 			}
+ 		}
+ 		else
+ 		{
+ 			m_wrapperState = WS_CONFIRM_QRYED;
+-			confirm();
++			if (confirm() < 0) { m_wrapperState = WS_LOGINFAILED; if (m_bscSink) m_bscSink->onLoginResult(false, "confirm failed", 0); }
+ 		}
+ 	}
+ 

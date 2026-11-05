@@ -1,0 +1,35 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Scenario.DisconnectInsideSdkCallbackIsBusy
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Scenario
+[ RUN      ] Scenario.DisconnectInsideSdkCallbackIsBusy
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/scenarios.cpp:77: Failure
+Expected equality of these values:
+  0
+  result.load()
+    Which is: 1
+disconnect inside callback must not report completion
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/scenarios.cpp:78: Failure
+Expected equality of these values:
+  0
+  fake().count(C_RELEASE_ON_SDK_THREAD)
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/scenarios.cpp:82: Failure
+Expected equality of these values:
+  0
+  fake().count(C_RELEASE_ON_SDK_THREAD)
+    Which is: 1
+
+[  FAILED  ] Scenario.DisconnectInsideSdkCallbackIsBusy (112 ms)
+[----------] 1 test from Scenario (112 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (112 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Scenario.DisconnectInsideSdkCallbackIsBusy
+
+ 1 FAILED TEST

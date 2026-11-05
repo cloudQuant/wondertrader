@@ -1,0 +1,38 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R71ExecTest.K06DiffCleanFailureFollowedBySuccessfulRetryLetsQuiesceComplete
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R71ExecTest
+[ RUN      ] R71ExecTest.K06DiffCleanFailureFollowedBySuccessfulRetryLetsQuiesceComplete
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:1383: Failure
+Death test: { WtExecuterMgr manager; R71BlockingExecStub blockingStub; blockingStub.comm_ = comm; blockingStub.sess_ = sess; blockingStub.hot_ = &traderEnv.hot; auto diff = std::make_shared<WtDiffExecuter>(&factory, "r71_k06_retry", &dm, &traderEnv.bd); manager.add_executer(diff); diff->setStub(&blockingStub); WTSVariant* c = cfg("r71_k06_retry", "WtExeFact.WtDiffMinImpactExeUnit", __null); if (c == __null || !diff->init(c)) std::exit(90); c->release(); diff->setTrader(&trader); trader.addSink(diff.get()); blockingStub.comm_ = __null; diff->on_position_changed("SHFE.ag.2512", 1.0); if (diff->queryUnitInitStatus("SHFE.ag.2512").state != ExecUnitInitState::FAILED) std::exit(91); blockingStub.comm_ = comm; R71PositionTargets targets; targets["SHFE.ag.2512"] = 1.0; diff->set_position(targets); if (diff->queryUnitInitStatus("SHFE.ag.2512").state != ExecUnitInitState::READY) std::exit(92); WtExecQuiesceCoordinator coordinator({ &manager }); const bool quiesced = coordinator.quiesce_all(); const bool complete = coordinator.is_complete(); std::cerr << "K06_CLEAN_RETRY quiesced=" << quiesced << " complete=" << complete << std::endl; std::exit(quiesced && complete ? 0 : 93); }
+    Result: died but not with expected exit code:
+            Exited with exit status 93
+Actual msg:
+[  DEATH   ] K06_CLEAN_RETRY quiesced=0 complete=0
+[  DEATH   ] 
+
+[  FAILED  ] R71ExecTest.K06DiffCleanFailureFollowedBySuccessfulRetryLetsQuiesceComplete (730 ms)
+[----------] 1 test from R71ExecTest (730 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (731 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R71ExecTest.K06DiffCleanFailureFollowedBySuccessfulRetryLetsQuiesceComplete
+
+ 1 FAILED TEST
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R71ExecTest.K06DiffCleanFailureWithoutSuccessfulRetryKeepsQuiesceIncomplete
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R71ExecTest
+[ RUN      ] R71ExecTest.K06DiffCleanFailureWithoutSuccessfulRetryKeepsQuiesceIncomplete
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[       OK ] R71ExecTest.K06DiffCleanFailureWithoutSuccessfulRetryKeepsQuiesceIncomplete (734 ms)
+[----------] 1 test from R71ExecTest (734 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (735 ms total)
+[  PASSED  ] 1 test.

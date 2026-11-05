@@ -1,0 +1,68 @@
+{
+ "suite": "i03_csv_block_type_20261103",
+ "entry": "src/TestUnits/fixtures/i03_csv_block_type_20261103/CMakeLists.txt",
+ "command": "/usr/bin/nm -gU /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/build/libcsv_block_helper.dylib | /usr/bin/grep -E \"dump_(bars|ticks)(_v2)?$\"",
+ "exit": 0,
+ "seconds": 21.1,
+ "verdict": "pass",
+ "reason": "green[pass]: csv_block_check exit 0 (tests=10 failures=0 errors=0)；导出符号 _dump_bars,_dump_bars_v2,_dump_ticks,_dump_ticks_v2",
+ "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/logs/04-nm-exports.log",
+ "started": "2026-11-05T18:22:23",
+ "workdir": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103",
+ "runner_sha256": "8bcda0a09fb0f106bbff847388a2e04f913c893018200386b6148c108e4f4be0",
+ "mirror": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/mirror",
+ "attribution": "",
+ "suggestion": "",
+ "notes": [
+  "使用 --tree 的 APFS 克隆副本 /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/mirror 运行；路径改写见 /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/mirror.patch"
+ ],
+ "variants": [
+  {
+   "name": "green",
+   "role": "primary",
+   "verdict": "pass",
+   "reason": "csv_block_check exit 0 (tests=10 failures=0 errors=0)；导出符号 _dump_bars,_dump_bars_v2,_dump_ticks,_dump_ticks_v2",
+   "seconds": 14.2,
+   "commands": [
+    {
+     "label": "fixture-configure",
+     "command": "/opt/homebrew/bin/cmake -S /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/mirror/src/TestUnits/fixtures/i03_csv_block_type_20261103 -B /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/build -G Ninja -DCMAKE_MAKE_PROGRAM=/opt/homebrew/bin/ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_BUILD_RPATH=/usr/local/lib -DCMAKE_CXX_COMPILER=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -DCMAKE_C_COMPILER=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103",
+     "env": {},
+     "exit": 0,
+     "seconds": 2.0,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/logs/01-fixture-configure.log"
+    },
+    {
+     "label": "fixture-build",
+     "command": "/opt/homebrew/bin/cmake --build /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/build -j 2",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103",
+     "env": {},
+     "exit": 0,
+     "seconds": 10.6,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/logs/02-fixture-build.log"
+    },
+    {
+     "label": "csv_block_check",
+     "command": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/build/csv_block_check --gtest_output=xml:/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/xml/csv_block_check.xml",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/build",
+     "env": {
+      "UBSAN_OPTIONS": "halt_on_error=1"
+     },
+     "exit": 0,
+     "seconds": 1.5,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/logs/03-csv_block_check.log"
+    },
+    {
+     "label": "nm-exports",
+     "command": "/usr/bin/nm -gU /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/build/libcsv_block_helper.dylib | /usr/bin/grep -E \"dump_(bars|ticks)(_v2)?$\"",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/build",
+     "env": {},
+     "exit": 0,
+     "seconds": 0.1,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice2-result-fxrun/i03_csv_block_type_20261103/logs/04-nm-exports.log"
+    }
+   ]
+  }
+ ]
+}

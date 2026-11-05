@@ -64,14 +64,26 @@ int main(int argc, char** argv) {
     cfg->append("front", "tcp://127.0.0.1:1"); cfg->append("broker", "9999");
     cfg->append("user", "test"); cfg->append("pass", "unused"); cfg->append("flowdir", "flow");
     if (scenario == "cross-instance") {
+        // Decision K16=A (2026-11-04, I03-NEW-003): after one instance failed on a
+        // module, another instance may load the same module again; that failure is
+        // isolated like the first one (module retained, never closed) and neither
+        // instance retries on its own quarantined module.
         if (parser.init(cfg)) return 41;
+        if (opens != 1 || symbols != 1 || closes != 0) return 43;
         ParserCTPMini other;
         if (other.init(cfg)) return 42;
-        cfg->release();
-        if (opens != 1) {
-            std::cerr << "UNRESOLVED: same module was loaded again from another parser (opens=" << opens << ")\n";
+        if (opens != 2) {
+            std::cerr << "K16=A: the second instance must make its own load attempt (opens=" << opens << ")\n";
             return 40;
         }
+        if (symbols != 2 || creators != 0 || closes != 0 || failedModuleUnloaded) return 44;
+        if (!sink.has("creator symbol")) return 45;
+        if (parser.init(cfg) || other.init(cfg)) return 46;	// both stay disabled
+        if (opens != 2 || closes != 0) return 47;
+        if (parser.connect() || other.connect()) return 48;
+        parser.release(); other.release();
+        if (closes != 0 || failedModuleUnloaded) return 49;
+        cfg->release();
         return 0;
     }
     const bool result = parser.init(scenario == "null-config" ? nullptr : cfg);
@@ -84,24 +96,29 @@ int main(int argc, char** argv) {
         if (result || parser.isConnected() || opens != expectedOpens || symbols != expectedSymbols || creators != expectedCreators || closes != 0 || !sink.has(expectedLog)) return 10;
         if (parser.connect()) return 16;
         const std::string failedPath = lastPath;
-        parser.release(); parser.release();
-        if (parser.connect()) return 17;
-        // Model a late callback whose code would have been unmapped by close.
-        if (closes != 0 || (loadedFailure && failedModuleUnloaded)) return 11;
-        scenario = "success";
         WTSVariant* good = WTSVariant::createObject();
         good->append("front", "tcp://127.0.0.1:1"); good->append("broker", "9999");
         good->append("user", "test"); good->append("pass", "unused"); good->append("flowdir", "flow");
         good->append("ctpmodule", "distinct_healthy_module");
         if (loadedFailure) {
-            // Even a different target is fail-closed on the quarantined object.
+            // Card 9 9c=A (I03-NEW-121): a failed instance that retained a module is
+            // fail-closed: a second init, even for a different target, is rejected
+            // before any load attempt.
             if (parser.init(good) || opens != expectedOpens || !sink.has("initialization disabled")) return 12;
+        }
+        parser.release(); parser.release();
+        if (parser.connect()) return 17;
+        // Model a late callback whose code would have been unmapped by close.
+        if (closes != 0 || (loadedFailure && failedModuleUnloaded)) return 11;
+        scenario = "success";
+        // Card 9 9c=A (I03-NEW-121): after the failure and release the same instance
+        // stays closed: init is rejected and makes no load attempt, in every mode.
+        if (parser.init(good) || parser.isConnected() || opens != expectedOpens) return 14;
+        {
+            // A new instance may retry (here with a distinct healthy module).
             ParserCTPMini other;
-            if (!other.init(good) || !other.isConnected() || lastPath == failedPath) return 13;
+            if (!other.init(good) || !other.isConnected() || opens != expectedOpens + 1 || lastPath == failedPath) return 13;
             other.release(); other.release();
-        } else {
-            if (!parser.init(good) || !parser.isConnected()) return 14;
-            parser.release(); parser.release();
         }
         good->release();
         if (api.release_calls != 1 || closes != 0 || (loadedFailure && failedModuleUnloaded)) return 15;

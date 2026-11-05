@@ -316,7 +316,7 @@ TEST_F(R71HftTest, HistoricalSlicesAndL2Subscriptions)
 
     WTSKlineSlice* bars = ctx->stra_get_bars("SHFE.ag.2512", "m5", 2);
     ASSERT_NE(bars, nullptr);
-    EXPECT_EQ(bars->size(), 3u);
+    EXPECT_EQ(bars->size(), 3);
     bars->release();
     EXPECT_EQ(dm.kline_calls, 1u);
 

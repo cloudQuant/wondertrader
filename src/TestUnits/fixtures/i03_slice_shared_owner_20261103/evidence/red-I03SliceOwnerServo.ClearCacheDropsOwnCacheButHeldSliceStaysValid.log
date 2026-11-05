@@ -1,0 +1,63 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03SliceOwnerServo.ClearCacheDropsOwnCacheButHeldSliceStaysValid
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03SliceOwnerServo
+[ RUN      ] I03SliceOwnerServo.ClearCacheDropsOwnCacheButHeldSliceStaysValid
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_slice_shared_owner_20261103/servo_owner_test.cpp:111: Failure
+Value of: dm->_bars_cache.empty()
+  Actual: false
+Expected: true
+
+[  FAILED  ] I03SliceOwnerServo.ClearCacheDropsOwnCacheButHeldSliceStaysValid (5 ms)
+[----------] 1 test from I03SliceOwnerServo (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (5 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] I03SliceOwnerServo.ClearCacheDropsOwnCacheButHeldSliceStaysValid
+
+ 1 FAILED TEST
+
+=================================================================
+==64909==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 72 byte(s) in 1 object(s) allocated from:
+    #0 0x000105b050e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000104ee8870 in (anonymous namespace)::I03SliceOwnerServo::SetUp()+0x1ac (i03_slice_servo:arm64+0x10014c870)
+    #2 0x000104fd8a5c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_servo:arm64+0x10023ca5c)
+    #3 0x000104fd894c in testing::Test::Run()+0x74 (i03_slice_servo:arm64+0x10023c94c)
+    #4 0x000104fd9584 in testing::TestInfo::Run()+0xd0 (i03_slice_servo:arm64+0x10023d584)
+    #5 0x000104fda008 in testing::TestSuite::Run()+0x1c4 (i03_slice_servo:arm64+0x10023e008)
+    #6 0x000104fe5430 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_servo:arm64+0x100249430)
+    #7 0x000104fe4ddc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_servo:arm64+0x100248ddc)
+    #8 0x000104fe4d40 in testing::UnitTest::Run()+0x78 (i03_slice_servo:arm64+0x100248d40)
+    #9 0x000104fc6078 in main+0x40 (i03_slice_servo:arm64+0x10022a078)
+    #10 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 352 byte(s) in 1 object(s) allocated from:
+    #0 0x000105b050e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000104e478d4 in wtp::WTSBarStruct* std::__1::__libcpp_allocate[abi:nqe220108]<wtp::WTSBarStruct>(std::__1::__element_count, unsigned long)+0x54 (i03_slice_servo:arm64+0x1000ab8d4)
+    #2 0x000104e47810 in std::__1::allocator<wtp::WTSBarStruct>::allocate[abi:nqe220108](unsigned long)+0x9c (i03_slice_servo:arm64+0x1000ab810)
+    #3 0x000104e47308 in std::__1::__allocation_result<std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>::pointer, std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>::size_type> std::__1::__allocate_at_least[abi:nqe220108]<std::__1::allocator<wtp::WTSBarStruct>, std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>>(std::__1::allocator<wtp::WTSBarStruct>&, unsigned long)+0x114 (i03_slice_servo:arm64+0x1000ab308)
+    #4 0x000104e46fcc in std::__1::__split_buffer<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<wtp::WTSBarStruct>&)+0xc4 (i03_slice_servo:arm64+0x1000aafcc)
+    #5 0x000104e45ab0 in std::__1::__split_buffer<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<wtp::WTSBarStruct>&)+0x4c (i03_slice_servo:arm64+0x1000a9ab0)
+    #6 0x000104ef7d64 in wtp::WTSBarStruct* std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::__emplace_back_slow_path<wtp::WTSBarStruct>(wtp::WTSBarStruct&&)+0x1b0 (i03_slice_servo:arm64+0x10015bd64)
+    #7 0x000104ef76a0 in wtp::WTSBarStruct& std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::emplace_back<wtp::WTSBarStruct>(wtp::WTSBarStruct&&)::'lambda0'()::operator()() const+0xc8 (i03_slice_servo:arm64+0x10015b6a0)
+    #8 0x000104ef73ec in void std::__1::__if_likely_else[abi:nqe220108]<wtp::WTSBarStruct& std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::emplace_back<wtp::WTSBarStruct>(wtp::WTSBarStruct&&)::'lambda'(), wtp::WTSBarStruct& std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::emplace_back<wtp::WTSBarStruct>(wtp::WTSBarStruct&&)::'lambda0'()>(bool, wtp::WTSBarStruct& std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::emplace_back<wtp::WTSBarStruct>(wtp::WTSBarStruct&&)::'lambda'(), wtp::WTSBarStruct& std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::emplace_back<wtp::WTSBarStruct>(wtp::WTSBarStruct&&)::'lambda0'())+0xc0 (i03_slice_servo:arm64+0x10015b3ec)
+    #9 0x000104ef7174 in wtp::WTSBarStruct& std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::emplace_back<wtp::WTSBarStruct>(wtp::WTSBarStruct&&)+0x300 (i03_slice_servo:arm64+0x10015b174)
+    #10 0x000104ef6a50 in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::push_back[abi:nqe220108](wtp::WTSBarStruct&&)+0x5c (i03_slice_servo:arm64+0x10015aa50)
+    #11 0x000104ee5adc in (anonymous namespace)::minute_bars(unsigned int, unsigned int, unsigned int)+0x280 (i03_slice_servo:arm64+0x100149adc)
+    #12 0x000104ee88f8 in (anonymous namespace)::I03SliceOwnerServo::SetUp()+0x234 (i03_slice_servo:arm64+0x10014c8f8)
+    #13 0x000104fd8a5c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_servo:arm64+0x10023ca5c)
+    #14 0x000104fd894c in testing::Test::Run()+0x74 (i03_slice_servo:arm64+0x10023c94c)
+    #15 0x000104fd9584 in testing::TestInfo::Run()+0xd0 (i03_slice_servo:arm64+0x10023d584)
+    #16 0x000104fda008 in testing::TestSuite::Run()+0x1c4 (i03_slice_servo:arm64+0x10023e008)
+    #17 0x000104fe5430 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_servo:arm64+0x100249430)
+    #18 0x000104fe4ddc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_servo:arm64+0x100248ddc)
+    #19 0x000104fe4d40 in testing::UnitTest::Run()+0x78 (i03_slice_servo:arm64+0x100248d40)
+    #20 0x000104fc6078 in main+0x40 (i03_slice_servo:arm64+0x10022a078)
+    #21 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: 424 byte(s) leaked in 2 allocation(s).

@@ -184,7 +184,7 @@ TEST(ParserXTP, state_queries_before_init_answer_deterministically)
 	EXPECT_TRUE(parser.disconnect());
 
 	/* registerSpi 会把 sink 与 sink->getBaseDataMgr 接线过来 */
-	EXPECT_EQ(1, spi.bdMgrQueryCalls);
+	EXPECT_EQ(1u, spi.bdMgrQueryCalls);
 	EXPECT_EQ(nullptr, spi.bdMgr);
 
 	parser.registerSpi(nullptr);

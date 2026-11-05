@@ -1,0 +1,33 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r7_stkvw.session_date_before_supported_year_is_not_used_for_orders
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from r7_stkvw
+[ RUN      ] r7_stkvw.session_date_before_supported_year_is_not_used_for_orders
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1251: Failure
+Value of: ctx.buys.empty()
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1253: Failure
+Expected equality of these values:
+  unit._tick_time_high_water
+    Which is: 19000101020000000
+  0u
+    Which is: 0
+
+src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp:1254: Failure
+Value of: ctx.hasLog("session-adjusted date cannot be verified")
+  Actual: false
+Expected: true
+
+[  FAILED  ] r7_stkvw.session_date_before_supported_year_is_not_used_for_orders (1 ms)
+[----------] 1 test from r7_stkvw (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] r7_stkvw.session_date_before_supported_year_is_not_used_for_orders
+
+ 1 FAILED TEST

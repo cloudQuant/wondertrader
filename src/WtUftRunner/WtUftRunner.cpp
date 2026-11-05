@@ -13,6 +13,7 @@
 #include <exception>
 #include <algorithm>
 #include <unordered_set>
+#include <memory>
 
 #include "../WtUftCore/WtHelper.h"
 #include "../WtUftCore/UftStraContext.h"
@@ -55,7 +56,12 @@ WtUftRunner::~WtUftRunner()
 {
 	if (!shutdown())
 	{
-		WTSLogger::error("UFT runner cannot be destroyed before callback owners are quiescent");
+		// Destroying members while a parser/trader owner may still call back would be
+		// use-after-free. Parser owners merely retained for lack of drain proof are kept
+		// alive by the process entry (main.cpp never destroys such a runner); reaching
+		// here is an unrecoverable teardown failure (I03-NEW-058).
+		WTSLogger::error("UFT runner cannot be destroyed before callback owners are quiescent (parser owners retained: {})",
+			parserOwnersRetained());
 		std::terminate();
 	}
 }
@@ -73,10 +79,19 @@ bool WtUftRunner::shutdown()
 		~ShutdownFlagGuard() { flag.clear(std::memory_order_release); }
 	} guard{ _shutdown_running };
 
+	_parser_owners_retained.store(false, std::memory_order_release);
 	_shutdown_requested.store(true, std::memory_order_release);
 	_to_exit.store(true, std::memory_order_release);
 	if (_config_in_progress.load(std::memory_order_acquire))
 		return false;
+	{
+		std::lock_guard<std::mutex> lock(_parser_start_mutex);
+		// A full runner startup retains every dependency until it leaves its
+		// lease. Never wait here: arbitrary startup callbacks can reenter
+		// shutdown from another thread. The owner must retry after startup.
+		if (_parser_start_active && !_parser_start_attempted)
+			return false;
+	}
 	if (isInParserCallbackOnCurrentThread())
 	{
 		WTSLogger::warn("UFT shutdown requested from a parser callback; defer teardown until the callback returns");
@@ -96,6 +111,7 @@ bool WtUftRunner::shutdown()
 
 	if (_parser_quarantine_pending.load(std::memory_order_acquire))
 	{
+		_parser_owners_retained.store(true, std::memory_order_release);
 		WTSLogger::error("UFT runner shutdown cannot release a failed parser while callback quiescence is unproven; keep the runner alive");
 		return false;
 	}
@@ -106,6 +122,7 @@ bool WtUftRunner::shutdown()
 		_parsers.release();
 		if (_parsers.hasRetainedAdapters())
 		{
+			_parser_owners_retained.store(true, std::memory_order_release);
 			WTSLogger::error("UFT parser teardown remains pending; retain the runner graph and retry shutdown after provider quiescence");
 			return false;
 		}
@@ -128,30 +145,44 @@ bool WtUftRunner::shutdown()
 
 bool WtUftRunner::startParsers()
 {
+	return startParsers(false);
+}
+
+bool WtUftRunner::startParsers(bool runnerLease)
+{
 	{
 		std::lock_guard<std::mutex> lock(_parser_start_mutex);
-		if (_parser_start_closed || _parser_start_attempted
-			|| _shutdown_requested.load(std::memory_order_acquire)
-			|| _parser_quarantine_pending.load(std::memory_order_acquire))
-			return false;
-
-		_parser_start_attempted = true;
-		_parser_start_active = true;
-		_parser_start_owner = std::this_thread::get_id();
+		if (runnerLease)
+		{
+			if (!_parser_start_active || _parser_start_attempted
+				|| _parser_start_owner != std::this_thread::get_id()
+				|| _parser_start_closed || _shutdown_requested.load(std::memory_order_acquire)
+				|| _parser_quarantine_pending.load(std::memory_order_acquire))
+				return false;
+		}
+		else
+		{
+			if (_parser_start_closed || _parser_start_attempted || _parser_start_active
+				|| _shutdown_requested.load(std::memory_order_acquire)
+				|| _parser_quarantine_pending.load(std::memory_order_acquire))
+				return false;
+			_parser_start_attempted = true;
+			_parser_start_active = true;
+			_parser_start_owner = std::this_thread::get_id();
+		}
 	}
 
 	try
 	{
-		// Never hold _parser_start_mutex across plugin code. shutdown closes the
-		// admission gate and waits for this active lease before releasing adapters.
+		// Never hold _parser_start_mutex across plugin code.
 		_parsers.run();
 	}
 	catch (...)
 	{
-		finishParserStart();
+		if (!runnerLease) finishParserStart();
 		throw;
 	}
-	finishParserStart();
+	if (!runnerLease) finishParserStart();
 	return true;
 }
 
@@ -160,6 +191,7 @@ void WtUftRunner::finishParserStart()
 	{
 		std::lock_guard<std::mutex> lock(_parser_start_mutex);
 		_parser_start_active = false;
+		_parser_start_attempted = true;
 		_parser_start_owner = std::thread::id();
 	}
 	_parser_start_cv.notify_all();
@@ -596,11 +628,16 @@ bool WtUftRunner::initParsers(WTSVariant* cfgParser)
 
 	uint32_t count = 0;
 	uint32_t failed = 0;
+	uint32_t optionalFailed = 0;
 	for (uint32_t idx = 0; idx < cfgParser->size(); idx++)
 	{
 		WTSVariant* cfgItem = cfgParser->get(idx);
 		if(!cfgItem->getBoolean("active"))
 			continue;
+		// Decision K13=B (BUG-R104-002 / I03-NEW-003): `required` defaults to true; an
+		// optional parser that fails to initialize or register is reported and skipped
+		// instead of failing the runner. Duplicate ids remain configuration errors.
+		const bool required = !cfgItem->has("required") || cfgItem->getBoolean("required");
 
 		const char* id = cfgItem->getCString("id");
 		// By Wesley @ 2021.12.14
@@ -633,6 +670,8 @@ bool WtUftRunner::initParsers(WTSVariant* cfgParser)
 		}
 
 		ParserAdapterPtr adapter(new ParserAdapter);
+		// K31=A: a module parser gets the runner's DateMappingV1 table when it exports the binder.
+		adapter->setDateMapping(_bd_mgr.getDateMappingV1());
 		try
 		{
 			// Keep the adapter alive before plugin code can register its SPI.
@@ -671,6 +710,12 @@ bool WtUftRunner::initParsers(WTSVariant* cfgParser)
 			}
 			else
 				_parser_quarantine_pending.store(true, std::memory_order_release);
+			if (!required)
+			{
+				WTSLogger::warn("Optional parser {} is unavailable; the runner continues without it", realid);
+				optionalFailed++;
+				continue;
+			}
 			failed++;
 			continue;
 		}
@@ -688,6 +733,12 @@ bool WtUftRunner::initParsers(WTSVariant* cfgParser)
 			}
 			else
 				_parser_quarantine_pending.store(true, std::memory_order_release);
+			if (!required)
+			{
+				WTSLogger::warn("Optional parser {} could not be registered; the runner continues without it", realid);
+				optionalFailed++;
+				continue;
+			}
 			failed++;
 			continue;
 		}
@@ -695,7 +746,7 @@ bool WtUftRunner::initParsers(WTSVariant* cfgParser)
 		count++;
 	}
 
-	WTSLogger::info("{} parsers loaded, {} failed", count, failed);
+	WTSLogger::info("{} parsers loaded, {} failed, {} optional parsers unavailable", count, failed, optionalFailed);
 	return failed == 0;
 }
 
@@ -827,6 +878,28 @@ void WtUftRunner::run(bool bAsync /* = false */)
 			return;
 		}
 
+		bool startupAdmitted = false;
+		{
+			std::lock_guard<std::mutex> lock(_parser_start_mutex);
+			if (!_parser_start_closed && !_parser_start_attempted && !_parser_start_active
+				&& !_shutdown_requested.load(std::memory_order_acquire)
+				&& !_parser_quarantine_pending.load(std::memory_order_acquire))
+			{
+				// active && !attempted denotes the full runner startup lease; direct
+				// startParsers uses active && attempted and retains its old drain rule.
+				_parser_start_active = true;
+				_parser_start_owner = std::this_thread::get_id();
+				startupAdmitted = true;
+			}
+		}
+		if (!startupAdmitted)
+		{
+			WTSLogger::error("UFT runner startup already attempted or shutdown requested");
+			return;
+		}
+		auto releaseStartup = [this](WtUftRunner*) { finishParserStart(); };
+		std::unique_ptr<WtUftRunner, decltype(releaseStartup)> startupLease(this, releaseStartup);
+
 		// WtUftEngine::run has a void interface. Check its configured session here
 		// as well so a failed engine startup cannot fall through to parser/trader
 		// startup or the runner's wait loop.
@@ -834,6 +907,8 @@ void WtUftRunner::run(bool bAsync /* = false */)
 		if (cfgEnv == NULL)
 		{
 			WTSLogger::error("UFT runner cannot start without a valid startup configuration");
+			startupLease.reset();
+			if (_shutdown_requested.load(std::memory_order_acquire)) shutdown();
 			return;
 		}
 
@@ -849,18 +924,22 @@ void WtUftRunner::run(bool bAsync /* = false */)
 		{
 			WTSLogger::error("UFT runner cannot start without a valid session: {}",
 				sessionID == NULL ? "" : sessionID);
+			startupLease.reset();
+			if (_shutdown_requested.load(std::memory_order_acquire)) shutdown();
 			return;
 		}
 
 		_uft_engine.run();
 		if (_shutdown_requested.load(std::memory_order_acquire))
 		{
+			startupLease.reset();
 			shutdown();
 			return;
 		}
 
-		if (!startParsers())
+		if (!startParsers(true))
 		{
+			startupLease.reset();
 			if (_shutdown_requested.load(std::memory_order_acquire))
 				shutdown();
 			else
@@ -869,17 +948,25 @@ void WtUftRunner::run(bool bAsync /* = false */)
 		}
 		if (_shutdown_requested.load(std::memory_order_acquire))
 		{
+			startupLease.reset();
 			shutdown();
 			return;
 		}
 		_traders.run();
 		if (_shutdown_requested.load(std::memory_order_acquire))
 		{
+			startupLease.reset();
 			shutdown();
 			return;
 		}
 
 		ShareManager::self().start_watching(2);
+		startupLease.reset();
+		if (_shutdown_requested.load(std::memory_order_acquire))
+		{
+			shutdown();
+			return;
+		}
 
 		if (!bAsync)
 		{
@@ -894,6 +981,8 @@ void WtUftRunner::run(bool bAsync /* = false */)
 	}
 	catch (...)
 	{
+		if (_shutdown_requested.load(std::memory_order_acquire))
+			shutdown();
 		print_stack_trace([](const char* message) {
 			WTSLogger::error(message);
 		});

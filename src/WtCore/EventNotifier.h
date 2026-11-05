@@ -12,6 +12,7 @@
 #include <atomic>
 #include <memory>
 #include <mutex>
+#include <condition_variable>
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
 
@@ -40,8 +41,8 @@ public:
 
 
 private:
-	void	tradeToJson(const char* trader, uint32_t localid, const char* stdCode, WTSTradeInfo* trdInfo, std::string& output);
-	void	orderToJson(const char* trader, uint32_t localid, const char* stdCode, WTSOrderInfo* ordInfo, std::string& output);
+	static void	tradeToJson(const char* trader, uint32_t localid, const char* stdCode, WTSTradeInfo* trdInfo, std::string& output);
+	static void	orderToJson(const char* trader, uint32_t localid, const char* stdCode, WTSOrderInfo* ordInfo, std::string& output);
 	void	stopAccepting();
 	bool	canAccept(const char* topic) const;
 	template<typename Handler> void postHandler(const char* topic, Handler&& handler);
@@ -72,10 +73,28 @@ private:
 	mutable std::mutex		_state_mutex;
 	bool			_accepting;
 	std::atomic<bool>		_stopped;
-	boost::asio::io_context		_asyncio;
+	// Decision K24=E1 (2026-11-04): the worker and every queued handler only
+	// use this heap core, so a bounded stop can detach a busy worker and keep
+	// the core (and the MQ server) alive until process exit.
 	using WorkGuard = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
-	std::unique_ptr<WorkGuard>	_work;
-	StdThreadPtr				_worker;
+	struct Core
+	{
+		boost::asio::io_context	io;
+		std::unique_ptr<WorkGuard>	work;
+		StdThreadPtr		worker;
+		FundPublishMessage	publisher = NULL;
+		WtUInt32		sid = 0;
+		std::mutex		mtx;
+		std::condition_variable	cv;
+		bool			finished = false;
+		void publish(const char* topic, const std::string& data) const
+		{
+			if (publisher)
+				publisher(sid, topic, data.c_str(), (WtUInt32)data.size());
+		}
+	};
+	std::shared_ptr<Core>		_core;
+	uint32_t			_stop_timeout_ms = 5000;
 };
 
 NS_WTP_END

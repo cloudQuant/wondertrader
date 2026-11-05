@@ -1,0 +1,106 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 5 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from XeleMapping
+[ RUN      ] XeleMapping.ValidMappingWritesTradingDateAndDeliversQuote
+[       OK ] XeleMapping.ValidMappingWritesTradingDateAndDeliversQuote (25 ms)
+[ RUN      ] XeleMapping.FailedMappingNeitherWritesNorDeliversTheQuote
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/xele_test.cpp:195: Failure
+Expected equality of these values:
+  0
+  sink.quotes.load()
+    Which is: 1
+missing commodity
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/xele_test.cpp:196: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  after.trading_date
+    Which is: 20240227
+missing commodity
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/xele_test.cpp:197: Failure
+Expected equality of these values:
+  before.action_date
+    Which is: 0
+  after.action_date
+    Which is: 20240227
+missing commodity
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/xele_test.cpp:198: Failure
+Expected equality of these values:
+  before.action_time
+    Which is: 0
+  after.action_time
+    Which is: 100000000
+missing commodity
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/xele_test.cpp:199: Failure
+Expected equality of these values:
+  before.price
+    Which is: 0
+  after.price
+    Which is: 555
+missing commodity
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/xele_test.cpp:195: Failure
+Expected equality of these values:
+  0
+  sink.quotes.load()
+    Which is: 2
+legacy zero
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/xele_test.cpp:196: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  after.trading_date
+    Which is: 20240227
+legacy zero
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/xele_test.cpp:195: Failure
+Expected equality of these values:
+  0
+  sink.quotes.load()
+    Which is: 3
+legacy invalid date
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/xele_test.cpp:196: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  after.trading_date
+    Which is: 20240227
+legacy invalid date
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/xele_test.cpp:195: Failure
+Expected equality of these values:
+  0
+  sink.quotes.load()
+    Which is: 4
+legacy throws
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/xele_test.cpp:196: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  after.trading_date
+    Which is: 20240227
+legacy throws
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/xele_test.cpp:204: Failure
+Expected equality of these values:
+  1
+  sink.quotes.load()
+    Which is: 5
+
+[  FAILED  ] XeleMapping.FailedMappingNeitherWritesNorDeliversTheQuote (0 ms)
+[----------] 2 tests from XeleMapping (25 ms total)
+
+[----------] 3 tests from XeleClockField
+[ RUN      ] XeleClockField.WellFormedAndEmptyFieldsKeepTheirValues
+[       OK ] XeleClockField.WellFormedAndEmptyFieldsKeepTheirValues (7 ms)
+[ RUN      ] XeleClockField.UnterminatedOrMalformedFieldsAreClearedWithoutOverflow
+/tmp/wt-i03-s5-date-session-fixture/baseline/ParserXeleSkt/ParserXeleSkt.cpp:54:4: runtime error: index 10 out of bounds for type 'char[10]'
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-s5-date-session-fixture/baseline/ParserXeleSkt/ParserXeleSkt.cpp:54:4 

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="2" failures="2" disabled="0" errors="0" time="0.054" timestamp="2026-11-04T11:57:53.051" name="AllTests">
+  <testsuite name="I03S5TimeZoneFailure" tests="2" failures="2" disabled="0" skipped="0" errors="0" time="0.054" timestamp="2026-11-04T11:57:53.051">
+    <testcase name="A_FailedLookupIsNotUsedAsAnHourOffset" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp" line="39" status="run" result="completed" time="0.054" timestamp="2026-11-04T11:57:53.051" classname="I03S5TimeZoneFailure">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:57&#x0A;Value of: curDate == refDate || curDate == afterDate&#x0A;  Actual: false&#x0A;Expected: true&#x0A;20261108 vs 20261104&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:57
+Value of: curDate == refDate || curDate == afterDate
+  Actual: false
+Expected: true
+20261108 vs 20261104
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:58&#x0A;Value of: date == refDate || date == afterDate&#x0A;  Actual: false&#x0A;Expected: true&#x0A;20261108&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:58
+Value of: date == refDate || date == afterDate
+  Actual: false
+Expected: true
+20261108
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:59&#x0A;Value of: stamp / 1000000 == refDate || stamp / 1000000 == afterDate&#x0A;  Actual: false&#x0A;Expected: true&#x0A;20261108145753&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:59
+Value of: stamp / 1000000 == refDate || stamp / 1000000 == afterDate
+  Actual: false
+Expected: true
+20261108145753
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:61&#x0A;Expected: (curMin / 10000) &lt;= (afterTime / 1000 / 10000 + (afterDate != refDate ? 24 : 0)), actual: 14 vs 11&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:61
+Expected: (curMin / 10000) <= (afterTime / 1000 / 10000 + (afterDate != refDate ? 24 : 0)), actual: 14 vs 11
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:65&#x0A;Expected equality of these values:&#x0A;  20240301u&#x0A;    Which is: 20240301&#x0A;  TimeUtils::getNextDate(20240229, 1)&#x0A;    Which is: 19700101&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:65
+Expected equality of these values:
+  20240301u
+    Which is: 20240301
+  TimeUtils::getNextDate(20240229, 1)
+    Which is: 19700101
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:66&#x0A;Expected equality of these values:&#x0A;  19691231u&#x0A;    Which is: 19691231&#x0A;  TimeUtils::getNextDate(19700101, -1)&#x0A;    Which is: 19691230&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:66
+Expected equality of these values:
+  19691231u
+    Which is: 19691231
+  TimeUtils::getNextDate(19700101, -1)
+    Which is: 19691230
+]]></failure>
+    </testcase>
+    <testcase name="B_ClockFailurePublishesAnInvalidDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp" line="70" status="run" result="completed" time="0." timestamp="2026-11-04T11:57:53.105" classname="I03S5TimeZoneFailure">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:83&#x0A;Value of: TimeUtils::tryGetWeekDay(curDate, weekDay)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;20261104&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:83
+Value of: TimeUtils::tryGetWeekDay(curDate, weekDay)
+  Actual: true
+Expected: false
+20261104
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:85&#x0A;Value of: TimeUtils::tryGetWeekDay(date, weekDay)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;20261104&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:85
+Value of: TimeUtils::tryGetWeekDay(date, weekDay)
+  Actual: true
+Expected: false
+20261104
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:86&#x0A;Expected equality of these values:&#x0A;  0u&#x0A;    Which is: 0&#x0A;  time&#x0A;    Which is: 115753105&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:86
+Expected equality of these values:
+  0u
+    Which is: 0
+  time
+    Which is: 115753105
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

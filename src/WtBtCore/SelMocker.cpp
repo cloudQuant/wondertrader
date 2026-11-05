@@ -17,6 +17,8 @@ namespace fs = std::filesystem;
 #include "../Share/StdUtils.hpp"
 #include "../Share/StrUtil.hpp"
 #include "../Share/decimal.h"
+#include "../Share/FeeSchedule.hpp"
+#include <cmath>
 #include "../Share/Converter.hpp"
 
 #include "../Includes/WTSContractInfo.hpp"
@@ -112,6 +114,7 @@ void SelMocker::dump_stradata()
 			pItem.AddMember("dynprofit", pInfo._dynprofit, allocator);
 			pItem.AddMember("lastentertime", pInfo._last_entertime, allocator);
 			pItem.AddMember("lastexittime", pInfo._last_exittime, allocator);
+			pItem.AddMember("frozen", pInfo._frozen, allocator);	//卡3 3d=C：保存冻结量，归属交易日为 fund.tdate
 
 			rj::Value details(rj::kArrayType);
 			for (auto dit = pInfo._details.begin(); dit != pInfo._details.end(); dit++)
@@ -291,10 +294,18 @@ bool SelMocker::init_sel_factory(WTSVariant* cfg)
 	if (hInst == NULL)
 		return false;
 
-	FuncCreateSelStraFact creator = (FuncCreateSelStraFact)DLLHelper::get_symbol(hInst, "createSelStrategyFact");
-	FuncDeleteSelStraFact remover = (FuncDeleteSelStraFact)DLLHelper::get_symbol(hInst, "deleteSelStrategyFact");
-	if (creator == NULL || remover == NULL)
+	// Card 4b=A: the backtest host accepts only a validated versioned SEL
+	// table; legacy v1 creators/deleters are never called.
+	const WtStrategyPluginApiV2* api = NULL;
+	std::string rejectReason;
+	const auto probe = wt_stra_plugin::probeModule(
+		[hInst](const char* symbol) { return DLLHelper::get_symbol(hInst, symbol); },
+		WT_STRA_PLUGIN_V2_FAMILY_SEL, api, rejectReason);
+	if (probe != wt_stra_plugin::ProbeResult::Accepted)
 	{
+		WTSLogger::error("SEL strategy module {} rejected: {}", module,
+			probe == wt_stra_plugin::ProbeResult::NotStrategyPlugin ?
+				std::string("no versioned SEL strategy plugin entry") : rejectReason);
 		DLLHelper::free_library(hInst);
 		return false;
 	}
@@ -302,7 +313,7 @@ bool SelMocker::init_sel_factory(WTSVariant* cfg)
 	ISelStrategyFact* fact = NULL;
 	try
 	{
-		fact = creator();
+		fact = static_cast<ISelStrategyFact*>(api->create_factory());
 	}
 	catch (...)
 	{
@@ -318,8 +329,9 @@ bool SelMocker::init_sel_factory(WTSVariant* cfg)
 
 	_factory._module_inst = hInst;
 	_factory._module_path = module;
-	_factory._creator = creator;
-	_factory._remover = remover;
+	_factory._creator = NULL;
+	_factory._remover = NULL;
+	_factory._api = api;
 	_factory._fact = fact;
 
 	try
@@ -450,7 +462,8 @@ void SelMocker::handle_tick(const char* stdCode, WTSTickData* newTick, uint32_t 
 	_price_map[stdCode].second = (uint64_t)newTick->actiondate() * 1000000000 + newTick->actiontime();
 
 	//先检查是否要信号要触发
-	proc_tick(stdCode, last_px, cur_px);
+	if (!proc_tick(stdCode, last_px, cur_px, newTick->getContractInfo()))
+		return;
 
 	on_tick_updated(stdCode, newTick);
 
@@ -463,10 +476,10 @@ void SelMocker::handle_tick(const char* stdCode, WTSTickData* newTick, uint32_t 
 	 *	而不至于在回测的时候成交价偏离太远
 	 */
 	if (pxType != 3)
-		proc_tick(stdCode, last_px, cur_px);
+		proc_tick(stdCode, last_px, cur_px, newTick->getContractInfo());
 }
 
-void SelMocker::proc_tick(const char* stdCode, double /*last_px*/, double cur_px)
+bool SelMocker::proc_tick(const char* stdCode, double /*last_px*/, double cur_px, const WTSContractInfo* fillContract)
 {
 	{
 		auto it = _sig_map.find(stdCode);
@@ -480,13 +493,15 @@ void SelMocker::proc_tick(const char* stdCode, double /*last_px*/, double cur_px
 					price = cur_px;
 				else
 					price = sInfo._desprice;
-				do_set_position(stdCode, sInfo._volume, price, sInfo._usertag.c_str());
+				if (!do_set_position(stdCode, sInfo._volume, price, sInfo._usertag.c_str(), fillContract))
+					return false;
 				_sig_map.erase(it);
 			}
 		}
 	}
 
 	update_dyn_profit(stdCode, cur_px);
+	return true;
 }
 
 
@@ -503,7 +518,7 @@ void SelMocker::on_bar(const char* stdCode, const char* period, uint32_t times, 
 	else
 		realPeriod = fmtutil::format<64>("m{}", times);
 
-	std::string key = fmtutil::format<64>("{}#{}", stdCode, realPeriod.c_str());
+	std::string key = fmt::format("{}#{}", stdCode, realPeriod.c_str());
 	KlineTag& tag = _kline_tags[key];
 	tag._closed = true;
 	tag._count++;
@@ -628,16 +643,25 @@ void SelMocker::on_session_begin(uint32_t curTDate)
 {
 	_cur_tdate = curTDate;
 	//每个交易日开始，要把冻结持仓置零
-	for (auto& it : _pos_map)
+	//卡3 3d=C：冻结量归属交易日（上一个 session）与本交易日相同（同日重复 session-begin）时保留
+	if (_frozen_tdate != curTDate)
 	{
-		const char* stdCode = it.first.c_str();
-		PosInfo& pInfo = (PosInfo&)it.second;
-		if (!decimal::eq(pInfo._frozen, 0))
+		for (auto& it : _pos_map)
 		{
-			log_debug("{} of {} frozen released on {}", pInfo._frozen, stdCode, curTDate);
-			pInfo._frozen = 0;
+			const char* stdCode = it.first.c_str();
+			PosInfo& pInfo = (PosInfo&)it.second;
+			if (!decimal::eq(pInfo._frozen, 0))
+			{
+				log_debug("{} of {} frozen released on {}", pInfo._frozen, stdCode, curTDate);
+				pInfo._frozen = 0;
+			}
 		}
 	}
+	else
+	{
+		log_debug("Frozen positions kept on same-tradingday session begin {}", curTDate);
+	}
+	_frozen_tdate = curTDate;
 }
 
 void SelMocker::enum_position(FuncEnumSelPositionCallBack cb)
@@ -756,26 +780,89 @@ void SelMocker::append_signal(const char* stdCode, double qty, const char* userT
 	//save_data();
 }
 
-void SelMocker::do_set_position(const char* stdCode, double qty, double price /* = 0.0 */, const char* userTag /* = "" */, bool /*bTriggered*/ /* = false */)
+bool SelMocker::do_set_position(const char* stdCode, double qty, double price, const char* userTag, const WTSContractInfo* fillContract)
 {
-	PosInfo& pInfo = _pos_map[stdCode];
-	double curPx = price;
+	const auto posIt = _pos_map.find(stdCode);
+	const PosInfo* existing = posIt == _pos_map.end() ? NULL : &posIt->second;
+	const double current = existing == NULL ? 0.0 : existing->_volume;
+	auto fail = [&](const std::string& message) {
+		_replayer->report_fee_error(std::string("Sel fee preflight for ") + stdCode + ": " + message);
+		return false;
+	};
+	if (!std::isfinite(current) || !std::isfinite(qty)) return fail("invalid position quantity");
+	if (decimal::eq(current, qty)) return true;
+
+	wt_fee::Context feeContext;
+	std::string feeError;
+	if (!_replayer->prepare_fee_context(stdCode, fillContract, feeContext, feeError))
+		return fail(feeError);
+	WTSCommodityInfo* commInfo = fillContract != NULL ? fillContract->getCommInfo() : _replayer->get_commodity_info(stdCode);
+	if (commInfo == NULL) return fail("missing commodity metadata");
+	double trdPx = price;
 	if (decimal::eq(price, 0.0))
-		curPx = _price_map[stdCode].first;
-	uint64_t curTm = (uint64_t)_replayer->get_date() * 10000 + _replayer->get_min_time();
-	uint32_t curTDate = _replayer->get_trading_date();
-
-	if (decimal::eq(pInfo._volume, qty))
-		return;
-
-	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
-	if (commInfo == NULL)
-		return;
-
-	//成交价
-	double trdPx = curPx;
-	double diff = qty - pInfo._volume;
-	bool isBuy = decimal::gt(diff, 0.0);
+	{
+		auto priceIt = _price_map.find(stdCode);
+		if (priceIt == _price_map.end()) return fail("missing fill price");
+		trdPx = priceIt->second.first;
+	}
+	const double diff = qty - current;
+	if (!std::isfinite(diff)) return fail("position difference overflow");
+	const bool isBuy = decimal::gt(diff, 0.0);
+	if (_slippage != 0)
+	{
+		// Slippage is expressed in price ticks; a zero/invalid tick would make
+		// the ratio path divide by zero (NaN fill) and the fixed path silently
+		// drop the configured slippage. Reject before any ledger change.
+		const double priceTick = commInfo->getPriceTick();
+		if (!std::isfinite(priceTick) || priceTick <= 0.0) return fail("invalid price tick for slippage");
+		if (_ratio_slippage)
+		{
+			double slp = _slippage * trdPx / 10000.0;
+			slp = round(slp / commInfo->getPriceTick()) * commInfo->getPriceTick();
+			trdPx += slp * (isBuy ? 1 : -1);
+		}
+		else
+			trdPx += _slippage * commInfo->getPriceTick() * (isBuy ? 1 : -1);
+	}
+	const uint64_t curTm = (uint64_t)_replayer->get_date() * 10000 + _replayer->get_min_time();
+	const uint32_t curTDate = _replayer->get_trading_date();
+	std::vector<double> feePlan;
+	double plannedFees = 0.0;
+	double plannedFundFees = _fund_info._total_fees;
+	if (!std::isfinite(plannedFundFees)) return fail("invalid existing total fees");
+	auto planFee = [&](double volume, uint32_t offset) {
+		const auto calc = wt_fee::calculate(feeContext, trdPx, volume, offset);
+		if (calc.status != wt_fee::CalculationStatus::ok) return false;
+		plannedFees += calc.value;
+		plannedFundFees += calc.value;
+		if (!std::isfinite(plannedFees) || !std::isfinite(plannedFundFees)) return false;
+		feePlan.push_back(calc.value);
+		return true;
+	};
+	if (decimal::gt(current * diff, 0))
+	{
+		if (!planFee(std::abs(diff), 0)) return fail("invalid open fee");
+	}
+	else
+	{
+		double left = std::abs(diff);
+		if (existing != NULL)
+		{
+			for (const DetailInfo& detail : existing->_details)
+			{
+				if (!std::isfinite(detail._volume) || detail._volume < 0) return fail("invalid position detail");
+				const double volume = min(detail._volume, left);
+				if (decimal::eq(volume, 0)) continue;
+				if (!planFee(volume, detail._opentdate == curTDate ? 2 : 1)) return fail("invalid close fee");
+				left -= volume;
+				if (left == 0) break;
+			}
+		}
+		if (left > 0 && decimal::eq(qty, 0)) return fail("position details do not cover close");
+		if (left > 0 && !planFee(left, 0)) return fail("invalid reversal fee");
+	}
+	size_t nextFee = 0;
+	PosInfo& pInfo = _pos_map[stdCode];
 	if (decimal::gt(pInfo._volume*diff, 0))//当前持仓和仓位变动方向一致,增加一条明细,增加数量即可
 	{
 		pInfo._volume = qty;
@@ -788,21 +875,7 @@ void SelMocker::do_set_position(const char* stdCode, double qty, double price /*
 			log_debug("{} frozen position up to {}", stdCode, pInfo._frozen);
 		}
 
-		if (_slippage != 0)
-		{
-			if (_ratio_slippage)
-			{
-				//By Wesley @ 2023.05.05
-				//如果是比率滑点，则要根据目标成交价计算
-				//得到滑点以后，再根据pricetick做一个修正
-				double slp = (_slippage * trdPx / 10000.0);
-				slp = round(slp / commInfo->getPriceTick())*commInfo->getPriceTick();
 
-				trdPx += slp * (isBuy ? 1 : -1);
-			}
-			else
-				trdPx += _slippage * commInfo->getPriceTick()*(isBuy ? 1 : -1);
-		}
 
 		DetailInfo dInfo;
 		dInfo._long = decimal::gt(qty, 0);
@@ -817,7 +890,7 @@ void SelMocker::do_set_position(const char* stdCode, double qty, double price /*
 		pInfo._details.emplace_back(dInfo);
 		pInfo._last_entertime = curTm;
 
-		double fee = _replayer->calc_fee(stdCode, trdPx, abs(diff), 0);
+		double fee = feePlan[nextFee++];
 		_fund_info._total_fees += fee;
 
 		log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(diff), userTag, fee);
@@ -825,23 +898,8 @@ void SelMocker::do_set_position(const char* stdCode, double qty, double price /*
 	else
 	{//持仓方向和目标仓位方向不一致,需要平仓
 		double left = abs(diff);
-		bool isBuy = decimal::gt(diff, 0.0);
 
-		if (_slippage != 0)
-		{
-			if (_ratio_slippage)
-			{
-				//By Wesley @ 2023.05.05
-				//如果是比率滑点，则要根据目标成交价计算
-				//得到滑点以后，再根据pricetick做一个修正
-				double slp = (_slippage * trdPx / 10000.0);
-				slp = round(slp / commInfo->getPriceTick())*commInfo->getPriceTick();
 
-				trdPx += slp * (isBuy ? 1 : -1);
-			}
-			else
-				trdPx += _slippage * commInfo->getPriceTick()*(isBuy ? 1 : -1);
-		}
 
 		pInfo._volume = qty;
 		if (decimal::eq(pInfo._volume, 0))
@@ -872,7 +930,7 @@ void SelMocker::do_set_position(const char* stdCode, double qty, double price /*
 			pInfo._last_exittime = curTm;
 			_fund_info._total_profit += profit;
 
-			double fee = _replayer->calc_fee(stdCode, trdPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
+			double fee = feePlan[nextFee++];
 			_fund_info._total_fees += fee;
 			//这里写成交记录
 			log_trade(stdCode, dInfo._long, false, curTm, trdPx, maxQty, userTag, fee);
@@ -895,7 +953,7 @@ void SelMocker::do_set_position(const char* stdCode, double qty, double price /*
 		//最后,如果还有剩余的,则需要反手了
 		if (left > 0)
 		{
-			left = left * qty / abs(qty);
+			left = std::copysign(left, qty);
 
 			//如果T+1，则冻结仓位要增加
 			if (commInfo->isT1())
@@ -918,17 +976,18 @@ void SelMocker::do_set_position(const char* stdCode, double qty, double price /*
 			pInfo._last_entertime = curTm;
 
 			//这里还需要写一笔成交记录
-			double fee = _replayer->calc_fee(stdCode, trdPx, abs(left), 0);
+			double fee = feePlan[nextFee++];
 			_fund_info._total_fees += fee;
 			log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(left), userTag, fee);
 		}
 	}
+	return true;
 }
 
 WTSKlineSlice* SelMocker::stra_get_bars(const char* stdCode, const char* period, uint32_t count)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", stdCode, period);
+	// I03-NEW-039: caller stdCode is unbounded; no fixed 64-byte key buffer
+	std::string key = fmt::format("{}#{}", stdCode, period);
 
 	thread_local static char basePeriod[2] = { 0 };
 	basePeriod[0] = period[0];
@@ -936,7 +995,7 @@ WTSKlineSlice* SelMocker::stra_get_bars(const char* stdCode, const char* period,
 	if (strlen(period) > 1)
 		times = convert::to_uint32(period + 1);
 	else
-		strcat(key, "1");
+		key += "1";
 
 	WTSKlineSlice* kline = _replayer->get_kline_slice(stdCode, basePeriod, count, times, false);
 

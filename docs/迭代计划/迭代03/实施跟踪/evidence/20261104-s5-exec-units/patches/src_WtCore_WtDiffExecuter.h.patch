@@ -1,0 +1,1092 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/WtCore/WtDiffExecuter.h	2026-11-04 09:06:41
++++ src/WtCore/WtDiffExecuter.h	2026-11-04 17:51:28
+@@ -1,543 +1,546 @@
+-/*!
+- * \file WtDiffExecuter.h
+- * \project	WonderTrader
+- *
+- * \author Wesley
+- * \date 2020/03/30
+- * 
+- * \brief 差价执行器头文件
+- * \details 差价执行器主要用于实现目标仓位和当前仓位之间的差价交易执行策略，是WonderTrader执行模块的重要组件
+- */
+-#pragma once
+-
+-#include "ITrdNotifySink.h"
+-#include "ExecOwnerModes.h"
+-#include "IExecCommand.h"
+-#include "ExecCommandQuiesce.h"
+-#include "ExecUnitInitStatus.h"
+-#include "WtExecuterFactory.h"
+-#include "../Includes/ExecuteDefs.h"
+-#include <Share/threadpool.hpp>
+-#include "../Share/SpinMutex.hpp"
+-#include <atomic>
+-#include <cstddef>
+-#include <condition_variable>
+-#include <deque>
+-#include <functional>
+-#include <map>
+-#include <mutex>
+-#include <set>
+-#include <thread>
+-#include <vector>
+-
+-NS_WTP_BEGIN
+-class WTSVariant;
+-class IDataManager;
+-class IBaseDataMgr;
+-class TraderAdapter;
+-class IHotMgr;
+-class WtDiffExecuterConcurrencyTest;
+-class P02DiffExecuterTestAccess;
+-
+-/*!
+- * \brief 差价执行器类
+- * \details 差价执行器继承自ExecuteContext、ITrdNotifySink和IExecCommand接口，负责根据目标仓位和当前仓位的差值执行交易操作
+- *          差价执行器通过计算目标仓位与实际仓位的差异，自动生成交易指令，实现仓位管理和调整
+- *          同时处理交易通道的推送回调，如成交、委托、资金、持仓等信息
+- */
+-class WtDiffExecuter : public ExecuteContext,
+-		public ITrdNotifySink, public IExecCommand, public IExecUnitInitStatusProvider,
+-		public IExecCommandQuiesce, public IExecCommandQuiesceStages
+-{
+-public:
+-	/*!
+-	 * \brief 构造函数
+-	 * \details 创建差价执行器对象，并初始化各种依赖组件
+-	 * \param factory 执行器工厂指针，用于创建执行单元
+-	 * \param name 执行器名称
+-	 * \param dataMgr 数据管理器指针，用于获取市场数据
+-	 * \param bdMgr 基础数据管理器指针，用于获取合约信息
+-	 */
+-	WtDiffExecuter(WtExecuterFactory* factory, const char* name, IDataManager* dataMgr, IBaseDataMgr* bdMgr);
+-
+-	/*!
+-	 * \brief 析构函数
+-	 * \details 清理差价执行器的资源，包括线程池和配置
+-	 */
+-	virtual ~WtDiffExecuter();
+-
+-public:
+-	/*!
+-	 * \brief 初始化执行器
+-	 * \details 根据传入的参数配置初始化差价执行器，设置缩放倍数、线程池等
+-	 * \param params 初始化参数，包含执行器的各种配置
+-	 * \return 是否初始化成功
+-	 */
+-	bool init(WTSVariant* params);
+-
+-	/*!
+-	 * \brief Pure eager validation of a complete executer configuration.
+-	 * \details Reads only; never retains, allocates runtime state, loads modules or
+-	 * creates units. init() runs the same check before any side effect, and runners
+-	 * call it for every active entry before constructing any executer (card 8b=A).
+-	 */
+-	static bool validateConfig(WTSVariant* params, std::string& error);
+-
+-	/*!
+-	 * \brief 设置交易适配器
+-	 * \details 记录执行器使用的交易适配器；通道就绪事件应在通知接收器注册后单独发送
+-	 * \param adapter 交易适配器指针
+-	 */
+-	void setTrader(TraderAdapter* adapter);
+-
+-	ExecUnitInitStatus queryUnitInitStatus(const char* stdCode) const override;
+-	ExecUnitInitClearResult clearFailedUnitInitStatus(const char* stdCode) override;
+-	void requestQuiesce() override;
+-	bool canWaitQuiescedOnCurrentThread() const override;
+-	bool waitQuiesced() override;
+-	WtExecuterFactory* quiesceFactory() const override;
+-	bool preflightQuiesceOnCurrentThread() const override;
+-	bool drainHostQuiesced() override;
+-	bool snapshotQuiescePluginOwners(std::vector<ExecQuiesceOwnerPtr>& out) const override;
+-	bool completeQuiesceAfterGlobalPluginWait() override;
+-
+-private:
+-	struct QuiesceThreadMarker
+-	{
+-		const WtDiffExecuter* owner;
+-		QuiesceThreadMarker* previous;
+-	};
+-	static QuiesceThreadMarker*& currentQuiesceMarker() noexcept;
+-	class QuiesceIngress
+-	{
+-	public:
+-		explicit QuiesceIngress(WtDiffExecuter* owner);
+-		~QuiesceIngress();
+-		QuiesceIngress(const QuiesceIngress&) = delete;
+-		QuiesceIngress& operator=(const QuiesceIngress&) = delete;
+-		explicit operator bool() const { return _accepted; }
+-	private:
+-		WtDiffExecuter* _owner;
+-		bool _accepted;
+-		int _uncaught_exceptions;
+-		QuiesceThreadMarker _marker;
+-	};
+-	class QuiesceDrainScope
+-	{
+-	public:
+-		QuiesceDrainScope(WtDiffExecuter* owner, bool reserved) noexcept;
+-		~QuiesceDrainScope();
+-		QuiesceDrainScope(const QuiesceDrainScope&) = delete;
+-		QuiesceDrainScope& operator=(const QuiesceDrainScope&) = delete;
+-		void enter() noexcept;
+-	private:
+-		WtDiffExecuter* _owner;
+-		bool _reserved;
+-		bool _entered;
+-		QuiesceThreadMarker _marker;
+-	};
+-	bool enterQuiesceIngress(QuiesceThreadMarker& marker);
+-	void leaveQuiesceIngress(QuiesceThreadMarker& marker);
+-	void reserveQuiesceDrain();
+-	void finishQuiesceDrain();
+-	void enterQuiesceCallback(QuiesceThreadMarker& marker) noexcept;
+-	void leaveQuiesceCallback(QuiesceThreadMarker& marker) noexcept;
+-
+-	struct UnitLifecycleState
+-	{
+-		std::mutex mutex;
+-		std::condition_variable condition;
+-		std::thread::id creation_owner;
+-		bool creation_complete = false;
+-		std::string std_code;
+-		ExecuteUnitPtr result;
+-		std::deque<std::function<void()>> callback_events;
+-		bool callback_active = false;
+-		bool callback_drain_scheduled = false;
+-		std::thread::id callback_owner;
+-		bool callback_failed = false;
+-		// A failure after plugin code may have produced external side effects is
+-		// terminal for this code: replaying its old target can duplicate orders.
+-		bool retry_blocked = false;
+-		ExecUnitInitState init_status = ExecUnitInitState::INITIALIZING;
+-		uint64_t init_generation = 0;
+-		uint32_t waiting_callers = 0;
+-		std::string init_error;
+-	};
+-	void drainUnitChannelEvents(const ExecuteUnitPtr& unit,
+-		const std::shared_ptr<UnitLifecycleState>& state, bool reserved = false);
+-	bool enqueueUnitCallback(const std::shared_ptr<UnitLifecycleState>& state,
+-		std::function<void()> callback);
+-	void scheduleUnitCallbackDrain(const ExecuteUnitPtr& unit,
+-		const std::shared_ptr<UnitLifecycleState>& state, bool schedule);
+-	void markUnitFailed(const std::string& code,
+-		const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason);
+-	void markUnitFailedLocked(const std::string& code,
+-		const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason);
+-	void markUnitFailedInMemoryLocked(const std::string& code,
+-		const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason);
+-	struct BatchRegistration
+-	{
+-		explicit BatchRegistration(WtDiffExecuter* value) : owner(value) {}
+-		~BatchRegistration();
+-		WtDiffExecuter* owner;
+-		uint64_t ticket = 0;
+-	};
+-	void submitPositionTargets(const wt_hashmap<std::string, double>& targets, bool incremental);
+-	std::shared_ptr<UnitLifecycleState> getUnitState(const char* stdCode,
+-		const ExecuteUnitPtr& unit) const;
+-	bool ownsCode(const std::string& code);
+-	bool ownsCodeLocked(const std::string& code) const;
+-	bool isRetryBlockedUnit(const std::string& code) const;
+-	bool isCurrentUnit(const std::string& code, const ExecuteUnitPtr& unit,
+-		const std::shared_ptr<UnitLifecycleState>& state) const;
+-	bool registerCreatedUnit(const std::string& code, const ExecuteUnitPtr& unit,
+-		const std::shared_ptr<UnitLifecycleState>& state);
+-	void recoverUnitPosition(const std::string& code, const ExecuteUnitPtr& unit,
+-		const std::shared_ptr<UnitLifecycleState>& state, uint64_t channelEpoch,
+-		double diff, bool hasDiff);
+-	void retainQuiesceUnit(const ExecuteUnitPtr& unit);
+-	std::vector<ExecuteUnitPtr> snapshotQuiesceUnits() const;
+-
+-	/*!
+-	 * \brief 获取执行单元
+-	 * \details 根据标准合约代码获取执行单元，如果单元不存在且允许自动创建，则创建新的执行单元
+-	 * \param code 标准合约代码
+-	 * \param bAutoCreate 是否自动创建，默认为true
+-	 * \return 执行单元指针
+-	 */
+-	ExecuteUnitPtr	getUnit(const char* code, bool bAutoCreate = true,
+-		bool waitForCreation = true, bool* creationPending = NULL);
+-
+-	/*!
+-	 * \brief 保存数据
+-	 * \details 保存目标仓位、差异仓位和不可自动重试的失败状态
+-	 * \return 快照是否成功写入并原子替换
+-	 */
+-	bool	save_data();
+-	bool	save_data_locked();
+-
+-	/*!
+-	 * \brief 加载数据
+-	 * \details 从存储中读取差价执行器的状态数据，恢复运行状态
+-	 */
+-	bool	load_data();
+-
+-public:
+-	//////////////////////////////////////////////////////////////////////////
+-	//ExecuteContext
+-	/*!
+-	 * \brief 获取Tick切片数据
+-	 * \details 从数据管理器获取指定合约的Tick切片数据
+-	 * \param code 标准合约代码
+-	 * \param count 请求的Tick数量
+-	 * \param etime 结束时间，默认为0表示当前
+-	 * \return Tick切片数据指针
+-	 */
+-	virtual WTSTickSlice* getTicks(const char* code, uint32_t count, uint64_t etime = 0) override;
+-
+-	/*!
+-	 * \brief 获取最新Tick数据
+-	 * \details 从数据管理器中获取指定合约的最新Tick数据
+-	 * \param code 标准合约代码
+-	 * \return 最新Tick数据指针
+-	 */
+-	virtual WTSTickData*	grabLastTick(const char* code) override;
+-
+-	/*!
+-	 * \brief 获取持仓量
+-	 * \details 从交易适配器中获取指定合约的持仓量
+-	 * \param stdCode 标准合约代码
+-	 * \param validOnly 是否只计算有效仓位，默认为true
+-	 * \param flag 仓位标记，默认为3
+-	 * \return 持仓数量
+-	 */
+-	virtual double		getPosition(const char* stdCode, bool validOnly = true, int32_t flag = 3) override;
+-
+-	/*!
+-	 * \brief 获取委托映射
+-	 * \details 从交易适配器中获取指定合约的委托映射
+-	 * \param code 标准合约代码
+-	 * \return 委托映射指针
+-	 */
+-	virtual OrderMap*	getOrders(const char* code) override;
+-
+-	/*!
+-	 * \brief 获取未完成数量
+-	 * \details 从交易适配器中获取指定合约的未完成委托数量
+-	 * \param code 标准合约代码
+-	 * \return 未完成委托数量
+-	 */
+-	virtual double		getUndoneQty(const char* code) override;
+-
+-	/*!
+-	 * \brief 买入委托
+-	 * \details 发出买入委托，需要交易通道就绪
+-	 * \param code 标准合约代码
+-	 * \param price 委托价格
+-	 * \param qty 委托数量
+-	 * \param bForceClose 是否强制平仓，默认为false
+-	 * \return 委托ID列表
+-	 */
+-	virtual OrderIDs	buy(const char* code, double price, double qty, bool bForceClose = false) override;
+-
+-	/*!
+-	 * \brief 卖出委托
+-	 * \details 发出卖出委托，需要交易通道就绪
+-	 * \param code 标准合约代码
+-	 * \param price 委托价格
+-	 * \param qty 委托数量
+-	 * \param bForceClose 是否强制平仓，默认为false
+-	 * \return 委托ID列表
+-	 */
+-	virtual OrderIDs	sell(const char* code, double price, double qty, bool bForceClose = false) override;
+-
+-	/*!
+-	 * \brief 撤销委托
+-	 * \details 根据委托ID撤销指定委托，需要交易通道就绪
+-	 * \param localid 本地委托ID
+-	 * \return 是否撤销成功
+-	 */
+-	virtual bool		cancel(uint32_t localid) override;
+-
+-	/*!
+-	 * \brief 撤销委托
+-	 * \details 根据合约代码、方向和数量撤销委托，需要交易通道就绪
+-	 * \param code 标准合约代码
+-	 * \param isBuy 是否买入方向
+-	 * \param qty 要撤销的数量
+-	 * \return 撤销的委托ID列表
+-	 */
+-	virtual OrderIDs	cancel(const char* code, bool isBuy, double qty) override;
+-
+-	/*!
+-	 * \brief 输出日志
+-	 * \details 输出日志信息，并添加执行器名称前缀
+-	 * \param message 日志消息
+-	 */
+-	virtual void		writeLog(const char* message) override;
+-
+-	/*!
+-	 * \brief 获取商品信息
+-	 * \details 从执行器绑定的执行核心中获取商品信息
+-	 * \param stdCode 标准合约代码
+-	 * \return 商品信息指针
+-	 */
+-	virtual WTSCommodityInfo*	getCommodityInfo(const char* stdCode) override;
+-
+-	/*!
+-	 * \brief 获取交易时段信息
+-	 * \details 从执行器绑定的执行核心中获取交易时段信息
+-	 * \param stdCode 标准合约代码
+-	 * \return 交易时段信息指针
+-	 */
+-	virtual WTSSessionInfo*		getSessionInfo(const char* stdCode) override;
+-
+-	/*!
+-	 * \brief 获取当前时间
+-	 * \details 从执行器绑定的执行核心中获取当前时间
+-	 * \return 当前时间戳
+-	 */
+-	virtual uint64_t	getCurTime() override;
+-
+-public:
+-	/*!
+-	 * \brief 设置目标仓位
+-	 * \details 根据传入的目标仓位映射表设置合约的目标仓位，并自动处理交易逻辑
+-	 *          根据目标仓位与实际仓位的差异生成交易指令
+-	 * \param targets 目标仓位映射表，键为标准合约代码，值为目标仓位
+-	 */
+-	virtual void set_position(const wt_hashmap<std::string, double>& targets) override;
+-
+-
+-	/*!
+-	 * \brief 处理仓位变更
+-	 * \details 接收仓位变更通知，更新内部仓位计算并生成新的交易指令
+-	 * \param stdCode 标准合约代码
+-	 * \param diffPos 仓位变化量
+-	 */
+-	virtual void on_position_changed(const char* stdCode, double diffPos) override;
+-
+-	/*!
+-	 * \brief 处理实时行情
+-	 * \details 接收并处理实时行情数据，将行情转发给相应执行单元
+-	 * \param stdCode 标准合约代码
+-	 * \param newTick 最新的行情数据
+-	 */
+-	virtual void on_tick(const char* stdCode, WTSTickData* newTick) override;
+-
+-	/*!
+-	 * \brief 处理成交回报
+-	 * \details 接收并处理成交回报，将成交信息转发给相应的执行单元
+-	 *          并更新差价执行器的仓位管理记录
+-	 * \param localid 本地委托ID
+-	 * \param stdCode 标准合约代码
+-	 * \param isBuy 是否买入方向
+-	 * \param vol 成交数量
+-	 * \param price 成交价格
+-	 */
+-	virtual void on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price) override;
+-
+-	/*!
+-	 * \brief 处理委托回报
+-	 * \details 接收并处理委托回报，将委托信息转发给相应的执行单元
+-	 *          更新委托状态处理和统计
+-	 * \param localid 本地委托ID
+-	 * \param stdCode 标准合约代码
+-	 * \param isBuy 是否买入方向
+-	 * \param totalQty 总委托数量
+-	 * \param leftQty 剩余委托数量
+-	 * \param price 委托价格
+-	 * \param isCanceled 是否已撤销，默认为false
+-	 */
+-	virtual void on_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled = false) override;
+-
+-	/*!
+-	 * \brief 处理持仓更新通知
+-	 * \details 接收交易账户持仓更新通知，更新差价执行器的持仓记录
+-	 * \param stdCode 标准合约代码
+-	 * \param isLong 是否为多头持仓
+-	 * \param prevol 之前的持仓量
+-	 * \param preavail 之前的可用持仓量
+-	 * \param newvol 新的持仓量
+-	 * \param newavail 新的可用持仓量
+-	 * \param tradingday 交易日
+-	 */
+-	virtual void on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday) override;
+-
+-	/*!
+-	 * \brief 处理委托下达回报
+-	 * \details 接收并处理委托下达回报，将委托下达结果转发给相应的执行单元
+-	 *          委托下达回报包含委托是否成功下达以及相关消息
+-	 * \param localid 本地委托ID
+-	 * \param stdCode 标准合约代码
+-	 * \param bSuccess 委托是否成功下达
+-	 * \param message 相关消息，如错误原因
+-	 */
+-	virtual void on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message) override;
+-
+-	/*!
+-	 * \brief 处理交易通道就绪事件
+-	 * \details 当交易通道就绪时，更新内部通道就绪状态并通知所有执行单元
+-	 *          通道就绪后可以开始发送交易指令
+-	 */
+-	virtual void on_channel_ready() override;
+-
+-	/*!
+-	 * \brief 处理交易通道丢失事件
+-	 * \details 当交易通道丢失时，更新内部通道状态并通知所有执行单元
+-	 *          通道丢失后不能发送交易指令，需要等待通道恢复
+-	 */
+-	virtual void on_channel_lost() override;
+-
+-	/*!
+-	 * \brief 处理账户资金更新
+-	 * \details 接收并处理账户资金更新通知，更新差价执行器的资金记录
+-	 *          资金信息包含余额、可用资金、盈亏、保证金等
+-	 * \param currency 货币代码
+-	 * \param prebalance 前一交易日结算后的账户余额
+-	 * \param balance 当前结算后的账户余额
+-	 * \param dynbalance 动态权益（包含浮动盈亏）
+-	 * \param avaliable 可用资金
+-	 * \param closeprofit 平仓盈亏
+-	 * \param dynprofit 浮动盈亏
+-	 * \param margin 保证金
+-	 * \param fee 手续费
+-	 * \param deposit 入金
+-	 * \param withdraw 出金
+-	 */
+-	virtual void on_account(const char* currency, double prebalance, double balance, double dynbalance,
+-		double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw) override;
+-
+-
+-private:
+-	friend class WtDiffExecuterConcurrencyTest;
+-	friend class P02DiffExecuterTestAccess;
+-	//! 执行单元映射，键为合约代码，值为执行单元指针
+-	ExecuteUnitMap		_unit_map;
+-	std::map<std::string, std::shared_ptr<UnitLifecycleState>> _unit_states;
+-	// Strong owners include live and retired initialized wrappers. A failed
+-	// runtime callback may detach a unit from _unit_map, but its plugin still
+-	// needs quiescence before its borrowed ExecuteContext can be destroyed.
+-	std::vector<ExecuteUnitPtr> _quiesce_unit_owners;
+-	std::atomic<uint64_t> _quiesce_owner_generation{ 0 };
+-	//! 交易适配器指针，用于执行交易操作
+-	TraderAdapter*		_trader;
+-	ExecOwnerModes		_owner_modes;	///< per-contract shared/non-shared owner mode (cards 5b/5c)
+-	//! 执行器工厂指针，用于创建执行单元
+-	WtExecuterFactory*	_factory;
+-	//! 数据管理器指针，用于获取市场数据
+-	IDataManager*		_data_mgr;
+-	//! 基础数据管理器指针，用于获取合约信息
+-	IBaseDataMgr*		_bd_mgr;
+-	//! 配置参数，包含执行器的各种配置项
+-	WTSVariant*			_config;
+-
+-	//! 仓位放大倍数，用于调整实际交易数量
+-	double				_scale;
+-	//! 交易通道是否就绪
+-	std::atomic<bool>	_channel_ready;
+-
+-	//! 执行单元操作的互斥锁，用于多线程安全访问
+-	mutable SpinMutex	_mtx_units;
+-	uint64_t			_next_unit_init_generation = 1;
+-	std::atomic<uint64_t> _channel_epoch{0};
+-
+-	//! 目标仓位映射表，键为合约代码，值为目标仓位
+-	wt_hashmap<std::string, double> _target_pos;
+-	//! 差异仓位映射表，键为合约代码，值为仓位差异
+-	wt_hashmap<std::string, double> _diff_pos;
+-	mutable std::mutex _position_mutex;
+-	// Serialize each state update through persistence and callback enqueueing so
+-	// a later callback cannot overtake an earlier snapshot on the same executor.
+-	std::mutex _position_update_mutex;
+-	uint64_t _position_revision = 1;
+-	uint64_t _position_batch_generation = 0;
+-	uint64_t _next_batch_ticket = 1;
+-	uint64_t _last_committed_batch_ticket = 0;
+-	uint64_t _incremental_generation = 0;
+-	std::map<std::string, uint64_t> _incremental_versions;
+-	std::map<uint64_t, std::set<std::string>> _active_batch_targets;
+-	std::set<std::string> _pending_target_notification;
+-	// Protected by _position_mutex. Omitted-code cleanup may only reset a
+-	// target whose version still matches the snapshot taken for that batch.
+-	std::map<std::string, uint64_t> _target_versions;
+-	uint64_t _target_update_generation = 0;
+-	std::mutex _save_mutex;
+-	uint64_t _saved_position_revision = 0;
+-	// Private deterministic fault/barrier injection used only by the friend test.
+-	std::function<bool(bool)> _save_test_hook;
+-	std::function<void()> _save_after_commit_test_hook;
+-	// Static syscall seams keep fault injection out of executor object layout.
+-	static std::size_t (*_save_write_test_hook)(void*, const void*, std::size_t);
+-	static int (*_save_flush_test_hook)(void*);
+-	static int (*_save_close_test_hook)(void*);
+-	std::function<void()> _failure_mutation_test_hook;
+-	std::function<void(const std::string&)> _omitted_sweep_test_hook;
+-	std::function<void(uint64_t)> _batch_preflight_test_hook;
+-	std::function<void(const std::string&)> _unit_lookup_test_hook;
+-	std::function<void(const std::string&)> _target_lookup_test_hook;
+-
+-	// Quiescence closes ingress, tracks accepted callers and callback drains, and
+-	// never owns or waits for plugin-created threads.
+-	mutable std::mutex _quiesce_mutex;
+-	std::condition_variable _quiesce_condition;
+-	std::atomic<bool> _quiesce_requested{ false };
+-	std::atomic<bool> _quiesce_incomplete{ false };
+-	size_t _quiesce_active_ingress = 0;
+-	size_t _quiesce_active_drains = 0;
+-	bool _quiesce_wait_in_progress = false;
+-	bool _quiesced = false;
+-	bool _quiesce_host_completed = false;
+-	bool _quiesce_plugins_completed = false;
+-	// Snapshot metadata is updated by the logically-const owner snapshot stage;
+-	// both fields are protected by _quiesce_mutex.
+-	mutable bool _quiesce_snapshot_taken = false;
+-	mutable uint64_t _quiesce_snapshot_generation = 0;
+-
+-	//! 线程池指针类型定义
+-	typedef std::shared_ptr<boost::threadpool::pool> ThreadPoolPtr;
+-	//! 线程池指针，用于异步执行交易操作
+-	ThreadPoolPtr		_pool;
+-};
+-NS_WTP_END
++/*!
++ * \file WtDiffExecuter.h
++ * \project	WonderTrader
++ *
++ * \author Wesley
++ * \date 2020/03/30
++ * 
++ * \brief 差价执行器头文件
++ * \details 差价执行器主要用于实现目标仓位和当前仓位之间的差价交易执行策略，是WonderTrader执行模块的重要组件
++ */
++#pragma once
++
++#include "ITrdNotifySink.h"
++#include "ExecOwnerModes.h"
++#include "IExecCommand.h"
++#include "ExecCommandQuiesce.h"
++#include "ExecUnitInitStatus.h"
++#include "WtExecuterFactory.h"
++#include "../Includes/ExecuteDefs.h"
++#include <Share/threadpool.hpp>
++#include "../Share/SpinMutex.hpp"
++#include "AccountNetPositionLimits.h"
++#include <atomic>
++#include <cstddef>
++#include <condition_variable>
++#include <deque>
++#include <functional>
++#include <map>
++#include <mutex>
++#include <set>
++#include <thread>
++#include <vector>
++
++NS_WTP_BEGIN
++class WTSVariant;
++class IDataManager;
++class IBaseDataMgr;
++class TraderAdapter;
++class IHotMgr;
++class WtDiffExecuterConcurrencyTest;
++class P02DiffExecuterTestAccess;
++
++/*!
++ * \brief 差价执行器类
++ * \details 差价执行器继承自ExecuteContext、ITrdNotifySink和IExecCommand接口，负责根据目标仓位和当前仓位的差值执行交易操作
++ *          差价执行器通过计算目标仓位与实际仓位的差异，自动生成交易指令，实现仓位管理和调整
++ *          同时处理交易通道的推送回调，如成交、委托、资金、持仓等信息
++ */
++class WtDiffExecuter : public ExecuteContext,
++		public ITrdNotifySink, public IExecCommand, public IExecUnitInitStatusProvider,
++		public IExecCommandQuiesce, public IExecCommandQuiesceStages
++{
++public:
++	/*!
++	 * \brief 构造函数
++	 * \details 创建差价执行器对象，并初始化各种依赖组件
++	 * \param factory 执行器工厂指针，用于创建执行单元
++	 * \param name 执行器名称
++	 * \param dataMgr 数据管理器指针，用于获取市场数据
++	 * \param bdMgr 基础数据管理器指针，用于获取合约信息
++	 */
++	WtDiffExecuter(WtExecuterFactory* factory, const char* name, IDataManager* dataMgr, IBaseDataMgr* bdMgr);
++
++	/*!
++	 * \brief 析构函数
++	 * \details 清理差价执行器的资源，包括线程池和配置
++	 */
++	virtual ~WtDiffExecuter();
++
++public:
++	/*!
++	 * \brief 初始化执行器
++	 * \details 根据传入的参数配置初始化差价执行器，设置缩放倍数、线程池等
++	 * \param params 初始化参数，包含执行器的各种配置
++	 * \return 是否初始化成功
++	 */
++	bool init(WTSVariant* params);
++
++	/*!
++	 * \brief Pure eager validation of a complete executer configuration.
++	 * \details Reads only; never retains, allocates runtime state, loads modules or
++	 * creates units. init() runs the same check before any side effect, and runners
++	 * call it for every active entry before constructing any executer (card 8b=A).
++	 */
++	static bool validateConfig(WTSVariant* params, std::string& error);
++
++	/*!
++	 * \brief 设置交易适配器
++	 * \details 记录执行器使用的交易适配器；通道就绪事件应在通知接收器注册后单独发送
++	 * \param adapter 交易适配器指针
++	 */
++	void setTrader(TraderAdapter* adapter);
++
++	ExecUnitInitStatus queryUnitInitStatus(const char* stdCode) const override;
++	ExecUnitInitClearResult clearFailedUnitInitStatus(const char* stdCode) override;
++	void requestQuiesce() override;
++	bool canWaitQuiescedOnCurrentThread() const override;
++	bool waitQuiesced() override;
++	WtExecuterFactory* quiesceFactory() const override;
++	bool preflightQuiesceOnCurrentThread() const override;
++	bool drainHostQuiesced() override;
++	bool snapshotQuiescePluginOwners(std::vector<ExecQuiesceOwnerPtr>& out) const override;
++	bool completeQuiesceAfterGlobalPluginWait() override;
++
++private:
++	struct QuiesceThreadMarker
++	{
++		const WtDiffExecuter* owner;
++		QuiesceThreadMarker* previous;
++	};
++	static QuiesceThreadMarker*& currentQuiesceMarker() noexcept;
++	class QuiesceIngress
++	{
++	public:
++		explicit QuiesceIngress(WtDiffExecuter* owner);
++		~QuiesceIngress();
++		QuiesceIngress(const QuiesceIngress&) = delete;
++		QuiesceIngress& operator=(const QuiesceIngress&) = delete;
++		explicit operator bool() const { return _accepted; }
++	private:
++		WtDiffExecuter* _owner;
++		bool _accepted;
++		int _uncaught_exceptions;
++		QuiesceThreadMarker _marker;
++	};
++	class QuiesceDrainScope
++	{
++	public:
++		QuiesceDrainScope(WtDiffExecuter* owner, bool reserved) noexcept;
++		~QuiesceDrainScope();
++		QuiesceDrainScope(const QuiesceDrainScope&) = delete;
++		QuiesceDrainScope& operator=(const QuiesceDrainScope&) = delete;
++		void enter() noexcept;
++	private:
++		WtDiffExecuter* _owner;
++		bool _reserved;
++		bool _entered;
++		QuiesceThreadMarker _marker;
++	};
++	bool enterQuiesceIngress(QuiesceThreadMarker& marker);
++	void leaveQuiesceIngress(QuiesceThreadMarker& marker);
++	void reserveQuiesceDrain();
++	void finishQuiesceDrain();
++	void enterQuiesceCallback(QuiesceThreadMarker& marker) noexcept;
++	void leaveQuiesceCallback(QuiesceThreadMarker& marker) noexcept;
++
++	struct UnitLifecycleState
++	{
++		std::mutex mutex;
++		std::condition_variable condition;
++		std::thread::id creation_owner;
++		bool creation_complete = false;
++		std::string std_code;
++		ExecuteUnitPtr result;
++		std::deque<std::function<void()>> callback_events;
++		bool callback_active = false;
++		bool callback_drain_scheduled = false;
++		std::thread::id callback_owner;
++		bool callback_failed = false;
++		// A failure after plugin code may have produced external side effects is
++		// terminal for this code: replaying its old target can duplicate orders.
++		bool retry_blocked = false;
++		ExecUnitInitState init_status = ExecUnitInitState::INITIALIZING;
++		uint64_t init_generation = 0;
++		uint32_t waiting_callers = 0;
++		std::string init_error;
++	};
++	void drainUnitChannelEvents(const ExecuteUnitPtr& unit,
++		const std::shared_ptr<UnitLifecycleState>& state, bool reserved = false);
++	bool enqueueUnitCallback(const std::shared_ptr<UnitLifecycleState>& state,
++		std::function<void()> callback);
++	void scheduleUnitCallbackDrain(const ExecuteUnitPtr& unit,
++		const std::shared_ptr<UnitLifecycleState>& state, bool schedule);
++	void markUnitFailed(const std::string& code,
++		const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason);
++	void markUnitFailedLocked(const std::string& code,
++		const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason);
++	void markUnitFailedInMemoryLocked(const std::string& code,
++		const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason);
++	struct BatchRegistration
++	{
++		explicit BatchRegistration(WtDiffExecuter* value) : owner(value) {}
++		~BatchRegistration();
++		WtDiffExecuter* owner;
++		uint64_t ticket = 0;
++	};
++	void submitPositionTargets(const wt_hashmap<std::string, double>& targets, bool incremental);
++	std::shared_ptr<UnitLifecycleState> getUnitState(const char* stdCode,
++		const ExecuteUnitPtr& unit) const;
++	bool ownsCode(const std::string& code);
++	bool ownsCodeLocked(const std::string& code) const;
++	bool isRetryBlockedUnit(const std::string& code) const;
++	bool isCurrentUnit(const std::string& code, const ExecuteUnitPtr& unit,
++		const std::shared_ptr<UnitLifecycleState>& state) const;
++	bool registerCreatedUnit(const std::string& code, const ExecuteUnitPtr& unit,
++		const std::shared_ptr<UnitLifecycleState>& state);
++	void recoverUnitPosition(const std::string& code, const ExecuteUnitPtr& unit,
++		const std::shared_ptr<UnitLifecycleState>& state, uint64_t channelEpoch,
++		double diff, bool hasDiff);
++	void retainQuiesceUnit(const ExecuteUnitPtr& unit);
++	std::vector<ExecuteUnitPtr> snapshotQuiesceUnits() const;
++
++	/*!
++	 * \brief 获取执行单元
++	 * \details 根据标准合约代码获取执行单元，如果单元不存在且允许自动创建，则创建新的执行单元
++	 * \param code 标准合约代码
++	 * \param bAutoCreate 是否自动创建，默认为true
++	 * \return 执行单元指针
++	 */
++	ExecuteUnitPtr	getUnit(const char* code, bool bAutoCreate = true,
++		bool waitForCreation = true, bool* creationPending = NULL);
++
++	/*!
++	 * \brief 保存数据
++	 * \details 保存目标仓位、差异仓位和不可自动重试的失败状态
++	 * \return 快照是否成功写入并原子替换
++	 */
++	bool	save_data();
++	bool	save_data_locked();
++
++	/*!
++	 * \brief 加载数据
++	 * \details 从存储中读取差价执行器的状态数据，恢复运行状态
++	 */
++	bool	load_data();
++
++public:
++	//////////////////////////////////////////////////////////////////////////
++	//ExecuteContext
++	/*!
++	 * \brief 获取Tick切片数据
++	 * \details 从数据管理器获取指定合约的Tick切片数据
++	 * \param code 标准合约代码
++	 * \param count 请求的Tick数量
++	 * \param etime 结束时间，默认为0表示当前
++	 * \return Tick切片数据指针
++	 */
++	virtual WTSTickSlice* getTicks(const char* code, uint32_t count, uint64_t etime = 0) override;
++
++	/*!
++	 * \brief 获取最新Tick数据
++	 * \details 从数据管理器中获取指定合约的最新Tick数据
++	 * \param code 标准合约代码
++	 * \return 最新Tick数据指针
++	 */
++	virtual WTSTickData*	grabLastTick(const char* code) override;
++
++	/*!
++	 * \brief 获取持仓量
++	 * \details 从交易适配器中获取指定合约的持仓量
++	 * \param stdCode 标准合约代码
++	 * \param validOnly 是否只计算有效仓位，默认为true
++	 * \param flag 仓位标记，默认为3
++	 * \return 持仓数量
++	 */
++	virtual double		getPosition(const char* stdCode, bool validOnly = true, int32_t flag = 3) override;
++
++	/*!
++	 * \brief 获取委托映射
++	 * \details 从交易适配器中获取指定合约的委托映射
++	 * \param code 标准合约代码
++	 * \return 委托映射指针
++	 */
++	virtual OrderMap*	getOrders(const char* code) override;
++
++	/*!
++	 * \brief 获取未完成数量
++	 * \details 从交易适配器中获取指定合约的未完成委托数量
++	 * \param code 标准合约代码
++	 * \return 未完成委托数量
++	 */
++	virtual double		getUndoneQty(const char* code) override;
++
++	/*!
++	 * \brief 买入委托
++	 * \details 发出买入委托，需要交易通道就绪
++	 * \param code 标准合约代码
++	 * \param price 委托价格
++	 * \param qty 委托数量
++	 * \param bForceClose 是否强制平仓，默认为false
++	 * \return 委托ID列表
++	 */
++	virtual OrderIDs	buy(const char* code, double price, double qty, bool bForceClose = false) override;
++
++	/*!
++	 * \brief 卖出委托
++	 * \details 发出卖出委托，需要交易通道就绪
++	 * \param code 标准合约代码
++	 * \param price 委托价格
++	 * \param qty 委托数量
++	 * \param bForceClose 是否强制平仓，默认为false
++	 * \return 委托ID列表
++	 */
++	virtual OrderIDs	sell(const char* code, double price, double qty, bool bForceClose = false) override;
++
++	/*!
++	 * \brief 撤销委托
++	 * \details 根据委托ID撤销指定委托，需要交易通道就绪
++	 * \param localid 本地委托ID
++	 * \return 是否撤销成功
++	 */
++	virtual bool		cancel(uint32_t localid) override;
++
++	/*!
++	 * \brief 撤销委托
++	 * \details 根据合约代码、方向和数量撤销委托，需要交易通道就绪
++	 * \param code 标准合约代码
++	 * \param isBuy 是否买入方向
++	 * \param qty 要撤销的数量
++	 * \return 撤销的委托ID列表
++	 */
++	virtual OrderIDs	cancel(const char* code, bool isBuy, double qty) override;
++
++	/*!
++	 * \brief 输出日志
++	 * \details 输出日志信息，并添加执行器名称前缀
++	 * \param message 日志消息
++	 */
++	virtual void		writeLog(const char* message) override;
++
++	/*!
++	 * \brief 获取商品信息
++	 * \details 从执行器绑定的执行核心中获取商品信息
++	 * \param stdCode 标准合约代码
++	 * \return 商品信息指针
++	 */
++	virtual WTSCommodityInfo*	getCommodityInfo(const char* stdCode) override;
++
++	/*!
++	 * \brief 获取交易时段信息
++	 * \details 从执行器绑定的执行核心中获取交易时段信息
++	 * \param stdCode 标准合约代码
++	 * \return 交易时段信息指针
++	 */
++	virtual WTSSessionInfo*		getSessionInfo(const char* stdCode) override;
++
++	/*!
++	 * \brief 获取当前时间
++	 * \details 从执行器绑定的执行核心中获取当前时间
++	 * \return 当前时间戳
++	 */
++	virtual uint64_t	getCurTime() override;
++
++public:
++	/*!
++	 * \brief 设置目标仓位
++	 * \details 根据传入的目标仓位映射表设置合约的目标仓位，并自动处理交易逻辑
++	 *          根据目标仓位与实际仓位的差异生成交易指令
++	 * \param targets 目标仓位映射表，键为标准合约代码，值为目标仓位
++	 */
++	virtual void set_position(const wt_hashmap<std::string, double>& targets) override;
++
++
++	/*!
++	 * \brief 处理仓位变更
++	 * \details 接收仓位变更通知，更新内部仓位计算并生成新的交易指令
++	 * \param stdCode 标准合约代码
++	 * \param diffPos 仓位变化量
++	 */
++	virtual void on_position_changed(const char* stdCode, double diffPos) override;
++
++	/*!
++	 * \brief 处理实时行情
++	 * \details 接收并处理实时行情数据，将行情转发给相应执行单元
++	 * \param stdCode 标准合约代码
++	 * \param newTick 最新的行情数据
++	 */
++	virtual void on_tick(const char* stdCode, WTSTickData* newTick) override;
++
++	/*!
++	 * \brief 处理成交回报
++	 * \details 接收并处理成交回报，将成交信息转发给相应的执行单元
++	 *          并更新差价执行器的仓位管理记录
++	 * \param localid 本地委托ID
++	 * \param stdCode 标准合约代码
++	 * \param isBuy 是否买入方向
++	 * \param vol 成交数量
++	 * \param price 成交价格
++	 */
++	virtual void on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price) override;
++
++	/*!
++	 * \brief 处理委托回报
++	 * \details 接收并处理委托回报，将委托信息转发给相应的执行单元
++	 *          更新委托状态处理和统计
++	 * \param localid 本地委托ID
++	 * \param stdCode 标准合约代码
++	 * \param isBuy 是否买入方向
++	 * \param totalQty 总委托数量
++	 * \param leftQty 剩余委托数量
++	 * \param price 委托价格
++	 * \param isCanceled 是否已撤销，默认为false
++	 */
++	virtual void on_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled = false) override;
++
++	/*!
++	 * \brief 处理持仓更新通知
++	 * \details 接收交易账户持仓更新通知，更新差价执行器的持仓记录
++	 * \param stdCode 标准合约代码
++	 * \param isLong 是否为多头持仓
++	 * \param prevol 之前的持仓量
++	 * \param preavail 之前的可用持仓量
++	 * \param newvol 新的持仓量
++	 * \param newavail 新的可用持仓量
++	 * \param tradingday 交易日
++	 */
++	virtual void on_position(const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail, uint32_t tradingday) override;
++
++	/*!
++	 * \brief 处理委托下达回报
++	 * \details 接收并处理委托下达回报，将委托下达结果转发给相应的执行单元
++	 *          委托下达回报包含委托是否成功下达以及相关消息
++	 * \param localid 本地委托ID
++	 * \param stdCode 标准合约代码
++	 * \param bSuccess 委托是否成功下达
++	 * \param message 相关消息，如错误原因
++	 */
++	virtual void on_entrust(uint32_t localid, const char* stdCode, bool bSuccess, const char* message) override;
++
++	/*!
++	 * \brief 处理交易通道就绪事件
++	 * \details 当交易通道就绪时，更新内部通道就绪状态并通知所有执行单元
++	 *          通道就绪后可以开始发送交易指令
++	 */
++	virtual void on_channel_ready() override;
++
++	/*!
++	 * \brief 处理交易通道丢失事件
++	 * \details 当交易通道丢失时，更新内部通道状态并通知所有执行单元
++	 *          通道丢失后不能发送交易指令，需要等待通道恢复
++	 */
++	virtual void on_channel_lost() override;
++
++	/*!
++	 * \brief 处理账户资金更新
++	 * \details 接收并处理账户资金更新通知，更新差价执行器的资金记录
++	 *          资金信息包含余额、可用资金、盈亏、保证金等
++	 * \param currency 货币代码
++	 * \param prebalance 前一交易日结算后的账户余额
++	 * \param balance 当前结算后的账户余额
++	 * \param dynbalance 动态权益（包含浮动盈亏）
++	 * \param avaliable 可用资金
++	 * \param closeprofit 平仓盈亏
++	 * \param dynprofit 浮动盈亏
++	 * \param margin 保证金
++	 * \param fee 手续费
++	 * \param deposit 入金
++	 * \param withdraw 出金
++	 */
++	virtual void on_account(const char* currency, double prebalance, double balance, double dynbalance,
++		double avaliable, double closeprofit, double dynprofit, double margin, double fee, double deposit, double withdraw) override;
++
++
++private:
++	friend class WtDiffExecuterConcurrencyTest;
++	friend class P02DiffExecuterTestAccess;
++	//! 执行单元映射，键为合约代码，值为执行单元指针
++	ExecuteUnitMap		_unit_map;
++	std::map<std::string, std::shared_ptr<UnitLifecycleState>> _unit_states;
++	// Strong owners include live and retired initialized wrappers. A failed
++	// runtime callback may detach a unit from _unit_map, but its plugin still
++	// needs quiescence before its borrowed ExecuteContext can be destroyed.
++	std::vector<ExecuteUnitPtr> _quiesce_unit_owners;
++	std::atomic<uint64_t> _quiesce_owner_generation{ 0 };
++	//! 交易适配器指针，用于执行交易操作
++	TraderAdapter*		_trader;
++	ExecOwnerModes		_owner_modes;	///< per-contract shared/non-shared owner mode (cards 5b/5c)
++	//! 执行器工厂指针，用于创建执行单元
++	WtExecuterFactory*	_factory;
++	//! 数据管理器指针，用于获取市场数据
++	IDataManager*		_data_mgr;
++	//! 基础数据管理器指针，用于获取合约信息
++	IBaseDataMgr*		_bd_mgr;
++	//! 配置参数，包含执行器的各种配置项
++	WTSVariant*			_config;
++
++	//! 仓位放大倍数，用于调整实际交易数量
++	double				_scale;
++	// Card 8 (2026-11-03): per-contract account net-position limit declaration.
++	account_net_limits::Limits _account_limits;
++	//! 交易通道是否就绪
++	std::atomic<bool>	_channel_ready;
++
++	//! 执行单元操作的互斥锁，用于多线程安全访问
++	mutable SpinMutex	_mtx_units;
++	uint64_t			_next_unit_init_generation = 1;
++	std::atomic<uint64_t> _channel_epoch{0};
++
++	//! 目标仓位映射表，键为合约代码，值为目标仓位
++	wt_hashmap<std::string, double> _target_pos;
++	//! 差异仓位映射表，键为合约代码，值为仓位差异
++	wt_hashmap<std::string, double> _diff_pos;
++	mutable std::mutex _position_mutex;
++	// Serialize each state update through persistence and callback enqueueing so
++	// a later callback cannot overtake an earlier snapshot on the same executor.
++	std::mutex _position_update_mutex;
++	uint64_t _position_revision = 1;
++	uint64_t _position_batch_generation = 0;
++	uint64_t _next_batch_ticket = 1;
++	uint64_t _last_committed_batch_ticket = 0;
++	uint64_t _incremental_generation = 0;
++	std::map<std::string, uint64_t> _incremental_versions;
++	std::map<uint64_t, std::set<std::string>> _active_batch_targets;
++	std::set<std::string> _pending_target_notification;
++	// Protected by _position_mutex. Omitted-code cleanup may only reset a
++	// target whose version still matches the snapshot taken for that batch.
++	std::map<std::string, uint64_t> _target_versions;
++	uint64_t _target_update_generation = 0;
++	std::mutex _save_mutex;
++	uint64_t _saved_position_revision = 0;
++	// Private deterministic fault/barrier injection used only by the friend test.
++	std::function<bool(bool)> _save_test_hook;
++	std::function<void()> _save_after_commit_test_hook;
++	// Static syscall seams keep fault injection out of executor object layout.
++	static std::size_t (*_save_write_test_hook)(void*, const void*, std::size_t);
++	static int (*_save_flush_test_hook)(void*);
++	static int (*_save_close_test_hook)(void*);
++	std::function<void()> _failure_mutation_test_hook;
++	std::function<void(const std::string&)> _omitted_sweep_test_hook;
++	std::function<void(uint64_t)> _batch_preflight_test_hook;
++	std::function<void(const std::string&)> _unit_lookup_test_hook;
++	std::function<void(const std::string&)> _target_lookup_test_hook;
++
++	// Quiescence closes ingress, tracks accepted callers and callback drains, and
++	// never owns or waits for plugin-created threads.
++	mutable std::mutex _quiesce_mutex;
++	std::condition_variable _quiesce_condition;
++	std::atomic<bool> _quiesce_requested{ false };
++	std::atomic<bool> _quiesce_incomplete{ false };
++	size_t _quiesce_active_ingress = 0;
++	size_t _quiesce_active_drains = 0;
++	bool _quiesce_wait_in_progress = false;
++	bool _quiesced = false;
++	bool _quiesce_host_completed = false;
++	bool _quiesce_plugins_completed = false;
++	// Snapshot metadata is updated by the logically-const owner snapshot stage;
++	// both fields are protected by _quiesce_mutex.
++	mutable bool _quiesce_snapshot_taken = false;
++	mutable uint64_t _quiesce_snapshot_generation = 0;
++
++	//! 线程池指针类型定义
++	typedef std::shared_ptr<boost::threadpool::pool> ThreadPoolPtr;
++	//! 线程池指针，用于异步执行交易操作
++	ThreadPoolPtr		_pool;
++};
++NS_WTP_END

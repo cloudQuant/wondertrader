@@ -1,0 +1,47 @@
+Note: Google Test filter = MwStorage.TwoProcessTransAppendNoLossNoTear
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from MwStorage
+[ RUN      ] MwStorage.TwoProcessTransAppendNoLossNoTear
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:375: Failure
+Expected equality of these values:
+  head._size
+    Which is: 11930
+  2 * N
+    Which is: 12000
+published record count
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:398: Failure
+Expected equality of these values:
+  torn
+    Which is: 410
+  0u
+    Which is: 0
+records with mixed or empty payload
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:400: Failure
+Expected equality of these values:
+  reordered
+    Which is: 305
+  0u
+    Which is: 0
+each writer's own records must keep their order
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:401: Failure
+Expected equality of these values:
+  seen.size()
+    Which is: 11520
+  (size_t)(2 * N)
+    Which is: 12000
+lost records
+
+[  FAILED  ] MwStorage.TwoProcessTransAppendNoLossNoTear (184 ms)
+[----------] 1 test from MwStorage (184 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (184 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] MwStorage.TwoProcessTransAppendNoLossNoTear
+
+ 1 FAILED TEST

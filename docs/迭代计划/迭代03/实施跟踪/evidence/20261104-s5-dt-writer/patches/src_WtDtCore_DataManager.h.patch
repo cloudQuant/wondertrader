@@ -1,0 +1,117 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-dt-writer/before/src/WtDtCore/DataManager.h	2026-10-29 19:53:26
++++ src/WtDtCore/DataManager.h	2026-11-04 13:35:13
+@@ -16,6 +16,8 @@
+ #include "../Share/BoostMappingFile.hpp"
+ #include "../Share/DLLHelper.hpp"
+ 
++#include <memory>
++
+ NS_WTP_BEGIN
+ class WTSTickData;
+ class WTSOrdQueData;
+@@ -76,19 +78,48 @@
+ 	 * @details 注册一个数据广播器，用于将数据广播到其他终端或系统
+ 	 * @param caster 数据广播器指针
+ 	 */
+-	inline void add_caster(IDataCaster* caster)
+-	{
+-		if (caster == NULL)
+-			return;
++	void add_caster(IDataCaster* caster);
+ 
+-		_casters.emplace_back(caster);
+-	}
+-
+ 	/**
+ 	 * @brief 释放数据管理器资源
+ 	 * @details 清理并释放数据管理器使用的所有资源，包括广播器和数据写入器等
++	 *
++	 * Writer lifecycle (iteration 03, card 9: 9a=A+C, 9b=A, 9c=A, 9d=A):
++	 * - Called from inside any writer frame (a writer call made through this manager,
++	 *   or a writer -> sink callback on any thread), release only queues the request:
++	 *   admission closes, a V1 writer receives request_stop, and the call returns. The
++	 *   writer is never released, deleted or unloaded on a frame it may still return
++	 *   into. The request is delivered at the next safe point: when the last writer
++	 *   call made through this manager returns on a thread that is not inside a writer
++	 *   callback, or by the next release()/destructor from such a thread.
++	 * - From a safe context, release closes admission, waits for this manager's
++	 *   in-flight writer calls, then: a writer exporting lifecycle V1 is request_stop'ed
++	 *   and waited until DRAINED, then released, deleted and its module unloaded; a
++	 *   legacy writer is released and then retained with its module and sink until
++	 *   process exit (quarantine), because it cannot prove callback quiescence.
++	 * - "release_timeout_ms" (writer config, default 0 = no limit) bounds every wait;
++	 *   on expiry the writer, module and sink are quarantined instead of destroyed.
++	 * - The sink object handed to the writer outlives this manager when quarantined;
++	 *   after quarantine or destruction, callbacks no longer reach casters, the state
++	 *   monitor or base data.
+ 	 */
+ 	void release();
++
++	/** Observable writer lifecycle state (diagnostics and tests). */
++	enum WriterLifecycleState
++	{
++		WLS_None = 0,		///< no writer (never initialized, or init failed before a writer existed)
++		WLS_Initializing,
++		WLS_Ready,
++		WLS_ReleasePending,	///< release queued from a writer frame, waiting for a safe point
++		WLS_Finalizing,
++		WLS_Released,		///< drained, released, deleted and unloaded
++		WLS_Quarantined		///< retained until process exit (not provably drained)
++	};
++	WriterLifecycleState writerLifecycleState() const;
++
++	/** Number of writers retained in quarantine by this process. */
++	static size_t quarantinedWriterCount();
+ 
+ 	/**
+ 	 * @brief 写入Tick数据
+@@ -217,40 +248,17 @@
+ 	 */
+ 	virtual void outputLog(WTSLogLevel ll, const char* message) override;
+ 
++public:
++	class WriterHost;
++
+ private:
+ 	/**
+-	 * @brief 数据写入器指针
+-	 * @details 用于将数据写入到存储介质中
++	 * Heap-owned writer host (card 9b): owns the writer, its remover and module, the
++	 * borrowed base data/state monitor/casters, and is the IDataWriterSink handed to
++	 * the writer. Every writer call and callback pins it; a quarantined host is kept
++	 * alive by a process-wide registry so a retained writer never calls into a
++	 * destroyed DataManager.
+ 	 */
+-	IDataWriter*		_writer;
+-	/** Dynamic library must stay loaded while the writer is released and destroyed. */
+-	DllHandle		_writer_module;
+-	/** Prevent reentrant shutdown and retries after release() failed part way through. */
+-	bool			_writer_release_failed;
+-	bool			_writer_releasing;
+-
+-	/**
+-	 * @brief 数据写入器删除函数
+-	 * @details 用于释放数据写入器对象
+-	 */
+-	FuncDeleteWriter	_remover;
+-
+-	/**
+-	 * @brief 基础数据管理器指针
+-	 * @details 用于获取基础数据信息
+-	 */
+-	WTSBaseDataMgr*		_bd_mgr;
+-
+-	/**
+-	 * @brief 状态监控器指针
+-	 * @details 用于监控系统状态
+-	 */
+-	StateMonitor*		_state_mon;
+-
+-	/**
+-	 * @brief 数据广播器列表
+-	 * @details 存储所有注册的数据广播器
+-	 */
+-	std::vector<IDataCaster*>	_casters;
++	std::shared_ptr<WriterHost>	_host;
+ };
+ 

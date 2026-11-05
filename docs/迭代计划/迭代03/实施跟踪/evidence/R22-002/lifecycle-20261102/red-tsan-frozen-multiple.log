@@ -1,0 +1,24 @@
+argv=["/tmp/wt-r22-lifecycle-20261102/red-tsan-frozen", "multiple"]
+exit=-6
+==================
+WARNING: ThreadSanitizer: data race (pid=41244)
+  Write of size 8 at 0x000100c18a90 by thread T1:
+    #0 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>>(void*) <null> (red-tsan-frozen:arm64+0x10001c3c8)
+
+  Previous read of size 8 at 0x000100c18a90 by thread T2:
+    #0 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>>(void*) <null> (red-tsan-frozen:arm64+0x10001c190)
+
+  Location is global 'StateMonitor::run()::$_0::operator()() const::lastTime' at 0x000100c18a90 (red-tsan-frozen+0x100198a90)
+
+  Thread T1 (tid=1047718, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 StateMonitor::run() <null> (red-tsan-frozen:arm64+0x10000cc7c)
+    #2 main <null> (red-tsan-frozen:arm64+0x100021eb0)
+
+  Thread T2 (tid=1047719, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 StateMonitor::run() <null> (red-tsan-frozen:arm64+0x10000cc7c)
+    #2 main <null> (red-tsan-frozen:arm64+0x100021eb8)
+
+SUMMARY: ThreadSanitizer: data race (red-tsan-frozen:arm64+0x10001c3c8) in void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>>(void*)+0x3f4
+==================

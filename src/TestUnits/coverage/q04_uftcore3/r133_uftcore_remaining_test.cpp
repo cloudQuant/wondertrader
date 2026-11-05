@@ -233,6 +233,10 @@ TEST_F(R133ShareManagerFork, watcher_iterates_committed_sections)
 	run_child([this](R133SmReport& r) {
 		ShareManager& sm = ShareManager::self();
 		R133_SM_CHK(r, sm.initialize(_lib.c_str()));
+		// start_watching 合同：initialize/init_domain/set_engine/commit 须在启动前完成，无引擎拒绝启动
+		// （工作线程会向引擎投递参数更新）；子进程内的引擎只作接收方，不初始化（迭代03 第五会话 int2 归因）。
+		static WtUftEngine engine;
+		sm.set_engine(&engine);
 		// 未 init_domain 时 commit_section 返回 false，但会登记 _secnames
 		R133_SM_CHK(r, !sm.commit_param_watcher("r133_watch"));
 		R133_SM_CHK(r, sm.start_watching(1000));
@@ -240,8 +244,14 @@ TEST_F(R133ShareManagerFork, watcher_iterates_committed_sections)
 		// 重复 start 只返回 true，不重建线程
 		R133_SM_CHK(r, sm.start_watching(1000));
 
-		// 给工作线程至少几十轮迭代；子进程 exit 时单例析构 join
+		// 给工作线程至少几十轮迭代
 		::usleep(30000);
+		// I03-NEW-136: the engine stays borrowed until wait_watching_stopped() joins the
+		// worker (ShareManager.h). Stop and join here; relying on the singleton destructor
+		// at exit let the function-local static engine (constructed later, destroyed
+		// earlier) die while the watcher still posted to it (recursive_mutex EINVAL).
+		R133_SM_CHK(r, sm.request_stop_watching());
+		R133_SM_CHK(r, sm.wait_watching_stopped());
 		r.marks = 3;
 	});
 }

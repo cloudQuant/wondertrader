@@ -1,0 +1,17 @@
+PASS rc=0 p06_stra_mgr.load_factories_missing_directory_returns_false
+PASS rc=0 p06_stra_mgr.load_factories_empty_directory_returns_true
+PASS rc=0 p06_stra_mgr.load_factories_skips_dirs_and_wrong_extensions
+PASS rc=0 p06_stra_mgr.create_strategy_by_dotted_name_validates_input
+PASS rc=0 p06_stra_mgr.repeated_load_is_idempotent_on_empty_dir
+PASS rc=0 p06_stra_mgr.manager_destructor_with_empty_registry
+PASS rc=0 R11UftStrategyMgr.loadFactoriesMissingDirectory
+PASS rc=0 R11UftStrategyMgr.loadFactoriesSkipsNonModules
+PASS rc=0 R11UftStrategyMgr.getStrategyMissReturnsEmptyPointer
+PASS rc=0 R173UftStrategyMgr.ValidDylibWithoutStrategyFactoryIsSkipped
+PASS rc=0 R183UftFactory.DylibWithoutFactoryEntryIsSkipped
+PASS rc=0 R54StraMgr.loads_plugin_and_creates_strategy
+PASS rc=0 R54StraMgr.managerDestructorReleasesFactoryWithPublishedAbi
+PASS rc=0 R54StraMgr.skips_module_without_entry_symbol
+PASS rc=0 R78UftStraMgr.load_factories_skips_unusable_entries
+PASS rc=0 R78UftStraMgr.create_and_get_misses
+TOTAL       16 PASS 16 FAIL 0

@@ -1,0 +1,126 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r7_twap.*
+[==========] Running 41 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 41 tests from r7_twap
+[ RUN      ] r7_twap.names_and_init_derived_span
+[       OK ] r7_twap.names_and_init_derived_span (0 ms)
+[ RUN      ] r7_twap.timeout_without_verified_identity_keeps_monitor_and_never_cancels
+[       OK ] r7_twap.timeout_without_verified_identity_keeps_monitor_and_never_cancels (0 ms)
+[ RUN      ] r7_twap.init_rejects_missing_trading_session
+[       OK ] r7_twap.init_rejects_missing_trading_session (0 ms)
+[ RUN      ] r7_twap.init_rejects_null_context_code_and_configuration
+[       OK ] r7_twap.init_rejects_null_context_code_and_configuration (0 ms)
+[ RUN      ] r7_twap.invalid_schedule_configs_fail_closed_without_orders
+[       OK ] r7_twap.invalid_schedule_configs_fail_closed_without_orders (0 ms)
+[ RUN      ] r7_twap.total_times_out_of_range_is_rejected_before_unsigned_conversion
+[       OK ] r7_twap.total_times_out_of_range_is_rejected_before_unsigned_conversion (0 ms)
+[ RUN      ] r7_twap.positive_total_times_one_and_n_derive_expected_spans
+[       OK ] r7_twap.positive_total_times_one_and_n_derive_expected_spans (0 ms)
+[ RUN      ] r7_twap.session_reference_released_after_invalid_config
+[       OK ] r7_twap.session_reference_released_after_invalid_config (0 ms)
+[ RUN      ] r7_twap.session_reference_released_after_normal_destruction
+[       OK ] r7_twap.session_reference_released_after_normal_destruction (0 ms)
+[ RUN      ] r7_twap.splits_remaining_qty_evenly_across_left_times
+[       OK ] r7_twap.splits_remaining_qty_evenly_across_left_times (0 ms)
+[ RUN      ] r7_twap.tick_ownership_survives_caller_release_later_tick_and_unit_destruction
+[       OK ] r7_twap.tick_ownership_survives_caller_release_later_tick_and_unit_destruction (0 ms)
+[ RUN      ] r7_twap.rounds_half_away_from_zero_when_remainder_not_even
+[       OK ] r7_twap.rounds_half_away_from_zero_when_remainder_not_even (0 ms)
+[ RUN      ] r7_twap.tiny_diffqty_floors_to_min_open_lots
+[       OK ] r7_twap.tiny_diffqty_floors_to_min_open_lots (0 ms)
+[ RUN      ] r7_twap.minopenlots_absent_defaults_to_zero
+[       OK ] r7_twap.minopenlots_absent_defaults_to_zero (0 ms)
+[ RUN      ] r7_twap.explicit_zero_minopenlots_is_accepted_and_adds_no_floor
+[       OK ] r7_twap.explicit_zero_minopenlots_is_accepted_and_adds_no_floor (0 ms)
+[ RUN      ] r7_twap.sell_side_keeps_sign_and_splits_evenly
+[       OK ] r7_twap.sell_side_keeps_sign_and_splits_evenly (0 ms)
+[ RUN      ] r7_twap.last_slice_showhand_buys_remaining_with_5_tick_premium
+[       OK ] r7_twap.last_slice_showhand_buys_remaining_with_5_tick_premium (0 ms)
+[ RUN      ] r7_twap.fire_span_blocks_second_tick_recalc
+[       OK ] r7_twap.fire_span_blocks_second_tick_recalc (0 ms)
+[ RUN      ] r7_twap.price_mode_1_buy_uses_bid_and_mode_2_uses_ask
+[       OK ] r7_twap.price_mode_1_buy_uses_bid_and_mode_2_uses_ask (0 ms)
+[ RUN      ] r7_twap.price_offset_shifts_buy_up_and_sell_down
+[       OK ] r7_twap.price_offset_shifts_buy_up_and_sell_down (0 ms)
+[ RUN      ] r7_twap.zero_last_price_falls_back_to_preclose
+[       OK ] r7_twap.zero_last_price_falls_back_to_preclose (0 ms)
+[ RUN      ] r7_twap.limit_prices_cap_the_order_price
+[       OK ] r7_twap.limit_prices_cap_the_order_price (0 ms)
+[ RUN      ] r7_twap.calc_before_channel_ready_does_nothing
+[       OK ] r7_twap.calc_before_channel_ready_does_nothing (0 ms)
+[ RUN      ] r7_twap.calc_exits_without_tick_then_blocks_on_live_order
+[       OK ] r7_twap.calc_exits_without_tick_then_blocks_on_live_order (0 ms)
+[ RUN      ] r7_twap.pending_cancel_blocks_calc
+[       OK ] r7_twap.pending_cancel_blocks_calc (0 ms)
+[ RUN      ] r7_twap.opposite_live_order_canceled_first_without_new_order
+[       OK ] r7_twap.opposite_live_order_canceled_first_without_new_order (0 ms)
+[ RUN      ] r7_twap.channel_ready_drops_unconfirmed_local_orders
+[       OK ] r7_twap.channel_ready_drops_unconfirmed_local_orders (0 ms)
+[ RUN      ] r7_twap.stale_tick_gate_and_entrust_reject
+[       OK ] r7_twap.stale_tick_gate_and_entrust_reject (0 ms)
+[ RUN      ] r7_twap.on_order_drains_cancel_cnt
+[       OK ] r7_twap.on_order_drains_cancel_cnt (0 ms)
+[ RUN      ] r7_twap.cancel_report_refires_with_cancel_times_price_step
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:887: Failure
+Expected equality of these values:
+  ctx.buys[1].qty
+    Which is: 5
+  25.0
+    Which is: 25
+
+[  FAILED  ] r7_twap.cancel_report_refires_with_cancel_times_price_step (0 ms)
+[ RUN      ] r7_twap.fire_at_once_mode_1_and_2_pricing
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:915: Failure
+Expected equality of these values:
+  ctx.buys[2].qty
+    Which is: 5
+  25.0
+    Which is: 25
+
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:916: Failure
+Expected equality of these values:
+  ctx.buys[3].qty
+    Which is: 5
+  25.0
+    Which is: 25
+
+[  FAILED  ] r7_twap.fire_at_once_mode_1_and_2_pricing (0 ms)
+[ RUN      ] r7_twap.fire_at_once_unknown_price_mode_has_no_preclose_fallback
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:938: Failure
+Expected equality of these values:
+  ctx.buys[1].qty
+    Which is: 5
+  25.0
+    Which is: 25
+
+[  FAILED  ] r7_twap.fire_at_once_unknown_price_mode_has_no_preclose_fallback (0 ms)
+[ RUN      ] r7_twap.unknown_price_mode_falls_into_counter_price
+[       OK ] r7_twap.unknown_price_mode_falls_into_counter_price (0 ms)
+[ RUN      ] r7_twap.tick_guards_and_noop_callbacks
+[       OK ] r7_twap.tick_guards_and_noop_callbacks (0 ms)
+[ RUN      ] r7_twap.repeated_target_is_ignored
+[       OK ] r7_twap.repeated_target_is_ignored (0 ms)
+[ RUN      ] r7_twap.clear_target_with_flat_position_does_nothing
+[       OK ] r7_twap.clear_target_with_flat_position_does_nothing (0 ms)
+[ RUN      ] r7_twap.init_zero_total_times_bounded_child_probe
+[       OK ] r7_twap.init_zero_total_times_bounded_child_probe (1 ms)
+[ RUN      ] r7_twap.init_positive_total_times_control_returns
+[       OK ] r7_twap.init_positive_total_times_control_returns (1 ms)
+[ RUN      ] r7_twap.null_commodity_with_price_offset_fails_closed
+[       OK ] r7_twap.null_commodity_with_price_offset_fails_closed (0 ms)
+[ RUN      ] r7_twap.failed_concurrent_calc_guard_does_not_release_owner
+[       OK ] r7_twap.failed_concurrent_calc_guard_does_not_release_owner (0 ms)
+[ RUN      ] r7_twap.startup_cancel_before_first_slice_does_not_retry_default_target
+[       OK ] r7_twap.startup_cancel_before_first_slice_does_not_retry_default_target (0 ms)
+[----------] 41 tests from r7_twap (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 41 tests from 1 test suite ran. (5 ms total)
+[  PASSED  ] 38 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] r7_twap.cancel_report_refires_with_cancel_times_price_step
+[  FAILED  ] r7_twap.fire_at_once_mode_1_and_2_pricing
+[  FAILED  ] r7_twap.fire_at_once_unknown_price_mode_has_no_preclose_fallback
+
+ 3 FAILED TESTS

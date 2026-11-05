@@ -1,0 +1,36 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R160EventNotifier.*
+[==========] Running 12 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 12 tests from R160EventNotifier
+[ RUN      ] R160EventNotifier.FakeModuleObservesExactServerAndPublishAbi
+[       OK ] R160EventNotifier.FakeModuleObservesExactServerAndPublishAbi (72 ms)
+[ RUN      ] R160EventNotifier.WorkGuardKeepsWorkerAliveForEveryPublishLambda
+[       OK ] R160EventNotifier.WorkGuardKeepsWorkerAliveForEveryPublishLambda (127 ms)
+[ RUN      ] R160EventNotifier.DiscardedOrderHandlerReleasesRetainedReference
+[       OK ] R160EventNotifier.DiscardedOrderHandlerReleasesRetainedReference (0 ms)
+[ RUN      ] R160EventNotifier.AsyncOrderHandlerDestroysObjectOnceAfterPublisherReturns
+[       OK ] R160EventNotifier.AsyncOrderHandlerDestroysObjectOnceAfterPublisherReturns (0 ms)
+[ RUN      ] R160EventNotifier.DiscardedOrderHandlerDestroysLastReferenceOnce
+[       OK ] R160EventNotifier.DiscardedOrderHandlerDestroysLastReferenceOnce (0 ms)
+[ RUN      ] R160EventNotifier.ThrowingOrderPublisherDestroysLastReferenceOnce
+EventNotifier TRD_ORDER handler failed: R160 trade publisher failure
+[       OK ] R160EventNotifier.ThrowingOrderPublisherDestroysLastReferenceOnce (1 ms)
+[ RUN      ] R160EventNotifier.WorkerFinishesPendingOrderBeforeDestructorReturns
+[       OK ] R160EventNotifier.WorkerFinishesPendingOrderBeforeDestructorReturns (6 ms)
+[ RUN      ] R160EventNotifier.DiscardedTradeHandlerReleasesRetainedReference
+[       OK ] R160EventNotifier.DiscardedTradeHandlerReleasesRetainedReference (0 ms)
+[ RUN      ] R160EventNotifier.ThrowingTradePublisherReleasesRetainedReference
+EventNotifier TRD_TRADE handler failed: R160 trade publisher failure
+[       OK ] R160EventNotifier.ThrowingTradePublisherReleasesRetainedReference (0 ms)
+[ RUN      ] R160EventNotifier.DeliversAfterIdleWithoutExternalWorkGuard
+[       OK ] R160EventNotifier.DeliversAfterIdleWithoutExternalWorkGuard (113 ms)
+[ RUN      ] R160EventNotifier.ThrowingPublisherIsReportedAndLaterItemRuns
+[       OK ] R160EventNotifier.ThrowingPublisherIsReportedAndLaterItemRuns (5 ms)
+[ RUN      ] R160EventNotifier.ConcurrentStopDrainsAcceptedItemsAndRejectsLaterItems
+[       OK ] R160EventNotifier.ConcurrentStopDrainsAcceptedItemsAndRejectsLaterItems (13 ms)
+[----------] 12 tests from R160EventNotifier (340 ms total)
+
+[----------] Global test environment tear-down
+[==========] 12 tests from 1 test suite ran. (342 ms total)
+[  PASSED  ] 12 tests.

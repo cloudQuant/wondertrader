@@ -1,0 +1,42 @@
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1359: Failure
+Expected equality of these values:
+  1.0
+    Which is: 1
+  adapter.getUndoneQty(kStdCode)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1361: Failure
+Expected equality of these values:
+  1.0
+    Which is: 1
+  adapter.getUndoneQty(kStdCode)
+    Which is: 0
+
+[  FAILED  ] Wp1Test.OrderReportThenTradeOfSameFillDeductsOnce (414 ms)
+[ RUN      ] Wp1Test.TombstonePruneDuringRejectionKeepsTheRejectedOrdersIdentity
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1397: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  failures
+    Which is: 0
+the rejection reaches the order's owner
+
+[  FAILED  ] Wp1Test.TombstonePruneDuringRejectionKeepsTheRejectedOrdersIdentity (4987 ms)
+[ RUN      ] Wp1Test.EntrustObserverRunsBeforeProviderCallAndOnlyForItsAdapter
+[       OK ] Wp1Test.EntrustObserverRunsBeforeProviderCallAndOnlyForItsAdapter (439 ms)
+[----------] 39 tests from Wp1Test (24151 ms total)
+
+[----------] Global test environment tear-down
+[==========] 39 tests from 1 test suite ran. (24151 ms total)
+[  PASSED  ] 36 tests.
+[  SKIPPED ] 1 test, listed below:
+[  SKIPPED ] Wp1Test.ChildScenario
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] Wp1Test.OrderReportThenTradeOfSameFillDeductsOnce
+[  FAILED  ] Wp1Test.TombstonePruneDuringRejectionKeepsTheRejectedOrdersIdentity
+
+ 2 FAILED TESTS
+exit=1
+exit=1

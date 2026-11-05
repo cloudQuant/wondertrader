@@ -62,7 +62,7 @@ TEST_F(R145StateMonitorRunTest, HolidaySessionWithoutCommoditiesTransitionsToHol
  */
 TEST_F(R145StateMonitorRunTest, CommodityMarkedHolidayDrivesHolidayBranchOfOriginal)
 {
-	load_holidays(std::string("{\"R145_HOL\":") + r145::today_window() + "}");
+	load_holidays(std::string("{\"R145_NONE\": [], \"R145_HOL\":") + r145::today_window() + "}");
 
 	StateMonitor mon;
 	fs::path cfg = state_cfg(

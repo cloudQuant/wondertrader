@@ -8,6 +8,7 @@
  * \brief
  */
 #include "TraderATP.h"
+#include "../Share/ProviderRawReport.hpp"
 
 #include "../Includes/IBaseDataMgr.h"
 #include "../Includes/WTSContractInfo.hpp"
@@ -45,6 +46,14 @@ inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, cons
 
 extern "C"
 {
+	// BUG-L01-014 / K42: optional host feature declaration (WT_TRADER_SPI_FEATURES_SYMBOL).
+	EXPORT_FLAG void setTraderSpiFeatures(ITraderApi* trader, uint64_t features)
+	{
+		TraderATP* self = dynamic_cast<TraderATP*>(trader);
+		if (self != NULL)
+			self->setSpiFeatures(features);
+	}
+
 	EXPORT_FLAG ITraderApi* createTrader()
 	{
 		TraderATP *instance = new TraderATP();
@@ -713,6 +722,12 @@ void TraderATP::OnRspCashAuctionTradeER(const ATPRspCashAuctionTradeERMsg& cash_
 			tRecord->release();
 		});
 	}
+	else
+	{
+		// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+		wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderATP", "trade", "trade report could not be converted",
+			wt_provider_raw::hexOf("ATPRspCashAuctionTradeERMsg", &cash_auction_trade_er));
+	}
 
 	// 保存回报分区号、序号，用于断线重连时指定已收到最新回报序号
 	report_sync[cash_auction_trade_er.partition] = cash_auction_trade_er.index;
@@ -755,7 +770,12 @@ void TraderATP::OnRspOrderQueryResult(const ATPRspOrderQueryResultMsg &msg)
 	{
 		WTSOrderInfo* ordInfo = makeOrderInfo(&unit);
 		if (ordInfo == NULL)
+		{
+			// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the struct); the host pauses the account.
+			wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderATP", "order", "order query row could not be converted",
+				wt_provider_raw::hexOf("APIOrderUnit", &unit));
 			continue;
+		}
 
 		boost::asio::post(_asyncio, [this, ordInfo] {
 			ayOrders->append(ordInfo, false);
@@ -786,7 +806,12 @@ void TraderATP::OnRspTradeOrderQueryResult(const ATPRspTradeOrderQueryResultMsg 
 	{
 		WTSTradeInfo* trdInfo = makeTradeInfo(&unit);
 		if (trdInfo == NULL)
+		{
+			// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the struct); the host pauses the account.
+			wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderATP", "trade", "trade query row could not be converted",
+				wt_provider_raw::hexOf("APITradeOrderUnit", &unit));
 			continue;
+		}
 
 		boost::asio::post(_asyncio, [this, trdInfo] {
 			ayTrades->append(trdInfo, false);

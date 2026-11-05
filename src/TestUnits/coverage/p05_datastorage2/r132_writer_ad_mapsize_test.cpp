@@ -96,9 +96,37 @@ TEST_F(R132WriterADMapsizeTest, R132WriterADTickMapFullLogsPipeFailure)
 	cfg->append("tickmapsize", kMapSize);
 	init_writer(cfg);
 
-	write_ticks(ct);
-
+	// 卡13（13a=A，用户裁定 2026-11-03）：tick 库 put 失败 → 不发布缓存、不广播，
+	// 同步 writeTick 返回 false 并计入 tickPersistFailures()（旧合同"仍缓存并广播"已废止）。
+	const uint32_t n = 30;
+	for (uint32_t i = 0; i < n; i++)
+	{
+		const uint32_t tdate = 20230103 + i / 2;
+		WTSTickStruct ts = r4fx::make_tick("EXQ", "rb2301", tdate, tdate,
+			(930 + i) * 100000, 100.0 + i, 1.0, 1.0, 1000.0, 0.0,
+			(double)(i + 1), (double)(i + 1));
+		WTSTickData* tick = tick_of(ct, ts);
+		EXPECT_FALSE(_writer->writeTick(tick, 0)) << i;
+		tick->release();
+	}
 	EXPECT_GE(_sink->count_containing("pipe tick"), 1u);
+	EXPECT_EQ(_sink->bcast_tick(), 0u);
+	EXPECT_EQ(_writer->tickPersistFailures(), n);
+	WTSTickData* cur = _writer->getCurTick("rb2301", "EXQ");
+	EXPECT_TRUE(cur == NULL);
+	if (cur) cur->release();
+
+	// 可重试：换用足够的 mapsize 重新打开后，同一笔首 tick 原样落库并发布
+	_writer->release();
+	init_writer(r4fx::make_writer_cfg(_root.string(), 1000, false, false, false, false));
+	WTSTickStruct first = r4fx::make_tick("EXQ", "rb2301", 20230103, 20230103,
+		930 * 100000, 100.0, 1.0, 1.0, 1000.0, 0.0, 1.0, 1.0);
+	write_or_fail(tick_of(ct, first), 0);
+	EXPECT_EQ(_sink->bcast_tick(), 1u);
+	cur = _writer->getCurTick("rb2301", "EXQ");
+	ASSERT_TRUE(cur != NULL);
+	EXPECT_EQ(cur->actiontime(), 930u * 100000u);
+	cur->release();
 }
 
 // WtDataWriterAD.cpp: L450-547（m1/m5/day 库 put 失败；关掉 tick 落库以隔离）

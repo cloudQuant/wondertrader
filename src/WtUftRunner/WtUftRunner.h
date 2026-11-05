@@ -43,7 +43,7 @@ USING_NS_WTP;
  * @details 负责初始化并运行整个UFT策略引擎，包括加载配置、初始化各个模块、
  *          管理策略和各种适配器、处理日志输出等。继承ILogHandler接口实现日志处理功能。
  */
-class WtUftRunner : public ILogHandler
+class WtUftRunner final : public ILogHandler // final: owned/deleted by main (I03-NEW-058)
 {
 public:
 	/**
@@ -79,6 +79,7 @@ public:
 	 * @brief 启动并运行引擎
 	 * @param bAsync 是否以异步模式运行，默认为同步模式
 	 * @details 两种模式都会在当前线程启动引擎、行情和交易适配器。异步模式在启动完成后返回；
+	 *          每个实例最多尝试启动一次；重复调用在进入引擎前拒绝。
 	 *          调用方必须保持 runner 存活，并在控制线程调用 shutdown()。同步模式等待退出信号并自行调用 shutdown()。
 	 */
 	void run(bool bAsync = false);
@@ -86,17 +87,24 @@ public:
 	/**
  * Request producer shutdown, join the ticker/share watcher, and drain trader
  * notifications. Returns false while parser callback quiescence is unproven or
- * adapter teardown remains pending; keep the runner alive and retry after the
- * provider-specific barrier. Parser callback calls return false immediately;
+ * adapter teardown remains pending or runner startup is active; keep the
+ * runner alive and retry after startup or the provider-specific barrier.
+ * A startup-time request is retried when run() leaves startup. Parser callback calls return false immediately;
  * retry from a control thread before destroying the runner.
 	 */
 	bool shutdown();
+
+	// I03-NEW-058 / card 9a: true when the last shutdown attempt was blocked only by
+	// parser owners lacking callback-drain proof; such a runner is retained (never
+	// destroyed) by the process entry until process exit instead of aborting.
+	bool parserOwnersRetained() const { return _parser_owners_retained.load(std::memory_order_acquire); }
 
 private:
 	bool configImpl(const std::string& filename);
 	bool registerParserCandidate(const std::string& id, ParserAdapterPtr& adapter);
 	bool releaseParserCandidateIfSafe(ParserAdapterPtr& adapter);
 	bool startParsers();
+	bool startParsers(bool runnerLease);
 	void finishParserStart();
 	bool closeParserStartAndDrain();
 	bool isInParserCallbackOnCurrentThread() const;
@@ -180,6 +188,7 @@ private:
 	std::atomic<bool>   _config_succeeded{false};
 	std::atomic<bool>   _share_domain_attached{false};
 	std::atomic<bool>   _parser_quarantine_pending{false};
+	std::atomic<bool>   _parser_owners_retained{false};
 	std::vector<ParserAdapterPtr> _quarantined_parsers;
 	std::mutex _parser_start_mutex;
 	std::condition_variable _parser_start_cv;

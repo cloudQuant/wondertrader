@@ -1,0 +1,144 @@
+[ RUN      ] l03_commodity.create_fills_identity_fields
+[       OK ] l03_commodity.create_fills_identity_fields (0 ms)
+[ RUN      ] l03_commodity.create_initializes_identity_buffers
+[       OK ] l03_commodity.create_initializes_identity_buffers (0 ms)
+[ RUN      ] l03_commodity.identity_field_boundary_length
+[       OK ] l03_commodity.identity_field_boundary_length (0 ms)
+[ RUN      ] l03_commodity.identity_fields_reject_values_that_do_not_fit
+[       OK ] l03_commodity.identity_fields_reject_values_that_do_not_fit (0 ms)
+[ RUN      ] l03_commodity.scalar_accessors_round_trip
+[       OK ] l03_commodity.scalar_accessors_round_trip (0 ms)
+[ RUN      ] l03_commodity.category_predicates
+[       OK ] l03_commodity.category_predicates (0 ms)
+[ RUN      ] l03_commodity.trading_mode_predicates
+[       OK ] l03_commodity.trading_mode_predicates (0 ms)
+[ RUN      ] l03_commodity.cover_and_price_modes
+[       OK ] l03_commodity.cover_and_price_modes (0 ms)
+[ RUN      ] l03_commodity.code_set_add_and_dedupe
+[       OK ] l03_commodity.code_set_add_and_dedupe (0 ms)
+[ RUN      ] l03_commodity.session_info_binding
+[       OK ] l03_commodity.session_info_binding (0 ms)
+[ RUN      ] l03_commodity.calc_fee_by_volume
+[       OK ] l03_commodity.calc_fee_by_volume (0 ms)
+[ RUN      ] l03_commodity.calc_fee_by_amount_and_rounding
+[       OK ] l03_commodity.calc_fee_by_amount_and_rounding (0 ms)
+[ RUN      ] l03_commodity.calc_fee_disabled_after_enable
+[       OK ] l03_commodity.calc_fee_disabled_after_enable (0 ms)
+[ RUN      ] l03_contract.create_and_defaults
+[       OK ] l03_contract.create_and_defaults (0 ms)
+[ RUN      ] l03_contract.date_and_limit_setters
+[       OK ] l03_contract.date_and_limit_setters (0 ms)
+[ RUN      ] l03_contract.alt_code_for_zce
+[       OK ] l03_contract.alt_code_for_zce (0 ms)
+[ RUN      ] l03_contract.identity_fields_reject_values_that_do_not_fit
+[       OK ] l03_contract.identity_fields_reject_values_that_do_not_fit (0 ms)
+[ RUN      ] l03_contract.alt_code_capacity_rejection_preserves_previous_identity
+[       OK ] l03_contract.alt_code_capacity_rejection_preserves_previous_identity (0 ms)
+[ RUN      ] l03_contract.oversized_configured_identity_is_rejected_before_registration
+[       OK ] l03_contract.oversized_configured_identity_is_rejected_before_registration (2 ms)
+[ RUN      ] l03_contract.storage_width_contract_limits_preserve_valid_edges_and_reject_before_rules_registration
+[       OK ] l03_contract.storage_width_contract_limits_preserve_valid_edges_and_reject_before_rules_registration (4 ms)
+[ RUN      ] l03_contract.margin_ratio_from_commodity
+[       OK ] l03_contract.margin_ratio_from_commodity (0 ms)
+[ RUN      ] l03_contract.calc_fee_delegates_to_commodity
+[       OK ] l03_contract.calc_fee_delegates_to_commodity (0 ms)
+[ RUN      ] l03_contract.calc_fee_keeps_cents_above_int32_range
+[       OK ] l03_contract.calc_fee_keeps_cents_above_int32_range (0 ms)
+[ RUN      ] l03_contract.hot_codes
+[       OK ] l03_contract.hot_codes (0 ms)
+[ RUN      ] l03_contract.total_index_round_trip
+[       OK ] l03_contract.total_index_round_trip (0 ms)
+[ RUN      ] l03_contract.ext_data_slots
+[       OK ] l03_contract.ext_data_slots (0 ms)
+[ RUN      ] l03_contract.null_comm_info_is_guarded_by_caller_contract
+[       OK ] l03_contract.null_comm_info_is_guarded_by_caller_contract (0 ms)
+[ RUN      ] l03_object.initial_ref_is_single
+[       OK ] l03_object.initial_ref_is_single (0 ms)
+[ RUN      ] l03_object.retain_and_release_balancing
+[       OK ] l03_object.retain_and_release_balancing (0 ms)
+[ RUN      ] l03_object.release_is_idempotent_at_zero_refs
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l03_includes/l03_object_pool_test.cpp:106: Failure
+Expected equality of these values:
+    Which is: 2
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l03_includes/l03_object_pool_test.cpp:108: Failure
+Expected equality of these values:
+    Which is: 3
+[  FAILED  ] l03_object.release_is_idempotent_at_zero_refs (0 ms)
+[ RUN      ] l03_object.refcount_works_on_concrete_includes_type
+[       OK ] l03_object.refcount_works_on_concrete_includes_type (0 ms)
+[ RUN      ] l03_pool_object.allocate_returns_usable_ready_item
+[       OK ] l03_pool_object.allocate_returns_usable_ready_item (0 ms)
+[ RUN      ] l03_pool_object.recycled_after_last_release
+[       OK ] l03_pool_object.recycled_after_last_release (0 ms)
+[ RUN      ] l03_pool_object.shared_pool_serves_many_release_paths
+[       OK ] l03_pool_object.shared_pool_serves_many_release_paths (0 ms)
+[ RUN      ] l03_switch_item.create_and_accessors
+[       OK ] l03_switch_item.create_and_accessors (0 ms)
+[ RUN      ] l03_switch_item.empty_fields_and_date_edges
+[       OK ] l03_switch_item.empty_fields_and_date_edges (0 ms)
+[ RUN      ] l03_switch_item.refcount_lifecycle
+[       OK ] l03_switch_item.refcount_lifecycle (0 ms)
+[ RUN      ] l03_session.create_and_id_name
+[       OK ] l03_session.create_and_id_name (0 ms)
+[ RUN      ] l03_session.empty_sections_fallback_branches
+[       OK ] l03_session.empty_sections_fallback_branches (0 ms)
+[ RUN      ] l03_session.offset_time_zero_offset
+[       OK ] l03_session.offset_time_zero_offset (0 ms)
+[ RUN      ] l03_session.offset_time_positive_offset_wrap
+[       OK ] l03_session.offset_time_positive_offset_wrap (0 ms)
+[ RUN      ] l03_session.offset_time_negative_offset_wrap
+[       OK ] l03_session.offset_time_negative_offset_wrap (0 ms)
+[ RUN      ] l03_session.original_time_inverse_mapping
+[       OK ] l03_session.original_time_inverse_mapping (0 ms)
+[ RUN      ] l03_session.offset_arithmetic_keeps_valid_offsets_and_avoids_int32_overflow
+[       OK ] l03_session.offset_arithmetic_keeps_valid_offsets_and_avoids_int32_overflow (0 ms)
+[ RUN      ] l03_session.multi_day_offsets_normalize_endpoints_and_checked_date
+[       OK ] l03_session.multi_day_offsets_normalize_endpoints_and_checked_date (0 ms)
+[ RUN      ] l03_session.checked_offset_date_rejects_out_of_range_without_publication
+[       OK ] l03_session.checked_offset_date_rejects_out_of_range_without_publication (0 ms)
+[ RUN      ] l03_session.offset_setter_rebuilds_sections_after_multiple_days
+[       OK ] l03_session.offset_setter_rebuilds_sections_after_multiple_days (0 ms)
+[ RUN      ] l03_session.offset_date_branches
+[       OK ] l03_session.offset_date_branches (2 ms)
+[ RUN      ] l03_session.night_section_raw_vs_offseted
+[       OK ] l03_session.night_section_raw_vs_offseted (0 ms)
+[ RUN      ] l03_session.time_to_minutes_offset_nonmonotonic_sections
+[       OK ] l03_session.time_to_minutes_offset_nonmonotonic_sections (0 ms)
+[ RUN      ] l03_session.minute_to_time_24h_uses_2400_convention
+[       OK ] l03_session.minute_to_time_24h_uses_2400_convention (0 ms)
+[ RUN      ] l03_session.all_day_section_aggregate_views_survive_offset_changes
+[       OK ] l03_session.all_day_section_aggregate_views_survive_offset_changes (0 ms)
+[ RUN      ] l03_session.full_day_section_is_not_mixed_with_other_sections
+[       OK ] l03_session.full_day_section_is_not_mixed_with_other_sections (0 ms)
+[ RUN      ] l03_session.non_midnight_zero_length_section_is_rejected
+[       OK ] l03_session.non_midnight_zero_length_section_is_rejected (0 ms)
+[ RUN      ] l03_session.midnight_section_raw_2400_and_0_alias
+[       OK ] l03_session.midnight_section_raw_2400_and_0_alias (0 ms)
+[ RUN      ] l03_session.auction_sections
+[       OK ] l03_session.auction_sections (0 ms)
+[ RUN      ] l03_session.empty_auction_range_with_zero_start_threshold_survives_offsets
+[       OK ] l03_session.empty_auction_range_with_zero_start_threshold_survives_offsets (0 ms)
+[ RUN      ] l03_session.set_offset_mins_keeps_registered_sections_consistent
+[       OK ] l03_session.set_offset_mins_keeps_registered_sections_consistent (0 ms)
+[ RUN      ] L03DaySessionTest.trading_sections_keep_raw_and_offset
+[       OK ] L03DaySessionTest.trading_sections_keep_raw_and_offset (0 ms)
+[ RUN      ] L03DaySessionTest.time_to_minutes_inside_sections
+[       OK ] L03DaySessionTest.time_to_minutes_inside_sections (0 ms)
+[ RUN      ] L03DaySessionTest.time_to_minutes_break_and_auto_adjust
+[       OK ] L03DaySessionTest.time_to_minutes_break_and_auto_adjust (0 ms)
+[ RUN      ] L03DaySessionTest.auction_time_short_circuits_to_zero
+[       OK ] L03DaySessionTest.auction_time_short_circuits_to_zero (0 ms)
+[ RUN      ] L03DaySessionTest.minute_to_time_forward_and_boundary
+[       OK ] L03DaySessionTest.minute_to_time_forward_and_boundary (0 ms)
+[ RUN      ] L03DaySessionTest.minute_to_time_head_first_mode
+[       OK ] L03DaySessionTest.minute_to_time_head_first_mode (0 ms)
+[ RUN      ] L03DaySessionTest.seconds_round_trip
+[       OK ] L03DaySessionTest.seconds_round_trip (0 ms)
+[ RUN      ] L03DaySessionTest.trading_minutes_and_section_list
+[       OK ] L03DaySessionTest.trading_minutes_and_section_list (0 ms)
+[ RUN      ] L03DaySessionTest.trading_time_and_section_edges
+[       OK ] L03DaySessionTest.trading_time_and_section_edges (0 ms)
+[ RUN      ] L03DaySessionTest.auction_only_maps_minutes_and_does_not_create_trading_time
+[       OK ] L03DaySessionTest.auction_only_maps_minutes_and_does_not_create_trading_time (0 ms)
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] l03_object.release_is_idempotent_at_zero_refs

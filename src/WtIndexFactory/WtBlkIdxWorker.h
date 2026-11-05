@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <atomic>
 #include "../Includes/IIndexDefs.h"
 
 #include "../Includes/WTSStruct.h"
@@ -19,6 +20,8 @@ class WtBlkIdxWorker : public IIndexWorker
 {
 public:
 	WtBlkIdxWorker(const char* id):IIndexWorker(id), _stopped(false), _process(false) {}
+	// Stops and joins the timeout trigger thread before the worker is freed.
+	virtual ~WtBlkIdxWorker();
 
 public:
 	virtual bool		init(WTSVariant* config) override;
@@ -54,8 +57,8 @@ protected:
 	StdThreadPtr	_thrd_trigger;
 	StdUniqueMutex	_mtx_trigger;
 	StdCondVariable	_cond_trigger;
-	bool			_stopped;
-	bool			_process;
+	std::atomic<bool>	_stopped;
+	std::atomic<bool>	_process;
 };
 
 NS_WTP_END

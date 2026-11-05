@@ -1,0 +1,90 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = N04ExecMocker.SuccessfulRunnerReplayCallsPluginAndClosesSafely
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from N04ExecMocker
+[ RUN      ] N04ExecMocker.SuccessfulRunnerReplayCallsPluginAndClosesSafely
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSUtils/zstdlib/zstd_compress.c:1326:46: runtime error: applying non-zero offset 1 to null pointer
+    #0 0x00010e280370 in ZSTD_reset_matchState zstd_compress.c:1326
+    #1 0x00010e27db44 in ZSTD_resetCCtx_internal zstd_compress.c:1527
+    #2 0x00010e26b980 in ZSTD_compressBegin_internal zstd_compress.c:2946
+    #3 0x00010e26e270 in ZSTD_compress_advanced_internal zstd_compress.c:3120
+    #4 0x00010e26e5c8 in ZSTD_compress_usingDict zstd_compress.c:3135
+    #5 0x00010e26e708 in ZSTD_compressCCtx zstd_compress.c:3145
+    #6 0x00010e26e8f4 in ZSTD_compress zstd_compress.c:3155
+    #7 0x00010d81d908 in WTSCmpHelper::compress_data(void const*, unsigned long, unsigned int) WTSCmpHelper.hpp:44
+    #8 0x00010d7ede80 in HisDataReplayer::cacheRawBarsFromCSV(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, char const*, wtp::tagKlinePeriod, bool) HisDataReplayer.cpp:6445
+    #9 0x00010d7d9554 in HisDataReplayer::get_kline_slice(char const*, char const*, unsigned int, unsigned int, bool) HisDataReplayer.cpp:4372
+    #10 0x00010d528400 in ExecMocker::handle_init() ExecMocker.cpp:802
+    #11 0x00010d764968 in HisDataReplayer::prepare() HisDataReplayer.cpp:1172
+    #12 0x00010088114c in WtBtRunner::run(bool, bool) WtBtRunner.cpp:744
+    #13 0x0001005e3500 in N04ExecMocker_SuccessfulRunnerReplayCallsPluginAndClosesSafely_Test::TestBody() r222_bt_runner_shutdown_test.cpp:501
+    #14 0x000100c20470 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (CoverageTests_btporter:arm64+0x10081c470)
+    #15 0x000100c203b8 in testing::Test::Run()+0xcc (CoverageTests_btporter:arm64+0x10081c3b8)
+    #16 0x000100c20f98 in testing::TestInfo::Run()+0xd0 (CoverageTests_btporter:arm64+0x10081cf98)
+    #17 0x000100c21a1c in testing::TestSuite::Run()+0x1c4 (CoverageTests_btporter:arm64+0x10081da1c)
+    #18 0x000100c2ce44 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (CoverageTests_btporter:arm64+0x100828e44)
+    #19 0x000100c2c7f0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (CoverageTests_btporter:arm64+0x1008287f0)
+    #20 0x000100c2c754 in testing::UnitTest::Run()+0x78 (CoverageTests_btporter:arm64+0x100828754)
+    #21 0x0001008e4a44 in main+0x40 (CoverageTests_btporter:arm64+0x1004e0a44)
+    #22 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSUtils/zstdlib/zstd_compress.c:1326:46 
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSUtils/zstdlib/zstd_compress_internal.h:876:41: runtime error: applying non-zero offset 1 to null pointer
+    #0 0x00010e2861f0 in ZSTD_window_update zstd_compress_internal.h:876
+    #1 0x00010e26a41c in ZSTD_compressContinue_internal zstd_compress.c:2630
+    #2 0x00010e26ce0c in ZSTD_compressEnd zstd_compress.c:3059
+    #3 0x00010e26e2cc in ZSTD_compress_advanced_internal zstd_compress.c:3123
+    #4 0x00010e26e5c8 in ZSTD_compress_usingDict zstd_compress.c:3135
+    #5 0x00010e26e708 in ZSTD_compressCCtx zstd_compress.c:3145
+    #6 0x00010e26e8f4 in ZSTD_compress zstd_compress.c:3155
+    #7 0x00010d81d908 in WTSCmpHelper::compress_data(void const*, unsigned long, unsigned int) WTSCmpHelper.hpp:44
+    #8 0x00010d7ede80 in HisDataReplayer::cacheRawBarsFromCSV(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, char const*, wtp::tagKlinePeriod, bool) HisDataReplayer.cpp:6445
+    #9 0x00010d7d9554 in HisDataReplayer::get_kline_slice(char const*, char const*, unsigned int, unsigned int, bool) HisDataReplayer.cpp:4372
+    #10 0x00010d528400 in ExecMocker::handle_init() ExecMocker.cpp:802
+    #11 0x00010d764968 in HisDataReplayer::prepare() HisDataReplayer.cpp:1172
+    #12 0x00010088114c in WtBtRunner::run(bool, bool) WtBtRunner.cpp:744
+    #13 0x0001005e3500 in N04ExecMocker_SuccessfulRunnerReplayCallsPluginAndClosesSafely_Test::TestBody() r222_bt_runner_shutdown_test.cpp:501
+    #14 0x000100c20470 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (CoverageTests_btporter:arm64+0x10081c470)
+    #15 0x000100c203b8 in testing::Test::Run()+0xcc (CoverageTests_btporter:arm64+0x10081c3b8)
+    #16 0x000100c20f98 in testing::TestInfo::Run()+0xd0 (CoverageTests_btporter:arm64+0x10081cf98)
+    #17 0x000100c21a1c in testing::TestSuite::Run()+0x1c4 (CoverageTests_btporter:arm64+0x10081da1c)
+    #18 0x000100c2ce44 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (CoverageTests_btporter:arm64+0x100828e44)
+    #19 0x000100c2c7f0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (CoverageTests_btporter:arm64+0x1008287f0)
+    #20 0x000100c2c754 in testing::UnitTest::Run()+0x78 (CoverageTests_btporter:arm64+0x100828754)
+    #21 0x0001008e4a44 in main+0x40 (CoverageTests_btporter:arm64+0x1004e0a44)
+    #22 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSUtils/zstdlib/zstd_compress_internal.h:876:41 
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSUtils/zstdlib/zstd_compress_internal.h:877:33: runtime error: applying non-zero offset 1 to null pointer
+    #0 0x00010e286450 in ZSTD_window_update zstd_compress_internal.h:877
+    #1 0x00010e26a41c in ZSTD_compressContinue_internal zstd_compress.c:2630
+    #2 0x00010e26ce0c in ZSTD_compressEnd zstd_compress.c:3059
+    #3 0x00010e26e2cc in ZSTD_compress_advanced_internal zstd_compress.c:3123
+    #4 0x00010e26e5c8 in ZSTD_compress_usingDict zstd_compress.c:3135
+    #5 0x00010e26e708 in ZSTD_compressCCtx zstd_compress.c:3145
+    #6 0x00010e26e8f4 in ZSTD_compress zstd_compress.c:3155
+    #7 0x00010d81d908 in WTSCmpHelper::compress_data(void const*, unsigned long, unsigned int) WTSCmpHelper.hpp:44
+    #8 0x00010d7ede80 in HisDataReplayer::cacheRawBarsFromCSV(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, char const*, wtp::tagKlinePeriod, bool) HisDataReplayer.cpp:6445
+    #9 0x00010d7d9554 in HisDataReplayer::get_kline_slice(char const*, char const*, unsigned int, unsigned int, bool) HisDataReplayer.cpp:4372
+    #10 0x00010d528400 in ExecMocker::handle_init() ExecMocker.cpp:802
+    #11 0x00010d764968 in HisDataReplayer::prepare() HisDataReplayer.cpp:1172
+    #12 0x00010088114c in WtBtRunner::run(bool, bool) WtBtRunner.cpp:744
+    #13 0x0001005e3500 in N04ExecMocker_SuccessfulRunnerReplayCallsPluginAndClosesSafely_Test::TestBody() r222_bt_runner_shutdown_test.cpp:501
+    #14 0x000100c20470 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (CoverageTests_btporter:arm64+0x10081c470)
+    #15 0x000100c203b8 in testing::Test::Run()+0xcc (CoverageTests_btporter:arm64+0x10081c3b8)
+    #16 0x000100c20f98 in testing::TestInfo::Run()+0xd0 (CoverageTests_btporter:arm64+0x10081cf98)
+    #17 0x000100c21a1c in testing::TestSuite::Run()+0x1c4 (CoverageTests_btporter:arm64+0x10081da1c)
+    #18 0x000100c2ce44 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (CoverageTests_btporter:arm64+0x100828e44)
+    #19 0x000100c2c7f0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (CoverageTests_btporter:arm64+0x1008287f0)
+    #20 0x000100c2c754 in testing::UnitTest::Run()+0x78 (CoverageTests_btporter:arm64+0x100828754)
+    #21 0x0001008e4a44 in main+0x40 (CoverageTests_btporter:arm64+0x1004e0a44)
+    #22 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSUtils/zstdlib/zstd_compress_internal.h:877:33 
+[       OK ] N04ExecMocker.SuccessfulRunnerReplayCallsPluginAndClosesSafely (1520 ms)
+[----------] 1 test from N04ExecMocker (1520 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1521 ms total)
+[  PASSED  ] 1 test.

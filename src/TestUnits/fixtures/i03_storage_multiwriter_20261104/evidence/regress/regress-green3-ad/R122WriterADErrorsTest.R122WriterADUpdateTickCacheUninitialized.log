@@ -1,0 +1,35 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R122WriterADErrorsTest.R122WriterADUpdateTickCacheUninitialized
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R122WriterADErrorsTest
+[ RUN      ] R122WriterADErrorsTest.R122WriterADUpdateTickCacheUninitialized
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==6265==ERROR: AddressSanitizer: SEGV on unknown address 0x17d7d857d7d9d7d7 (pc 0x0001022ee000 bp 0x00016db29810 sp 0x00016db29760 T0)
+==6265==The signal is caused by a READ memory access.
+    #0 0x0001022ee000 in (anonymous namespace)::checkedTickSessionDate(wtp::IBaseDataMgr*, wtp::WTSTickData const*, unsigned int&)+0x10c (mw_regress_ad:arm64+0x10001a000)
+    #1 0x0001022ed5d4 in WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)+0x42c (mw_regress_ad:arm64+0x1000195d4)
+    #2 0x0001024d8ad0 in r122adw::R122WriterADErrorsTest_R122WriterADUpdateTickCacheUninitialized_Test::TestBody()+0x920 (mw_regress_ad:arm64+0x100204ad0)
+    #3 0x0001025955d0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (mw_regress_ad:arm64+0x1002c15d0)
+    #4 0x000102595518 in testing::Test::Run()+0xcc (mw_regress_ad:arm64+0x1002c1518)
+    #5 0x0001025960f8 in testing::TestInfo::Run()+0xd0 (mw_regress_ad:arm64+0x1002c20f8)
+    #6 0x000102596b7c in testing::TestSuite::Run()+0x1c4 (mw_regress_ad:arm64+0x1002c2b7c)
+    #7 0x0001025a1fa4 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (mw_regress_ad:arm64+0x1002cdfa4)
+    #8 0x0001025a1950 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (mw_regress_ad:arm64+0x1002cd950)
+    #9 0x0001025a18b4 in testing::UnitTest::Run()+0x78 (mw_regress_ad:arm64+0x1002cd8b4)
+    #10 0x000102582b68 in main+0x40 (mw_regress_ad:arm64+0x1002aeb68)
+    #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+==6265==Register values:
+ x[0] = 0x0000629000000220   x[1] = 0x0000629000000200   x[2] = 0x000000016db29840   x[3] = 0x000000016db29740  
+ x[4] = 0xffff9d716db29bc0   x[5] = 0x0000000000000020   x[6] = 0x0000000000004610   x[7] = 0x0000000000000001  
+ x[8] = 0x17d7d857d7d9d7d7   x[9] = 0xbebebebebebebebe  x[10] = 0x000000016db29820  x[11] = 0x0000000000000004  
+x[12] = 0x000000802db85308  x[13] = 0xfffff32dfffdffb7  x[14] = 0x00000cd200020044  x[15] = 0x000010800001ffff  
+x[16] = 0x00000001022ede64  x[17] = 0x00000001f5b8d120  x[18] = 0x0000000000000000  x[19] = 0x000000016db29980  
+x[20] = 0x0000000000000001  x[21] = 0x0000606000002180  x[22] = 0x0000606000002180  x[23] = 0x0000000000000001  
+x[24] = 0x00000001028ff000  x[25] = 0x0000000000000000  x[26] = 0x0000000000000005  x[27] = 0x000000016db2a940  
+x[28] = 0x0000000000000001     fp = 0x000000016db29810     lr = 0x00000001022edfec     sp = 0x000000016db29760  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (mw_regress_ad:arm64+0x10001a000) in (anonymous namespace)::checkedTickSessionDate(wtp::IBaseDataMgr*, wtp::WTSTickData const*, unsigned int&)+0x10c
+==6265==ABORTING

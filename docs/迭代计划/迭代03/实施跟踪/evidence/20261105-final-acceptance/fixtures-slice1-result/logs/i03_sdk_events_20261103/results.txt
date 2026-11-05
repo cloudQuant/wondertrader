@@ -1,0 +1,46 @@
+baseline fee-reverse RED exit=0 elapsed=3.09 missing:sent, awaiting confirmation; missing:CTP fee batch closed: 3 sent, 3 confirmed; forbidden:succeed
+baseline fee-empty-commission RED exit=1 elapsed=3.10 contracts.json changed=True; commodities.json changed=True; missing:Empty response for request; forbidden:contracts dumped
+baseline fee-empty-margin RED exit=1 elapsed=3.08 contracts.json changed=True; commodities.json changed=True; missing:Empty response for request; forbidden:contracts dumped
+baseline fee-empty-instrument RED exit=1 elapsed=0.91 contracts.json changed=True; commodities.json changed=True; missing:Empty instrument response; forbidden:contracts dumped
+baseline plain-ok RED exit=0 elapsed=0.20 missing:sent, awaiting confirmation; missing:confirmed with 1 rows; forbidden:succeed
+baseline plain-sync RED exit=0 elapsed=0.03 missing:confirmed with 1 rows
+baseline plain-stale RED exit=0 elapsed=0.19 contracts content; missing:not in flight; missing:confirmed with 1 rows
+baseline plain-error RED exit=0 elapsed=0.17 exit=0 expected=1; contracts.json changed=True; commodities.json changed=True; missing:failed, no files published; forbidden:contracts dumped
+baseline plain-empty RED exit=0 elapsed=0.17 exit=0 expected=1; contracts.json changed=True; commodities.json changed=True; missing:empty response without SDK contract; forbidden:contracts dumped
+baseline plain-rsp-error RED exit=97 elapsed=5.18 exit=97 expected=1; missing:failed by error response; elapsed=5.18>5
+baseline plain-send-failure RED exit=91 elapsed=6.04 exit=91 expected=1; missing:send failed; elapsed=6.04>5
+normal fee-reverse PASS exit=0 elapsed=2.98 
+normal fee-empty-commission PASS exit=1 elapsed=2.98 
+normal fee-empty-margin PASS exit=1 elapsed=2.20 
+normal fee-empty-instrument PASS exit=1 elapsed=0.03 
+normal plain-ok PASS exit=0 elapsed=0.17 
+normal plain-sync PASS exit=0 elapsed=0.02 
+normal plain-stale PASS exit=0 elapsed=0.19 
+normal plain-error PASS exit=1 elapsed=0.17 
+normal plain-empty PASS exit=1 elapsed=0.19 
+normal plain-rsp-error PASS exit=1 elapsed=0.19 
+normal plain-send-failure PASS exit=1 elapsed=0.02 
+asan fee-reverse PASS exit=0 elapsed=3.21 
+asan fee-empty-commission PASS exit=1 elapsed=3.07 
+asan fee-empty-margin PASS exit=1 elapsed=2.36 
+asan fee-empty-instrument PASS exit=1 elapsed=0.21 
+asan plain-ok PASS exit=0 elapsed=0.35 
+asan plain-sync PASS exit=0 elapsed=0.21 
+asan plain-stale PASS exit=0 elapsed=0.33 
+asan plain-error PASS exit=1 elapsed=0.33 
+asan plain-empty PASS exit=1 elapsed=0.32 
+asan plain-rsp-error PASS exit=1 elapsed=0.35 
+asan plain-send-failure PASS exit=1 elapsed=0.16 
+tsan fee-reverse PASS exit=0 elapsed=5.31 
+tsan fee-empty-commission PASS exit=1 elapsed=5.19 
+tsan fee-empty-margin PASS exit=1 elapsed=5.01 
+tsan fee-empty-instrument PASS exit=1 elapsed=2.82 
+tsan plain-ok PASS exit=0 elapsed=0.98 
+tsan plain-sync PASS exit=0 elapsed=0.87 
+tsan plain-stale PASS exit=0 elapsed=1.10 
+tsan plain-error PASS exit=1 elapsed=1.14 
+tsan plain-empty PASS exit=1 elapsed=1.10 
+tsan plain-rsp-error PASS exit=1 elapsed=1.25 
+tsan plain-send-failure PASS exit=1 elapsed=0.98 
+non-baseline failures: 0
+runner-exit=0

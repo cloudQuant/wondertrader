@@ -87,7 +87,7 @@ protected:
 		EXPECT_NE(slice, nullptr);
 		if (slice != NULL)
 		{
-			EXPECT_EQ(slice->size(), 1u);
+			EXPECT_EQ(slice->size(), 1);
 			slice->release();
 		}
 	}
@@ -99,7 +99,7 @@ protected:
 		const uint64_t etime = period == KP_DAY ? 20230103150000000ull : 20230103094000000ull;
 		WTSKlineSlice* slice = _reader->readKlineSlice("EXMX.rb2301", period, 2, etime);
 		ASSERT_NE(slice, nullptr);
-		ASSERT_EQ(slice->size(), 2u);
+		ASSERT_EQ(slice->size(), 2);
 		const WTSBarStruct* first = slice->at(0);
 		const WTSBarStruct* tail = slice->at(1);
 		ASSERT_NE(first, nullptr);
@@ -159,7 +159,7 @@ TEST_F(R100ADReaderTest, R100ReaderADOnMinuteEndMinutes)
 	// 末条等于 cutoff，因此本次读不再访问 LMDB 更新（避免第三次 get_k_db 的空句柄缺陷）。
 	WTSKlineSlice* s1 = _reader->readKlineSlice("EXM1.rb2301", KP_Minute1, 2, 20230103093200000ull);
 	ASSERT_TRUE(s1 != NULL);
-	EXPECT_EQ(s1->size(), 2u);
+	EXPECT_EQ(s1->size(), 2);
 	ASSERT_NE(s1->at(0), nullptr);
 	ASSERT_NE(s1->at(1), nullptr);
 	EXPECT_EQ(s1->at(0)->time, min_bar(kDate, 931));
@@ -173,7 +173,7 @@ TEST_F(R100ADReaderTest, R100ReaderADOnMinuteEndMinutes)
 	// 只做一次 get_k_db，供随后的 onMinuteEnd 使用相同缓存句柄。
 	WTSKlineSlice* s5 = _reader->readKlineSlice("EXM1.rb2301", KP_Minute5, 3, 20230103094500000ull);
 	ASSERT_TRUE(s5 != NULL);
-	EXPECT_EQ(s5->size(), 3u);
+	EXPECT_EQ(s5->size(), 3);
 	ASSERT_NE(s5->at(0), nullptr);
 	ASSERT_NE(s5->at(1), nullptr);
 	ASSERT_NE(s5->at(2), nullptr);
@@ -214,15 +214,21 @@ TEST_F(R100ADReaderTest, R100ReaderADHotReloadDayAndRtCacheGrowth)
 
 	init_reader();
 
+	// 决策 K34（2026-11-04 用户裁定“先 C 再 A”，接受现有预合并 HOT 读取失败）：AD 读端的 HOT/custom
+	// 规则代码只从规则分段的物理合约读取，不使用预合并品种键 rb 的数据（K34=C 前期望各返回 2 条）。
+	// 本夹具的 hot mgr 不提供分段，故 tick 与 K 线均拒绝并各记一条错误（K34=A 起错误文本为“无规则分段”）。
+	const size_t errorsBefore = _sink->log_count(LL_ERROR);
 	WTSTickSlice* ht = _reader->readTickSlice("EXF.rb.HOT", 2, 20230103100000000ull);
-	ASSERT_TRUE(ht != NULL);
-	EXPECT_EQ(ht->size(), 2u);
-	ht->release();
+	EXPECT_TRUE(ht == NULL);
+	if (ht != NULL)
+		ht->release();
 
 	WTSKlineSlice* hk = _reader->readKlineSlice("EXF.rb.HOT", KP_Minute1, 2, 20230103100000000ull);
-	ASSERT_TRUE(hk != NULL);
-	EXPECT_EQ(hk->size(), 2u);
-	hk->release();
+	EXPECT_TRUE(hk == NULL);
+	if (hk != NULL)
+		hk->release();
+	EXPECT_EQ(_sink->log_count(LL_ERROR), errorsBefore + 2);
+	EXPECT_GE(_sink->count_containing("rule sections of EXF.rb.HOT"), 2u);
 
 	// ---- reload_flag==2：容量不足且请求时间更早，走全量 get_lowers ----
 	add_stock("EXR2", "rb2301");
@@ -254,7 +260,7 @@ TEST_F(R100ADReaderTest, R100ReaderADHotReloadDayAndRtCacheGrowth)
 
 	WTSKlineSlice* k2 = _reader->readKlineSlice("EXK3.rb2301", KP_Minute5, 1, 20230103100000000ull);
 	ASSERT_TRUE(k2 != NULL);
-	ASSERT_EQ(k2->size(), 1u);
+	ASSERT_EQ(k2->size(), 1);
 	EXPECT_EQ(k2->get_block_addr(0)[0].time, min_bar(kDate, 940));
 	k2->release();
 
@@ -274,7 +280,7 @@ TEST_F(R100ADReaderTest, R100ReaderADHotReloadDayAndRtCacheGrowth)
 
 	WTSKlineSlice* nk1 = _reader->readKlineSlice("EXN4.rb2301", KP_Minute1, 2, 20230103100000000ull);
 	ASSERT_TRUE(nk1 != NULL);
-	EXPECT_EQ(nk1->size(), 2u);
+	EXPECT_EQ(nk1->size(), 2);
 	nk1->release();
 
 	// 模拟 writer 在同一个 cache_m1.dmb 里登记 rb2302 并推进它的未闭合 bar
@@ -284,7 +290,7 @@ TEST_F(R100ADReaderTest, R100ReaderADHotReloadDayAndRtCacheGrowth)
 
 	WTSKlineSlice* nk2 = _reader->readKlineSlice("EXNA.rb2302", KP_Minute1, 2, 20230103100000000ull);
 	ASSERT_TRUE(nk2 != NULL);
-	ASSERT_EQ(nk2->size(), 2u);
+	ASSERT_EQ(nk2->size(), 2);
 	EXPECT_EQ(nk2->get_block_addr(0)[1].time, min_bar(kDate, 945));
 	nk2->release();
 
@@ -304,7 +310,7 @@ TEST_F(R100ADReaderTest, R100ReaderADHotReloadDayAndRtCacheGrowth)
 
 	WTSKlineSlice* dk = _reader->readKlineSlice("EXD5.rb2301", KP_DAY, 2, 20230102100000000ull);
 	ASSERT_TRUE(dk != NULL);
-	EXPECT_EQ(dk->size(), 1u);
+	EXPECT_EQ(dk->size(), 1);
 	dk->release();
 
 	// 只做一次 get_k_db 后，把 RT 缓存推进到 uDate，onMinuteEnd 用第二次句柄补线

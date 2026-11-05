@@ -1,0 +1,895 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 177 tests from 31 test suites.
+[----------] Global test environment set-up.
+[----------] 9 tests from P09RdmCacheTest
+[ RUN      ] P09RdmCacheTest.init_with_null_cfg_injects_host_and_skips_check_thread
+[       OK ] P09RdmCacheTest.init_with_null_cfg_injects_host_and_skips_check_thread (1 ms)
+[ RUN      ] P09RdmCacheTest.index_bar_by_range_empty_cache_returns_null_and_touches_key
+[       OK ] P09RdmCacheTest.index_bar_by_range_empty_cache_returns_null_and_touches_key (0 ms)
+[ RUN      ] P09RdmCacheTest.index_bar_by_range_trims_window
+[       OK ] P09RdmCacheTest.index_bar_by_range_trims_window (0 ms)
+[ RUN      ] P09RdmCacheTest.index_bar_by_count_clamps_and_walks_back
+[       OK ] P09RdmCacheTest.index_bar_by_count_clamps_and_walks_back (0 ms)
+[ RUN      ] P09RdmCacheTest.read_bars_from_cache_by_range_copies_window
+[       OK ] P09RdmCacheTest.read_bars_from_cache_by_range_copies_window (0 ms)
+[ RUN      ] P09RdmCacheTest.clear_cache_drops_bars_but_keeps_adj_factors
+[       OK ] P09RdmCacheTest.clear_cache_drops_bars_but_keeps_adj_factors (0 ms)
+[ RUN      ] P09RdmCacheTest.load_adj_factors_from_missing_or_bad_file
+[       OK ] P09RdmCacheTest.load_adj_factors_from_missing_or_bad_file (0 ms)
+[ RUN      ] P09RdmCacheTest.load_adj_factors_from_json_key_format_and_sort
+[       OK ] P09RdmCacheTest.load_adj_factors_from_json_key_format_and_sort (0 ms)
+[ RUN      ] P09RdmCacheTest.get_adj_factor_by_date_stock_and_non_stock
+[       OK ] P09RdmCacheTest.get_adj_factor_by_date_stock_and_non_stock (0 ms)
+[ DISABLED ] P09RdmCacheTest.DISABLED_p09_underflow_inputs_from_range_indexers
+[----------] 9 tests from P09RdmCacheTest (3 ms total)
+
+[----------] 9 tests from P09WindowTest
+[ RUN      ] P09WindowTest.window_bounds_are_inclusive_on_both_sides
+[       OK ] P09WindowTest.window_bounds_are_inclusive_on_both_sides (0 ms)
+[ RUN      ] P09WindowTest.range_right_edge_beyond_last_bar_clamps_to_latest
+[       OK ] P09WindowTest.range_right_edge_beyond_last_bar_clamps_to_latest (0 ms)
+[ RUN      ] P09WindowTest.range_left_edge_beyond_all_returns_null_for_empty_result
+[       OK ] P09WindowTest.range_left_edge_beyond_all_returns_null_for_empty_result (0 ms)
+[ RUN      ] P09WindowTest.seam_between_two_sections_is_returned_whole_without_dedup
+[       OK ] P09WindowTest.seam_between_two_sections_is_returned_whole_without_dedup (0 ms)
+[ RUN      ] P09WindowTest.isday_comparator_collapses_same_day_minute_bars
+[       OK ] P09WindowTest.isday_comparator_collapses_same_day_minute_bars (0 ms)
+[ RUN      ] P09WindowTest.rt_bars_are_never_scanned_by_the_indexers
+[       OK ] P09WindowTest.rt_bars_are_never_scanned_by_the_indexers (0 ms)
+[ RUN      ] P09WindowTest.index_bar_by_count_walks_back_from_right_edge
+[       OK ] P09WindowTest.index_bar_by_count_walks_back_from_right_edge (0 ms)
+[ RUN      ] P09WindowTest.index_bar_by_count_zero_returns_null_for_empty_result
+[       OK ] P09WindowTest.index_bar_by_count_zero_returns_null_for_empty_result (0 ms)
+[ RUN      ] P09WindowTest.public_kline_slice_readers_keep_empty_and_nonempty_results
+[       OK ] P09WindowTest.public_kline_slice_readers_keep_empty_and_nonempty_results (0 ms)
+[----------] 9 tests from P09WindowTest (0 ms total)
+
+[----------] 15 tests from Q03RdmKlineTest
+[ RUN      ] Q03RdmKlineTest.day_dsb_raw_v2_full_range_roundtrip
+[       OK ] Q03RdmKlineTest.day_dsb_raw_v2_full_range_roundtrip (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_etime_zero_is_normalized_to_203012312359
+[       OK ] Q03RdmKlineTest.day_etime_zero_is_normalized_to_203012312359 (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_compressed_v2_roundtrip
+[       OK ] Q03RdmKlineTest.day_compressed_v2_roundtrip (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_old_struct_versions_are_upgraded
+[       OK ] Q03RdmKlineTest.day_old_struct_versions_are_upgraded (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_tail_fragment_is_dropped
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_kline_file_test.cpp:196: Failure
+Value of: slice != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] Q03RdmKlineTest.day_tail_fragment_is_dropped (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_size_check_failure_returns_null_and_logs_error
+[       OK ] Q03RdmKlineTest.day_size_check_failure_returns_null_and_logs_error (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_missing_file_caches_empty_entry
+[       OK ] Q03RdmKlineTest.day_missing_file_caches_empty_entry (0 ms)
+[ RUN      ] Q03RdmKlineTest.day_window_out_of_range_returns_null
+[       OK ] Q03RdmKlineTest.day_window_out_of_range_returns_null (1 ms)
+[ RUN      ] Q03RdmKlineTest.day_range_and_count_handle_first_cached_bar_boundaries
+[       OK ] Q03RdmKlineTest.day_range_and_count_handle_first_cached_bar_boundaries (1 ms)
+[ RUN      ] Q03RdmKlineTest.min1_splices_his_block_with_rt_block
+[       OK ] Q03RdmKlineTest.min1_splices_his_block_with_rt_block (1 ms)
+[ RUN      ] Q03RdmKlineTest.min1_rt_only_when_start_inside_rt_block
+[       OK ] Q03RdmKlineTest.min1_rt_only_when_start_inside_rt_block (1 ms)
+[ RUN      ] Q03RdmKlineTest.min1_right_window_drops_late_bars
+[       OK ] Q03RdmKlineTest.min1_right_window_drops_late_bars (1 ms)
+[ RUN      ] Q03RdmKlineTest.empty_rt_blocks_fall_back_to_history_for_range_and_count
+[       OK ] Q03RdmKlineTest.empty_rt_blocks_fall_back_to_history_for_range_and_count (3 ms)
+[ RUN      ] Q03RdmKlineTest.min1_before_first_rt_bar_falls_back_to_history_for_range_and_count
+[       OK ] Q03RdmKlineTest.min1_before_first_rt_bar_falls_back_to_history_for_range_and_count (1 ms)
+[ RUN      ] Q03RdmKlineTest.clear_cache_forces_rebuild_from_file
+[       OK ] Q03RdmKlineTest.clear_cache_forces_rebuild_from_file (1 ms)
+[----------] 15 tests from Q03RdmKlineTest (22 ms total)
+
+[----------] 17 tests from Q03RdmTickTest
+[ RUN      ] Q03RdmTickTest.his_tick_raw_v2_roundtrip_field_by_field
+[       OK ] Q03RdmTickTest.his_tick_raw_v2_roundtrip_field_by_field (1 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_compressed_v2_roundtrip
+[       OK ] Q03RdmTickTest.his_tick_compressed_v2_roundtrip (1 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_old_struct_versions_are_upgraded
+[       OK ] Q03RdmTickTest.his_tick_old_struct_versions_are_upgraded (1 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_size_check_rejects_short_file
+[       OK ] Q03RdmTickTest.his_tick_size_check_rejects_short_file (1 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_tail_fragment_is_dropped
+[       OK ] Q03RdmTickTest.his_tick_tail_fragment_is_dropped (1 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_header_only_file_yields_zero_count
+[       OK ] Q03RdmTickTest.his_tick_header_only_file_yields_zero_count (1 ms)
+[ RUN      ] Q03RdmTickTest.rt_tick_block_read_back_when_no_his_file
+[       OK ] Q03RdmTickTest.rt_tick_block_read_back_when_no_his_file (1 ms)
+[ RUN      ] Q03RdmTickTest.rt_tick_block_missing_and_empty
+[       OK ] Q03RdmTickTest.rt_tick_block_missing_and_empty (0 ms)
+[ RUN      ] Q03RdmTickTest.rt_tick_capacity_larger_than_size_is_fully_mapped
+[       OK ] Q03RdmTickTest.rt_tick_capacity_larger_than_size_is_fully_mapped (2 ms)
+[ RUN      ] Q03RdmTickTest.range_splices_two_his_days_plus_rt_block
+[       OK ] Q03RdmTickTest.range_splices_two_his_days_plus_rt_block (2 ms)
+[ RUN      ] Q03RdmTickTest.range_clips_left_window_on_begin_trading_date
+[       OK ] Q03RdmTickTest.range_clips_left_window_on_begin_trading_date (2 ms)
+[ RUN      ] Q03RdmTickTest.range_clips_right_window_on_end_trading_date
+[       OK ] Q03RdmTickTest.range_clips_right_window_on_end_trading_date (1 ms)
+[ RUN      ] Q03RdmTickTest.range_returns_empty_object_when_no_data_at_all
+[       OK ] Q03RdmTickTest.range_returns_empty_object_when_no_data_at_all (0 ms)
+[ RUN      ] Q03RdmTickTest.range_skips_missing_middle_day
+[       OK ] Q03RdmTickTest.range_skips_missing_middle_day (1 ms)
+[ RUN      ] Q03RdmTickTest.trading_date_override_routes_to_his_branch
+[       OK ] Q03RdmTickTest.trading_date_override_routes_to_his_branch (1 ms)
+[ RUN      ] Q03RdmTickTest.his_kline_hot_rejects_fragmented_raw_and_cmp_blocks
+[       OK ] Q03RdmTickTest.his_kline_hot_rejects_fragmented_raw_and_cmp_blocks (2 ms)
+[ RUN      ] Q03RdmTickTest.adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp
+[       OK ] Q03RdmTickTest.adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp (1 ms)
+[----------] 17 tests from Q03RdmTickTest (25 ms total)
+
+[----------] 2 tests from Q03RdmTickRangeInclusiveTest
+[ RUN      ] Q03RdmTickRangeInclusiveTest.HistoricalAndRealtimeKeepInclusiveExactEndpoints
+[       OK ] Q03RdmTickRangeInclusiveTest.HistoricalAndRealtimeKeepInclusiveExactEndpoints (2 ms)
+[ RUN      ] Q03RdmTickRangeInclusiveTest.ZeroEndTimeReadsLatestCommittedHistoryAndRealtimeTicks
+[       OK ] Q03RdmTickRangeInclusiveTest.ZeroEndTimeReadsLatestCommittedHistoryAndRealtimeTicks (2 ms)
+[----------] 2 tests from Q03RdmTickRangeInclusiveTest (5 ms total)
+
+[----------] 1 test from WriterTickRangeE2ETest
+[ RUN      ] WriterTickRangeE2ETest.PublishedWriterTicksAreVisibleThroughPublicRange
+[       OK ] WriterTickRangeE2ETest.PublishedWriterTicksAreVisibleThroughPublicRange (3 ms)
+[----------] 1 test from WriterTickRangeE2ETest (3 ms total)
+
+[----------] 4 tests from R100RdmCrossDayTest
+[ RUN      ] R100RdmCrossDayTest.R100RdmRtHftCrossDateBackoff
+[       OK ] R100RdmCrossDayTest.R100RdmRtHftCrossDateBackoff (2 ms)
+[ RUN      ] R100RdmCrossDayTest.R100RdmHisHftMissingAndShortFileGuards
+[       OK ] R100RdmCrossDayTest.R100RdmHisHftMissingAndShortFileGuards (1 ms)
+[ DISABLED ] R100RdmCrossDayTest.DISABLED_R100RdmHisHftValidCrossDateFiles
+[ DISABLED ] R100RdmCrossDayTest.DISABLED_R100RdmHisHftEmptyCmpV2Payloads
+[ DISABLED ] R100RdmCrossDayTest.DISABLED_R100RdmQueueDetailTransCachesAreIndependent
+[ RUN      ] R100RdmCrossDayTest.R100RdmHisTickAndKlineBoundaries
+[       OK ] R100RdmCrossDayTest.R100RdmHisTickAndKlineBoundaries (4 ms)
+[ RUN      ] R100RdmCrossDayTest.R100RdmHisHftExclusiveEndBoundaries
+[       OK ] R100RdmCrossDayTest.R100RdmHisHftExclusiveEndBoundaries (3 ms)
+[----------] 4 tests from R100RdmCrossDayTest (11 ms total)
+
+[----------] 3 tests from R112RdmResidualTest
+[ RUN      ] R112RdmResidualTest.R112RdmHftRangeCrossDateComparators
+[       OK ] R112RdmResidualTest.R112RdmHftRangeCrossDateComparators (5 ms)
+[ RUN      ] R112RdmResidualTest.R112RdmMissingAndShortFileGuards
+[       OK ] R112RdmResidualTest.R112RdmMissingAndShortFileGuards (1 ms)
+[ DISABLED ] R112RdmResidualTest.DISABLED_R112RdmQueueDetailTransCachesAreIndependent
+[ RUN      ] R112RdmResidualTest.R112RdmTickCountsCrossDate
+[       OK ] R112RdmResidualTest.R112RdmTickCountsCrossDate (2 ms)
+[----------] 3 tests from R112RdmResidualTest (8 ms total)
+
+[----------] 3 tests from R122RdmByRangeTest
+[ RUN      ] R122RdmByRangeTest.R122RdmOrdQueByRangeCrossDateAndMissing
+Q1 rt written
+Q2 rt read ptr=0x60c00000bc80
+Q3 rt size=2
+Q4 his written
+Q5 his read ptr=0x60c00000bd40
+Q6 his size=2
+Q7 missing
+Q8 done
+Z1 clearCache
+Z2 sandbox reset
+Z3 teardown done
+[       OK ] R122RdmByRangeTest.R122RdmOrdQueByRangeCrossDateAndMissing (1 ms)
+[ RUN      ] R122RdmByRangeTest.R122RdmDtlTransByRangeCrossDateAndMissing
+T1 dtl rt written
+T2 dtl rt read 0x60c00000be00
+T3 dtl rt size 2
+T4 dtl his written
+T5 dtl his read 0x60c00000bec0
+T6 dtl his size 2
+T7 dtl missing rt
+T8 dtl missing his
+T9 trans rt written
+TA trans rt read 0x60c00000bf80
+TB trans rt size 2
+TC trans his written
+TD trans his read 0x60c00000c040
+TE trans his size 2
+TF trans missing rt
+TG trans missing his
+Z1 clearCache
+Z2 sandbox reset
+Z3 teardown done
+[       OK ] R122RdmByRangeTest.R122RdmDtlTransByRangeCrossDateAndMissing (3 ms)
+[ RUN      ] R122RdmByRangeTest.R122RdmKlineByCountEmptyResult
+Z1 clearCache
+Z2 sandbox reset
+Z3 teardown done
+[       OK ] R122RdmByRangeTest.R122RdmKlineByCountEmptyResult (0 ms)
+[----------] 3 tests from R122RdmByRangeTest (5 ms total)
+
+[----------] 4 tests from R132RdmResidualTest
+[ RUN      ] R132RdmResidualTest.R132RdmKlineRtBackoffByRangeAndCount
+[       OK ] R132RdmResidualTest.R132RdmKlineRtBackoffByRangeAndCount (1 ms)
+[ RUN      ] R132RdmResidualTest.R132RdmKlineRangeEndBetweenHisBars
+[       OK ] R132RdmResidualTest.R132RdmKlineRangeEndBetweenHisBars (1 ms)
+[ RUN      ] R132RdmResidualTest.R132RdmRtHftComparatorsSeeOlderActionDate
+[       OK ] R132RdmResidualTest.R132RdmRtHftComparatorsSeeOlderActionDate (1 ms)
+[ RUN      ] R132RdmResidualTest.R132RdmTickDateEmptyRtBlockReturnsNull
+[       OK ] R132RdmResidualTest.R132RdmTickDateEmptyRtBlockReturnsNull (1 ms)
+[----------] 4 tests from R132RdmResidualTest (5 ms total)
+
+[----------] 12 tests from R132ReaderHisTest
+[ RUN      ] R132ReaderHisTest.R132ReaderHisTickCrossActionDate
+[       OK ] R132ReaderHisTest.R132ReaderHisTickCrossActionDate (1 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisHftCompressedRoundTrip
+[       OK ] R132ReaderHisTest.R132ReaderHisHftCompressedRoundTrip (3 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisCompressibleQueueExpansion
+[       OK ] R132ReaderHisTest.R132ReaderHisCompressibleQueueExpansion (1 ms)
+[ RUN      ] R132ReaderHisTest.R132AlignedHistoricalSlicesPreserveExclusiveEnd
+[       OK ] R132ReaderHisTest.R132AlignedHistoricalSlicesPreserveExclusiveEnd (3 ms)
+[ RUN      ] R132ReaderHisTest.R132AlignedSliceSurvivesOtherCacheInsertions
+[       OK ] R132ReaderHisTest.R132AlignedSliceSurvivesOtherCacheInsertions (22 ms)
+[ RUN      ] R132ReaderHisTest.R132HistoricalBadFilesCanBeReplacedAndRetried
+[       OK ] R132ReaderHisTest.R132HistoricalBadFilesCanBeReplacedAndRetried (2 ms)
+[ RUN      ] R132ReaderHisTest.R132AllocationFailureDoesNotPublishOrInvalidateHeldSlices
+[       OK ] R132ReaderHisTest.R132AllocationFailureDoesNotPublishOrInvalidateHeldSlices (4 ms)
+[ RUN      ] R132ReaderHisTest.R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape
+[       OK ] R132ReaderHisTest.R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape (3 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisOrderQueueDetailAndTransCachesAreIndependent
+[       OK ] R132ReaderHisTest.R132ReaderHisOrderQueueDetailAndTransCachesAreIndependent (3 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisEmptyBlockAndEmptyRecordSet
+[       OK ] R132ReaderHisTest.R132ReaderHisEmptyBlockAndEmptyRecordSet (3 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisMalformedCompressedRecordsAreRejected
+[       OK ] R132ReaderHisTest.R132ReaderHisMalformedCompressedRecordsAreRejected (2 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderIntegratedSectionsOverlapHotTail
+[       OK ] R132ReaderHisTest.R132ReaderIntegratedSectionsOverlapHotTail (1 ms)
+[----------] 12 tests from R132ReaderHisTest (52 ms total)
+
+[----------] 8 tests from R142RdmHftHisTest
+[ RUN      ] R142RdmHftHisTest.R142RdmHisQueueCrossActionDateByRange
+[       OK ] R142RdmHftHisTest.R142RdmHisQueueCrossActionDateByRange (1 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmHisDetailTransCrossActionDateByRange
+[       OK ] R142RdmHftHisTest.R142RdmHisDetailTransCrossActionDateByRange (1 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmCompressedExpansionPreservesAllFieldsAndCacheReads
+[       OK ] R142RdmHftHisTest.R142RdmCompressedExpansionPreservesAllFieldsAndCacheReads (6 ms)
+[ RUN      ] R142RdmHftHisTest.R175RdmCmpV2NoGrowthPreservesAllFields
+[       OK ] R142RdmHftHisTest.R175RdmCmpV2NoGrowthPreservesAllFields (2 ms)
+[ RUN      ] R142RdmHftHisTest.R175RdmCmpV2RejectsMalformedPayloadsAndAllowsRetry
+[       OK ] R142RdmHftHisTest.R175RdmCmpV2RejectsMalformedPayloadsAndAllowsRetry (9 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmMissingRtAndHisHftFiles
+[       OK ] R142RdmHftHisTest.R142RdmMissingRtAndHisHftFiles (0 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmEmptyQueueBlockSecondCallReturnsNull
+[       OK ] R142RdmHftHisTest.R142RdmEmptyQueueBlockSecondCallReturnsNull (1 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmKlineHisEndBetweenBarsBacksOff
+[       OK ] R142RdmHftHisTest.R142RdmKlineHisEndBetweenBarsBacksOff (0 ms)
+[----------] 8 tests from R142RdmHftHisTest (23 ms total)
+
+[----------] 4 tests from R162ReaderEdgeTest
+[ RUN      ] R162ReaderEdgeTest.R162ReaderContinuousCacheNonStdExceptionIsCaught
+[       OK ] R162ReaderEdgeTest.R162ReaderContinuousCacheNonStdExceptionIsCaught (0 ms)
+[ RUN      ] R162ReaderEdgeTest.R162ReaderAdjustedStockNonStdExceptionIsCaught
+[       OK ] R162ReaderEdgeTest.R162ReaderAdjustedStockNonStdExceptionIsCaught (0 ms)
+[ RUN      ] R162ReaderEdgeTest.R162RdmReaderAllSourcesMissingReturnsEmpty
+[       OK ] R162ReaderEdgeTest.R162RdmReaderAllSourcesMissingReturnsEmpty (0 ms)
+[ RUN      ] R162ReaderEdgeTest.R162RdmReaderHisTransBlocksWithMixedActionDates
+[       OK ] R162ReaderEdgeTest.R162RdmReaderHisTransBlocksWithMixedActionDates (0 ms)
+[ DISABLED ] R162ReaderEdgeTest.DISABLED_R162RdmReaderHisTransBlocksWithMixedActionDatesFromFile
+[----------] 4 tests from R162ReaderEdgeTest (2 ms total)
+
+[----------] 1 test from R172RdmMixedDatesTest
+[ RUN      ] R172RdmMixedDatesTest.R172RdmMixedActionDatesHisHftBlocks
+[       OK ] R172RdmMixedDatesTest.R172RdmMixedActionDatesHisHftBlocks (2 ms)
+[----------] 1 test from R172RdmMixedDatesTest (2 ms total)
+
+[----------] 1 test from R172ReaderMixedDatesTest
+[ RUN      ] R172ReaderMixedDatesTest.R172ReaderMixedActionDatesHisHftSlices
+[       OK ] R172ReaderMixedDatesTest.R172ReaderMixedActionDatesHisHftSlices (2 ms)
+[----------] 1 test from R172ReaderMixedDatesTest (2 ms total)
+
+[----------] 2 tests from R182RdmRtSlicesTest
+[ RUN      ] R182RdmRtSlicesTest.R182Min1RangeStartsInsideRtBlock
+[       OK ] R182RdmRtSlicesTest.R182Min1RangeStartsInsideRtBlock (1 ms)
+[ RUN      ] R182RdmRtSlicesTest.R182Min1CountTakesTailOfRtBlock
+[       OK ] R182RdmRtSlicesTest.R182Min1CountTakesTailOfRtBlock (1 ms)
+[----------] 2 tests from R182RdmRtSlicesTest (2 ms total)
+
+[----------] 9 tests from R70RdmResidualTest
+[ RUN      ] R70RdmResidualTest.R70RdmTodayOrderQueueRangeClips
+[       OK ] R70RdmResidualTest.R70RdmTodayOrderQueueRangeClips (0 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayOrderDetailRangeClips
+[       OK ] R70RdmResidualTest.R70RdmTodayOrderDetailRangeClips (0 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayTransRangeClips
+[       OK ] R70RdmResidualTest.R70RdmTodayTransRangeClips (0 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmHisHftFilesBuildAndReject
+[       OK ] R70RdmResidualTest.R70RdmHisHftFilesBuildAndReject (2 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmAdjustedStockMin1Continuation
+[       OK ] R70RdmResidualTest.R70RdmAdjustedStockMin1Continuation (1 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmHotTickCountAndRangeTail
+[       OK ] R70RdmResidualTest.R70RdmHotTickCountAndRangeTail (1 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayOrderQueueRangeBoundaries
+[       OK ] R70RdmResidualTest.R70RdmTodayOrderQueueRangeBoundaries (1 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayOrderDetailRangeBoundaries
+[       OK ] R70RdmResidualTest.R70RdmTodayOrderDetailRangeBoundaries (1 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayTransactionRangeBoundaries
+[       OK ] R70RdmResidualTest.R70RdmTodayTransactionRangeBoundaries (1 ms)
+[----------] 9 tests from R70RdmResidualTest (13 ms total)
+
+[----------] 4 tests from R74RdmHftHotTest
+[ RUN      ] R74RdmHftHotTest.R74RdmHisQueueLoadsClipsAndRejects
+[       OK ] R74RdmHftHotTest.R74RdmHisQueueLoadsClipsAndRejects (2 ms)
+[ RUN      ] R74RdmHftHotTest.R74RdmHisDetailCrossDayAndRejects
+[       OK ] R74RdmHftHotTest.R74RdmHisDetailCrossDayAndRejects (2 ms)
+[ RUN      ] R74RdmHftHotTest.R74RdmHisTransCrossDayAndRejects
+[       OK ] R74RdmHftHotTest.R74RdmHisTransCrossDayAndRejects (2 ms)
+[ RUN      ] R74RdmHftHotTest.R74RdmHotDaySectionsEdgeCases
+[       OK ] R74RdmHftHotTest.R74RdmHotDaySectionsEdgeCases (2 ms)
+[----------] 4 tests from R74RdmHftHotTest (8 ms total)
+
+[----------] 7 tests from R74RdmInitAdjTest
+[ RUN      ] R74RdmInitAdjTest.R74RdmInitCfgLoadsAdjFactorsAndReplaysQfq
+[       OK ] R74RdmInitAdjTest.R74RdmInitCfgLoadsAdjFactorsAndReplaysQfq (1 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmAdjustedFileSizeGuards
+[       OK ] R74RdmInitAdjTest.R74RdmAdjustedFileSizeGuards (1 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmShortAdjustedFileFallsBackToRawAndLogsError
+[       OK ] R74RdmInitAdjTest.R74RdmShortAdjustedFileFallsBackToRawAndLogsError (1 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmShortAdjustedWithoutRawCanRetryWhenRawAppears
+[       OK ] R74RdmInitAdjTest.R74RdmShortAdjustedWithoutRawCanRetryWhenRawAppears (1 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmTickRangeRtBoundaries
+[       OK ] R74RdmInitAdjTest.R74RdmTickRangeRtBoundaries (1 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmHotMalformedTickFileFailsClosedThenReloads
+[       OK ] R74RdmInitAdjTest.R74RdmHotMalformedTickFileFailsClosedThenReloads (1 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmHotTickCandidatesAndCountWindows
+[       OK ] R74RdmInitAdjTest.R74RdmHotTickCandidatesAndCountWindows (2 ms)
+[----------] 7 tests from R74RdmInitAdjTest (10 ms total)
+
+[----------] 15 tests from R94RdmBadBlockRetryTest
+[ RUN      ] R94RdmBadBlockRetryTest.tick_by_date_rejects_corrupt_block_and_same_reader_retries
+[       OK ] R94RdmBadBlockRetryTest.tick_by_date_rejects_corrupt_block_and_same_reader_retries (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.tick_range_discards_prior_day_slice_and_retries
+[       OK ] R94RdmBadBlockRetryTest.tick_range_discards_prior_day_slice_and_retries (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.tick_count_rejects_corrupt_history_and_retries
+[       OK ] R94RdmBadBlockRetryTest.tick_count_rejects_corrupt_history_and_retries (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.absent_tick_history_remains_an_empty_read
+[       OK ] R94RdmBadBlockRetryTest.absent_tick_history_remains_an_empty_read (0 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.plain_bar_range_rejects_corruption_and_same_reader_retries
+[       OK ] R94RdmBadBlockRetryTest.plain_bar_range_rejects_corruption_and_same_reader_retries (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.plain_bar_count_rejects_corruption_and_same_reader_retries
+[       OK ] R94RdmBadBlockRetryTest.plain_bar_count_rejects_corruption_and_same_reader_retries (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.absent_plain_bar_history_is_not_logged_as_corrupt
+[       OK ] R94RdmBadBlockRetryTest.absent_plain_bar_history_is_not_logged_as_corrupt (0 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.header_only_plain_bar_block_remains_an_empty_read
+[       OK ] R94RdmBadBlockRetryTest.header_only_plain_bar_block_remains_an_empty_read (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.empty_adjusted_layer_falls_back_to_base_bars_for_range
+[       OK ] R94RdmBadBlockRetryTest.empty_adjusted_layer_falls_back_to_base_bars_for_range (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.empty_adjusted_layer_falls_back_to_base_bars_for_count
+[       OK ] R94RdmBadBlockRetryTest.empty_adjusted_layer_falls_back_to_base_bars_for_count (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.legacy_empty_cmp_adjusted_layer_falls_back_for_range
+[       OK ] R94RdmBadBlockRetryTest.legacy_empty_cmp_adjusted_layer_falls_back_for_range (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.legacy_empty_cmp_adjusted_layer_falls_back_for_count
+[       OK ] R94RdmBadBlockRetryTest.legacy_empty_cmp_adjusted_layer_falls_back_for_count (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.malformed_legacy_empty_cmp_adjusted_layer_is_rejected
+[       OK ] R94RdmBadBlockRetryTest.malformed_legacy_empty_cmp_adjusted_layer_is_rejected (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.continuous_bar_failure_frees_prior_sections_and_retries
+[       OK ] R94RdmBadBlockRetryTest.continuous_bar_failure_frees_prior_sections_and_retries (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.adjusted_continuation_failure_releases_hot_buffer_and_retries
+[       OK ] R94RdmBadBlockRetryTest.adjusted_continuation_failure_releases_hot_buffer_and_retries (1 ms)
+[----------] 15 tests from R94RdmBadBlockRetryTest (17 ms total)
+
+[----------] 1 test from R94RdmDayBackoffTest
+[ RUN      ] R94RdmDayBackoffTest.R94RdmDayRangeAndCountBackOffBeforeRightBoundary
+[       OK ] R94RdmDayBackoffTest.R94RdmDayRangeAndCountBackOffBeforeRightBoundary (0 ms)
+[ DISABLED ] R94RdmDayBackoffTest.DISABLED_R94RdmRangeBeforeFirstBarUnderflowsCacheCursor
+[----------] 1 test from R94RdmDayBackoffTest (0 ms total)
+
+[----------] 4 tests from R94RdmEmptyKlineTest
+[ RUN      ] R94RdmEmptyKlineTest.R94RdmCmpAdjustedFileWithZeroSizeIsEmpty
+[       OK ] R94RdmEmptyKlineTest.R94RdmCmpAdjustedFileWithZeroSizeIsEmpty (0 ms)
+[ RUN      ] R94RdmEmptyKlineTest.R94RdmRawAdjustedFileWithHeaderOnlyIsEmpty
+[       OK ] R94RdmEmptyKlineTest.R94RdmRawAdjustedFileWithHeaderOnlyIsEmpty (0 ms)
+[ RUN      ] R94RdmEmptyKlineTest.R94RdmRawContinuationFileHeaderOnlyKeepsAdjustedBars
+[       OK ] R94RdmEmptyKlineTest.R94RdmRawContinuationFileHeaderOnlyKeepsAdjustedBars (1 ms)
+[ RUN      ] R94RdmEmptyKlineTest.R94RdmPlainFileHeaderOnlyReturnsFalse
+[       OK ] R94RdmEmptyKlineTest.R94RdmPlainFileHeaderOnlyReturnsFalse (1 ms)
+[----------] 4 tests from R94RdmEmptyKlineTest (4 ms total)
+
+[----------] 1 test from R94RdmHfqRangeTest
+[ RUN      ] R94RdmHfqRangeTest.R94RdmHfqRangeMergesRealtimeIntoAdjustedCache
+[       OK ] R94RdmHfqRangeTest.R94RdmHfqRangeMergesRealtimeIntoAdjustedCache (1 ms)
+[----------] 1 test from R94RdmHfqRangeTest (1 ms total)
+
+[----------] 1 test from R94RdmHotHftTest
+[ RUN      ] R94RdmHotHftTest.R94RdmTodayHftUsesCustomRawCode
+[       OK ] R94RdmHotHftTest.R94RdmTodayHftUsesCustomRawCode (1 ms)
+[----------] 1 test from R94RdmHotHftTest (1 ms total)
+
+[----------] 2 tests from R94RdmHotMinuteEdgeTest
+[ RUN      ] R94RdmHotMinuteEdgeTest.R94RdmHotQfqStopsWhenSectionEndsBeforeHotTail
+[       OK ] R94RdmHotMinuteEdgeTest.R94RdmHotQfqStopsWhenSectionEndsBeforeHotTail (1 ms)
+[ RUN      ] R94RdmHotMinuteEdgeTest.R94RdmHotEmptySegmentFileBreaksAssembly
+[       OK ] R94RdmHotMinuteEdgeTest.R94RdmHotEmptySegmentFileBreaksAssembly (0 ms)
+[----------] 2 tests from R94RdmHotMinuteEdgeTest (1 ms total)
+
+[----------] 1 test from R94RdmRtRemapTest
+[ RUN      ] R94RdmRtRemapTest.R94RdmAllRtBlocksRemapAfterCapacityGrowth
+[       OK ] R94RdmRtRemapTest.R94RdmAllRtBlocksRemapAfterCapacityGrowth (2 ms)
+[----------] 1 test from R94RdmRtRemapTest (2 ms total)
+
+[----------] 1 test from R94RdmTickCountEdgeTest
+[ RUN      ] R94RdmTickCountEdgeTest.R94RdmCountSkipsEmptyAndBeforeFirstHisTick
+[       OK ] R94RdmTickCountEdgeTest.R94RdmCountSkipsEmptyAndBeforeFirstHisTick (1 ms)
+[----------] 1 test from R94RdmTickCountEdgeTest (1 ms total)
+
+[----------] 11 tests from R1RdmHftTest
+[ RUN      ] R1RdmHftTest.ordque_his_roundtrip_and_same_day_window
+[       OK ] R1RdmHftTest.ordque_his_roundtrip_and_same_day_window (1 ms)
+[ RUN      ] R1RdmHftTest.ordque_cross_day_window_returns_full_prefix
+[       OK ] R1RdmHftTest.ordque_cross_day_window_returns_full_prefix (1 ms)
+[ RUN      ] R1RdmHftTest.ordque_cache_hit_survives_file_removal
+[       OK ] R1RdmHftTest.ordque_cache_hit_survives_file_removal (1 ms)
+[ RUN      ] R1RdmHftTest.ordque_size_check_failures_log_error_and_recover_never
+[       OK ] R1RdmHftTest.ordque_size_check_failures_log_error_and_recover_never (1 ms)
+[ RUN      ] R1RdmHftTest.ordque_missing_file_returns_null_without_error_log
+[       OK ] R1RdmHftTest.ordque_missing_file_returns_null_without_error_log (0 ms)
+[ RUN      ] R1RdmHftTest.ordque_today_window_without_rt_block_returns_null
+[       OK ] R1RdmHftTest.ordque_today_window_without_rt_block_returns_null (0 ms)
+[ RUN      ] R1RdmHftTest.orddtl_his_first_read_roundtrip
+[       OK ] R1RdmHftTest.orddtl_his_first_read_roundtrip (1 ms)
+[ RUN      ] R1RdmHftTest.trans_his_first_read_roundtrip
+[       OK ] R1RdmHftTest.trans_his_first_read_roundtrip (1 ms)
+[ RUN      ] R1RdmHftTest.queue_then_detail_and_trans_use_independent_history_caches
+[       OK ] R1RdmHftTest.queue_then_detail_and_trans_use_independent_history_caches (2 ms)
+[ RUN      ] R1RdmHftTest.detail_and_trans_before_queue_keep_reverse_order_caches_independent
+[       OK ] R1RdmHftTest.detail_and_trans_before_queue_keep_reverse_order_caches_independent (2 ms)
+[ RUN      ] R1RdmHftTest.trans_size_check_short_file_logs_error
+[       OK ] R1RdmHftTest.trans_size_check_short_file_logs_error (0 ms)
+[----------] 11 tests from R1RdmHftTest (13 ms total)
+
+[----------] 15 tests from R23RdmCountTest
+[ RUN      ] R23RdmCountTest.CountWalksBackAcrossDaysUntilSatisfied
+[       OK ] R23RdmCountTest.CountWalksBackAcrossDaysUntilSatisfied (1 ms)
+[ RUN      ] R23RdmCountTest.CountStopsAfterThirtyMissingDays
+[       OK ] R23RdmCountTest.CountStopsAfterThirtyMissingDays (1 ms)
+[ RUN      ] R23RdmCountTest.CountTakesRealtimeTailFirstThenOneHisTick
+[       OK ] R23RdmCountTest.CountTakesRealtimeTailFirstThenOneHisTick (1 ms)
+[ RUN      ] R23RdmCountTest.CountZeroReturnsEmptySliceWithoutTouchingFiles
+[       OK ] R23RdmCountTest.CountZeroReturnsEmptySliceWithoutTouchingFiles (1 ms)
+[ RUN      ] R23RdmCountTest.HisWindowBoundaryKeepsTickExactlyAtEtime
+[       OK ] R23RdmCountTest.HisWindowBoundaryKeepsTickExactlyAtEtime (1 ms)
+[ RUN      ] R23RdmCountTest.RtWindowBoundaryKeepsTickExactlyAtEtime
+[       OK ] R23RdmCountTest.RtWindowBoundaryKeepsTickExactlyAtEtime (0 ms)
+[ RUN      ] R23RdmCountTest.HisEarlierActionDateWithLaterClockStaysBeforeEtime
+[       OK ] R23RdmCountTest.HisEarlierActionDateWithLaterClockStaysBeforeEtime (1 ms)
+[ RUN      ] R23RdmCountTest.RtEarlierActionDateWithLaterClockStaysBeforeEtime
+[       OK ] R23RdmCountTest.RtEarlierActionDateWithLaterClockStaysBeforeEtime (0 ms)
+[ RUN      ] R23RdmCountTest.CountSizeCheckFailureCanRecoverAfterFileRepair
+[       OK ] R23RdmCountTest.CountSizeCheckFailureCanRecoverAfterFileRepair (1 ms)
+[ RUN      ] R23RdmCountTest.CountWithNoDataAtAllReturnsEmptySlice
+[       OK ] R23RdmCountTest.CountWithNoDataAtAllReturnsEmptySlice (0 ms)
+[ RUN      ] R23RdmCountTest.KlineCountIsTailWindowOfHisDayBars
+[       OK ] R23RdmCountTest.KlineCountIsTailWindowOfHisDayBars (1 ms)
+[ RUN      ] R23RdmCountTest.KlineCountWithZeroEtimeUsesYear2030Sentinel
+[       OK ] R23RdmCountTest.KlineCountWithZeroEtimeUsesYear2030Sentinel (0 ms)
+[ RUN      ] R23RdmCountTest.KlineCountSplicesHisTailWithRtMin1Block
+[       OK ] R23RdmCountTest.KlineCountSplicesHisTailWithRtMin1Block (1 ms)
+[ RUN      ] R23RdmCountTest.KlineCountWithNoBarsAnywhereReturnsEmptyResult
+[       OK ] R23RdmCountTest.KlineCountWithNoBarsAnywhereReturnsEmptyResult (1 ms)
+[ RUN      ] R23RdmCountTest.KlineCountWithEmptyHistoryKeepsRealtimeBars
+[       OK ] R23RdmCountTest.KlineCountWithEmptyHistoryKeepsRealtimeBars (1 ms)
+[----------] 15 tests from R23RdmCountTest (18 ms total)
+
+[----------] 1 test from R23RdmCountStrictProbe
+[ RUN      ] R23RdmCountStrictProbe.CountUsesProductAndSafelyRejectsUnknownCommodity
+[       OK ] R23RdmCountStrictProbe.CountUsesProductAndSafelyRejectsUnknownCommodity (136 ms)
+[----------] 1 test from R23RdmCountStrictProbe (136 ms total)
+
+[----------] 9 tests from R52RdmTest
+[ RUN      ] R52RdmTest.R52HotContinuousDayBarsUseSectionsAndHotTail
+[       OK ] R52RdmTest.R52HotContinuousDayBarsUseSectionsAndHotTail (1 ms)
+[ RUN      ] R52RdmTest.R52HotContinuousMin1SplicesRealtimeBars
+[       OK ] R52RdmTest.R52HotContinuousMin1SplicesRealtimeBars (1 ms)
+[ RUN      ] R52RdmTest.R52AdjustedStockBarsReadCompressedOldFileAndRawSuffix
+[       OK ] R52RdmTest.R52AdjustedStockBarsReadCompressedOldFileAndRawSuffix (1 ms)
+[ RUN      ] R52RdmTest.R52HotContinuousByCountExrightUsesRealtimeCacheBranch
+[       OK ] R52RdmTest.R52HotContinuousByCountExrightUsesRealtimeCacheBranch (1 ms)
+[ RUN      ] R52RdmTest.R52HotTickCodeProbesCustomRawFileAndRealtimeBlock
+[       OK ] R52RdmTest.R52HotTickCodeProbesCustomRawFileAndRealtimeBlock (1 ms)
+[ RUN      ] R52RdmTest.R52ExrightRealtimeRangeCopiesFirstSingleAndMultipleBars
+[       OK ] R52RdmTest.R52ExrightRealtimeRangeCopiesFirstSingleAndMultipleBars (1 ms)
+[ RUN      ] R52RdmTest.R52ExrightRealtimeRangeSkipsAnEmptyRealtimeBlock
+[       OK ] R52RdmTest.R52ExrightRealtimeRangeSkipsAnEmptyRealtimeBlock (0 ms)
+[ RUN      ] R52RdmTest.R52ExrightRealtimeRangeBoundsBeforeHitAndAfterLast
+[       OK ] R52RdmTest.R52ExrightRealtimeRangeBoundsBeforeHitAndAfterLast (1 ms)
+[ RUN      ] R52RdmTest.R52ExrightRealtimeCountBoundsBeforeHitAndAfterLast
+[       OK ] R52RdmTest.R52ExrightRealtimeCountBoundsBeforeHitAndAfterLast (1 ms)
+[----------] 9 tests from R52RdmTest (13 ms total)
+
+[----------] Global test environment tear-down
+[==========] 177 tests from 31 test suites ran. (425 ms total)
+[  PASSED  ] 176 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Q03RdmKlineTest.day_tail_fragment_is_dropped
+
+ 1 FAILED TEST
+  YOU HAVE 7 DISABLED TESTS
+
+
+=================================================================
+==6609==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 1456 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100e24654 in r23::R23WriterTest::make_writer(char const*)+0x548 (i03_slice_rdm_regress:arm64+0x10052c654)
+    #2 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #3 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #4 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #5 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #6 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #7 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #8 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #9 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #10 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 128 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100af0894 in ankerl::unordered_dense::v4_0_4::bucket_type::standard* std::__1::__libcpp_allocate[abi:nqe220108]<ankerl::unordered_dense::v4_0_4::bucket_type::standard>(std::__1::__element_count, unsigned long)+0x50 (i03_slice_rdm_regress:arm64+0x1001f8894)
+    #2 0x000100af0800 in std::__1::allocator<ankerl::unordered_dense::v4_0_4::bucket_type::standard>::allocate[abi:nqe220108](unsigned long)+0x9c (i03_slice_rdm_regress:arm64+0x1001f8800)
+    #3 0x000100af06b0 in std::__1::allocator_traits<std::__1::allocator<ankerl::unordered_dense::v4_0_4::bucket_type::standard>>::allocate[abi:nqe220108](std::__1::allocator<ankerl::unordered_dense::v4_0_4::bucket_type::standard>&, unsigned long)+0x1c (i03_slice_rdm_regress:arm64+0x1001f86b0)
+    #4 0x000100c969e0 in ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::allocate_buckets_from_shift()+0x250 (i03_slice_rdm_regress:arm64+0x10039e9e0)
+    #5 0x000100cc38b4 in ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::increase_size()+0x118 (i03_slice_rdm_regress:arm64+0x1003cb8b4)
+    #6 0x000100d1ce60 in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_try_emplace<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&)+0x188 (i03_slice_rdm_regress:arm64+0x100424e60)
+    #7 0x000100d1cc74 in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::try_emplace<unsigned int, true>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&)+0x6c (i03_slice_rdm_regress:arm64+0x100424c74)
+    #8 0x000100bf25f4 in unsigned int& ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::operator[]<unsigned int, true>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&)+0x160 (i03_slice_rdm_regress:arm64+0x1002fa5f4)
+    #9 0x000100bbc298 in WtDataWriter::updateCache(wtp::WTSContractInfo*, wtp::WTSTickData*, unsigned int)+0x4138 (i03_slice_rdm_regress:arm64+0x1002c4298)
+    #10 0x000100bb7a94 in WtDataWriter::procTick(wtp::WTSTickData*, unsigned int)+0x5f8 (i03_slice_rdm_regress:arm64+0x1002bfa94)
+    #11 0x000100bb6a78 in WtDataWriter::writeTick(wtp::WTSTickData*, unsigned int)+0x5a4 (i03_slice_rdm_regress:arm64+0x1002bea78)
+    #12 0x000100e2508c in r23::R23WriterTest::write_tick(r23::R23Writer*, r23::TickSpec const&, unsigned int)+0x284 (i03_slice_rdm_regress:arm64+0x10052d08c)
+    #13 0x000100e22914 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x864 (i03_slice_rdm_regress:arm64+0x10052a914)
+    #14 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #15 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #16 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #17 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #18 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #19 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #20 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #21 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #22 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 128 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100af0894 in ankerl::unordered_dense::v4_0_4::bucket_type::standard* std::__1::__libcpp_allocate[abi:nqe220108]<ankerl::unordered_dense::v4_0_4::bucket_type::standard>(std::__1::__element_count, unsigned long)+0x50 (i03_slice_rdm_regress:arm64+0x1001f8894)
+    #2 0x000100af0800 in std::__1::allocator<ankerl::unordered_dense::v4_0_4::bucket_type::standard>::allocate[abi:nqe220108](unsigned long)+0x9c (i03_slice_rdm_regress:arm64+0x1001f8800)
+    #3 0x000100af06b0 in std::__1::allocator_traits<std::__1::allocator<ankerl::unordered_dense::v4_0_4::bucket_type::standard>>::allocate[abi:nqe220108](std::__1::allocator<ankerl::unordered_dense::v4_0_4::bucket_type::standard>&, unsigned long)+0x1c (i03_slice_rdm_regress:arm64+0x1001f86b0)
+    #4 0x000100caddd4 in ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::allocate_buckets_from_shift()+0x250 (i03_slice_rdm_regress:arm64+0x1003b5dd4)
+    #5 0x000100d08d10 in ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::increase_size()+0x118 (i03_slice_rdm_regress:arm64+0x100410d10)
+    #6 0x000100be0068 in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::emplace<char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>(char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>&&)+0x1bc (i03_slice_rdm_regress:arm64+0x1002e8068)
+    #7 0x000100bd37e8 in WtDataWriter::getTickBlock(wtp::WTSContractInfo*, unsigned int, bool)+0x650 (i03_slice_rdm_regress:arm64+0x1002db7e8)
+    #8 0x000100bbc83c in WtDataWriter::pipeToTicks(wtp::WTSContractInfo*, wtp::WTSTickData*)+0x1e4 (i03_slice_rdm_regress:arm64+0x1002c483c)
+    #9 0x000100bb7b38 in WtDataWriter::procTick(wtp::WTSTickData*, unsigned int)+0x69c (i03_slice_rdm_regress:arm64+0x1002bfb38)
+    #10 0x000100bb6a78 in WtDataWriter::writeTick(wtp::WTSTickData*, unsigned int)+0x5a4 (i03_slice_rdm_regress:arm64+0x1002bea78)
+    #11 0x000100e2508c in r23::R23WriterTest::write_tick(r23::R23Writer*, r23::TickSpec const&, unsigned int)+0x284 (i03_slice_rdm_regress:arm64+0x10052d08c)
+    #12 0x000100e22914 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x864 (i03_slice_rdm_regress:arm64+0x10052a914)
+    #13 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #14 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #15 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #16 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #17 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #18 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #19 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #20 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #21 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 88 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100c162bc in std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>* std::__1::__libcpp_allocate[abi:nqe220108]<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>(std::__1::__element_count, unsigned long)+0x54 (i03_slice_rdm_regress:arm64+0x10031e2bc)
+    #2 0x000100c16224 in std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>::allocate[abi:nqe220108](unsigned long)+0x9c (i03_slice_rdm_regress:arm64+0x10031e224)
+    #3 0x000100c16134 in std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>>::allocate[abi:nqe220108](std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>&, unsigned long)+0x1c (i03_slice_rdm_regress:arm64+0x10031e134)
+    #4 0x000100c16000 in std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>>::__allocation_guard[abi:nqe220108]<std::__1::allocator<std::__1::mutex>>(std::__1::allocator<std::__1::mutex>, unsigned long)+0x1cc (i03_slice_rdm_regress:arm64+0x10031e000)
+    #5 0x000100c15a5c in std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>>::__allocation_guard[abi:nqe220108]<std::__1::allocator<std::__1::mutex>>(std::__1::allocator<std::__1::mutex>, unsigned long)+0x3c (i03_slice_rdm_regress:arm64+0x10031da5c)
+    #6 0x000100c15858 in std::__1::shared_ptr<std::__1::mutex> std::__1::allocate_shared[abi:nqe220108]<std::__1::mutex, std::__1::allocator<std::__1::mutex>, 0>(std::__1::allocator<std::__1::mutex> const&)+0x13c (i03_slice_rdm_regress:arm64+0x10031d858)
+    #7 0x000100c15680 in std::__1::shared_ptr<std::__1::mutex> std::__1::make_shared[abi:nqe220108]<std::__1::mutex, 0>()+0x118 (i03_slice_rdm_regress:arm64+0x10031d680)
+    #8 0x000100c15524 in std::__1::condition_variable_any::condition_variable_any[abi:nqe220108]()+0x40 (i03_slice_rdm_regress:arm64+0x10031d524)
+    #9 0x000100ba9bd0 in std::__1::condition_variable_any::condition_variable_any[abi:nqe220108]()+0x34 (i03_slice_rdm_regress:arm64+0x1002b1bd0)
+    #10 0x000100ba8ffc in WtDataWriter::WtDataWriter()+0x298 (i03_slice_rdm_regress:arm64+0x1002b0ffc)
+    #11 0x000100e2f3e4 in r23::R23Writer::R23Writer()+0x60 (i03_slice_rdm_regress:arm64+0x1005373e4)
+    #12 0x000100e2ee80 in r23::R23Writer::R23Writer()+0x34 (i03_slice_rdm_regress:arm64+0x100536e80)
+    #13 0x000100e24690 in r23::R23WriterTest::make_writer(char const*)+0x584 (i03_slice_rdm_regress:arm64+0x10052c690)
+    #14 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #15 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #16 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #17 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #18 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #19 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #20 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #21 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #22 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #23 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 88 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100c162bc in std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>* std::__1::__libcpp_allocate[abi:nqe220108]<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>(std::__1::__element_count, unsigned long)+0x54 (i03_slice_rdm_regress:arm64+0x10031e2bc)
+    #2 0x000100c16224 in std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>::allocate[abi:nqe220108](unsigned long)+0x9c (i03_slice_rdm_regress:arm64+0x10031e224)
+    #3 0x000100c16134 in std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>>::allocate[abi:nqe220108](std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>&, unsigned long)+0x1c (i03_slice_rdm_regress:arm64+0x10031e134)
+    #4 0x000100c16000 in std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>>::__allocation_guard[abi:nqe220108]<std::__1::allocator<std::__1::mutex>>(std::__1::allocator<std::__1::mutex>, unsigned long)+0x1cc (i03_slice_rdm_regress:arm64+0x10031e000)
+    #5 0x000100c15a5c in std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>>::__allocation_guard[abi:nqe220108]<std::__1::allocator<std::__1::mutex>>(std::__1::allocator<std::__1::mutex>, unsigned long)+0x3c (i03_slice_rdm_regress:arm64+0x10031da5c)
+    #6 0x000100c15858 in std::__1::shared_ptr<std::__1::mutex> std::__1::allocate_shared[abi:nqe220108]<std::__1::mutex, std::__1::allocator<std::__1::mutex>, 0>(std::__1::allocator<std::__1::mutex> const&)+0x13c (i03_slice_rdm_regress:arm64+0x10031d858)
+    #7 0x000100c15680 in std::__1::shared_ptr<std::__1::mutex> std::__1::make_shared[abi:nqe220108]<std::__1::mutex, 0>()+0x118 (i03_slice_rdm_regress:arm64+0x10031d680)
+    #8 0x000100c15524 in std::__1::condition_variable_any::condition_variable_any[abi:nqe220108]()+0x40 (i03_slice_rdm_regress:arm64+0x10031d524)
+    #9 0x000100ba9bd0 in std::__1::condition_variable_any::condition_variable_any[abi:nqe220108]()+0x34 (i03_slice_rdm_regress:arm64+0x1002b1bd0)
+    #10 0x000100ba9020 in WtDataWriter::WtDataWriter()+0x2bc (i03_slice_rdm_regress:arm64+0x1002b1020)
+    #11 0x000100e2f3e4 in r23::R23Writer::R23Writer()+0x60 (i03_slice_rdm_regress:arm64+0x1005373e4)
+    #12 0x000100e2ee80 in r23::R23Writer::R23Writer()+0x34 (i03_slice_rdm_regress:arm64+0x100536e80)
+    #13 0x000100e24690 in r23::R23WriterTest::make_writer(char const*)+0x584 (i03_slice_rdm_regress:arm64+0x10052c690)
+    #14 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #15 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #16 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #17 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #18 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #19 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #20 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #21 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #22 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #23 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 88 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100c162bc in std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>* std::__1::__libcpp_allocate[abi:nqe220108]<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>(std::__1::__element_count, unsigned long)+0x54 (i03_slice_rdm_regress:arm64+0x10031e2bc)
+    #2 0x000100c16224 in std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>::allocate[abi:nqe220108](unsigned long)+0x9c (i03_slice_rdm_regress:arm64+0x10031e224)
+    #3 0x000100c16134 in std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>>::allocate[abi:nqe220108](std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>&, unsigned long)+0x1c (i03_slice_rdm_regress:arm64+0x10031e134)
+    #4 0x000100c16000 in std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>>::__allocation_guard[abi:nqe220108]<std::__1::allocator<std::__1::mutex>>(std::__1::allocator<std::__1::mutex>, unsigned long)+0x1cc (i03_slice_rdm_regress:arm64+0x10031e000)
+    #5 0x000100c15a5c in std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>>::__allocation_guard[abi:nqe220108]<std::__1::allocator<std::__1::mutex>>(std::__1::allocator<std::__1::mutex>, unsigned long)+0x3c (i03_slice_rdm_regress:arm64+0x10031da5c)
+    #6 0x000100c15858 in std::__1::shared_ptr<std::__1::mutex> std::__1::allocate_shared[abi:nqe220108]<std::__1::mutex, std::__1::allocator<std::__1::mutex>, 0>(std::__1::allocator<std::__1::mutex> const&)+0x13c (i03_slice_rdm_regress:arm64+0x10031d858)
+    #7 0x000100c15680 in std::__1::shared_ptr<std::__1::mutex> std::__1::make_shared[abi:nqe220108]<std::__1::mutex, 0>()+0x118 (i03_slice_rdm_regress:arm64+0x10031d680)
+    #8 0x000100c15524 in std::__1::condition_variable_any::condition_variable_any[abi:nqe220108]()+0x40 (i03_slice_rdm_regress:arm64+0x10031d524)
+    #9 0x000100ba9bd0 in std::__1::condition_variable_any::condition_variable_any[abi:nqe220108]()+0x34 (i03_slice_rdm_regress:arm64+0x1002b1bd0)
+    #10 0x000100ba9204 in WtDataWriter::WtDataWriter()+0x4a0 (i03_slice_rdm_regress:arm64+0x1002b1204)
+    #11 0x000100e2f3e4 in r23::R23Writer::R23Writer()+0x60 (i03_slice_rdm_regress:arm64+0x1005373e4)
+    #12 0x000100e2ee80 in r23::R23Writer::R23Writer()+0x34 (i03_slice_rdm_regress:arm64+0x100536e80)
+    #13 0x000100e24690 in r23::R23WriterTest::make_writer(char const*)+0x584 (i03_slice_rdm_regress:arm64+0x10052c690)
+    #14 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #15 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #16 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #17 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #18 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #19 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #20 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #21 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #22 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #23 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 88 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100c162bc in std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>* std::__1::__libcpp_allocate[abi:nqe220108]<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>(std::__1::__element_count, unsigned long)+0x54 (i03_slice_rdm_regress:arm64+0x10031e2bc)
+    #2 0x000100c16224 in std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>::allocate[abi:nqe220108](unsigned long)+0x9c (i03_slice_rdm_regress:arm64+0x10031e224)
+    #3 0x000100c16134 in std::__1::allocator_traits<std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>>::allocate[abi:nqe220108](std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>&, unsigned long)+0x1c (i03_slice_rdm_regress:arm64+0x10031e134)
+    #4 0x000100c16000 in std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>>::__allocation_guard[abi:nqe220108]<std::__1::allocator<std::__1::mutex>>(std::__1::allocator<std::__1::mutex>, unsigned long)+0x1cc (i03_slice_rdm_regress:arm64+0x10031e000)
+    #5 0x000100c15a5c in std::__1::__allocation_guard<std::__1::allocator<std::__1::__shared_ptr_emplace<std::__1::mutex, std::__1::allocator<std::__1::mutex>>>>::__allocation_guard[abi:nqe220108]<std::__1::allocator<std::__1::mutex>>(std::__1::allocator<std::__1::mutex>, unsigned long)+0x3c (i03_slice_rdm_regress:arm64+0x10031da5c)
+    #6 0x000100c15858 in std::__1::shared_ptr<std::__1::mutex> std::__1::allocate_shared[abi:nqe220108]<std::__1::mutex, std::__1::allocator<std::__1::mutex>, 0>(std::__1::allocator<std::__1::mutex> const&)+0x13c (i03_slice_rdm_regress:arm64+0x10031d858)
+    #7 0x000100c15680 in std::__1::shared_ptr<std::__1::mutex> std::__1::make_shared[abi:nqe220108]<std::__1::mutex, 0>()+0x118 (i03_slice_rdm_regress:arm64+0x10031d680)
+    #8 0x000100c15524 in std::__1::condition_variable_any::condition_variable_any[abi:nqe220108]()+0x40 (i03_slice_rdm_regress:arm64+0x10031d524)
+    #9 0x000100ba9bd0 in std::__1::condition_variable_any::condition_variable_any[abi:nqe220108]()+0x34 (i03_slice_rdm_regress:arm64+0x1002b1bd0)
+    #10 0x000100ba9224 in WtDataWriter::WtDataWriter()+0x4c0 (i03_slice_rdm_regress:arm64+0x1002b1224)
+    #11 0x000100e2f3e4 in r23::R23Writer::R23Writer()+0x60 (i03_slice_rdm_regress:arm64+0x1005373e4)
+    #12 0x000100e2ee80 in r23::R23Writer::R23Writer()+0x34 (i03_slice_rdm_regress:arm64+0x100536e80)
+    #13 0x000100e24690 in r23::R23WriterTest::make_writer(char const*)+0x584 (i03_slice_rdm_regress:arm64+0x10052c690)
+    #14 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #15 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #16 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #17 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #18 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #19 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #20 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #21 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #22 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #23 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 72 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x0001882e1060 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*)+0xb0 (libc++.1.dylib:arm64e+0x4060)
+    #2 0x0001882f64bc in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__assign_external(char const*, unsigned long)+0x68 (libc++.1.dylib:arm64e+0x194bc)
+    #3 0x000100900e7c in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::operator=[abi:nqe220108](char const*)+0x3c (i03_slice_rdm_regress:arm64+0x100008e7c)
+    #4 0x00010093f16c in BoostMappingFile::map(char const*, int, int, bool)+0x228 (i03_slice_rdm_regress:arm64+0x10004716c)
+    #5 0x000100bae7ec in WtDataWriter::loadCache()+0x7f4 (i03_slice_rdm_regress:arm64+0x1002b67ec)
+    #6 0x000100bac62c in WtDataWriter::init(wtp::WTSVariant*, wtp::IDataWriterSink*)+0x1304 (i03_slice_rdm_regress:arm64+0x1002b462c)
+    #7 0x000100e24798 in r23::R23WriterTest::make_writer(char const*)+0x68c (i03_slice_rdm_regress:arm64+0x10052c798)
+    #8 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #9 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #10 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #11 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #12 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #13 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #14 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #15 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #16 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #17 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 72 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b091f8 in _Znam+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x651f8)
+    #1 0x0001009f476c in boost::interprocess::char_wchar_holder::char_wchar_holder(char const*)+0xb4 (i03_slice_rdm_regress:arm64+0x1000fc76c)
+    #2 0x0001009f4194 in boost::interprocess::char_wchar_holder::char_wchar_holder(char const*)+0x3c (i03_slice_rdm_regress:arm64+0x1000fc194)
+    #3 0x0001009f3cb4 in boost::interprocess::file_mapping::file_mapping(char const*, boost::interprocess::mode_t)+0x16c (i03_slice_rdm_regress:arm64+0x1000fbcb4)
+    #4 0x0001009f3850 in boost::interprocess::file_mapping::file_mapping(char const*, boost::interprocess::mode_t)+0x74 (i03_slice_rdm_regress:arm64+0x1000fb850)
+    #5 0x00010093f1a0 in BoostMappingFile::map(char const*, int, int, bool)+0x25c (i03_slice_rdm_regress:arm64+0x1000471a0)
+    #6 0x000100bae7ec in WtDataWriter::loadCache()+0x7f4 (i03_slice_rdm_regress:arm64+0x1002b67ec)
+    #7 0x000100bac62c in WtDataWriter::init(wtp::WTSVariant*, wtp::IDataWriterSink*)+0x1304 (i03_slice_rdm_regress:arm64+0x1002b462c)
+    #8 0x000100e24798 in r23::R23WriterTest::make_writer(char const*)+0x68c (i03_slice_rdm_regress:arm64+0x10052c798)
+    #9 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #10 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #11 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #12 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #13 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #14 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #15 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #16 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #17 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #18 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 64 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x0001882f83bc in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__init_copy_ctor_external(char const*, unsigned long)+0x64 (libc++.1.dylib:arm64e+0x1b3bc)
+    #2 0x0001882dfd9c in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::basic_string(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)+0x3c (libc++.1.dylib:arm64e+0x2d9c)
+    #3 0x000100bace9c in StrUtil::standardisePath(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, bool)+0x170 (i03_slice_rdm_regress:arm64+0x1002b4e9c)
+    #4 0x000100bab838 in WtDataWriter::init(wtp::WTSVariant*, wtp::IDataWriterSink*)+0x510 (i03_slice_rdm_regress:arm64+0x1002b3838)
+    #5 0x000100e24798 in r23::R23WriterTest::make_writer(char const*)+0x68c (i03_slice_rdm_regress:arm64+0x10052c798)
+    #6 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #7 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #8 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #9 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #10 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #11 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #12 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #13 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #14 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #15 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 40 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100bae740 in WtDataWriter::loadCache()+0x748 (i03_slice_rdm_regress:arm64+0x1002b6740)
+    #2 0x000100bac62c in WtDataWriter::init(wtp::WTSVariant*, wtp::IDataWriterSink*)+0x1304 (i03_slice_rdm_regress:arm64+0x1002b462c)
+    #3 0x000100e24798 in r23::R23WriterTest::make_writer(char const*)+0x68c (i03_slice_rdm_regress:arm64+0x10052c798)
+    #4 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #5 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #6 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #7 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #8 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #9 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #10 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #11 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #12 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #13 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 40 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100c76320 in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>* std::__1::__libcpp_allocate[abi:nqe220108]<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>(std::__1::__element_count, unsigned long)+0x54 (i03_slice_rdm_regress:arm64+0x10037e320)
+    #2 0x000100c7625c in std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>::allocate[abi:nqe220108](unsigned long)+0x9c (i03_slice_rdm_regress:arm64+0x10037e25c)
+    #3 0x000100c75d54 in std::__1::__allocation_result<std::__1::allocator_traits<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>>::pointer, std::__1::allocator_traits<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>>::size_type> std::__1::__allocate_at_least[abi:nqe220108]<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>, std::__1::allocator_traits<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>>>(std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>&, unsigned long)+0x114 (i03_slice_rdm_regress:arm64+0x10037dd54)
+    #4 0x000100c75a18 in std::__1::__split_buffer<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>&)+0xc4 (i03_slice_rdm_regress:arm64+0x10037da18)
+    #5 0x000100c75528 in std::__1::__split_buffer<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>&)+0x4c (i03_slice_rdm_regress:arm64+0x10037d528)
+    #6 0x000100d0a238 in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>* std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>>::__emplace_back_slow_path<char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>(char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>&&)+0x1b4 (i03_slice_rdm_regress:arm64+0x100412238)
+    #7 0x000100d097a8 in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>>::emplace_back<char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>(char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>&&)::'lambda0'()::operator()() const+0x11c (i03_slice_rdm_regress:arm64+0x1004117a8)
+    #8 0x000100d0944c in void std::__1::__if_likely_else[abi:nqe220108]<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>>::emplace_back<char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>(char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>&&)::'lambda'(), std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>>::emplace_back<char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>(char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>&&)::'lambda0'()>(bool, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>>::emplace_back<char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>(char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>&&)::'lambda'(), std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>>::emplace_back<char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>(char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>&&)::'lambda0'())+0xc0 (i03_slice_rdm_regress:arm64+0x10041144c)
+    #9 0x000100d09074 in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>>::emplace_back<char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>(char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>&&)+0x34c (i03_slice_rdm_regress:arm64+0x100411074)
+    #10 0x000100be00d8 in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::emplace<char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>>(char const*&, std::__1::shared_ptr<WtDataWriter::_TickBlockPair>&&)+0x22c (i03_slice_rdm_regress:arm64+0x1002e80d8)
+    #11 0x000100bd37e8 in WtDataWriter::getTickBlock(wtp::WTSContractInfo*, unsigned int, bool)+0x650 (i03_slice_rdm_regress:arm64+0x1002db7e8)
+    #12 0x000100bbc83c in WtDataWriter::pipeToTicks(wtp::WTSContractInfo*, wtp::WTSTickData*)+0x1e4 (i03_slice_rdm_regress:arm64+0x1002c483c)
+    #13 0x000100bb7b38 in WtDataWriter::procTick(wtp::WTSTickData*, unsigned int)+0x69c (i03_slice_rdm_regress:arm64+0x1002bfb38)
+    #14 0x000100bb6a78 in WtDataWriter::writeTick(wtp::WTSTickData*, unsigned int)+0x5a4 (i03_slice_rdm_regress:arm64+0x1002bea78)
+    #15 0x000100e2508c in r23::R23WriterTest::write_tick(r23::R23Writer*, r23::TickSpec const&, unsigned int)+0x284 (i03_slice_rdm_regress:arm64+0x10052d08c)
+    #16 0x000100e22914 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x864 (i03_slice_rdm_regress:arm64+0x10052a914)
+    #17 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #18 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #19 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #20 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #21 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #22 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #23 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #24 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #25 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100c96610 in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>* std::__1::__libcpp_allocate[abi:nqe220108]<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>(std::__1::__element_count, unsigned long)+0x50 (i03_slice_rdm_regress:arm64+0x10039e610)
+    #2 0x000100c96550 in std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>::allocate[abi:nqe220108](unsigned long)+0x9c (i03_slice_rdm_regress:arm64+0x10039e550)
+    #3 0x000100c961cc in std::__1::__allocation_result<std::__1::allocator_traits<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>>::pointer, std::__1::allocator_traits<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>>::size_type> std::__1::__allocate_at_least[abi:nqe220108]<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>, std::__1::allocator_traits<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>>>(std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>&, unsigned long)+0x114 (i03_slice_rdm_regress:arm64+0x10039e1cc)
+    #4 0x000100cb703c in std::__1::__split_buffer<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>&)+0xc4 (i03_slice_rdm_regress:arm64+0x1003bf03c)
+    #5 0x000100cb6bc4 in std::__1::__split_buffer<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>&)+0x4c (i03_slice_rdm_regress:arm64+0x1003bebc4)
+    #6 0x000100d1ed20 in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>* std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>>::__emplace_back_slow_path<std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>, std::__1::tuple<>>(std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>&&, std::__1::tuple<>&&)+0x1b8 (i03_slice_rdm_regress:arm64+0x100426d20)
+    #7 0x000100d1e23c in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>>::emplace_back<std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>, std::__1::tuple<>>(std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>&&, std::__1::tuple<>&&)::'lambda0'()::operator()() const+0x170 (i03_slice_rdm_regress:arm64+0x10042623c)
+    #8 0x000100d1de38 in void std::__1::__if_likely_else[abi:nqe220108]<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>>::emplace_back<std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>, std::__1::tuple<>>(std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>&&, std::__1::tuple<>&&)::'lambda'(), std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>>::emplace_back<std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>, std::__1::tuple<>>(std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>&&, std::__1::tuple<>&&)::'lambda0'()>(bool, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>>::emplace_back<std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>, std::__1::tuple<>>(std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>&&, std::__1::tuple<>&&)::'lambda'(), std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>>::emplace_back<std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>, std::__1::tuple<>>(std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>&&, std::__1::tuple<>&&)::'lambda0'())+0xc0 (i03_slice_rdm_regress:arm64+0x100425e38)
+    #9 0x000100d1dbc0 in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>>::emplace_back<std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>, std::__1::tuple<>>(std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&>&&, std::__1::tuple<>&&)+0x3b8 (i03_slice_rdm_regress:arm64+0x100425bc0)
+    #10 0x000100d1d658 in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_place_element<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>(unsigned int, unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&)+0x218 (i03_slice_rdm_regress:arm64+0x100425658)
+    #11 0x000100d1d318 in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_try_emplace<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&)+0x640 (i03_slice_rdm_regress:arm64+0x100425318)
+    #12 0x000100d1cc74 in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::try_emplace<unsigned int, true>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&)+0x6c (i03_slice_rdm_regress:arm64+0x100424c74)
+    #13 0x000100bf25f4 in unsigned int& ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, unsigned int>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::operator[]<unsigned int, true>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>&&)+0x160 (i03_slice_rdm_regress:arm64+0x1002fa5f4)
+    #14 0x000100bbc298 in WtDataWriter::updateCache(wtp::WTSContractInfo*, wtp::WTSTickData*, unsigned int)+0x4138 (i03_slice_rdm_regress:arm64+0x1002c4298)
+    #15 0x000100bb7a94 in WtDataWriter::procTick(wtp::WTSTickData*, unsigned int)+0x5f8 (i03_slice_rdm_regress:arm64+0x1002bfa94)
+    #16 0x000100bb6a78 in WtDataWriter::writeTick(wtp::WTSTickData*, unsigned int)+0x5a4 (i03_slice_rdm_regress:arm64+0x1002bea78)
+    #17 0x000100e2508c in r23::R23WriterTest::write_tick(r23::R23Writer*, r23::TickSpec const&, unsigned int)+0x284 (i03_slice_rdm_regress:arm64+0x10052d08c)
+    #18 0x000100e22914 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x864 (i03_slice_rdm_regress:arm64+0x10052a914)
+    #19 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #20 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #21 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #22 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #23 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #24 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #25 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #26 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #27 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100a1d1bc in std::__1::shared_ptr<std::__1::thread>::shared_ptr[abi:nqe220108]<std::__1::thread, 0>(std::__1::thread*)+0x18c (i03_slice_rdm_regress:arm64+0x1001251bc)
+    #2 0x000100a1cf40 in std::__1::shared_ptr<std::__1::thread>::shared_ptr[abi:nqe220108]<std::__1::thread, 0>(std::__1::thread*)+0x3c (i03_slice_rdm_regress:arm64+0x100124f40)
+    #3 0x000100902c64 in void std::__1::shared_ptr<std::__1::thread>::reset[abi:nqe220108]<std::__1::thread, 0>(std::__1::thread*)+0x140 (i03_slice_rdm_regress:arm64+0x10000ac64)
+    #4 0x000100bac6f4 in WtDataWriter::init(wtp::WTSVariant*, wtp::IDataWriterSink*)+0x13cc (i03_slice_rdm_regress:arm64+0x1002b46f4)
+    #5 0x000100e24798 in r23::R23WriterTest::make_writer(char const*)+0x68c (i03_slice_rdm_regress:arm64+0x10052c798)
+    #6 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #7 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #8 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #9 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #10 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #11 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #12 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #13 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #14 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #15 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x00010093f250 in BoostMappingFile::map(char const*, int, int, bool)+0x30c (i03_slice_rdm_regress:arm64+0x100047250)
+    #2 0x000100bae7ec in WtDataWriter::loadCache()+0x7f4 (i03_slice_rdm_regress:arm64+0x1002b67ec)
+    #3 0x000100bac62c in WtDataWriter::init(wtp::WTSVariant*, wtp::IDataWriterSink*)+0x1304 (i03_slice_rdm_regress:arm64+0x1002b462c)
+    #4 0x000100e24798 in r23::R23WriterTest::make_writer(char const*)+0x68c (i03_slice_rdm_regress:arm64+0x10052c798)
+    #5 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #6 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #7 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #8 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #9 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #10 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #11 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #12 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #13 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #14 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100a805c0 in std::__1::shared_ptr<BoostMappingFile>::shared_ptr[abi:nqe220108]<BoostMappingFile, 0>(BoostMappingFile*)+0x18c (i03_slice_rdm_regress:arm64+0x1001885c0)
+    #2 0x000100a80420 in std::__1::shared_ptr<BoostMappingFile>::shared_ptr[abi:nqe220108]<BoostMappingFile, 0>(BoostMappingFile*)+0x3c (i03_slice_rdm_regress:arm64+0x100188420)
+    #3 0x00010093edbc in void std::__1::shared_ptr<BoostMappingFile>::reset[abi:nqe220108]<BoostMappingFile, 0>(BoostMappingFile*)+0x140 (i03_slice_rdm_regress:arm64+0x100046dbc)
+    #4 0x000100bae77c in WtDataWriter::loadCache()+0x784 (i03_slice_rdm_regress:arm64+0x1002b677c)
+    #5 0x000100bac62c in WtDataWriter::init(wtp::WTSVariant*, wtp::IDataWriterSink*)+0x1304 (i03_slice_rdm_regress:arm64+0x1002b462c)
+    #6 0x000100e24798 in r23::R23WriterTest::make_writer(char const*)+0x68c (i03_slice_rdm_regress:arm64+0x10052c798)
+    #7 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #8 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #9 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #10 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #11 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #12 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #13 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #14 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #15 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #16 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 24 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x00010093f174 in BoostMappingFile::map(char const*, int, int, bool)+0x230 (i03_slice_rdm_regress:arm64+0x100047174)
+    #2 0x000100bae7ec in WtDataWriter::loadCache()+0x7f4 (i03_slice_rdm_regress:arm64+0x1002b67ec)
+    #3 0x000100bac62c in WtDataWriter::init(wtp::WTSVariant*, wtp::IDataWriterSink*)+0x1304 (i03_slice_rdm_regress:arm64+0x1002b462c)
+    #4 0x000100e24798 in r23::R23WriterTest::make_writer(char const*)+0x68c (i03_slice_rdm_regress:arm64+0x10052c798)
+    #5 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #6 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #7 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #8 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #9 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #10 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #11 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #12 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #13 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #14 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 8 byte(s) in 1 object(s) allocated from:
+    #0 0x000102b090e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100bac65c in WtDataWriter::init(wtp::WTSVariant*, wtp::IDataWriterSink*)+0x1334 (i03_slice_rdm_regress:arm64+0x1002b465c)
+    #2 0x000100e24798 in r23::R23WriterTest::make_writer(char const*)+0x68c (i03_slice_rdm_regress:arm64+0x10052c798)
+    #3 0x000100e22694 in q03range::WriterTickRangeE2ETest_PublishedWriterTicksAreVisibleThroughPublicRange_Test::TestBody()+0x5e4 (i03_slice_rdm_regress:arm64+0x10052a694)
+    #4 0x0001011dc20c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008e420c)
+    #5 0x0001011dc154 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x1008e4154)
+    #6 0x0001011dcd34 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x1008e4d34)
+    #7 0x0001011dd7b8 in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x1008e57b8)
+    #8 0x0001011e8be0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x1008f0be0)
+    #9 0x0001011e858c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1008f058c)
+    #10 0x0001011e84f0 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x1008f04f0)
+    #11 0x0001011c9924 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008d1924)
+    #12 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: 2512 byte(s) leaked in 18 allocation(s).

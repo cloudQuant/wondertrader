@@ -1,4 +1,5 @@
 ﻿#include "WtDataReader.h"
+#include "RTBlockPublish.hpp"
 
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/TimeUtils.hpp"
@@ -9,16 +10,25 @@
 #include "../Includes/IBaseDataMgr.h"
 #include "../Includes/IHotMgr.h"
 #include "../Includes/WTSDataDef.hpp"
+#include "../Includes/DateMappingClient.hpp"
 
 #include "../WTSUtils/WTSCmpHelper.hpp"
+#include "../WTSUtils/WTSCmpBudgetConfig.hpp"
 #include "../WTSUtils/WTSCfgLoader.h"
 
 #include <rapidjson/document.h>
+#include <cstring>
 #include <exception>
+#include <limits>
+#include <new>
+#include <type_traits>
 namespace rj = rapidjson;
 
 namespace
 {
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+	thread_local int r132_allocation_failure_stage = 0;
+#endif
 	bool decode_his_compressed_items(std::string& content, std::size_t itemSize)
 	{
 		if (content.size() < sizeof(BlockHeaderV2))
@@ -34,7 +44,8 @@ namespace
 		if (expandedSize == ZSTD_CONTENTSIZE_ERROR ||
 			expandedSize == ZSTD_CONTENTSIZE_UNKNOWN ||
 			expandedSize > content.max_size() - sizeof(BlockHeader) ||
-			expandedSize % itemSize != 0)
+			expandedSize % itemSize != 0 ||
+			expandedSize / itemSize > (std::numeric_limits<uint32_t>::max)())
 			return false;
 
 		try
@@ -59,7 +70,75 @@ namespace
 
 		return true;
 	}
+
+	// R132-001: move a history tick block's payload out of the packed buffer
+	// (12-byte header -> records at a 4-byte offset) into the pair's aligned
+	// vector once; `_buffer` keeps only the header afterwards.
+	template <typename Pair>
+	bool align_his_tick_items(Pair& pair)
+	{
+		const std::size_t headerSize = sizeof(HisTickBlock);
+		if (pair._buffer.size() <= headerSize)
+			return true;
+		const std::size_t count = (pair._buffer.size() - headerSize) / sizeof(WTSTickStruct);
+		try
+		{
+			std::vector<WTSTickStruct> items(count);
+			if (count != 0)
+				std::memcpy(items.data(), pair._buffer.data() + headerSize, count * sizeof(WTSTickStruct));
+			pair._items.swap(items);
+			pair._buffer.resize(headerSize);
+			pair._buffer.shrink_to_fit();
+		}
+		catch (const std::exception&)
+		{
+			return false;
+		}
+		pair._block = reinterpret_cast<HisTickBlock*>(&pair._buffer[0]);
+		return true;
+	}
+
+	template <typename T>
+	bool copy_his_items_aligned(const std::string& content, std::vector<T>& output)
+	{
+		static_assert(std::is_trivially_copyable<T>::value, "historical records must be byte-copyable");
+		if (content.size() < sizeof(BlockHeader))
+			return false;
+		const std::size_t payloadSize = content.size() - sizeof(BlockHeader);
+		if (payloadSize % sizeof(T) != 0)
+			return false;
+		const std::size_t count = payloadSize / sizeof(T);
+		if (count > (std::numeric_limits<uint32_t>::max)() || count > output.max_size())
+			return false;
+		try
+		{
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+			if (r132_allocation_failure_stage == 1)
+			{
+				r132_allocation_failure_stage = 0;
+				throw std::bad_alloc();
+			}
+#endif
+			std::vector<T> items(count);
+			if (payloadSize != 0)
+				std::memcpy(items.data(), content.data() + sizeof(BlockHeader), payloadSize);
+			output.swap(items);
+			return true;
+		}
+		catch (const std::exception&)
+		{
+			return false;
+		}
+	}
 }
+
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+// Test-only, per-thread failure injection; 1 = aligned vector, 2 = publication, 3 = slice creation.
+void wt_r132_fail_next_allocation_for_test(int stage)
+{
+	r132_allocation_failure_stage = stage;
+}
+#endif
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
@@ -99,6 +178,35 @@ inline void pipe_reader_log(IDataReaderSink* sink, WTSLogLevel ll, const char* f
 	sink->reader_log(ll, buffer);
 }
 
+// Decision card 1 (A+C): trading dates come from the typed client over the
+// guarded legacy IBaseDataMgr virtuals. A failure is logged and the caller
+// stops before creating a slice or touching a cache.
+static bool reader_trading_date(IDataReaderSink* sink, wtp::DateMappingClient& mapping, const char* stdPID,
+	uint32_t uDate, uint32_t uTime, uint32_t& tradingDate)
+{
+	const wtp::DateMappingResult32 result = mapping.calcTradingDate(stdPID, uDate, uTime, false);
+	if (result.status != wtp::DateMappingStatus::Ok)
+	{
+		pipe_reader_log(sink, LL_ERROR, "Mapping trading date of {} at {}.{} failed: {}",
+			stdPID == NULL ? "" : stdPID, uDate, uTime, wtp::dateMappingStatusName(result.status));
+		return false;
+	}
+	tradingDate = result.value;
+	return true;
+}
+
+static void report_historical_slice_exception(IDataReaderSink* sink, const char* kind, const char* stdCode) noexcept
+{
+	try
+	{
+		pipe_reader_log(sink, LL_ERROR, "Unexpected failure reading historical {} slice for {}", kind, stdCode ? stdCode : "<null>");
+	}
+	catch (...)
+	{
+		// A failing log sink must not turn a guarded read into an escaping exception.
+	}
+}
+
 extern "C"
 {
 	EXPORT_FLAG IDataReader* createDataReader()
@@ -111,6 +219,14 @@ extern "C"
 	{
 		if (reader != NULL)
 			delete reader;
+	}
+
+	// K31=A: optional DateMappingV1 injection (see Includes/DateMappingBinding.h).
+	EXPORT_FLAG int bindDataReaderDateMappingV1(IDataReader* reader, const wtp::DateMappingV1* table)
+	{
+		if (reader == NULL)
+			return 0;
+		return static_cast<WtDataReader*>(reader)->bindDateMapping(table) ? 1 : 0;
 	}
 };
 
@@ -274,6 +390,12 @@ void WtDataReader::init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader* 
 
 	if (cfg == NULL)
 		return ;
+
+	// BUG-R132-001 (K37=B): this module's decompression budget comes from its own store
+	// config (keys next to path); an invalid value fails closed for compressed blocks.
+	std::string budgetError;
+	if (wt_cmp_budget::apply(cfg, budgetError) == wt_cmp_budget::ApplyResult::Invalid)
+		pipe_reader_log(sink, LL_ERROR, "{}; decompression in this storage module is refused", budgetError);
 
 	WTSVariant* cfgPath = cfg->get("path");
 	if (cfgPath == NULL)
@@ -507,6 +629,12 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
+		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
 	const char* stdPID = commInfo->getFullPid();
 
 	uint32_t curDate, curTime, curSecs;
@@ -526,8 +654,11 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 		curSecs = (uint32_t)(etime % 100000);
 	}
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, curTDate = 0;
+	if (!reader_trading_date(_sink, dateMapping, stdPID, curDate, curTime, endTDate) ||
+		!reader_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 
 	bool isToday = (endTDate == curTDate);
 
@@ -551,8 +682,12 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 			return NULL;
 
 		RTTickBlock* tBlock = tPair->_block;
+		// 卡13：只读取已发布且落在本进程映射内的记录
+		const uint32_t visible = wt_rtpub::visibleRecords(tBlock, tPair->_file->size(), sizeof(RTTickBlock), sizeof(WTSTickStruct));
+		if (visible == 0)
+			return NULL;
 
-		WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + (tBlock->_size - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b){
+		WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + (visible - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b){
 			if (a.action_date != b.action_date)
 				return a.action_date < b.action_date;
 			else
@@ -571,12 +706,16 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 		uint32_t cnt = min(eIdx + 1, count);
 		uint32_t sIdx = eIdx + 1 - cnt;
 		WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks + sIdx, cnt);
+		//卡11=B：实时切片持有映射文件 owner，重映射/巡检释放后切片仍有效
+		if (slice != NULL)
+			slice->addOwner(tPair->_file);
 		return slice;
 	}
 	else
 	{
-		thread_local static char key[64] = { 0 };
-		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
+		// I03-NEW-039: the cache key embeds the caller's stdCode, which may be longer
+		// than a fixed 64-byte buffer; build it as a string.
+		const std::string key = fmt::format("{}-{}", stdCode, endTDate);
 
 		auto it = _his_tick_map.find(key);
 		if(it == _his_tick_map.end())
@@ -619,20 +758,24 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 		if (tBlkPair._block == NULL)
 			return NULL;
 
-		HisTickBlock* tBlock = tBlkPair._block;
+		// R132-001: records are served from the pair's aligned copy, never from
+		// the packed history buffer (12-byte header leaves them misaligned).
+		if (!align_his_tick_items(tBlkPair))
+			return NULL;
+		WTSTickStruct* const hisTicks = tBlkPair._items.data();
 
-		uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisTickBlock)) / sizeof(WTSTickStruct);
+		uint32_t tcnt = (uint32_t)tBlkPair._items.size();
 		if (tcnt <= 0)
 			return NULL;
 
-		WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + (tcnt - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b){
+		WTSTickStruct* pTick = std::lower_bound(hisTicks, hisTicks + (tcnt - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b){
 			if (a.action_date != b.action_date)
 				return a.action_date < b.action_date;
 			else
 				return a.action_time < b.action_time;
 		});
 
-		uint32_t eIdx = pTick - tBlock->_ticks;
+		uint32_t eIdx = pTick - hisTicks;
 		if (pTick->action_date > eTick.action_date || pTick->action_time >= eTick.action_time)
 		{
 			pTick--;
@@ -641,7 +784,7 @@ WTSTickSlice* WtDataReader::readTickSlice(const char* stdCode, uint32_t count, u
 
 		uint32_t cnt = min(eIdx + 1, count);
 		uint32_t sIdx = eIdx + 1 - cnt;
-		WTSTickSlice* slice = WTSTickSlice::create(stdCode, tBlock->_ticks + sIdx, cnt);
+		WTSTickSlice* slice = WTSTickSlice::create(stdCode, hisTicks + sIdx, cnt);
 		return slice;
 	}
 }
@@ -653,6 +796,12 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
+		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
 	const char* stdPID = commInfo->getFullPid();
 
 	uint32_t curDate, curTime, curSecs;
@@ -672,8 +821,11 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 		curSecs = (uint32_t)(etime % 100000);
 	}
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, curTDate = 0;
+	if (!reader_trading_date(_sink, dateMapping, stdPID, curDate, curTime, endTDate) ||
+		!reader_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 
 	bool isToday = (endTDate == curTDate);
 
@@ -697,8 +849,12 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 			return NULL;
 
 		RTOrdQueBlock* rtBlock = tPair->_block;
+		// 卡13：只读取已发布且落在本进程映射内的记录
+		const uint32_t visible = wt_rtpub::visibleRecords(rtBlock, tPair->_file->size(), sizeof(RTOrdQueBlock), sizeof(WTSOrdQueStruct));
+		if (visible == 0)
+			return NULL;
 
-		WTSOrdQueStruct* pItem = std::lower_bound(rtBlock->_queues, rtBlock->_queues + (rtBlock->_size - 1), eTick, [](const WTSOrdQueStruct& a, const WTSOrdQueStruct& b) {
+		WTSOrdQueStruct* pItem = std::lower_bound(rtBlock->_queues, rtBlock->_queues + (visible - 1), eTick, [](const WTSOrdQueStruct& a, const WTSOrdQueStruct& b) {
 			if (a.action_date != b.action_date)
 				return a.action_date < b.action_date;
 			else
@@ -717,12 +873,18 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 		uint32_t cnt = min(eIdx + 1, count);
 		uint32_t sIdx = eIdx + 1 - cnt;
 		WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, rtBlock->_queues + sIdx, cnt);
+		//卡11=B：实时切片持有映射文件 owner，重映射/巡检释放后切片仍有效
+		if (slice != NULL)
+			slice->addOwner(tPair->_file);
 		return slice;
 	}
 	else
 	{
-		thread_local static char key[64] = { 0 };
-		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
+		try
+		{
+		// I03-NEW-039: the cache key embeds the caller's stdCode, which may be longer
+		// than a fixed 64-byte buffer; build it as a string.
+		const std::string key = fmt::format("{}-{}", stdCode, endTDate);
 
 		auto it = _his_ordque_map.find(key);
 		if (it == _his_ordque_map.end())
@@ -749,51 +911,79 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 			if (!bHit)
 				return NULL;
 
-			HisOrdQueBlockPair& hisBlkPair = _his_ordque_map[key];
-			StdFile::read_file_content(filename.c_str(), hisBlkPair._buffer);
-			if (hisBlkPair._buffer.size() < sizeof(HisOrdQueBlockV2))
+			HisOrdQueBlockPair candidate;
+			std::string buffer;
+			try
+			{
+				StdFile::read_file_content(filename.c_str(), buffer);
+			}
+			catch (const std::exception&)
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Historical data file {}: read failed", filename.c_str());
+				return NULL;
+			}
+			if (buffer.size() < sizeof(HisOrdQueBlockV2))
 			{
 				pipe_reader_log(_sink,LL_ERROR, "历史委托队列数据文件{}大小校验失败", filename);
-				hisBlkPair._buffer.clear();
+				buffer.clear();
 				return NULL;
 			}
 
-			HisOrdQueBlockV2* tBlockV2 = (HisOrdQueBlockV2*)hisBlkPair._buffer.c_str();
+			HisOrdQueBlockV2* tBlockV2 = (HisOrdQueBlockV2*)buffer.c_str();
 
-			if (tBlockV2->_size != hisBlkPair._buffer.size() - sizeof(HisOrdQueBlockV2))
+			if (tBlockV2->_size != buffer.size() - sizeof(HisOrdQueBlockV2))
 			{
 				pipe_reader_log(_sink,LL_ERROR, "历史委托队列数据文件{}大小校验失败", filename);
 				return NULL;
 			}
 
-			if (!decode_his_compressed_items(hisBlkPair._buffer, sizeof(WTSOrdQueStruct)))
+			if (!decode_his_compressed_items(buffer, sizeof(WTSOrdQueStruct)))
 			{
 				pipe_reader_log(_sink, LL_ERROR, "历史委托队列数据文件{}解压或记录大小校验失败", filename);
-				hisBlkPair._buffer.clear();
+				buffer.clear();
 				return NULL;
 			}
 
-			hisBlkPair._block = (HisOrdQueBlock*)hisBlkPair._buffer.c_str();
+			if (!copy_his_items_aligned(buffer, candidate._items))
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Historical data file {}: aligned record allocation or validation failed", filename.c_str());
+				return NULL;
+			}
+			candidate._loaded = true;
+			try
+			{
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+				if (r132_allocation_failure_stage == 2)
+				{
+					r132_allocation_failure_stage = 0;
+					throw std::bad_alloc();
+				}
+#endif
+				it = _his_ordque_map.try_emplace(key, std::move(candidate)).first;
+			}
+			catch (const std::exception&)
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Historical data file {}: cache publication failed", filename.c_str());
+				return NULL;
+			}
 		}
 
-		HisOrdQueBlockPair& tBlkPair = _his_ordque_map[key];
-		if (tBlkPair._block == NULL)
+		HisOrdQueBlockPair& tBlkPair = it->second;
+		if (!tBlkPair._loaded)
 			return NULL;
 
-		HisOrdQueBlock* tBlock = tBlkPair._block;
-
-		uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisOrdQueBlock)) / sizeof(WTSOrdQueStruct);
-		if (tcnt <= 0)
+		const uint32_t tcnt = static_cast<uint32_t>(tBlkPair._items.size());
+		if (tcnt == 0)
 			return NULL;
 
-		WTSOrdQueStruct* pTick = std::lower_bound(tBlock->_items, tBlock->_items + (tcnt - 1), eTick, [](const WTSOrdQueStruct& a, const WTSOrdQueStruct& b) {
+		WTSOrdQueStruct* pTick = std::lower_bound(tBlkPair._items.data(), tBlkPair._items.data() + (tcnt - 1), eTick, [](const WTSOrdQueStruct& a, const WTSOrdQueStruct& b) {
 			if (a.action_date != b.action_date)
 				return a.action_date < b.action_date;
 			else
 				return a.action_time < b.action_time;
 		});
 
-		uint32_t eIdx = pTick - tBlock->_items;
+		uint32_t eIdx = pTick - tBlkPair._items.data();
 		if (pTick->action_date > eTick.action_date ||
 			(pTick->action_date == eTick.action_date && pTick->action_time >= eTick.action_time))
 		{
@@ -807,8 +997,21 @@ WTSOrdQueSlice* WtDataReader::readOrdQueSlice(const char* stdCode, uint32_t coun
 
 		uint32_t cnt = min(eIdx + 1, count);
 		uint32_t sIdx = eIdx + 1 - cnt;
-		WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, tBlock->_items + sIdx, cnt);
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+		if (r132_allocation_failure_stage == 3)
+		{
+			r132_allocation_failure_stage = 0;
+			throw std::bad_alloc();
+		}
+#endif
+		WTSOrdQueSlice* slice = WTSOrdQueSlice::create(stdCode, tBlkPair._items.data() + sIdx, cnt);
 		return slice;
+		}
+		catch (...)
+		{
+			report_historical_slice_exception(_sink, "queue", stdCode);
+			return NULL;
+		}
 	}
 }
 
@@ -819,6 +1022,12 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
+		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
 	const char* stdPID = commInfo->getFullPid();
 
 	uint32_t curDate, curTime, curSecs;
@@ -838,8 +1047,11 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 		curSecs = (uint32_t)(etime % 100000);
 	}
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, curTDate = 0;
+	if (!reader_trading_date(_sink, dateMapping, stdPID, curDate, curTime, endTDate) ||
+		!reader_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 
 	bool isToday = (endTDate == curTDate);
 
@@ -863,8 +1075,12 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 			return NULL;
 
 		RTOrdDtlBlock* rtBlock = tPair->_block;
+		// 卡13：只读取已发布且落在本进程映射内的记录
+		const uint32_t visible = wt_rtpub::visibleRecords(rtBlock, tPair->_file->size(), sizeof(RTOrdDtlBlock), sizeof(WTSOrdDtlStruct));
+		if (visible == 0)
+			return NULL;
 
-		WTSOrdDtlStruct* pItem = std::lower_bound(rtBlock->_details, rtBlock->_details + (rtBlock->_size - 1), eTick, [](const WTSOrdDtlStruct& a, const WTSOrdDtlStruct& b) {
+		WTSOrdDtlStruct* pItem = std::lower_bound(rtBlock->_details, rtBlock->_details + (visible - 1), eTick, [](const WTSOrdDtlStruct& a, const WTSOrdDtlStruct& b) {
 			if (a.action_date != b.action_date)
 				return a.action_date < b.action_date;
 			else
@@ -883,12 +1099,18 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 		uint32_t cnt = min(eIdx + 1, count);
 		uint32_t sIdx = eIdx + 1 - cnt;
 		WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, rtBlock->_details + sIdx, cnt);
+		//卡11=B：实时切片持有映射文件 owner，重映射/巡检释放后切片仍有效
+		if (slice != NULL)
+			slice->addOwner(tPair->_file);
 		return slice;
 	}
 	else
 	{
-		thread_local static char key[64] = { 0 };
-		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
+		try
+		{
+		// I03-NEW-039: the cache key embeds the caller's stdCode, which may be longer
+		// than a fixed 64-byte buffer; build it as a string.
+		const std::string key = fmt::format("{}-{}", stdCode, endTDate);
 
 		auto it = _his_orddtl_map.find(key);
 		if (it == _his_orddtl_map.end())
@@ -915,51 +1137,79 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 			if (!bHit)
 				return NULL;
 
-			HisOrdDtlBlockPair& hisBlkPair = _his_orddtl_map[key];
-			StdFile::read_file_content(filename.c_str(), hisBlkPair._buffer);
-			if (hisBlkPair._buffer.size() < sizeof(HisOrdDtlBlockV2))
+			HisOrdDtlBlockPair candidate;
+			std::string buffer;
+			try
+			{
+				StdFile::read_file_content(filename.c_str(), buffer);
+			}
+			catch (const std::exception&)
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Historical data file {}: read failed", filename.c_str());
+				return NULL;
+			}
+			if (buffer.size() < sizeof(HisOrdDtlBlockV2))
 			{
 				pipe_reader_log(_sink,LL_ERROR, "历史逐笔委托数据文件{}大小校验失败", filename.c_str());
-				hisBlkPair._buffer.clear();
+				buffer.clear();
 				return NULL;
 			}
 
-			HisOrdDtlBlockV2* tBlockV2 = (HisOrdDtlBlockV2*)hisBlkPair._buffer.c_str();
+			HisOrdDtlBlockV2* tBlockV2 = (HisOrdDtlBlockV2*)buffer.c_str();
 
-			if (tBlockV2->_size != hisBlkPair._buffer.size() - sizeof(HisOrdDtlBlockV2))
+			if (tBlockV2->_size != buffer.size() - sizeof(HisOrdDtlBlockV2))
 			{
 				pipe_reader_log(_sink,LL_ERROR, "历史逐笔委托数据文件{}大小校验失败", filename.c_str());
 				return NULL;
 			}
 
-			if (!decode_his_compressed_items(hisBlkPair._buffer, sizeof(WTSOrdDtlStruct)))
+			if (!decode_his_compressed_items(buffer, sizeof(WTSOrdDtlStruct)))
 			{
 				pipe_reader_log(_sink, LL_ERROR, "历史逐笔委托数据文件{}解压或记录大小校验失败", filename.c_str());
-				hisBlkPair._buffer.clear();
+				buffer.clear();
 				return NULL;
 			}
 
-			hisBlkPair._block = (HisOrdDtlBlock*)hisBlkPair._buffer.c_str();
+			if (!copy_his_items_aligned(buffer, candidate._items))
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Historical data file {}: aligned record allocation or validation failed", filename.c_str());
+				return NULL;
+			}
+			candidate._loaded = true;
+			try
+			{
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+				if (r132_allocation_failure_stage == 2)
+				{
+					r132_allocation_failure_stage = 0;
+					throw std::bad_alloc();
+				}
+#endif
+				it = _his_orddtl_map.try_emplace(key, std::move(candidate)).first;
+			}
+			catch (const std::exception&)
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Historical data file {}: cache publication failed", filename.c_str());
+				return NULL;
+			}
 		}
 
-		HisOrdDtlBlockPair& tBlkPair = _his_orddtl_map[key];
-		if (tBlkPair._block == NULL)
+		HisOrdDtlBlockPair& tBlkPair = it->second;
+		if (!tBlkPair._loaded)
 			return NULL;
 
-		HisOrdDtlBlock* tBlock = tBlkPair._block;
-
-		uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisOrdDtlBlock)) / sizeof(WTSOrdDtlStruct);
-		if (tcnt <= 0)
+		const uint32_t tcnt = static_cast<uint32_t>(tBlkPair._items.size());
+		if (tcnt == 0)
 			return NULL;
 
-		WTSOrdDtlStruct* pTick = std::lower_bound(tBlock->_items, tBlock->_items + (tcnt - 1), eTick, [](const WTSOrdDtlStruct& a, const WTSOrdDtlStruct& b) {
+		WTSOrdDtlStruct* pTick = std::lower_bound(tBlkPair._items.data(), tBlkPair._items.data() + (tcnt - 1), eTick, [](const WTSOrdDtlStruct& a, const WTSOrdDtlStruct& b) {
 			if (a.action_date != b.action_date)
 				return a.action_date < b.action_date;
 			else
 				return a.action_time < b.action_time;
 		});
 
-		uint32_t eIdx = pTick - tBlock->_items;
+		uint32_t eIdx = pTick - tBlkPair._items.data();
 		if (pTick->action_date > eTick.action_date ||
 			(pTick->action_date == eTick.action_date && pTick->action_time >= eTick.action_time))
 		{
@@ -973,8 +1223,21 @@ WTSOrdDtlSlice* WtDataReader::readOrdDtlSlice(const char* stdCode, uint32_t coun
 
 		uint32_t cnt = min(eIdx + 1, count);
 		uint32_t sIdx = eIdx + 1 - cnt;
-		WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, tBlock->_items + sIdx, cnt);
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+		if (r132_allocation_failure_stage == 3)
+		{
+			r132_allocation_failure_stage = 0;
+			throw std::bad_alloc();
+		}
+#endif
+		WTSOrdDtlSlice* slice = WTSOrdDtlSlice::create(stdCode, tBlkPair._items.data() + sIdx, cnt);
 		return slice;
+		}
+		catch (...)
+		{
+			report_historical_slice_exception(_sink, "detail", stdCode);
+			return NULL;
+		}
 	}
 }
 
@@ -985,6 +1248,12 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052: an unknown commodity is reported before any mapping or session use.
+		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, request refused", stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
 	const char* stdPID = commInfo->getFullPid();
 
 	uint32_t curDate, curTime, curSecs;
@@ -1004,8 +1273,11 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 		curSecs = (uint32_t)(etime % 100000);
 	}
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, curTDate = 0;
+	if (!reader_trading_date(_sink, dateMapping, stdPID, curDate, curTime, endTDate) ||
+		!reader_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 
 	bool isToday = (endTDate == curTDate);
 
@@ -1029,8 +1301,12 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 			return NULL;
 
 		RTTransBlock* rtBlock = tPair->_block;
+		// 卡13：只读取已发布且落在本进程映射内的记录
+		const uint32_t visible = wt_rtpub::visibleRecords(rtBlock, tPair->_file->size(), sizeof(RTTransBlock), sizeof(WTSTransStruct));
+		if (visible == 0)
+			return NULL;
 
-		WTSTransStruct* pItem = std::lower_bound(rtBlock->_trans, rtBlock->_trans + (rtBlock->_size - 1), eTick, [](const WTSTransStruct& a, const WTSTransStruct& b) {
+		WTSTransStruct* pItem = std::lower_bound(rtBlock->_trans, rtBlock->_trans + (visible - 1), eTick, [](const WTSTransStruct& a, const WTSTransStruct& b) {
 			if (a.action_date != b.action_date)
 				return a.action_date < b.action_date;
 			else
@@ -1049,12 +1325,18 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 		uint32_t cnt = min(eIdx + 1, count);
 		uint32_t sIdx = eIdx + 1 - cnt;
 		WTSTransSlice* slice = WTSTransSlice::create(stdCode, rtBlock->_trans + sIdx, cnt);
+		//卡11=B：实时切片持有映射文件 owner，重映射/巡检释放后切片仍有效
+		if (slice != NULL)
+			slice->addOwner(tPair->_file);
 		return slice;
 	}
 	else
 	{
-		thread_local static char key[64] = { 0 };
-		fmtutil::format_to(key, "{}-{}", stdCode, endTDate);
+		try
+		{
+		// I03-NEW-039: the cache key embeds the caller's stdCode, which may be longer
+		// than a fixed 64-byte buffer; build it as a string.
+		const std::string key = fmt::format("{}-{}", stdCode, endTDate);
 
 		auto it = _his_trans_map.find(key);
 		if (it == _his_trans_map.end())
@@ -1081,51 +1363,79 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 			if (!bHit)
 				return NULL;
 
-			HisTransBlockPair& hisBlkPair = _his_trans_map[key];
-			StdFile::read_file_content(filename.c_str(), hisBlkPair._buffer);
-			if (hisBlkPair._buffer.size() < sizeof(HisTransBlockV2))
+			HisTransBlockPair candidate;
+			std::string buffer;
+			try
+			{
+				StdFile::read_file_content(filename.c_str(), buffer);
+			}
+			catch (const std::exception&)
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Historical data file {}: read failed", filename.c_str());
+				return NULL;
+			}
+			if (buffer.size() < sizeof(HisTransBlockV2))
 			{
 				pipe_reader_log(_sink,LL_ERROR, "历史逐笔成交数据文件{}大小校验失败", filename.c_str());
-				hisBlkPair._buffer.clear();
+				buffer.clear();
 				return NULL;
 			}
 
-			HisTransBlockV2* tBlockV2 = (HisTransBlockV2*)hisBlkPair._buffer.c_str();
+			HisTransBlockV2* tBlockV2 = (HisTransBlockV2*)buffer.c_str();
 
-			if (tBlockV2->_size != hisBlkPair._buffer.size() - sizeof(HisTransBlockV2))
+			if (tBlockV2->_size != buffer.size() - sizeof(HisTransBlockV2))
 			{
 				pipe_reader_log(_sink,LL_ERROR, "历史逐笔成交数据文件{}大小校验失败", filename.c_str());
 				return NULL;
 			}
 
-			if (!decode_his_compressed_items(hisBlkPair._buffer, sizeof(WTSTransStruct)))
+			if (!decode_his_compressed_items(buffer, sizeof(WTSTransStruct)))
 			{
 				pipe_reader_log(_sink, LL_ERROR, "历史逐笔成交数据文件{}解压或记录大小校验失败", filename.c_str());
-				hisBlkPair._buffer.clear();
+				buffer.clear();
 				return NULL;
 			}
 
-			hisBlkPair._block = (HisTransBlock*)hisBlkPair._buffer.c_str();
+			if (!copy_his_items_aligned(buffer, candidate._items))
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Historical data file {}: aligned record allocation or validation failed", filename.c_str());
+				return NULL;
+			}
+			candidate._loaded = true;
+			try
+			{
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+				if (r132_allocation_failure_stage == 2)
+				{
+					r132_allocation_failure_stage = 0;
+					throw std::bad_alloc();
+				}
+#endif
+				it = _his_trans_map.try_emplace(key, std::move(candidate)).first;
+			}
+			catch (const std::exception&)
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Historical data file {}: cache publication failed", filename.c_str());
+				return NULL;
+			}
 		}
 
-		HisTransBlockPair& tBlkPair = _his_trans_map[key];
-		if (tBlkPair._block == NULL)
+		HisTransBlockPair& tBlkPair = it->second;
+		if (!tBlkPair._loaded)
 			return NULL;
 
-		HisTransBlock* tBlock = tBlkPair._block;
-
-		uint32_t tcnt = (tBlkPair._buffer.size() - sizeof(HisTransBlock)) / sizeof(WTSTransStruct);
-		if (tcnt <= 0)
+		const uint32_t tcnt = static_cast<uint32_t>(tBlkPair._items.size());
+		if (tcnt == 0)
 			return NULL;
 
-		WTSTransStruct* pTick = std::lower_bound(tBlock->_items, tBlock->_items + (tcnt - 1), eTick, [](const WTSTransStruct& a, const WTSTransStruct& b) {
+		WTSTransStruct* pTick = std::lower_bound(tBlkPair._items.data(), tBlkPair._items.data() + (tcnt - 1), eTick, [](const WTSTransStruct& a, const WTSTransStruct& b) {
 			if (a.action_date != b.action_date)
 				return a.action_date < b.action_date;
 			else
 				return a.action_time < b.action_time;
 		});
 
-		uint32_t eIdx = pTick - tBlock->_items;
+		uint32_t eIdx = pTick - tBlkPair._items.data();
 		if (pTick->action_date > eTick.action_date ||
 			(pTick->action_date == eTick.action_date && pTick->action_time >= eTick.action_time))
 		{
@@ -1139,8 +1449,21 @@ WTSTransSlice* WtDataReader::readTransSlice(const char* stdCode, uint32_t count,
 
 		uint32_t cnt = min(eIdx + 1, count);
 		uint32_t sIdx = eIdx + 1 - cnt;
-		WTSTransSlice* slice = WTSTransSlice::create(stdCode, tBlock->_items + sIdx, cnt);
+#if defined(WT_RDM_DT_READER_TEST_HOOKS)
+		if (r132_allocation_failure_stage == 3)
+		{
+			r132_allocation_failure_stage = 0;
+			throw std::bad_alloc();
+		}
+#endif
+		WTSTransSlice* slice = WTSTransSlice::create(stdCode, tBlkPair._items.data() + sIdx, cnt);
 		return slice;
+		}
+		catch (...)
+		{
+			report_historical_slice_exception(_sink, "transaction", stdCode);
+			return NULL;
+		}
 	}
 }
 
@@ -1188,10 +1511,12 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 {
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
 
-	uint32_t curDate = TimeUtils::getCurDate();
-	uint32_t curTime = TimeUtils::getCurMin() / 100;
-
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(cInfo->stdCommID(), curDate, curTime, false);
+	// One checked clock snapshot for the current trading date and every later
+	// date-zero request of this load (decision card 1, I03-NEW-006).
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0;
+	if (!reader_trading_date(_sink, dateMapping, cInfo->stdCommID(), 0, 0, endTDate))
+		return false;
 
 	std::string pname;
 	switch (period)
@@ -1317,8 +1642,22 @@ bool WtDataReader::cacheIntegratedBars(void* codeInfo, const std::string& key, c
 		WTSBarStruct sBar, eBar;
 		if (period != KP_DAY)
 		{
-			uint64_t sTime = _base_data_mgr->getBoundaryTime(cInfo->stdCommID(), leftDt, false, true);
-			uint64_t eTime = _base_data_mgr->getBoundaryTime(cInfo->stdCommID(), rightDt, false, false);
+			const wtp::DateMappingResult64 sBound = dateMapping.getBoundaryTime(cInfo->stdCommID(), leftDt, false, true);
+			const wtp::DateMappingResult64 eBound = dateMapping.getBoundaryTime(cInfo->stdCommID(), rightDt, false, false);
+			if (sBound.status != wtp::DateMappingStatus::Ok || eBound.status != wtp::DateMappingStatus::Ok)
+			{
+				pipe_reader_log(_sink, LL_ERROR, "Mapping boundaries of {} section {}-{} failed: {}/{}", stdCode, leftDt, rightDt,
+					wtp::dateMappingStatusName(sBound.status), wtp::dateMappingStatusName(eBound.status));
+				for (std::vector<WTSBarStruct>* section : barsSections)
+					delete section;
+				barsSections.clear();
+				if (hotAy != NULL)
+					delete hotAy;
+				_bars_cache.erase(key);
+				return false;
+			}
+			const uint64_t sTime = sBound.value;
+			const uint64_t eTime = eBound.value;
 
 			sBar.date = leftDt;
 			sBar.time = ((uint32_t)(sTime / 10000) - 19900000) * 10000 + (uint32_t)(sTime % 10000);
@@ -1546,10 +1885,8 @@ bool WtDataReader::cacheAdjustedStkBars(void* codeInfo, const std::string& key, 
 {
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
 
-	uint32_t curDate = TimeUtils::getCurDate();
-	uint32_t curTime = TimeUtils::getCurMin() / 100;
-
-	[[maybe_unused]] uint32_t endTDate = _base_data_mgr->calcTradingDate(cInfo->stdCommID(), curDate, curTime, false);
+	// The former current-trading-date mapping here was never used; it is
+	// removed so an unchecked clock/mapping cannot affect this load.
 
 	std::string pname;
 	switch (period)
@@ -1867,12 +2204,15 @@ bool WtDataReader::cacheHisBarsFromFile(void* codeInfo, const std::string& key, 
 {
 	CodeHelper::CodeInfo* cInfo = (CodeHelper::CodeInfo*)codeInfo;
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo->_exchg, cInfo->_product);
-	const char* stdPID = commInfo->getFullPid();
+	if (commInfo == NULL)
+	{
+		// I03-NEW-052
+		pipe_reader_log(_sink, LL_ERROR, "Commodity of {} not found, history bars not loaded", stdCode == NULL ? "" : stdCode);
+		return false;
+	}
 
-	uint32_t curDate = TimeUtils::getCurDate();
-	uint32_t curTime = TimeUtils::getCurMin() / 100;
-
-	[[maybe_unused]] uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
+	// The former current-trading-date mapping here was never used; it is
+	// removed so an unchecked clock/mapping cannot affect this load.
 
 	std::string pname;
 	switch (period)
@@ -2044,8 +2384,8 @@ WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	const char* stdPID = cInfo.stdCommID();
 
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", stdCode, (uint32_t)period);
+	// I03-NEW-039: caller stdCode may exceed a fixed 64-byte key buffer.
+	const std::string key = fmt::format("{}#{}", stdCode, (uint32_t)period);
 	auto it = _bars_cache.find(key);
 	bool bHasHisData = false;
 	if (it == _bars_cache.end())
@@ -2088,11 +2428,16 @@ WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod 
 		curTime = (uint32_t)(etime % 10000);
 	}
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID, curDate, curTime, false);
-	uint32_t curTDate = _base_data_mgr->calcTradingDate(stdPID, 0, 0, false);
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, curTDate = 0;
+	if (!reader_trading_date(_sink, dateMapping, stdPID, curDate, curTime, endTDate) ||
+		!reader_trading_date(_sink, dateMapping, stdPID, 0, 0, curTDate))
+		return NULL;
 
 	BarsList& barsList = _bars_cache[key];
-	WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, 1, NULL, 0);;
+	WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, 1, NULL, 0);
+	if (slice == NULL)	// I03-NEW-083: rejected (e.g. overlong) code
+		return NULL;
 	WTSBarStruct* head = NULL;
 	uint32_t hisCnt = 0;
 	uint32_t rtCnt = 0;
@@ -2133,11 +2478,14 @@ WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod 
 
 		//读取实时的
 		RTKlineBlockPair* kPair = getRTKilneBlock(cInfo._exchg, curCode, period);
-		if (kPair != NULL && kPair->_block && kPair->_block->_size>0)
+		// 卡13：只读取已发布且落在本进程映射内的记录
+		const uint32_t visibleBars = (kPair != NULL && kPair->_block && kPair->_file)
+			? wt_rtpub::visibleRecords(kPair->_block, kPair->_file->size(), sizeof(RTKlineBlock), sizeof(WTSBarStruct)) : 0;
+		if (visibleBars > 0)
 		{
 			//读取当日的数据
 			WTSBarStruct* pBar = NULL;
-			pBar = std::lower_bound(kPair->_block->_bars, kPair->_block->_bars + (kPair->_block->_size - 1), bar, [period](const WTSBarStruct& a, const WTSBarStruct& b) {
+			pBar = std::lower_bound(kPair->_block->_bars, kPair->_block->_bars + (visibleBars - 1), bar, [period](const WTSBarStruct& a, const WTSBarStruct& b) {
 				if (period == KP_DAY)
 					return a.date < b.date;
 				else
@@ -2148,7 +2496,7 @@ WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod 
 			if (pBar != NULL)
 				idx = pBar - kPair->_block->_bars;
 			else
-				idx = kPair->_block->_size;
+				idx = visibleBars;
 
 			if ((period == KP_DAY && pBar->date > bar.date) || (period != KP_DAY && pBar->time > bar.time))
 			{
@@ -2216,6 +2564,7 @@ WTSKlineSlice* WtDataReader::readKlineSlice(const char* stdCode, WTSKlinePeriod 
 				{
 					head = &kPair->_block->_bars[sIdx];
 					slice->appendBlock(head, rtCnt);
+					slice->addOwner(kPair->_file);
 				}
 			}
 		}
@@ -2309,7 +2658,9 @@ WtDataReader::TickBlockPair* WtDataReader::getRTTickBlock(const char* exchg, con
 		block._block = (RTTickBlock*)block._file->addr();
 		block._last_cap = block._block->_capacity;
 	}
-	else if (block._last_cap != block._block->_capacity)
+	// 卡13：除容量变化外，若已发布容量超过本进程映射覆盖的记录数（映射早于扩容）也要重新映射
+	else if (block._last_cap != block._block->_capacity
+		|| wt_rtpub::publishedCapacity(block._block) > wt_rtpub::mappedRecords(block._file->size(), sizeof(RTTickBlock), sizeof(WTSTickStruct)))
 	{
 		//说明文件大小已变, 需要重新映射
 		block._file.reset(new BoostMappingFile());
@@ -2364,7 +2715,9 @@ WtDataReader::OrdDtlBlockPair* WtDataReader::getRTOrdDtlBlock(const char* exchg,
 		block._block = (RTOrdDtlBlock*)block._file->addr();
 		block._last_cap = block._block->_capacity;
 	}
-	else if (block._last_cap != block._block->_capacity)
+	// 卡13：除容量变化外，若已发布容量超过本进程映射覆盖的记录数（映射早于扩容）也要重新映射
+	else if (block._last_cap != block._block->_capacity
+		|| wt_rtpub::publishedCapacity(block._block) > wt_rtpub::mappedRecords(block._file->size(), sizeof(RTOrdDtlBlock), sizeof(WTSOrdDtlStruct)))
 	{
 		//说明文件大小已变, 需要重新映射
 		block._file.reset(new BoostMappingFile());
@@ -2419,7 +2772,9 @@ WtDataReader::OrdQueBlockPair* WtDataReader::getRTOrdQueBlock(const char* exchg,
 		block._block = (RTOrdQueBlock*)block._file->addr();
 		block._last_cap = block._block->_capacity;
 	}
-	else if (block._last_cap != block._block->_capacity)
+	// 卡13：除容量变化外，若已发布容量超过本进程映射覆盖的记录数（映射早于扩容）也要重新映射
+	else if (block._last_cap != block._block->_capacity
+		|| wt_rtpub::publishedCapacity(block._block) > wt_rtpub::mappedRecords(block._file->size(), sizeof(RTOrdQueBlock), sizeof(WTSOrdQueStruct)))
 	{
 		//说明文件大小已变, 需要重新映射
 		block._file.reset(new BoostMappingFile());
@@ -2474,7 +2829,9 @@ WtDataReader::TransBlockPair* WtDataReader::getRTTransBlock(const char* exchg, c
 		block._block = (RTTransBlock*)block._file->addr();
 		block._last_cap = block._block->_capacity;
 	}
-	else if (block._last_cap != block._block->_capacity)
+	// 卡13：除容量变化外，若已发布容量超过本进程映射覆盖的记录数（映射早于扩容）也要重新映射
+	else if (block._last_cap != block._block->_capacity
+		|| wt_rtpub::publishedCapacity(block._block) > wt_rtpub::mappedRecords(block._file->size(), sizeof(RTTransBlock), sizeof(WTSTransStruct)))
 	{
 		//说明文件大小已变, 需要重新映射
 		block._file.reset(new BoostMappingFile());
@@ -2551,7 +2908,9 @@ WtDataReader::RTKlineBlockPair* WtDataReader::getRTKilneBlock(const char* exchg,
 		block._last_cap = block._block->_capacity;
 		pipe_reader_log(_sink, LL_DEBUG, "RT {} block of {}.{} loaded", subdir.c_str(), exchg, code);
 	}
-	else if (block._last_cap != block._block->_capacity)
+	// 卡13：除容量变化外，若已发布容量超过本进程映射覆盖的记录数（映射早于扩容）也要重新映射
+	else if (block._last_cap != block._block->_capacity
+		|| wt_rtpub::publishedCapacity(block._block) > wt_rtpub::mappedRecords(block._file->size(), sizeof(RTKlineBlock), sizeof(WTSBarStruct)))
 	{
 		//说明文件大小已变, 需要重新映射
 		pipe_reader_log(_sink, LL_DEBUG, "RT {} block of {}.{} expanded to {}, remapping...", subdir.c_str(), exchg, code, block._block->_capacity);
@@ -2602,7 +2961,8 @@ void WtDataReader::onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t /*endTDa
 
 				for (;;)
 				{
-					if (kBlk->_block->_size <= preCnt)
+					if (kBlk->_block == NULL || kBlk->_file == NULL
+						|| wt_rtpub::visibleRecords(kBlk->_block, kBlk->_file->size(), sizeof(RTKlineBlock), sizeof(WTSBarStruct)) <= preCnt)
 						break;
 
 					WTSBarStruct& nextBar = kBlk->_block->_bars[preCnt];
@@ -2680,7 +3040,7 @@ double WtDataReader::getAdjFactorByDate(const char* stdCode, uint32_t date /* = 
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
-	if (!commInfo->isStock())
+	if (commInfo == NULL || !commInfo->isStock())	// I03-NEW-052: unknown commodity has no adjustment
 		return 1.0;
 
 	AdjFactor factor = { date, 1.0 };

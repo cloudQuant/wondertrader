@@ -129,12 +129,17 @@ ChildResult call_entry_in_child(const std::vector<std::string>& words, bool use_
 		policy << "default:\n    order: []\n";
 		policy.close();
 		std::filesystem::create_directory(std::string(directory) + "/data");
+		// 迭代03（I03-NEW-008 / 卡13d 费用门禁）：配置了的费用模板必须存在；本例验证 main
+		// 到达 run()，改用有效空模板（原 ./absent_fees.json，.before 见 s5-runners 证据）。
+		std::ofstream fees(std::string(directory) + "/fees.json");
+		fees << "{}";
+		fees.close();
 		std::ofstream config(std::string(directory) + "/config.yaml");
 		config << "basefiles:\n"
 			"    session: ./sessions.json\n"
 			"env:\n"
 			"    name: cta\n"
-			"    fees: ./absent_fees.json\n"
+			"    fees: ./fees.json\n"
 			"    filters: ./absent_filters.yaml\n"
 			"    poolsize: 0\n"
 			"    product:\n"

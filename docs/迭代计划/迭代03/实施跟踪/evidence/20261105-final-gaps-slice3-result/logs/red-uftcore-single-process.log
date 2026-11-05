@@ -1,0 +1,1003 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 305 tests from 83 test suites.
+[----------] Global test environment set-up.
+[----------] 8 tests from n03_action_policy
+[ RUN      ] n03_action_policy.action_rule_defaults_and_enum_values
+[       OK ] n03_action_policy.action_rule_defaults_and_enum_values (0 ms)
+[ RUN      ] n03_action_policy.init_fails_on_missing_file
+[       OK ] n03_action_policy.init_fails_on_missing_file (0 ms)
+[ RUN      ] n03_action_policy.init_loads_groups_and_filters
+[       OK ] n03_action_policy.init_loads_groups_and_filters (2 ms)
+[ RUN      ] n03_action_policy.init_with_minimal_and_empty_rules
+[       OK ] n03_action_policy.init_with_minimal_and_empty_rules (0 ms)
+[ RUN      ] n03_action_policy.init_only_filters_no_order
+[       OK ] n03_action_policy.init_only_filters_no_order (0 ms)
+[ RUN      ] n03_action_policy.init_twice_is_additive
+[       OK ] n03_action_policy.init_twice_is_additive (1 ms)
+[ RUN      ] n03_action_policy.unrecognized_action_types_are_skipped
+[       OK ] n03_action_policy.unrecognized_action_types_are_skipped (0 ms)
+[ RUN      ] n03_action_policy.missing_default_is_rejected_and_default_policy_works
+[       OK ] n03_action_policy.missing_default_is_rejected_and_default_policy_works (2 ms)
+[----------] 8 tests from n03_action_policy (9 ms total)
+
+[----------] 3 tests from n03_wthelper
+[ RUN      ] n03_wthelper.date_time_and_inst_dir
+[       OK ] n03_wthelper.date_time_and_inst_dir (0 ms)
+[ RUN      ] n03_wthelper.cwd_and_module_path
+[       OK ] n03_wthelper.cwd_and_module_path (0 ms)
+[ RUN      ] n03_wthelper.generated_dirs_are_created_under_configured_root
+[       OK ] n03_wthelper.generated_dirs_are_created_under_configured_root (1 ms)
+[----------] 3 tests from n03_wthelper (1 ms total)
+
+[----------] 1 test from n03_uftdefs
+[ RUN      ] n03_uftdefs.packed_struct_layouts
+[       OK ] n03_uftdefs.packed_struct_layouts (0 ms)
+[----------] 1 test from n03_uftdefs (0 ms total)
+
+[----------] 2 tests from n03_trader_adapter
+[ RUN      ] n03_trader_adapter.pos_item_and_risk_params
+[       OK ] n03_trader_adapter.pos_item_and_risk_params (0 ms)
+[ RUN      ] n03_trader_adapter.fresh_adapter_public_accessors
+[       OK ] n03_trader_adapter.fresh_adapter_public_accessors (1 ms)
+[----------] 2 tests from n03_trader_adapter (1 ms total)
+
+[----------] 1 test from n03_trader_adapter_mgr
+[ RUN      ] n03_trader_adapter_mgr.add_get_run_release
+[       OK ] n03_trader_adapter_mgr.add_get_run_release (0 ms)
+[----------] 1 test from n03_trader_adapter_mgr (0 ms total)
+
+[----------] 4 tests from n03_parser_adapter
+[ RUN      ] n03_parser_adapter.init_rejects_bad_config
+[       OK ] n03_parser_adapter.init_rejects_bad_config (0 ms)
+[ RUN      ] n03_parser_adapter.init_ext_subscribes_and_pushes_quote
+[       OK ] n03_parser_adapter.init_ext_subscribes_and_pushes_quote (0 ms)
+[ RUN      ] n03_parser_adapter.init_ext_failure_retains_api_and_borrowed_context
+[       OK ] n03_parser_adapter.init_ext_failure_retains_api_and_borrowed_context (0 ms)
+[ RUN      ] n03_parser_adapter.init_ext_transfers_api_with_null_base_manager_and_when_busy
+[       OK ] n03_parser_adapter.init_ext_transfers_api_with_null_base_manager_and_when_busy (0 ms)
+[----------] 4 tests from n03_parser_adapter (0 ms total)
+
+[----------] 1 test from n03_parser_adapter_mgr
+[ RUN      ] n03_parser_adapter_mgr.add_get_release
+[       OK ] n03_parser_adapter_mgr.add_get_release (0 ms)
+[----------] 1 test from n03_parser_adapter_mgr (0 ms total)
+
+[----------] 6 tests from p06_stra_mgr
+[ RUN      ] p06_stra_mgr.load_factories_missing_directory_returns_false
+[       OK ] p06_stra_mgr.load_factories_missing_directory_returns_false (0 ms)
+[ RUN      ] p06_stra_mgr.load_factories_empty_directory_returns_true
+[       OK ] p06_stra_mgr.load_factories_empty_directory_returns_true (0 ms)
+[ RUN      ] p06_stra_mgr.load_factories_skips_dirs_and_wrong_extensions
+[       OK ] p06_stra_mgr.load_factories_skips_dirs_and_wrong_extensions (1 ms)
+[ RUN      ] p06_stra_mgr.create_strategy_by_dotted_name_validates_input
+[       OK ] p06_stra_mgr.create_strategy_by_dotted_name_validates_input (0 ms)
+[ RUN      ] p06_stra_mgr.repeated_load_is_idempotent_on_empty_dir
+[       OK ] p06_stra_mgr.repeated_load_is_idempotent_on_empty_dir (0 ms)
+[ RUN      ] p06_stra_mgr.manager_destructor_with_empty_registry
+[       OK ] p06_stra_mgr.manager_destructor_with_empty_registry (0 ms)
+[----------] 6 tests from p06_stra_mgr (3 ms total)
+
+[----------] 1 test from p06_share_manager
+[ RUN      ] p06_share_manager.self_singleton_and_engine_wiring
+[       OK ] p06_share_manager.self_singleton_and_engine_wiring (9 ms)
+[----------] 1 test from p06_share_manager (9 ms total)
+
+[----------] 6 tests from p06_uft_context
+[ RUN      ] p06_uft_context.identity_and_object_slots
+[       OK ] p06_uft_context.identity_and_object_slots (0 ms)
+[ RUN      ] p06_uft_context.callbacks_without_strategy_are_noops
+[       OK ] p06_uft_context.callbacks_without_strategy_are_noops (0 ms)
+[ RUN      ] p06_uft_context.engine_delegated_time_and_price
+[       OK ] p06_uft_context.engine_delegated_time_and_price (0 ms)
+[ RUN      ] p06_uft_context.local_position_lookups_miss_paths
+[       OK ] p06_uft_context.local_position_lookups_miss_paths (0 ms)
+[ RUN      ] p06_uft_context.subscribe_apis_fill_engine_tables
+[       OK ] p06_uft_context.subscribe_apis_fill_engine_tables (1 ms)
+[ RUN      ] p06_uft_context.strategy_logging_paths
+[       OK ] p06_uft_context.strategy_logging_paths (0 ms)
+[ DISABLED ] p06_uft_context.DISABLED_uninitialized_trader_and_param_class
+[----------] 6 tests from p06_uft_context (1 ms total)
+
+[----------] 8 tests from p06_uft_engine
+[ RUN      ] p06_uft_engine.init_wires_managers_and_state_queries
+[       OK ] p06_uft_engine.init_wires_managers_and_state_queries (0 ms)
+[ RUN      ] p06_uft_engine.contract_and_commodity_queries
+[       OK ] p06_uft_engine.contract_and_commodity_queries (0 ms)
+[ RUN      ] p06_uft_engine.session_info_two_lookup_paths
+[       OK ] p06_uft_engine.session_info_two_lookup_paths (0 ms)
+[ RUN      ] p06_uft_engine.data_mgr_delegation_and_price
+[       OK ] p06_uft_engine.data_mgr_delegation_and_price (0 ms)
+[ RUN      ] p06_uft_engine.price_after_push_and_slice_interfaces
+[       OK ] p06_uft_engine.price_after_push_and_slice_interfaces (0 ms)
+[ RUN      ] p06_uft_engine.context_map_add_and_get
+[       OK ] p06_uft_engine.context_map_add_and_get (0 ms)
+[ RUN      ] p06_uft_engine.tick_subscribe_dispatch_and_miss
+[       OK ] p06_uft_engine.tick_subscribe_dispatch_and_miss (0 ms)
+[ RUN      ] p06_uft_engine.bar_and_l2_push_dispatch
+[       OK ] p06_uft_engine.bar_and_l2_push_dispatch (0 ms)
+[ DISABLED ] p06_uft_engine.DISABLED_uninitialized_and_malformed_stdcode_class
+[----------] 8 tests from p06_uft_engine (0 ms total)
+
+[----------] 2 tests from p06_uft_ticker
+[ RUN      ] p06_uft_ticker.init_and_forward_before_thread_start
+[       OK ] p06_uft_ticker.init_and_forward_before_thread_start (0 ms)
+[ RUN      ] p06_uft_ticker.null_engine_guard_on_forward
+[       OK ] p06_uft_ticker.null_engine_guard_on_forward (0 ms)
+[----------] 2 tests from p06_uft_ticker (0 ms total)
+
+[----------] 6 tests from R54UftCtx
+[ RUN      ] R54UftCtx.callbacks_forward_without_blocks
+[       OK ] R54UftCtx.callbacks_forward_without_blocks (2 ms)
+[ RUN      ] R54UftCtx.manual_import_and_tick_marks_profit
+[       OK ] R54UftCtx.manual_import_and_tick_marks_profit (7 ms)
+[ RUN      ] R54UftCtx.manual_file_without_details_is_rejected_and_kept
+[       OK ] R54UftCtx.manual_file_without_details_is_rejected_and_kept (1 ms)
+[ RUN      ] R54UftCtx.order_trade_callbacks_with_blocks
+[       OK ] R54UftCtx.order_trade_callbacks_with_blocks (3 ms)
+[ RUN      ] R54UftCtx.trade_detail_edge_branches
+[       OK ] R54UftCtx.trade_detail_edge_branches (5 ms)
+[ RUN      ] R54UftCtx.slice_queries_are_null_before_cache
+[       OK ] R54UftCtx.slice_queries_are_null_before_cache (0 ms)
+[----------] 6 tests from R54UftCtx (21 ms total)
+
+[----------] 24 tests from UftTraderAdapterLifecycle
+[ RUN      ] UftTraderAdapterLifecycle.LateSinkReceivesCurrentReadyState
+[       OK ] UftTraderAdapterLifecycle.LateSinkReceivesCurrentReadyState (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.ReadyAndLostAreDeliveredInLinearizedOrder
+[       OK ] UftTraderAdapterLifecycle.ReadyAndLostAreDeliveredInLinearizedOrder (2 ms)
+[ RUN      ] UftTraderAdapterLifecycle.StopRequestBlocksNewCallbacksAndWaitDrainsInFlight
+[       OK ] UftTraderAdapterLifecycle.StopRequestBlocksNewCallbacksAndWaitDrainsInFlight (36 ms)
+[ RUN      ] UftTraderAdapterLifecycle.DirectReleaseFromSinkCallbackDefersApiCleanup
+[       OK ] UftTraderAdapterLifecycle.DirectReleaseFromSinkCallbackDefersApiCleanup (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.DirectReleaseFromApiCallbackDefersApiCleanup
+[       OK ] UftTraderAdapterLifecycle.DirectReleaseFromApiCallbackDefersApiCleanup (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.ManagerRequestsAllAdaptersAndDefersReleaseFromCallback
+[       OK ] UftTraderAdapterLifecycle.ManagerRequestsAllAdaptersAndDefersReleaseFromCallback (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.ManagerWaitsForEveryAdapterInFlightGate
+[       OK ] UftTraderAdapterLifecycle.ManagerWaitsForEveryAdapterInFlightGate (72 ms)
+[ RUN      ] UftTraderAdapterLifecycle.ManagerReleaseReentryDefersAndConcurrentCallerWaits
+[       OK ] UftTraderAdapterLifecycle.ManagerReleaseReentryDefersAndConcurrentCallerWaits (37 ms)
+[ RUN      ] UftTraderAdapterLifecycle.SpiCallbackReleaseReentryDefersAndDrainsBeforeManagerReturns
+[       OK ] UftTraderAdapterLifecycle.SpiCallbackReleaseReentryDefersAndDrainsBeforeManagerReturns (58 ms)
+[ RUN      ] UftTraderAdapterLifecycle.ManagerRetainsAdapterWhenProviderReleaseThrows
+[       OK ] UftTraderAdapterLifecycle.ManagerRetainsAdapterWhenProviderReleaseThrows (4 ms)
+[ RUN      ] UftTraderAdapterLifecycle.StopWaitIncludesApiConnectStartup
+[       OK ] UftTraderAdapterLifecycle.StopWaitIncludesApiConnectStartup (33 ms)
+[ RUN      ] UftTraderAdapterLifecycle.StopDuringSpiRegistrationPreventsConnectAndKeepsNotLoginState
+[       OK ] UftTraderAdapterLifecycle.StopDuringSpiRegistrationPreventsConnectAndKeepsNotLoginState (36 ms)
+[ RUN      ] UftTraderAdapterLifecycle.QueryCallLeaseBlocksReleaseAndRejectsReentrantWait
+[       OK ] UftTraderAdapterLifecycle.QueryCallLeaseBlocksReleaseAndRejectsReentrantWait (41 ms)
+[ RUN      ] UftTraderAdapterLifecycle.LoginReplyAfterCloseCannotAdvanceClosedSession
+[       OK ] UftTraderAdapterLifecycle.LoginReplyAfterCloseCannotAdvanceClosedSession (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.FailedPluginInitReleasesConfigAndAllowsRetry
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_32134_312978902569750/traders/libUftLifecycleMissingModule.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_32134_312978902569750/traders/libUftLifecycleMissingModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_32134_312978902569750/traders/libUftLifecycleMissingModule.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_32134_312978902569750/traders/libUftLifecycleMissingModule.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_32134_312978902569750/traders/libUftLifecycleMissingModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_32134_312978902569750/traders/libUftLifecycleMissingModule.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/uft_adapter_lifecycle_32134_312978902569750/traders/libUftLifecycleMissingModule.dylib' (no such file)
+[       OK ] UftTraderAdapterLifecycle.FailedPluginInitReleasesConfigAndAllowsRetry (464 ms)
+[ RUN      ] UftTraderAdapterLifecycle.NullAndOversizedIdsAreRejectedBeforeInitializationSideEffects
+[       OK ] UftTraderAdapterLifecycle.NullAndOversizedIdsAreRejectedBeforeInitializationSideEffects (416 ms)
+[ RUN      ] UftTraderAdapterLifecycle.SuccessfulPluginReleaseIsIdempotentAndClosesAdapter
+[       OK ] UftTraderAdapterLifecycle.SuccessfulPluginReleaseIsIdempotentAndClosesAdapter (273 ms)
+[ RUN      ] UftTraderAdapterLifecycle.DestructorReleasesPluginConfigWithoutExplicitRelease
+[       OK ] UftTraderAdapterLifecycle.DestructorReleasesPluginConfigWithoutExplicitRelease (267 ms)
+[ RUN      ] UftTraderAdapterLifecycle.FailedExternalApiInitRollsBackAndAllowsRetry
+[       OK ] UftTraderAdapterLifecycle.FailedExternalApiInitRollsBackAndAllowsRetry (0 ms)
+[ RUN      ] UftTraderAdapterLifecycle.ConcurrentReleaseWaitsForSingleApiRelease
+[       OK ] UftTraderAdapterLifecycle.ConcurrentReleaseWaitsForSingleApiRelease (37 ms)
+[ RUN      ] UftTraderAdapterLifecycle.FakeFactoryThrowAndNullRollbackConfigAndAllowRetry
+[       OK ] UftTraderAdapterLifecycle.FakeFactoryThrowAndNullRollbackConfigAndAllowRetry (241 ms)
+[ RUN      ] UftTraderAdapterLifecycle.FakePluginInitFalseAndThrowRollbackInSafeOrderAndAllowRetry
+[       OK ] UftTraderAdapterLifecycle.FakePluginInitFalseAndThrowRollbackInSafeOrderAndAllowRetry (665 ms)
+[ RUN      ] UftTraderAdapterLifecycle.FailedInitCleanupFailuresRetainResourcesRejectRetryAndFailStop
+[       OK ] UftTraderAdapterLifecycle.FailedInitCleanupFailuresRetainResourcesRejectRetryAndFailStop (252 ms)
+[ RUN      ] UftTraderAdapterLifecycle.PluginCleanupThrowsAreCaughtAndDestructorFailsClosed
+[       OK ] UftTraderAdapterLifecycle.PluginCleanupThrowsAreCaughtAndDestructorFailsClosed (246 ms)
+[----------] 24 tests from UftTraderAdapterLifecycle (3191 ms total)
+
+[----------] 11 tests from q04_trader_buysell
+[ RUN      ] q04_trader_buysell.zero_quantity_returns_empty_without_touching_channel
+[       OK ] q04_trader_buysell.zero_quantity_returns_empty_without_touching_channel (0 ms)
+[ RUN      ] q04_trader_buysell.malformed_standard_codes_fail_before_contract_lookup
+[       OK ] q04_trader_buysell.malformed_standard_codes_fail_before_contract_lookup (0 ms)
+[ RUN      ] q04_trader_buysell.open_rule_respects_max_limit_volume_per_order
+[       OK ] q04_trader_buysell.open_rule_respects_max_limit_volume_per_order (0 ms)
+[ RUN      ] q04_trader_buysell.buy_closes_short_by_yestoday_then_today_then_opens
+[       OK ] q04_trader_buysell.buy_closes_short_by_yestoday_then_today_then_opens (0 ms)
+[ RUN      ] q04_trader_buysell.sell_closes_long_with_covermode_branches
+[       OK ] q04_trader_buysell.sell_closes_long_with_covermode_branches (0 ms)
+[ RUN      ] q04_trader_buysell.pure_rules_are_skipped_when_opposite_side_is_not_clean
+[       OK ] q04_trader_buysell.pure_rules_are_skipped_when_opposite_side_is_not_clean (0 ms)
+[ RUN      ] q04_trader_buysell.long_open_limit_is_consumed_by_reported_trades
+[       OK ] q04_trader_buysell.long_open_limit_is_consumed_by_reported_trades (0 ms)
+[ RUN      ] q04_trader_buysell.short_open_limit_only_constrains_the_sell_side
+[       OK ] q04_trader_buysell.short_open_limit_only_constrains_the_sell_side (1 ms)
+[ RUN      ] q04_trader_buysell.total_limit_shares_the_quota_between_both_directions
+[       OK ] q04_trader_buysell.total_limit_shares_the_quota_between_both_directions (0 ms)
+[ RUN      ] q04_trader_buysell.registered_contract_with_explicit_info_reaches_close_first_rules
+[       OK ] q04_trader_buysell.registered_contract_with_explicit_info_reaches_close_first_rules (0 ms)
+[ RUN      ] q04_trader_buysell.unknown_contract_is_rejected_through_strategy_context
+[       OK ] q04_trader_buysell.unknown_contract_is_rejected_through_strategy_context (1 ms)
+[----------] 11 tests from q04_trader_buysell (9 ms total)
+
+[----------] 2 tests from q04_trader_contract_info
+[ RUN      ] q04_trader_contract_info.push_trade_uses_embedded_contract_when_base_data_misses
+[       OK ] q04_trader_contract_info.push_trade_uses_embedded_contract_when_base_data_misses (0 ms)
+[ RUN      ] q04_trader_contract_info.push_trade_without_embedded_or_registered_contract_is_ignored
+[       OK ] q04_trader_contract_info.push_trade_without_embedded_or_registered_contract_is_ignored (0 ms)
+[----------] 2 tests from q04_trader_contract_info (0 ms total)
+
+[----------] 22 tests from q04_trader_entrust
+[ RUN      ] q04_trader_entrust.four_direction_actions_are_assembled_correctly
+[       OK ] q04_trader_entrust.four_direction_actions_are_assembled_correctly (0 ms)
+[ RUN      ] q04_trader_entrust.price_type_and_order_flag_mapping
+[       OK ] q04_trader_entrust.price_type_and_order_flag_mapping (0 ms)
+[ RUN      ] q04_trader_entrust.malformed_standard_codes_fail_before_vendor_calls
+[       OK ] q04_trader_entrust.malformed_standard_codes_fail_before_vendor_calls (0 ms)
+[ RUN      ] q04_trader_entrust.insert_failure_returns_uint_max_without_counting_undone
+[       OK ] q04_trader_entrust.insert_failure_returns_uint_max_without_counting_undone (0 ms)
+[ RUN      ] q04_trader_entrust.rejection_without_this_adapters_usertag_does_not_change_undone
+[       OK ] q04_trader_entrust.rejection_without_this_adapters_usertag_does_not_change_undone (0 ms)
+[ RUN      ] q04_trader_entrust.duplicate_rejection_does_not_consume_another_live_order
+[       OK ] q04_trader_entrust.duplicate_rejection_does_not_consume_another_live_order (1 ms)
+[ RUN      ] q04_trader_entrust.reentrant_rejection_and_negative_return_leave_other_order_unchanged
+[       OK ] q04_trader_entrust.reentrant_rejection_and_negative_return_leave_other_order_unchanged (1 ms)
+[ RUN      ] q04_trader_entrust.duplicate_trade_does_not_reduce_undone_twice
+[       OK ] q04_trader_entrust.duplicate_trade_does_not_reduce_undone_twice (0 ms)
+[ RUN      ] q04_trader_entrust.duplicate_cancellation_does_not_reduce_undone_twice
+[       OK ] q04_trader_entrust.duplicate_cancellation_does_not_reduce_undone_twice (0 ms)
+[ RUN      ] q04_trader_entrust.older_order_snapshot_does_not_undo_live_trade
+[       OK ] q04_trader_entrust.older_order_snapshot_does_not_undo_live_trade (0 ms)
+[ RUN      ] q04_trader_entrust.fill_reported_by_order_and_trade_is_counted_once
+[       OK ] q04_trader_entrust.fill_reported_by_order_and_trade_is_counted_once (0 ms)
+[ RUN      ] q04_trader_entrust.late_live_report_after_cancel_does_not_reopen_order
+[       OK ] q04_trader_entrust.late_live_report_after_cancel_does_not_reopen_order (0 ms)
+[ RUN      ] q04_trader_entrust.unattributable_trades_do_not_change_undone
+[       OK ] q04_trader_entrust.unattributable_trades_do_not_change_undone (0 ms)
+[ RUN      ] q04_trader_entrust.duplicate_trade_is_notified_and_positioned_once
+[       OK ] q04_trader_entrust.duplicate_trade_is_notified_and_positioned_once (0 ms)
+[ RUN      ] q04_trader_entrust.accepted_report_during_insert_keeps_order_despite_negative_return
+[       OK ] q04_trader_entrust.accepted_report_during_insert_keeps_order_despite_negative_return (0 ms)
+[ RUN      ] q04_trader_entrust.snapshot_absent_orders_use_the_query_epoch
+[       OK ] q04_trader_entrust.snapshot_absent_orders_use_the_query_epoch (0 ms)
+[ RUN      ] q04_trader_entrust.usertag_pattern_is_scoped_per_channel
+[       OK ] q04_trader_entrust.usertag_pattern_is_scoped_per_channel (0 ms)
+[ RUN      ] q04_trader_entrust.cancel_single_order_goes_through_doCancel
+[       OK ] q04_trader_entrust.cancel_single_order_goes_through_doCancel (0 ms)
+[ RUN      ] q04_trader_entrust.cancel_single_order_fails_closed_without_manager_or_contract
+[       OK ] q04_trader_entrust.cancel_single_order_fails_closed_without_manager_or_contract (1 ms)
+[ RUN      ] q04_trader_entrust.cancel_all_filters_alive_orders_by_full_code
+[       OK ] q04_trader_entrust.cancel_all_filters_alive_orders_by_full_code (0 ms)
+[ RUN      ] q04_trader_entrust.cancel_all_with_lookup_only_contract_info
+[       OK ] q04_trader_entrust.cancel_all_with_lookup_only_contract_info (0 ms)
+[ RUN      ] q04_trader_entrust.cancel_all_skips_unknown_contract_and_cancels_known_orders
+[       OK ] q04_trader_entrust.cancel_all_skips_unknown_contract_and_cancels_known_orders (0 ms)
+[----------] 22 tests from q04_trader_entrust (16 ms total)
+
+[----------] 8 tests from q04_trader_push
+[ RUN      ] q04_trader_push.order_push_reduces_available_position_on_first_notice
+[       OK ] q04_trader_push.order_push_reduces_available_position_on_first_notice (0 ms)
+[ RUN      ] q04_trader_push.closetoday_and_short_side_offsets_are_handled
+[       OK ] q04_trader_push.closetoday_and_short_side_offsets_are_handled (0 ms)
+[ RUN      ] q04_trader_push.foreign_and_unknown_channel_reports_are_dropped
+[       OK ] q04_trader_push.foreign_and_unknown_channel_reports_are_dropped (0 ms)
+[ RUN      ] q04_trader_push.canceled_push_updates_cancel_stats_and_undone
+[       OK ] q04_trader_push.canceled_push_updates_cancel_stats_and_undone (0 ms)
+[ RUN      ] q04_trader_push.trade_push_updates_position_volumes_for_both_sides
+[       OK ] q04_trader_push.trade_push_updates_position_volumes_for_both_sides (0 ms)
+[ RUN      ] q04_trader_push.t1_commodity_does_not_freeze_new_available_position
+[       OK ] q04_trader_push.t1_commodity_does_not_freeze_new_available_position (0 ms)
+[ RUN      ] q04_trader_push.unknown_instrument_trade_returns_early
+[       OK ] q04_trader_push.unknown_instrument_trade_returns_early (0 ms)
+[ RUN      ] q04_trader_push.k07c_own_trade_without_trade_id_is_not_booked
+[       OK ] q04_trader_push.k07c_own_trade_without_trade_id_is_not_booked (0 ms)
+[----------] 8 tests from q04_trader_push (4 ms total)
+
+[----------] 11 tests from q04_trader_reply
+[ RUN      ] q04_trader_reply.initext_run_release_wire_the_channel
+[       OK ] q04_trader_reply.initext_run_release_wire_the_channel (0 ms)
+[ RUN      ] q04_trader_reply.login_result_drives_state_and_position_query
+[       OK ] q04_trader_reply.login_result_drives_state_and_position_query (0 ms)
+[ RUN      ] q04_trader_reply.onRspPosition_fills_positions_and_notifies_sinks
+[       OK ] q04_trader_reply.onRspPosition_fills_positions_and_notifies_sinks (0 ms)
+[ RUN      ] q04_trader_reply.onRspOrders_counts_stats_and_registers_alive_orders
+[       OK ] q04_trader_reply.onRspOrders_counts_stats_and_registers_alive_orders (0 ms)
+[ RUN      ] q04_trader_reply.adapter_destruction_releases_owned_order_map_reference
+[       OK ] q04_trader_reply.adapter_destruction_releases_owned_order_map_reference (0 ms)
+[ RUN      ] q04_trader_reply.getOrders_snapshot_is_safe_while_release_waits
+[       OK ] q04_trader_reply.getOrders_snapshot_is_safe_while_release_waits (30 ms)
+[ RUN      ] q04_trader_reply.getOrders_supports_raw_and_full_codes_without_cross_contract_matches
+[       OK ] q04_trader_reply.getOrders_supports_raw_and_full_codes_without_cross_contract_matches (1 ms)
+[ RUN      ] q04_trader_reply.onRspTrades_accumulates_stats_then_channel_ready
+[       OK ] q04_trader_reply.onRspTrades_accumulates_stats_then_channel_ready (1 ms)
+[ RUN      ] q04_trader_reply.onRspEntrust_error_only_counts_the_first_time
+[       OK ] q04_trader_reply.onRspEntrust_error_only_counts_the_first_time (1 ms)
+[ RUN      ] q04_trader_reply.handleEvent_and_error_channels_forward_to_sinks
+[       OK ] q04_trader_reply.handleEvent_and_error_channels_forward_to_sinks (1 ms)
+[ RUN      ] q04_trader_reply.failed_config_init_rolls_back_before_external_api_init
+[       OK ] q04_trader_reply.failed_config_init_rolls_back_before_external_api_init (0 ms)
+[----------] 11 tests from q04_trader_reply (39 ms total)
+
+[----------] 12 tests from q04_trader_risk
+[ RUN      ] q04_trader_risk.riskmon_parsing_switches_the_monitor_on_and_off
+[       OK ] q04_trader_risk.riskmon_parsing_switches_the_monitor_on_and_off (965 ms)
+[ RUN      ] q04_trader_risk.cancel_total_limit_moves_the_code_into_the_excluding_list
+[       OK ] q04_trader_risk.cancel_total_limit_moves_the_code_into_the_excluding_list (243 ms)
+[ RUN      ] q04_trader_risk.order_total_limit_is_counted_from_order_reports
+[       OK ] q04_trader_risk.order_total_limit_is_counted_from_order_reports (240 ms)
+[ RUN      ] q04_trader_risk.product_cancel_limit_overrides_permissive_default
+[       OK ] q04_trader_risk.product_cancel_limit_overrides_permissive_default (222 ms)
+[ RUN      ] q04_trader_risk.risk_params_default_group_is_used_for_unlisted_products
+[       OK ] q04_trader_risk.risk_params_default_group_is_used_for_unlisted_products (221 ms)
+[ RUN      ] q04_trader_risk.custom_only_policy_matches_configured_products_and_leaves_unknown_products_unmonitored
+[       OK ] q04_trader_risk.custom_only_policy_matches_configured_products_and_leaves_unknown_products_unmonitored (1194 ms)
+[ RUN      ] q04_trader_risk.order_frequency_limits_allow_the_configured_maximum_then_exclude_only_that_contract
+[       OK ] q04_trader_risk.order_frequency_limits_allow_the_configured_maximum_then_exclude_only_that_contract (234 ms)
+[ RUN      ] q04_trader_risk.order_frequency_window_expires_before_the_next_eligible_order
+[       OK ] q04_trader_risk.order_frequency_window_expires_before_the_next_eligible_order (1353 ms)
+[ RUN      ] q04_trader_risk.failed_sdk_order_is_not_counted_in_the_frequency_window
+[       OK ] q04_trader_risk.failed_sdk_order_is_not_counted_in_the_frequency_window (236 ms)
+[ RUN      ] q04_trader_risk.cancel_frequency_limits_record_only_successful_sdk_actions
+[       OK ] q04_trader_risk.cancel_frequency_limits_record_only_successful_sdk_actions (241 ms)
+[ RUN      ] q04_trader_risk.failed_sdk_cancel_is_not_counted_and_cancel_all_uses_the_same_guard
+[       OK ] q04_trader_risk.failed_sdk_cancel_is_not_counted_and_cancel_all_uses_the_same_guard (510 ms)
+[ RUN      ] q04_trader_risk.inactive_frequency_policy_does_not_change_order_or_cancel_paths
+[       OK ] q04_trader_risk.inactive_frequency_policy_does_not_change_order_or_cancel_paths (251 ms)
+[----------] 12 tests from q04_trader_risk (5915 ms total)
+
+[----------] 1 test from q04_trader_usertag
+[ RUN      ] q04_trader_usertag.maximum_adapter_id_fits_full_uint32_local_id_tag
+[       OK ] q04_trader_usertag.maximum_adapter_id_fits_full_uint32_local_id_tag (0 ms)
+[----------] 1 test from q04_trader_usertag (0 ms total)
+
+[----------] 15 tests from q04_uftctx_local
+[ RUN      ] q04_uftctx_local.channel_ready_builds_the_four_local_blocks
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:99: Failure
+Value of: std::filesystem::exists(ctx.straFile("position.membin"))
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:100: Failure
+Value of: std::filesystem::exists(ctx.straFile("order.membin"))
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:101: Failure
+Value of: std::filesystem::exists(ctx.straFile("trade.membin"))
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:102: Failure
+Value of: std::filesystem::exists(ctx.straFile("round.membin"))
+  Actual: false
+Expected: true
+
+[  FAILED  ] q04_uftctx_local.channel_ready_builds_the_four_local_blocks (2 ms)
+[ RUN      ] q04_uftctx_local.manual_positions_are_imported_then_file_is_renamed
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:133: Failure
+Expected equality of these values:
+  3.0
+    Which is: 3
+  ctx._ctx.stra_get_local_position(kAg)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:141: Failure
+Expected equality of these values:
+  1L
+    Which is: 1
+  renamed
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:142: Failure
+Value of: std::filesystem::exists(ctx.straFolder() + "mannual.yaml")
+  Actual: true
+Expected: false
+
+[  FAILED  ] q04_uftctx_local.manual_positions_are_imported_then_file_is_renamed (5 ms)
+[ RUN      ] q04_uftctx_local.manual_file_with_unknown_contract_is_rejected_as_a_whole
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:176: Failure
+Expected equality of these values:
+  5.0
+    Which is: 5
+  ctx._ctx.stra_get_local_position(kAg)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:177: Failure
+Value of: std::filesystem::exists(manual)
+  Actual: true
+Expected: false
+
+[  FAILED  ] q04_uftctx_local.manual_file_with_unknown_contract_is_rejected_as_a_whole (3 ms)
+[ RUN      ] q04_uftctx_local.manual_file_with_invalid_entries_is_rejected_as_a_whole
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:211: Failure
+Value of: std::filesystem::exists(manual)
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:212: Failure
+Value of: std::filesystem::exists(ctx.straFile("position.membin"))
+  Actual: false
+Expected: true
+
+[  FAILED  ] q04_uftctx_local.manual_file_with_invalid_entries_is_rejected_as_a_whole (6 ms)
+[ RUN      ] q04_uftctx_local.manual_file_is_not_applied_when_it_cannot_be_archived
+unknown file: Failure
+C++ exception with description "filesystem error: in permissions: No such file or directory ["/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_uftctx_root_32134/outputs/q04ctx_manual_archive_fail/"]" thrown in the test body.
+
+[  FAILED  ] q04_uftctx_local.manual_file_is_not_applied_when_it_cannot_be_archived (8 ms)
+[ RUN      ] q04_uftctx_local.trade_reports_advance_position_and_round_profit
+[       OK ] q04_uftctx_local.trade_reports_advance_position_and_round_profit (4 ms)
+[ RUN      ] q04_uftctx_local.order_and_cancel_forward_through_the_channel
+[       OK ] q04_uftctx_local.order_and_cancel_forward_through_the_channel (3 ms)
+[ RUN      ] q04_uftctx_local.trading_day_switch_rebuilds_stale_blocks
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:363: Failure
+Value of: std::filesystem::exists(ctx.straFile("position.membin"))
+  Actual: false
+Expected: true
+
+[  FAILED  ] q04_uftctx_local.trading_day_switch_rebuilds_stale_blocks (3 ms)
+[ RUN      ] q04_uftctx_local.trading_day_switch_then_close_uses_each_detail_once
+[       OK ] q04_uftctx_local.trading_day_switch_then_close_uses_each_detail_once (2 ms)
+[ RUN      ] q04_uftctx_local.trading_day_switch_matches_cold_start_of_the_new_day
+[       OK ] q04_uftctx_local.trading_day_switch_matches_cold_start_of_the_new_day (5 ms)
+[ RUN      ] q04_uftctx_local.failed_day_switch_keeps_state_and_retries
+unknown file: Failure
+C++ exception with description "filesystem error: in permissions: No such file or directory ["/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_uftctx_root_32134/outputs/q04ctx_switch_retry/order.membin"]" thrown in the test body.
+
+[  FAILED  ] q04_uftctx_local.failed_day_switch_keeps_state_and_retries (4 ms)
+[ RUN      ] q04_uftctx_local.manual_file_at_day_switch_replaces_positions
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:468: Failure
+Expected equality of these values:
+  3.0
+    Which is: 3
+  ctx._ctx.stra_get_local_position(kAg)
+    Which is: 4
+
+[  FAILED  ] q04_uftctx_local.manual_file_at_day_switch_replaces_positions (4 ms)
+[ RUN      ] q04_uftctx_local.synchronous_fill_during_insert_is_attributed_to_the_context
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:592: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  blockSize(env.straFile("order.membin"))
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:595: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  blockSize(env.straFile("order.membin"))
+    Which is: 0
+
+[  FAILED  ] q04_uftctx_local.synchronous_fill_during_insert_is_attributed_to_the_context (2 ms)
+[ RUN      ] q04_uftctx_local.local_blocks_grow_beyond_one_day_of_capacity
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp:609: Failure
+Expected: (initialCapacity) > (0u), actual: 0 vs 0
+
+[  FAILED  ] q04_uftctx_local.local_blocks_grow_beyond_one_day_of_capacity (7 ms)
+[ RUN      ] q04_uftctx_local.unextendable_block_retains_events_and_refuses_new_orders
+unknown file: Failure
+C++ exception with description "filesystem error: in permissions: No such file or directory ["/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_uftctx_root_32134/outputs/q04ctx_capacity_blocked/position.membin"]" thrown in the test body.
+
+[  FAILED  ] q04_uftctx_local.unextendable_block_retains_events_and_refuses_new_orders (3 ms)
+[----------] 15 tests from q04_uftctx_local (68 ms total)
+
+[----------] 3 tests from R11EventNotifier
+[ RUN      ] R11EventNotifier.initDisabledByInactiveFlag
+[       OK ] R11EventNotifier.initDisabledByInactiveFlag (0 ms)
+[ RUN      ] R11EventNotifier.initFailsWhenMqModuleMissing
+[       OK ] R11EventNotifier.initFailsWhenMqModuleMissing (3 ms)
+[ RUN      ] R11EventNotifier.notifyGuardsBeforeTouchingPayload
+[       OK ] R11EventNotifier.notifyGuardsBeforeTouchingPayload (0 ms)
+[----------] 3 tests from R11EventNotifier (3 ms total)
+
+[----------] 19 tests from R11ParserAdapter
+[ RUN      ] R11ParserAdapter.initRejectsNullConfig
+[       OK ] R11ParserAdapter.initRejectsNullConfig (0 ms)
+[ RUN      ] R11ParserAdapter.initRejectsEmptyModule
+[       OK ] R11ParserAdapter.initRejectsEmptyModule (0 ms)
+[ RUN      ] R11ParserAdapter.preApiFailureReleasesConfigAndAllowsAdapterReuse
+[       OK ] R11ParserAdapter.preApiFailureReleasesConfigAndAllowsAdapterReuse (0 ms)
+[ RUN      ] R11ParserAdapter.initRejectsUnloadableModule
+dlopen(parsers/libR11NoSuchParserModule.dylib, 0x0002): tried: 'parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OSparsers/libR11NoSuchParserModule.dylib' (no such file), '/opt/homebrew/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/usr/local/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libR11NoSuchParserModule.dylib' (no such file), '/opt/homebrew/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/usr/local/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libR11NoSuchParserModule.dylib' (no such file), '/usr/lib/parsers/libR11NoSuchParserModule.dylib' (no such file, not in dyld cache), 'parsers/libR11NoSuchParserModule.dylib' (no such file)
+dlopen(parsers/libR11NoSuchParserModule.dylib, 0x0002): tried: 'parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OSparsers/libR11NoSuchParserModule.dylib' (no such file), '/opt/homebrew/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/usr/local/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libR11NoSuchParserModule.dylib' (no such file), '/opt/homebrew/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/usr/local/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libR11NoSuchParserModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libR11NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libR11NoSuchParserModule.dylib' (no such file), '/usr/lib/parsers/libR11NoSuchParserModule.dylib' (no such file, not in dyld cache), 'parsers/libR11NoSuchParserModule.dylib' (no such file)
+[       OK ] R11ParserAdapter.initRejectsUnloadableModule (0 ms)
+[ RUN      ] R11ParserAdapter.initExtRejectsNullApi
+[       OK ] R11ParserAdapter.initExtRejectsNullApi (0 ms)
+[ RUN      ] R11ParserAdapter.initExtSubscribesAllContracts
+[       OK ] R11ParserAdapter.initExtSubscribesAllContracts (0 ms)
+[ RUN      ] R11ParserAdapter.initExtReturnsFalseAndRetainsApiWhenApiInitFails
+[       OK ] R11ParserAdapter.initExtReturnsFalseAndRetainsApiWhenApiInitFails (0 ms)
+[ RUN      ] R11ParserAdapter.throwingReleaseIsNeverInvokedForExternalApi
+[       OK ] R11ParserAdapter.throwingReleaseIsNeverInvokedForExternalApi (0 ms)
+[ RUN      ] R11ParserAdapter.removerIsNeverCalledAndManagerKeepsAdapterResident
+[       OK ] R11ParserAdapter.removerIsNeverCalledAndManagerKeepsAdapterResident (0 ms)
+[ RUN      ] R11ParserAdapter.pendingStyleRemoverIsNeverCalled
+[       OK ] R11ParserAdapter.pendingStyleRemoverIsNeverCalled (0 ms)
+[ RUN      ] R11ParserAdapter.replacingRemoverIsNeverCalled
+[       OK ] R11ParserAdapter.replacingRemoverIsNeverCalled (0 ms)
+[ RUN      ] R11ParserAdapter.releaseToleratesNullApi
+[       OK ] R11ParserAdapter.releaseToleratesNullApi (0 ms)
+[ RUN      ] R11ParserAdapter.handleQuoteRejectAndPassThrough
+[       OK ] R11ParserAdapter.handleQuoteRejectAndPassThrough (0 ms)
+[ RUN      ] R11ParserAdapter.handleQuoteUsesEmbeddedContractInfo
+[       OK ] R11ParserAdapter.handleQuoteUsesEmbeddedContractInfo (0 ms)
+[ RUN      ] R11ParserAdapter.orderQueueRejectAndPassThrough
+[       OK ] R11ParserAdapter.orderQueueRejectAndPassThrough (0 ms)
+[ RUN      ] R11ParserAdapter.orderDetailRejectAndPassThrough
+[       OK ] R11ParserAdapter.orderDetailRejectAndPassThrough (0 ms)
+[ RUN      ] R11ParserAdapter.transactionRejectAndPassThrough
+[       OK ] R11ParserAdapter.transactionRejectAndPassThrough (0 ms)
+[ RUN      ] R11ParserAdapter.handleParserLogAndSymbolList
+[       OK ] R11ParserAdapter.handleParserLogAndSymbolList (0 ms)
+[ RUN      ] R11ParserAdapter.adapterMgrRegisterAndLookup
+[       OK ] R11ParserAdapter.adapterMgrRegisterAndLookup (0 ms)
+[----------] 19 tests from R11ParserAdapter (1 ms total)
+
+[----------] 5 tests from R11ShareManager
+[ RUN      ] R11ShareManager.initializeMissingModuleReturnsFalse
+[       OK ] R11ShareManager.initializeMissingModuleReturnsFalse (0 ms)
+[ RUN      ] R11ShareManager.setValueRejectedWhenNotInited
+[       OK ] R11ShareManager.setValueRejectedWhenNotInited (0 ms)
+[ RUN      ] R11ShareManager.getValueFallsBackToDefaultWhenNotInited
+[       OK ] R11ShareManager.getValueFallsBackToDefaultWhenNotInited (0 ms)
+[ RUN      ] R11ShareManager.allocateValueReturnsNullWhenNotInited
+[       OK ] R11ShareManager.allocateValueReturnsNullWhenNotInited (0 ms)
+[ RUN      ] R11ShareManager.selfIsStableSingleton
+[       OK ] R11ShareManager.selfIsStableSingleton (0 ms)
+[----------] 5 tests from R11ShareManager (0 ms total)
+
+[----------] 3 tests from R11UftTicker
+[ RUN      ] R11UftTicker.tickWithoutEngineAndThreadIsSilent
+[       OK ] R11UftTicker.tickWithoutEngineAndThreadIsSilent (0 ms)
+[ RUN      ] R11UftTicker.tickBeforeThreadForwardsButKeepsEngineTime
+[       OK ] R11UftTicker.tickBeforeThreadForwardsButKeepsEngineTime (0 ms)
+[ RUN      ] R11UftTicker.engineTimeSlotsFollowExplicitArguments
+[       OK ] R11UftTicker.engineTimeSlotsFollowExplicitArguments (0 ms)
+[----------] 3 tests from R11UftTicker (0 ms total)
+
+[----------] 3 tests from R11UftStrategyMgr
+[ RUN      ] R11UftStrategyMgr.loadFactoriesMissingDirectory
+[       OK ] R11UftStrategyMgr.loadFactoriesMissingDirectory (0 ms)
+[ RUN      ] R11UftStrategyMgr.loadFactoriesSkipsNonModules
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_fact_skip_32134_96/libfake.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_fact_skip_32134_96/libfake.dylib' (slice is not valid mach-o file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_fact_skip_32134_96/libfake.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_fact_skip_32134_96/libfake.dylib' (slice is not valid mach-o file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_fact_skip_32134_96/libfake.dylib' (slice is not valid mach-o file), '/System/Volumes/Preboot/Cryptexes/OS/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_fact_skip_32134_96/libfake.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_fact_skip_32134_96/libfake.dylib' (slice is not valid mach-o file)
+[       OK ] R11UftStrategyMgr.loadFactoriesSkipsNonModules (1 ms)
+[ RUN      ] R11UftStrategyMgr.getStrategyMissReturnsEmptyPointer
+[       OK ] R11UftStrategyMgr.getStrategyMissReturnsEmptyPointer (0 ms)
+[----------] 3 tests from R11UftStrategyMgr (1 ms total)
+
+[----------] 12 tests from R11TraderDeep
+[ RUN      ] R11TraderDeep.positionResponseFiltersAndGuardsState
+[       OK ] R11TraderDeep.positionResponseFiltersAndGuardsState (0 ms)
+[ RUN      ] R11TraderDeep.positionResponseAfterLoginChainsQueryOrders
+[       OK ] R11TraderDeep.positionResponseAfterLoginChainsQueryOrders (0 ms)
+[ RUN      ] R11TraderDeep.orderResponseFiltersBadEntries
+[       OK ] R11TraderDeep.orderResponseFiltersBadEntries (0 ms)
+[ RUN      ] R11TraderDeep.orderResponseCancelTallyBranches
+[       OK ] R11TraderDeep.orderResponseCancelTallyBranches (0 ms)
+[ RUN      ] R11TraderDeep.tradeResponseSkipsItemsWithoutContract
+[       OK ] R11TraderDeep.tradeResponseSkipsItemsWithoutContract (0 ms)
+[ RUN      ] R11TraderDeep.accountResponseHoldsChannelReadyBack
+[       OK ] R11TraderDeep.accountResponseHoldsChannelReadyBack (0 ms)
+[ RUN      ] R11TraderDeep.pushOrderCancelWrongAndAutoCancel
+[       OK ] R11TraderDeep.pushOrderCancelWrongAndAutoCancel (0 ms)
+[ RUN      ] R11TraderDeep.pushOrderForeignAndEmptyOrderID
+[       OK ] R11TraderDeep.pushOrderForeignAndEmptyOrderID (0 ms)
+[ RUN      ] R11TraderDeep.queriesOnEmptyChannel
+[       OK ] R11TraderDeep.queriesOnEmptyChannel (0 ms)
+[ RUN      ] R11TraderDeep.logErrorAndLogoutAreNarrow
+[       OK ] R11TraderDeep.logErrorAndLogoutAreNarrow (0 ms)
+[ RUN      ] R11TraderDeep.failedLoginKeepsChannelUnready
+[       OK ] R11TraderDeep.failedLoginKeepsChannelUnready (0 ms)
+[ RUN      ] R11TraderDeep.adapterMgrAddGetRunRelease
+[       OK ] R11TraderDeep.adapterMgrAddGetRunRelease (0 ms)
+[----------] 12 tests from R11TraderDeep (7 ms total)
+
+[----------] 5 tests from R11UftCtxParam
+[ RUN      ] R11UftCtxParam.readParamReturnsDefaultWhenShareOffline
+[       OK ] R11UftCtxParam.readParamReturnsDefaultWhenShareOffline (0 ms)
+[ RUN      ] R11UftCtxParam.syncParamYieldsNullPointerWhenShareOffline
+[       OK ] R11UftCtxParam.syncParamYieldsNullPointerWhenShareOffline (1 ms)
+[ RUN      ] R11UftCtxParam.stringWatchParamAndCommitAreNullSafe
+[       OK ] R11UftCtxParam.stringWatchParamAndCommitAreNullSafe (0 ms)
+[ RUN      ] R11UftCtxParam.numericWatchParamReturnsInitValWhenShareOffline
+[       OK ] R11UftCtxParam.numericWatchParamReturnsInitValWhenShareOffline (1713 ms)
+[ RUN      ] R11UftCtxParam.numericWatchParamReadsSharedValuesWhenShareOnline
+[       OK ] R11UftCtxParam.numericWatchParamReadsSharedValuesWhenShareOnline (430 ms)
+[----------] 5 tests from R11UftCtxParam (2145 ms total)
+
+[----------] 1 test from R11UftCtxLog
+[ RUN      ] R11UftCtxLog.logSinksAndNullStrategyCallbacksAreSilent
+[       OK ] R11UftCtxLog.logSinksAndNullStrategyCallbacksAreSilent (0 ms)
+[----------] 1 test from R11UftCtxLog (0 ms total)
+
+[----------] 1 test from R11UftCtxTime
+[ RUN      ] R11UftCtxTime.idAndTimeForwardingFromEngine
+[       OK ] R11UftCtxTime.idAndTimeForwardingFromEngine (0 ms)
+[----------] 1 test from R11UftCtxTime (0 ms total)
+
+[----------] 2 tests from R123UftDtMgr
+[ RUN      ] R123UftDtMgr.null_tick_does_not_create_cache
+[       OK ] R123UftDtMgr.null_tick_does_not_create_cache (0 ms)
+[ RUN      ] R123UftDtMgr.realtime_tick_roundtrip_and_release
+[       OK ] R123UftDtMgr.realtime_tick_roundtrip_and_release (0 ms)
+[----------] 2 tests from R123UftDtMgr (0 ms total)
+
+[----------] 2 tests from R123ShareManagerOnlineTest
+[ RUN      ] R123ShareManagerOnlineTest.initialized_wrappers_fall_back_without_domain
+[       OK ] R123ShareManagerOnlineTest.initialized_wrappers_fall_back_without_domain (25 ms)
+[ RUN      ] R123ShareManagerOnlineTest.start_watching_without_domain
+[       OK ] R123ShareManagerOnlineTest.start_watching_without_domain (8 ms)
+[----------] 2 tests from R123ShareManagerOnlineTest (34 ms total)
+
+[----------] 5 tests from R123UftTicker
+[ RUN      ] R123UftTicker.firstSameDayQuoteBeforeStartupClockSetsTimeBeforeStrategy
+[       OK ] R123UftTicker.firstSameDayQuoteBeforeStartupClockSetsTimeBeforeStrategy (0 ms)
+[ RUN      ] R123UftTicker.firstBreakQuoteDoesNotInitializeClockOrMinuteBaseline
+[       OK ] R123UftTicker.firstBreakQuoteDoesNotInitializeClockOrMinuteBaseline (0 ms)
+[ RUN      ] R123UftTicker.breakQuoteAfterMinuteBaselineDoesNotMoveClockOrPosition
+[       OK ] R123UftTicker.breakQuoteAfterMinuteBaselineDoesNotMoveClockOrPosition (0 ms)
+[ RUN      ] R123UftTicker.auto_close_after_check_time
+[       OK ] R123UftTicker.auto_close_after_check_time (14 ms)
+[ RUN      ] R123UftTicker.unknownSessionDoesNotStartOrForwardTicks
+[       OK ] R123UftTicker.unknownSessionDoesNotStartOrForwardTicks (0 ms)
+[----------] 5 tests from R123UftTicker (15 ms total)
+
+[----------] 1 test from R123UftEngine
+[ RUN      ] R123UftEngine.product_session_run_and_push_quote
+[       OK ] R123UftEngine.product_session_run_and_push_quote (0 ms)
+[ DISABLED ] R123UftEngine.DISABLED_get_kline_slice_never_reaches_subscription
+[----------] 1 test from R123UftEngine (0 ms total)
+
+[----------] 1 test from R133TraderAdapterInit
+[ RUN      ] R133TraderAdapterInit.loads_mocker_module_and_initializes
+[       OK ] R133TraderAdapterInit.loads_mocker_module_and_initializes (764 ms)
+[----------] 1 test from R133TraderAdapterInit (764 ms total)
+
+[----------] 2 tests from R133ShareManagerFork
+[ RUN      ] R133ShareManagerFork.repeated_initialize_short_circuits
+[       OK ] R133ShareManagerFork.repeated_initialize_short_circuits (6 ms)
+[ RUN      ] R133ShareManagerFork.watcher_iterates_committed_sections
+libc++abi: terminating due to uncaught exception of type std::__1::system_error: recursive_mutex lock failed: Invalid argument
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/r133_uftcore_remaining_test.cpp:207: Failure
+Value of: (((*(int *)&(status)) & 0177) == 0)
+  Actual: false
+Expected: true
+子进程异常退出, status=6
+
+[  FAILED  ] R133ShareManagerFork.watcher_iterates_committed_sections (38 ms)
+[----------] 2 tests from R133ShareManagerFork (45 ms total)
+
+[----------] 1 test from R133ParserAdapterGuards
+[ RUN      ] R133ParserAdapterGuards.filter_and_level2_early_returns
+[       OK ] R133ParserAdapterGuards.filter_and_level2_early_returns (500 ms)
+[----------] 1 test from R133ParserAdapterGuards (501 ms total)
+
+[----------] 1 test from R133UftCtxLocalMapFail
+[ RUN      ] R133UftCtxLocalMapFail.dangling_block_files_take_map_failure_else
+[       OK ] R133UftCtxLocalMapFail.dangling_block_files_take_map_failure_else (0 ms)
+[----------] 1 test from R133UftCtxLocalMapFail (0 ms total)
+
+[----------] 1 test from R143UftCtxFallback
+[ RUN      ] R143UftCtxFallback.directory_block_paths_take_map_failure_else
+[       OK ] R143UftCtxFallback.directory_block_paths_take_map_failure_else (1 ms)
+[----------] 1 test from R143UftCtxFallback (1 ms total)
+
+[----------] 1 test from R143UftNotifierInit
+[ RUN      ] R143UftNotifierInit.PropagatesBindFailureWithoutInitializingAndCanRetry
+[       OK ] R143UftNotifierInit.PropagatesBindFailureWithoutInitializingAndCanRetry (1 ms)
+[----------] 1 test from R143UftNotifierInit (1 ms total)
+
+[----------] 1 test from R160UftNotifier
+[ RUN      ] R160UftNotifier.FakeMqReceivesDefaultConfirmAndIsDestroyed
+[       OK ] R160UftNotifier.FakeMqReceivesDefaultConfirmAndIsDestroyed (14 ms)
+[----------] 1 test from R160UftNotifier (14 ms total)
+
+[----------] 9 tests from R143UftNotifier
+[ RUN      ] R143UftNotifier.postsTextLogEventAndTraderMessages
+[       OK ] R143UftNotifier.postsTextLogEventAndTraderMessages (1 ms)
+[ RUN      ] R143UftNotifier.postsTradeJsonAndReleasesRetainedPayload
+[       OK ] R143UftNotifier.postsTradeJsonAndReleasesRetainedPayload (0 ms)
+[ RUN      ] R143UftNotifier.postsOrderJsonWithStateAndVolumeFields
+[       OK ] R143UftNotifier.postsOrderJsonWithStateAndVolumeFields (0 ms)
+[ RUN      ] R143UftNotifier.releasesRetainedOrderWhenPublisherIsMissing
+[       OK ] R143UftNotifier.releasesRetainedOrderWhenPublisherIsMissing (0 ms)
+[ RUN      ] R143UftNotifier.releasesRetainedOrderWhenJsonWriterRejectsNonFinitePrice
+[       OK ] R143UftNotifier.releasesRetainedOrderWhenJsonWriterRejectsNonFinitePrice (0 ms)
+[ RUN      ] R143UftNotifier.PublishesOnlyCompleteJsonForFiniteTradeAndOrderValues
+[       OK ] R143UftNotifier.PublishesOnlyCompleteJsonForFiniteTradeAndOrderValues (0 ms)
+[ RUN      ] R143UftNotifier.releasesRetainedOrderWhenPublisherThrows
+[       OK ] R143UftNotifier.releasesRetainedOrderWhenPublisherThrows (0 ms)
+[ RUN      ] R143UftNotifier.ShutdownWaitsForInflightPublishAndDrainsQueuedOrder
+[       OK ] R143UftNotifier.ShutdownWaitsForInflightPublishAndDrainsQueuedOrder (54 ms)
+[ RUN      ] R143UftNotifier.nullPayloadIsDroppedBeforeRetainWhenMqIsActive
+[       OK ] R143UftNotifier.nullPayloadIsDroppedBeforeRetainWhenMqIsActive (2 ms)
+[----------] 9 tests from R143UftNotifier (61 ms total)
+
+[----------] 1 test from R163UftEngine
+[ RUN      ] R163UftEngine.DeadSliceAccessorsAndEmptyBarDispatch
+[       OK ] R163UftEngine.DeadSliceAccessorsAndEmptyBarDispatch (0 ms)
+[----------] 1 test from R163UftEngine (0 ms total)
+
+[----------] 3 tests from R163UftNotifier
+[ RUN      ] R163UftNotifier.InactiveMissingModuleAndGuardLifecycle
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r163_no_mq_32134_120libWtMsgQue.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r163_no_mq_32134_120libWtMsgQue.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r163_no_mq_32134_120libWtMsgQue.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r163_no_mq_32134_120libWtMsgQue.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r163_no_mq_32134_120libWtMsgQue.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r163_no_mq_32134_120libWtMsgQue.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r163_no_mq_32134_120libWtMsgQue.dylib' (no such file)
+[       OK ] R163UftNotifier.InactiveMissingModuleAndGuardLifecycle (17 ms)
+[ RUN      ] R163UftNotifier.WorkerSurvivesIdleAndDrainsPostedTradeNotification
+[       OK ] R163UftNotifier.WorkerSurvivesIdleAndDrainsPostedTradeNotification (0 ms)
+[ RUN      ] R163UftNotifier.WorkerContinuesAfterPublishHandlerThrows
+[       OK ] R163UftNotifier.WorkerContinuesAfterPublishHandlerThrows (1 ms)
+[----------] 3 tests from R163UftNotifier (19 ms total)
+
+[----------] 1 test from R163UftTrader
+[ RUN      ] R163UftTrader.InitGuardsAndRiskTotalLimits
+[       OK ] R163UftTrader.InitGuardsAndRiskTotalLimits (231 ms)
+[ DISABLED ] R163UftTrader.DISABLED_NullApiIsAnInvalidDependencyProbe
+[----------] 1 test from R163UftTrader (231 ms total)
+
+[----------] 1 test from R173UftStrategyMgr
+[ RUN      ] R173UftStrategyMgr.ValidDylibWithoutStrategyFactoryIsSkipped
+[       OK ] R173UftStrategyMgr.ValidDylibWithoutStrategyFactoryIsSkipped (670 ms)
+[----------] 1 test from R173UftStrategyMgr (670 ms total)
+
+[----------] 1 test from R173UftEngine
+[ RUN      ] R173UftEngine.HelperClockAndEngineAccessorsRoundTrip
+[       OK ] R173UftEngine.HelperClockAndEngineAccessorsRoundTrip (0 ms)
+[----------] 1 test from R173UftEngine (0 ms total)
+
+[----------] 1 test from R173UftTradeTypes
+[ RUN      ] R173UftTradeTypes.PosItemTotalsAndAdapterDefaultState
+[       OK ] R173UftTradeTypes.PosItemTotalsAndAdapterDefaultState (0 ms)
+[----------] 1 test from R173UftTradeTypes (0 ms total)
+
+[----------] 1 test from R173UftSink
+[ RUN      ] R173UftSink.DefaultPositionAndEntrustHooksAreNoops
+[       OK ] R173UftSink.DefaultPositionAndEntrustHooksAreNoops (0 ms)
+[----------] 1 test from R173UftSink (0 ms total)
+
+[----------] 1 test from R173UftParser
+[ RUN      ] R173UftParser.DefaultStubAndAdapterMetadata
+[       OK ] R173UftParser.DefaultStubAndAdapterMetadata (0 ms)
+[----------] 1 test from R173UftParser (0 ms total)
+
+[----------] 1 test from R183UftFactory
+[ RUN      ] R183UftFactory.DylibWithoutFactoryEntryIsSkipped
+[       OK ] R183UftFactory.DylibWithoutFactoryEntryIsSkipped (511 ms)
+[----------] 1 test from R183UftFactory (511 ms total)
+
+[----------] 1 test from R183UftEngine
+[ RUN      ] R183UftEngine.ClockAndReadOnlySlicePaths
+[       OK ] R183UftEngine.ClockAndReadOnlySlicePaths (0 ms)
+[----------] 1 test from R183UftEngine (0 ms total)
+
+[----------] 1 test from R183UftTypes
+[ RUN      ] R183UftTypes.InlineDefaultsAndNullWrapperAreSafe
+[       OK ] R183UftTypes.InlineDefaultsAndNullWrapperAreSafe (0 ms)
+[----------] 1 test from R183UftTypes (0 ms total)
+
+[----------] 1 test from R194UftEngine
+[ RUN      ] R194UftEngine.SliceEntriesAreNullStubsAndOnBarIsInert
+[       OK ] R194UftEngine.SliceEntriesAreNullStubsAndOnBarIsInert (0 ms)
+[----------] 1 test from R194UftEngine (0 ms total)
+
+[----------] 1 test from R194UftParserAdapter
+[ RUN      ] R194UftParserAdapter.MissingModuleIsRejected
+dlopen(parsers/libr194_missing_parser_module.dylib, 0x0002): tried: 'parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OSparsers/libr194_missing_parser_module.dylib' (no such file), '/opt/homebrew/lib/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/parsers/libr194_missing_parser_module.dylib' (no such file), '/usr/local/lib/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/parsers/libr194_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libr194_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libr194_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libr194_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libr194_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libr194_missing_parser_module.dylib' (no such file), '/opt/homebrew/lib/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/parsers/libr194_missing_parser_module.dylib' (no such file), '/usr/local/lib/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/parsers/libr194_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libr194_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libr194_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libr194_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libr194_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libr194_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libr194_missing_parser_module.dylib' (no such file), '/usr/lib/parsers/libr194_missing_parser_module.dylib' (no such file, not in dyld cache), 'parsers/libr194_missing_parser_module.dylib' (no such file)
+[       OK ] R194UftParserAdapter.MissingModuleIsRejected (0 ms)
+[----------] 1 test from R194UftParserAdapter (0 ms total)
+
+[----------] 1 test from R203UftLocalOrderId
+[ RUN      ] R203UftLocalOrderId.ConcurrentFirstOrdersHaveUniqueIds
+[       OK ] R203UftLocalOrderId.ConcurrentFirstOrdersHaveUniqueIds (30 ms)
+[----------] 1 test from R203UftLocalOrderId (30 ms total)
+
+[----------] 1 test from R204UftContext
+[ RUN      ] R204UftContext.SliceStubsReturnNullThroughContext
+[       OK ] R204UftContext.SliceStubsReturnNullThroughContext (0 ms)
+[----------] 1 test from R204UftContext (0 ms total)
+
+[----------] 1 test from R204UftParserAdapter
+[ RUN      ] R204UftParserAdapter.MissingModuleIsRejected
+dlopen(parsers/libr204_missing_parser_module.dylib, 0x0002): tried: 'parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OSparsers/libr204_missing_parser_module.dylib' (no such file), '/opt/homebrew/lib/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/parsers/libr204_missing_parser_module.dylib' (no such file), '/usr/local/lib/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/parsers/libr204_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libr204_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libr204_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libr204_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libr204_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libr204_missing_parser_module.dylib' (no such file), '/opt/homebrew/lib/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/parsers/libr204_missing_parser_module.dylib' (no such file), '/usr/local/lib/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/parsers/libr204_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libr204_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libr204_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libr204_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libr204_missing_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libr204_missing_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libr204_missing_parser_module.dylib' (no such file), '/usr/lib/parsers/libr204_missing_parser_module.dylib' (no such file, not in dyld cache), 'parsers/libr204_missing_parser_module.dylib' (no such file)
+[       OK ] R204UftParserAdapter.MissingModuleIsRejected (0 ms)
+[----------] 1 test from R204UftParserAdapter (0 ms total)
+
+[----------] 1 test from R213UftEngine
+[ RUN      ] R213UftEngine.TimeAccessorsAndInertOnBar
+[       OK ] R213UftEngine.TimeAccessorsAndInertOnBar (0 ms)
+[----------] 1 test from R213UftEngine (0 ms total)
+
+[----------] 1 test from R213UftParserAdapter
+[ RUN      ] R213UftParserAdapter.GuardsBeforeModuleLoad
+dlopen(parsers/libr213_no_such_uft_parser_module.dylib, 0x0002): tried: 'parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OSparsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/opt/homebrew/lib/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/usr/local/lib/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/opt/homebrew/lib/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/usr/local/lib/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/parsers/libr213_no_such_uft_parser_module.dylib' (no such file), '/usr/lib/parsers/libr213_no_such_uft_parser_module.dylib' (no such file, not in dyld cache), 'parsers/libr213_no_such_uft_parser_module.dylib' (no such file)
+[       OK ] R213UftParserAdapter.GuardsBeforeModuleLoad (0 ms)
+[----------] 1 test from R213UftParserAdapter (0 ms total)
+
+[----------] 1 test from R213UftContext
+[ RUN      ] R213UftContext.OfflineParamAndSliceStubs
+[       OK ] R213UftContext.OfflineParamAndSliceStubs (0 ms)
+[----------] 1 test from R213UftContext (0 ms total)
+
+[----------] 1 test from R220ShareManagerLifecycle
+[ RUN      ] R220ShareManagerLifecycle.watcherEngineBorrowEndsOnlyAfterControlThreadJoin
+[       OK ] R220ShareManagerLifecycle.watcherEngineBorrowEndsOnlyAfterControlThreadJoin (29 ms)
+[----------] 1 test from R220ShareManagerLifecycle (29 ms total)
+
+[----------] 9 tests from R54TraderCallback
+[ RUN      ] R54TraderCallback.risk_exclude_and_product_key_match
+[       OK ] R54TraderCallback.risk_exclude_and_product_key_match (218 ms)
+[ RUN      ] R54TraderCallback.response_chain_reaches_channel_ready
+[       OK ] R54TraderCallback.response_chain_reaches_channel_ready (0 ms)
+[ RUN      ] R54TraderCallback.entrust_errors_cover_action_text
+[       OK ] R54TraderCallback.entrust_errors_cover_action_text (0 ms)
+[ RUN      ] R54TraderCallback.buy_close_rule_matrix
+[       OK ] R54TraderCallback.buy_close_rule_matrix (0 ms)
+[ RUN      ] R54TraderCallback.sell_close_rule_matrix
+[       OK ] R54TraderCallback.sell_close_rule_matrix (1 ms)
+[ RUN      ] R54TraderCallback.order_limit_exhaustion
+[       OK ] R54TraderCallback.order_limit_exhaustion (0 ms)
+[ RUN      ] R54TraderCallback.push_order_and_trade_edges
+[       OK ] R54TraderCallback.push_order_and_trade_edges (0 ms)
+[ RUN      ] R54TraderCallback.query_filter_and_dead_orders
+[       OK ] R54TraderCallback.query_filter_and_dead_orders (0 ms)
+[ RUN      ] R54TraderCallback.onRspTrades_looks_up_registered_contract_without_embedded_info
+[       OK ] R54TraderCallback.onRspTrades_looks_up_registered_contract_without_embedded_info (0 ms)
+[----------] 9 tests from R54TraderCallback (224 ms total)
+
+[----------] 1 test from BugR54002UftTickMetadata
+[ RUN      ] BugR54002UftTickMetadata.parserFallbackMarksPositionAndMissingMetadataStillForwards
+[       OK ] BugR54002UftTickMetadata.parserFallbackMarksPositionAndMissingMetadataStillForwards (2 ms)
+[----------] 1 test from BugR54002UftTickMetadata (2 ms total)
+
+[----------] 1 test from R54ParserGuard
+[ RUN      ] R54ParserGuard.release_stops_all_handlers
+[       OK ] R54ParserGuard.release_stops_all_handlers (0 ms)
+[----------] 1 test from R54ParserGuard (0 ms total)
+
+[----------] 3 tests from R54StraMgr
+[ RUN      ] R54StraMgr.loads_plugin_and_creates_strategy
+[       OK ] R54StraMgr.loads_plugin_and_creates_strategy (421 ms)
+[ RUN      ] R54StraMgr.managerDestructorReleasesFactoryWithPublishedAbi
+[       OK ] R54StraMgr.managerDestructorReleasesFactoryWithPublishedAbi (247 ms)
+[ RUN      ] R54StraMgr.skips_module_without_entry_symbol
+[       OK ] R54StraMgr.skips_module_without_entry_symbol (223 ms)
+[----------] 3 tests from R54StraMgr (892 ms total)
+
+[----------] 1 test from R54EngineGap
+[ RUN      ] R54EngineGap.cfg_release_and_session_lookup
+[       OK ] R54EngineGap.cfg_release_and_session_lookup (0 ms)
+[----------] 1 test from R54EngineGap (0 ms total)
+
+[----------] 7 tests from R78UftParserAdapterInit
+[ RUN      ] R78UftParserAdapterInit.missing_parser_factory_releases_config_and_module_reference
+[       OK ] R78UftParserAdapterInit.missing_parser_factory_releases_config_and_module_reference (393 ms)
+[ RUN      ] R78UftParserAdapterInit.loads_udp_plugin_with_filter
+[       OK ] R78UftParserAdapterInit.loads_udp_plugin_with_filter (279 ms)
+[ RUN      ] R78UftParserAdapterInit.loads_udp_plugin_without_filter
+[       OK ] R78UftParserAdapterInit.loads_udp_plugin_without_filter (265 ms)
+[ RUN      ] R78UftParserAdapterInit.precreate_failures_retry_and_quiescent_init_failure_can_be_released
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r78parserretry_32134_162/modroot/parsers/libR78NoSuchParserModule.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r78parserretry_32134_162/modroot/parsers/libR78NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r78parserretry_32134_162/modroot/parsers/libR78NoSuchParserModule.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r78parserretry_32134_162/modroot/parsers/libR78NoSuchParserModule.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r78parserretry_32134_162/modroot/parsers/libR78NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r78parserretry_32134_162/modroot/parsers/libR78NoSuchParserModule.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q04_r78parserretry_32134_162/modroot/parsers/libR78NoSuchParserModule.dylib' (no such file)
+[       OK ] R78UftParserAdapterInit.precreate_failures_retry_and_quiescent_init_failure_can_be_released (503 ms)
+[ RUN      ] R78UftParserAdapterInit.release_does_not_register_a_null_spi
+[       OK ] R78UftParserAdapterInit.release_does_not_register_a_null_spi (0 ms)
+[ RUN      ] R78UftParserAdapterInit.release_waits_for_active_callback_before_teardown
+[       OK ] R78UftParserAdapterInit.release_waits_for_active_callback_before_teardown (0 ms)
+[ RUN      ] R78UftParserAdapterInit.release_inside_callback_is_deferred_to_safe_point
+[       OK ] R78UftParserAdapterInit.release_inside_callback_is_deferred_to_safe_point (0 ms)
+[----------] 7 tests from R78UftParserAdapterInit (1443 ms total)
+
+[----------] 2 tests from R78TraderAdapterInit
+[ RUN      ] R78TraderAdapterInit.unloadable_module_is_rejected
+dlopen(traders/libR78NoSuchTraderModule.dylib, 0x0002): tried: 'traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OStraders/libR78NoSuchTraderModule.dylib' (no such file), '/opt/homebrew/lib/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/traders/libR78NoSuchTraderModule.dylib' (no such file), '/usr/local/lib/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/traders/libR78NoSuchTraderModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/traders/libR78NoSuchTraderModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/traders/libR78NoSuchTraderModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/traders/libR78NoSuchTraderModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/traders/libR78NoSuchTraderModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/traders/libR78NoSuchTraderModule.dylib' (no such file), '/opt/homebrew/lib/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/traders/libR78NoSuchTraderModule.dylib' (no such file), '/usr/local/lib/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/traders/libR78NoSuchTraderModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/traders/libR78NoSuchTraderModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtDtPorter/traders/libR78NoSuchTraderModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtBtPorter/traders/libR78NoSuchTraderModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtPorter/traders/libR78NoSuchTraderModule.dylib' (no such file), '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/traders/libR78NoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/WtUftRunner/traders/libR78NoSuchTraderModule.dylib' (no such file), '/usr/lib/traders/libR78NoSuchTraderModule.dylib' (no such file, not in dyld cache), 'traders/libR78NoSuchTraderModule.dylib' (no such file)
+[       OK ] R78TraderAdapterInit.unloadable_module_is_rejected (0 ms)
+[ RUN      ] R78TraderAdapterInit.module_without_create_symbol_is_rejected
+[       OK ] R78TraderAdapterInit.module_without_create_symbol_is_rejected (248 ms)
+[----------] 2 tests from R78TraderAdapterInit (248 ms total)
+
+[----------] 2 tests from R78UftStraMgr
+[ RUN      ] R78UftStraMgr.load_factories_skips_unusable_entries
+[       OK ] R78UftStraMgr.load_factories_skips_unusable_entries (262 ms)
+[ RUN      ] R78UftStraMgr.create_and_get_misses
+[       OK ] R78UftStraMgr.create_and_get_misses (0 ms)
+[----------] 2 tests from R78UftStraMgr (262 ms total)
+
+[----------] 1 test from R78UftTicker
+[ RUN      ] R78UftTicker.run_stop_and_full_tick_flow
+[       OK ] R78UftTicker.run_stop_and_full_tick_flow (0 ms)
+[----------] 1 test from R78UftTicker (0 ms total)
+
+[----------] 1 test from R78UftEngineRun
+[ RUN      ] R78UftEngineRun.starts_and_stops_allday_ticker
+[       OK ] R78UftEngineRun.starts_and_stops_allday_ticker (0 ms)
+[----------] 1 test from R78UftEngineRun (0 ms total)
+
+[----------] 2 tests from R78UftCtxLocal
+[ RUN      ] R78UftCtxLocal.empty_mannual_file_is_rejected_and_kept
+[       OK ] R78UftCtxLocal.empty_mannual_file_is_rejected_and_kept (0 ms)
+[ RUN      ] R78UftCtxLocal.mannual_without_details_section_is_rejected_and_kept
+[       OK ] R78UftCtxLocal.mannual_without_details_section_is_rejected_and_kept (0 ms)
+[----------] 2 tests from R78UftCtxLocal (1 ms total)
+
+[----------] 3 tests from R85UftCtxLocal
+[ RUN      ] R85UftCtxLocal.zero_volume_position_resets_dynamic_profit
+[       OK ] R85UftCtxLocal.zero_volume_position_resets_dynamic_profit (2 ms)
+[ RUN      ] R85UftCtxLocal.stale_block_drops_unknown_contract
+[       OK ] R85UftCtxLocal.stale_block_drops_unknown_contract (2 ms)
+[ RUN      ] R85UftCtxLocal.same_day_block_drops_unknown_contract
+[       OK ] R85UftCtxLocal.same_day_block_drops_unknown_contract (2 ms)
+[----------] 3 tests from R85UftCtxLocal (7 ms total)
+
+[----------] 2 tests from R85UftParserInit
+[ RUN      ] R85UftParserInit.module_without_create_symbol_is_rejected
+[       OK ] R85UftParserInit.module_without_create_symbol_is_rejected (897 ms)
+[ RUN      ] R85UftParserInit.init_ext_applies_filters_and_handles_reject_unknown
+[       OK ] R85UftParserInit.init_ext_applies_filters_and_handles_reject_unknown (263 ms)
+[----------] 2 tests from R85UftParserInit (1160 ms total)
+
+[----------] 1 test from R85UftTicker
+[ RUN      ] R85UftTicker.last_section_minute_and_worker_loop
+[       OK ] R85UftTicker.last_section_minute_and_worker_loop (50 ms)
+[----------] 1 test from R85UftTicker (50 ms total)
+
+[----------] 1 test from R85UftShareManager
+[ RUN      ] R85UftShareManager.existing_unloadable_module_still_returns_false
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r85_sharemgrmod_32134_0, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r85_sharemgrmod_32134_0' (slice is not valid mach-o file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r85_sharemgrmod_32134_0' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r85_sharemgrmod_32134_0' (slice is not valid mach-o file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r85_sharemgrmod_32134_0' (slice is not valid mach-o file), '/System/Volumes/Preboot/Cryptexes/OS/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r85_sharemgrmod_32134_0' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r85_sharemgrmod_32134_0' (slice is not valid mach-o file)
+[       OK ] R85UftShareManager.existing_unloadable_module_still_returns_false (1 ms)
+[----------] 1 test from R85UftShareManager (1 ms total)
+
+[----------] 1 test from R85UftTraderInit
+[ RUN      ] R85UftTraderInit.loads_mock_trader_module_and_returns_true
+[       OK ] R85UftTraderInit.loads_mock_trader_module_and_returns_true (254 ms)
+[----------] 1 test from R85UftTraderInit (254 ms total)
+
+[----------] 1 test from R85UftTraderReply
+[ RUN      ] R85UftTraderReply.error_report_without_undone_qty_is_ignored
+[       OK ] R85UftTraderReply.error_report_without_undone_qty_is_ignored (0 ms)
+[----------] 1 test from R85UftTraderReply (0 ms total)
+
+[----------] 2 tests from UftEngineSessionGate
+[ RUN      ] UftEngineSessionGate.unknownSessionSkipsStrategyInitialization
+[       OK ] UftEngineSessionGate.unknownSessionSkipsStrategyInitialization (0 ms)
+[ RUN      ] UftEngineSessionGate.knownSessionPreservesStrategyInitialization
+[       OK ] UftEngineSessionGate.knownSessionPreservesStrategyInitialization (0 ms)
+[----------] 2 tests from UftEngineSessionGate (0 ms total)
+
+[----------] 3 tests from UftTickerLifecycle
+[ RUN      ] UftTickerLifecycle.repeatedStopCallsJoinWorkerOnce
+[       OK ] UftTickerLifecycle.repeatedStopCallsJoinWorkerOnce (0 ms)
+[ RUN      ] UftTickerLifecycle.notificationBeforeWaitIsNotLost
+[       OK ] UftTickerLifecycle.notificationBeforeWaitIsNotLost (0 ms)
+[ RUN      ] UftTickerLifecycle.callbackRequestsStopAndControllerJoinsWorker
+[       OK ] UftTickerLifecycle.callbackRequestsStopAndControllerJoinsWorker (15 ms)
+[----------] 3 tests from UftTickerLifecycle (15 ms total)
+
+[----------] 5 tests from UftEngineLifecycle
+[ RUN      ] UftEngineLifecycle.stopDrainsGatedInitializationAndCallbackWaitDoesNotSelfWait
+[       OK ] UftEngineLifecycle.stopDrainsGatedInitializationAndCallbackWaitDoesNotSelfWait (111 ms)
+[ RUN      ] UftEngineLifecycle.concurrentRunCallsInitializeStrategiesOnce
+[       OK ] UftEngineLifecycle.concurrentRunCallsInitializeStrategiesOnce (0 ms)
+[ RUN      ] UftEngineLifecycle.startupAndSessionCallbacksCanReenterEngineAndStopWakesWorker
+[       OK ] UftEngineLifecycle.startupAndSessionCallbacksCanReenterEngineAndStopWakesWorker (0 ms)
+[ RUN      ] UftEngineLifecycle.stopBeforeRunSkipsStrategyInitialization
+[       OK ] UftEngineLifecycle.stopBeforeRunSkipsStrategyInitialization (0 ms)
+[ RUN      ] UftEngineLifecycle.waitClosesQuoteAdmissionBeforeCheckingForZero
+[       OK ] UftEngineLifecycle.waitClosesQuoteAdmissionBeforeCheckingForZero (10 ms)
+[----------] 5 tests from UftEngineLifecycle (122 ms total)
+
+[----------] Global test environment tear-down
+[==========] 305 tests from 83 test suites ran. (19084 ms total)
+[  PASSED  ] 293 tests.
+[  FAILED  ] 12 tests, listed below:
+[  FAILED  ] q04_uftctx_local.channel_ready_builds_the_four_local_blocks
+[  FAILED  ] q04_uftctx_local.manual_positions_are_imported_then_file_is_renamed
+[  FAILED  ] q04_uftctx_local.manual_file_with_unknown_contract_is_rejected_as_a_whole
+[  FAILED  ] q04_uftctx_local.manual_file_with_invalid_entries_is_rejected_as_a_whole
+[  FAILED  ] q04_uftctx_local.manual_file_is_not_applied_when_it_cannot_be_archived
+[  FAILED  ] q04_uftctx_local.trading_day_switch_rebuilds_stale_blocks
+[  FAILED  ] q04_uftctx_local.failed_day_switch_keeps_state_and_retries
+[  FAILED  ] q04_uftctx_local.manual_file_at_day_switch_replaces_positions
+[  FAILED  ] q04_uftctx_local.synchronous_fill_during_insert_is_attributed_to_the_context
+[  FAILED  ] q04_uftctx_local.local_blocks_grow_beyond_one_day_of_capacity
+[  FAILED  ] q04_uftctx_local.unextendable_block_retains_events_and_refuses_new_orders
+[  FAILED  ] R133ShareManagerFork.watcher_iterates_committed_sections
+
+12 FAILED TESTS
+  YOU HAVE 11 DISABLED TESTS
+

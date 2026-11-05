@@ -483,8 +483,9 @@ TEST_F(P07TaskScheduleTest, yearlyLeapDayFiresWhenTheCalendarDateExists)
 }
 
 /*
- * 未知周期 -> TPT_None：switch 里不置 fired，整个区间只推进日期，
- * 覆盖「时间补齐 + 换交易日判定 + 收尾」而不触发任何调度。
+ * 未知周期 -> TPT_None。决策 K27=A（2026-11-04）：永远不会触发的调度在登记时即被拒绝，
+ * 回放器不持有任务，整段回放无调度、无交易日开收盘回调，只发布回放结束。
+ * （改前期望：任务以 TPT_None 登记，收尾时有一次 session end。）
  */
 TEST_F(P07TaskScheduleTest, unknownPeriodNeverFiresButTerminates)
 {
@@ -493,8 +494,8 @@ TEST_F(P07TaskScheduleTest, unknownPeriodNeverFiresButTerminates)
 
 	EXPECT_EQ(0u, sink.scheduleCalls);
 	EXPECT_EQ(0u, sink.beginCalls);
-	// 只有收尾那一次
-	EXPECT_EQ(1u, sink.endCalls);
+	// K27：任务未登记，没有收尾的 session end
+	EXPECT_EQ(0u, sink.endCalls);
 	EXPECT_EQ(1u, sink.replayDoneCalls);
 	// 日期按自然日推进到区间外
 	EXPECT_EQ(20200104u, TimeUtils::getNextDate(20200103));
@@ -574,16 +575,12 @@ TEST_F(P07TaskScheduleTest, invalidConfigAndExplicitRangesFailClosed)
 }
 
 /*
- * 崩溃/挂死一类输入统一收进这一个禁用用例，启用用例里零残留：
- * 1) session 传不存在的模板（或依赖默认 "TRADING" 时底座里没有该模板）：
- *    run_by_tasks 里 sInfo = _bd_mgr.getSession(DEF_SESS) 返回 NULL 后，
- *    fired 分支直接 sInfo->offsetTime(...) 解引用（BUG-P04-007）。
+ * 迭代03 最终验收复核后启用（原禁用：BUG-P04-007 未知 session 模板）。
  * 2) TPT_Minute 配 offset!=0 的会话（"TRADING" offset=300）时，
  *    换日逻辑 L1173-L1194 不会推进 _cur_date，nextTime 永不大于 _end_time -> 死循环，
  *    这正是 p04 把整个 run_by_tasks 放进 DISABLED_ 的原因，这里不重复开启。
- * 只保留第 1 条（确定性崩溃），第 2 条以注释形式归档，避免启用后整轮空转。
  */
-TEST_F(P07TaskScheduleTest, DISABLED_unknownSessionTemplateCrashes)
+TEST_F(P07TaskScheduleTest, unknownSessionTemplateCrashes)
 {
 	TaskSink sink;
 	// sInfo == NULL -> fired 分支解引用崩溃

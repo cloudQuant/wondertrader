@@ -1,0 +1,96 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/WtCore/WtArbiExecuter.cpp	2026-11-04 09:06:41
++++ src/WtCore/WtArbiExecuter.cpp	2026-11-04 17:50:34
+@@ -105,6 +105,7 @@
+ 	// fail-stops in its destructor rather than release a borrowed context.
+ 	requestQuiesce();
+ 	(void)waitQuiesced();
++	account_net_limits::Registry::instance().release(this);
+ }
+ 
+ WtArbiExecuter::QuiesceIngress::QuiesceIngress(WtArbiExecuter* owner)
+@@ -531,6 +532,9 @@
+ 		error = "invalid group configuration: " + groupError;
+ 		return false;
+ 	}
++	account_net_limits::Limits accountLimits;
++	if (!account_net_limits::parse(params, accountLimits, error))
++		return false;
+ 	return exec_policy_config::validateClear(params, error) &&
+ 		exec_policy_config::validatePolicy(params, error);
+ }
+@@ -563,6 +567,16 @@
+ 		return false;
+ 	}
+ 	_group_rules.swap(groupRules);
++	{
++		account_net_limits::Limits accountLimits;
++		std::string accountError;
++		if (!account_net_limits::parse(params, accountLimits, accountError))
++		{
++			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid account limits: {}", accountError);
++			return false;
++		}
++		_account_limits = accountLimits;
++	}
+ 
+ 	_config = params;
+ 	_config->retain();
+@@ -803,9 +817,18 @@
+ 			std::lock_guard<std::mutex> stateLock(state->mutex);
+ 			state->side_effects_possible = true;
+ 		}
+-		unit = _factory->createExeUnit(name);
++		bool pluginEntered = true;
++		unit = _factory->createExeUnit(name, pluginEntered);
+ 		if (unit == NULL)
++		{
++			// A host-side factory rejection ran no plugin code; keep it retryable.
++			if (!pluginEntered)
++			{
++				std::lock_guard<std::mutex> stateLock(state->mutex);
++				state->side_effects_possible = false;
++			}
+ 			return failCreation("execution-unit creation failed");
++		}
+ 		std::string error;
+ 		if (!unit->initialize(this, stdCode, cfg, error, true) || unit->self() == NULL)
+ 			return failCreation(error.empty() ? "plugin initialization failed" : error.c_str());
+@@ -1500,11 +1523,26 @@
+ 	}
+ 	for (Action& action : actions)
+ 		if (!action.bypass) action.allowed = !_trader || _trader->checkOrderLimits(action.code.c_str());
++	// Card 8 / BUG-P02-005: per-contract account net limit shared by every
++	// executer on the same account (trader quantity, after scale); group
++	// limits were checked above and both must pass.
++	account_net_limits::Positions accountTargets;
++	for (const auto& item : physical)
++		if (item.second != 0.0) accountTargets[item.first] = item.second * _scale;
++	const std::shared_ptr<const void> accountKeepalive = _trader ?
++		std::shared_ptr<const void>(_trader->accountGate()) : std::shared_ptr<const void>();
++	const void* accountKey = accountKeepalive ? accountKeepalive.get() : static_cast<const void*>(this);
+ 	bool stale = false;
++	std::string accountError;
+ 	{
+ 		std::lock_guard<std::mutex> positionLock(_mtx_positions);
++		account_net_limits::Positions previousAccount;
++		const void* previousAccountKey = NULL;
+ 		if (_target_revision != revision || (sequence && _latest_position_batch_sequence > sequence))
+ 			stale = true;
++		else if (!account_net_limits::Registry::instance().apply(accountKey, accountKeepalive, this,
++			_name, _account_limits, accountTargets, previousAccount, previousAccountKey, accountError))
++			stale = true;
+ 		else
+ 		{
+ 			if (!sequence)
+@@ -1552,7 +1590,10 @@
+ 	}
+ 	if (stale)
+ 	{
+-		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Target batch rejected: target state changed during validation");
++		if (!accountError.empty())
++			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Target batch rejected: {}", accountError);
++		else
++			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Target batch rejected: target state changed during validation");
+ 		return;
+ 	}
+ 	for (Action& action : actions)

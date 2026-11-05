@@ -1,0 +1,210 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp	2026-10-31 16:46:02
++++ src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp	2026-11-04 20:33:14
+@@ -53,8 +53,12 @@
+ 	ofs.close();
+ }
+ 
+-// 4 个会话模板：SSE（日盘/偏移 0/单段集合竞价）、SHFE（夜盘/偏移 -120/两段集合竞价）、
+-// SESSTESTLONG15C（15 字符，正好塞满 StateInfo::_session[16]）、NODATA（无 sections，被 loadSessions 丢弃）
++// 会话模板：SSE（日盘/偏移 0/单段集合竞价）、SHFE（夜盘/偏移 -120/两段集合竞价）、
++// SESSTESTLONG15C（15 字符，正好塞满 StateInfo::_session[16]）等。
++// 2026-11-04（I03-NEW-043，卡 2 / 卡 4a / 卡 1 合同漂移）：loadSessions 现为整份校验后发布，
++// 缺 sections 的 NODATA、相同起止的 R5EQUAL（120-120）与 0-2400 都会使整份文件被拒，
++// 因此 NODATA/R5EQUAL 移出共享文件、改由 InvalidSessionEntriesRejectWholeFile 单独断言整份不发布；
++// 全天会话按卡 2b 唯一表示改写为 0-0（StateMonitor 换算出的区间与原 0-2400 相同）。
+ const char* kR5Sessions = R"JSON({
+ 	"SSE": {
+ 		"name": "上交所",
+@@ -86,10 +90,6 @@
+ 			{"from": 900, "to": 1530}
+ 		]
+ 	},
+-	"NODATA": {
+-		"name": "缺时段条目",
+-		"offset": 0
+-	},
+ 	"NOAUC": {
+ 		"name": "无集合竞价会话",
+ 		"offset": 0,
+@@ -110,7 +110,7 @@
+ 		"name": "全天会话",
+ 		"offset": 0,
+ 		"sections": [
+-			{"from": 0, "to": 2400}
++			{"from": 0, "to": 0}
+ 		]
+ 	},
+ 	"R5ORDINARY": {
+@@ -175,29 +175,28 @@
+ 		"sections": [
+ 			{"from": 3, "to": 1}
+ 		]
+-	},
+-	"R5EQUAL": {
+-		"name": "相等端点普通段",
+-		"offset": 0,
+-		"sections": [
+-			{"from": 120, "to": 120}
+-		]
+ 	}
+ })JSON";
+ 
+ // stock/etf 挂在 SSE（模板 SSE_H）、longpid 挂在 15 字符会话（独立模板 LONG_H，
+ // 便于把「同模板互相覆写」的干扰排除掉）、rb 挂在 SHFE（偏移 -120 分支）
++// 2026-11-04（I03-NEW-043，卡 4a=A）：商品须有正 pricetick 与正整数 volscale 才登记，
++// 否则整份文件不发布；补齐这两个字段，其余字段保持原样（trademode 缺省按补充裁定为 TM_Both）。
+ const char* kR5Commodities = R"JSON({
+ 	"SSE": {
+-		"stock":   {"name": "股票", "session": "SSE", "holiday": "SSE_H"},
+-		"etf":     {"name": "基金", "session": "SSE", "holiday": "SSE_H"},
+-		"longpid": {"name": "长会话品种", "session": "SESSTESTLONG15C", "holiday": "LONG_H"}
++		"stock":   {"name": "股票", "session": "SSE", "holiday": "SSE_H", "pricetick": 0.01, "volscale": 1},
++		"etf":     {"name": "基金", "session": "SSE", "holiday": "SSE_H", "pricetick": 0.001, "volscale": 1},
++		"longpid": {"name": "长会话品种", "session": "SESSTESTLONG15C", "holiday": "LONG_H", "pricetick": 1, "volscale": 1}
+ 	},
+ 	"SHFE": {
+-		"rb": {"name": "螺纹钢", "session": "SHFE", "holiday": "SHFE_H"}
++		"rb": {"name": "螺纹钢", "session": "SHFE", "holiday": "SHFE_H", "pricetick": 1, "volscale": 10}
+ 	}
+ })JSON";
+ 
++// 2026-11-04（I03-NEW-043，卡 1=A+C）：有关联品种的会话在初始化时用 checked 映射，
++// 引用的节假日模板必须已加载（缺失为 MissingCalendar，初始化失败且不发布）。
++const char* kR5AllHolidays = R"JSON({"SSE_H": [], "SHFE_H": [], "LONG_H": []})JSON";
++
+ class R5StateMonitorBdtTest : public ::testing::Test
+ {
+ protected:
+@@ -307,7 +306,8 @@
+ 
+ TEST_F(R5StateMonitorBdtTest, FifteenCharSessionIdFitsStateKeyBuffer)
+ {
+-	loadHolidayFile(R"JSON({"SSE_H": []})JSON");
++	// I03-NEW-043：longpid 使用 LONG_H，卡 1 下须加载（原只加载 SSE_H）。
++	loadHolidayFile(kR5AllHolidays);
+ 	StateMonitor mon;
+ 	fs::path cfg = initStateCfg(R"JSON({
+ 		"SESSTESTLONG15C": {"inittime": 900, "closetime": 1530, "proctime": 1600}
+@@ -324,6 +324,7 @@
+ 
+ TEST_F(R5StateMonitorBdtTest, MissingTimeFieldsDefaultToZeroAndStillAssembleSections)
+ {
++	loadHolidayFile(kR5AllHolidays); // I03-NEW-043：卡 1，见 kR5AllHolidays
+ 	StateMonitor mon;
+ 	// 三个时间字段全部缺失 -> getUInt32 走 defVal=0 路径；集合竞价与交易区间仍要换算入表
+ 	fs::path cfg = initStateCfg(R"JSON({"SSE": {}, "SHFE": {"inittime": 2045}})JSON");
+@@ -339,6 +340,7 @@
+ 
+ TEST_F(R5StateMonitorBdtTest, ReinitializeWithExtraSessionGrowsStateTable)
+ {
++	loadHolidayFile(kR5AllHolidays); // I03-NEW-043：卡 1，见 kR5AllHolidays
+ 	StateMonitor mon;
+ 	fs::path cfg1 = initStateCfg(R"JSON({"SSE": {"inittime": 900, "closetime": 1510, "proctime": 1530}})JSON");
+ 	ASSERT_TRUE(mon.initialize(cfg1.string().c_str(), &_bdMgr, nullptr));
+@@ -478,20 +480,21 @@
+ 	StateMonitor mon;
+ 	fs::path cfg = initStateCfg(R"JSON({
+ 		"R5CROSSOVERLAP":{"inittime": 0, "closetime": 2400, "proctime": 2400},
+-		"R5CROSSTOUCH": {"inittime": 0, "closetime": 2400, "proctime": 2400},
+-		"R5EQUAL":      {"inittime": 0, "closetime": 2400, "proctime": 2400}
++		"R5CROSSTOUCH": {"inittime": 0, "closetime": 2400, "proctime": 2400}
+ 	})JSON");
+ 	ASSERT_TRUE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
+ 
+-	// These two offsets expose normalized endpoint pairs 0001->0000 and 0003->0001.
++	// These two offsets expose normalized endpoint pairs 0001->2400 and 0003->0001.
+ 	// The offsets only arrange helper inputs; this test does not define an offset range.
++	// I03-NEW-043（卡 2c 运行时按一天归一化）：结束端点右对齐时 00:00 记为 2400
++	// （offsetTime(…, false) 的既有约定），原期望 0 来自旧的单次回绕实现。
+ 	for (const char* sid : { "R5CROSSOVERLAP", "R5CROSSTOUCH" })
+ 	{
+ 		const bool overlapCase = std::string(sid) == "R5CROSSOVERLAP";
+ 		const auto& sections = _bdMgr.getSession(sid)->getTradingSections();
+ 		ASSERT_EQ(sections.size(), 1u) << sid;
+ 		EXPECT_EQ(sections[0].first, overlapCase ? 1u : 3u) << sid;
+-		EXPECT_EQ(sections[0].second, overlapCase ? 0u : 1u) << sid;
++		EXPECT_EQ(sections[0].second, overlapCase ? 2400u : 1u) << sid;
+ 
+ 		auto it = mon._map.find(sid);
+ 		ASSERT_NE(it, mon._map.end()) << sid;
+@@ -506,23 +509,38 @@
+ 		EXPECT_FALSE(state.isInSections(2400)) << sid;
+ 	}
+ 
+-	// A non-cross-midnight equal endpoint retains the pre-existing one-minute padding behavior.
+-	const auto& equalSessionSections = _bdMgr.getSession("R5EQUAL")->getTradingSections();
+-	ASSERT_EQ(equalSessionSections.size(), 1u);
+-	EXPECT_EQ(equalSessionSections[0].first, 120u);
+-	EXPECT_EQ(equalSessionSections[0].second, 120u);
+-	auto equalIt = mon._map.find("R5EQUAL");
+-	ASSERT_NE(equalIt, mon._map.end());
+-	StateInfo& equal = *equalIt->second;
+-	ASSERT_EQ(equal._sections.size(), 1u);
+-	EXPECT_EQ(equal._sections[0]._from, 119u);
+-	EXPECT_EQ(equal._sections[0]._end, 121u);
+-	EXPECT_FALSE(equal.isInSections(118));
+-	EXPECT_TRUE(equal.isInSections(119));
+-	EXPECT_TRUE(equal.isInSections(120));
+-	EXPECT_FALSE(equal.isInSections(121));
++	// I03-NEW-043：原 R5EQUAL（120-120）断言 StateMonitor 对相同端点段的 1 分钟填充；
++	// 卡 2b 下该段在注册前被拒，配置无法再到达 StateMonitor，改由
++	// InvalidSessionEntriesRejectWholeFile 断言整份不发布。
+ }
+ 
++// I03-NEW-043：卡 2（相同起止仅 0-0 合法、配置整份校验后发布）与 sections 必填。
++// 每个无效条目都使整份 sessions 文件被拒，已发布的会话不变，监控器无法引用被拒会话。
++TEST_F(R5StateMonitorBdtTest, InvalidSessionEntriesRejectWholeFile)
++{
++	loadHolidayFile(kR5AllHolidays);
++	const char* invalidEntries[] = {
++		R"JSON("R5EQUAL": {"name": "相等端点普通段", "offset": 0, "sections": [{"from": 120, "to": 120}]})JSON",
++		R"JSON("R5ALLDAY2400": {"name": "0-2400", "offset": 0, "sections": [{"from": 0, "to": 2400}]})JSON",
++		R"JSON("NODATA": {"name": "缺时段条目", "offset": 0})JSON"
++	};
++	for (const char* entry : invalidEntries)
++	{
++		r5_write_file(_dir / "bad_sessions.json", std::string(R"JSON({"R5GOODNEW": {"name": "good", "offset": 0, "sections": [{"from": 930, "to": 1130}]}, )JSON") + entry + "}");
++		EXPECT_FALSE(_bdMgr.loadSessions((_dir / "bad_sessions.json").string().c_str())) << entry;
++		EXPECT_EQ(_bdMgr.getSession("R5GOODNEW"), nullptr) << entry;
++		EXPECT_EQ(_bdMgr.getSession("R5EQUAL"), nullptr) << entry;
++		EXPECT_EQ(_bdMgr.getSession("R5ALLDAY2400"), nullptr) << entry;
++		EXPECT_EQ(_bdMgr.getSession("NODATA"), nullptr) << entry;
++		ASSERT_NE(_bdMgr.getSession("SSE"), nullptr) << entry; // 先前发布的会话不受影响
++	}
++	StateMonitor mon;
++	fs::path cfg = initStateCfg(R"JSON({"R5EQUAL": {"inittime": 0}, "SSE": {"inittime": 900, "closetime": 1510, "proctime": 1530}})JSON");
++	ASSERT_TRUE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
++	EXPECT_FALSE(mon.isInState("R5EQUAL", SS_ORIGINAL));
++	EXPECT_TRUE(mon.isInState("SSE", SS_ORIGINAL));
++}
++
+ TEST_F(R5StateMonitorBdtTest, ZeroStartSectionUsesClampedMidnightPadding)
+ {
+ 	StateMonitor mon;
+@@ -578,12 +596,23 @@
+ 
+ TEST_F(R5StateMonitorBdtTest, NonObjectEntriesDegradeToDefaultTimes)
+ {
++	loadHolidayFile(kR5AllHolidays); // I03-NEW-043：卡 1，见 kR5AllHolidays
+ 	StateMonitor mon;
+-	// 会话项不是对象（这里是数组）：getUInt32 取不到键，退回 defVal=0，不抛不崩
++	// I03-NEW-043：2026-11-03 起 StateMonitor 初始化按卡 1 A+C 先整批校验再发布，
++	// 非对象会话项是配置错误：初始化失败、不发布任何状态，不抛不崩
++	// （原用例期望退回默认时间 0 并登记，与现行 fail-closed 初始化冲突）。
+ 	fs::path cfg = initStateCfg(R"JSON({"SSE": [1, 2, 3], "SHFE": "not-an-object"})JSON");
+-	EXPECT_TRUE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
++	EXPECT_FALSE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
++	EXPECT_FALSE(mon.isInState("SSE", SS_ORIGINAL));
++	EXPECT_FALSE(mon.isInState("SHFE", SS_ORIGINAL));
++	EXPECT_FALSE(mon.isAnyInState(SS_ORIGINAL));
++	// 先前成功的初始化不被失败的重新初始化破坏。
++	fs::path good = initStateCfg(R"JSON({"SSE": {"inittime": 900, "closetime": 1510, "proctime": 1530}})JSON");
++	ASSERT_TRUE(mon.initialize(good.string().c_str(), &_bdMgr, nullptr));
++	fs::path bad = initStateCfg(R"JSON({"SHFE": "not-an-object"})JSON");
++	EXPECT_FALSE(mon.initialize(bad.string().c_str(), &_bdMgr, nullptr));
+ 	EXPECT_TRUE(mon.isInState("SSE", SS_ORIGINAL));
+-	EXPECT_TRUE(mon.isInState("SHFE", SS_ORIGINAL));
++	EXPECT_FALSE(mon.isInState("SHFE", SS_ORIGINAL));
+ 
+ 	// Config root must be an object; a root-level array is rejected by WTSCfgLoader.
+ 	StateMonitor mon2;

@@ -1,0 +1,26 @@
+command=['/tmp/wt-i03-new034/red/monitor-tsan', 'repeat']
+exit=-6
+==================
+WARNING: ThreadSanitizer: data race (pid=20853)
+  Read of size 1 at 0x00016d84ab68 by thread T1:
+    #0 WtSimpleRiskMon::run()::$_0::operator()() const WtSimpRiskMon.cpp:169 (monitor-tsan:arm64+0x10001ff98)
+    #1 std::__1::__invoke_result_impl<void, WtSimpleRiskMon::run()::$_0>::type std::__1::__invoke[abi:nqe220108]<WtSimpleRiskMon::run()::$_0>(WtSimpleRiskMon::run()::$_0&&) invoke.h:90 (monitor-tsan:arm64+0x10001ff98)
+    #2 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, WtSimpleRiskMon::run()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, WtSimpleRiskMon::run()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (monitor-tsan:arm64+0x10001ff98)
+    #3 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, WtSimpleRiskMon::run()::$_0>>(void*) thread.h:169 (monitor-tsan:arm64+0x10001ff98)
+
+  Previous write of size 1 at 0x00016d84ab68 by main thread:
+    #0 WtSimpleRiskMon::stop() WtSimpRiskMon.cpp:189 (monitor-tsan:arm64+0x100002f6c)
+    #1 main monitor_lifecycle.cpp:57 (monitor-tsan:arm64+0x100000d8c)
+
+  Location is stack of main thread.
+
+  Thread T1 (tid=908898, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (monitor-tsan:arm64+0x100002db0)
+    #2 std::__1::thread::thread[abi:nqe220108]<WtSimpleRiskMon::run()::$_0, 0>(WtSimpleRiskMon::run()::$_0&&) thread.h:218 (monitor-tsan:arm64+0x100002db0)
+    #3 std::__1::thread::thread[abi:nqe220108]<WtSimpleRiskMon::run()::$_0, 0>(WtSimpleRiskMon::run()::$_0&&) thread.h:209 (monitor-tsan:arm64+0x100002db0)
+    #4 WtSimpleRiskMon::run() WtSimpRiskMon.cpp:89 (monitor-tsan:arm64+0x100002db0)
+    #5 main monitor_lifecycle.cpp:55 (monitor-tsan:arm64+0x100000d40)
+
+SUMMARY: ThreadSanitizer: data race WtSimpRiskMon.cpp:169 in WtSimpleRiskMon::run()::$_0::operator()() const
+==================

@@ -1,0 +1,64 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/q06_porter/v2_exec_status_api_test.cpp	2026-11-01 21:44:15
++++ src/TestUnits/coverage/q06_porter/v2_exec_status_api_test.cpp	2026-11-04 18:29:33
+@@ -39,6 +39,8 @@
+ USING_NS_WTP;
+ 
+ extern WtRtRunner& getRunner();
++// BUG-R42-002 gate: HFT contexts bind only a registered trader (module-less local adapter).
++TraderAdapterPtr i03s5_register_test_trader(WtRtRunner& runner, const char* id);
+ 
+ class WtRtRunnerTestAccess
+ {
+@@ -484,13 +486,15 @@
+ 		actions << "{\"default\":{}}";
+ 		ASSERT_TRUE(actions.good());
+ 
++		// 卡2 2b=A（用户裁定 2026-11-03）：交易时段全天只能写 0-0，0-2400 被会话加载器拒绝，
++		// 会话缺失后 HFT ticker 解引用空会话（迭代03 s5-runners 更新，原为 to: 2400）。
+ 		std::ofstream sessions(_dir / "sessions.yaml", std::ios::binary | std::ios::trunc);
+ 		sessions << "ALLDAY:\n"
+ 			"    name: AllDay\n"
+ 			"    offset: 0\n"
+ 			"    sections:\n"
+ 			"        - from: 0\n"
+-			"          to: 2400\n";
++			"          to: 0\n";
+ 		ASSERT_TRUE(sessions.good());
+ 	}
+ 
+@@ -983,7 +987,9 @@
+ 	ASSERT_TRUE(configure("hft"));
+ 	getRunner().registerHftCallbacks(&block_hft_init_callback, NULL, NULL, NULL, NULL,
+ 		NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+-	ASSERT_NE(0u, getRunner().createHftContext("status_startup_barrier", "missing_trader", false, 0));
++	// R42-002 gate: bind a registered local adapter (an unknown trader yields no context).
++	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "status_bound_trader") != nullptr);
++	ASSERT_NE(0u, getRunner().createHftContext("status_startup_barrier", "status_bound_trader", false, 0));
+ 
+ 	StartupBarrier barrier;
+ 	g_startup_barrier.store(&barrier, std::memory_order_release);
+@@ -1051,8 +1057,11 @@
+ 	ASSERT_TRUE(configure("hft"));
+ 	getRunner().registerHftCallbacks(&release_from_child_then_block_hft_init, NULL, NULL,
+ 		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
++	// R42-002 gate: an unknown trader no longer yields a context; bind a
++	// registered local adapter so the startup callback still runs.
++	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "status_bound_trader") != nullptr);
+ 	ASSERT_NE(0u, getRunner().createHftContext("status_child_release_barrier",
+-		"missing_trader", false, 0));
++		"status_bound_trader", false, 0));
+ 
+ 	StartupBarrier barrier;
+ 	g_child_startup_release_returned.store(false, std::memory_order_release);
+@@ -1154,8 +1163,10 @@
+ 	g_startup_release_callback_called.store(false, std::memory_order_release);
+ 	getRunner().registerHftCallbacks(&release_other_runner_on_hft_init, NULL, NULL, NULL,
+ 		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
++	// R42-002 gate: bind a registered local adapter (see above).
++	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "status_bound_trader") != nullptr);
+ 	ASSERT_NE(0u, getRunner().createHftContext("status_other_runner_scope",
+-		"missing_trader", false, 0));
++		"status_bound_trader", false, 0));
+ 
+ 	getRunner().run(true);
+ 	g_startup_release_target = nullptr;

@@ -85,7 +85,7 @@ inline const char* sessions_json()
 		"PAUSE": {
 			"name": "休盘会话", "offset": 0,
 			"auction": {"from": 0, "to": 1},
-			"sections": [{"from": 0, "to": 0}]
+			"sections": [{"from": 2358, "to": 2359}]
 		},
 		"SETTLE": {
 			"name": "结算价会话", "offset": 0,
@@ -103,17 +103,22 @@ inline const char* sessions_json()
  * 品种 -> 会话映射。HOLIDAY 故意不挂任何品种（isEmptySession 场景）；
  * 其余每个会话一个独立品种，避免同一 getSessionComms 集合互相干扰。
  * holiday 模板不存在的品种按 isHoliday 默认返回 false（工作日为非节假日）。
+ * 卡2（2b=A）后交易时段 0-0 表示全天，PAUSE 原用 0-0 表达“空交易段”已不成立，
+ * 改为 23:58-23:59 的一分钟交易段（收盘时间仍为日末）：除 00:00 竞价分钟与日末两分钟外，
+ * 均处于“竞价已开始、不在交易段内且未到收盘”的 SS_PAUSED 分支。
+ * 卡4（4a=A）后 loadCommodities 只登记 pricetick>0、volscale 为正整数的就绪品种，
+ * 夹具因此补 pricetick/volscale（I02-NEW-026 复查：夹具缺字段，非产品校验问题）。
  */
 inline const char* commodities_json()
 {
 	return R"JSON({
 		"R145": {
-			"CLS": {"name": "收盘品种", "session": "CLOSED", "holiday": "R145_NONE"},
-			"INI": {"name": "初始化品种", "session": "INIT", "holiday": "R145_NONE"},
-			"RCV": {"name": "接收品种", "session": "RECV", "holiday": "R145_NONE"},
-			"PSE": {"name": "休盘品种", "session": "PAUSE", "holiday": "R145_NONE"},
-			"STL": {"name": "结算品种", "session": "SETTLE", "holiday": "R145_NONE"},
-			"HLC": {"name": "节假日品种", "session": "HLM", "holiday": "R145_HOL"}
+			"CLS": {"name": "收盘品种", "session": "CLOSED", "holiday": "R145_NONE", "pricetick": 1, "volscale": 1},
+			"INI": {"name": "初始化品种", "session": "INIT", "holiday": "R145_NONE", "pricetick": 1, "volscale": 1},
+			"RCV": {"name": "接收品种", "session": "RECV", "holiday": "R145_NONE", "pricetick": 1, "volscale": 1},
+			"PSE": {"name": "休盘品种", "session": "PAUSE", "holiday": "R145_NONE", "pricetick": 1, "volscale": 1},
+			"STL": {"name": "结算品种", "session": "SETTLE", "holiday": "R145_NONE", "pricetick": 1, "volscale": 1},
+			"HLC": {"name": "节假日品种", "session": "HLM", "holiday": "R145_HOL", "pricetick": 1, "volscale": 1}
 		}
 	})JSON";
 }
@@ -165,6 +170,11 @@ protected:
 		write_file(_dir / "commodities.json", commodities_json());
 		ASSERT_TRUE(_bdMgr.loadSessions((_dir / "sessions.json").string().c_str()));
 		ASSERT_TRUE(_bdMgr.loadCommodities((_dir / "commodities.json").string().c_str()));
+		// Card 1 (A+C): checked trading-date mapping reports MissingCalendar for a
+		// commodity whose holiday template was never loaded, and StateMonitor
+		// initialization fails closed. Load both templates (empty = no holidays);
+		// holiday cases reload them with their own dates.
+		load_holidays(R"JSON({"R145_NONE": [], "R145_HOL": []})JSON");
 	}
 
 	void TearDown() override

@@ -666,6 +666,14 @@ public:
 	 */
 	bool addSelFactories(const char* folder);
 
+	/**
+	 * @brief 显式、可审计的账户恢复命令（卡 6b）。返回 AccountTradingGate::ResumeStatus 数值。
+	 */
+	int32_t resumeAccountTrading(const char* traderId, const char* operatorId, const char* reason,
+		uint64_t expectedGeneration, const char* reference);
+	/** @brief 账户门禁当前暂停代数；未知 trader 返回 0。 */
+	uint64_t getAccountPauseGeneration(const char* traderId);
+
 private:
 	/**
 	 * @brief 初始化交易适配器
@@ -978,6 +986,9 @@ private:
 	bool _release_deferred_for_startup = false; // guarded by _status_config_mutex
 	bool _release_deferred_for_config = false; // guarded by _status_config_mutex
 	bool _teardown_in_progress = false; // guarded by _status_config_mutex
+	// Decision K15=A: teardown is delivering parser stop notifications; releases from other
+	// threads return immediately instead of waiting (no callback/join wait cycle).
+	bool _parser_stop_notifications_active = false; // guarded by _status_config_mutex
 	bool _teardown_pending = false; // guarded by _status_config_mutex; owners remain live until a control-thread retry
 	bool _teardown_inputs_stopped = false; // guarded by _status_config_mutex
 	bool _teardown_parsers_stopped = false; // guarded by _status_config_mutex
@@ -986,6 +997,7 @@ private:
 	bool _manager_release_in_progress = false; // guarded by _status_config_mutex
 	uint32_t _release_waiters = 0; // guarded by _status_config_mutex
 	std::atomic<bool> _status_ready{ false };
+	std::atomic<bool> _host_callbacks_closed{ false }; // I03-NEW-046: set when the runner is destroyed
 	/**
 	 * @brief 是否退出
 	 */

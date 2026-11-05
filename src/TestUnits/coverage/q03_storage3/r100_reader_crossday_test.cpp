@@ -235,13 +235,13 @@ TEST_F(R100ReaderCrossDayTest, R100ReaderIntegratedHotLoaderAndAdjustedCatch)
 	// 前复权：baseFactor 取最后一段因子（HOT-），loader 提供分月原始 bar
 	WTSKlineSlice* qfq = _reader.readKlineSlice("SSE.STK.HOT-", KP_Minute5, 10, 202401101500ull);
 	ASSERT_TRUE(qfq != NULL);
-	EXPECT_EQ(qfq->size(), 2u);
+	EXPECT_EQ(qfq->size(), 2);
 	qfq->release();
 
 	// 后复权：基础因子为 1，缓存条数一致
 	WTSKlineSlice* hfq = _reader.readKlineSlice("SSE.STK.HOT+", KP_Minute5, 10, 202401101500ull);
 	ASSERT_TRUE(hfq != NULL);
-	EXPECT_EQ(hfq->size(), 2u);
+	EXPECT_EQ(hfq->size(), 2);
 	hfq->release();
 
 	// 复权文件只有块头：cacheAdjustedStkBars 记录空复权数据错误，最终返回空切片。
@@ -249,7 +249,7 @@ TEST_F(R100ReaderCrossDayTest, R100ReaderIntegratedHotLoaderAndAdjustedCatch)
 		make_block(BT_HIS_Day, BLOCK_VERSION_RAW_V2, string())));
 	WTSKlineSlice* empty = _reader.readKlineSlice("SSE.STK.600000-", KP_DAY, 2, 202401101500ull);
 	ASSERT_TRUE(empty != NULL);
-	EXPECT_EQ(empty->size(), 0u);
+	EXPECT_EQ(empty->size(), 0);
 	EXPECT_GE(_sink.count_of(LL_ERROR), 1u);
 	empty->release();
 }

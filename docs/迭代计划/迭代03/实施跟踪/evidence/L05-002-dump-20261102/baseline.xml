@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="4" failures="4" disabled="0" errors="0" time="0.007" timestamp="2026-11-02T09:07:05.348" name="AllTests">
+  <testsuite name="L05HelperBarTest" tests="2" failures="2" disabled="0" skipped="0" errors="0" time="0.004" timestamp="2026-11-02T09:07:05.348">
+    <testcase name="DumpBarsReportsOneOutputFailureAndContinues" file="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp" line="772" status="run" result="completed" time="0.002" timestamp="2026-11-02T09:07:05.348" classname="L05HelperBarTest">
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:780&#x0A;Expected: dump_bars(_root.string().c_str(), output.string().c_str(), &quot;&quot;, log_cb) doesn&apos;t throw an exception.&#x0A;  Actual: it throws std::runtime_error with description &quot;Failed to open file for writing&quot;.&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:780
+Expected: dump_bars(_root.string().c_str(), output.string().c_str(), "", log_cb) doesn't throw an exception.
+  Actual: it throws std::runtime_error with description "Failed to open file for writing".
+]]></failure>
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:784&#x0A;Value of: any_log_has(&quot;创建失败&quot;)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:784
+Value of: any_log_has("创建失败")
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:786&#x0A;Value of: any_log_has((good + &quot;写入完成&quot;).c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:786
+Value of: any_log_has((good + "写入完成").c_str())
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:790&#x0A;Value of: std::getline(input, header)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:790
+Value of: std::getline(input, header)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="DumpBarsReportsShortWriteWithoutSuccess" file="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp" line="795" status="run" result="completed" time="0.001" timestamp="2026-11-02T09:07:05.351" classname="L05HelperBarTest">
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:807&#x0A;Value of: any_log_has(&quot;写入失败&quot;)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:807
+Value of: any_log_has("写入失败")
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:808&#x0A;Value of: any_log_has(&quot;写入完成&quot;)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:808
+Value of: any_log_has("写入完成")
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:809&#x0A;Value of: any_log_has(&quot;全部导出完成&quot;)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:809
+Value of: any_log_has("全部导出完成")
+  Actual: true
+Expected: false
+]]></failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="L05HelperTickTest" tests="2" failures="2" disabled="0" skipped="0" errors="0" time="0.003" timestamp="2026-11-02T09:07:05.353">
+    <testcase name="DumpTicksReportsOneOutputFailureAndContinues" file="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp" line="521" status="run" result="completed" time="0.002" timestamp="2026-11-02T09:07:05.353" classname="L05HelperTickTest">
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:529&#x0A;Expected: dump_ticks(_root.string().c_str(), output.string().c_str(), &quot;&quot;, t_log_cb) doesn&apos;t throw an exception.&#x0A;  Actual: it throws std::runtime_error with description &quot;Failed to open file for writing&quot;.&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:529
+Expected: dump_ticks(_root.string().c_str(), output.string().c_str(), "", t_log_cb) doesn't throw an exception.
+  Actual: it throws std::runtime_error with description "Failed to open file for writing".
+]]></failure>
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:533&#x0A;Value of: t_any_log_has(&quot;创建失败&quot;)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:533
+Value of: t_any_log_has("创建失败")
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:535&#x0A;Value of: t_any_log_has((good + &quot;写入完成&quot;).c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:535
+Value of: t_any_log_has((good + "写入完成").c_str())
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:539&#x0A;Value of: std::getline(input, header)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:539
+Value of: std::getline(input, header)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="DumpTicksReportsShortWriteWithoutSuccess" file="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp" line="544" status="run" result="completed" time="0.001" timestamp="2026-11-02T09:07:05.355" classname="L05HelperTickTest">
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:556&#x0A;Value of: t_any_log_has(&quot;写入失败&quot;)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:556
+Value of: t_any_log_has("写入失败")
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:557&#x0A;Value of: t_any_log_has(&quot;写入完成&quot;)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:557
+Value of: t_any_log_has("写入完成")
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:558&#x0A;Value of: t_any_log_has(&quot;全部导出完成&quot;)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:558
+Value of: t_any_log_has("全部导出完成")
+  Actual: true
+Expected: false
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

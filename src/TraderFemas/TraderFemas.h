@@ -18,6 +18,9 @@
 #include <unordered_map>
 #include <stdint.h>
 #include <atomic>
+#include <condition_variable>
+#include <memory>
+#include <mutex>
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_context_strand.hpp>
@@ -58,12 +61,48 @@ public:
 	} WrapperState;
 
 
+	/*
+	 *	BUG-T4-003 / BUG-T4-002 (card 9: 9a=A+C, 9b=A, 9c=A, 9d=A) lifecycle state.
+	 *	Observable through lifecycleState() for the host and tests.
+	 */
+	typedef enum
+	{
+		LS_IDLE,			// not connected yet
+		LS_RUNNING,			// connect() created the API and published the worker
+		LS_STOP_REQUESTED,	// admission closed; release requested from a callback/worker
+		LS_RELEASED,		// worker joined, requests and callbacks drained, API released
+		LS_UNQUIESCED		// drain timed out: API kept, object must be quarantined
+	} LifecycleState;
+
+	LifecycleState lifecycleState() const;
+	// True when the caller runs on this instance's worker or inside one of its
+	// SPI callbacks (where release/destroy must not block or join, card 9d).
+	bool isCallbackContext() const;
+	// True once an external release() proved that the worker, every outbound API
+	// call and every SPI callback that entered this wrapper have finished.
+	bool isQuiesced() const;
+	// Factory-remover quarantine support (card 9a/9b): detach the worker, which
+	// exits on its own after the stop request, so no joinable thread is left in
+	// an object that is never destroyed. No-op while an external release() joins.
+	void detachForQuarantine();
+
 private:
 	void onInitialized();
 
 	int authenticate();
 
 	int doLogin();
+
+	class ApiLease;
+	class CallbackScope;
+	friend class ApiLease;
+	friend class CallbackScope;
+	bool	acquireApiLease();
+	void	releaseApiLease();
+	bool	enterCallback();
+	void	leaveCallback();
+	void	requestStop();
+	void	workerMain();
 
 //////////////////////////////////////////////////////////////////////////
 //ITraderApi接口
@@ -222,16 +261,40 @@ protected:
 	WTSArray*					m_ayPosition;
 	WTSArray*					m_ayTrades;
 	WTSArray*					m_ayOrders;
+public:
+	// BUG-L01-014: host features declared through setTraderSpiFeatures.
+	void setSpiFeatures(uint64_t features) { m_spiFeatures.store(features); }
+	std::atomic<uint64_t>		m_spiFeatures{ 0 };
+protected:
+	// K42 / BUG-I02-NEW-154: state of the order query in flight (SPI callback thread only).
+	bool						m_qryOrdersFailed = false;
+	bool						m_qryOrdersDropped = false;
 	WTSArray*					m_ayPosDetail;
 	
 	IBaseDataMgr*				m_bdMgr;
 
 	bool						m_bQryOnline;
-	bool						m_bStopped;
+	// Admission: set once release()/disconnect() is requested; no new request,
+	// API call or callback delivery starts afterwards.
+	std::atomic<bool>			m_bStopped;
 
 	boost::asio::io_context		m_asyncIO;
 	boost::asio::io_context::strand*	m_strandIO;
 	StdThreadPtr				m_thrdWorker;
+	// The worker owns a persistent work guard so it keeps serving queries while
+	// idle; release() resets it and stops the context before joining.
+	typedef boost::asio::executor_work_guard<boost::asio::io_context::executor_type> WorkGuard;
+	std::unique_ptr<WorkGuard>	m_workGuard;
+	std::unique_ptr<boost::asio::io_context::strand>	m_ownedStrand;
+
+	mutable std::mutex			m_mtxLifecycle;
+	std::condition_variable		m_cvLifecycle;
+	std::mutex					m_mtxRelease;		// serializes external release()
+	uint32_t					m_apiLeases;		// outbound API calls in flight
+	uint32_t					m_activeCallbacks;	// SPI callbacks inside this wrapper
+	bool						m_workerExited;
+	LifecycleState				m_lifecycle;
+	uint32_t					m_drainTimeoutMs;	// bounded drain, then quarantine
 
 	typedef std::queue<CommonExecuter>	QueryQue;
 	QueryQue				m_queQuery;

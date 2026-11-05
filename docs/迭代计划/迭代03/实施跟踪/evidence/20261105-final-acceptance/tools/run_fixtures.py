@@ -1,0 +1,2799 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Iteration-03 standalone fixture-suite runner (src/TestUnits/fixtures/*).
+
+usage:
+  python3 -I run_fixtures.py --tree <frozen root with src/ dist/> --build <Apple clang Debug+coverage build>
+                             --out <new or existing output dir> [--only a,b,c] [--parallel 2] [--jobs 2]
+                             [--head <commit>] [--repo-git <repo>/.git] [--report-only]
+
+Every suite runs in its own work directory <out>/<suite>/. Nothing is written into the
+repository or into --tree/--build:
+  * suites whose scripts hard-code old /tmp builds, conda, the Anaconda ninja, `git rev-parse`
+    or mktemp under /tmp are run from an APFS clone (cp -Rc, no symlinks) of --tree placed in
+    <out>/<suite>/mirror with the path edits recorded in <out>/<suite>/mirror.patch;
+  * shared non-coverage dependency libraries (plain / asan / tsan, Homebrew LLVM 22) are built
+    from --tree into <out>/_deps/<kind>;
+  * `git show <commit>:path` (only for scripts that derive a hash-checked red control from an
+    immutable commit) reads the object store via GIT_DIR=--repo-git, read-only.
+Writes <out>/summary.json and <out>/README.md (README annotations from --annotations, if any).
+"""
+import argparse
+import contextlib
+import datetime
+import difflib
+import hashlib
+import json
+import os
+import re
+import shlex
+import shutil
+import signal
+import subprocess
+import sys
+import threading
+import time
+import traceback
+import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+LLVM = '/opt/homebrew/Cellar/llvm/22.1.8/bin'
+BOOST_INC = '/opt/homebrew/opt/boost/include'
+NINJA = '/opt/homebrew/bin/ninja'
+CMAKE = '/opt/homebrew/bin/cmake'
+SYS_PY = '/usr/bin/python3'
+SUITE_TIMEOUT = 1200          # seconds per documented invocation group (variant)
+CONDA_FORMS = ['/Users/yunjinqi/opt/anaconda3/bin/conda run --no-capture-output -n base python',
+               '/Users/yunjinqi/opt/anaconda3/bin/conda run -n base python']
+VERDICTS = ('pass', 'fail', 'expected-red', 'not-applicable', 'blocked-env', 'timeout')
+
+PRIORITY_FILE = HERE / 'priority.txt'
+RUNNER_SHA = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+
+
+class SuiteTimeout(Exception):
+    pass
+
+
+class Blocked(Exception):
+    """Raised by a handler when a prerequisite outside --tree/--build is missing."""
+    def __init__(self, reason, attribution='环境问题'):
+        super().__init__(reason)
+        self.reason = reason
+        self.attribution = attribution
+
+
+# --------------------------------------------------------------------------- runner state
+class Runner:
+    def __init__(self, args):
+        self.tree = Path(args.tree).resolve()
+        self.build = Path(args.build).resolve()
+        self.out = Path(args.out).resolve()
+        self.jobs = args.jobs
+        self.repo_git = Path(args.repo_git).resolve() if args.repo_git else None
+        self.head = args.head
+        self.fixtures = self.tree / 'src/TestUnits/fixtures'
+        self.libs = self.build / 'build_x64/Debug/libs'
+        self.bin = self.build / 'build_x64/Debug/bin'
+        self.dep_locks = {}
+        self.dep_state = {}
+        self.dep_lock = threading.Lock()
+        self.results = {}
+        self.results_lock = threading.Lock()
+        self.tools = self.out / '_tools'
+        self.forbidden = [str(Path('/Users/yunjinqi/Documents/new_projects/wondertrader'))]
+
+    # tools generated at runtime: rg compatibility shim (rg is not installed for /bin/sh
+    # scripts on this host) and the LLVM implicit-include project include file.
+    def prepare_tools(self):
+        (self.tools / 'bin').mkdir(parents=True, exist_ok=True)
+        rg = self.tools / 'bin/rg'
+        rg.write_text('#!/bin/sh\n# minimal ripgrep stand-in for fixture scripts: rg [-q|-c] PATTERN [FILE...]\nexec /usr/bin/grep -E "$@"\n')
+        rg.chmod(0o755)
+        py = self.tools / 'bin/python3'
+        py.write_text('#!/bin/sh\n# fixture scripts calling bare python3 use the system interpreter (not Homebrew/conda)\nexec /usr/bin/python3 "$@"\n')
+        py.chmod(0o755)
+        inc = self.tools / 'llvm-implicit-usrlocal.cmake'
+        inc.write_text('# Homebrew LLVM does not treat /usr/local/include as implicit; mark it so CMake drops the -I\n'
+                       '# (it is re-added with -isystem after the Boost/bridge headers).\n'
+                       'list(APPEND CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES /usr/local/include)\n'
+                       'list(APPEND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES /usr/local/include)\n')
+
+    def base_env(self, suite_dir):
+        env = {k: v for k, v in os.environ.items()
+               if not k.startswith(('CONDA', 'PYTHON', '_CE_', 'GTEST_', 'ASAN_', 'TSAN_', 'UBSAN_', 'LSAN_',
+                                    'LLVM_PROFILE', 'DYLD_', 'WT_', 'MyDeps', 'CXX', 'CC', 'CFLAGS',
+                                    'CXXFLAGS', 'LDFLAGS', 'GIT_'))}
+        # Homebrew perl (not SIP-protected) must win over /usr/bin/perl: fixture scripts set
+        # DYLD_LIBRARY_PATH and run tests through `perl -e 'alarm N; exec @ARGV'`, and SIP strips
+        # DYLD_* when exec'ing protected /usr/bin binaries. Bare `python3` is pinned to the system
+        # interpreter by the wrapper in _tools/bin.
+        env['PATH'] = ':'.join([str(self.tools / 'bin'), '/opt/homebrew/bin', '/usr/bin', '/bin', '/usr/sbin', '/sbin'])
+        tmp = suite_dir / 'tmp'
+        tmp.mkdir(parents=True, exist_ok=True)
+        env['TMPDIR'] = str(tmp) + '/'
+        env['LLVM_PROFILE_FILE'] = str(suite_dir / 'profraw' / '%p.profraw')
+        env['LC_ALL'] = 'en_US.UTF-8'
+        env['LANG'] = 'en_US.UTF-8'
+        return env
+
+    # ------------------------------------------------------------------ shared deps
+    DEP_KINDS = {
+        'plain': '',
+        'asan': '-fsanitize=address,undefined -fno-omit-frame-pointer',
+        'tsan': '-fsanitize=thread -fno-omit-frame-pointer',
+    }
+
+    def dep(self, kind, targets, ctx):
+        """Build (once) non-coverage Debug libraries of --tree with Homebrew LLVM 22."""
+        with self.dep_lock:
+            lock = self.dep_locks.setdefault(kind, threading.Lock())
+        d = self.out / '_deps' / kind
+        with lock:
+            st = self.dep_state.setdefault(kind, {'configured': False, 'built': set(), 'failed': {}})
+            logs = self.out / '_deps' / 'logs'
+            logs.mkdir(parents=True, exist_ok=True)
+            env = self.base_env(self.out / '_deps')
+            env.pop('LLVM_PROFILE_FILE', None)
+            if not st['configured'] and not (d / 'build.ninja').exists():
+                san = self.DEP_KINDS[kind]
+                ldsan = san.replace('-fno-omit-frame-pointer', '').strip()
+                argv = [CMAKE, '-S', str(self.tree / 'src'), '-B', str(d), '-G', 'Ninja',
+                        '-DCMAKE_MAKE_PROGRAM=' + NINJA, '-DCMAKE_BUILD_TYPE=Debug',
+                        '-DWT_ENABLE_COVERAGE=OFF', '-DWT_WARNINGS_AS_ERRORS=OFF',
+                        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5', '-DBoost_INCLUDE_DIR=' + BOOST_INC,
+                        '-DCMAKE_PREFIX_PATH=/opt/homebrew',
+                        '-DCMAKE_PROJECT_INCLUDE=' + str(self.tools / 'llvm-implicit-usrlocal.cmake'),
+                        '-DCMAKE_C_COMPILER=' + LLVM + '/clang', '-DCMAKE_CXX_COMPILER=' + LLVM + '/clang++',
+                        '-DCMAKE_C_FLAGS=%s -isystem /usr/local/include' % san,
+                        '-DCMAKE_CXX_FLAGS=%s -include cstdlib -isystem /usr/local/include' % san,
+                        '-DCMAKE_EXE_LINKER_FLAGS=%s --ld-path=/usr/bin/ld' % ldsan,
+                        '-DCMAKE_SHARED_LINKER_FLAGS=%s --ld-path=/usr/bin/ld' % ldsan,
+                        '-DCMAKE_MODULE_LINKER_FLAGS=%s --ld-path=/usr/bin/ld' % ldsan]
+                rc = run_logged(argv, logs / (kind + '-configure.log'), cwd=self.out / '_deps', env=env, timeout=1800)
+                if rc != 0:
+                    st['failed']['configure'] = str(logs / (kind + '-configure.log'))
+                st['configured'] = True
+            if 'configure' in st['failed']:
+                raise Blocked('共享依赖 %s 配置失败，见 %s' % (kind, st['failed']['configure']))
+            need = [t for t in targets if t not in st['built']]
+            bad = [t for t in targets if t in st['failed']]
+            if bad:
+                raise Blocked('共享依赖 %s 目标 %s 构建失败，见 %s' % (kind, ','.join(bad), st['failed'][bad[0]]))
+            if need:
+                log = logs / ('%s-build-%s.log' % (kind, '_'.join(need)))
+                t0 = time.time()
+                rc = run_logged([CMAKE, '--build', str(d), '--target'] + need + ['-j', str(self.jobs)],
+                                log, cwd=self.out / '_deps', env=env, timeout=5400)
+                ctx.note('共享依赖 %s 构建 %s：exit %s，%.0fs，日志 %s' % (kind, ','.join(need), rc, time.time() - t0, log))
+                if rc != 0:
+                    for t in need:
+                        st['failed'][t] = str(log)
+                    raise Blocked('共享依赖 %s 目标 %s 构建失败，见 %s' % (kind, ','.join(need), log))
+                st['built'].update(need)
+            return d
+
+
+def run_logged(argv, log, cwd, env, timeout):
+    log.parent.mkdir(parents=True, exist_ok=True)
+    with open(log, 'wb') as f:
+        f.write(('# cwd: %s\n# argv: %s\n' % (cwd, shlex.join(argv))).encode())
+        f.flush()
+        p = subprocess.Popen(argv, cwd=str(cwd), env=env, stdout=f, stderr=subprocess.STDOUT, start_new_session=True)
+        try:
+            return p.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            with contextlib.suppress(Exception):
+                os.killpg(p.pid, signal.SIGKILL)
+            p.wait()
+            return 'timeout'
+
+
+# --------------------------------------------------------------------------- per-suite context
+class Variant:
+    def __init__(self, name, role):
+        self.name = name
+        self.role = role            # primary | red | info
+        self.verdict = None
+        self.reason = ''
+        self.commands = []          # dicts: label, command, cwd, exit, seconds, log
+        self.started = time.time()
+        self.seconds = 0.0
+
+    def as_dict(self):
+        return {'name': self.name, 'role': self.role, 'verdict': self.verdict, 'reason': self.reason,
+                'seconds': round(self.seconds, 1), 'commands': self.commands}
+
+
+class Ctx:
+    def __init__(self, runner, name):
+        self.R = runner
+        self.name = name
+        self.dir = runner.out / name
+        self.logs = self.dir / 'logs'
+        self.fx = runner.fixtures / name
+        self.variants = []
+        self.notes = []
+        self.seq = 0
+        self.cur = None
+        self.deadline = None
+        self.mirror_root = None
+        self.entry = None
+        self.attribution = None
+        self.suggestion = None
+        self.short_dirs = []
+
+    # paths ---------------------------------------------------------------
+    @property
+    def tree(self):
+        return self.R.tree
+
+    @property
+    def build(self):
+        return self.R.build
+
+    @property
+    def libs(self):
+        return self.R.libs
+
+    def root(self):
+        """Source root used to run scripts: the mirror if one was created, else --tree."""
+        return self.mirror_root or self.R.tree
+
+    def fxdir(self, name=None):
+        return self.root() / 'src/TestUnits/fixtures' / (name or self.name)
+
+    def new(self, *parts):
+        """A fresh, not yet existing path below the suite directory."""
+        p = self.dir.joinpath(*parts)
+        if p.exists():
+            shutil.rmtree(p)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        return p
+
+    def note(self, text):
+        self.notes.append(text)
+
+    # variants ------------------------------------------------------------
+    def variant(self, name, fn, role='primary', budget=SUITE_TIMEOUT):
+        v = Variant(name, role)
+        self.variants.append(v)
+        self.cur = v
+        self.deadline = time.time() + budget
+        try:
+            res = fn()
+            if isinstance(res, tuple):
+                v.verdict, v.reason = res
+            else:
+                v.verdict = res
+        except SuiteTimeout as e:
+            v.verdict, v.reason = 'timeout', '超过 %ds 上限被中止：%s' % (budget, e)
+        except Blocked as e:
+            v.verdict, v.reason = 'blocked-env', e.reason
+            if not self.attribution:
+                self.attribution = e.attribution
+        except Exception as e:      # runner/handler problem: keep going, record it
+            v.verdict, v.reason = 'fail', '运行器异常：%s: %s' % (type(e).__name__, e)
+            with contextlib.suppress(Exception):
+                with open(self.dir / 'runner-exception.txt', 'a') as f:
+                    f.write(traceback.format_exc())
+        v.seconds = time.time() - v.started
+        self.cur = None
+        self.deadline = None
+        return v
+
+    # commands ------------------------------------------------------------
+    def sh(self, label, cmd, cwd=None, env=None, timeout=None, stdin=None):
+        """Run a command (list -> argv, str -> bash -c). Returns (exit, text)."""
+        self.seq += 1
+        safe = re.sub(r'[^A-Za-z0-9_.-]+', '_', label)[:80]
+        log = self.logs / ('%02d-%s.log' % (self.seq, safe))
+        log.parent.mkdir(parents=True, exist_ok=True)
+        cwd = Path(cwd or self.dir)
+        cwd.mkdir(parents=True, exist_ok=True)
+        full_env = self.R.base_env(self.dir)
+        overrides = {}
+        if env:
+            for k, v in env.items():
+                if v is None:
+                    full_env.pop(k, None)
+                else:
+                    full_env[k] = str(v)
+                overrides[k] = v
+        argv = cmd if isinstance(cmd, list) else ['/bin/bash', '-c', cmd]
+        argv = [str(a) for a in argv]
+        text_cmd = shlex.join(argv) if isinstance(cmd, list) else cmd
+        for bad in self.R.forbidden:
+            if bad in text_cmd or bad in str(cwd):
+                raise RuntimeError('命令引用了仓库路径（禁止）：' + text_cmd)
+        remaining = None
+        if self.deadline:
+            remaining = self.deadline - time.time()
+            if remaining <= 0:
+                raise SuiteTimeout(label)
+        to = min(x for x in (timeout, remaining) if x is not None) if (timeout or remaining) else None
+        t0 = time.time()
+        with open(log, 'wb') as f:
+            f.write(('# suite: %s\n# cwd: %s\n# env overrides: %s\n# command: %s\n\n'
+                     % (self.name, cwd, json.dumps(overrides, ensure_ascii=False), text_cmd)).encode())
+            f.flush()
+            p = subprocess.Popen(argv, cwd=str(cwd), env=full_env, stdout=f, stderr=subprocess.STDOUT,
+                                 stdin=subprocess.PIPE if stdin is not None else subprocess.DEVNULL,
+                                 start_new_session=True)
+            timed_out = False
+            try:
+                if stdin is not None:
+                    p.stdin.write(stdin.encode())
+                    p.stdin.close()
+                rc = p.wait(timeout=to)
+            except subprocess.TimeoutExpired:
+                timed_out = True
+                with contextlib.suppress(Exception):
+                    os.killpg(p.pid, signal.SIGKILL)
+                p.wait()
+                rc = 'timeout'
+            # children left in the session (background jobs of scripts) are reaped too
+            with contextlib.suppress(Exception):
+                os.killpg(p.pid, signal.SIGKILL)
+        secs = time.time() - t0
+        rec = {'label': label, 'command': text_cmd, 'cwd': str(cwd), 'env': overrides,
+               'exit': rc, 'seconds': round(secs, 1), 'log': str(log)}
+        if self.cur is not None:
+            self.cur.commands.append(rec)
+        text = log.read_text(errors='replace')
+        if timed_out:
+            if remaining is not None and to == remaining:
+                raise SuiteTimeout(label)
+        return rc, text
+
+    # mirror --------------------------------------------------------------
+    def mirror(self, edits=(), copies=()):
+        """APFS clone of --tree (src, dist) with recorded path edits; returns the mirror root.
+        edits: (relative path, old, new[, min_count]) applied as plain text replacement.
+        copies: (absolute source, relative destination) extra read-only inputs."""
+        if self.mirror_root:
+            return self.mirror_root
+        m = self.new('mirror')
+        m.mkdir()
+        for part in ('src', 'dist'):
+            subprocess.run(['/bin/cp', '-Rc', str(self.R.tree / part), str(m / part)], check=True)
+        patch = []
+        for e in edits:
+            rel, old, new = e[0], e[1], e[2]
+            minc = e[3] if len(e) > 3 else 1
+            p = m / rel
+            before = p.read_text(encoding='utf-8')
+            n = before.count(old)
+            if n < minc:
+                raise RuntimeError('mirror edit pattern not found (%d<%d) in %s: %r' % (n, minc, rel, old))
+            after = before.replace(old, new)
+            p.write_text(after, encoding='utf-8')
+            if after != before:
+                patch.extend(difflib.unified_diff(before.splitlines(True), after.splitlines(True),
+                                                  'tree/' + rel, 'mirror/' + rel))
+        for src, rel in copies:
+            dst = m / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            if Path(src).is_dir():
+                shutil.copytree(src, dst, symlinks=False)
+            else:
+                shutil.copyfile(src, dst)
+            patch.append('# copied read-only input %s -> mirror/%s (sha256 %s)\n'
+                         % (src, rel, sha_tree(Path(src))))
+        links = subprocess.run(['/usr/bin/find', str(m), '-type', 'l'], capture_output=True, text=True).stdout.strip()
+        if links:
+            raise RuntimeError('mirror contains symlinks: ' + links[:200])
+        (self.dir / 'mirror.patch').write_text(''.join(patch))
+        self.mirror_root = m
+        self.note('使用 --tree 的 APFS 克隆副本 %s 运行；路径改写见 %s' % (m, self.dir / 'mirror.patch'))
+        return m
+
+    def dep(self, kind, targets):
+        return self.R.dep(kind, targets, self)
+
+    def short_dir(self, why):
+        """Short work directory for fixtures whose controls depend on path length (<=128 chars).
+        Created under /private/tmp, copied back to <suite>/short-run afterwards and removed."""
+        import tempfile
+        d = Path(tempfile.mkdtemp(prefix='wtfx-', dir='/private/tmp'))
+        self.short_dirs.append(d)
+        self.note('短路径工作目录 %s（%s）；运行后复制回 %s 并删除' % (d, why, self.dir / 'short-run'))
+        return d
+
+    def finish_short_dirs(self):
+        for d in self.short_dirs:
+            dst = self.dir / 'short-run' / d.name
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            with contextlib.suppress(Exception):
+                shutil.copytree(d, dst, symlinks=True)
+            shutil.rmtree(d, ignore_errors=True)
+
+
+def sha_tree(p):
+    h = hashlib.sha256()
+    if p.is_dir():
+        for f in sorted(p.rglob('*')):
+            if f.is_file():
+                h.update(str(f.relative_to(p)).encode())
+                h.update(f.read_bytes())
+    else:
+        h.update(p.read_bytes())
+    return h.hexdigest()
+
+
+# --------------------------------------------------------------------------- result helpers
+EXIT_RE = re.compile(r'(?:exit[ =:]|exit_code=|rc=)\s*(-?\d+|TIMEOUT|timeout)')
+
+
+def exit_lines(text):
+    """[(line, code)] for lines carrying an `exit N` / `exit=N` record."""
+    out = []
+    for line in text.splitlines():
+        m = EXIT_RE.search(line)
+        if m:
+            out.append((line.strip(), m.group(1)))
+    return out
+
+
+def xml_counts(path):
+    try:
+        r = ET.parse(path).getroot()
+        return {k: int(r.get(k, 0)) for k in ('tests', 'failures', 'errors', 'disabled')}
+    except Exception:
+        return None
+
+
+def xml_failed_cases(path):
+    try:
+        r = ET.parse(path).getroot()
+    except Exception:
+        return None
+    bad = []
+    for tc in r.iter('testcase'):
+        if tc.find('failure') is not None or tc.find('error') is not None:
+            bad.append(tc.get('classname', '') + '.' + tc.get('name', ''))
+    return bad
+
+
+def read(p):
+    p = Path(p)
+    return p.read_text(errors='replace') if p.exists() else ''
+
+
+def all_zero(pairs):
+    return bool(pairs) and all(c == '0' for _, c in pairs)
+
+
+def summarize_pairs(pairs, limit=8):
+    bad = [l for l, c in pairs if c != '0']
+    s = '%d/%d exit 0' % (len(pairs) - len(bad), len(pairs))
+    if bad:
+        s += '；非零：' + ' | '.join(bad[:limit]) + (' …' if len(bad) > limit else '')
+    return s
+
+
+def rc_verdict(rc, what):
+    if rc == 'timeout':
+        return 'timeout', what + ' 超时'
+    return ('pass', what + ' exit 0') if rc == 0 else ('fail', '%s exit %s' % (what, rc))
+
+
+def gtest_run(ctx, label, binary, args=(), cwd=None, env=None, timeout=600):
+    """Run one gtest binary with XML output; returns (verdict, reason, rc)."""
+    xml = ctx.dir / 'xml' / (re.sub(r'[^A-Za-z0-9_.-]+', '_', label) + '.xml')
+    xml.parent.mkdir(parents=True, exist_ok=True)
+    if xml.exists():
+        xml.unlink()
+    rc, text = ctx.sh(label, [str(binary)] + list(args) + ['--gtest_output=xml:' + str(xml)],
+                      cwd=cwd, env=env, timeout=timeout)
+    c = xml_counts(xml)
+    detail = ('tests=%(tests)d failures=%(failures)d errors=%(errors)d' % c) if c else 'no XML'
+    if rc == 0:
+        return 'pass', '%s exit 0 (%s)' % (label, detail), rc
+    bad = xml_failed_cases(xml) or []
+    return ('timeout' if rc == 'timeout' else 'fail'), '%s exit %s (%s)%s' % (
+        label, rc, detail, ('；失败：' + ','.join(bad[:6])) if bad else ''), rc
+
+
+def combine(ctx, extra_reason=''):
+    """Suite verdict from variants.
+    primary: must pass; red: red controls (must be expected-red); demo: counterexamples that are
+    expected to fail on the current tree (documented existing defects); info: informational only."""
+    prim = [v for v in ctx.variants if v.role == 'primary']
+    demo = [v for v in ctx.variants if v.role == 'demo']
+    red = [v for v in ctx.variants if v.role == 'red']
+    parts = ['%s[%s%s]: %s' % (v.name, v.verdict, '' if v.role in ('primary',) else '/' + v.role, v.reason) for v in ctx.variants]
+    reason = '；'.join(parts)
+    if extra_reason:
+        reason = extra_reason + '；' + reason
+    decide = prim + demo
+    if not decide:
+        return 'not-applicable', reason
+    for o in ('timeout', 'fail', 'blocked-env'):
+        if any(v.verdict == o for v in decide):
+            return o, reason
+    if any(v.verdict == 'fail' for v in red):
+        return 'fail', '红控未按预期失败；' + reason
+    if any(v.verdict == 'red-unbuildable' for v in red):
+        reason = '（自带红控无法与当前树组合构建，未形成红绿对照）' + reason
+    if demo and all(v.verdict == 'expected-red' for v in demo) and all(v.verdict == 'pass' for v in prim):
+        return 'expected-red', reason
+    if all(v.verdict == 'pass' for v in prim) and not demo:
+        return 'pass', reason
+    return 'fail', reason
+
+
+# --------------------------------------------------------------------------- suite registry
+SUITES = {}
+DERIVED = {}
+
+
+def suite(name, entry=None):
+    def deco(fn):
+        SUITES[name] = (fn, entry)
+        return fn
+    return deco
+
+
+def na(name, reason):
+    def fn(ctx):
+        return 'not-applicable', reason
+    SUITES[name] = (fn, None)
+
+
+def derived(name, source, entry, describe):
+    """Suite whose sources are compiled and run by another suite's entry."""
+    DERIVED[name] = (source, entry, describe)
+
+
+# ===================================================================== suite handlers
+# Common text edits for mirror copies -----------------------------------------------
+# Snapshot coverage builds configured by the scripts' pinned /opt/homebrew/bin/cmake do not record
+# /usr/local/lib (the only nanomsg install on this host) in LC_RPATH, so CoverageTests_wtcore cannot
+# load @rpath/libnanomsg.6.dylib. CMake seeds CMAKE_*_LINKER_FLAGS from LDFLAGS at first configure;
+# DYLD_* cannot be used because SIP strips it for /bin/bash and /usr/bin/perl.
+NANOMSG_RPATH_ENV = {'LDFLAGS': '-Wl,-rpath,/usr/local/lib'}
+
+
+def conda_edits(rel):
+    return [(rel, c, SYS_PY + ' -I', 0) for c in CONDA_FORMS]
+
+
+def nonzero(code):
+    return code not in ('0', 0)
+
+
+def lib_edits(ctx, rel, old='/tmp/wt-i03-r41-drain/libs'):
+    return [(rel, old, str(ctx.libs))]
+
+
+def compdb(ctx):
+    """Sanitized compile database of --build (no -MD/-MT/-MF so dependency files are never
+    written into the frozen build directory). Generated once into <out>/_tools."""
+    p = ctx.R.tools / 'compile_commands.json'
+    with ctx.R.dep_lock:
+        if not p.exists():
+            raw = subprocess.check_output([NINJA, '-C', str(ctx.build), '-t', 'compdb'], text=True)
+            data = json.loads(raw)
+            for e in data:
+                args = shlex.split(e['command'])
+                clean = []
+                i = 0
+                while i < len(args):
+                    if args[i] in ('-MT', '-MF'):
+                        i += 2
+                        continue
+                    if args[i] in ('-MD', '-MMD'):
+                        i += 1
+                        continue
+                    clean.append(args[i])
+                    i += 1
+                e['command'] = shlex.join(clean)
+            p.write_text(json.dumps(data))
+    return p
+
+
+def results_file_verdict(path, what, want_zero=True):
+    text = read(path)
+    pairs = exit_lines(text)
+    if not pairs:
+        return 'fail', '%s 未产生 exit 记录（%s）' % (what, path)
+    ok = all_zero(pairs)
+    return ('pass' if ok else 'fail'), '%s：%s' % (what, summarize_pairs(pairs))
+
+
+def red_expect_nonzero(pairs, what, need='any'):
+    if not pairs:
+        return 'fail', '%s 无记录' % what
+    nz = [l for l, c in pairs if nonzero(c)]
+    ok = bool(nz) if need == 'any' else len(nz) == len(pairs)
+    s = '%s：%d/%d 非零' % (what, len(nz), len(pairs))
+    return ('expected-red' if ok else 'fail'), s + ('' if ok else '（红控未复现）')
+
+
+def cmake_fixture(ctx, label, src, bdir, defs=(), llvm=False, build_targets=None, extra_env=None):
+    # /usr/local/lib holds the only nanomsg on this host (no Homebrew nanomsg); record it in the
+    # build RPATH so @rpath/libnanomsg.6.dylib resolves (the --build binaries carry the same entry).
+    argv = [CMAKE, '-S', str(src), '-B', str(bdir), '-G', 'Ninja', '-DCMAKE_MAKE_PROGRAM=' + NINJA,
+            '-DCMAKE_BUILD_TYPE=Debug', '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
+            '-DCMAKE_BUILD_RPATH=/usr/local/lib'] + list(defs)
+    if llvm:
+        argv += ['-DCMAKE_CXX_COMPILER=' + LLVM + '/clang++', '-DCMAKE_C_COMPILER=' + LLVM + '/clang']
+    rc, _ = ctx.sh(label + '-configure', argv, env=extra_env)
+    if rc != 0:
+        return rc
+    bargv = [CMAKE, '--build', str(bdir), '-j', str(ctx.R.jobs)]
+    if build_targets:
+        bargv += ['--target'] + list(build_targets)
+    rc, _ = ctx.sh(label + '-build', bargv, env=extra_env)
+    return rc
+
+
+SAN_ASAN_ARGS = ['-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer -include stdlib.h',
+                 '-DCMAKE_SHARED_LINKER_FLAGS=-fsanitize=address,undefined',
+                 '-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined']
+SAN_TSAN_ARGS = ['-DCMAKE_CXX_FLAGS=-fsanitize=thread -fno-omit-frame-pointer -include stdlib.h',
+                 '-DCMAKE_SHARED_LINKER_FLAGS=-fsanitize=thread',
+                 '-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=thread']
+ASAN_ENV = {'ASAN_OPTIONS': 'detect_leaks=0:abort_on_error=1', 'UBSAN_OPTIONS': 'halt_on_error=1'}
+TSAN_ENV = {'TSAN_OPTIONS': 'halt_on_error=1'}
+
+
+# ---------------------------------------------------------------------- not applicable
+for _n, _r in [
+    ('femas_insert_return', '目录只有 insert_return_test.cpp，无 README/脚本/CMake，CoverageTests 也未编入；仓库内无运行命令（docs 中仅出现在快照哈希清单）'),
+    ('new034_monitor', '目录只有 monitor_lifecycle.cpp，无 README/脚本/CMake，CoverageTests 未编入；无可执行入口'),
+    ('owner_delivery_result', '空目录（0 个文件），无入口'),
+    ('r22_monitor_lifecycle', '目录只有 probe.cpp，无 README/脚本，无运行入口'),
+    ('r22_monitor_owner', '目录只有两个 probe 源码，无 README/脚本，无运行入口'),
+    ('module_helper_odr', '源码由 coverage CMake 编入 CoverageTests_modulehelper_odr（WT_COV_MODULE_HELPER_ODR_DIR / add_subdirectory windows），随 CoverageTests 回归运行'),
+    ('r60_yd', 'YD fixture 动态库源码由 coverage CMake 编入 CoverageTests_t_TraderYD（WT_COV_R60_YD_FIXTURE_DIR），无独立入口'),
+    ('r68_index_factory', '由 coverage CMake add_subdirectory 编入 CoverageTests_dtcore；README 命令只是运行该 CoverageTests 目标的过滤集'),
+    ('r78_no_parser', 'no_parser.cpp 由 coverage CMake 编为 R78NoParserFixture 供 CoverageTests 加载，无独立入口'),
+    ('t1_ctpopt_init', 'missing_symbol.cpp 由 coverage CMake 编入（WT_COV_T1_CTPOPT_FIXTURE_DIR），无独立入口'),
+    ('t1_xtp', '两个 fixture 源码由 coverage CMake 编入 CoverageTests_t_ParserXTP（WT_COV_T1_XTP_FIXTURE_DIR），无独立入口'),
+    ('t4_ctpopt_loader', '两个 fixture 源码由 coverage CMake 编入（WT_COV_T4_CTP_OPT_FIXTURE_DIR），无独立入口'),
+    ('t4_femas', '两个 fixture 源码由 coverage CMake 编入（WT_COV_T4_FEMAS_FIXTURE_DIR），无独立入口'),
+]:
+    na(_n, _r)
+
+
+# ---------------------------------------------------------------------- strategy factory quarantine
+def _factory_quarantine(ctx, kind):
+    fx = ctx.fxdir()
+    out = ctx.dir / 'run'
+
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/sh', str(fx / 'run.sh'), str(out)], cwd=ctx.dir, timeout=1100)
+        lines = [l for l in text.splitlines() if re.match(r'^(current|head|previous|path)-\S+ exit=', l)]
+        cur = [l for l in lines if l.startswith('current-')]
+        red = [l for l in lines if not l.startswith('current-')]
+        base = 'run.sh exit %s；current 用例 %d 个；历史红控 %d 行' % (rc, len(cur), len(red))
+        if 'baseline controls NOT RUN' in text:
+            base += '；基线红控 NOT RUN（套件未自带基线源码，WT_%s_BASELINE_DIR 未提供）' % kind.upper()
+        if rc == 0:
+            return 'pass', base
+        m = re.findall(r'^(\S+) exit=(\d+)\s*$', text, re.M)
+        last = m[-1] if m else None
+        return 'fail', base + ('；最后用例 %s exit=%s' % last if last else '')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('hft_factory_quarantine', 'src/TestUnits/fixtures/hft_factory_quarantine/run.sh')
+def s_hft_factory(ctx):
+    return _factory_quarantine(ctx, 'hft')
+
+
+@suite('sel_factory_quarantine', 'src/TestUnits/fixtures/sel_factory_quarantine/run.sh')
+def s_sel_factory(ctx):
+    return _factory_quarantine(ctx, 'sel')
+
+
+@suite('cta_factory_quarantine', 'src/TestUnits/fixtures/cta_factory_quarantine/run.sh')
+def s_cta_factory(ctx):
+    if not ctx.R.head or not ctx.R.repo_git:
+        raise Blocked('run.sh 以 git HEAD 作历史红控（git rev-parse/git show HEAD:...），需要 --head 与 --repo-git', '夹具问题')
+    rel = 'src/TestUnits/fixtures/cta_factory_quarantine/run.sh'
+    ctx.mirror([(rel, 'git rev-parse HEAD > "$run_dir/head-commit.txt"', 'echo %s > "$run_dir/head-commit.txt"' % ctx.R.head),
+                # slice1 2026-11-05: run.sh now pins its historical control commit itself
+                # (9094fd8e, hash-checked); this rewrite only applies to an older run.sh.
+                (rel, 'git show HEAD:src/WtCore/CtaStrategyMgr.cpp', 'git show %s:src/WtCore/CtaStrategyMgr.cpp' % ctx.R.head, 0)])
+    ctx.note('HEAD 红控固定为冻结 HEAD %s，经 GIT_DIR 只读取对象库' % ctx.R.head)
+    fx = ctx.fxdir()
+    out = ctx.short_dir('short-directory 控制用例要求插件目录 <=128 字符，--out 路径过长')
+
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/sh', str(fx / 'run.sh'), str(out)], cwd=ctx.dir, timeout=1100,
+                          env={'GIT_DIR': str(ctx.R.repo_git)})
+        lines = re.findall(r'^((?:current|head|previous|path)-\S+) exit=(\d+)', text, re.M)
+        cur = [x for x in lines if x[0].startswith('current-')]
+        red = [x for x in lines if x[0].startswith('head-red')]
+        s = 'run.sh exit %s；current %d 例；HEAD 红控 %d 例（非零 %d）' % (
+            rc, len(cur), len(red), sum(1 for x in red if x[1] != '0'))
+        if 'unexpected historical control result' in text:
+            s += '；脚本报告 unexpected historical control result（HEAD 基线红控未失败）'
+        return ('pass' if rc == 0 else 'fail'), s
+    ctx.variant('green+head-red', green)
+    ctx.note('run_path_asan.sh 需要改前 CtaStrategyMgr.cpp（套件未自带），未运行')
+    return combine(ctx)
+
+
+# ---------------------------------------------------------------------- module-path fixtures (ninja -t commands of --build)
+@suite('ctpm_empty_module_path', 'src/TestUnits/fixtures/ctpm_empty_module_path/run.py')
+def s_ctpm_empty(ctx):
+    def green():
+        rc, text = ctx.sh('run.py', [SYS_PY, '-I', str(ctx.fxdir() / 'run.py'), str(ctx.build), str(ctx.dir / 'run')],
+                          cwd=ctx.dir)
+        return rc_verdict(rc, 'run.py（ParserCTPMini/TraderCTPMini empty/valid/absolute + 控制用例）')
+    ctx.variant('green', green)
+    ctx.note('可选基线源码目录未提供（套件未自带），基线 42 退出码对照未运行')
+    return combine(ctx)
+
+
+@suite('ctpopt_empty_module_path', 'src/TestUnits/fixtures/ctpopt_empty_module_path/run.py')
+def s_ctpopt_empty(ctx):
+    def green():
+        rc, _ = ctx.sh('run.py', [SYS_PY, '-I', str(ctx.fxdir() / 'run.py'), str(ctx.build), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.py（ParserCTPOpt/TraderCTPOpt empty/absolute/valid）')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('ctpmini_api_init', 'src/TestUnits/fixtures/ctpmini_api_init/run.py')
+def s_ctpmini_init(ctx):
+    src = ctx.tree / 'src/ParserCTPMini/ParserCTPMini.cpp'
+
+    def init():
+        rc, _ = ctx.sh('run.py', [SYS_PY, '-I', str(ctx.fxdir() / 'run.py'), str(ctx.build), str(src), str(ctx.dir / 'init')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.py 6 模式')
+
+    def unload():
+        rc, _ = ctx.sh('run_unload.py', [SYS_PY, '-I', str(ctx.fxdir() / 'run_unload.py'), str(ctx.build), str(src), str(ctx.dir / 'unload')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run_unload.py 2 模式')
+    ctx.variant('init', init)
+    ctx.variant('unload', unload)
+    return combine(ctx)
+
+
+@suite('parser_module_dir', 'src/TestUnits/fixtures/parser_module_dir/build.py')
+def s_parser_module_dir(ctx):
+    def green():
+        rc, _ = ctx.sh('build.py', [SYS_PY, '-I', str(ctx.fxdir() / 'build.py'), str(ctx.dir / 'run')], cwd=ctx.dir,
+                       env={'WT_PARSER_V8_BUILD': str(ctx.build), 'WT_PARSER_BASELINE': str(ctx.dir / 'no-baseline')})
+        return rc_verdict(rc, 'build.py（ParserXTP/ParserFemas after empty/valid/absolute）')
+    ctx.variant('green', green)
+    ctx.note('WT_PARSER_BASELINE 指向不存在目录：套件未自带改前源码，before 变体不运行')
+    return combine(ctx)
+
+
+@suite('trader_module_path', 'src/TestUnits/fixtures/trader_module_path/build_and_run.py')
+def s_trader_module_path(ctx):
+    rel = 'src/TestUnits/fixtures/trader_module_path/build_and_run.py'
+    ctx.mirror([(rel, "ninja = '/Users/yunjinqi/opt/anaconda3/bin/ninja'", "ninja = '%s'" % NINJA)])
+
+    def green():
+        rc, _ = ctx.sh('build_and_run.py', [SYS_PY, '-I', str(ctx.fxdir() / 'build_and_run.py'), str(ctx.build), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return rc_verdict(rc, 'build_and_run.py')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('huax_module_path', 'src/TestUnits/fixtures/huax_module_path/build_and_run.py')
+def s_huax(ctx):
+    def green():
+        rc, _ = ctx.sh('build_and_run.py', [SYS_PY, '-I', str(ctx.fxdir() / 'build_and_run.py'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return rc_verdict(rc, 'build_and_run.py（ParserHuaX/TraderHuaX 当前 + 去掉路径守卫的对照）')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('module_helper_posix', 'src/TestUnits/fixtures/module_helper_posix/run.sh')
+def s_module_helper_posix(ctx):
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/sh', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'build')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.sh（fake dladdr 6 模式 + real dladdr）')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('ctpopt_time_snapshot', 'src/TestUnits/fixtures/ctpopt_time_snapshot/build.py + run.py')
+def s_ctpopt_time(ctx):
+    rel = 'src/TestUnits/fixtures/ctpopt_time_snapshot/run.py'
+    ctx.mirror([(rel, "for variant in ('red', 'green'):", "for variant in ('green',):"),
+                (rel, "'/tmp/wt-i03-ctpopt-time-' + variant + '/confirm-probe'",
+                 "os.environ['WT_FX_OUT'] + '/' + variant + '/confirm-probe'")])
+    ctx.note('red 变体需要 docs/…/I03-NEW-006-* 基线（不在套件内），仅运行 green；run.py 的探针路径改为 --out')
+
+    def green():
+        rc, _ = ctx.sh('build.py', [SYS_PY, '-I', str(ctx.fxdir() / 'build.py'), str(ctx.dir / 'green')], cwd=ctx.dir)
+        if rc != 0:
+            return 'fail', 'build.py exit %s' % rc
+        rc, text = ctx.sh('run.py', [SYS_PY, '-I', str(ctx.fxdir() / 'run.py'), str(ctx.dir / 'evidence')], cwd=ctx.dir,
+                          env={'WT_FX_OUT': str(ctx.dir)})
+        if rc != 0:
+            return 'fail', 'run.py exit %s' % rc
+        res = json.loads(read(ctx.dir / 'evidence/results.json') or '[]')
+        bad = ['%s=%s' % (r['mode'], r['exit']) for r in res if r['exit'] != 0]
+        return ('pass' if res and not bad else 'fail'), 'green %d 模式，非零 %d %s' % (len(res), len(bad), ' '.join(bad[:8]))
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+# ---------------------------------------------------------------------- CMake fixtures linking --build libs
+def _old_build_cmake_suite(ctx, binary, args=(), env=None, label=None):
+    """CMake fixtures whose CMakeLists hard-code set(OLD_BUILD /tmp/ctpm-i03-build/...)."""
+    rel = 'src/TestUnits/fixtures/%s/CMakeLists.txt' % ctx.name
+    ctx.mirror([(rel, 'set(OLD_BUILD /tmp/ctpm-i03-build/build_x64/Debug/libs)', 'set(OLD_BUILD %s)' % ctx.libs)])
+    b = ctx.dir / 'build'
+
+    def green():
+        rc = cmake_fixture(ctx, 'fixture', ctx.fxdir(), b, llvm=True)
+        if rc != 0:
+            return 'fail', 'CMake 配置/构建 exit %s' % rc
+        e = dict(ASAN_ENV)
+        e['LLVM_PROFILE_FILE'] = str(ctx.dir / 'run' / '%p.profraw')
+        if env:
+            e.update(env)
+        v, r, _ = gtest_run(ctx, label or binary, b / binary, ['--gtest_color=no'] + list(args), cwd=ctx.dir / 'run', env=e)
+        return v, r
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('i03_bar_fee_provenance_20261103', 'src/TestUnits/fixtures/i03_bar_fee_provenance_20261103/CMakeLists.txt')
+def s_bar_fee(ctx):
+    return _old_build_cmake_suite(ctx, 'i03_bar_fee_provenance')
+
+
+@suite('i03_replay_status_20261103', 'src/TestUnits/fixtures/i03_replay_status_20261103/CMakeLists.txt')
+def s_replay_status(ctx):
+    return _old_build_cmake_suite(ctx, 'i03_replay_status')
+
+
+@suite('i03_replay_fee_identity_20261103', 'src/TestUnits/fixtures/i03_replay_fee_identity_20261103/CMakeLists.txt')
+def s_replay_fee_identity(ctx):
+    readme = read(ctx.fx / 'README.md')
+    m = re.search(r"i03_replay_fee_identity --gtest_color=no \\\s*\n\s*--gtest_filter='([^']+)'", readme)
+    if not m:
+        m = re.search(r"--gtest_filter='(FeeIdentityTest[^']+)'", read(ctx.R.fixtures / 'i03_bar_fee_provenance_20261103/README.md'))
+    filt = m.group(1) if m else 'FeeIdentityTest.*'
+    return _old_build_cmake_suite(ctx, 'i03_replay_fee_identity', ['--gtest_filter=' + filt])
+
+
+@suite('i03_replayer_date_range_20261103', 'src/TestUnits/fixtures/i03_replayer_date_range_20261103/CMakeLists.txt')
+def s_replayer_date_range(ctx):
+    return _old_build_cmake_suite(ctx, 'i03_replayer_date_range')
+
+
+@suite('i03_resampled_fee_provenance_20261103', 'src/TestUnits/fixtures/i03_resampled_fee_provenance_20261103/CMakeLists.txt')
+def s_resampled_fee(ctx):
+    return _old_build_cmake_suite(ctx, 'i03_resampled_fee_provenance')
+
+
+@suite('i03_hft_uft_fee_commit_20261103', 'src/TestUnits/fixtures/i03_hft_uft_fee_commit_20261103/CMakeLists.txt')
+def s_hft_uft_fee(ctx):
+    return _old_build_cmake_suite(ctx, 'check', label='check')
+
+
+def _wt_build_cmake(ctx, binary, args=(), extra_runs=(), llvm=False, wt_build=None, defs=(), red_runs=()):
+    """CMake fixtures that take -DWT_BUILD=<coverage build> (libs under build_x64/Debug/libs)."""
+    b = ctx.dir / 'build'
+
+    def green():
+        rc = cmake_fixture(ctx, 'fixture', ctx.fx, b, ['-DWT_BUILD=' + str(wt_build or ctx.build)] + list(defs), llvm=llvm)
+        if rc != 0:
+            return 'fail', 'CMake 配置/构建 exit %s' % rc
+        res = []
+        for bin_, a, env in [(binary, args, None)] + list(extra_runs):
+            e = {'LLVM_PROFILE_FILE': str(b / (bin_ + '-%p.profraw'))}
+            if env:
+                e.update(env)
+            v, r, _ = gtest_run(ctx, bin_, b / bin_, list(a), cwd=b, env=e, timeout=300)
+            res.append((v, r))
+        bad = [r for v, r in res if v != 'pass']
+        return ('pass' if not bad else ('timeout' if any(v == 'timeout' for v, _ in res) else 'fail')), '；'.join(r for _, r in res)
+    ctx.variant('green', green)
+    for name, bin_, a, timeout in red_runs:
+        def red(bin_=bin_, a=a, timeout=timeout, name=name):
+            if not (b / bin_).exists():
+                return 'red-unbuildable', '%s 未构建' % bin_
+            v, r, rc = gtest_run(ctx, name, b / bin_, list(a), cwd=b, env={'LLVM_PROFILE_FILE': '/dev/null'}, timeout=timeout)
+            return ('expected-red' if rc not in (0,) else 'fail'), r + ('' if rc != 0 else '（红控未失败）')
+        ctx.variant(name, red, role='red')
+    return combine(ctx)
+
+
+@suite('i03_config_embedded_nul_20261103', 'src/TestUnits/fixtures/i03_config_embedded_nul_20261103/CMakeLists.txt')
+def s_config_nul(ctx):
+    return _wt_build_cmake(ctx, 'i03_config_nul', ["--gtest_filter=I03ConfigNul.*:ws05_cfgloader.Parse*:ws05_cfgloader.YamlSyntaxErrorThrows:ws05_cfgloader.ContentUtf8Chinese:ws05_cfgloader.ContentGbkChineseConverted:ws05_cfgloader.RejectJson*:ws05_cfgloader.RejectYaml*"])
+
+
+@suite('i03_date_mapping_20261103', 'src/TestUnits/fixtures/i03_date_mapping_20261103/CMakeLists.txt')
+def s_date_mapping(ctx):
+    return _wt_build_cmake(ctx, 'i03_date_mapping')
+
+
+@suite('i03_session_contract_20261103', 'src/TestUnits/fixtures/i03_session_contract_20261103/CMakeLists.txt')
+def s_session_contract(ctx):
+    return _wt_build_cmake(ctx, 'i03_session_contract', ["--gtest_filter=I03SessionContract.*:l03_session.*:L03DaySessionTest.*:r12_session.*"])
+
+
+@suite('i03_parser_lifecycle_v2', 'src/TestUnits/fixtures/i03_parser_lifecycle_v2/CMakeLists.txt')
+def s_parser_v2(ctx):
+    return _wt_build_cmake(ctx, 'i03_parser_v2')
+
+
+def _parser_san_variant(ctx, name, args_list, targets, runs, san):
+    """Sanitizer rebuild of a WT_BUILD parser fixture with Homebrew LLVM 22 (README flags)."""
+    def fn():
+        b = ctx.dir / ('build-' + name)
+        rc = cmake_fixture(ctx, name, ctx.fx, b, ['-DWT_BUILD=' + str(ctx.build)] + args_list, llvm=True,
+                           build_targets=targets)
+        if rc != 0:
+            return 'fail', '%s 配置/构建 exit %s' % (name, rc)
+        out = []
+        for bin_, a in runs:
+            env = dict(ASAN_ENV if san == 'asan' else TSAN_ENV)
+            env['LLVM_PROFILE_FILE'] = '/dev/null'
+            v, r, _ = gtest_run(ctx, name + '-' + bin_, b / bin_, list(a), cwd=b, env=env, timeout=600)
+            out.append((v, r))
+        bad = [x for x in out if x[0] != 'pass']
+        return ('pass' if not bad else bad[0][0]), '；'.join(r for _, r in out)
+    ctx.variant(name, fn)
+
+
+@suite('i03_parser_shm_lifecycle_v2', 'src/TestUnits/fixtures/i03_parser_shm_lifecycle_v2/CMakeLists.txt')
+def s_parser_shm(ctx):
+    legacy = "--gtest_filter=R76ParserShmTest.*:ParserShmTest.*:shm_queue_layout.*:ParserShmZeroGlobalSize.*:shm_plugin_factory.*-R76ParserShmTest.InitIsRepeatableAndNeverConnects:ParserShmTest.init_accepts_full_and_partial_config"
+    r = _wt_build_cmake(ctx, 'i03_parser_shm_v2', extra_runs=[('i03_parser_shm_legacy', [legacy], None)])
+    _parser_san_variant(ctx, 'asan', SAN_ASAN_ARGS, None, [('i03_parser_shm_v2', []), ('i03_parser_shm_legacy', [legacy])], 'asan')
+    _parser_san_variant(ctx, 'tsan', SAN_TSAN_ARGS, None, [('i03_parser_shm_v2', []), ('i03_parser_shm_legacy', [legacy])], 'tsan')
+    ctx.note('baseline_reproduce.sh 硬编码 /tmp/wt-i03-r58-20261102-build 旧库且未在 README 列为验收命令，未运行')
+    return combine(ctx)
+
+
+@suite('i03_parser_udp_lifecycle_v2', 'src/TestUnits/fixtures/i03_parser_udp_lifecycle_v2/CMakeLists.txt')
+def s_parser_udp(ctx):
+    m = re.search(r"i03_parser_udp_legacy \\\s*\n\s*--gtest_filter='([^']+)'", read(ctx.fx / 'README.md'))
+    legacy = '--gtest_filter=' + (m.group(1) if m else 'R76ParserUDPTest.*')
+    _wt_build_cmake(ctx, 'i03_parser_udp_v2', extra_runs=[('i03_parser_udp_legacy', [legacy], None)])
+    _parser_san_variant(ctx, 'asan', SAN_ASAN_ARGS, None, [('i03_parser_udp_v2', []), ('i03_parser_udp_legacy', [legacy])], 'asan')
+    _parser_san_variant(ctx, 'tsan', SAN_TSAN_ARGS, None, [('i03_parser_udp_v2', []), ('i03_parser_udp_legacy', [legacy])], 'tsan')
+    return combine(ctx)
+
+
+@suite('i03_parser_xele_lifecycle_v2', 'src/TestUnits/fixtures/i03_parser_xele_lifecycle_v2/CMakeLists.txt')
+def s_parser_xele(ctx):
+    leg = "--gtest_filter=-R76ParserXeleSktLoopbackTest.PrepareCommitsOnlyCompleteTcpSnapshotBatches:R76ParserXeleSktLoopbackTest.FirstReconnectFailureLeavesRetryUnseeded:R76ParserXeleSktTest.InitIsRepeatableAndReleaseIsIdempotent"
+    _wt_build_cmake(ctx, 'i03_parser_xele_v2', extra_runs=[
+        ('i03_parser_xele_scenarios', [], None), ('i03_parser_xele_prepare', [], None),
+        ('i03_parser_xele_legacy', [leg], None)])
+    b = ctx.dir / 'build'
+
+    def legacy_all():
+        v, r, rc = gtest_run(ctx, 'legacy-all', b / 'i03_parser_xele_legacy', [], cwd=b, timeout=120)
+        return ('pass' if rc == 0 else 'fail'), r + '（README 另行运行的全量 legacy，含 3 条已排除的旧 oracle）'
+    ctx.variant('legacy-all(info)', legacy_all, role='info')
+
+    def red():
+        out = []
+        for t in ['ConnectDisconnectConnectResumesData', 'ReleaseThenConnectIsRejected',
+                  'ReleaseAndRemoverInsideWorkerCallbackDoNotSelfJoin', 'RepeatedReleaseAndDestructorJoinWorker',
+                  'DisconnectInsideCallbackIsQueuedAndConnectIsBusy']:
+            rc, _ = ctx.sh('red-' + t, ['/usr/bin/perl', '-e', 'alarm 20; exec @ARGV', '--', str(b / 'i03_parser_xele_scenarios_baseline'),
+                                        '--gtest_filter=XeleLifecycleScenario.' + t], cwd=b, env={'LLVM_PROFILE_FILE': '/dev/null'})
+            out.append(('%s exit=%s' % (t, rc), str(rc)))
+        return red_expect_nonzero(out, '基线场景红控（baseline/ 自带）')
+    ctx.variant('red-baseline', red, role='red')
+    _parser_san_variant(ctx, 'asan', SAN_ASAN_ARGS, None, [('i03_parser_xele_v2', []), ('i03_parser_xele_scenarios', []), ('i03_parser_xele_prepare', [])], 'asan')
+    _parser_san_variant(ctx, 'tsan', SAN_TSAN_ARGS, None, [('i03_parser_xele_v2', []), ('i03_parser_xele_scenarios', []), ('i03_parser_xele_prepare', [])], 'tsan')
+    return combine(ctx)
+
+
+@suite('i03_parser_event_contract_20261103', 'src/TestUnits/fixtures/i03_parser_event_contract_20261103/CMakeLists.txt')
+def s_parser_events(ctx):
+    _wt_build_cmake(ctx, 'i03_parser_events', red_runs=[
+        ('red-events-before', 'i03_parser_events_before', [], 120),
+        ('red-xele-oracle-head', 'i03_xele_oracle_head', [], 120)])
+    _parser_san_variant(ctx, 'asan', SAN_ASAN_ARGS, ['XeleCurrent', 'UdpCurrent', 'UdpCurrentFault', 'i03_parser_events'],
+                        [('i03_parser_events', [])], 'asan')
+    _parser_san_variant(ctx, 'tsan', SAN_TSAN_ARGS, ['XeleCurrent', 'UdpCurrent', 'UdpCurrentFault', 'i03_parser_events'],
+                        [('i03_parser_events', [])], 'tsan')
+    return combine(ctx)
+
+
+@suite('i03_parser_vendor_v2_20261104', 'src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/run.sh')
+def s_parser_vendor(ctx):
+    b = ctx.dir / 'build'
+    state = {}
+
+    def green():
+        rc = cmake_fixture(ctx, 'fixture', ctx.fx, b, ['-DWT_BUILD=' + str(ctx.build)])
+        if rc != 0:
+            return 'fail', 'CMake 配置/构建 exit %s' % rc
+        rc, text = ctx.sh('run.sh-all', ['/bin/sh', str(ctx.fx / 'run.sh'), str(b), str(ctx.dir / 'out'), 'all'], cwd=ctx.dir)
+        summ = read(ctx.dir / 'out/summary.txt')
+        pairs = exit_lines(summ)
+        state['pairs'] = pairs
+        g = [p for p in pairs if not p[0].startswith('red-')]
+        v = 'pass' if all_zero(g) else 'fail'
+        return v, 'green：%s' % summarize_pairs(g)
+
+    def red():
+        r = [p for p in state.get('pairs', []) if p[0].startswith('red-')]
+        return red_expect_nonzero(r, '基线（baseline/ 自带）v2 与场景红控')
+    ctx.variant('green', green)
+    ctx.variant('red-baseline', red, role='red')
+    return combine(ctx)
+
+
+@suite('i03_dualthrust_config_20261103', 'src/TestUnits/fixtures/i03_dualthrust_config_20261103/CMakeLists.txt')
+def s_dualthrust(ctx):
+    b = ctx.dir / 'build'
+    readme = read(ctx.fx / 'README.md')
+    filters = re.findall(r"i03_dualthrust_existing --gtest_filter='([^']+)'", readme)
+
+    def green():
+        rc = cmake_fixture(ctx, 'fixture', ctx.fx, b)
+        if rc != 0:
+            return 'fail', 'CMake 配置/构建 exit %s' % rc
+        rc, _ = ctx.sh('ctest', ['/opt/homebrew/bin/ctest', '--test-dir', str(b), '--output-on-failure'], cwd=b)
+        out = [('ctest', rc)]
+        for i, f in enumerate(filters):
+            v, r, rc2 = gtest_run(ctx, 'existing-%d' % i, b / 'i03_dualthrust_existing', ['--gtest_filter=' + f], cwd=b)
+            out.append(('existing-%d' % i, rc2))
+        bad = [x for x in out if x[1] != 0]
+        return ('pass' if not bad else 'fail'), 'ctest + %d 组既有用例过滤：%s' % (len(filters), ', '.join('%s=%s' % x for x in out))
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+# ---------------------------------------------------------------------- plain shell/python entries on the frozen tree
+@suite('i03_ctp_order_identity_20261103', 'src/TestUnits/fixtures/i03_ctp_order_identity_20261103/run.sh')
+def s_ctp_identity(ctx):
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.sh（TraderCTP/WtCore 生产构建 + i03_ctp_identity + P11 host tag）')
+    ctx.variant('green', green)
+    ctx.note('baseline/ 只作对照存档，run.sh 无红控模式')
+    return combine(ctx)
+
+
+@suite('i03_backtest_fee_consumer_20261103', 'src/TestUnits/fixtures/i03_backtest_fee_consumer_20261103/run.sh')
+def s_bt_fee_consumer(ctx):
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.dir / 'build')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.sh（WtBtCore 构建 + fee_consumer_test + p03 选定用例）')
+    ctx.variant('green', green)
+    ctx.note('baseline/ 只作对照存档，run.sh 无红控模式')
+    return combine(ctx)
+
+
+@suite('i03_fee_context_20261103', 'src/TestUnits/fixtures/i03_fee_context_20261103/run.sh')
+def s_fee_context(ctx):
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir,
+                       env={'GTEST_FILTER': 'FeeContext.*:FeeScheduleCandidate.*'})
+        return rc_verdict(rc, 'run.sh normal+ubsan（FeeContext.* + FeeScheduleCandidate.*）')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+derived('i03_fee_schedule_candidate', 'i03_fee_context_20261103',
+        'src/TestUnits/fixtures/i03_fee_context_20261103/run.sh（编入 i03_fee_schedule_candidate/fee_schedule_test.cpp）',
+        lambda R, src: (src['verdict'], '本目录 fee_schedule_test.cpp 无独立入口，由 i03_fee_context_20261103/run.sh 与 FeeContext 一起编译运行（FeeScheduleCandidate.*）：' + src['reason'], {}))
+
+
+@suite('i03_fee_engine_gate', 'src/TestUnits/fixtures/i03_fee_engine_gate/run.sh')
+def s_fee_engine_gate(ctx):
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.build), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.sh（I03FeeEngineGate.* + R130EngineFee.*）')
+    ctx.variant('green', green)
+    ctx.note('README 的旧 WtEngine 红控来自 git show ccaad010（不在套件内），未运行')
+    return combine(ctx)
+
+
+@suite('i03_hft_fee_pipeline', 'src/TestUnits/fixtures/i03_hft_fee_pipeline/run.sh')
+def s_hft_fee_pipeline(ctx):
+    st = {}
+
+    def run():
+        rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.build), str(ctx.dir / 'run')], cwd=ctx.dir)
+        st['rc'], st['text'] = rc, text
+        ok = re.findall(r'^\[       OK \] (\S+)', text, re.M)
+        bad = sorted(set(re.findall(r'^\[  FAILED  \] (R71HftTest\.\S+)', text, re.M)))
+        st['ok'], st['bad'] = ok, bad
+        ctrl = 'R71HftTest.TradeAccountingAndDynProfitExtremes'
+        if ctrl not in ok:
+            return 'fail', 'run.sh exit %s：控制用例 %s 未通过（OK %s，FAILED %s）' % (rc, ctrl, ok, bad)
+        return 'pass', '控制用例 %s 通过' % ctrl
+
+    def probes():
+        bad = st.get('bad', [])
+        others = [b for b in bad if not b.startswith('R71HftTest.FeeProbe')]
+        probes_ok = [o for o in st.get('ok', []) if o.startswith('R71HftTest.FeeProbe')]
+        if others:
+            return 'fail', '非 FeeProbe 用例失败：%s' % others
+        if bad and not probes_ok:
+            return 'expected-red', 'README：四项按目标行为编写的红控当前应失败（现存缺陷）；FAILED %d：%s' % (len(bad), ','.join(bad))
+        return 'fail', 'FeeProbe 红控未全部失败（通过 %s），与 README 当前观测不符' % probes_ok
+    ctx.variant('control', run)
+    ctx.variant('fee-probes(known-red)', probes, role='demo')
+    return combine(ctx)
+
+
+@suite('i03_frequency_20261103', 'src/TestUnits/fixtures/i03_frequency_20261103/run.py')
+def s_frequency(ctx):
+    def green():
+        rc, _ = ctx.sh('run.py', [SYS_PY, '-I', str(ctx.fx / 'run.py'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.py（抽取的生产请求方法 + 本地 fake）')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('i03_strategy_id_20261103', 'src/TestUnits/fixtures/i03_strategy_id_20261103/run.sh')
+def s_strategy_id(ctx):
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/sh', str(ctx.fx / 'run.sh'), str(ctx.dir / 'build')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.sh（Hft/Sel 策略 ID 检查）')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('i03_uft_strategy_mgr_v2_20261104s5', 'src/TestUnits/fixtures/i03_uft_strategy_mgr_v2_20261104s5/run.sh')
+def s_uft_mgr(ctx):
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.dir / 'work')], cwd=ctx.dir)
+        pairs = [p for p in exit_lines(text) if p[0].startswith('green ')]
+        return ('pass' if rc == 0 and all_zero(pairs) else 'fail'), 'run.sh exit %s；%s' % (rc, summarize_pairs(pairs))
+    ctx.variant('green', green)
+    ctx.note('红控需改前 UftStrategyMgr 源码目录（套件未自带），未运行')
+    return combine(ctx)
+
+
+@suite('i03_strategy_plugin_abi_20261104s5', 'src/TestUnits/fixtures/i03_strategy_plugin_abi_20261104s5/run.sh')
+def s_plugin_abi(ctx):
+    w = ctx.dir / 'work'
+
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(w)], cwd=ctx.dir, env={'WT_ABI_LIBDIR': str(ctx.libs)})
+        if rc != 0:
+            return 'fail', 'run.sh exit %s' % rc
+        res = []
+        for f in ('live-green-results.txt', 'mocker-green-results.txt'):
+            pairs = exit_lines(read(w / f))
+            res.append('%s %s' % (f, summarize_pairs(pairs)))
+            if not all_zero(pairs):
+                return 'fail', '；'.join(res)
+        return 'pass', '；'.join(res)
+    ctx.variant('green', green)
+    ctx.note('红控需改前管理器源码与静态库（套件未自带），未运行')
+    return combine(ctx)
+
+
+@suite('i03_runner_quarantine_exit_20261104s5', 'src/TestUnits/fixtures/i03_runner_quarantine_exit_20261104s5/run.sh')
+def s_runner_quarantine(ctx):
+    storage = ctx.R.bin / 'WtRunner/libWtDataStorage.dylib'
+
+    def one(mode, exe):
+        def fn():
+            rc, text = ctx.sh('run.sh-' + mode, ['/bin/bash', str(ctx.fx / 'run.sh'), str(exe), str(storage),
+                                                 str(ctx.dir / 'out'), mode, mode], cwd=ctx.dir)
+            m = re.search(r'^%s exit=(\S+) retained_log_lines=(\d+)(.*)$' % mode, text, re.M)
+            if not m:
+                return 'fail', 'run.sh exit %s，未输出结果行' % rc
+            status, retained, tail = m.group(1), int(m.group(2)), m.group(3)
+            ok = status not in ('134', '137') and 'TIMEOUT' not in tail and retained > 0
+            return ('pass' if ok else 'fail'), '%s：进程退出码 %s，retained 诊断 %d 行%s（期望非 134/SIGABRT、未超时、诊断≥1）' % (
+                mode, status, retained, tail)
+        return fn
+    ctx.variant('cta', one('cta', ctx.R.bin / 'WtRunner/WtRunner'))
+    ctx.variant('uft', one('uft', ctx.R.bin / 'WtUftRunner/WtUftRunner'))
+    return combine(ctx)
+
+
+@suite('i03_riskmon_quiesce_20261104s5', 'src/TestUnits/fixtures/i03_riskmon_quiesce_20261104s5/run.sh')
+def s_riskmon(ctx):
+    rel = 'src/TestUnits/fixtures/i03_riskmon_quiesce_20261104s5/run.sh'
+    ctx.mirror([(rel, '--target WtCore WTSTools WTSUtils -j3', '--target WtCore WTSTools WTSUtils -j%d' % ctx.R.jobs)])
+
+    def green():
+        rc, _ = ctx.sh('run.sh-green', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'work'), 'green'], cwd=ctx.dir)
+        if rc != 0:
+            return 'fail', 'run.sh exit %s' % rc
+        return results_file_verdict(ctx.dir / 'work/green-results.txt', 'green 3 用例')
+    ctx.variant('green', green)
+    ctx.note('红控需改前 WtEngine 目录（套件未自带），未运行')
+    return combine(ctx)
+
+
+@suite('i03_r42_fundinfo_leak_20261103', 'src/TestUnits/fixtures/i03_r42_fundinfo_leak_20261103/run.sh')
+def s_r42(ctx):
+    w = ctx.dir / 'work'
+
+    def red():
+        rc, _ = ctx.sh('run.sh-red', ['/bin/bash', str(ctx.fx / 'run.sh'), str(w), 'red'], cwd=ctx.dir)
+        if rc != 0:
+            return 'red-unbuildable', 'red run.sh exit %s（基线与当前树组合构建/链接失败，红控未运行）' % rc
+        return red_expect_nonzero(exit_lines(read(w / 'red-results.txt')), 'red（baseline/WtEngine.*）5 用例')
+
+    def green():
+        rc, _ = ctx.sh('run.sh-green', ['/bin/bash', str(ctx.fx / 'run.sh'), str(w), 'green'], cwd=ctx.dir)
+        if rc != 0:
+            return 'fail', 'green run.sh exit %s' % rc
+        return results_file_verdict(w / 'green-results.txt', 'green 5 用例（ASan/UBSan/LSan）')
+    ctx.variant('red', red, role='red')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('i03_commodity_ready_20261103', 'src/TestUnits/fixtures/i03_commodity_ready_20261103/run.sh')
+def s_commodity_ready(ctx):
+    w = ctx.dir / 'work'
+
+    def red():
+        rc, _ = ctx.sh('run.sh-red', ['/bin/bash', str(ctx.fx / 'run.sh'), str(w), 'red'], cwd=ctx.dir)
+        if rc != 0:
+            return 'red-unbuildable', 'red run.sh exit %s（基线构建失败，红控未运行）' % rc
+        return red_expect_nonzero(exit_lines(read(w / 'red-results.txt').replace(';', '\n')), 'red（baseline/ 四文件）ready/mocker', need='all')
+
+    def green():
+        rc, _ = ctx.sh('run.sh-green', ['/bin/bash', str(ctx.fx / 'run.sh'), str(w), 'green'], cwd=ctx.dir)
+        if rc != 0:
+            return 'fail', 'green run.sh exit %s' % rc
+        pairs = exit_lines(read(w / 'green-results.txt').replace(';', '\n'))
+        return ('pass' if all_zero(pairs) else 'fail'), 'green ready/mocker：' + summarize_pairs(pairs)
+
+    def regression():
+        rc, _ = ctx.sh('run-regression.sh', ['/bin/bash', str(ctx.fx / 'run-regression.sh'), str(w)], cwd=ctx.dir)
+        pairs = exit_lines(read(w / 'regression/results.txt'))
+        fails = xml_failed_cases(w / 'regression/l03.xml') or []
+        return ('pass' if all_zero(pairs) else 'fail'), '相关回归（README 记 l03 26/27 既有失败）：%s%s' % (
+            summarize_pairs(pairs), ('；l03 失败：' + ','.join(fails)) if fails else '')
+
+    def asan():
+        wa = ctx.dir / 'work-asan'
+        rc, _ = ctx.sh('run.sh-green-asan', ['/bin/bash', str(ctx.fx / 'run.sh'), str(wa), 'green', 'asan'], cwd=ctx.dir)
+        if rc != 0:
+            return 'fail', 'asan run.sh exit %s' % rc
+        pairs = exit_lines(read(wa / 'green-results.txt').replace(';', '\n'))
+        return ('pass' if all_zero(pairs) else 'fail'), 'green ASan/UBSan/LSan：' + summarize_pairs(pairs)
+    ctx.variant('red', red, role='red')
+    ctx.variant('green', green)
+    ctx.variant('regression(info)', regression, role='info')
+    ctx.variant('green-asan', asan)
+    return combine(ctx)
+
+
+@suite('i03_container_ownership_20261103', 'src/TestUnits/fixtures/i03_container_ownership_20261103/run.sh')
+def s_container(ctx):
+    out = ctx.dir / 'run'
+    st = {}
+
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/sh', str(ctx.fx / 'run.sh'), str(out)], cwd=ctx.dir)
+        summ = read(out / 'summary.txt')
+        pairs = exit_lines(summ)
+        st['pairs'] = pairs
+        g = [p for p in pairs if ('green' in p[0])]
+        return ('pass' if all_zero(g) else 'fail'), 'green 构建/运行：' + summarize_pairs(g)
+
+    def red():
+        pairs = st.get('pairs', [])
+        builds = [p for p in pairs if p[0].startswith('build ') and ('red' in p[0] or 'oldoracle' in p[0])]
+        runs = [p for p in pairs if p[0].startswith('run ') and ('red' in p[0] or 'oldoracle' in p[0])]
+        if not all_zero(builds):
+            return 'red-unbuildable', '红控构建失败：' + summarize_pairs(builds)
+        return red_expect_nonzero(runs, 'check-red(baseline/Includes) 与旧 oracle 对新头', need='all')
+    ctx.variant('green', green)
+    ctx.variant('red-baseline', red, role='red')
+    return combine(ctx)
+
+
+@suite('i03_csv_status_20261103', 'src/TestUnits/fixtures/i03_csv_status_20261103/CMakeLists.txt')
+def s_csv_status(ctx):
+    # slice2-result 2026-11-05: the fixture now builds without BASELINE_SOURCE (the pre-change
+    # helper snapshot is not retained); the prior-bytes comparison is then not built.
+    rel = 'src/TestUnits/fixtures/i03_csv_status_20261103/CMakeLists.txt'
+    ctx.mirror([(rel, '/tmp/wt-i03-r41-drain/libs', str(ctx.libs), 2)])
+    b = ctx.dir / 'build'
+
+    def green():
+        rc = cmake_fixture(ctx, 'fixture', ctx.fxdir(), b, llvm=True)
+        if rc != 0:
+            return 'fail', 'CMake 配置/构建 exit %s' % rc
+        v, r, _ = gtest_run(ctx, 'csv_status', b / 'csv_status', [], cwd=b, env=ASAN_ENV)
+        rc2, text = ctx.sh('nm-exports', '/usr/bin/nm -gU %s | /usr/bin/grep -E "dump_(bars|ticks)(_v2)?$"' % shlex.quote(str(b / 'libcsv_status_exports.dylib')), cwd=b)
+        syms = [l.split()[-1] for l in text.splitlines() if 'dump_' in l and not l.startswith('#')]
+        ok = v == 'pass' and rc2 == 0 and syms
+        return ('pass' if ok else 'fail'), '%s；导出符号 %s' % (r, ','.join(syms) or '无')
+    ctx.variant('green', green)
+    ctx.note('BASELINE_SOURCE 未传：改前 WtDtHelper.cpp 快照未保留，NormalMatchesPriorBytes（与改前字节对比）不构建，按 not-applicable')
+    return combine(ctx)
+
+
+# ---------------------------------------------------------------------- snapshot/coverage builds of --tree
+@suite('i03_fractional_targets_20261103', 'src/TestUnits/fixtures/i03_fractional_targets_20261103/run.sh')
+def s_fractional(ctx):
+    rel = 'src/TestUnits/fixtures/i03_fractional_targets_20261103/run.sh'
+    ctx.mirror(conda_edits(rel))
+    out = ctx.dir / 'run'
+
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(out)], cwd=ctx.dir, env=NANOMSG_RPATH_ENV)
+        c = xml_counts(out / 'test.xml')
+        d = ('tests=%(tests)d failures=%(failures)d errors=%(errors)d' % c) if c else 'no XML'
+        bad = xml_failed_cases(out / 'test.xml') or []
+        if 'wtcore test target changed' in text or 'Boost include configuration changed' in text:
+            return 'fail', 'prepare.py 字符串匹配失败（%s）' % ('wtcore test target changed' if 'wtcore' in text else 'Boost')
+        return ('pass' if rc == 0 else ('timeout' if rc == 'timeout' else 'fail')), \
+            'run.sh exit %s（%s，fractional+groups 合并过滤）%s' % (rc, d, ('；失败：' + ','.join(bad[:6])) if bad else '')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+def _from_fractional(own_filter_file):
+    def describe(R, src):
+        xml = R.out / 'i03_fractional_targets_20261103/run/test.xml'
+        names = [x for x in read(R.fixtures / own_filter_file).strip().split(':') if x]
+        try:
+            root = ET.parse(xml).getroot()
+            cases = {tc.get('classname') + '.' + tc.get('name'): tc for tc in root.iter('testcase')}
+        except Exception:
+            return src['verdict'] if src['verdict'] != 'pass' else 'fail', '来源 run 无 XML：' + src['reason'], {}
+        import fnmatch
+        hit = [n for n in cases if any(fnmatch.fnmatch(n, pat) for pat in names)]
+        bad = [n for n in hit if cases[n].find('failure') is not None or cases[n].find('error') is not None]
+        if not hit:
+            return 'fail', '本目录 filter.txt 的 %d 个模式在合并运行 XML 中无匹配用例' % len(names), {}
+        v = 'pass' if not bad else 'fail'
+        return v, ('无独立入口：README 规定经 i03_fractional_targets_20261103/run.sh 合并编译运行；本目录 filter.txt 匹配 %d 例，失败 %d%s；来源套件结论 %s'
+                   % (len(hit), len(bad), (' ' + ','.join(bad[:5])) if bad else '', src['verdict'])), {}
+    return describe
+
+
+derived('i03_diff_batch_atomic_20261103', 'i03_fractional_targets_20261103',
+        'src/TestUnits/fixtures/i03_fractional_targets_20261103/run.sh（编入 atomic.inc）',
+        _from_fractional('i03_diff_batch_atomic_20261103/filter.txt'))
+derived('i03_execution_groups_20261103', 'i03_fractional_targets_20261103',
+        'src/TestUnits/fixtures/i03_fractional_targets_20261103/run.sh（编入 pure/local/arbi.inc）',
+        _from_fractional('i03_execution_groups_20261103/filter.txt'))
+
+
+@suite('i03_runner_parser_drain_20261103', 'src/TestUnits/fixtures/i03_runner_parser_drain_20261103/run.sh')
+def s_runner_drain(ctx):
+    rel = 'src/TestUnits/fixtures/i03_runner_parser_drain_20261103/run.sh'
+    ctx.mirror(conda_edits(rel))
+    out = ctx.dir / 'run'
+
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(out)], cwd=ctx.dir, env=NANOMSG_RPATH_ENV)
+        c = xml_counts(out / 'test.xml')
+        d = ('tests=%(tests)d failures=%(failures)d' % c) if c else 'no XML'
+        for m in ('wtcore target changed', 'runner test selection changed', 'Boost configuration changed'):
+            if m in text:
+                return 'fail', 'prepare.py：' + m
+        return ('pass' if rc == 0 else 'fail'), 'run.sh exit %s（%s）' % (rc, d)
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('i03_exec_eager_validation_20261103', 'src/TestUnits/fixtures/i03_exec_eager_validation_20261103/run.sh')
+def s_exec_eager(ctx):
+    rel = 'src/TestUnits/fixtures/i03_exec_eager_validation_20261103/run.sh'
+    ctx.mirror(conda_edits(rel))
+
+    def one(mode, san=None):
+        def fn():
+            out = ctx.dir / ('run-' + mode + ('-' + san if san else ''))
+            argv = ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(out), mode] + ([san] if san else [])
+            rc, text = ctx.sh('run.sh-' + mode + ('-' + san if san else ''), argv, cwd=ctx.dir, env=dict(NANOMSG_RPATH_ENV, WT_I03_NO_WERROR='1'))
+            prep = read(out / 'prepare.log')
+            if 'target changed' in prep or 'selection changed' in prep:
+                return 'fail', 'prepare.py 字符串匹配失败：' + prep.strip()[-200:]
+            codes = exit_lines(read(out / 'exit_codes.txt'))
+            if not codes:
+                return ('red-unbuildable' if mode == 'red' else 'fail'), 'run.sh exit %s，未生成 exit_codes.txt（构建失败？见 %s）' % (rc, out / 'build.log')
+            if mode == 'red':
+                return red_expect_nonzero(codes, 'red（baseline/ 改前 executer/runner）exec/runner/r104')
+            return ('pass' if all_zero(codes) else 'fail'), '%s：%s' % (mode + ('-' + san if san else ''), summarize_pairs(codes))
+        return fn
+    ctx.variant('green', one('green'))
+    ctx.variant('red', one('red'), role='red')
+    ctx.variant('green-asan', one('green', 'asan'))
+    return combine(ctx)
+
+
+@suite('i03_traders_other_20261104s5', 'src/TestUnits/fixtures/i03_traders_other_20261104s5/run.sh')
+def s_traders_other(ctx):
+    rel = 'src/TestUnits/fixtures/i03_traders_other_20261104s5/run.sh'
+    ctx.mirror([(rel, 'CoverageTests_t_TraderXTP CoverageTests_t_TraderYD -j 3', 'CoverageTests_t_TraderXTP CoverageTests_t_TraderYD -j %d' % ctx.R.jobs),
+                (rel, 'ninja -C "$B" -j 3 $objs', 'ninja -C "$B" -j %d $objs' % ctx.R.jobs)])
+    run = ctx.dir / 'run'
+
+    def green():
+        env = {'LDFLAGS': NANOMSG_RPATH_ENV['LDFLAGS'],
+               'WT_REPO': str(ctx.root()), 'WT_S5_BUILD': str(ctx.dir / 'cov'), 'WT_S5_RUN': str(run),
+               'WT_S5_RED': str(ctx.dir / 'red'), 'WT_S5_BEFORE': str(ctx.dir / 'no-before')}
+        rc, text = ctx.sh('run.sh-fix', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), 'fix'], cwd=ctx.dir, env=env)
+        groups = []
+        bad = []
+        for g in ['t4002', 't6009', 'r60003', 'r60001', 't4003', 'r93006', 'lane']:
+            f = run / ('results-%s-fix.json' % g)
+            if not f.exists():
+                bad.append('%s 无结果' % g)
+                continue
+            recs = json.loads(f.read_text())
+            nz = [r['name'] for r in recs if r['exit'] != 0 or r.get('xml') is None]
+            groups.append('%s %d/%d' % (g, len(recs) - len(nz), len(recs)))
+            bad += ['%s:%s' % (g, n) for n in nz]
+        if rc != 0 and not groups:
+            return 'fail', 'run.sh fix exit %s（构建/链接失败）' % rc
+        return ('pass' if not bad and rc == 0 else 'fail'), 'run.sh fix exit %s；%s%s' % (
+            rc, '，'.join(groups), ('；非零/缺 XML：' + ','.join(bad[:8])) if bad else '')
+    ctx.variant('fix', green)
+    ctx.note('red 组需要 docs/…/20261104-s5-traders-other/before（不在套件内），未运行')
+    return combine(ctx)
+
+
+# ---------------------------------------------------------------------- shared dependency users
+@suite('i03_initext_login_20261104', 'src/TestUnits/fixtures/i03_initext_login_20261104/run.sh')
+def s_initext(ctx):
+    d = ctx.dep('plain', ['WtCore', 'WtDtCore', 'WTSTools', 'WTSUtils'])
+
+    def one(variant, mode, role):
+        def fn():
+            out = ctx.dir / ('run-%s-%s' % (variant, mode))
+            rc, text = ctx.sh('run.sh-%s-%s' % (variant, mode), ['/bin/bash', str(ctx.fx / 'run.sh'), str(d), str(out), variant, mode], cwd=ctx.dir)
+            tests = re.findall(r'^test (\S+) exit (\S+)', read(out / 'manifest.txt'), re.M)
+            pairs = [('%s exit %s' % t, t[1]) for t in tests]
+            if role == 'red':
+                if not pairs:
+                    return 'red-unbuildable', 'base 构建失败（exit %s）' % rc
+                return red_expect_nonzero(pairs, 'base(baseline/)-%s' % mode)
+            return ('pass' if rc == 0 and all_zero(pairs) else 'fail'), 'fix-%s exit %s；%s' % (mode, rc, summarize_pairs(pairs))
+        return fn
+    ctx.variant('fix-plain', one('fix', 'plain', 'primary'))
+    ctx.variant('fix-asan', one('fix', 'asan', 'primary'))
+    ctx.variant('base-plain', one('base', 'plain', 'red'), role='red')
+    ctx.variant('base-asan', one('base', 'asan', 'red'), role='red')
+    return combine(ctx)
+
+
+@suite('i03_trader_ratelimit_20261103', 'src/TestUnits/fixtures/i03_trader_ratelimit_20261103/run.sh')
+def s_ratelimit(ctx):
+    d = ctx.dep('plain', ['WtCore', 'WtDtCore', 'WTSTools', 'WTSUtils'])
+
+    def one(variant, mode, filt=None, role='primary'):
+        def fn():
+            out = ctx.dir / ('run-%s-%s' % (variant, mode))
+            argv = ['/bin/bash', str(ctx.fx / 'run.sh'), str(d), str(out), variant, mode] + ([filt] if filt else [])
+            rc, text = ctx.sh('run.sh-%s-%s' % (variant, mode), argv, cwd=ctx.dir)
+            man = read(out / 'manifest.txt')
+            steps = re.findall(r'^(ta-build|journal-build|test-build|link|test) exit (\S+)', man, re.M)
+            c = xml_counts(out / 'result.xml')
+            det = ('tests=%(tests)d failures=%(failures)d' % c) if c else 'no XML'
+            built = all(code == '0' for name, code in steps if name != 'test') and any(n == 'test' for n, _ in steps)
+            if role == 'red':
+                if not built:
+                    return 'red-unbuildable', 'base-%s 构建/链接失败：%s' % (mode, steps)
+                ok = rc not in (0, 'timeout') and bool(c) and (c['failures'] > 0 or c['errors'] > 0) or (rc not in (0,) and not c)
+                return ('expected-red' if ok else 'fail'), 'base(baseline/)-%s exit %s（%s）%s' % (mode, rc, det, '' if ok else '（红控未失败）')
+            return ('pass' if rc == 0 else 'fail'), '%s-%s exit %s（%s）' % (variant, mode, rc, det)
+        return fn
+    ctx.variant('fix-plain', one('fix', 'plain'))
+    ctx.variant('fix-asan', one('fix', 'asan'))
+    ctx.variant('fix-tsan', one('fix', 'tsan'))
+    ctx.variant('base-plain', one('base', 'plain', 'I03RateLimit.*-I03RateLimit.batch_cancel_survives_sync_cancel_reports', 'red'), role='red')
+    ctx.variant('base-asan-batch', one('base', 'asan', 'I03RateLimit.batch_cancel_survives_sync_cancel_reports', 'red'), role='red')
+    ctx.note('head 变体以 git show HEAD 为基线（不在套件内），未运行')
+    return combine(ctx)
+
+
+@suite('i03_report_quarantine_20261103', 'src/TestUnits/fixtures/i03_report_quarantine_20261103/run.sh')
+def s_report_quarantine(ctx):
+    d = ctx.dep('plain', ['WtCore', 'WtDtCore', 'WTSTools', 'WTSUtils'])
+    rel = 'src/TestUnits/fixtures/i03_report_quarantine_20261103/run.sh'
+    ctx.mirror([(rel, '/Users/yunjinqi/opt/anaconda3/bin/conda run -n base python -c', SYS_PY + ' -I -c')])
+
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(d), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.sh（I03Quarantine.*，UBSan）')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('i03_monitor_date_20261103', 'src/TestUnits/fixtures/i03_monitor_date_20261103/CMakeLists.txt')
+def s_monitor_date(ctx):
+    d = ctx.dep('plain', ['WtCore', 'WtDtCore', 'WTSTools', 'WTSUtils'])
+    b = ctx.dir / 'build'
+
+    def green():
+        rc = cmake_fixture(ctx, 'fixture', ctx.fx, b, ['-DWT_BUILD=' + str(d)], llvm=True)
+        if rc != 0:
+            return 'fail', 'CMake 配置/构建 exit %s' % rc
+        v1, r1, _ = gtest_run(ctx, 'monitor_date', b / 'monitor_date', [], cwd=b, timeout=30,
+                              env={'I03_MONITOR_SPY': str(b / 'libMonitorSpy.dylib'), 'UBSAN_OPTIONS': 'halt_on_error=1'})
+        v2, r2, _ = gtest_run(ctx, 'q05_monitor_control', b / 'q05_monitor_control', ['--gtest_filter=Q05StateMonitorTest.*'], cwd=b,
+                              timeout=30, env={'UBSAN_OPTIONS': 'halt_on_error=1'})
+        return ('pass' if v1 == v2 == 'pass' else 'fail'), r1 + '；' + r2
+    ctx.variant('green', green)
+    ctx.note('README 中 conda python 包装的 30s 超时改由运行器直接施加')
+    return combine(ctx)
+
+
+@suite('i03_servo_date_20261103', 'src/TestUnits/fixtures/i03_servo_date_20261103/CMakeLists.txt')
+def s_servo_date(ctx):
+    d = ctx.dep('plain', ['WtCore', 'WtDtCore', 'WTSTools', 'WTSUtils'])
+    b = ctx.dir / 'build'
+
+    def green():
+        rc = cmake_fixture(ctx, 'fixture', ctx.fx, b, ['-DWT_BUILD=' + str(d)], llvm=True)
+        if rc != 0:
+            return 'fail', 'CMake 配置/构建 exit %s' % rc
+        v, r, _ = gtest_run(ctx, 'servo_date', b / 'servo_date', [], cwd=b, timeout=30,
+                            env={'I03_DATE_SPY': str(b / 'libDateSpy.dylib'), 'UBSAN_OPTIONS': 'halt_on_error=1'})
+        return v, r
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('i03_dt_writer_lifecycle_20261104s5', 'src/TestUnits/fixtures/i03_dt_writer_lifecycle_20261104s5/run.sh + run_cases.sh')
+def s_dt_writer(ctx):
+    d = ctx.dep('plain', ['WTSTools', 'WTSUtils'])
+    base = ctx.short_dir('真实 writer 用例在长 cwd 下触发 fmtutil::format 512 字节缓冲截断 -> fmt::format_error -> terminate（见 README 产品发现），'
+                         '构建与逐例运行放在短路径')
+
+    def one(variant):
+        def fn():
+            out = base / ('build-' + variant)
+            rc, _ = ctx.sh('run.sh-' + variant, ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.tree / 'src'), str(out), variant],
+                           cwd=ctx.dir, env={'S5_LIBS': str(d / 'build_x64/Debug/libs')})
+            if rc != 0:
+                return 'fail', 'run.sh %s exit %s（构建失败）' % (variant, rc)
+            rc, text = ctx.sh('run_cases.sh-' + variant, ['/bin/bash', str(ctx.fx / 'run_cases.sh'), str(out), str(base / ('run-' + variant)), '60'],
+                              cwd=ctx.dir)
+            lines = read(base / ('run-' + variant) / 'results.txt').splitlines()
+            bad = [l for l in lines if not re.search(r'exit=0 .*failures="0".* sanitizer_reports=0', l)]
+            return ('pass' if lines and not bad else 'fail'), '%s：%d 例，异常 %d%s' % (variant, len(lines), len(bad), ('：' + ' | '.join(bad[:4])) if bad else '')
+        return fn
+    for v in ('normal', 'asan', 'tsan'):
+        ctx.variant(v, one(v))
+    ctx.note('baseline 红控需改前源码树（docs 证据，不在套件内），未运行')
+    return combine(ctx)
+
+
+@suite('i03_engine_followup_20261104s5', 'src/TestUnits/fixtures/i03_engine_followup_20261104s5/run.sh')
+def s_engine_followup(ctx):
+    deps = {san: ctx.dep(san, ['WtCore', 'WTSTools', 'WTSUtils']) for san in ('asan', 'tsan')}
+
+    def one(san):
+        def fn():
+            d = deps[san]
+            rc, text = ctx.sh('run.sh-' + san, ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.dir / 'work'), san,
+                                                str(d / 'build_x64/Debug/libs'), str(ctx.tree / 'src'), san], cwd=ctx.dir)
+            lines = read(ctx.dir / 'work' / (san + '-results.txt')).splitlines()
+            if rc != 0 or not lines:
+                return 'fail', 'run.sh exit %s' % rc
+            bad = [l for l in lines if not re.search(r'exit=0 sanitizer_reports=0', l)]
+            return ('pass' if not bad else 'fail'), '%s：%d 例，异常 %d%s' % (san, len(lines), len(bad), ('：' + ' | '.join(bad[:4])) if bad else '')
+        return fn
+    ctx.variant('asan', one('asan'))
+    ctx.variant('tsan', one('tsan'))
+    return combine(ctx)
+
+
+@suite('i03_r15_hft_tags_20261104s5', 'src/TestUnits/fixtures/i03_r15_hft_tags_20261104s5/run.sh')
+def s_r15_hft_tags(ctx):
+    d = ctx.dep('plain', ['WtCore', 'WtDtCore', 'WTSTools', 'WTSUtils'])
+    ev = 'docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before'
+    repo = ctx.R.repo_git.parent if ctx.R.repo_git else None
+    copies = []
+    if repo and (repo / ev).exists():
+        copies = [(str(repo / ev / 'src/WtCore/HftStraBaseCtx.h'), ev + '/src/WtCore/HftStraBaseCtx.h'),
+                  (str(repo / ev / 'src/WtCore/HftStraBaseCtx.cpp'), ev + '/src/WtCore/HftStraBaseCtx.cpp')]
+    rel = 'src/TestUnits/fixtures/i03_r15_hft_tags_20261104s5/run.sh'
+    ctx.mirror([(rel, 'git -C "$root" rev-parse HEAD > "$out/head.txt"', 'echo %s > "$out/head.txt"' % ctx.R.head)], copies=copies)
+    ctx.attribution = '夹具问题'
+    ctx.suggestion = 'current-* 变体也无条件 shasum docs 证据中的 before 文件并调用 git rev-parse（set -e）；应仅在 before-* 变体登记该哈希、git 失败不应中止，或把 before 副本放入套件'
+    ctx.note('run.sh 在 current 变体也对 docs/…/20261104-s5-wp1-ledger/before 的两个文件取哈希（set -e，缺失即中止）；'
+             '镜像中只读复制该两份 docs 证据文件仅用于登记哈希，未编译；before-asan 红控不运行')
+
+    def one(variant):
+        def fn():
+            rc, text = ctx.sh('run.sh-' + variant, ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(d), str(ctx.dir / variant), variant], cwd=ctx.dir)
+            c = xml_counts(ctx.dir / variant / 'result.xml')
+            return ('pass' if rc == 0 else 'fail'), '%s exit %s（%s）' % (variant, rc, ('tests=%(tests)d failures=%(failures)d' % c) if c else 'no XML')
+        return fn
+    ctx.variant('current-asan', one('current-asan'))
+    ctx.variant('current-tsan', one('current-tsan'))
+    return combine(ctx)
+
+
+@suite('i03_wp1_identity_gate_20261104', 'src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/run.sh')
+def s_wp1_gate(ctx):
+    d = ctx.dep('plain', ['WtCore', 'WtDtCore', 'WTSTools', 'WTSUtils'])
+    ev = 'docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before'
+    repo = ctx.R.repo_git.parent if ctx.R.repo_git else None
+    copies = []
+    if repo and (repo / ev).exists():
+        copies = [(str(repo / ev / 'src/WtCore/TraderAdapter.cpp'), ev + '/src/WtCore/TraderAdapter.cpp'),
+                  (str(repo / ev / 'src/WtCore/TraderAdapter.h'), ev + '/src/WtCore/TraderAdapter.h')]
+    rel = 'src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/run.sh'
+    ctx.mirror([(rel, 'git -C "$root" rev-parse HEAD > "$out/head.txt"', 'echo %s > "$out/head.txt"' % ctx.R.head)], copies=copies)
+    ctx.attribution = '夹具问题'
+    ctx.suggestion = 'watched 列表无条件包含 docs 证据 s5before 文件、且 git rev-parse 失败即中止（set -e）；应只在 baseline3 变体登记，或把副本放入套件'
+    ctx.note('run.sh 的 watched 哈希列表无条件包含 docs/…/s5-wp1-ledger/before 的 TraderAdapter.*；镜像中只读复制该两份 docs 证据文件仅用于登记哈希，baseline3 红控不运行')
+
+    def one(variant, role):
+        def fn():
+            rc, text = ctx.sh('run.sh-' + variant, ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(d), str(ctx.dir / variant), variant], cwd=ctx.dir)
+            c = xml_counts(ctx.dir / variant / 'result.xml')
+            det = ('tests=%(tests)d failures=%(failures)d' % c) if c else 'no XML'
+            if role == 'red':
+                return ('expected-red' if rc not in (0,) else 'fail'), '%s exit %s（%s）%s' % (variant, rc, det, '' if rc != 0 else '（红控未失败）')
+            return ('pass' if rc == 0 else 'fail'), '%s exit %s（%s）' % (variant, rc, det)
+        return fn
+    ctx.variant('current-asan', one('current-asan', 'primary'))
+    ctx.variant('current-tsan', one('current-tsan', 'primary'))
+    ctx.variant('baseline-asan', one('baseline-asan', 'red'), role='red')
+    ctx.variant('baseline2-asan', one('baseline2-asan', 'red'), role='red')
+    return combine(ctx)
+
+
+@suite('i03_wp1_ledger_20261104s5', 'src/TestUnits/fixtures/i03_wp1_ledger_20261104s5/run_r202_003.sh')
+def s_wp1_ledger(ctx):
+    d = ctx.dep('plain', ['WtCore', 'WtDtCore', 'WTSTools', 'WTSUtils', 'TraderMocker'])
+
+    def green():
+        mock = d / 'build_x64/Debug/bin/libTraderMocker.dylib'
+        if not mock.exists():
+            alt = list(d.glob('build_x64/Debug/**/libTraderMocker.dylib'))
+            ctx.note('plain 依赖中 libTraderMocker.dylib 位置：%s' % (', '.join(str(a) for a in alt) or '未找到'))
+        rc, text = ctx.sh('run_r202_003.sh', ['/bin/bash', str(ctx.fx / 'run_r202_003.sh'), str(d), str(ctx.dir / 'green'),
+                                             str(ctx.tree / 'src/WtCore')], cwd=ctx.dir)
+        c = xml_counts(ctx.dir / 'green/result.xml')
+        return ('pass' if rc == 0 else 'fail'), 'run_r202_003.sh 当前 TraderAdapter exit %s（%s）' % (rc, ('tests=%(tests)d failures=%(failures)d' % c) if c else 'no XML')
+    ctx.variant('green', green)
+    ctx.note('红控需改前 TraderAdapter 副本（docs 证据，不在套件内），未运行')
+    return combine(ctx)
+
+
+derived('i03_exec_units_20261104s5', 'i03_wp1_ledger_20261104s5',
+        'src/TestUnits/fixtures/i03_wp1_ledger_20261104s5/run_r202_003.sh（编译本目录 r202_003_risk_unknown_code_test.cpp）',
+        lambda R, src: (src['verdict'], '本目录只有测试源码，无独立入口；由 i03_wp1_ledger_20261104s5/run_r202_003.sh 编译运行：' + src['reason'], {}))
+
+
+@suite('i03_slice_shared_owner_20261103', 'src/TestUnits/fixtures/i03_slice_shared_owner_20261103/CMakeLists.txt')
+def s_slice(ctx):
+    d = ctx.dep('plain', ['WTSUtils', 'WTSTools', 'WtCore', 'WtBtCore', 'WtDtCore'])
+    libs = d / 'build_x64/Debug/libs'
+
+    def one(san, runs, env):
+        def fn():
+            b = ctx.dir / ('green-' + san)
+            rc = cmake_fixture(ctx, 'green-' + san, ctx.fx, b, ['-DWT_LIB_DIR=' + str(libs), '-DWT_SAN=' + {'asan': 'address', 'tsan': 'thread'}[san],
+                                                               '-DWT_GREEN=ON'], llvm=True, build_targets=runs)
+            if rc != 0:
+                return 'fail', 'CMake 配置/构建 exit %s' % rc
+            out = []
+            for t in runs:
+                v, r, _ = gtest_run(ctx, san + '-' + t, b / t, [], cwd=b, env=env, timeout=600)
+                out.append((v, r))
+            return ('pass' if all(v == 'pass' for v, _ in out) else 'fail'), '；'.join(r for _, r in out)
+        return fn
+    asan_env = {'ASAN_OPTIONS': 'detect_leaks=1:halt_on_error=1', 'UBSAN_OPTIONS': 'halt_on_error=1'}
+    ctx.variant('green-asan', one('asan', ['i03_slice_rdm', 'i03_slice_servo', 'i03_slice_replay', 'i03_slice_unit'], asan_env))
+    ctx.variant('green-tsan', one('tsan', ['i03_slice_rdm'], {'TSAN_OPTIONS': 'halt_on_error=1'}))
+    ctx.note('WT_BASELINE_ROOT（改前快照，不在套件内）未提供：i03_slice_abi 不构建；red-* 与 bench 未运行；既有 rdm 回归 i03_slice_rdm_regress README 记 1 例既有失败，未运行')
+    return combine(ctx)
+
+
+@suite('i03_storage_multiwriter_20261104', 'src/TestUnits/fixtures/i03_storage_multiwriter_20261104/CMakeLists.txt')
+def s_storage_mw(ctx):
+    d = ctx.dep('plain', ['WTSUtils', 'WTSTools'])
+    libs = d / 'build_x64/Debug/libs'
+    bins = ['mw_storage', 'mw_reader', 'mw_ad']
+
+    def one(san, env):
+        def fn():
+            b = ctx.dir / ('green-' + san)
+            rc = cmake_fixture(ctx, 'green-' + san, ctx.fx, b, ['-DWT_LIB_DIR=' + str(libs), '-DWT_SAN=' + {'plain': 'none', 'asan': 'address', 'tsan': 'thread'}[san],
+                                                               '-DWT_GREEN=ON'], llvm=True, build_targets=bins)
+            if rc != 0:
+                return 'fail', 'CMake 配置/构建 exit %s' % rc
+            out = []
+            for t in bins:
+                v, r, _ = gtest_run(ctx, san + '-' + t, b / t, [], cwd=b, env=env, timeout=600)
+                out.append((v, r))
+            return ('pass' if all(v == 'pass' for v, _ in out) else ('timeout' if any(v == 'timeout' for v, _ in out) else 'fail')), '；'.join(r for _, r in out)
+        return fn
+    ctx.variant('green-asan', one('asan', ASAN_ENV))
+    ctx.variant('green-plain', one('plain', {}))
+    ctx.variant('green-tsan', one('tsan', TSAN_ENV))
+    ctx.note('red-* 需改前快照 WT_SRC_ROOT（不在套件内），未运行；mw_regress_* 既有回归 README 记旧合同失败，未运行')
+    return combine(ctx)
+
+
+@suite('i03_storage_read_20261104s5', 'src/TestUnits/fixtures/i03_storage_read_20261104s5/run.sh')
+def s_storage_read(ctx):
+    d = ctx.dep('plain', ['WTSUtils', 'WTSTools'])
+    rel = 'src/TestUnits/fixtures/i03_storage_read_20261104s5/run.sh'
+    ctx.mirror([(rel, 'ninja -C "$out/build-$label" -j 3', 'ninja -C "$out/build-$label" -j %d' % ctx.R.jobs)])
+
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(d / 'build_x64/Debug/libs'), str(ctx.dir / 'out')], cwd=ctx.dir)
+        m = re.search(r'^green exit=(\S+)(.*)$', text, re.M)
+        if not m:
+            return 'fail', 'run.sh 未输出 green 结果（exit %s，构建失败？）' % rc
+        return ('pass' if m.group(1) == '0' else 'fail'), 'green exit=%s%s' % (m.group(1), m.group(2))
+    ctx.variant('green', green)
+    ctx.note('红控需改前读端源码根（docs 证据，不在套件内），未运行')
+    return combine(ctx)
+
+
+@suite('i03_btcore_s5_20261104s5', 'src/TestUnits/fixtures/i03_btcore_s5_20261104s5/run.sh')
+def s_btcore_s5(ctx):
+    rel = 'src/TestUnits/fixtures/i03_btcore_s5_20261104s5/run.sh'
+    ctx.mirror([(rel, 'ninja -C "$build" -j 3', 'ninja -C "$build" -j %d' % ctx.R.jobs)])
+
+    # WT_LIB_DIR must also hold libWtDataStorage.dylib (CMake links it so bin-mode replay finds the
+    # module in-process); --build keeps it in bin/, so assemble a physical lib dir copy.
+    libdir = ctx.dir / 'libdir'
+    libdir.mkdir(parents=True, exist_ok=True)
+    for f in ('libWTSTools.a', 'libWTSUtils.a'):
+        shutil.copyfile(ctx.libs / f, libdir / f)
+    shutil.copyfile(ctx.R.bin / 'libWtDataStorage.dylib', libdir / 'libWtDataStorage.dylib')
+    ctx.note('WT_LIB_DIR=%s：复制 --build 的 libWTSTools.a/libWTSUtils.a 与 bin/libWtDataStorage.dylib（CMake 仅在 WT_LIB_DIR 下找到该模块时才链接，供 s5_new029 bin 模式回放）' % libdir)
+
+    def green():
+        rc, text = ctx.sh('run.sh-green', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), 'green', str(ctx.dir / 'build'), str(ctx.dir / 'run'), str(libdir)], cwd=ctx.dir)
+        lines = [l.split() for l in read(ctx.dir / 'run/results.txt').splitlines() if l.strip()]
+        missing = [l for l in lines if len(l) >= 2 and l[1] == 'missing']
+        res = [l for l in lines if len(l) == 3]
+        bad = [' '.join(l) for l in res if l[2] != '0']
+        if missing:
+            return 'fail', '二进制缺失：%s（见 %s.build.log）' % (','.join(l[0] for l in missing), ctx.dir / 'build')
+        return ('pass' if res and not bad else 'fail'), 'green %d 例，非零 %d%s' % (len(res), len(bad), ('：' + ' | '.join(bad[:5])) if bad else '')
+    ctx.variant('green', green)
+    ctx.note('red 需要改前产品源码根（不在套件内），未运行')
+    return combine(ctx)
+
+
+@suite('i03_dt_parser_host_20261104s5', 'src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/run.sh')
+def s_dt_parser_host(ctx):
+    rel = 'src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/run.sh'
+    ctx.mirror([(rel, 'cmake --build "$B" -j 3', 'cmake --build "$B" -j %d' % ctx.R.jobs)])
+
+    def one(san):
+        def fn():
+            argv = ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.build), str(ctx.dir / ('build-' + (san or 'plain'))), ''] + ([san] if san else [])
+            rc, text = ctx.sh('run.sh-' + (san or 'plain'), argv, cwd=ctx.dir)
+            pairs = exit_lines(text)
+            return ('pass' if rc == 0 and all_zero(pairs) else 'fail'), 'run.sh%s exit %s；%s' % (' ' + san if san else '', rc, summarize_pairs(pairs))
+        return fn
+    ctx.variant('plain', one(None))
+    ctx.variant('thread', one('thread'))
+    ctx.note('before-dir 传空：改前副本（docs 证据）不在套件内，基线红控跳过')
+    return combine(ctx)
+
+
+@suite('i03_uft_parser_lifecycle_20261104s5', 'src/TestUnits/fixtures/i03_uft_parser_lifecycle_20261104s5/run.sh')
+def s_uft_parser(ctx):
+    rel = 'src/TestUnits/fixtures/i03_uft_parser_lifecycle_20261104s5/run.sh'
+    ctx.mirror([(rel, 'cmake --build "$B" -j 3', 'cmake --build "$B" -j %d' % ctx.R.jobs)])
+
+    def one(san):
+        def fn():
+            argv = ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.build), str(ctx.dir / ('build-' + (san or 'plain'))), ''] + ([san] if san else [])
+            rc, text = ctx.sh('run.sh-' + (san or 'plain'), argv, cwd=ctx.dir)
+            pairs = [p for p in exit_lines(text) if p[0].startswith('cur ')]
+            return ('pass' if rc == 0 and all_zero(pairs) else 'fail'), 'run.sh%s exit %s；%s' % (' ' + san if san else '', rc, summarize_pairs(pairs))
+        return fn
+    ctx.variant('plain', one(None))
+    ctx.variant('thread', one('thread'))
+    ctx.note('before-dir 传空：改前副本不在套件内，基线红控跳过')
+    return combine(ctx)
+
+
+@suite('i03_uft_ledger_ctx_concurrency_20261104s5', 'src/TestUnits/fixtures/i03_uft_ledger_ctx_concurrency_20261104s5/run.sh')
+def s_uft_ledger(ctx):
+    rel = 'src/TestUnits/fixtures/i03_uft_ledger_ctx_concurrency_20261104s5/run.sh'
+    ctx.mirror([(rel, 'cmake --build "$B" -j 3', 'cmake --build "$B" -j %d' % ctx.R.jobs)])
+
+    def one(san):
+        def fn():
+            argv = ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.build), str(ctx.dir / ('build-' + san.replace(',', '_'))), '', san]
+            rc, text = ctx.sh('run.sh-' + san, argv, cwd=ctx.dir)
+            pairs = [p for p in exit_lines(text) if p[0].startswith('cur ')]
+            return ('pass' if rc == 0 and all_zero(pairs) else 'fail'), 'run.sh %s exit %s；%s' % (san, rc, summarize_pairs(pairs))
+        return fn
+    ctx.variant('thread', one('thread'))
+    ctx.variant('address,undefined', one('address,undefined'))
+    ctx.note('before-dir 传空：改前副本不在套件内，基线红控跳过')
+    return combine(ctx)
+
+
+@suite('i03_date_mapping_20261104s5', 'src/TestUnits/fixtures/i03_date_mapping_20261104s5/run.sh')
+def s_date_mapping_s5(ctx):
+    rel = 'src/TestUnits/fixtures/i03_date_mapping_20261104s5/run.sh'
+    ctx.mirror([(rel, '(cd "$build" && ninja -j3 -k 0)', '(cd "$build" && ninja -j%d -k 0)' % ctx.R.jobs)])
+    ctx.attribution = '夹具问题'
+    ctx.suggestion = 'CMakeLists 在配置期无条件 configure_file("${BEFORE}/src/...")；应在 BEFORE 为空时跳过 *_baseline 目标，或把改前副本放入套件'
+    ctx.note('CMake 配置期无条件要求 BEFORE/src 下的改前副本；为只验证当前目标，BEFORE 指向镜像根（=当前源码），*_baseline 结果不计入结论')
+
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/sh', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'build'), str(ctx.dir / 'run'),
+                                     str(ctx.build), str(ctx.root())], cwd=ctx.root())
+        pairs = [p for p in exit_lines(read(ctx.dir / 'run/results.txt')) if '_baseline ' not in p[0]]
+        return ('pass' if all_zero(pairs) else 'fail'), '当前目标：%s' % summarize_pairs(pairs)
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+# ---------------------------------------------------------------------- old-isolated-build replays (retargeted to --tree/--build)
+R202_OLD_BUILD = "'/tmp/wt-i03-r202-001-midnight/build'"
+R202_OLD_SNAP = "'/tmp/wt-i03-r202-001-midnight/snapshot/src'"
+COMPDB_FORMS = ["build / 'compile_commands.json'", "build/'compile_commands.json'"]
+
+
+def compdb_edits(rel):
+    return [(rel, f, "Path(os.environ['WT_FX_COMPDB'])", 0) for f in COMPDB_FORMS]
+
+
+def fx_env(ctx, snap=None):
+    return {'WT_FX_BUILD': str(ctx.build), 'WT_FX_SNAP': str(snap or (ctx.tree / 'src')), 'WT_FX_COMPDB': str(compdb(ctx))}
+
+
+@suite('r202_nextday', 'src/TestUnits/fixtures/r202_nextday/run.py')
+def s_r202_nextday(ctx):
+    rel = 'src/TestUnits/fixtures/r202_nextday/run.py'
+    ctx.mirror([(rel, R202_OLD_BUILD, "os.environ['WT_FX_BUILD']"), (rel, R202_OLD_SNAP, "os.environ['WT_FX_SNAP']")] + compdb_edits(rel))
+    ctx.note('旧隔离源码/构建 /tmp/wt-i03-r202-001-midnight 改为 --tree/src 与 --build（编译库取自 --build 的 ninja compdb，去掉 -MD/-MF）')
+
+    # slice4-result (2026-11-05): run.py now asserts the card 3/9d contract (all 12 cases pass);
+    # the old "known-red" demo expectation is retired, so the probe is a primary variant.
+    def green():
+        rc, text = ctx.sh('run.py', [SYS_PY, '-I', str(ctx.fxdir() / 'run.py'), str(ctx.dir / 'run')], cwd=ctx.dir, env=fx_env(ctx))
+        res = read(ctx.dir / 'run/results.txt').strip().replace('\n', '，')
+        if rc == 0:
+            return 'pass', 'R202NextDay/R202Reentry 及收盘正控在卡3/9d 合同下全部通过：' + res
+        return 'fail', 'run.py exit %s：%s' % (rc, res or text.strip().splitlines()[-1:])
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('r13_real_schedule', 'src/TestUnits/fixtures/r13_real_schedule/run.py')
+def s_r13_real(ctx):
+    rel = 'src/TestUnits/fixtures/r13_real_schedule/run.py'
+    ctx.mirror([(rel, R202_OLD_BUILD, "os.environ['WT_FX_BUILD']"), (rel, R202_OLD_SNAP, "os.environ['WT_FX_SNAP']")] + compdb_edits(rel))
+
+    def demo():
+        rc, text = ctx.sh('run.py', [SYS_PY, '-I', str(ctx.fxdir() / 'run.py'), str(ctx.dir / 'run')], cwd=ctx.dir, env=fx_env(ctx))
+        res = read(ctx.dir / 'run/results.txt').strip().replace('\n', '，')
+        if rc == 0:
+            return 'expected-red', '探针观测与脚本期望一致（original 中止、joined 键错 exit1、key_fixed 0、monthly 1）：' + res
+        return 'fail', 'run.py exit %s，观测与脚本期望不符：%s' % (rc, res or (text.strip().splitlines() or [''])[-1])
+    ctx.variant('controlled-probe', demo, role='demo')
+    return combine(ctx)
+
+
+@suite('p04_cross_session_clock', 'src/TestUnits/fixtures/p04_cross_session_clock/run.py + verify.py')
+def s_p04(ctx):
+    rel = 'src/TestUnits/fixtures/p04_cross_session_clock/run.py'
+    ctx.mirror([(rel, "Path('/tmp/wt-i03-r58-20261102-build')", "Path(os.environ['WT_FX_BUILD'])"),
+                (rel, "Path('/tmp/wt-i03-r58-20261102-src')", "Path(os.environ['WT_FX_SNAP'])")] + compdb_edits(rel))
+
+    def green():
+        rc, _ = ctx.sh('run.py', [SYS_PY, '-I', str(ctx.fxdir() / 'run.py'), str(ctx.dir / 'build')], cwd=ctx.dir, env=fx_env(ctx, ctx.tree))
+        if rc != 0 and not (ctx.dir / 'build/fixture').exists():
+            return 'fail', 'run.py exit %s（编译/链接失败）' % rc
+        rc2, text = ctx.sh('verify.py', [SYS_PY, '-I', str(ctx.fxdir() / 'verify.py'), str(ctx.dir / 'build/fixture'), str(ctx.dir / 'results')], cwd=ctx.dir)
+        lines = [l for l in text.splitlines() if ' exit ' in l and 'expected' in l]
+        return ('pass' if rc2 == 0 else 'fail'), 'run.py exit %s；verify.py exit %s（green + known-red 期望）：%s' % (rc, rc2, ' | '.join(lines))
+    ctx.variant('green+known-red', green)
+    return combine(ctx)
+
+
+@suite('i03_fee_consumer_pipeline', 'src/TestUnits/fixtures/i03_fee_consumer_pipeline/run.py')
+def s_fee_consumer_pipeline(ctx):
+    # 2026-11-05 (fixtures-agent): run.py now takes <out> <coverage build> itself, derives
+    # the build's source root from its compile database and asserts every card-13d case
+    # passes; no mirror rewriting is needed any more.
+    def green():
+        rc, text = ctx.sh('run.py', [SYS_PY, '-I', str(ctx.fx / 'run.py'), str(ctx.dir / 'run'), str(ctx.build)], cwd=ctx.dir)
+        m = re.search(r"^\[\('Unmigrated.*\]$", text, re.M)
+        obs = m.group(0) if m else ''
+        return ('pass' if rc == 0 else 'fail'), 'run.py exit %s（卡13d 四例逐进程）：%s' % (rc, obs)
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('i03_card3_dayboundary_20261104', 'src/TestUnits/fixtures/i03_card3_dayboundary_20261104/CMakeLists.txt + run_cases.sh + r202_run.py')
+def s_card3(ctx):
+    d = ctx.dep('plain', ['WTSUtils', 'WTSTools'])
+    libs = d / 'build_x64/Debug/libs'
+    rel = 'src/TestUnits/fixtures/i03_card3_dayboundary_20261104/r202_run.py'
+    ctx.mirror([(rel, "Path('/tmp/wt-i03-r202-001-midnight/build')", "Path(os.environ['WT_FX_BUILD'])"),
+                (rel, "Path('/tmp/wt-i03-r202-001-midnight/snapshot/src')", "Path(os.environ['WT_FX_SNAP'])")] + compdb_edits(rel))
+    green_bins = ['c3_actday_ParserCTP', 'c3_actday_ParserCTPMini', 'c3_actday_ParserFemas', 'c3_ad_daybar', 'c3_cta_frozen']
+
+    def cm(san):
+        def fn():
+            b = ctx.dir / ('green-' + san)
+            rc = cmake_fixture(ctx, 'green-' + san, ctx.fx, b, ['-DWT_LIB_DIR=' + str(libs), '-DWT_SAN=' + {'plain': 'none', 'asan': 'address'}[san],
+                                                               '-DWT_GREEN=ON'], llvm=True, build_targets=green_bins)
+            if rc != 0:
+                return 'fail', 'CMake 配置/构建 exit %s' % rc
+            res = []
+            for t in green_bins:
+                if san == 'plain':
+                    rc, text = ctx.sh('run_cases-' + t, ['/bin/bash', str(ctx.fx / 'run_cases.sh'), str(b / t), str(ctx.dir / ('cases-' + t)), '120'], cwd=ctx.dir)
+                    m = re.search(r'total=(\d+) pass=(\d+) fail=(\d+)', text)
+                    res.append((t, m.group(0) if m else 'no summary', bool(m) and m.group(3) == '0' and m.group(1) != '0'))
+                else:
+                    v, r, _ = gtest_run(ctx, 'asan-' + t, b / t, [], cwd=b, env={'ASAN_OPTIONS': 'detect_leaks=0:abort_on_error=1', 'UBSAN_OPTIONS': 'halt_on_error=1'})
+                    res.append((t, r, v == 'pass'))
+            return ('pass' if all(x[2] for x in res) else 'fail'), '；'.join('%s %s' % (a, b_) for a, b_, _ in res)
+        return fn
+
+    def r202(tsan):
+        def fn():
+            out = ctx.dir / ('r202-green' + ('-tsan' if tsan else ''))
+            env = fx_env(ctx)
+            if tsan:
+                env['R202_TSAN'] = '1'
+            rc, text = ctx.sh('r202_run' + ('-tsan' if tsan else ''), [SYS_PY, '-I', str(ctx.fxdir() / 'r202_run.py'), str(out), str(ctx.root() / 'src')],
+                              cwd=ctx.dir, env=env)
+            lines = [l.split() for l in read(out / 'results.txt').splitlines() if l.strip()]
+            if rc != 0 or not lines:
+                return 'fail', 'r202_run.py exit %s（编译/链接失败？）' % rc
+            bad = [' '.join(l) for l in lines if l[-1] != '0']
+            return ('pass' if not bad else 'fail'), 'ticker 探针 %d 例，非零 %d%s' % (len(lines), len(bad), ('：' + ' | '.join(bad[:6])) if bad else '')
+        return fn
+    ctx.variant('green-plain', cm('plain'))
+    ctx.variant('green-asan', cm('asan'))
+    ctx.variant('r202-green', r202(False))
+    ctx.variant('r202-green-tsan', r202(True))
+    ctx.note('红控（改前快照 $B/baseline/src、pre9d-root）不在套件内，未运行；r202_run.py 的旧隔离构建改为 --tree/--build；c3_regress_* 既有回归 README 记旧合同断言失败，未运行')
+    return combine(ctx)
+
+
+# ---------------------------------------------------------------------- /tmp lib / conda / git retargets
+@suite('i03_csv_block_type_20261103', 'src/TestUnits/fixtures/i03_csv_block_type_20261103/CMakeLists.txt')
+def s_csv_block(ctx):
+    rel = 'src/TestUnits/fixtures/i03_csv_block_type_20261103/CMakeLists.txt'
+    ctx.mirror([(rel, '/tmp/wt-i03-r41-drain/libs', str(ctx.libs), 2)])
+    b = ctx.dir / 'build'
+
+    def green():
+        rc = cmake_fixture(ctx, 'fixture', ctx.fxdir(), b, llvm=True)
+        if rc != 0:
+            return 'fail', 'CMake 配置/构建 exit %s' % rc
+        v, r, _ = gtest_run(ctx, 'csv_block_check', b / 'csv_block_check', [], cwd=b, env={'UBSAN_OPTIONS': 'halt_on_error=1'})
+        rc2, text = ctx.sh('nm-exports', '/usr/bin/nm -gU %s | /usr/bin/grep -E "dump_(bars|ticks)(_v2)?$"' % shlex.quote(str(b / 'libcsv_block_helper.dylib')), cwd=b)
+        syms = [l.split()[-1] for l in text.splitlines() if 'dump_' in l and not l.startswith('#')]
+        ok = v == 'pass' and rc2 == 0 and syms
+        return ('pass' if ok else 'fail'), '%s；导出符号 %s' % (r, ','.join(syms) or '无')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('i03_sdk_events_20261103', 'src/TestUnits/fixtures/i03_sdk_events_20261103/run.sh + run_t26_regression.sh')
+def s_sdk_events(ctx):
+    r1 = 'src/TestUnits/fixtures/i03_sdk_events_20261103/run.sh'
+    r2 = 'src/TestUnits/fixtures/i03_sdk_events_20261103/run_t26_regression.sh'
+    ctx.mirror(lib_edits(ctx, r1) + lib_edits(ctx, r2))
+    st = {}
+
+    def main():
+        rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        st['text'] = read(ctx.dir / 'run/results.txt')
+        m = re.search(r'non-baseline failures: (\d+)', st['text'])
+        return ('pass' if rc == 0 else 'fail'), 'run.sh exit %s；%s' % (rc, m.group(0) if m else '无汇总')
+
+    def red():
+        rows = re.findall(r'^baseline (\S+) (PASS|RED|FAIL) exit=(\S+)', st.get('text', ''), re.M)
+        if not rows:
+            return 'fail', '无 baseline 结果'
+        reds = [r for r in rows if r[1] == 'RED']
+        return ('expected-red' if reds else 'fail'), 'baseline（反向应用本目录补丁）11 场景：RED %d、PASS %d' % (len(reds), len(rows) - len(reds))
+
+    def reg():
+        rc, text = ctx.sh('run_t26_regression.sh', ['/bin/bash', str(ctx.fxdir() / 'run_t26_regression.sh'), str(ctx.dir / 'reg'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        n = len(re.findall(r' PASS ', text))
+        return ('pass' if rc == 0 else 'fail'), 'run_t26_regression.sh exit %s（PASS 行 %d）' % (rc, n)
+    ctx.variant('normal+asan+tsan', main)
+    ctx.variant('red-baseline', red, role='red')
+    ctx.variant('t26-regression', reg)
+    return combine(ctx)
+
+
+@suite('t26_request_completion', 'src/TestUnits/fixtures/t26_request_completion/run.sh')
+def s_t26_completion(ctx):
+    rel = 'src/TestUnits/fixtures/t26_request_completion/run.sh'
+    ctx.mirror(conda_edits(rel) + lib_edits(ctx, rel))
+
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        f = read(ctx.dir / 'run/fee-results.txt')
+        q = read(ctx.dir / 'run/query-results.txt')
+        return ('pass' if rc == 0 else 'fail'), 'run.sh exit %s；fee PASS 行 %d，query PASS 行 %d，baseline known-red 行 %d' % (
+            rc, f.count('PASS'), q.count('PASS'), q.count('known-red'))
+    ctx.variant('green+known-red', green)
+    return combine(ctx)
+
+
+@suite('t26_fees_atomic', 'src/TestUnits/fixtures/t26_fees_atomic/run.sh')
+def s_t26_fees(ctx):
+    if not ctx.R.repo_git:
+        raise Blocked('run.sh 用 git show ccaad010:… 重建红控，需要 --repo-git', '夹具问题')
+    rel = 'src/TestUnits/fixtures/t26_fees_atomic/run.sh'
+    ctx.mirror(conda_edits(rel) + lib_edits(ctx, rel))
+    ctx.note('run.sh 以不可变提交 ccaad010 的 TraderSpi.* 重建红控并按 2026-11-02 哈希校验；经 GIT_DIR 只读对象库')
+
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir,
+                          env={'GIT_DIR': str(ctx.R.repo_git)})
+        res = read(ctx.dir / 'run/results.txt')
+        tail = [l for l in res.splitlines() if l.strip()][-3:]
+        return ('pass' if rc == 0 else 'fail'), 'run.sh exit %s；%s' % (rc, ' | '.join(tail))
+    ctx.variant('normal+asan+baselines', green)
+    return combine(ctx)
+
+
+@suite('i03_porter_replay_status_20261103', 'src/TestUnits/fixtures/i03_porter_replay_status_20261103/run.sh')
+def s_porter_status(ctx):
+    rel = 'src/TestUnits/fixtures/i03_porter_replay_status_20261103/run.sh'
+    ctx.mirror(conda_edits(rel))
+
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.sh（WtBtPorter 构建 + 7 模式 + launch-failure 注入）')
+    ctx.variant('green', green)
+    ctx.note('baseline/ 只作对照存档，run.sh 无红控模式')
+    return combine(ctx)
+
+
+@suite('i03_leaks_main_20261104', 'src/TestUnits/fixtures/i03_leaks_main_20261104/manual_build.sh + run_cases.py')
+def s_leaks_main(ctx):
+    root = ctx.dir / 'leaks'
+    env = {'WT_I03_LEAKS_ROOT': str(root), 'WT_REPO': str(ctx.tree), 'WT_I03_BOOST_INCLUDE': BOOST_INC}
+
+    def one(mod, mode):
+        def fn():
+            rc, text = ctx.sh('manual_build-%s-%s' % (mod, mode), ['/bin/bash', str(ctx.fx / 'manual_build.sh'), 'fix', mode, mod], cwd=ctx.dir, env=env)
+            if 'build_status=0' not in text:
+                return 'fail', 'manual_build.sh fix %s %s 构建失败（%s）' % (mode, mod, re.findall(r'build_status=\d', text))
+            cases = json.loads(read(ctx.fx / ('cases-%s-fix-%s.json' % (mod, mode))))
+            old = '/tmp/wt-i03-leaks-20261104'
+            for c in cases:
+                c['bin'] = c['bin'].replace(old, str(root))
+            cf = ctx.dir / ('cases-%s-fix-%s.json' % (mod, mode))
+            cf.write_text(json.dumps(cases, indent=1))
+            res = ctx.dir / ('results-%s-fix-%s.json' % (mod, mode))
+            rc, text = ctx.sh('run_cases-%s-%s' % (mod, mode), [SYS_PY, '-I', str(ctx.fx / 'run_cases.py'), str(cf), str(res)], cwd=ctx.dir, env=env)
+            recs = json.loads(read(res) or '[]')
+            # README: the manual link uses -undefined dynamic_lookup without WtCore, so
+            # t6_init.wtcore_init_ext_rejects_tradermocker_null_config is invalid (NULL call) in this
+            # build; the whole-lane 'ALL' entry (filter '*') reaches it and crashes by design.
+            allrec = [r for r in recs if r['name'] == 'ALL']
+            cases = [r for r in recs if r['name'] != 'ALL']
+            bad = [r['name'] for r in cases if r['exit'] != 0 or not r.get('xml') or r['xml'].get('failures') not in ('0', None)]
+            note = ''
+            if allrec:
+                lastlog = read(Path(allrec[0]['cwd']) / 'output.log')
+                runs = re.findall(r'^\[ RUN      \] (\S+)', lastlog, re.M)
+                note = '；ALL(filter *) exit %s，最后运行 %s（README：该用例在手工链接中无效，不计）' % (allrec[0]['exit'], runs[-1] if runs else '?')
+                if allrec[0]['exit'] != 0 and (not runs or runs[-1] != 't6_init.wtcore_init_ext_rejects_tradermocker_null_config'):
+                    bad.append('ALL(非预期位置失败)')
+            ok = cases and not bad and rc in (0, 2)
+            return ('pass' if ok else 'fail'), '%s-%s %d 例，非零/缺 XML %d%s%s' % (
+                mod, mode, len(cases), len(bad), ('：' + ','.join(bad[:4])) if bad else '', note)
+        return fn
+    for mod, mode in [('femas', 'normal'), ('femas', 'asan'), ('mocker', 'normal'), ('mocker', 'asan'), ('mocker', 'tsan')]:
+        ctx.variant('%s-%s' % (mod, mode), one(mod, mode))
+    ctx.note('用例清单 cases-*-fix-*.json 中的 /tmp/wt-i03-leaks-20261104 二进制路径改写为 --out 下副本；base 变体需 $WT_I03_LEAKS_ROOT/baseline/src（不在套件内）未运行；'
+             'red_main_relink.sh 需要带 compile_commands 的完整 CoverageTests 构建并重链，未运行；cases-mocker-lane/femas-extra 未运行')
+    return combine(ctx)
+
+
+@suite('l03_commodity_state', 'src/TestUnits/fixtures/l03_commodity_state/run.sh + run-init.sh + run-config.sh')
+def s_l03(ctx):
+    rel = 'src/TestUnits/fixtures/l03_commodity_state/run-config.sh'
+    ctx.mirror([(rel, 'mktemp -d /tmp/wt-l03-config.XXXXXX', 'mktemp -d "$WT_FX_TMP/wt-l03-config.XXXXXX"')])
+    tmp = ctx.dir / 'mktemp'
+    tmp.mkdir(parents=True, exist_ok=True)
+
+    def probe():
+        rc, _ = ctx.sh('run.sh', ['/bin/sh', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'probe')], cwd=ctx.root())
+        return rc_verdict(rc, 'run.sh（probe normal+sanitizer）')
+
+    def init():
+        rc, text = ctx.sh('run-init.sh', ['/bin/sh', str(ctx.fxdir() / 'run-init.sh'), str(ctx.dir / 'init')], cwd=ctx.root())
+        if rc == 0:
+            return 'pass', 'run-init.sh exit 0（README 记 2026-11-02 未修复时 exit 1，当前已通过）'
+        return 'expected-red', 'run-init.sh exit %s：README 定义为“未来修复的目标探针”，未修复时 FAIL: default initialization（%s）' % (
+            rc, 'default initialization' in text)
+
+    def config(san):
+        def fn():
+            rc, _ = ctx.sh('run-config.sh' + ('-sanitize' if san else ''), ['/bin/bash', str(ctx.fxdir() / 'run-config.sh'), str(ctx.build)],
+                           cwd=ctx.root(), env={'WT_FX_TMP': str(tmp), 'L03_SANITIZE': '1' if san else '0'})
+            return rc_verdict(rc, 'run-config.sh%s（L03CommodityReady.*）' % (' L03_SANITIZE=1' if san else ''))
+        return fn
+    ctx.variant('probe', probe)
+    ctx.variant('config', config(False))
+    ctx.variant('config-sanitize', config(True))
+    ctx.variant('init-target-probe(info)', init, role='info')
+    return combine(ctx)
+
+
+@suite('l04_contract_import', 'src/TestUnits/fixtures/l04_contract_import/run.sh')
+def s_l04_import(ctx):
+    rel = 'src/TestUnits/fixtures/l04_contract_import/run.sh'
+    ctx.mirror([(rel, 'mktemp -d /tmp/wt-l04-import.XXXXXX', 'mktemp -d "$WT_FX_TMP/wt-l04-import.XXXXXX"')])
+    tmp = ctx.dir / 'mktemp'
+    tmp.mkdir(parents=True, exist_ok=True)
+
+    def one(san):
+        def fn():
+            rc, _ = ctx.sh('run.sh' + ('-sanitize' if san else ''), ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.build)], cwd=ctx.root(),
+                           env={'WT_FX_TMP': str(tmp), 'L04_SANITIZE': '1' if san else '0'})
+            return rc_verdict(rc, 'run.sh%s' % (' L04_SANITIZE=1' if san else ''))
+        return fn
+    ctx.variant('normal', one(False))
+    ctx.variant('sanitize', one(True))
+    return combine(ctx)
+
+
+@suite('l04_lmdb_key_bounds', 'src/TestUnits/fixtures/l04_lmdb_key_bounds/run.sh')
+def s_l04_key(ctx):
+    r1 = 'src/TestUnits/fixtures/l04_lmdb_key_bounds/run.sh'
+    r2 = 'src/TestUnits/fixtures/l04_lmdb_key_bounds/compile_product.py'
+    ctx.mirror([(r1, 'mktemp -d /tmp/wt-l04-key-test.XXXXXX', 'mktemp -d "$WT_FX_TMP/wt-l04-key-test.XXXXXX"'),
+                (r2, "'/Users/yunjinqi/opt/anaconda3/bin/ninja'", "'%s'" % NINJA)] + conda_edits(r1))
+    tmp = ctx.dir / 'mktemp'
+    tmp.mkdir(parents=True, exist_ok=True)
+
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.build)], cwd=ctx.root(), env={'WT_FX_TMP': str(tmp)})
+        return rc_verdict(rc, 'run.sh（key_bounds ASan + 产品编译 + reader_rejection）')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('l05_csv_failure_signal', 'src/TestUnits/fixtures/l05_csv_failure_signal/run.sh')
+def s_l05(ctx):
+    rel = 'src/TestUnits/fixtures/l05_csv_failure_signal/run.sh'
+    ctx.mirror(lib_edits(ctx, rel))
+
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/sh', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.root())
+        red = read(ctx.dir / 'run/red.exit').strip()
+        return ('pass' if rc == 0 else 'fail'), 'run.sh exit %s（green 全部 + KnownRed 子集 exit=%s，脚本要求 1）' % (rc, red or '?')
+    ctx.variant('green+known-red', green)
+    return combine(ctx)
+
+
+@suite('lmdb_bar_key_v2', 'src/TestUnits/fixtures/lmdb_bar_key_v2/run.sh')
+def s_lmdb_key_v2(ctx):
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.sh（normal + sanitized key test）')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('lmdb_bar_migration', 'src/TestUnits/fixtures/lmdb_bar_migration/run_capability.sh + run_controlled_regression.sh (+ run.sh)')
+def s_lmdb_migration(ctx):
+    base = 'src/TestUnits/fixtures/lmdb_bar_migration/'
+    ctx.mirror(conda_edits(base + 'run.sh') + conda_edits(base + 'run_capability.sh') + conda_edits(base + 'run_controlled_regression.sh'))
+
+    def cap():
+        rc, _ = ctx.sh('run_capability.sh', ['/bin/bash', str(ctx.fxdir() / 'run_capability.sh'), str(ctx.dir / 'capability')], cwd=ctx.dir)
+        pairs = [(l, l.split()[-1]) for l in read(ctx.dir / 'capability/results.txt').splitlines() if l.strip() and not l.startswith('tsan')]
+        return ('pass' if rc == 0 and all_zero(pairs) else 'fail'), 'run_capability.sh exit %s；%s' % (rc, summarize_pairs(pairs))
+
+    def ctrl():
+        rc, _ = ctx.sh('run_controlled_regression.sh', ['/bin/bash', str(ctx.fxdir() / 'run_controlled_regression.sh'), str(ctx.dir / 'controlled')], cwd=ctx.dir)
+        n = []
+        for v in ('normal', 'asan'):
+            recs = json.loads(read(ctx.dir / ('controlled/%s-results.json' % v)) or '[]')
+            n.append('%s %d/%d' % (v, sum(1 for r in recs if r['exit'] == 0), len(recs)))
+        return ('pass' if rc == 0 else 'fail'), 'run_controlled_regression.sh exit %s；%s' % (rc, '，'.join(n))
+
+    def legacy():
+        rc, _ = ctx.sh('run.sh(legacy-34)', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'legacy')], cwd=ctx.dir)
+        n = []
+        for v in ('normal', 'asan', 'tsan-raw', 'tsan-annotated'):
+            recs = json.loads(read(ctx.dir / ('legacy/%s-results.json' % v)) or '[]')
+            n.append('%s %d/%d exit0' % (v, sum(1 for r in recs if r['exit'] == 0), len(recs)))
+        return ('pass' if rc == 0 else 'fail'), 'run.sh exit %s；%s（旧 callback 34 场景，evidence-controlled-legacy README 说明 5 项不再适用）' % (rc, '，'.join(n))
+    ctx.variant('capability', cap)
+    ctx.variant('controlled-legacy', ctrl)
+    ctx.variant('legacy-run.sh(info)', legacy, role='info')
+    return combine(ctx)
+
+
+@suite('lmdb_bar_migration_perf', 'src/TestUnits/fixtures/lmdb_bar_migration_perf/run.sh')
+def s_lmdb_perf(ctx):
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.sh（cache guard normal+asan 5 模式）')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('n05_timeout_guard_race', 'src/TestUnits/fixtures/n05_timeout_guard_race/README.md（c++ 编译 + 两个进程）')
+def s_n05(ctx):
+    exe = ctx.dir / 'probe'
+
+    def build():
+        rc, _ = ctx.sh('compile', ['/usr/bin/c++', '-std=c++17', '-pthread', str(ctx.fx / 'check.cpp'), str(ctx.tree / 'src/WtExeFact/WtOrdMon.cpp'),
+                                   '-o', str(exe)], cwd=ctx.tree)
+        if rc != 0:
+            return 'fail', 'compile exit %s' % rc
+        rc, _ = ctx.sh('sequential', [str(exe), 'sequential'], cwd=ctx.dir, timeout=60)
+        return rc_verdict(rc, 'sequential 控制')
+
+    def race():
+        if not exe.exists():
+            return 'fail', '未构建'
+        rc, _ = ctx.sh('race', [str(exe)], cwd=ctx.dir, timeout=60)
+        if rc == 1:
+            return 'expected-red', '并发反例 exit 1（README：当前实现已知反例）'
+        return 'fail', '并发反例 exit %s（README 期望当前为 1）' % rc
+    ctx.variant('sequential-control', build)
+    ctx.variant('race-counterexample', race, role='demo')
+    return combine(ctx)
+
+
+@suite('p10_first_insert', 'src/TestUnits/fixtures/p10_first_insert/run.sh + run_tests.py')
+def s_p10(ctx):
+    rel = 'src/TestUnits/fixtures/p10_first_insert/run.sh'
+    ctx.mirror([(rel, 'repo=$(git rev-parse --show-toplevel)', 'repo="$WT_FX_REPO"')] + conda_edits(rel) + lib_edits(ctx, rel))
+
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.root(), env={'WT_FX_REPO': str(ctx.root())})
+        if rc != 0:
+            return 'fail', 'run.sh exit %s' % rc
+        rc, text = ctx.sh('run_tests.py', [SYS_PY, '-I', str(ctx.fxdir() / 'run_tests.py'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return ('pass' if rc == 0 else 'fail'), 'run_tests.py exit %s：%s' % (rc, ' '.join(text.strip().splitlines()[-2:])[:300])
+    ctx.variant('normal+tsan', green)
+    return combine(ctx)
+
+
+@suite('r103_dispatched_snapshot', 'src/TestUnits/fixtures/r103_dispatched_snapshot/run.sh')
+def s_r103(ctx):
+    def one(mode):
+        def fn():
+            rc, _ = ctx.sh('run.sh-' + mode, ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.dir / mode), mode], cwd=ctx.dir,
+                           env={'WT_R103_BUILD': str(ctx.build)})
+            return rc_verdict(rc, 'run.sh %s' % mode)
+        return fn
+    ctx.variant('asan', one('asan'))
+    ctx.variant('tsan', one('tsan'))
+    ctx.note('link-integrated.sh 需要“集成快照/构建”目录（旧 /tmp），未运行')
+    return combine(ctx)
+
+
+@suite('r13_sel_period_contract', 'src/TestUnits/fixtures/r13_sel_period_contract/run.sh')
+def s_r13_sel(ctx):
+    rel = 'src/TestUnits/fixtures/r13_sel_period_contract/run.sh'
+    ctx.mirror(conda_edits(rel))
+
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        pairs = [(l, l.split()[-1]) for l in read(ctx.dir / 'run/results.txt').splitlines() if l.strip()]
+        return ('pass' if rc == 0 else 'fail'), 'run.sh exit %s（脚本逐项断言 baseline/current 期望；%d 行）' % (rc, len(pairs))
+    ctx.variant('green+baseline-extract', green)
+    return combine(ctx)
+
+
+@suite('r14_runner_startup_overlap', 'src/TestUnits/fixtures/r14_runner_startup_overlap/run.sh')
+def s_r14(ctx):
+    rel = 'src/TestUnits/fixtures/r14_runner_startup_overlap/run.sh'
+    ctx.mirror([(rel, 'snap="$old/snapshot/src"', 'snap="$WT_FX_SNAP"'), (rel, 'build="$old/build"', 'build="$WT_FX_BUILD"')] + conda_edits(rel))
+
+    def green():
+        rc, _ = ctx.sh('run.sh', ['/bin/bash', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir,
+                       env={'WT_FX_SNAP': str(ctx.tree / 'src'), 'WT_FX_BUILD': str(ctx.build)})
+        pairs = [(l, l.split()[-1]) for l in read(ctx.dir / 'run/results.txt').splitlines() if l.strip()]
+        return ('pass' if rc == 0 and all_zero(pairs) else 'fail'), 'run.sh exit %s；%s' % (rc, summarize_pairs(pairs))
+    ctx.variant('normal+asan+tsan', green)
+    ctx.note('旧隔离快照/构建 /tmp/wt-i03-r14-010-20261102 改为 --tree/src 与 --build')
+    return combine(ctx)
+
+
+@suite('r15_tag_snapshot', 'src/TestUnits/fixtures/r15_tag_snapshot/run.sh')
+def s_r15_tag(ctx):
+    rel = 'src/TestUnits/fixtures/r15_tag_snapshot/run.sh'
+    ctx.mirror([(rel, '/private/tmp/wt-r14-resume/build/build_x64/Debug/libs', str(ctx.libs), 3),
+                (rel, '/private/tmp/wt-r14-resume/build/build_x64/Debug/bin', str(ctx.R.bin), 2),
+                (rel, '-Wl,-rpath,/private/tmp/wt-i03-r15-tags/libs', '-Wl,-rpath,/usr/local/lib')])
+    ctx.note('旧 rpath /private/tmp/wt-i03-r15-tags/libs 改为 /usr/local/lib（本机 libnanomsg 唯一位置；脚本按完整路径链接 /usr/local/lib/libnanomsg.6.0.1.dylib，其 install name 为 @rpath）')
+
+    def one(mode):
+        def fn():
+            rc, _ = ctx.sh('run.sh-' + mode, ['/bin/zsh', str(ctx.fxdir() / 'run.sh'), str(ctx.dir / mode), mode], cwd=ctx.root())
+            return rc_verdict(rc, 'run.sh %s' % mode)
+        return fn
+    ctx.variant('asan', one('asan'))
+    ctx.variant('tsan', one('tsan'))
+    return combine(ctx)
+
+
+@suite('r20_zstd_ubsan', 'src/TestUnits/fixtures/r20_zstd_ubsan/run.sh')
+def s_r20(ctx):
+    # 2026-11-05 (fixtures-agent): the vendored zstd UB was fixed (R20_wtbtcore#1); run.sh is now
+    # a self-contained green regression check built from this tree's zstdlib sources.
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        res = read(ctx.dir / 'run/results.txt').strip().replace('\n', '，')
+        return ('pass' if rc == 0 else 'fail'), 'run.sh exit %s（ASan+UBSan 与普通 direct/wrapper/sweep）：%s' % (rc, res)
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+@suite('r22_timezone', 'src/TestUnits/fixtures/r22_timezone/run.sh')
+def s_r22_tz(ctx):
+    # 2026-11-05 (fixtures-agent): baseline header moved into baseline/, run.sh added.
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/bash', str(ctx.fx / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        lines = [l for l in read(ctx.dir / 'run/results.txt').splitlines() if l.strip()]
+        bad = [l for l in lines if not l.endswith('OK')]
+        return ('pass' if rc == 0 and lines and not bad else 'fail'), 'run.sh exit %s；%d 项，MISMATCH %d%s（含 baseline-tsan-race 红控）' % (
+            rc, len(lines), len(bad), ('：' + ' | '.join(bad[:4])) if bad else '')
+    ctx.variant('green+red-baseline', green)
+    return combine(ctx)
+
+
+@suite('i03_trader_oes_query_s4', 'src/TestUnits/fixtures/i03_trader_oes_query_s4/run.sh')
+def s_trader_oes_query(ctx):
+    # 2026-11-05 (fixtures-agent): slice4 fixture for I03-NEW-101. run.sh is green-only
+    # (current TraderOES.cpp, every case in its own process); the suite carries no
+    # pre-change baseline, so its red control is not run here.
+    def green():
+        rc, text = ctx.sh('run.sh', ['/bin/sh', str(ctx.fx / 'run.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        pairs = exit_lines(read(ctx.dir / 'run/results.txt'))
+        return ('pass' if rc == 0 and all_zero(pairs) else 'fail'), 'run.sh exit %s；%s' % (rc, summarize_pairs(pairs))
+    ctx.variant('green', green)
+    ctx.note('红控（改前 TraderOES.cpp）不在套件内，未运行')
+    return combine(ctx)
+
+
+@suite('r7_twap_sell_sign', 'src/TestUnits/fixtures/r7_twap_sell_sign/README.md（手工复现步骤）')
+def s_r7(ctx):
+    ctx.attribution = '夹具问题'
+    ctx.suggestion = '为当前版本提供一个自包含 run.sh：复制 --tree、追加本目录 .inc 与 position_fake_contract.patch、构建 CoverageTests_exefact 并运行 README 末节三个过滤集（unsettled_red 期望 exit 1）；UBSan CMake 补丁需随套件提供'
+    raise Blocked('README 复现步骤依赖 `git archive ccaad010 src` 快照、docs/…/R7-002-total-times-ccaad010/CMakeLists.ubsan.patch 与前一节工作目录，且各节红控属于当时版本；'
+                  '套件无脚本入口，冻结树不含 docs', '夹具问题')
+
+
+@suite('r23_old_mapping', 'src/TestUnits/fixtures/r23_old_mapping/build.sh')
+def s_r23_old(ctx):
+    rel = 'src/TestUnits/fixtures/r23_old_mapping/build.sh'
+    ctx.mirror(conda_edits(rel) + lib_edits(ctx, rel))
+
+    def green():
+        rc, text = ctx.sh('build.sh', ['/bin/bash', str(ctx.fxdir() / 'build.sh'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        lines = re.findall(r'^(\S+) exit=(\S+) expected=(\S+)$', text, re.M)
+        return ('pass' if rc == 0 and len(lines) == 4 else 'fail'), 'build.sh exit %s；%s' % (
+            rc, '，'.join('%s=%s/期望%s' % l for l in lines) or '无结果行')
+    ctx.variant('green+known-red', green)
+    return combine(ctx)
+
+
+@suite('r23_retry_wait', 'src/TestUnits/fixtures/r23_retry_wait/build.sh + run_tests.py')
+def s_r23_retry(ctx):
+    rel = 'src/TestUnits/fixtures/r23_retry_wait/build.sh'
+    ctx.mirror([(rel, 'repo=$(git rev-parse --show-toplevel)', 'repo="$WT_FX_REPO"')] + conda_edits(rel) + lib_edits(ctx, rel))
+
+    def green():
+        rc, _ = ctx.sh('build.sh', ['/bin/bash', str(ctx.fxdir() / 'build.sh'), str(ctx.dir / 'run')], cwd=ctx.root(), env={'WT_FX_REPO': str(ctx.root())})
+        if rc != 0:
+            return 'fail', 'build.sh exit %s' % rc
+        rc, text = ctx.sh('run_tests.py', [SYS_PY, '-I', str(ctx.fxdir() / 'run_tests.py'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return ('pass' if rc == 0 else 'fail'), 'run_tests.py exit %s（baseline shutdown 期望 5，其余 0）：%s' % (rc, ' '.join(text.strip().splitlines()[-2:])[:300])
+    ctx.variant('green+baseline', green)
+    ctx.note('README 的 300 秒 normal-retry 长测未运行（README 标为单独运行）')
+    return combine(ctx)
+
+
+@suite('r3_cancel_batch_cache', 'src/TestUnits/fixtures/r3_cancel_batch_cache/run.py')
+def s_r3_batch(ctx):
+    def one(san):
+        def fn():
+            rc, _ = ctx.sh('run.py' + ('-sanitize' if san else ''), [SYS_PY, '-I', str(ctx.fx / 'run.py'), str(ctx.dir / ('asan' if san else 'run'))],
+                           cwd=ctx.dir, env={'R3_SANITIZE': '1'} if san else None)
+            return rc_verdict(rc, 'run.py%s（single/failure 期望 0，batch 期望 1 已内置）' % (' R3_SANITIZE=1' if san else ''))
+        return fn
+    ctx.variant('normal', one(False))
+    ctx.variant('sanitize', one(True))
+    return combine(ctx)
+
+
+@suite('r3_split_reject', 'src/TestUnits/fixtures/r3_split_reject/run.py')
+def s_r3_split(ctx):
+    def green():
+        rc, _ = ctx.sh('run.py', [SYS_PY, '-I', str(ctx.fx / 'run.py'), str(ctx.dir / 'run')], cwd=ctx.dir)
+        return rc_verdict(rc, 'run.py')
+    ctx.variant('green', green)
+    return combine(ctx)
+
+
+
+
+# --------------------------------------------------------------------------- driver
+def tree_manifest(root):
+    m = {}
+    for dp, dn, fn in os.walk(root):
+        for f in fn:
+            p = os.path.join(dp, f)
+            with contextlib.suppress(OSError):
+                st = os.lstat(p)
+                m[p] = (st.st_size, int(st.st_mtime))
+    return m
+
+
+PRUNE_DIRS = ('snapshot', 'CMakeFiles', 'overlay', 'profraw')
+PRUNE_SUFFIX = ('.o', '.profraw', '.d')
+
+
+def prune(ctx):
+    """Free disk after a suite finished: drop object files, CMakeFiles, copied source snapshots and
+    raw profiles. Logs, XML, result files, binaries and the mirror (APFS clone) are kept."""
+    freed = 0
+    for dp, dn, fn in os.walk(ctx.dir, topdown=True):
+        for d in list(dn):
+            if d in PRUNE_DIRS:
+                full = os.path.join(dp, d)
+                with contextlib.suppress(Exception):
+                    shutil.rmtree(full)
+                dn.remove(d)
+        for f in fn:
+            if f.endswith(PRUNE_SUFFIX):
+                full = os.path.join(dp, f)
+                with contextlib.suppress(Exception):
+                    freed += os.lstat(full).st_size
+                    os.unlink(full)
+    return freed
+
+
+def run_suite(R, name):
+    fn, entry = SUITES[name]
+    ctx = Ctx(R, name)
+    if ctx.dir.exists():
+        shutil.rmtree(ctx.dir)
+    ctx.dir.mkdir(parents=True)
+    ctx.entry = entry
+    t0 = time.time()
+    started = datetime.datetime.now().isoformat(timespec='seconds')
+    try:
+        res = fn(ctx)
+        verdict, reason = res if isinstance(res, tuple) else (res, '')
+    except Blocked as e:
+        verdict, reason = 'blocked-env', e.reason
+        ctx.attribution = ctx.attribution or e.attribution
+    except SuiteTimeout as e:
+        verdict, reason = 'timeout', str(e)
+    except Exception as e:
+        verdict, reason = 'fail', '运行器异常：%s: %s' % (type(e).__name__, e)
+        with contextlib.suppress(Exception):
+            with open(ctx.dir / 'runner-exception.txt', 'a') as f:
+                f.write(traceback.format_exc())
+    ctx.finish_short_dirs()
+    secs = time.time() - t0
+    prim = [v for v in ctx.variants if v.role == 'primary'] or ctx.variants
+    first = None
+    for v in prim:
+        if v.commands:
+            first = v.commands[-1] if v.verdict != 'pass' else v.commands[-1]
+            # prefer the main test command: the last command of the first primary variant
+            first = v.commands[-1]
+            break
+    rec = {
+        'suite': name,
+        'entry': entry or '',
+        'command': first['command'] if first else '',
+        'exit': first['exit'] if first else None,
+        'seconds': round(secs, 1),
+        'verdict': verdict,
+        'reason': reason,
+        'log': first['log'] if first else '',
+        'started': started,
+        'workdir': str(ctx.dir),
+        'runner_sha256': RUNNER_SHA,
+        'mirror': str(ctx.mirror_root) if ctx.mirror_root else '',
+        'attribution': ctx.attribution or '',
+        'suggestion': ctx.suggestion or '',
+        'notes': ctx.notes,
+        'variants': [v.as_dict() for v in ctx.variants],
+    }
+    (ctx.dir / 'result.json').write_text(json.dumps(rec, ensure_ascii=False, indent=1))
+    with contextlib.suppress(Exception):
+        prune(ctx)
+    with R.results_lock:
+        R.results[name] = rec
+    print('[%s] %-45s %-14s %6.0fs  %s' % (time.strftime('%H:%M:%S'), name, verdict, secs, reason[:150]), flush=True)
+    return rec
+
+
+def safe_run_suite(R, name):
+    try:
+        return run_suite(R, name)
+    except Exception as e:      # e.g. ENOSPC while writing results: keep the batch going
+        print('[%s] %-45s RUNNER-ERROR %s: %s' % (time.strftime('%H:%M:%S'), name, type(e).__name__, e), flush=True)
+        return None
+
+
+def derive(R, name):
+    source, entry, describe = DERIVED[name]
+    src = R.results.get(source)
+    if src is None:
+        p = R.out / source / 'result.json'
+        src = json.loads(p.read_text()) if p.exists() else None
+    d = R.out / name
+    d.mkdir(parents=True, exist_ok=True)
+    if src is None:
+        verdict, reason, extra = 'blocked-env', '来源套件 %s 未运行' % source, {}
+    else:
+        verdict, reason, extra = describe(R, src)
+    rec = {'suite': name, 'entry': entry, 'command': src['command'] if src else '', 'exit': src['exit'] if src else None,
+           'seconds': 0.0, 'verdict': verdict, 'reason': reason, 'log': src['log'] if src else '',
+           'workdir': str(d), 'derived_from': source, 'attribution': extra.get('attribution', ''),
+           'suggestion': '', 'notes': [], 'variants': []}
+    (d / 'result.json').write_text(json.dumps(rec, ensure_ascii=False, indent=1))
+    R.results[name] = rec
+    print('[%s] %-45s %-14s (derived from %s) %s' % (time.strftime('%H:%M:%S'), name, verdict, source, reason[:120]), flush=True)
+
+
+def render_readme(meta, recs, annotations):
+    """Chinese summary grouped by verdict; failures/blocked/timeouts get attribution + suggestion."""
+    order = ['pass', 'expected-red', 'fail', 'timeout', 'blocked-env', 'not-applicable']
+    title = {'pass': '通过（pass）', 'expected-red': '预期红（expected-red）', 'fail': '失败（fail）',
+             'timeout': '超时（timeout）', 'blocked-env': '无法运行（blocked-env）', 'not-applicable': '不适用（not-applicable）'}
+    counts = {k: sum(1 for r in recs if r['verdict'] == k) for k in order}
+    L = []
+    L.append('# 迭代03 独立夹具套件统一运行结果（src/TestUnits/fixtures）')
+    L.append('')
+    L.append('本文件由 `run_fixtures.py` 生成（人工归因来自同目录上级的 `annotations.json`）。**只是独立夹具套件的定向运行，不是整体回归或整体验收。**'
+             '仅本机 macOS arm64、本地 fake/受控输入；Windows/MSVC、真实厂商 SDK、生产环境均未验证。')
+    L.append('')
+    L.append('- 冻结源码树 `--tree`：`%s`' % meta['tree'])
+    L.append('- 构建目录 `--build`：`%s`（Apple clang Debug+coverage，-Werror）' % meta['build'])
+    L.append('- 输出目录：`%s`；生成时间 %s' % (meta['out'], meta['generated']))
+    L.append('- 运行器：`%s`（sha256 `%s`）' % (meta['runner'], meta['runner_sha256']))
+    integ = meta.get('integrity')
+    if integ:
+        L.append('- 完整性：运行前后 --tree 变化文件 %d 个、--build 变化文件 %d 个（`_integrity.json`）' % (integ['tree_changed_count'], integ['build_changed_count']))
+    ic = meta.get('integrity_check')
+    if ic:
+        L.append('- 只读核对：--tree 文件 %d 个，与 meta/files.txt 一致=%s；首个套件开始（%s）后 --tree 被修改的文件 %d 个、--build 被修改的文件 %d 个（summary.json meta.integrity_check）' % (
+            ic.get('tree_files', 0), ic.get('tree_filelist_equals_meta_files_txt'), ic.get('first_suite_start'),
+            len(ic.get('tree_modified_after_first_suite_start', [])), ic.get('build_modified_count', 0)))
+    L.append('- 套件目录 %d 个，结论 %d 条；★ 标记 priority.txt 所列（复核员认定的条目验收证据）%d 个' % (len(meta['fixture_dirs']), len(recs), sum(1 for r in recs if r.get('priority'))))
+    L.append('')
+    L.append('| 结论 | 数量 |')
+    L.append('|---|---|')
+    for k in order:
+        L.append('| %s | %d |' % (title[k], counts[k]))
+    L.append('')
+    L.append('## 运行约定')
+    L.append('')
+    for line in [
+        '每个套件在 `--out/<suite>/` 下独立运行，日志在 `logs/NN-<label>.log`，结果在 `result.json`；`summary.json` 汇总全部条目（字段 suite/entry/command/exit/seconds/verdict/reason/log，另含 variants 明细）。',
+        '同时最多 2 个套件，构建并行度 `-j 2`；每个变体（一次文档化的调用组）上限 20 分钟，超时记 `timeout`。',
+        '脚本内写死的 `/tmp/...` 旧构建、`conda run`、Anaconda ninja、`git rev-parse --show-toplevel`、`mktemp /tmp/...`、`-j3` 等，均在 `--out/<suite>/mirror/`（`cp -Rc` APFS 克隆的 --tree，无符号链接）中改写为 --tree/--build/--out 位置，差异逐条记录在 `mirror.patch`；不改断言。',
+        '需要非覆盖率依赖库的套件，使用从 --tree 以 Homebrew LLVM 22 构建的共享依赖 `--out/_deps/{plain,asan,tsan}`（WT_ENABLE_COVERAGE=OFF，WT_WARNINGS_AS_ERRORS=OFF，`/usr/local/include` 作隐式目录并以 -isystem 置后，Boost 1.88 优先）。',
+        'python 一律用系统 `/usr/bin/python3 -I`；脚本中的 `rg` 由运行器生成的 `grep -E` 替身提供（`_tools/bin/rg`）。',
+        'red 模式只在套件自带基线（baseline/、before/、补丁或脚本内置构造）时运行，按预期失败记入 variants（role=red）；`demo` 角色表示在当前树上用于复现现存缺陷的反例，复现时整套记 `expected-red`。',
+        '`git show <commit>:…` 只用于脚本以不可变提交重建并哈希校验红控（cta_factory_quarantine 固定为冻结 HEAD、t26_fees_atomic 固定 ccaad010），经 GIT_DIR 只读对象库。',
+    ]:
+        L.append('- ' + line)
+    L.append('')
+    for k in order:
+        group = [r for r in recs if r['verdict'] == k]
+        if not group:
+            continue
+        L.append('## %s（%d）' % (title[k], len(group)))
+        L.append('')
+        if k in ('pass', 'expected-red', 'not-applicable'):
+            L.append('| 套件 | 入口 | 耗时 s | 依据 |')
+            L.append('|---|---|---|---|')
+            for r in group:
+                reason = r['reason'].replace('|', '\\|').replace('\n', ' ')
+                if len(reason) > 600:
+                    reason = reason[:600] + '…'
+                L.append('| `%s`%s | %s | %s | %s |' % (r['suite'], ' ★' if r.get('priority') else '', (r.get('entry') or '').replace('|', '\\|'), r['seconds'], reason))
+            L.append('')
+            continue
+        for r in group:
+            L.append('### `%s`%s' % (r['suite'], '（★ 优先：条目验收证据）' if r.get('priority') else ''))
+            L.append('')
+            L.append('- 入口：%s' % (r.get('entry') or ''))
+            if r.get('command'):
+                L.append('- 主命令：`%s`（exit %s，%ss）' % (r['command'][:400], r.get('exit'), r['seconds']))
+            if r.get('log'):
+                L.append('- 日志：`%s`' % r['log'])
+            L.append('- 结论依据：%s' % r['reason'].replace('\n', ' ')[:1500])
+            a = annotations.get(r['suite'], {})
+            L.append('- 归因：%s' % (a.get('attribution') or r.get('attribution') or '待分析'))
+            if a.get('analysis'):
+                L.append('- 分析：%s' % a['analysis'])
+            sug = a.get('suggestion') or r.get('suggestion')
+            if sug:
+                L.append('- 建议：%s' % sug)
+            for n in r.get('notes', []):
+                L.append('- 备注：%s' % n)
+            L.append('')
+    finds = annotations.get('__findings__') or []
+    if finds:
+        L.append('## 运行中的新发现（未计入 213 项分母，需主代理另行登记）')
+        L.append('')
+        for f in finds:
+            L.append('- ' + f)
+        L.append('')
+    extra = annotations.get('__notes__') or []
+    if extra:
+        L.append('## 运行说明')
+        L.append('')
+        for f in extra:
+            L.append('- ' + f)
+        L.append('')
+    L.append('## 在新冻结树上重跑')
+    L.append('')
+    L.append('```sh')
+    L.append('/usr/bin/python3 -I %s \\' % meta['runner'])
+    L.append('  --tree <新冻结根，含 src/ dist/> --build <该树 Apple clang Debug+coverage 构建> \\')
+    L.append('  --out <新输出目录> --repo-git /Users/yunjinqi/Documents/new_projects/wondertrader/.git \\')
+    L.append('  [--head <冻结 HEAD；缺省读 <tree>/../meta/HEAD.txt>] [--only a,b,c] [--parallel 2 --jobs 2]')
+    L.append('```')
+    L.append('')
+    return '\n'.join(L) + '\n'
+
+
+def integrity_check(R, recs):
+    """Read-only check that the frozen tree/build were not modified by the runs."""
+    out = {}
+    metad = R.tree.parent / 'meta'
+    starts = sorted(r.get('started', '') for r in recs if r.get('started'))
+    first = None
+    if starts:
+        with contextlib.suppress(Exception):
+            first = datetime.datetime.fromisoformat(starts[0]).timestamp()
+    frozen = None
+    if (metad / 'frozen_at.txt').exists():
+        with contextlib.suppress(Exception):
+            frozen = datetime.datetime.fromisoformat(read(metad / 'frozen_at.txt').strip()).timestamp()
+    tree_files, newer_tree = [], []
+    for dp, dn, fn in os.walk(R.tree):
+        for f in fn:
+            full = os.path.join(dp, f)
+            tree_files.append('./' + os.path.relpath(full, R.tree))
+            with contextlib.suppress(OSError):
+                if first and os.lstat(full).st_mtime > first:
+                    newer_tree.append(full)
+    out['tree_files'] = len(tree_files)
+    if (metad / 'files.txt').exists():
+        listed = set(l.strip() for l in read(metad / 'files.txt').splitlines() if l.strip())
+        cur = set(tree_files)
+        out['tree_filelist_equals_meta_files_txt'] = listed == cur
+        out['tree_files_added'] = sorted(cur - listed)[:50]
+        out['tree_files_missing'] = sorted(listed - cur)[:50]
+    out['tree_modified_after_first_suite_start'] = newer_tree[:50]
+    newer_build = []
+    for dp, dn, fn in os.walk(R.build):
+        for f in fn:
+            full = os.path.join(dp, f)
+            with contextlib.suppress(OSError):
+                if first and os.lstat(full).st_mtime > first:
+                    newer_build.append(full)
+    out['build_modified_after_first_suite_start'] = newer_build[:50]
+    out['build_modified_count'] = len(newer_build)
+    out['first_suite_start'] = starts[0] if starts else ''
+    out['frozen_at'] = read(metad / 'frozen_at.txt').strip() if (metad / 'frozen_at.txt').exists() else ''
+    return out
+
+
+def write_reports(R, annotations):
+    allnames = sorted(set(SUITES) | set(DERIVED))
+    recs = []
+    for n in allnames:
+        if n in R.results:
+            recs.append(R.results[n])
+            continue
+        p = R.out / n / 'result.json'
+        if p.exists():
+            recs.append(json.loads(p.read_text()))
+    prio = [l.strip() for l in PRIORITY_FILE.read_text().splitlines() if l.strip()] if PRIORITY_FILE.exists() else []
+    for r in recs:
+        r['priority'] = r['suite'] in prio
+        a = annotations.get(r['suite']) if not r['suite'].startswith('__') else None
+        if a:
+            r['attribution'] = a.get('attribution', r.get('attribution', ''))
+            r['suggestion'] = a.get('suggestion', r.get('suggestion', ''))
+            if a.get('analysis'):
+                r['analysis'] = a['analysis']
+    meta = {'tree': str(R.tree), 'build': str(R.build), 'out': str(R.out),
+            'generated': datetime.datetime.now().isoformat(timespec='seconds'),
+            'runner': str(Path(__file__).resolve()),
+            'runner_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                        'fixture_dirs': sorted(p.name for p in R.fixtures.iterdir() if p.is_dir())}
+    integ = R.out / '_integrity.json'
+    if integ.exists():
+        meta['integrity'] = json.loads(integ.read_text())
+    meta['integrity_check'] = integrity_check(R, recs)
+    (R.out / 'summary.json').write_text(json.dumps({'meta': meta, 'suites': recs}, ensure_ascii=False, indent=1))
+    (R.out / 'README.md').write_text(render_readme(meta, recs, annotations))
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--tree', required=True)
+    ap.add_argument('--build', required=True)
+    ap.add_argument('--out', required=True)
+    ap.add_argument('--only', default='')
+    ap.add_argument('--parallel', type=int, default=2)
+    ap.add_argument('--jobs', type=int, default=2)
+    ap.add_argument('--head', default='')
+    ap.add_argument('--repo-git', default='')
+    ap.add_argument('--annotations', default=str(HERE / 'annotations.json'))
+    ap.add_argument('--report-only', action='store_true')
+    args = ap.parse_args()
+    if not args.head:
+        hp = Path(args.tree).resolve().parent / 'meta/HEAD.txt'
+        args.head = hp.read_text().strip() if hp.exists() else ''
+    R = Runner(args)
+    R.out.mkdir(parents=True, exist_ok=True)
+    R.prepare_tools()
+    ann = {}
+    if args.annotations and Path(args.annotations).exists():
+        ann = json.loads(Path(args.annotations).read_text())
+    if args.report_only:
+        write_reports(R, ann)
+        return 0
+    dirs = sorted(p.name for p in R.fixtures.iterdir() if p.is_dir())
+    unknown = [d for d in dirs if d not in SUITES and d not in DERIVED]
+    if unknown:
+        print('WARNING: fixture directories without handler: ' + ', '.join(unknown), flush=True)
+    names = [d for d in dirs if d in SUITES]
+    if args.only:
+        want = [x.strip() for x in args.only.split(',') if x.strip()]
+        names = [n for n in names if n in want]
+        der = [n for n in DERIVED if n in want]
+        for n in der:
+            src = DERIVED[n][0]
+            if src not in names and src in SUITES and not (R.out / src / 'result.json').exists():
+                names.append(src)
+    else:
+        der = sorted(DERIVED)
+    prio = [l.strip() for l in PRIORITY_FILE.read_text().splitlines() if l.strip()] if PRIORITY_FILE.exists() else []
+    names.sort(key=lambda n: (0 if n in prio else 1, prio.index(n) if n in prio else 0, n))
+    before = tree_manifest(R.tree) if not args.only else None
+    bman = tree_manifest(R.build) if not args.only else None
+    print('suites to run: %d (priority first), parallel=%d, -j %d' % (len(names), args.parallel, args.jobs), flush=True)
+    with ThreadPoolExecutor(max_workers=args.parallel) as pool:
+        list(pool.map(lambda n: safe_run_suite(R, n), names))
+    for n in der:
+        derive(R, n)
+    if before is not None:
+        after = tree_manifest(R.tree)
+        bafter = tree_manifest(R.build)
+        changed = sorted(k for k in set(before) | set(after) if before.get(k) != after.get(k))
+        bchanged = sorted(k for k in set(bman) | set(bafter) if bman.get(k) != bafter.get(k))
+        (R.out / '_integrity.json').write_text(json.dumps(
+            {'tree_files': len(after), 'tree_changed': changed[:200], 'tree_changed_count': len(changed),
+             'build_files': len(bafter), 'build_changed': bchanged[:200], 'build_changed_count': len(bchanged)},
+            ensure_ascii=False, indent=1))
+    write_reports(R, ann)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

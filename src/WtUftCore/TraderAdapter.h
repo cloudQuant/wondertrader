@@ -21,8 +21,14 @@
 #include <deque>
 #include <functional>
 #include <mutex>
+#include <string>
 #include <thread>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
+
+// Feature macro: per-order undone ledger (BUG-Q04-002, card 5) and its diagnostic view.
+#define WT_UFT_UNDONE_LEDGER 1
 
 NS_WTP_BEGIN
 class WTSVariant;
@@ -112,6 +118,13 @@ public:
 
 	bool initExt(const char* id, ITraderApi* api, IBaseDataMgr* bdMgr, ActionPolicyMgr* policyMgr);
 
+	// I03-NEW-006 (slice1 final gaps): checked clock used for the local order id.
+	// UFT has no identity journal, so every entry takes one snapshot and a failed
+	// snapshot rejects the entry before the provider call. Test seam: NULL restores
+	// the default clock.
+	typedef bool (*OrderClock)(uint32_t& date, uint32_t& time, uint64_t& epochMillis);
+	void setOrderClockForTest(OrderClock clock);
+
 	// Permanently closes this adapter instance; a released instance cannot be reinitialized.
 	// From a sink/API/SPI callback this only requests stop and returns; it does not
 	// schedule teardown. After the callback exits, a control thread must call release()
@@ -183,6 +196,8 @@ private:
 	void rollbackInitialization();
 	bool cleanupApiAndConfig();
 	bool isReleaseComplete() const;
+	/// K43：本适配器是否由模块工厂创建过 provider（释放后对象与模块常驻到进程退出）
+	bool hasModuleProvider() const { return _module_provider && _spi_ever_registered; }
 
 	uint32_t doEntrust(WTSEntrust* entrust);
 	bool	doCancel(WTSOrderInfo* ordInfo);
@@ -191,10 +206,85 @@ private:
 
 	inline WTSContractInfo* getContract(const char* stdCode);
 
-	inline void updateUndone(const char* stdCode, double qty);
-	bool rollbackUndoneIfNonzero(const char* stdCode, double qty);
-
 	const RiskParams* getRiskParams(const char* stdCode);
+
+public:
+	/*
+	 *	Per-order undone ledger (BUG-Q04-002, decision card 5).
+	 *	Each local order owns its contribution to the per-contract undone quantity.
+	 *	The contribution is reserved in doEntrust before the provider call, only
+	 *	decreases afterwards, and is released exactly once by the first terminal
+	 *	outcome. Terminal entries are tombstones; duplicate or late reports and
+	 *	reports for unknown local ids never change another order's quantity.
+	 *	The view is for diagnostics and tests only.
+	 */
+	enum class UndoneLedgerState { Submitting, Live, Terminal, Absent };
+	struct UndoneLedgerView
+	{
+		bool		found = false;
+		UndoneLedgerState state = UndoneLedgerState::Submitting;
+		double		volume = 0;			///< submitted (or first reported) order quantity
+		double		accounted = 0;		///< quantity currently counted in the undone total
+		double		order_traded = 0;	///< largest cumulative traded quantity seen in order reports
+		double		trade_sum = 0;		///< sum of distinct trade reports applied to this order
+		uint64_t	last_version = 0;
+		std::string	std_code;
+	};
+	UndoneLedgerView undoneLedger(uint32_t localid) const;
+
+	/*
+	 *	I03-NEW-059: a caller that submits orders through this adapter can learn
+	 *	each local order id before the provider call, so reports delivered
+	 *	synchronously (or concurrently) from orderInsert can be attributed to it.
+	 *	The innermost registrar of this adapter on the calling thread is invoked
+	 *	once per order, after the undone reservation and before orderInsert. The
+	 *	callback must not call back into this adapter. If it throws, the order is
+	 *	not sent and its reservation is released.
+	 */
+	class LocalOrderRegistrar
+	{
+	public:
+		typedef void (*Callback)(void* owner, uint32_t localid);
+		LocalOrderRegistrar(TraderAdapter* adapter, Callback callback, void* owner);
+		~LocalOrderRegistrar();
+		LocalOrderRegistrar(const LocalOrderRegistrar&) = delete;
+		LocalOrderRegistrar& operator=(const LocalOrderRegistrar&) = delete;
+
+	private:
+		friend class TraderAdapter;
+		TraderAdapter*			_adapter;
+		Callback				_callback;
+		void*					_owner;
+		LocalOrderRegistrar*	_previous;
+	};
+
+private:
+	struct UndoneLedgerEntry
+	{
+		std::string	std_code;
+		double		volume = 0;
+		double		order_traded = 0;
+		double		trade_sum = 0;
+		double		accounted = 0;
+		uint64_t	created_version = 0;
+		uint64_t	last_version = 0;
+		uint64_t	absent_version = 0;
+		UndoneLedgerState state = UndoneLedgerState::Submitting;
+		std::unordered_set<std::string> trade_ids;	///< trade ids already applied
+	};
+	// All helpers below require _mtx_undone_qty; none of them calls provider or sink code.
+	void undoneSetAccountedLocked(UndoneLedgerEntry& entry, double accounted);
+	void undoneRecomputeLocked(UndoneLedgerEntry& entry);
+	void undoneTerminateLocked(uint32_t localid, UndoneLedgerEntry& entry);
+	void undonePruneLocked(uint32_t keep);
+	// Applies one order report. Returns true on the first terminal transition.
+	// keepActive is true when the order should stay registered in _orders.
+	bool undoneApplyOrderLocked(uint32_t localid, const std::string& stdCode, double volume,
+		bool alive, double volLeft, uint64_t version, bool& keepActive);
+	uint8_t undoneNoteInflight(uint32_t localid, uint8_t bits);
+	// Returns the local id carried by this adapter's own tag, or 0 if the tag
+	// is foreign, malformed, unterminated within capacity or out of range.
+	uint32_t parseOwnLocalId(const char* tag, std::size_t capacity) const;
 
 public:
 	double	getPosition(const char* stdCode, bool bValidOnly, int32_t flag = 3);
@@ -305,6 +395,8 @@ private:
 	FuncDeleteTrader	_remover;
 	DllHandle			_dll_handle;
 	bool				_owns_trader_api;
+	bool				_module_provider = false;	// K43：init 曾由模块工厂创建 provider
+	bool				_spi_ever_registered = false;	// K43：provider 曾获得回调通道
 	bool				_spi_registered;
 	bool				_api_released;
 	bool				_api_release_failed;
@@ -341,8 +433,18 @@ private:
 	OrderMap*	_orders;
 	wt_hashset<std::string> _orderids;	//主要用于标记有没有处理过该订单
 
-	std::mutex	_mtx_undone_qty;
-	wt_hashmap<std::string, double> _undone_qty;	//未完成数量
+	// Guards _undone_qty and the per-order ledger. Never held across provider,
+	// sink or SPI calls; synchronous reports from orderInsert may take it.
+	mutable std::mutex	_mtx_undone_qty;
+	wt_hashmap<std::string, double> _undone_qty;	//未完成数量: 各订单账本贡献之和
+	// Node-based containers: references to one entry stay valid while others
+	// are inserted or erased.
+	std::unordered_map<uint32_t, UndoneLedgerEntry> _undone_ledger;
+	std::deque<uint32_t>	_undone_tombstones;
+	uint64_t	_undone_event_version{0};
+	uint64_t	_orders_query_version{0};	///< ledger version when queryOrders was issued
+	std::mutex	_mtx_inflight;	///< guards _inflight_entrusts; taken before _mtx_undone_qty when both are needed
+	std::unordered_map<uint32_t, uint8_t> _inflight_entrusts;	///< local ids inside orderInsert -> report flags
 
 	typedef WTSHashMap<std::string>	TradeStatMap;
 	TradeStatMap*	_stat_map;	//统计数据
@@ -359,6 +461,9 @@ private:
 	typedef wt_hashmap<std::string, RiskParams>	RiskParamsMap;
 	RiskParamsMap	_risk_params_map;
 	bool			_risk_mon_enabled;
+
+	OrderClock		_order_clock = &TraderAdapter::defaultOrderClock;
+	static bool defaultOrderClock(uint32_t& date, uint32_t& time, uint64_t& epochMillis);
 };
 
 typedef std::shared_ptr<TraderAdapter>					TraderAdapterPtr;

@@ -1,0 +1,52 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = P11TraderTest.init_rejects_overlong_ids_and_keeps_empty_id_accepted
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from P11TraderTest
+[ RUN      ] P11TraderTest.init_rejects_overlong_ids_and_keeps_empty_id_accepted
+[       OK ] P11TraderTest.init_rejects_overlong_ids_and_keeps_empty_id_accepted (466 ms)
+[----------] 1 test from P11TraderTest (466 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (472 ms total)
+[  PASSED  ] 1 test.
+
+=================================================================
+==52680==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 55 byte(s) in 1 object(s) allocated from:
+    #0 0x00010e80d77c in strdup+0xfc (libclang_rt.asan_osx_dynamic.dylib:arm64+0x4d77c)
+    #1 0x00010d4256c4  (<unknown module>)
+    #2 0x00010d425af0  (<unknown module>)
+    #3 0x00010d426d00  (<unknown module>)
+    #4 0x00018803ce2c in invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const::$_0::operator()() const+0xb0 (dyld:arm64e+0x4ce2c)
+    #5 0x000188048110 in invocation function for block in dyld3::MachOAnalyzer::forEachInitializer(Diagnostics&, dyld3::MachOAnalyzer::VMAddrConverter const&, void (unsigned int) block_pointer, void const*) const+0x13c (dyld:arm64e+0x58110)
+    #6 0x00018807e85c in invocation function for block in mach_o::UnsafeHeader::forEachSection(void (mach_o::UnsafeHeader::SectionInfo const&, bool&) block_pointer) const+0x134 (dyld:arm64e+0x8e85c)
+    #7 0x00018807b390 in mach_o::UnsafeHeader::forEachLoadCommand(void (load_command const*, bool&) block_pointer) const+0xcc (dyld:arm64e+0x8b390)
+    #8 0x00018807cc38 in mach_o::UnsafeHeader::forEachSection(void (mach_o::UnsafeHeader::SectionInfo const&, bool&) block_pointer) const+0x78 (dyld:arm64e+0x8cc38)
+    #9 0x000188047c04 in dyld3::MachOAnalyzer::forEachInitializer(Diagnostics&, dyld3::MachOAnalyzer::VMAddrConverter const&, void (unsigned int) block_pointer, void const*) const+0x200 (dyld:arm64e+0x57c04)
+    #10 0x0001880377d0 in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const+0x20c (dyld:arm64e+0x477d0)
+    #11 0x000188030408 in dyld4::JustInTimeLoader::runInitializers(dyld4::RuntimeState&) const+0x20 (dyld:arm64e+0x40408)
+    #12 0x000188037eec in dyld4::Loader::runInitializersBottomUp(dyld4::RuntimeState&, lsl::Vector<AuthenticatedValue<dyld4::Loader const*>>&, lsl::Vector<AuthenticatedValue<dyld4::Loader const*>>&) const+0x234 (dyld:arm64e+0x47eec)
+    #13 0x00018803cec4 in dyld4::Loader::runInitializersBottomUpPlusUpwardLinks(dyld4::RuntimeState&) const::$_0::operator()() const+0x70 (dyld:arm64e+0x4cec4)
+    #14 0x0001880381d4 in dyld4::Loader::runInitializersBottomUpPlusUpwardLinks(dyld4::RuntimeState&) const+0x2c8 (dyld:arm64e+0x481d4)
+    #15 0x0001880082a8 in dyld4::APIs::dlopen_from(char const*, int, void*)::$_0::operator()() const+0x90c (dyld:arm64e+0x182a8)
+    #16 0x000187ffbfe0 in dyld4::APIs::dlopen_from(char const*, int, void*)+0x458 (dyld:arm64e+0xbfe0)
+    #17 0x000187ffbae0 in dyld4::APIs::dlopen(char const*, int)+0x74 (dyld:arm64e+0xbae0)
+    #18 0x00010e8001c0 in dlopen+0x114 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x401c0)
+    #19 0x000100e0ba20 in DLLHelper::load_library(char const*) DLLHelper.hpp:34
+    #20 0x00010288f788 in wtp::TraderAdapter::init(char const*, wtp::WTSVariant*, wtp::IBaseDataMgr*, wtp::ActionPolicyMgr*) TraderAdapter.cpp:822
+    #21 0x00010167bfc8 in P11TraderTest_init_rejects_overlong_ids_and_keeps_empty_id_accepted_Test::TestBody() p11_usertag_bounds_test.cpp:74
+    #22 0x000103c60ae4 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (CoverageTests_wtcore:arm64+0x1039e4ae4)
+    #23 0x000103c60a2c in testing::Test::Run()+0xcc (CoverageTests_wtcore:arm64+0x1039e4a2c)
+    #24 0x000103c6160c in testing::TestInfo::Run()+0xd0 (CoverageTests_wtcore:arm64+0x1039e560c)
+    #25 0x000103c62090 in testing::TestSuite::Run()+0x1c4 (CoverageTests_wtcore:arm64+0x1039e6090)
+    #26 0x000103c6d4b8 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (CoverageTests_wtcore:arm64+0x1039f14b8)
+    #27 0x000103c6ce64 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (CoverageTests_wtcore:arm64+0x1039f0e64)
+    #28 0x000103c6cdc8 in testing::UnitTest::Run()+0x78 (CoverageTests_wtcore:arm64+0x1039f0dc8)
+    #29 0x000103780894 in main+0x40 (CoverageTests_wtcore:arm64+0x103504894)
+
+Objects leaked above:
+0x606000015860 (55 bytes)
+
+SUMMARY: AddressSanitizer: 55 byte(s) leaked in 1 allocation(s).

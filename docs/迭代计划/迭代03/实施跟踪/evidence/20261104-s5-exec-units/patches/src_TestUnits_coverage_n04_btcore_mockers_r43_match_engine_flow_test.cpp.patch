@@ -1,0 +1,65 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/TestUnits/coverage/n04_btcore_mockers/r43_match_engine_flow_test.cpp	2026-11-01 23:40:14
++++ src/TestUnits/coverage/n04_btcore_mockers/r43_match_engine_flow_test.cpp	2026-11-04 17:47:00
+@@ -398,6 +398,62 @@
+ 	ASSERT_NE(nullptr, items);
+ 	EXPECT_DOUBLE_EQ(250.0, items->at(100000u));
+ 	EXPECT_DOUBLE_EQ(800.0, items->at(101000u));
++}
++
++// BUG-R43-002（迭代03，2026-11-04）：盘口簿按每笔 tick 的完整档位快照重建。不再显示的
++// 价位（含空盘口之后的全部旧档）剩余量未知，不得当作当前流动性保留；该簿不参与撮合，
++// 本用例只约束其内容与空/单边/档位收缩时的有界性。
++TEST_F(R43MatchEngineFlowTest, bookIsRebuiltFromEachTickSnapshotAndEmptyQuoteClearsOldLevels)
++{
++	const char* code = "SSE.STK.610009";
++	WTSTickStruct ts;
++	memset(&ts, 0, sizeof(ts));
++	strcpy(ts.exchg, "SSE");
++	strcpy(ts.code, code);
++	ts.trading_date = 20240102;
++	ts.action_date = 20240102;
++	ts.action_time = 93000000;
++	ts.price = 10.0;
++	for (uint32_t i = 0; i < 3; i++)
++	{
++		ts.bid_prices[i] = 10.0 - 0.1 * i;
++		ts.bid_qty[i] = 100 + i;
++		ts.ask_prices[i] = 10.1 + 0.1 * i;
++		ts.ask_qty[i] = 200 + i;
++	}
++	feed(code, WTSTickData::create(ts));
++	const auto* items = MatchEngineTestAccess::book_items(engine, code);
++	ASSERT_NE(nullptr, items);
++	EXPECT_EQ(6u, items->size());
++
++	// Depth shrinks to one level per side: the two deeper levels on each side
++	// are no longer displayed and must not survive as stale liquidity.
++	feed(code, r43_tick(code, 10.0, 0, 10.0, 150, 10.1, 250));
++	items = MatchEngineTestAccess::book_items(engine, code);
++	ASSERT_NE(nullptr, items);
++	ASSERT_EQ(2u, items->size());
++	EXPECT_DOUBLE_EQ(150.0, items->at(100000u));
++	EXPECT_DOUBLE_EQ(250.0, items->at(101000u));
++
++	// One-sided quote keeps only the displayed side.
++	feed(code, r43_tick(code, 10.0, 0, 0.0, 0.0, 10.2, 300));
++	items = MatchEngineTestAccess::book_items(engine, code);
++	ASSERT_NE(nullptr, items);
++	ASSERT_EQ(1u, items->size());
++	EXPECT_DOUBLE_EQ(300.0, items->at(102000u));
++
++	// An empty quote leaves no level; a later quote rebuilds from its own snapshot.
++	feed(code, r43_tick(code, 10.0, 0, 0.0, 0.0, 0.0, 0.0));
++	items = MatchEngineTestAccess::book_items(engine, code);
++	ASSERT_NE(nullptr, items);
++	EXPECT_TRUE(items->empty());
++	EXPECT_TRUE(engine.buy(code, 10.0, 1, 20240102093000000ULL).empty());
++	feed(code, r43_tick(code, 10.0, 0, 9.9, 80, 0.0, 0.0));
++	items = MatchEngineTestAccess::book_items(engine, code);
++	ASSERT_NE(nullptr, items);
++	ASSERT_EQ(1u, items->size());
++	EXPECT_DOUBLE_EQ(80.0, items->at(99000u));
++	EXPECT_TRUE(sink.trades.empty());
+ }
+ 
+ TEST_F(R43MatchEngineFlowTest, orderSnapshotsPreserveGrossStateAndDisappearAfterTerminalReport)

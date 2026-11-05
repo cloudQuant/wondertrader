@@ -41,6 +41,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <thread>
+#include <new>
 #include <string>
 #include <vector>
 
@@ -169,8 +170,22 @@ namespace {
 	bool g_hft_configured = false;
 	std::string g_current_env;
 
+	/* 卡9c（迭代03）：runner 配置一次性，重复 config 被拒；切换 env 时以一个全新的
+	 * 进程级 runner 对象替换（与 v2 夹具相同的析构+原位重建），等价于每引擎一进程。 */
+	void fresh_porter_runner()
+	{
+		WtRtRunner& runner = getRunner();
+		runner.WtRtRunner::~WtRtRunner();
+		new (&runner) WtRtRunner();
+		g_cta_configured = false;
+		g_sel_configured = false;
+		g_hft_configured = false;
+		g_current_env.clear();
+	}
+
 	void configure_porter(const std::string& dir, const char* envName, bool& flag)
 	{
+		fresh_porter_runner();
 		getRunner().init((dir + "/r82_absent_logcfg.yaml").c_str(), true, dir.c_str());
 		/* WtPorter.cpp:260-266 的 isFile=false 转发支 */
 		config_porter(real_cfg(dir, envName).c_str(), false);
@@ -203,6 +218,7 @@ namespace {
 		if (!need_config(g_hft_configured, "hft"))
 			return true;
 
+		fresh_porter_runner();
 		getRunner().init((dir + "/r82_absent_logcfg.yaml").c_str(), true, dir.c_str());
 		if (!trader_mocker.install())
 			return false;
@@ -505,7 +521,8 @@ TEST(R82PorterCapiReal, SelEntriesAndSliceMisses)
 	ensure_sel_configured(dir);
 	ASSERT_NE(getRunner().getEngine(), nullptr);
 
-	const CtxHandler h = create_sel_context("r82_sel_real", 20240101, 93000, "d",
+	const CtxHandler h = create_sel_context("r82_sel_real", 20240101, 930, "d",	/* K27=A（2026-11-04 用户裁定）：SEL 调度时间为 HHMM，HHMMSS 值在入口被拒；原写法 93000/153000 见证据 before/。 */
+		
 		"CHINA", "TRADING", 0);
 	ASSERT_NE(h, 0U);
 	ASSERT_TRUE(getRunner().getSelContext(h) != NULL);
@@ -537,7 +554,7 @@ TEST(R82PorterCapiReal, SelEntriesAndSliceMisses)
 	EXPECT_EQ(g_pos.last_code, "");
 
 	/* 独立新上下文没有持仓或信号，空表只发一个终止回调。 */
-	const CtxHandler empty = create_sel_context("r82_sel_empty", 20240101, 93000, "d",
+	const CtxHandler empty = create_sel_context("r82_sel_empty", 20240101, 930, "d",
 		"CHINA", "TRADING", 0);
 	ASSERT_NE(empty, 0U);
 	ASSERT_TRUE(getRunner().getSelContext(empty) != NULL);
@@ -861,19 +878,20 @@ TEST(R82RunnerEdges, ConfigFailureArmsAcrossSections)
 	}
 
 	{
-		/* L678 + L936：executers 文件存在但 executers 段不是数组。 */
+		/* executers 文件存在但 executers 段不是数组。迭代03 卡8b=A（BUG-R134-003/WSN06-001）：
+		 * 执行器表在任何副作用之前整表预检，非法表使 config 失败（原断言为 TRUE，.before 见 s5-runners 证据）。 */
 		WtRtRunner* r = new_heap_runner(dir);
 		const std::string cfg = "{\"basefiles\":{},\"executers\":\""
 			+ dir + "/executers_obj.json\"," + tail + "}";
-		EXPECT_TRUE(r->config(cfg.c_str(), false));
+		EXPECT_FALSE(r->config(cfg.c_str(), false));
 	}
 
 	{
-		/* L686-689：executers 文件坏 JSON。 */
+		/* executers 文件坏 JSON：同上，卡8b=A 下 config 失败（原断言为 TRUE）。 */
 		WtRtRunner* r = new_heap_runner(dir);
 		const std::string cfg = "{\"basefiles\":{},\"executers\":\""
 			+ dir + "/bad.json\"," + tail + "}";
-		EXPECT_TRUE(r->config(cfg.c_str(), false));
+		EXPECT_FALSE(r->config(cfg.c_str(), false));
 	}
 
 	{
@@ -983,22 +1001,29 @@ TEST(R82RunnerEdges, HftFactoryNullUnitFailsAndSupportedUnitConfigures)
 		<< ": " << ec.message();
 
 	const std::string tail = "\"env\":{\"name\":\"hft\"},\"data\":{},"
-		"\"bspolicy\":\"" + dir + "/actions.json\"";
+		"\"bspolicy\":\"" + dir + "/actions.json\","
+		"\"traders\":[{\"active\":true,\"id\":\"r82_trd\",\"module\":\"TraderMocker\",\"mockerid\":82001,\"udp_port\":0}]";
 	{
 		WtRtRunner* r = new_heap_runner(dir);
+		wtp_test::TraderMockerFixture traderFixture("r82_hft_factory_missing");
+		ASSERT_TRUE(traderFixture.install()) << traderFixture.error();
 		ASSERT_TRUE(r->addHftFactories(isolatedFactoryDir.string().c_str()));
 		const std::string cfg = "{\"basefiles\":{},\"strategies\":{\"hft\":[{"
 			"\"active\":true,\"id\":\"r82_hft_null_unit\","
-			"\"name\":\"WtHftStraFact.DoesNotExist\"}]}," + tail + "}";
+			"\"name\":\"WtHftStraFact.DoesNotExist\",\"trader\":\"r82_trd\"}]}," + tail + "}";
 		EXPECT_FALSE(r->config(cfg.c_str(), false));
 	}
 
 	{
 		WtRtRunner* r = new_heap_runner(dir);
+		wtp_test::TraderMockerFixture traderFixture("r82_hft_factory_valid");
+		ASSERT_TRUE(traderFixture.install()) << traderFixture.error();
 		ASSERT_TRUE(r->addHftFactories(isolatedFactoryDir.string().c_str()));
 		const std::string cfg = "{\"basefiles\":{},\"strategies\":{\"hft\":[{"
 			"\"active\":true,\"id\":\"r82_hft_valid\","
-			"\"name\":\"WtHftStraFact.SimpleHft\",\"params\":{}}]}," + tail + "}";
+			// BUG-WSN06-002（迭代03 卡E）：SimpleHft 参数严格 schema 要求 code 必填，空对象被拒绝
+			// 且 init(false) 现传播为配置失败；合法正分支须给出最小合法参数（原为 params:{}）。
+			"\"name\":\"WtHftStraFact.SimpleHft\",\"trader\":\"r82_trd\",\"params\":{\"code\":\"SHFE.au.2406\"}}]}," + tail + "}";
 		EXPECT_TRUE(r->config(cfg.c_str(), false));
 		EXPECT_NE(dynamic_cast<WtHftEngine*>(r->getEngine()), nullptr);
 	}
@@ -1043,14 +1068,17 @@ TEST(R82RunnerEdges, LaterInvalidHftFactoryDoesNotLeaveEarlierContextInstalled)
 	HftStraContext idProbe(NULL, "r82_hft_id_probe", false, 0);
 	const uint32_t wouldBeEarlierContext = idProbe.id() + 1;
 	WtRtRunner* r = new_heap_runner(dir);
+	wtp_test::TraderMockerFixture traderFixture("r82_hft_partial");
+	ASSERT_TRUE(traderFixture.install()) << traderFixture.error();
 	ASSERT_TRUE(r->addHftFactories(isolatedFactoryDir.string().c_str()));
 	const std::string cfg = "{\"basefiles\":{},\"strategies\":{\"hft\":[{"
 		"\"active\":true,\"id\":\"r82_hft_before_invalid\","
-		"\"name\":\"WtHftStraFact.SimpleHft\",\"params\":{}},"
+		"\"name\":\"WtHftStraFact.SimpleHft\",\"trader\":\"r82_trd\",\"params\":{}},"
 		"{\"active\":true,\"id\":\"r82_hft_after_invalid\","
-		"\"name\":\"WtHftStraFact.DoesNotExist\"}]},"
+		"\"name\":\"WtHftStraFact.DoesNotExist\",\"trader\":\"r82_trd\"}]},"
 		"\"env\":{\"name\":\"hft\"},\"data\":{},"
-		"\"bspolicy\":\"" + dir + "/actions.json\"}";
+		"\"bspolicy\":\"" + dir + "/actions.json\","
+		"\"traders\":[{\"active\":true,\"id\":\"r82_trd\",\"module\":\"TraderMocker\",\"mockerid\":82001,\"udp_port\":0}]}";
 	EXPECT_FALSE(r->config(cfg.c_str(), false));
 	EXPECT_EQ(nullptr, r->getHftContext(wouldBeEarlierContext));
 
@@ -1101,13 +1129,14 @@ TEST(R82RunnerEdges, ExecuterKindFallbacksAndMissingTraders)
 		"\"env\":{\"name\":\"cta\"},\"data\":{},"
 		"\"bspolicy\":\"" + dir + "/actions.json\","
 		"\"executers\":["
-		"{\"active\":true,\"id\":\"r82_exec_noname\"},"
+		// 卡8b=A（迭代03）：local/diff/arbi 须带 scale 与含 default 的 policy。
+		"{\"active\":true,\"id\":\"r82_exec_noname\",\"scale\":1,\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\"}}},"
 		"{\"active\":true,\"id\":\"r82_exec_local_badtrd\",\"name\":\"local\","
-		"\"trader\":\"r82_absent_trader\"},"
+		"\"trader\":\"r82_absent_trader\",\"scale\":1,\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\"}}},"
 		"{\"active\":true,\"id\":\"r82_exec_diff_badtrd\",\"name\":\"diff\","
-		"\"trader\":\"r82_absent_trader\"},"
+		"\"trader\":\"r82_absent_trader\",\"scale\":1,\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\"}}},"
 		"{\"active\":true,\"id\":\"r82_exec_arbi_badtrd\",\"name\":\"arbi\","
-		"\"trader\":\"r82_absent_trader\"},"
+		"\"trader\":\"r82_absent_trader\",\"scale\":1,\"policy\":{\"default\":{\"name\":\"WtExeFact.WtMinImpactExeUnit\"}}},"
 		"{\"active\":true,\"id\":\"r82_exec_dist\",\"name\":\"dist\"},"
 		"{\"active\":false,\"id\":\"r82_exec_skipped\"}"
 		"]}";

@@ -1,0 +1,52 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-uftcore/before/src/WtUftCore/UftStraContext.h	2026-10-27 13:19:22
++++ src/WtUftCore/UftStraContext.h	2026-11-04 17:50:32
+@@ -16,6 +16,7 @@
+ #include "../Share/fmtlib.h"
+ 
+ #include "../Share/BoostMappingFile.hpp"
++#include <mutex>
+ typedef std::shared_ptr<BoostMappingFile> BoostMFPtr;
+ 
+ class UftStrategy;
+@@ -780,8 +781,17 @@
+ 	/**
+ 	 * @brief 加载本地数据
+ 	 * @details 加载本地内存映射文件中的持仓、订单、成交和回合数据
++	 *
++	 * BUG-Q04-007: the reload is a transaction. All four blocks are mapped and
++	 * validated and the new in-memory state is prepared while the published
++	 * state stays untouched. Only then are the persistent day rollover and the
++	 * manual import written, and the new mappings, positions and trading day
++	 * published together; the previous mappings are released afterwards. On any
++	 * failure nothing is published, the trading day is not advanced and the next
++	 * on_channel_ready retries. The caller must hold _local_mutex.
++	 * @return true when the state for tradingday has been published
+ 	 */
+-	void	load_local_data();
++	bool	load_local_data(uint32_t tradingday);
+ 
+ 	/**
+ 	 * @brief 持仓块配对
+@@ -848,6 +858,7 @@
+ 	 * @brief 检查是否为本策略发出的订单
+ 	 * @param localid 本地订单ID
+ 	 * @return 是否属于本策略的订单
++	 * @note 调用方必须持有 _local_mutex
+ 	 */
+ 	inline bool is_my_order(uint32_t localid) const
+ 	{
+@@ -855,6 +866,14 @@
+ 		return it != _order_ids.end();
+ 	}
+ 
++	/**
++	 * @brief 本地状态互斥锁(BUG-Q04-007)
++	 * @details 保护 _positions、_order_ids、四个本地数据块与 _tradingday。
++	 * 交易回报线程、策略线程和交易日切换都经由它串行化。持锁期间不调用
++	 * 交易通道或策略回调，避免同步回报重入时自锁。
++	 */
++	mutable std::mutex	_local_mutex;
++
+ private:
+ 	/**
+ 	 * @brief 上下文ID

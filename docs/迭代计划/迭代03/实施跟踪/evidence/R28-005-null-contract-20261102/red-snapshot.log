@@ -1,0 +1,24 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r28_wtrunner_config.router_sidecar_uses_preflight_snapshot_after_file_removed
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from r28_wtrunner_config
+[ RUN      ] r28_wtrunner_config.router_sidecar_uses_preflight_snapshot_after_file_removed
+/tmp/wt-r28-null/snapshot/src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp:1758: Failure
+Value of: runner->config(fixture_path("router_snapshot_main.yaml"))
+  Actual: false
+Expected: true
+
+/tmp/wt-r28-null/snapshot/src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp:1762: Failure
+Expected: (route.end()) != (route.find("kept")), actual: 8-byte object <98-11 00-39 0B-00 00-00> vs 8-byte object <98-11 00-39 0B-00 00-00>
+
+[  FAILED  ] r28_wtrunner_config.router_sidecar_uses_preflight_snapshot_after_file_removed (1174 ms)
+[----------] 1 test from r28_wtrunner_config (1175 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1175 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] r28_wtrunner_config.router_sidecar_uses_preflight_snapshot_after_file_removed
+
+ 1 FAILED TEST

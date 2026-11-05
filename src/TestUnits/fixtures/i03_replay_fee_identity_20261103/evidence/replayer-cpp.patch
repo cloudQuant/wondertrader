@@ -1,0 +1,450 @@
+--- /tmp/i03-replay-fee-identity-baseline-20261103/HisDataReplayer.cpp	2026-11-03 16:07:59
++++ src/WtBtCore/HisDataReplayer.cpp	2026-11-03 16:24:53
+@@ -39,6 +39,9 @@
+ #include "../WTSUtils/WTSCfgLoader.h"
+ 
+ #include "../Share/CodeHelper.hpp"
++#include "../WTSUtils/yamlcpp/yaml.h"
++#include <rapidjson/writer.h>
++#include <rapidjson/stringbuffer.h>
+ 
+ #include <filesystem>
+ namespace fs = std::filesystem;
+@@ -51,6 +54,7 @@
+ 
+ namespace
+ {
++	bool fee_is_continuous(const std::string&, const CodeHelper::CodeInfo&);
+ 	using wtp::replay::CivilDateTime;
+ 	using wtp::replay::ReplayTimeRange;
+ 	using wtp::replay::TimeRangeParseError;
+@@ -532,16 +536,69 @@
+ 		}
+ 	}
+ 
+-	loadFees(cfg->getCString("fees"));
+-	for (const auto& feeEntry : _fee_map)
++	WTSVariant* feeOption = cfg->get("fees");
++	if (feeOption && feeOption->type() != WTSVariant::VT_String)
+ 	{
+-		if (!feeEntry.second._by_volume && _bd_mgr.getCommodity(feeEntry.first.c_str()) == NULL)
++		_fee_schedule = wt_fee::Schedule{};
++		_fee_map.clear();
++		WTSLogger::error("Fees template path must be a string");
++		return false;
++	}
++	const char* feeFile = cfg->getCString("fees");
++	if (feeFile && *feeFile)
++	{
++		const std::string previousFeeError = fee_error();
++		if (!loadFeesChecked(feeFile)) return false;
++		// Preserve the historical initialization gate for amount-based fees.
++		// Initialization has no fill date; validate against loaded metadata
++		// without imposing a current-date restriction on historical contracts.
++		bool feeMetadataValid = true;
++		for (const auto& entry : _fee_schedule.productRates())
+ 		{
+-			WTSLogger::error("Amount-based fee template for {} requires commodity metadata; replayer initialization failed",
+-				feeEntry.first.c_str());
++			if (entry.second.by_volume) continue;
++			WTSCommodityInfo* commodity = _bd_mgr.getCommodity(entry.first.c_str());
++			if (!commodity || commodity->getVolScale() == 0)
++			{
++				WTSLogger::error("Amount-based fee template for {} requires valid commodity metadata", entry.first);
++				feeMetadataValid = false;
++			}
++		}
++		for (const auto& entry : _fee_schedule.contractRates())
++		{
++			if (entry.second.by_volume) continue;
++			const std::size_t dot = entry.first.find('.');
++			const std::string exchange = entry.first.substr(0, dot);
++			const std::string rawCode = entry.first.substr(dot + 1);
++			WTSContractInfo* contract = _bd_mgr.getContract(rawCode.c_str(), exchange.c_str());
++			WTSCommodityInfo* commodity = contract ? _bd_mgr.getCommodity(contract->getFullPid()) : NULL;
++			const char* rule = _hot_mgr.getRuleTag(rawCode.c_str());
++			CodeHelper::CodeInfo identity = CodeHelper::extractStdCode(entry.first.c_str(), &_hot_mgr);
++			if (fee_is_continuous(entry.first, identity) || (rule && *rule) ||
++				!contract || !commodity || contract->getCommInfo() != commodity ||
++				std::strcmp(contract->getExchg(), exchange.c_str()) ||
++				std::strcmp(contract->getCode(), rawCode.c_str()) || contract->getVolScale() == 0)
++			{
++				WTSLogger::error("Amount-based fee template for {} requires valid physical contract metadata", entry.first);
++				feeMetadataValid = false;
++			}
++		}
++		if (!feeMetadataValid)
++		{
++			_fee_schedule = wt_fee::Schedule{};
++			_fee_map.clear();
++			if (!previousFeeError.empty())
++			{
++				std::lock_guard<std::mutex> lock(_fee_error_mutex);
++				if (_fee_error.empty()) _fee_error = previousFeeError;
++			}
+ 			return false;
+ 		}
+ 	}
++	else
++	{
++		_fee_schedule = wt_fee::Schedule{};
++		_fee_map.clear();
++	}
+ 
+ 	/*
+ 	 *	By Wesley @ 2021.12.20
+@@ -1011,8 +1068,21 @@
+ 
+ 	// Clear the previous run's termination state before publishing that a new
+ 	// replay is active. A concurrent stop then cannot be overwritten by prepare.
+-	_terminated.store(false);
+-	_running.store(true);
++	std::string feeError;
++	{
++		std::lock_guard<std::mutex> lock(_fee_error_mutex);
++		feeError = _fee_error;
++		if (feeError.empty())
++		{
++			_terminated.store(false);
++			_running.store(true);
++		}
++	}
++	if (!feeError.empty())
++	{
++		WTSLogger::error("Cannot prepare replayer with unresolved fee error: {}", feeError);
++		return false;
++	}
+ 	reset();
+ 
+ 	_cur_date = _range_begin_date;
+@@ -1044,6 +1114,12 @@
+ 
+ void HisDataReplayer::run(bool bNeedDump/* = false*/)
+ {
++	const std::string pendingFeeError = fee_error();
++	if (!pendingFeeError.empty())
++	{
++		WTSLogger::error("Cannot run replayer with unresolved fee error: {}", pendingFeeError);
++		return;
++	}
+ 	if (!_time_range_valid)
+ 	{
+ 		WTSLogger::error("Cannot run replayer with an invalid time range");
+@@ -2357,10 +2433,14 @@
+ 			if (curTick != NULL)
+ 			{
+ 				_tick_simulated = true;
++				CodeHelper::CodeInfo simCode = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
++				WTSContractInfo* physical = fee_is_continuous(stdCode, simCode) ? NULL :
++					resolve_fee_contract(stdCode, simCode._code, simCode._exchg, _cur_tdate);
++				curTick->setContractInfo(physical);
+ 				if (_tick_enabled && _running.load())
+ 				{
+ 					std::lock_guard<std::mutex> lock(_dispatched_ticks_mutex);
+-					_last_dispatched_ticks[base_tick_code(stdCode)] = { _cur_tdate, curTick->getTickStruct(), adjustedSource };
++					_last_dispatched_ticks[base_tick_code(stdCode)] = { _cur_tdate, curTick->getTickStruct(), adjustedSource, physical ? physical->getCode() : "", physical ? physical->getExchg() : "" };
+ 				}
+ 				_listener->handle_tick(stdCode, curTick, pxType);
+ 			}
+@@ -3641,6 +3721,14 @@
+ 			if (data != NULL)
+ 			{
+ 				WTSReleaseGuard<WTSTickData> guard(data);
++				// Identity is copied and verified before trySetCode overwrites the
++				// event's source code. Missing identity must not suppress market data.
++				WTSContractInfo* physical = NULL;
++				if (std::memchr(item.code, '\0', sizeof(item.code)) && item.code[0] &&
++					std::memchr(item.exchg, '\0', sizeof(item.exchg)) && item.exchg[0] &&
++					item.trading_date != 0 && item.trading_date == event.tDate && event.tDate == _cur_tdate)
++					physical = resolve_fee_contract(event.code.c_str(), item.code, item.exchg, event.tDate);
++				data->setContractInfo(physical);
+ 				if (data->trySetCode(event.code.c_str()))
+ 				{
+ 					update_price(event.code.c_str(), item.price);
+@@ -3648,7 +3736,7 @@
+ 					_tick_simulated = false;
+ 					{
+ 						std::lock_guard<std::mutex> lock(_dispatched_ticks_mutex);
+-						_last_dispatched_ticks[event.code] = { _cur_tdate, data->getTickStruct(), false };
++						_last_dispatched_ticks[event.code] = { _cur_tdate, data->getTickStruct(), false, physical ? physical->getCode() : "", physical ? physical->getExchg() : "" };
+ 					}
+ 					_listener->handle_tick(event.code.c_str(), data, 0);
+ 					dispatchedRealTick = true;
+@@ -4858,7 +4946,14 @@
+ 				// A synthetic adjusted bar can be delivered under a suffix-free
+ 				// code. Its price is not the raw price requested by the caller.
+ 				if (!last->second.adjustedSource)
+-					return WTSTickData::create(last->second.tick);
++				{
++					WTSTickData* tick = WTSTickData::create(last->second.tick);
++					if (tick) tick->setContractInfo(NULL);
++					if (tick && !last->second.physicalCode.empty() && !last->second.exchange.empty())
++						tick->setContractInfo(resolve_fee_contract(subscriptionCode.c_str(), last->second.physicalCode.c_str(),
++							last->second.exchange.c_str(), last->second.tradingDate));
++					return tick;
++				}
+ 			}
+ 		}
+ 	}
+@@ -4931,79 +5026,210 @@
+ 	return cInfo->getSessionInfo();
+ }
+ 
+-void HisDataReplayer::loadFees(const char* filename)
++namespace
+ {
+-	if (strlen(filename) == 0)
+-		return;
+-
+-	if (!StdFile::exists(filename))
++	// YAML is retained for existing templates. Preserve duplicate keys for the
++	// schedule parser to reject and preserve scalar text where it is not JSON.
++	bool fee_yaml_json(const YAML::Node& node, rj::Writer<rj::StringBuffer>& out, const std::string& key, unsigned depth)
+ 	{
+-		WTSLogger::error("Fees template file {} not exists", filename);
+-		return;
++		if (depth > 8) return false;
++		if (node.IsMap())
++		{
++			out.StartObject();
++			for (const auto& entry : node)
++			{
++				if (!entry.first.IsScalar()) return false;
++				const std::string name = entry.first.Scalar();
++				out.Key(name.c_str(), static_cast<rj::SizeType>(name.size()));
++				if (!fee_yaml_json(entry.second, out, name, depth + 1)) return false;
++			}
++			out.EndObject();
++			return true;
++		}
++		if (!node.IsScalar()) return false;
++		const std::string value = node.Scalar();
++		if (key == "byvolume")
++		{
++			try { out.Bool(node.as<bool>()); return true; } catch (...) { return false; }
++		}
++		rj::Document scalar;
++		scalar.Parse(value.data(), value.size());
++		if (!scalar.HasParseError() && scalar.IsNumber() && node.Tag() != "!")
++			return scalar.Accept(out);
++		out.String(value.c_str(), static_cast<rj::SizeType>(value.size()));
++		return true;
+ 	}
+ 
+-	WTSVariant* cfg = WTSCfgLoader::load_from_file(filename);
+-	if (cfg == NULL)
++	bool fee_is_continuous(const std::string& code, const CodeHelper::CodeInfo& info)
+ 	{
+-		WTSLogger::error("Converting fees template file {} failed", filename);
+-		return;
++		if (info.hasRule()) return true;
++		std::string base = base_tick_code(code);
++		const std::size_t dot = base.rfind('.');
++		const std::string tail = dot == std::string::npos ? base : base.substr(dot + 1);
++		return tail == "HOT" || tail == "2ND" || tail == "SECOND";
+ 	}
++}
+ 
+-	auto keys = cfg->memberNames();
+-	for (const std::string& key : keys)
++void HisDataReplayer::loadFees(const char* filename)
++{
++	(void)loadFeesChecked(filename);
++}
++
++bool HisDataReplayer::loadFeesChecked(const char* filename)
++{
++	if (_running.load())
+ 	{
+-		WTSVariant* cfgItem = cfg->get(key.c_str());
+-		FeeItem& fItem = _fee_map[key];
+-		fItem._by_volume = cfgItem->getBoolean("byvolume");
+-		fItem._open = cfgItem->getDouble("open");
+-		fItem._close = cfgItem->getDouble("close");
+-		fItem._close_today = cfgItem->getDouble("closetoday");
+-		// Optional for backward-compatible fee templates.  A missing field is 0.
+-		fItem._min_fee = cfgItem->getDouble("minfee");
++		WTSLogger::error("Cannot reload fees during replay");
++		return false;
+ 	}
++	_fee_schedule = wt_fee::Schedule{};
++	_fee_map.clear();
++	std::string error;
++	try
++	{
++		if (!filename || !*filename) error = "empty fee path";
++		else
++		{
++			std::ifstream input(filename, std::ios::binary);
++			if (!input) error = "cannot open fee file";
++			else
++			{
++				std::string content((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
++				if (input.bad()) error = "cannot read fee file";
++				if (content.find('\0') != std::string::npos) error = "embedded NUL in fee file";
++				input.close();
++				if (input.fail() && error.empty()) error = "cannot close fee file";
++				const std::string ext = fs::path(filename).extension().string();
++				if (error.empty() && (ext == ".yaml" || ext == ".yml"))
++				{
++					rj::StringBuffer buffer;
++					rj::Writer<rj::StringBuffer> writer(buffer);
++					if (!fee_yaml_json(YAML::Load(content), writer, "", 0)) error = "invalid YAML fee structure";
++					else content.assign(buffer.GetString(), buffer.GetSize());
++				}
++				if (error.empty() && !_fee_schedule.loadJson(content, error)) { }
++			}
++		}
++	}
++	catch (const std::exception& e) { error = e.what(); }
++	catch (...) { error = "unknown fee load error"; }
++	if (!error.empty() || !_fee_schedule.valid())
++	{
++		_fee_schedule = wt_fee::Schedule{};
++		WTSLogger::error("Fees template {} failed: {}", filename ? filename : "", error);
++		return false;
++	}
++	for (const auto& entry : _fee_schedule.productRates())
++	{
++		FeeItem& item = _fee_map[entry.first];
++		item._open = entry.second.open; item._close = entry.second.close;
++		item._close_today = entry.second.close_today; item._min_fee = entry.second.min_fee;
++		item._by_volume = entry.second.by_volume;
++	}
++	{
++		std::lock_guard<std::mutex> lock(_fee_error_mutex);
++		_fee_error.clear();
++	}
++	WTSLogger::info("Fees template {} loaded", filename);
++	return true;
++}
+ 
+-	cfg->release();
++WTSContractInfo* HisDataReplayer::resolve_fee_contract(const char* stdCode, const char* rawCode, const char* exchange, uint32_t tradingDate)
++{
++	if (!stdCode || !*stdCode || !rawCode || !*rawCode || !exchange || !*exchange) return NULL;
++	CodeHelper::CodeInfo requested = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
++	if (!requested._exchg[0] || !requested._product[0] || std::strcmp(requested._exchg, exchange) != 0) return NULL;
++	WTSContractInfo* contract = _bd_mgr.getContract(rawCode, exchange, tradingDate);
++	WTSCommodityInfo* commodity = _bd_mgr.getCommodity(requested._exchg, requested._product);
++	if (!contract || !commodity || contract->getCommInfo() != commodity ||
++		std::strcmp(contract->getCode(), rawCode) || std::strcmp(contract->getExchg(), exchange) ||
++		std::strcmp(contract->getProduct(), requested._product)) return NULL;
++	if (!fee_is_continuous(stdCode, requested) && std::strcmp(requested._code, rawCode) != 0) return NULL;
++	// A synthetic or malformed raw code cannot establish physical provenance.
++	std::string fullCode = std::string(exchange) + "." + rawCode;
++	CodeHelper::CodeInfo physical = CodeHelper::extractStdCode(fullCode.c_str(), &_hot_mgr);
++	if (fee_is_continuous(fullCode, physical)) return NULL;
++	return contract;
++}
+ 
+-	WTSLogger::info("{} items of fees template loaded", _fee_map.size());
++bool HisDataReplayer::prepare_fee_context(const char* stdCode, const WTSContractInfo* fillContract, wt_fee::Context& out, std::string& error)
++{
++	error.clear();
++	if (!stdCode || !*stdCode) { error = "missing subscription code"; return false; }
++	CodeHelper::CodeInfo info = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
++	if (!info._exchg[0] || !info._product[0]) { error = "invalid subscription code"; return false; }
++	const bool continuous = fee_is_continuous(stdCode, info);
++	if (continuous && !fillContract) { error = "continuous subscription requires actual fill contract"; return false; }
++	const char* raw = fillContract ? fillContract->getCode() : info._code;
++	const char* exchange = fillContract ? fillContract->getExchg() : info._exchg;
++	WTSContractInfo* verified = resolve_fee_contract(stdCode, raw, exchange, _cur_tdate);
++	if (!verified || (fillContract && (fillContract != verified || fillContract->getCommInfo() != verified->getCommInfo())))
++	{ error = "fill contract does not match subscription metadata"; return false; }
++	WTSCommodityInfo* commodity = verified->getCommInfo();
++	const double scale = verified->getVolScale();
++	if (!std::isfinite(scale) || scale <= 0) { error = "invalid volume scale"; return false; }
++	wt_fee::Context candidate;
++	candidate.physical_contract = verified->getFullCode();
++	candidate.product = commodity->getFullPid();
++	candidate.volume_scale = scale;
++	const auto found = _fee_schedule.lookup(candidate.physical_contract, candidate.product);
++	if (found.status != wt_fee::LookupStatus::contract && found.status != wt_fee::LookupStatus::product)
++	{ error = "missing or invalid fee schedule for " + candidate.physical_contract; return false; }
++	candidate.rates = found.rates;
++	out = std::move(candidate);
++	return true;
+ }
+ 
++void HisDataReplayer::report_fee_error(const std::string& message)
++{
++	std::string first;
++	{
++		std::lock_guard<std::mutex> lock(_fee_error_mutex);
++		if (_fee_error.empty()) _fee_error = message.empty() ? "unspecified fee error" : message;
++		first = _fee_error;
++		_terminated.store(true);
++	}
++	WTSLogger::error("Replay fee error: {}", first);
++}
+ 
+-double HisDataReplayer::calc_fee(const char* stdCode, double price, double qty, uint32_t offset)
++std::string HisDataReplayer::fee_error() const
+ {
+-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
+-	const char* stdPID = codeInfo.stdCommID();
+-	auto it = _fee_map.find(stdPID);
+-	if (it == _fee_map.end())
+-		return 0.0;
++	std::lock_guard<std::mutex> lock(_fee_error_mutex);
++	return _fee_error;
++}
+ 
+-	double ret = 0.0;
+-	double rate = 0.0;
+-	WTSCommodityInfo* commInfo = _bd_mgr.getCommodity(stdPID);
+-	const FeeItem& fItem = it->second;
+-	if (fItem._by_volume)
++double HisDataReplayer::calc_fee(const char* stdCode, double price, double qty, uint32_t offset)
++{
++	wt_fee::Context context;
++	std::string error;
++	WTSContractInfo* physical = NULL;
++	if (stdCode && *stdCode)
+ 	{
+-		switch (offset)
++		CodeHelper::CodeInfo info = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
++		if (fee_is_continuous(stdCode, info) && _running.load())
+ 		{
+-		case 0: rate = fItem._open; ret = rate*qty; break;
+-		case 1: rate = fItem._close; ret = rate*qty; break;
+-		case 2: rate = fItem._close_today; ret = rate*qty; break;
+-		default: ret = 0.0; break;
++			std::lock_guard<std::mutex> lock(_dispatched_ticks_mutex);
++			auto last = _last_dispatched_ticks.find(stdCode);
++			if (_dispatched_tick_subscriptions.count(stdCode) && last != _last_dispatched_ticks.end() &&
++				last->second.tradingDate == _cur_tdate && !last->second.adjustedSource &&
++				!last->second.physicalCode.empty() && !last->second.exchange.empty())
++				physical = resolve_fee_contract(stdCode, last->second.physicalCode.c_str(),
++					last->second.exchange.c_str(), last->second.tradingDate);
+ 		}
+ 	}
+-	else
++	const bool ok = prepare_fee_context(stdCode, physical, context, error);
++	if (!ok)
+ 	{
+-		double amount = price*qty*commInfo->getVolScale();
+-		switch (offset)
+-		{
+-		case 0: rate = fItem._open; ret = rate*amount; break;
+-		case 1: rate = fItem._close; ret = rate*amount; break;
+-		case 2: rate = fItem._close_today; ret = rate*amount; break;
+-		default: ret = 0.0; break;
+-		}
++		WTSLogger::error("Cannot calculate fee for {}: {}", stdCode ? stdCode : "", error);
++		return std::numeric_limits<double>::quiet_NaN();
+ 	}
+-
+-	ret = apply_fee_minimum(ret, qty, rate, fItem._min_fee);
+-	return (int32_t)(ret * 100 + 0.5) / 100.0;
++	const auto result = wt_fee::calculate(context, price, qty, offset);
++	if (result.status != wt_fee::CalculationStatus::ok)
++	{
++		WTSLogger::error("Cannot calculate fee for {}: invalid calculation", stdCode);
++		return std::numeric_limits<double>::quiet_NaN();
++	}
++	return result.value;
+ }
+ 
+ double HisDataReplayer::get_cur_price(const char* stdCode)

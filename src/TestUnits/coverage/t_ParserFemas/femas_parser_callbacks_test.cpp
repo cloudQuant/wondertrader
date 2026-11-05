@@ -402,7 +402,7 @@ TEST(femas_parser, depth_market_data_converts_prices_and_times)
 
 	ASSERT_EQ(1u, fx.sink.quoteCalls);
 	const WTSTickStruct& q = fx.sink.lastTick;
-	EXPECT_EQ(0u, strcmp(q.exchg, "SHFE"));
+	EXPECT_EQ(0, strcmp(q.exchg, "SHFE"));
 	EXPECT_EQ(20260105u, q.action_date);
 	// strToTime("10:15:30")=101530 → *1000 + 250
 	EXPECT_EQ(101530250u, q.action_time);
@@ -447,7 +447,7 @@ TEST(femas_parser, czce_turnover_multiplied_by_vol_scale)
 	// CZCE 分支：Turnover * volScale(15)
 	EXPECT_DOUBLE_EQ(15000.0, q.total_turnover);
 	EXPECT_DOUBLE_EQ(0.0, q.settle_price);
-	EXPECT_EQ(0u, strcmp(q.exchg, "CZCE"));
+	EXPECT_EQ(0, strcmp(q.exchg, "CZCE"));
 }
 
 //////////////////////////////////////////////////////////////////////////

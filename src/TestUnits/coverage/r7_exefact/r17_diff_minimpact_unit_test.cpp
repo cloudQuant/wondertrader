@@ -1119,3 +1119,52 @@ TEST(r17_diff_minimpact, filled_order_keeps_late_trade_until_reconciliation)
 	}
 	h.comm->release();
 }
+
+//////////////////////////////////////////////////////////////////////////
+// 迭代03 WP1（卡5/N05-003，2026-11-04）：宿主通过保留配置键声明已按 owner 与不可复用
+// 身份核验撤单时，超时撤单经 ctx->cancel(localid) 发出且同一单只发一次；宿主拒绝核验
+// （cancel 返回 false）即转为持久隔离，不回退裸 ID、不重复撤单。未声明时保持原 fail-closed。
+//////////////////////////////////////////////////////////////////////////
+#include "Includes/IExecPluginV2.h"
+#ifndef WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY
+#define WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY "__wt_host_order_identity"
+#endif
+
+TEST(r17_diff_minimpact, wp1_timeout_with_host_verified_identity_cancels_once_or_latches)
+{
+	for (int refuse = 0; refuse < 2; ++refuse)
+	{
+		Harness h;
+		std::unique_ptr<WTSCommodityInfo, ReleaseWTSObject<WTSCommodityInfo>> commOwner(h.comm);
+		h.ctx.cancelByIdRet = refuse == 0;
+		{
+			WtDiffMinImpactExeUnit unit;
+			std::unique_ptr<WTSVariant, ReleaseWTSObject<WTSVariant>> cfg(
+				mkCfg(0, 1, 0, 0, false, 3.0, 0.0));  // expire=1s
+			ASSERT_NE(nullptr, cfg.get());
+			cfg->append(WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY, (uint32_t)1);
+			unit.init(&h.ctx, kCode, cfg.get());
+			const uint32_t id = 7361;
+			unit._orders_mon.push_order(&id, 1, h.ctx.curTime);
+			std::unique_ptr<WTSTickData, ReleaseWTSObject<WTSTickData>> t1(
+				mkTick(kCode, 93000000, 3505, 3500, 100, 3510, 50));
+			unit.on_tick(t1.get());
+			EXPECT_TRUE(h.ctx.byidCancels.empty());
+			h.ctx.curTime += 1000;
+			std::unique_ptr<WTSTickData, ReleaseWTSObject<WTSTickData>> t2(
+				mkTick(kCode, 93003000, 3505, 3500, 100, 3510, 50));
+			unit.on_tick(t2.get());
+			ASSERT_EQ(1u, h.ctx.byidCancels.size()) << "refuse=" << refuse;
+			EXPECT_EQ(id, h.ctx.byidCancels[0]);
+			EXPECT_TRUE(unit._orders_mon.has_order(id));
+			EXPECT_EQ(refuse == 1, unit._orders_mon.has_unverified_timeout());
+			EXPECT_EQ(refuse == 0, h.ctx.hasLog("canceled with host-verified identity"));
+			EXPECT_EQ(refuse == 1, h.ctx.hasLog("host could not verify its identity"));
+			h.ctx.curTime += 2000;
+			std::unique_ptr<WTSTickData, ReleaseWTSObject<WTSTickData>> t3(
+				mkTick(kCode, 93005000, 3505, 3500, 100, 3510, 50));
+			unit.on_tick(t3.get());
+			EXPECT_EQ(1u, h.ctx.byidCancels.size()) << "claimed or latched order is never re-cancelled";
+		}
+	}
+}

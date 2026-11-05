@@ -1,0 +1,23 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = P04ReplayCsvTest.failedMainBarsLoadDoesNotPoisonReplayAndCanRetry
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from P04ReplayCsvTest
+[ RUN      ] P04ReplayCsvTest.failedMainBarsLoadDoesNotPoisonReplayAndCanRetry
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:552: Failure
+Death test: { struct rlimit noCoreDumps{}; if (::setrlimit(4, &noCoreDumps) != 0) std::_Exit(90); HisDataReplayer* replayer = new HisDataReplayer(); WTSVariant* cfg = replay_cfg(_root, _base); if (cfg == nullptr) std::_Exit(91); const bool initialized = replayer->init(cfg); cfg->release(); if (!initialized) std::_Exit(92); RecordingSink sink; replayer->register_sink(&sink, "p04_missing_main"); if (!replayer->prepare()) std::_Exit(93); if (replayer->get_kline_slice("SSE.STK.000004", "d", 1, 1, true) != nullptr) std::_Exit(1); replayer->run(false); if (sink.replayDoneCalls != 1 || !sink.closedDates.empty()) std::_Exit(2); if (!write_daily_csv(_base, "SSE.STK.000004", true)) std::_Exit(3); if (!replayer->prepare()) std::_Exit(4); WTSKlineSlice* slice = replayer->get_kline_slice("SSE.STK.000004", "d", 1, 1, true); if (slice != nullptr) slice->release(); replayer->run(false); if (sink.replayDoneCalls != 2 || sink.closedDates.size() != kBarCnt) std::_Exit(5); std::_Exit(0); }
+    Result: died but not with expected exit code:
+            Exited with exit status 93
+Actual msg:
+[  DEATH   ] 
+
+[  FAILED  ] P04ReplayCsvTest.failedMainBarsLoadDoesNotPoisonReplayAndCanRetry (36 ms)
+[----------] 1 test from P04ReplayCsvTest (40 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (40 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] P04ReplayCsvTest.failedMainBarsLoadDoesNotPoisonReplayAndCanRetry
+
+ 1 FAILED TEST

@@ -1,0 +1,26 @@
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:19:
+/opt/homebrew/include/gtest/gtest.h:1394:11: warning: comparison of integers of different signs: 'const unsigned int' and 'const int' [-Wsign-compare]
+ 1394 |   if (lhs == rhs) {
+      |       ~~~ ^  ~~~
+/opt/homebrew/include/gtest/gtest.h:1413:12: note: in instantiation of function template specialization 'testing::internal::CmpHelperEQ<unsigned int, int>' requested here
+ 1413 |     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
+      |            ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:909:2: note: in instantiation of function template specialization 'testing::internal::EqHelper::Compare<unsigned int, int, nullptr>' requested here
+  909 |         EXPECT_EQ(5u, api.action.FrontID);
+      |         ^
+/opt/homebrew/include/gtest/gtest.h:1885:54: note: expanded from macro 'EXPECT_EQ'
+ 1885 |   EXPECT_PRED_FORMAT2(::testing::internal::EqHelper::Compare, val1, val2)
+      |                                                      ^
+/opt/homebrew/include/gtest/gtest.h:1394:11: warning: comparison of integers of different signs: 'const wtp::tagDirectionType' and 'const int' [-Wsign-compare]
+ 1394 |   if (lhs == rhs) {
+      |       ~~~ ^  ~~~
+/opt/homebrew/include/gtest/gtest.h:1413:12: note: in instantiation of function template specialization 'testing::internal::CmpHelperEQ<wtp::tagDirectionType, int>' requested here
+ 1413 |     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
+      |            ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp:1485:2: note: in instantiation of function template specialization 'testing::internal::EqHelper::Compare<wtp::tagDirectionType, int, nullptr>' requested here
+ 1485 |         EXPECT_EQ(WDT_LONG, rb->direction);
+      |         ^
+/opt/homebrew/include/gtest/gtest.h:1885:54: note: expanded from macro 'EXPECT_EQ'
+ 1885 |   EXPECT_PRED_FORMAT2(::testing::internal::EqHelper::Compare, val1, val2)
+      |                                                      ^
+2 warnings generated.

@@ -25,6 +25,10 @@
 
 USING_NS_WTP;
 
+#ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
+extern "C" void wt_dt_helper_fail_next_csv_read_close_for_test();
+#endif
+
 namespace {
 
 	std::vector<std::string>& t_log_sink()
@@ -481,14 +485,30 @@ TEST_F(L05HelperTickTest, DumpTicksWritesCsvAndSkipsInvalid)
 	std::ofstream ignore((_root / "ignore.txt").string());
 	ignore << "ignored";
 	std::filesystem::create_directories(_root / "sub_dir");
+	{
+		std::string malformed(sizeof(HisTickBlock) + 1, '\0');
+		HisTickBlock* header = reinterpret_cast<HisTickBlock*>(&malformed[0]);
+		memcpy(header->_blk_flag, BLK_FLAG, FLAG_SIZE);
+		header->_type = BT_HIS_Ticks;
+		header->_version = BLOCK_VERSION_RAW_V2;
+		std::ofstream out(file("malformed.dsb"), std::ios::binary);
+		out.write(malformed.data(), static_cast<std::streamsize>(malformed.size()));
+	}
 
 	const std::string csvDir = (_root / "tick_csv").string();
 	dump_ticks(_root.string().c_str(), csvDir.c_str(), "", t_log_cb);
-	const std::string brokenHeader = "文件" + (_root / "broken.dsb").string() + "头部校验失败";
-	const std::string secondBrokenHeader = "文件" + (_root / "second_broken.dsb").string() + "头部校验失败";
+	// BUG-L05-002 CSV 数据块识别（2026-11-03，见 fixtures/i03_csv_block_type_20261103）：解码前统一校验
+	// 文件标识/支持版本/tick 类型/载荷长度，不符输出 "Invalid data block header: <文件>" 并跳过。
+	const std::string invalidHeader = "Invalid data block header: ";
+	const std::string brokenHeader = invalidHeader + (_root / "broken.dsb").string();
+	const std::string secondBrokenHeader = invalidHeader + (_root / "second_broken.dsb").string();
+	const std::string malformedPayload = invalidHeader + file("malformed.dsb");
 	EXPECT_TRUE(t_any_log_has(brokenHeader.c_str())) << brokenHeader;
 	EXPECT_TRUE(t_any_log_has(secondBrokenHeader.c_str())) << secondBrokenHeader;
-	EXPECT_TRUE(t_any_log_has("导出完成"));
+	EXPECT_TRUE(t_any_log_has(malformedPayload.c_str())) << malformedPayload;
+	// 合法 tick 文件不得被误报
+	EXPECT_FALSE(t_any_log_has((invalidHeader + (_root / "SHFE.rb2010.dsb").string()).c_str()));
+	EXPECT_FALSE(t_any_log_has("全部导出完成"));
 
 	const std::string csv = (_root / "tick_csv" / "SHFE.rb2010.csv").string();
 	ASSERT_TRUE(std::filesystem::exists(csv));
@@ -517,3 +537,154 @@ TEST_F(L05HelperTickTest, DumpTicksWritesCsvAndSkipsInvalid)
 	dump_ticks((_root / "nowhere").string().c_str(), csvDir.c_str(), "", t_log_cb);
 	EXPECT_TRUE(t_any_log_has("不存在"));
 }
+
+TEST_F(L05HelperTickTest, DumpTicksValidOutputReportsBatchSuccess)
+{
+	std::vector<WTSTickStruct> ticks{ make_tick(93000, 3000) };
+	ASSERT_TRUE(store_ticks(file("tick.dsb").c_str(), ticks.data(), 1, NULL));
+	t_log_sink().clear();
+	dump_ticks(_root.string().c_str(), file("csv").c_str(), "", t_log_cb);
+	EXPECT_TRUE(t_any_log_has("写入完成"));
+	EXPECT_TRUE(t_any_log_has("全部导出完成"));
+}
+
+TEST_F(L05HelperTickTest, DumpTicksReportsOneOutputFailureAndContinues)
+{
+	std::vector<WTSTickStruct> ticks{ make_tick(93000, 3000) };
+	ASSERT_TRUE(store_ticks(file("bad.dsb").c_str(), ticks.data(), 1, NULL));
+	ASSERT_TRUE(store_ticks(file("good.dsb").c_str(), ticks.data(), 1, NULL));
+	const auto output = _root / "csv";
+	ASSERT_TRUE(std::filesystem::create_directories(output / "bad.csv"));
+	t_log_sink().clear();
+	EXPECT_NO_THROW(dump_ticks(_root.string().c_str(), output.string().c_str(), "", t_log_cb));
+	const std::string bad = (output / "bad.csv").string();
+	const std::string good = (output / "good.csv").string();
+	EXPECT_TRUE(t_any_log_has(bad.c_str()));
+	EXPECT_TRUE(t_any_log_has("创建失败"));
+	EXPECT_FALSE(t_any_log_has((bad + "写入完成").c_str()));
+	EXPECT_TRUE(t_any_log_has((good + "写入完成").c_str()));
+	EXPECT_FALSE(t_any_log_has("全部导出完成"));
+	std::ifstream input(good);
+	std::string header, row;
+	ASSERT_TRUE(std::getline(input, header));
+	ASSERT_TRUE(std::getline(input, row));
+	EXPECT_NE(row.find("3000"), std::string::npos);
+}
+
+TEST_F(L05HelperTickTest, DumpTicksReportsShortWriteWithoutSuccess)
+{
+	std::vector<WTSTickStruct> ticks{ make_tick(93000, 3000) };
+	ASSERT_TRUE(store_ticks(file("tick.dsb").c_str(), ticks.data(), 1, NULL));
+	const auto output = _root / "csv";
+	ASSERT_TRUE(std::filesystem::create_directories(output));
+	t_log_sink().clear();
+	{
+		ScopedFileSizeLimit limit;
+		ASSERT_TRUE(limit.active());
+		EXPECT_NO_THROW(dump_ticks(_root.string().c_str(), output.string().c_str(), "", t_log_cb));
+	}
+	// Buffered output may surface a short write only when close flushes it.
+	EXPECT_TRUE(t_any_log_has("写入失败") || t_any_log_has("关闭失败"));
+	EXPECT_FALSE(t_any_log_has("写入完成"));
+	EXPECT_FALSE(t_any_log_has("全部导出完成"));
+}
+
+TEST_F(L05HelperTickTest, DumpTicksReportsOutputDirectoryCreationFailure)
+{
+	std::ofstream blocker(file("not_directory"));
+	blocker << "file";
+	blocker.close();
+	const auto output = _root / "not_directory" / "csv";
+	EXPECT_NO_THROW(dump_ticks(_root.string().c_str(), output.string().c_str(), "", t_log_cb));
+	EXPECT_TRUE(t_any_log_has("目录"));
+	EXPECT_TRUE(t_any_log_has("创建失败"));
+	EXPECT_FALSE(t_any_log_has("全部导出完成"));
+	t_log_sink().clear();
+	EXPECT_NO_THROW(dump_ticks(_root.string().c_str(), file("not_directory").c_str(), "", t_log_cb));
+	EXPECT_TRUE(t_any_log_has("创建失败"));
+	EXPECT_FALSE(t_any_log_has("全部导出完成"));
+}
+
+TEST_F(L05HelperTickTest, DumpTicksReportsInputReadFailure)
+{
+	if (::geteuid() == 0)
+		GTEST_SKIP() << "root can bypass file permissions";
+	std::vector<WTSTickStruct> ticks{ make_tick(93000, 3000) };
+	ASSERT_TRUE(store_ticks(file("unreadable.dsb").c_str(), ticks.data(), 1, NULL));
+	std::error_code ec;
+	std::filesystem::permissions(file("unreadable.dsb"), std::filesystem::perms::none,
+		std::filesystem::perm_options::replace, ec);
+	ASSERT_FALSE(ec);
+	t_log_sink().clear();
+	EXPECT_NO_THROW(dump_ticks(_root.string().c_str(), file("csv").c_str(), "", t_log_cb));
+	EXPECT_TRUE(t_any_log_has("读取数据文件"));
+	EXPECT_TRUE(t_any_log_has("失败:"));
+	EXPECT_FALSE(t_any_log_has("全部导出完成"));
+}
+
+TEST_F(L05HelperTickTest, DumpTicksOverwritesWriteOnlyOutput)
+{
+	if (::geteuid() == 0)
+		GTEST_SKIP() << "root can bypass file permissions";
+	std::vector<WTSTickStruct> ticks{ make_tick(93000, 3000) };
+	ASSERT_TRUE(store_ticks(file("tick.dsb").c_str(), ticks.data(), 1, NULL));
+	const auto output = _root / "csv";
+	ASSERT_TRUE(std::filesystem::create_directories(output));
+	const auto destination = output / "tick.csv";
+	std::ofstream(destination.string()) << "old";
+	std::error_code ec;
+	std::filesystem::permissions(destination, std::filesystem::perms::owner_write,
+		std::filesystem::perm_options::replace, ec);
+	ASSERT_FALSE(ec);
+	t_log_sink().clear();
+	dump_ticks(_root.string().c_str(), output.string().c_str(), "", t_log_cb);
+	EXPECT_TRUE(t_any_log_has("写入完成"));
+	EXPECT_TRUE(t_any_log_has("全部导出完成"));
+	std::filesystem::permissions(destination, std::filesystem::perms::owner_read,
+		std::filesystem::perm_options::add, ec);
+	ASSERT_FALSE(ec);
+	std::ifstream input(destination);
+	std::string header, row;
+	ASSERT_TRUE(std::getline(input, header));
+	ASSERT_TRUE(std::getline(input, row));
+	EXPECT_NE(row.find("3000"), std::string::npos);
+}
+
+TEST_F(L05HelperTickTest, DumpTicksReportsUnenumerableSource)
+{
+	if (::geteuid() == 0)
+		GTEST_SKIP() << "root can bypass directory permissions";
+	const auto input = _root / "input";
+	ASSERT_TRUE(std::filesystem::create_directories(input));
+	std::error_code ec;
+	std::filesystem::permissions(input, std::filesystem::perms::none,
+		std::filesystem::perm_options::replace, ec);
+	ASSERT_FALSE(ec);
+	t_log_sink().clear();
+	EXPECT_NO_THROW(dump_ticks(input.string().c_str(), file("csv").c_str(), "", t_log_cb));
+	EXPECT_TRUE(t_any_log_has("读取失败"));
+	EXPECT_FALSE(t_any_log_has("全部导出完成"));
+	std::filesystem::permissions(input, std::filesystem::perms::owner_all,
+		std::filesystem::perm_options::replace, ec);
+	ASSERT_FALSE(ec);
+	std::ofstream(file("source_file")) << "file";
+	t_log_sink().clear();
+	EXPECT_NO_THROW(dump_ticks(file("source_file").c_str(), file("csv").c_str(), "", t_log_cb));
+	EXPECT_FALSE(t_any_log_has("全部导出完成"));
+}
+
+#ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
+TEST_F(L05HelperTickTest, DumpTicksReportsInputCloseFailureWithoutSuccess)
+{
+    std::vector<WTSTickStruct> ticks{ make_tick(93000, 3000) };
+    ASSERT_TRUE(store_ticks(file("tick.dsb").c_str(), ticks.data(), 1, NULL));
+    t_log_sink().clear();
+    wt_dt_helper_fail_next_csv_read_close_for_test();
+    dump_ticks(_root.string().c_str(), file("csv").c_str(), "", t_log_cb);
+    EXPECT_TRUE(t_any_log_has("读取数据文件"));
+    EXPECT_TRUE(t_any_log_has("Failed to close input file"));
+    EXPECT_FALSE(t_any_log_has("写入完成"));
+    EXPECT_FALSE(t_any_log_has("全部导出完成"));
+    EXPECT_FALSE(std::filesystem::exists(_root / "csv" / "tick.csv"));
+}
+#endif

@@ -1,0 +1,25 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.I03LongPathFailureLogStaysInsideBuffer
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.I03LongPathFailureLogStaysInsideBuffer
+/tmp/wt-i03-s5-dt-writer-base2/src/TestUnits/coverage/p05_datastorage2/i03_writer_ad_log_identity_test.cpp:93: Failure
+Expected: (message.size()) < (512u), actual: 512 vs 512
+log message escaped the 512-byte buffer: 512
+
+/tmp/wt-i03-s5-dt-writer-base2/src/TestUnits/coverage/p05_datastorage2/i03_writer_ad_log_identity_test.cpp:97: Failure
+Value of: sawLongDiagnostic
+  Actual: false
+Expected: true
+
+[  FAILED  ] R4WriterADTest.I03LongPathFailureLogStaysInsideBuffer (3 ms)
+[----------] 1 test from R4WriterADTest (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (4 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R4WriterADTest.I03LongPathFailureLogStaysInsideBuffer
+
+ 1 FAILED TEST

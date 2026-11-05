@@ -239,13 +239,8 @@ TEST_F(R112ReaderResidualTest, R112ReaderMissingAndShortHisFiles)
 
 }
 
-// A prior single run exited with signal 9 for an unknown reason. The controlled run
-// could not start because macOS rejected RLIMIT_AS before exec. Separately, these
-// CMP_V2 readers resize the input buffer, append the uncompressed payload, then write
-// through a saved V2-header pointer; append may reallocate that buffer. This is a
-// potential runtime risk, but it is not established as the cause of signal 9.
-// Keep the valid-file regression available but disabled pending a safe reproduction.
-TEST_F(R112ReaderResidualTest, DISABLED_R112ReaderQueueDetailTransCachesAreIndependent)
+// 迭代03 最终验收复核后启用（原禁用：历史单次运行 signal 9 原因未明，CMP_V2 头指针风险）。
+TEST_F(R112ReaderResidualTest, R112ReaderQueueDetailTransCachesAreIndependent)
 {
 	const uint32_t date = 20240105;
 	const char* const stdCode = "SSE.STK.600000";

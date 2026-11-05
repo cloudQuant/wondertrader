@@ -1,0 +1,113 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q02CtaIntegrationTest.incrementalSignalRestoresDesiredPriceAndConditionCallback
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q02CtaIntegrationTest
+[ RUN      ] Q02CtaIntegrationTest.incrementalSignalRestoresDesiredPriceAndConditionCallback
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:378: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  mocker->callback_count
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:379: Failure
+Expected equality of these values:
+  std::string(kCode)
+    Which is: "SSE.STK.000001"
+  mocker->callback_code
+    Which is: ""
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:380: Failure
+Expected equality of these values:
+  25.0
+    Which is: 25
+  mocker->callback_target
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:381: Failure
+Expected equality of these values:
+  12.5
+  mocker->callback_price
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:382: Failure
+Expected equality of these values:
+  std::string("conditional-resume")
+    Which is: "conditional-resume"
+  mocker->callback_usertag
+    Which is: ""
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:384: Failure
+Expected equality of these values:
+  10.5
+  mocker->stra_get_position_avgpx(kCode)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:378: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  mocker->callback_count
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:379: Failure
+Expected equality of these values:
+  std::string(kCode)
+    Which is: "SSE.STK.000001"
+  mocker->callback_code
+    Which is: ""
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:380: Failure
+Expected equality of these values:
+  25.0
+    Which is: 25
+  mocker->callback_target
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:381: Failure
+Expected equality of these values:
+  12.5
+  mocker->callback_price
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:382: Failure
+Expected equality of these values:
+  std::string("conditional-resume")
+    Which is: "conditional-resume"
+  mocker->callback_usertag
+    Which is: ""
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:384: Failure
+Expected equality of these values:
+  10.5
+  mocker->stra_get_position_avgpx(kCode)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:392: Failure
+Expected: (std::string::npos) != (resumedTrades.find(",LONG,OPEN,10.5,25,conditional-resume,")), actual: 18446744073709551615 vs 18446744073709551615
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:402: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  finalSnapshot["signals"].MemberCount()
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp:402: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  finalSnapshot["signals"].MemberCount()
+    Which is: 1
+
+[  FAILED  ] Q02CtaIntegrationTest.incrementalSignalRestoresDesiredPriceAndConditionCallback (14 ms)
+[----------] 1 test from Q02CtaIntegrationTest (14 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (14 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Q02CtaIntegrationTest.incrementalSignalRestoresDesiredPriceAndConditionCallback
+
+ 1 FAILED TEST

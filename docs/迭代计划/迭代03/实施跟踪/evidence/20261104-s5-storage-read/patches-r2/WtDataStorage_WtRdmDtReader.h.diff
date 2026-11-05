@@ -1,0 +1,42 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before-r2/src/WtDataStorage/WtRdmDtReader.h	2026-11-03 21:43:25
++++ src/WtDataStorage/WtRdmDtReader.h	2026-11-04 21:19:47
+@@ -12,6 +12,7 @@
+ #include <atomic>
+ #include <condition_variable>
+ #include <mutex>
++#include <vector>
+ 
+ #include "DataDefine.h"
+ 
+@@ -183,6 +184,7 @@
+ 	typedef struct _HisTBlockPair
+ 	{
+ 		HisTickBlock*	_block;      ///< 历史Tick数据块指针
++		std::vector<WTSTickStruct>	_items;  ///< R132-001：对齐的记录副本，读取与切片只用它（_buffer 只保留打包头）
+ 		uint64_t		_date;       ///< 数据日期
+ 		std::string		_buffer;     ///< 数据缓冲区
+ 
+@@ -207,6 +209,7 @@
+ 	typedef struct _HisTransBlockPair
+ 	{
+ 		HisTransBlock*	_block;      ///< 历史成交数据块指针
++		std::vector<WTSTransStruct>	_items;  ///< R132-001：对齐的记录副本，读取与切片只用它（_buffer 只保留打包头）
+ 		uint64_t		_date;       ///< 数据日期
+ 		std::string		_buffer;     ///< 数据缓冲区
+ 
+@@ -230,6 +233,7 @@
+ 	typedef struct _HisOrdDtlBlockPair
+ 	{
+ 		HisOrdDtlBlock*	_block;      ///< 历史委托明细数据块指针
++		std::vector<WTSOrdDtlStruct>	_items;  ///< R132-001：对齐的记录副本，读取与切片只用它（_buffer 只保留打包头）
+ 		uint64_t		_date;       ///< 数据日期
+ 		std::string		_buffer;     ///< 数据缓冲区
+ 
+@@ -253,6 +257,7 @@
+ 	typedef struct _HisOrdQueBlockPair
+ 	{
+ 		HisOrdQueBlock*	_block;      ///< 历史委托队列数据块指针
++		std::vector<WTSOrdQueStruct>	_items;  ///< R132-001：对齐的记录副本，读取与切片只用它（_buffer 只保留打包头）
+ 		uint64_t		_date;       ///< 数据日期
+ 		std::string		_buffer;     ///< 数据缓冲区
+ 

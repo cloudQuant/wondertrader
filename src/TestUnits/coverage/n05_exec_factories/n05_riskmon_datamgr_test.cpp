@@ -125,9 +125,8 @@ TEST(n05_simpdatamgr, push_null_tick_is_noop)
 	EXPECT_EQ(mgr.grab_last_tick("SHFE.rb2401"), nullptr);
 }
 
-// BUG-N05-002：未配置有效 session 时，首笔行情会解引用空 _s_info。
-// 本用例只记录独立的 session 生命周期缺陷；未初始化时钟字段已由上面的普通用例覆盖。
-TEST(DISABLED_n05_simpdatamgr, push_quote_without_session_dereferences_null)
+// 迭代03 最终验收复核后启用（原禁用：BUG-N05-002，主记录 BUG-R17-004）。
+TEST(n05_simpdatamgr, push_quote_without_session_dereferences_null)
 {
 	WtSimpDataMgr mgr;
 	WTSTickStruct ts;

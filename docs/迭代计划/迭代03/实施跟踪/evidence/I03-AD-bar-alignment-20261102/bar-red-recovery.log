@@ -1,0 +1,36 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars
+/tmp/wt-i03-ad-tick-alignment-20261102/src/WtDataStorageAD/WtDataWriterAD.cpp:1046:45: runtime error: member access within misaligned address 0x0001026f80cc for type 'WTSBarStruct', which requires 8 byte alignment
+0x0001026f80cc: note: pointer points here
+  00 00 00 00 ec d6 34 01  00 00 00 00 62 60 b8 ca  00 00 00 00 00 00 00 00  00 00 54 40 00 00 00 00
+              ^ 
+    #0 0x000100907988 in WtDataWriterAD::updateBarCache(wtp::WTSContractInfo*, wtp::WTSTickData*) WtDataWriterAD.cpp:1046
+    #1 0x000100a0270c in WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0::operator()() const WtDataWriterAD.cpp:789
+    #2 0x000100a01ff0 in std::__1::__invoke_result_impl<void, WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&>::type std::__1::__invoke[abi:nqe220108]<WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&>(WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&) invoke.h:90
+    #3 0x000100a01f8c in void std::__1::__invoke_void_return_wrapper<void, true>::__call[abi:nqe220108]<WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&>(WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&) invoke.h:350
+    #4 0x000100a01f28 in void std::__1::__invoke_r[abi:nqe220108]<void, WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&>(WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&) invoke.h:356
+    #5 0x000100a01150 in std::__1::__function::__func<WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0, void ()>::operator()() function.h:172
+    #6 0x0001009f2284 in std::__1::__function::__value_func<void ()>::operator()[abi:nqe220108]() const function.h:273
+    #7 0x0001008fcdbc in std::__1::function<void ()>::operator()() const function.h:754
+    #8 0x0001008fc798 in WtDataWriterAD::pushTask(std::__1::function<void ()>) WtDataWriterAD.cpp:812
+    #9 0x0001008fb318 in WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int) WtDataWriterAD.cpp:756
+    #10 0x000100a70dc4 in r4fx::R4WriterADTest::write_or_fail(wtp::WTSTickData*, unsigned int) r4_ad_fixture.h:470
+    #11 0x000100abc8e0 in (anonymous namespace)::R4WriterADTest_L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars_Test::TestBody() l03_ad_bar_alignment_test.cpp:75
+    #12 0x00010187c7e4 in void testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2664
+    #13 0x000101790300 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2700
+    #14 0x00010178fff8 in testing::Test::Run() gtest.cc:2739
+    #15 0x000101793610 in testing::TestInfo::Run() gtest.cc:2885
+    #16 0x000101797bb0 in testing::TestSuite::Run() gtest.cc:3063
+    #17 0x0001017ca01c in testing::internal::UnitTestImpl::RunAllTests() gtest.cc:6054
+    #18 0x0001018a9d1c in bool testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2664
+    #19 0x0001017c84f8 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2700
+    #20 0x0001017c8040 in testing::UnitTest::Run() gtest.cc:5594
+    #21 0x0001018d101c in RUN_ALL_TESTS() gtest.h:2334
+    #22 0x0001018d0f40 in main gtest_main.cc:64
+    #23 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-ad-tick-alignment-20261102/src/WtDataStorageAD/WtDataWriterAD.cpp:1046:45 

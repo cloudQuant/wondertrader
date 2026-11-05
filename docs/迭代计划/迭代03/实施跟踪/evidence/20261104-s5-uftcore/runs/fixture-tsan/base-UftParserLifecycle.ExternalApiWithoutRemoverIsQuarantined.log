@@ -1,0 +1,54 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = UftParserLifecycle.ExternalApiWithoutRemoverIsQuarantined
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from UftParserLifecycle
+[ RUN      ] UftParserLifecycle.ExternalApiWithoutRemoverIsQuarantined
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_uft_parser_lifecycle_20261104s5/parser_test.cpp:255: Failure
+Value of: adapter.hasApi()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_uft_parser_lifecycle_20261104s5/parser_test.cpp:256: Failure
+Expected equality of these values:
+  0
+  ExternalParser::destroyed.load()
+    Which is: 1
+
+[  FAILED  ] UftParserLifecycle.ExternalApiWithoutRemoverIsQuarantined (30 ms)
+[----------] 1 test from UftParserLifecycle (30 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (31 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] UftParserLifecycle.ExternalApiWithoutRemoverIsQuarantined
+
+ 1 FAILED TEST
+ThreadSanitizer:DEADLYSIGNAL
+==2916==ERROR: ThreadSanitizer: SEGV on unknown address 0x000000000008 (pc 0x0001022abff0 bp 0x00016dca2940 sp 0x00016dca2920 T6499002)
+==2916==The signal is caused by a READ memory access.
+==2916==Hint: address points to the zero page.
+    #0 testing::internal::ThreadLocal<testing::TestPartResultReporterInterface*>::~ThreadLocal() <null> (uft_parser_base:arm64+0x10014fff0)
+    #1 testing::internal::UnitTestImpl::~UnitTestImpl() <null> (uft_parser_base:arm64+0x100143f18)
+    #2 testing::internal::UnitTestImpl::~UnitTestImpl() <null> (uft_parser_base:arm64+0x100143f54)
+    #3 testing::UnitTest::~UnitTest() <null> (uft_parser_base:arm64+0x1001428b8)
+    #4 cxa_at_exit_callback_installed_at(void*) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x593f0)
+    #5 __cxa_finalize_ranges <null> (libsystem_c.dylib:arm64e+0x277f0)
+    #6 exit <null> (libsystem_c.dylib:arm64e+0x275f0)
+    #7 dyld4::LibSystemHelpers::exit(int) const <null> (libdyld.dylib:arm64e+0x1d2e0)
+    #8 dyld4::LibSystemHelpersWrapper::exit(int) const <null> (dyld:arm64e+0x1ff08)
+    #9 start <null> (dyld:arm64e+0x1fe2c)
+
+==2916==Register values:
+ x[0] = 0x0000000107400230   x[1] = 0x0000000104372040   x[2] = 0x0000000000000001   x[3] = 0x0000000107400330  
+ x[4] = 0x0000000000000001   x[5] = 0x0000000000000000   x[6] = 0x0000000000000000   x[7] = 0x000000016dca2540  
+ x[8] = 0x0000000000000000   x[9] = 0x0000000102a00008  x[10] = 0x0000000102bc6a88  x[11] = 0x0000000000000002  
+x[12] = 0x1000000000000000  x[13] = 0x0000000000000000  x[14] = 0x0000000000000000  x[15] = 0x0000000000000000  
+x[16] = 0x00000001883c8c8c  x[17] = 0x00000001f5b8d278  x[18] = 0x0000000000000000  x[19] = 0x0000000107d03ca0  
+x[20] = 0x0000000000000000  x[21] = 0x0000000000000000  x[22] = 0x0000000102600030  x[23] = 0x0000000000000002  
+x[24] = 0x0000000000000008  x[25] = 0x00000001f4558000  x[26] = 0x000000000000000d  x[27] = 0x0000000102600040  
+x[28] = 0x000000000000000c     fp = 0x000000016dca2940     lr = 0x00000001022abfe8     sp = 0x000000016dca2920  
+ThreadSanitizer can not provide additional info.
+SUMMARY: ThreadSanitizer: SEGV (uft_parser_base:arm64+0x10014fff0) in testing::internal::ThreadLocal<testing::TestPartResultReporterInterface*>::~ThreadLocal()+0x24
+==2916==ABORTING

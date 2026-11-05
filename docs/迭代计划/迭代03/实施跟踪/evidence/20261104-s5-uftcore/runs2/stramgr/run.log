@@ -1,0 +1,9 @@
+green S5UftStrategyMgrV2.ValidVersionedPluginLoadsOnce exit=0
+green S5UftStrategyMgrV2.LegacyAndInvalidTablesNeverReachCreator exit=0
+green S5UftStrategyMgrV2.ForeignFamilyPluginIsSkippedWithoutRunningIt exit=0
+green S5UftStrategyMgrV2.FactoryTeardownFollowsCapability exit=0
+red S5UftStrategyMgrV2.ValidVersionedPluginLoadsOnce exit=1
+run.sh: line 35: 59876 Bus error: 10           WT_ABI_PLUGIN_ROOT="$work/plugins" perl -e 'alarm 60; exec @ARGV' "$work/$bin" --gtest_filter="$t" --gtest_output=xml:"$out/$t.xml" > "$out/$t.log" 2>&1
+red S5UftStrategyMgrV2.LegacyAndInvalidTablesNeverReachCreator exit=138
+red S5UftStrategyMgrV2.ForeignFamilyPluginIsSkippedWithoutRunningIt exit=0
+red S5UftStrategyMgrV2.FactoryTeardownFollowsCapability exit=1

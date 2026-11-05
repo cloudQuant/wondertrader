@@ -17,6 +17,7 @@
 #include "WTSTools/WTSHotMgr.h"
 
 #include <fstream>
+#include <functional>
 
 namespace wtp {
 
@@ -56,6 +57,11 @@ struct WtDataReaderADTestAccess
 		const char* code, WTSKlinePeriod period)
 	{
 		return reader.read_bars_to_buffer(exchg, code, period);
+	}
+	static bool read_rt_snapshot(WtDataReaderAD& reader, const char* exchg,
+		const char* code, WTSKlinePeriod period, WTSBarStruct& result)
+	{
+		return reader.get_rt_cache_bar(exchg, code, period, result) == WtDataReaderAD::RTBarRead::Found;
 	}
 };
 
@@ -121,6 +127,8 @@ public:
 			_last_code = stdCode == NULL ? "" : stdCode;
 			_last_period = period;
 			_bar_events.push_back({ _last_code, period, newBar->date, newBar->time, newBar->open });
+			if (_bar_hook)
+				_bar_hook(newBar);
 		}
 	}
 
@@ -149,6 +157,7 @@ public:
 	}
 
 	void set_clock(uint32_t d, uint32_t m, uint32_t s) { _date = d; _min_time = m; _secs = s; }
+	void set_bar_hook(std::function<void(WTSBarStruct*)> hook) { _bar_hook = std::move(hook); }
 	uint32_t bar_calls() const { return _bar_calls; }
 	uint32_t all_updated() const { return _all_updated; }
 	uint32_t last_update_time() const { return _last_update_time; }
@@ -201,6 +210,7 @@ private:
 	WTSKlinePeriod	_last_period = KP_DAY;
 	uint32_t		_total = 0;
 	std::vector<BarEvent> _bar_events;
+	std::function<void(WTSBarStruct*)> _bar_hook;
 	std::vector<std::string> _all;
 	wt_hashmap<WTSLogLevel, uint32_t> _logs;
 	wt_hashmap<WTSLogLevel, std::string> _last;
@@ -1653,13 +1663,13 @@ TEST_F(R4ReaderADTest, HotBackwardCutoffWithEmptyProductHistoryFailsClosed)
 		});
 	init_reader();
 
+	// 决策 K34=C（2026-11-04 用户裁定，接受现有预合并 HOT 读取失败）：物理分段落地前 AD 读端对 HOT/custom
+	// 规则代码 fail-closed，预合并品种历史也不再提供（改前期望 late 返回品种历史 4930 一根）。
 	WTSKlineSlice* late = _reader->readKlineSlice("EXHOT_BACK.rb.HOT", KP_Minute1, 1,
 		20230103094000000ull);
-	ASSERT_NE(late, nullptr);
-	ASSERT_EQ(late->size(), 1);
-	EXPECT_EQ(late->at(0)->time, (uint64_t)R4_M1_940);
-	EXPECT_DOUBLE_EQ(late->at(0)->open, 4930.0);
-	late->release();
+	EXPECT_EQ(late, nullptr);
+	if (late != nullptr)
+		late->release();
 	ASSERT_TRUE(_sink->bar_events().empty());
 
 	WTSKlineSlice* early = _reader->readKlineSlice("EXHOT_BACK.rb.HOT", KP_Minute1, 1,
@@ -1987,6 +1997,240 @@ TEST_F(R4ReaderADTest, P05ReadBarsBufferRejectsInvalidIdentityAndPeriod)
 	EXPECT_FALSE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, "EXX", longCode.c_str(), KP_Minute1, output));
 	EXPECT_FALSE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, "EXX", "rb2301", static_cast<WTSKlinePeriod>(99), output));
 	EXPECT_EQ(output, "unchanged");
+}
+
+TEST_F(R4ReaderADTest, P05ReadBarsBufferDistinguishesEmptyFromDatabaseOpenFailure)
+{
+	seed_bars("min1", "EMPTY", "rb2301", {});
+	std::filesystem::create_directories(_root / "min1");
+	{
+		std::ofstream blocker(_root / "min1" / "BLOCKED");
+		ASSERT_TRUE(blocker.good());
+		blocker << "not a directory";
+	}
+	init_reader();
+
+	std::string output = "unchanged";
+	ASSERT_TRUE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, "EMPTY", "rb2301", KP_Minute1, output));
+	EXPECT_TRUE(output.empty());
+	output = "unchanged";
+	EXPECT_FALSE(WtDataReaderADTestAccess::read_bars_to_buffer(*_reader, "BLOCKED", "rb2301", KP_Minute1, output));
+	EXPECT_EQ(output, "unchanged");
+	// The legacy private string wrapper is retained for compatibility, but its
+	// empty return cannot distinguish a database error from a valid empty scan.
+	EXPECT_TRUE(WtDataReaderADTestAccess::read_bars_legacy(*_reader, "EMPTY", "rb2301", KP_Minute1).empty());
+	EXPECT_TRUE(WtDataReaderADTestAccess::read_bars_legacy(*_reader, "BLOCKED", "rb2301", KP_Minute1).empty());
+}
+
+// Construct packed disk records bytewise: creating a BarCacheItem on the
+// stack would itself bind an unaligned WTSBarStruct before exercising reader.
+static std::string r4_raw_bar_payload(const char* exchange, const char* code,
+	const WTSBarStruct& bar)
+{
+	std::string payload(sizeof(BarCacheItem), '\0');
+	const size_t exchangeLength = std::strlen(exchange);
+	const size_t codeLength = std::strlen(code);
+	if (exchangeLength >= 16 || codeLength >= 32)
+		return {};
+	std::memcpy(&payload[0], exchange, exchangeLength);
+	std::memcpy(&payload[16], code, codeLength);
+	std::memcpy(&payload[48], &bar, sizeof(bar));
+	return payload;
+}
+
+TEST_F(R4ReaderADTest, I03PackedRealtimeBarReadsAlignedSnapshot)
+{
+	add_stock("EXALN", "rb2301");
+	seed_bars("min1", "EXALN", "rb2301", {});
+	WTSBarStruct bar = bar_at("rb2301", R4_M1_940, 3940.0);
+	write_block_file((_root / "cache_m1.dmb").string(), BLK_FLAG, BT_RT_Cache,
+		1, 1, 1, r4_raw_bar_payload("EXALN", "rb2301", bar));
+	init_reader();
+	WTSKlineSlice* slice = _reader->readKlineSlice("EXALN.rb2301", KP_Minute1, 1,
+		20230103100000000ull);
+	ASSERT_NE(slice, nullptr);
+	ASSERT_EQ(slice->size(), 1);
+	EXPECT_DOUBLE_EQ(slice->at(0)->open, 3940.0);
+	slice->release();
+}
+
+TEST_F(R4ReaderADTest, I03PackedRealtimeSnapshotsCoverAllPeriodsAndRecords)
+{
+	add_stock("EXALL", "rb2301");
+	seed_bars("min1", "EXALL", "rb2301", {});
+	seed_bars("min5", "EXALL", "rb2301", {});
+	seed_bars("day", "EXALL", "rb2301", {});
+	struct PeriodCase { const char* filename; WTSKlinePeriod period; uint64_t barTime; };
+	const PeriodCase cases[] = {{"cache_m1.dmb", KP_Minute1, R4_M1_940},
+		{"cache_m5.dmb", KP_Minute5, R4_M1_940}, {"cache_d1.dmb", KP_DAY, 0}};
+	for (const auto& item : cases)
+	{
+		WTSBarStruct bar = bar_at("rb2301", item.barTime, 3940.0);
+		bar.date = R4_RD1;
+		const auto unwanted = r4_raw_bar_payload("EXALL", "rb9999", bar);
+		const auto wanted = r4_raw_bar_payload("EXALL", "rb2301", bar);
+		write_block_file((_root / item.filename).string(), BLK_FLAG, BT_RT_Cache,
+			1, 2, 2, unwanted + wanted);
+	}
+	init_reader();
+	for (const auto& item : cases)
+	{
+		WTSKlineSlice* slice = _reader->readKlineSlice("EXALL.rb2301", item.period, 1,
+			20230103100000000ull);
+		ASSERT_NE(slice, nullptr) << item.filename;
+		ASSERT_EQ(slice->size(), 1) << item.filename;
+		EXPECT_DOUBLE_EQ(slice->at(0)->open, 3940.0) << item.filename;
+		slice->release();
+	}
+}
+
+TEST_F(R4ReaderADTest, I03TruncatedRealtimeCacheIsNotPublishedAndCanRetry)
+{
+	add_stock("EXSHORT", "rb2301");
+	seed_bars("min1", "EXSHORT", "rb2301", {{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)}});
+	WTSBarStruct bar = bar_at("rb2301", R4_M1_940, 3940.0);
+	const auto record = r4_raw_bar_payload("EXSHORT", "rb2301", bar);
+	const auto path = (_root / "cache_m1.dmb").string();
+	write_block_file(path, BLK_FLAG, BT_RT_Cache, 1, 2, 2, record);
+	init_reader();
+	WTSKlineSlice* before = _reader->readKlineSlice("EXSHORT.rb2301", KP_Minute1, 2,
+		20230103100000000ull);
+	EXPECT_EQ(before, nullptr);
+	EXPECT_GE(_sink->count_containing("Invalid or truncated real-time bar cache"), 1u);
+	write_block_file(path, BLK_FLAG, BT_RT_Cache, 1, 2, 2, record + record);
+	WTSKlineSlice* after = _reader->readKlineSlice("EXSHORT.rb2301", KP_Minute1, 2,
+		20230103100000000ull);
+	ASSERT_NE(after, nullptr);
+	ASSERT_EQ(after->size(), 2);
+	EXPECT_DOUBLE_EQ(after->at(1)->open, 3940.0);
+	after->release();
+}
+
+TEST_F(R4ReaderADTest, I03InvalidRealtimeIdentityDoesNotPublishPartialIndex)
+{
+	add_stock("EXBAD", "rb2301");
+	seed_bars("min1", "EXBAD", "rb2301", {{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)}});
+	WTSBarStruct bar = bar_at("rb2301", R4_M1_940, 3940.0);
+	const auto good = r4_raw_bar_payload("EXBAD", "rb2301", bar);
+	auto bad = good;
+	std::memset(&bad[0], 'X', 16);
+	const auto path = (_root / "cache_m1.dmb").string();
+	write_block_file(path, BLK_FLAG, BT_RT_Cache, 1, 2, 2, good + bad);
+	init_reader();
+	WTSKlineSlice* before = _reader->readKlineSlice("EXBAD.rb2301", KP_Minute1, 2,
+		20230103100000000ull);
+	EXPECT_EQ(before, nullptr);
+	write_block_file(path, BLK_FLAG, BT_RT_Cache, 1, 2, 2, good + good);
+	WTSKlineSlice* after = _reader->readKlineSlice("EXBAD.rb2301", KP_Minute1, 2,
+		20230103100000000ull);
+	ASSERT_NE(after, nullptr);
+	ASSERT_EQ(after->size(), 2);
+	EXPECT_DOUBLE_EQ(after->at(1)->open, 3940.0);
+	after->release();
+}
+
+TEST_F(R4ReaderADTest, I03MinuteEndKeepsGateAndRetriesAtNextMinuteAfterInvalidCache)
+{
+	add_stock("EXRETRY", "rb2301");
+	seed_bars("min1", "EXRETRY", "rb2301", {{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)}});
+	init_reader();
+	WTSKlineSlice* initial = _reader->readKlineSlice("EXRETRY.rb2301", KP_Minute1, 1,
+		20230103093100000ull);
+	ASSERT_NE(initial, nullptr);
+	initial->release();
+	const auto path = (_root / "cache_m1.dmb").string();
+	const auto record = r4_raw_bar_payload("EXRETRY", "rb2301", bar_at("rb2301", R4_M1_940, 3940.0));
+	write_block_file(path, BLK_FLAG, BT_RT_Cache, 1, 2, 2, record);
+	_reader->onMinuteEnd(R4_RD1, 1000, 0);
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+	EXPECT_EQ(_sink->all_updated(), 0u);
+	write_block_file(path, BLK_FLAG, BT_RT_Cache, 1, 2, 2, record + record);
+	_reader->onMinuteEnd(R4_RD1, 1000, 0);
+	EXPECT_EQ(_sink->bar_calls(), 0u);
+	EXPECT_EQ(_sink->all_updated(), 0u);
+	_reader->onMinuteEnd(R4_RD1, 1001, 0);
+	EXPECT_EQ(_sink->bar_calls(), 1u);
+	EXPECT_EQ(_sink->all_updated(), 1u);
+}
+
+TEST_F(R4ReaderADTest, I03MinuteEndFailureCanFollowAnEmittedBarButDoesNotRepeatMinute)
+{
+	add_stock("EXPART", "rb2301");
+	add_stock("EXPART", "rb2302");
+	seed_bars("min1", "EXPART", "rb2301", {
+		{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)},
+		{R4_M1_940, bar_at("rb2301", R4_M1_940, 3940.0)}});
+	seed_bars("min1", "EXPART", "rb2302", {{R4_M1_931, bar_at("rb2302", R4_M1_931, 4000.0)}});
+	init_reader();
+	for (const char* code : {"EXPART.rb2301", "EXPART.rb2302"})
+	{
+		WTSKlineSlice* slice = _reader->readKlineSlice(code, KP_Minute1, 1, 20230103093100000ull);
+		ASSERT_NE(slice, nullptr);
+		slice->release();
+	}
+	const auto record = r4_raw_bar_payload("EXPART", "rb2302", bar_at("rb2302", R4_M1_940, 4040.0));
+	const auto path = (_root / "cache_m1.dmb").string();
+	write_block_file(path, BLK_FLAG, BT_RT_Cache, 1, 2, 2, record);
+	_reader->onMinuteEnd(R4_RD1, 1000, 0);
+	EXPECT_EQ(_sink->bar_calls(), 1u); // LMDB callback cannot be rolled back.
+	EXPECT_EQ(_sink->all_updated(), 0u);
+	write_block_file(path, BLK_FLAG, BT_RT_Cache, 1, 2, 2, record + record);
+	_reader->onMinuteEnd(R4_RD1, 1000, 0);
+	EXPECT_EQ(_sink->bar_calls(), 1u);
+	EXPECT_EQ(_sink->all_updated(), 0u);
+}
+
+TEST_F(R4ReaderADTest, I03ChangedRealtimeIdentityDoesNotReturnAnotherContract)
+{
+	add_stock("EXCHG", "rb2301");
+	WTSBarStruct bar = bar_at("rb2301", R4_M1_940, 3940.0);
+	const auto path = (_root / "cache_m1.dmb").string();
+	write_block_file(path, BLK_FLAG, BT_RT_Cache, 1, 1, 1,
+		r4_raw_bar_payload("EXCHG", "rb2301", bar));
+	init_reader();
+	WTSBarStruct snapshot;
+	ASSERT_TRUE(WtDataReaderADTestAccess::read_rt_snapshot(*_reader, "EXCHG", "rb2301", KP_Minute1, snapshot));
+	EXPECT_DOUBLE_EQ(snapshot.open, 3940.0);
+	{
+		// Replace the identity without truncating the already-mapped file.
+		std::fstream file(path, std::ios::binary | std::ios::in | std::ios::out);
+		ASSERT_TRUE(file.good());
+		file.seekp(sizeof(RTBlockHeader) + 16);
+		const char other[32] = "rb9999";
+		file.write(other, sizeof(other));
+		ASSERT_TRUE(file.good());
+	}
+	EXPECT_FALSE(WtDataReaderADTestAccess::read_rt_snapshot(*_reader, "EXCHG", "rb2301", KP_Minute1, snapshot));
+	EXPECT_TRUE(WtDataReaderADTestAccess::read_rt_snapshot(*_reader, "EXCHG", "rb9999", KP_Minute1, snapshot));
+}
+
+TEST_F(R4ReaderADTest, I03PackedRealtimeBarCallbackSurvivesReentrantBufferGrowth)
+{
+	add_stock("EXCB", "rb2301");
+	seed_bars("min1", "EXCB", "rb2301", {{R4_M1_931, bar_at("rb2301", R4_M1_931, 3900.0)}});
+	WTSBarStruct bar = bar_at("rb2301", R4_M1_940, 3940.0);
+	write_block_file((_root / "cache_m1.dmb").string(), BLK_FLAG, BT_RT_Cache,
+		1, 1, 1, r4_raw_bar_payload("EXCB", "rb2301", bar));
+	init_reader();
+	WTSKlineSlice* first = _reader->readKlineSlice("EXCB.rb2301", KP_Minute1, 1,
+		20230103093100000ull);
+	ASSERT_NE(first, nullptr);
+	first->release();
+	bool invoked = false;
+	_sink->set_bar_hook([&](WTSBarStruct* callbackBar) {
+		if (invoked) return;
+		invoked = true;
+		ASSERT_NE(callbackBar, nullptr);
+		EXPECT_DOUBLE_EQ(callbackBar->open, 3940.0);
+		WTSKlineSlice* grown = _reader->readKlineSlice("EXCB.rb2301", KP_Minute1, 64,
+			20230103100000000ull);
+		ASSERT_NE(grown, nullptr);
+		grown->release();
+		EXPECT_DOUBLE_EQ(callbackBar->open, 3940.0);
+	});
+	_reader->onMinuteEnd(R4_RD1, 1000, 0);
+	EXPECT_TRUE(invoked);
+	_sink->set_bar_hook({});
 }
 
 }  // namespace

@@ -91,10 +91,18 @@ namespace
 		cfg->append("align_by_section", false);
 		cfg->append("dont_simtick_if_notrade", false);
 		cfg->append("cache_clear_days", static_cast<uint32_t>(10));
-		cfg->append("fees", "");
+		// 卡13d：成交须有可核验的实际合约与费率（缺费即错误，零费率合法）；
+		// 本组验证信号成交语义而非费用，夹具提供合约元数据与零费率模板。
+		const std::filesystem::path fees = base / "r2_zero_fees.json";
+		std::ofstream(fees) << "{\"SSE.STK\":{\"open\":0.0,\"close\":0.0,\"closetoday\":0.0,\"byvolume\":false}}";
+		const std::filesystem::path contracts = base / "r2_contracts.json";
+		std::ofstream(contracts) << "{\"SSE\":{\"000001\":{\"name\":\"r2\",\"code\":\"000001\",\"exchg\":\"SSE\","
+			"\"product\":\"STK\",\"opendate\":20000101,\"expiredate\":20991231}}}";
+		cfg->append("fees", fees.string().c_str());
 		WTSVariant* basefiles = WTSVariant::createObject();
 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
 		basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
+		basefiles->append("contract", contracts.string().c_str());
 		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
 		cfg->append("basefiles", basefiles);
 		basefiles->release();

@@ -1,0 +1,110 @@
+[
+ {
+  "id": "asan-yd",
+  "name": "YdDestroyLifecycle.release_waits_for_after_api_destroy_notification",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/tests",
+  "filter": "YdDestroyLifecycle.release_waits_for_after_api_destroy_notification",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-yd",
+  "name": "YdDestroyLifecycle.worker_joined_and_delete_does_not_terminate",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/tests",
+  "filter": "YdDestroyLifecycle.worker_joined_and_delete_does_not_terminate",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-yd",
+  "name": "YdDestroyLifecycle.missing_after_destroy_notification_keeps_instance_and_remover_quarantines",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/tests",
+  "filter": "YdDestroyLifecycle.missing_after_destroy_notification_keeps_instance_and_remover_quarantines",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-yd",
+  "name": "YdDestroyLifecycle.release_from_callback_defers_destroy_to_external_release",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/tests",
+  "filter": "YdDestroyLifecycle.release_from_callback_defers_destroy_to_external_release",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-yd",
+  "name": "YdDestroyLifecycle.delete_trader_from_callback_quarantines",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/tests",
+  "filter": "YdDestroyLifecycle.delete_trader_from_callback_quarantines",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-yd",
+  "name": "YdDestroyLifecycle.admission_closed_after_release_and_repeated_connect_rejected",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/tests",
+  "filter": "YdDestroyLifecycle.admission_closed_after_release_and_repeated_connect_rejected",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-yd",
+  "name": "YdDestroyLifecycle.late_callback_after_release_is_not_delivered",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/tests",
+  "filter": "YdDestroyLifecycle.late_callback_after_release_is_not_delivered",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-yd",
+  "name": "YdDestroyLifecycle.release_drains_concurrent_callbacks_before_destroy",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/tests",
+  "filter": "YdDestroyLifecycle.release_drains_concurrent_callbacks_before_destroy",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-yd",
+  "name": "R93YdTest.r93_mixed_close_trade_reduces_yesterday_then_today",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/tests",
+  "filter": "R93YdTest.r93_mixed_close_trade_reduces_yesterday_then_today",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ }
+]

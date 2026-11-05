@@ -1,0 +1,35 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = C3TickerLeapSecond.Cta
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from C3TickerLeapSecond
+[ RUN      ] C3TickerLeapSecond.Cta
+==================
+WARNING: ThreadSanitizer: data race (pid=59665)
+  Write of size 4 at 0x00016f3860e4 by main thread:
+    #0 wtp::WtCtaRtTicker::on_tick(wtp::WTSTickData*) WtCtaTicker.cpp:128 (test:arm64+0x1002c01a0)
+    #1 void expectLeapSecondRejected<R202NextDayEngine<(anonymous namespace)::R202CtaEngine>, wtp::WtCtaRtTicker>()::'lambda'(unsigned int)::operator()(unsigned int) const merged.cpp:669 (test:arm64+0x1000653cc)
+    #2 void expectLeapSecondRejected<R202NextDayEngine<(anonymous namespace)::R202CtaEngine>, wtp::WtCtaRtTicker>() merged.cpp:672 (test:arm64+0x10000de88)
+    #3 C3TickerLeapSecond_Cta_Test::TestBody() merged.cpp:685 (test:arm64+0x10000dac0)
+    #4 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (test:arm64+0x100463e84)
+
+  Previous read of size 4 at 0x00016f3860e4 by thread T1:
+    #0 wtp::WtCtaRtTicker::run()::$_0::operator()() const WtCtaTicker.cpp:234 (test:arm64+0x1002cf544)
+    #1 std::__1::__invoke_result_impl<void, wtp::WtCtaRtTicker::run()::$_0>::type std::__1::__invoke[abi:nqe220108]<wtp::WtCtaRtTicker::run()::$_0>(wtp::WtCtaRtTicker::run()::$_0&&) invoke.h:90 (test:arm64+0x1002cf3e4)
+    #2 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::WtCtaRtTicker::run()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::WtCtaRtTicker::run()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (test:arm64+0x1002cf308)
+    #3 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::WtCtaRtTicker::run()::$_0>>(void*) thread.h:169 (test:arm64+0x1002cec94)
+
+  Location is stack of main thread.
+
+  Thread T1 (tid=5246128, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (test:arm64+0x1002cebf8)
+    #2 std::__1::thread::thread[abi:nqe220108]<wtp::WtCtaRtTicker::run()::$_0, 0>(wtp::WtCtaRtTicker::run()::$_0&&) thread.h:218 (test:arm64+0x1002ce990)
+    #3 std::__1::thread::thread[abi:nqe220108]<wtp::WtCtaRtTicker::run()::$_0, 0>(wtp::WtCtaRtTicker::run()::$_0&&) thread.h:209 (test:arm64+0x1002c2148)
+    #4 wtp::WtCtaRtTicker::run() WtCtaTicker.cpp:229 (test:arm64+0x1002c1f48)
+    #5 void expectLeapSecondRejected<R202NextDayEngine<(anonymous namespace)::R202CtaEngine>, wtp::WtCtaRtTicker>() merged.cpp:665 (test:arm64+0x10000de38)
+    #6 C3TickerLeapSecond_Cta_Test::TestBody() merged.cpp:685 (test:arm64+0x10000dac0)
+    #7 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (test:arm64+0x100463e84)
+
+SUMMARY: ThreadSanitizer: data race WtCtaTicker.cpp:128 in wtp::WtCtaRtTicker::on_tick(wtp::WTSTickData*)
+==================

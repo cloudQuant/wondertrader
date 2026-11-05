@@ -1,0 +1,55 @@
+[ RUN      ] R44DataManagerEdgesTest.InitFailsOnExistingButCorruptDefaultModuleFile
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:175: Failure
+Expected equality of these values:
+    Which is: NULL
+    Which is: 0x1076b3c60
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:177: Failure
+Value of: dm.canSessionReceive("DAY0")
+  Actual: true
+Expected: false
+[  FAILED  ] R44DataManagerEdgesTest.InitFailsOnExistingButCorruptDefaultModuleFile (225 ms)
+[ RUN      ] R44DataManagerEdgesTest.InitFailsWhenDefaultModuleNameIsDirectory
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:191: Failure
+Expected equality of these values:
+    Which is: NULL
+    Which is: 0x1076b49b0
+[  FAILED  ] R44DataManagerEdgesTest.InitFailsWhenDefaultModuleNameIsDirectory (39 ms)
+[ RUN      ] R44DataManagerEdgesTest.DuplicateCasterIsFannedOutTwice
+[       OK ] R44DataManagerEdgesTest.DuplicateCasterIsFannedOutTwice (23 ms)
+[ RUN      ] R44DataManagerEdgesTest.FourBroadcastOverloadsReachCaster
+[       OK ] R44DataManagerEdgesTest.FourBroadcastOverloadsReachCaster (23 ms)
+[ RUN      ] R44DataManagerEdgesTest.ReleaseWithoutWriterIsIdempotent
+[       OK ] R44DataManagerEdgesTest.ReleaseWithoutWriterIsIdempotent (3 ms)
+[ RUN      ] R44DataManagerEdgesTest.SessionCommsExposeCommodityFullPids
+[       OK ] R44DataManagerEdgesTest.SessionCommsExposeCommodityFullPids (721 ms)
+[ RUN      ] R5StateMonitorBdtTest.SessionCommsPresentOverwritesSeededTradingDate
+[       OK ] R5StateMonitorBdtTest.SessionCommsPresentOverwritesSeededTradingDate (3 ms)
+[ RUN      ] R5StateMonitorBdtTest.SessionWithoutCommsKeepsSeededTradingDate
+[       OK ] R5StateMonitorBdtTest.SessionWithoutCommsKeepsSeededTradingDate (56 ms)
+[ RUN      ] R5StateMonitorBdtTest.TodayAsHolidayDrivesHolidayLogBranchOfInitLoop
+[       OK ] R5StateMonitorBdtTest.TodayAsHolidayDrivesHolidayLogBranchOfInitLoop (21 ms)
+[ RUN      ] R5StateMonitorBdtTest.FifteenCharSessionIdFitsStateKeyBuffer
+[       OK ] R5StateMonitorBdtTest.FifteenCharSessionIdFitsStateKeyBuffer (54 ms)
+[ RUN      ] R5StateMonitorBdtTest.MissingTimeFieldsDefaultToZeroAndStillAssembleSections
+[       OK ] R5StateMonitorBdtTest.MissingTimeFieldsDefaultToZeroAndStillAssembleSections (36 ms)
+[ RUN      ] R5StateMonitorBdtTest.ReinitializeWithExtraSessionGrowsStateTable
+[       OK ] R5StateMonitorBdtTest.ReinitializeWithExtraSessionGrowsStateTable (29 ms)
+[ RUN      ] R5StateMonitorBdtTest.SessionWithoutAuctionKeepsOnlyTradingSections
+[       OK ] R5StateMonitorBdtTest.SessionWithoutAuctionKeepsOnlyTradingSections (6 ms)
+[ RUN      ] R5StateMonitorBdtTest.InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions
+[       OK ] R5StateMonitorBdtTest.InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions (4 ms)
+[ RUN      ] R5StateMonitorBdtTest.CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries
+[       OK ] R5StateMonitorBdtTest.CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries (24 ms)
+[ RUN      ] R5StateMonitorBdtTest.CrossMidnightPaddingOverlapCollapsesToFullDay
+[       OK ] R5StateMonitorBdtTest.CrossMidnightPaddingOverlapCollapsesToFullDay (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.InvalidSessionEntriesRejectWholeFile
+[       OK ] R5StateMonitorBdtTest.InvalidSessionEntriesRejectWholeFile (3 ms)
+[ RUN      ] R5StateMonitorBdtTest.ZeroStartSectionUsesClampedMidnightPadding
+[       OK ] R5StateMonitorBdtTest.ZeroStartSectionUsesClampedMidnightPadding (3 ms)
+[ RUN      ] R5StateMonitorBdtTest.NonObjectEntriesDegradeToDefaultTimes
+[       OK ] R5StateMonitorBdtTest.NonObjectEntriesDegradeToDefaultTimes (43 ms)
+[ RUN      ] R5StateMonitorBdtTest.MixedKnownAndUnknownSessionsKeepTableConsistent
+[       OK ] R5StateMonitorBdtTest.MixedKnownAndUnknownSessionsKeepTableConsistent (50 ms)
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] R44DataManagerEdgesTest.InitFailsOnExistingButCorruptDefaultModuleFile
+[  FAILED  ] R44DataManagerEdgesTest.InitFailsWhenDefaultModuleNameIsDirectory

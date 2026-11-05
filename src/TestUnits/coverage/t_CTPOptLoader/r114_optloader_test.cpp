@@ -198,7 +198,7 @@ TEST_F(R114OptFixture, run_json_file_branch_reads_all_ctp_and_config_keys)
 		}
 	})");
 
-	ASSERT_EQ(run(cfg.c_str(), true, true), 0);
+	ASSERT_EQ(run(cfg.c_str(), true, true), 1) << "I03-NEW-091 / K02=B: missing config.path is a configuration error";
 	EXPECT_EQ(FRONT_ADDR, "tcp://10.2.3.4:5678");
 	EXPECT_EQ(BROKER_ID, "brk_json");
 	EXPECT_EQ(INVESTOR_ID, "inv_json");
@@ -238,7 +238,7 @@ TEST_F(R114OptFixture, run_ini_file_branch_reads_explicit_values)
 		"onlyincfg=true\n"
 		"incremental=true\n");
 
-	ASSERT_EQ(run(cfg.c_str(), true, true), 0);
+	ASSERT_EQ(run(cfg.c_str(), true, true), 1) << "I03-NEW-091 / K02=B: missing config.path is a configuration error";
 	EXPECT_EQ(FRONT_ADDR, "tcp://127.0.0.1:19001");
 	EXPECT_EQ(BROKER_ID, "brk_ini");
 	EXPECT_EQ(INVESTOR_ID, "inv_ini");
@@ -481,10 +481,13 @@ TEST_F(R114OptFixture, dump_to_json_writes_two_files_and_exits_zero)
 	opt.UnderlyingMultiple = 5.0;
 	spi.OnRspQryInstrument(&opt, &ok, 3, false);
 
-	// bIsLast=true -> DumpToJson() + exit(0)（BUG-T4-015）。死亡测试把它关在子进程里，
-	// 父进程继续断言两个 JSON 文件确实写出。
-	EXPECT_EXIT(spi.OnRspQryInstrument(&opt, &ok, 4, true),
-		::testing::ExitedWithCode(0), "");
+	// K02=B / BUG-T4-015（2026-11-04 用户裁定）：成功末包落盘并记录结果码 0，不再 exit 宿主进程；
+	// 原死亡测试（EXPECT_EXIT 退出码 0）见证据 before/。
+	loader_completion::reset();
+	spi.OnRspQryInstrument(&opt, &ok, 4, true);
+	int completion = -1;
+	ASSERT_TRUE(loader_completion::finished(&completion));
+	EXPECT_EQ(completion, 0);
 
 	std::ifstream cf(_dir + "/r114_comm.json");
 	std::string comms((std::istreambuf_iterator<char>(cf)), std::istreambuf_iterator<char>());
@@ -502,4 +505,31 @@ TEST_F(R114OptFixture, dump_to_json_writes_two_files_and_exits_zero)
 	EXPECT_NE(conts.find("\"m2601-C-3000\""), std::string::npos);
 	EXPECT_NE(conts.find("\"option\""), std::string::npos);
 	EXPECT_NE(conts.find("\"volscale\""), std::string::npos);
+}
+
+/* ------------------------------------------------------------------ */
+/* K02=B / BUG-T4-015（2026-11-04）：错误末包为失败终态，不落盘、不 exit    */
+/* ------------------------------------------------------------------ */
+TEST_F(R114OptFixture, error_final_packet_reports_failure_and_publishes_nothing)
+{
+	SAVEPATH = _dir + "/";
+	COMM_FILE = "r114_err_comm.json";
+	CONT_FILE = "r114_err_cont.json";
+
+	CTraderSpi spi;
+	CThostFtdcRspInfoField ok = makeRsp(0, "");
+	CLASSMASK = 1 | 2 | 4;
+	CThostFtdcInstrumentField rb =
+		makeInstrument("SHFE", "rb2601", "rb", "Rebar2601", THOST_FTDC_PC_Futures);
+	spi.OnRspQryInstrument(&rb, &ok, 1, false);
+
+	loader_completion::reset();
+	CThostFtdcRspInfoField err = makeRsp(7, "query failed");
+	spi.OnRspQryInstrument(nullptr, &err, 2, true);
+
+	int completion = -1;
+	ASSERT_TRUE(loader_completion::finished(&completion));
+	EXPECT_NE(completion, 0);
+	EXPECT_FALSE(std::filesystem::exists(_dir + "/r114_err_comm.json"));
+	EXPECT_FALSE(std::filesystem::exists(_dir + "/r114_err_cont.json"));
 }

@@ -1,0 +1,21 @@
+[ 66%] Building CXX object CMakeFiles/i03_ctp_identity.dir/Users/yunjinqi/Documents/new_projects/wondertrader/src/TraderCTP/TraderCTP.cpp.o
+[ 66%] Building CXX object CMakeFiles/i03_ctp_identity.dir/ctp_identity_test.cpp.o
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_ctp_order_identity_20261103/ctp_identity_test.cpp:1:
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_ctp_order_identity_20261103/../../coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:27:
+/opt/homebrew/include/gtest/gtest.h:1394:11: error: comparison of integers of different signs: 'const int' and 'const unsigned long' [-Werror,-Wsign-compare]
+ 1394 |   if (lhs == rhs) {
+      |       ~~~ ^  ~~~
+/opt/homebrew/include/gtest/gtest.h:1413:12: note: in instantiation of function template specialization 'testing::internal::CmpHelperEQ<int, unsigned long>' requested here
+ 1413 |     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
+      |            ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_ctp_order_identity_20261103/ctp_identity_test.cpp:63:2: note: in instantiation of function template specialization 'testing::internal::EqHelper::Compare<int, unsigned long, nullptr>' requested here
+   63 |  EXPECT_EQ(N, ids.size()); EXPECT_EQ(N, tags.size()); EXPECT_EQ(N, refs.size());
+      |  ^
+/opt/homebrew/include/gtest/gtest.h:1885:54: note: expanded from macro 'EXPECT_EQ'
+ 1885 |   EXPECT_PRED_FORMAT2(::testing::internal::EqHelper::Compare, val1, val2)
+      |                                                      ^
+1 error generated.
+gmake[2]: *** [CMakeFiles/i03_ctp_identity.dir/build.make:79: CMakeFiles/i03_ctp_identity.dir/ctp_identity_test.cpp.o] Error 1
+gmake[2]: *** Waiting for unfinished jobs....
+gmake[1]: *** [CMakeFiles/Makefile2:87: CMakeFiles/i03_ctp_identity.dir/all] Error 2
+gmake: *** [Makefile:91: all] Error 2

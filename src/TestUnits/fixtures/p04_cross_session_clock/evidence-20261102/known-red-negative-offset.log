@@ -1,0 +1,64 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = P07TickLoaderTest.pureTickMixedSessionsNoDataDayAndFinalMillisecond
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from P07TickLoaderTest
+[ RUN      ] P07TickLoaderTest.pureTickMixedSessionsNoDataDayAndFinalMillisecond
+REPLAYER ERROR: Session-begin boundary 202001090000 for ZZZ.NEG.N1 does not map to trading date 20200109
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/p04_cross_session_clock/cross_session_test.cpp:75: Failure
+Value of: HisDataReplayerTestAccess::replay_terminated(replayer)
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/p04_cross_session_clock/cross_session_test.cpp:76: Failure
+Expected equality of these values:
+  std::vector<double>({1,2,3,4,5})
+    Which is: { 1, 2, 3, 4, 5 }
+  sink.tickPrices
+    Which is: { 1, 2, 3 }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/p04_cross_session_clock/cross_session_test.cpp:77: Failure
+Expected equality of these values:
+  std::vector<std::string>({codeA,codeB,codeA,codeB,codeA})
+    Which is: { "CRY.COIN.BTC", "ZZZ.NEG.N1", "CRY.COIN.BTC", "ZZZ.NEG.N1", "CRY.COIN.BTC" }
+  sink.tickCodes
+    Which is: { "CRY.COIN.BTC", "ZZZ.NEG.N1", "CRY.COIN.BTC" }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/p04_cross_session_clock/cross_session_test.cpp:78: Failure
+Expected equality of these values:
+  std::vector<uint32_t>({20200108u,20200108u,20200108u,20200110u,20200110u})
+    Which is: { 20200108, 20200108, 20200108, 20200110, 20200110 }
+  sink.tickDates
+    Which is: { 20200108, 20200108, 20200108 }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/p04_cross_session_clock/cross_session_test.cpp:79: Failure
+Expected equality of these values:
+  std::vector<uint32_t>({p07_action_time(5),p07_action_time(131,10,100),p07_action_time(2359,59,999),p07_action_time(131,10,100),p07_action_time(2359,59,999)})
+    Which is: { 500000, 13110100, 235959999, 13110100, 235959999 }
+  sink.tickActionTimes
+    Which is: { 500000, 13110100, 235959999 }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/p04_cross_session_clock/cross_session_test.cpp:80: Failure
+Expected equality of these values:
+  5u
+    Which is: 5
+  clocks.size()
+    Which is: 3
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/p04_cross_session_clock/cross_session_test.cpp:84: Failure
+Expected equality of these values:
+  5u
+    Which is: 5
+  visible.size()
+    Which is: 3
+
+[  FAILED  ] P07TickLoaderTest.pureTickMixedSessionsNoDataDayAndFinalMillisecond (8 ms)
+[----------] 1 test from P07TickLoaderTest (8 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (8 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] P07TickLoaderTest.pureTickMixedSessionsNoDataDayAndFinalMillisecond
+
+ 1 FAILED TEST

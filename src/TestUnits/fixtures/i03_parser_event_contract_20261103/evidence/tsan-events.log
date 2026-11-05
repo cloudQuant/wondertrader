@@ -1,0 +1,38 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 13 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 7 tests from XeleEvents
+[ RUN      ] XeleEvents.ConnectThenLoginOnlyAfterFirstValidFrame
+[       OK ] XeleEvents.ConnectThenLoginOnlyAfterFirstValidFrame (1408 ms)
+[ RUN      ] XeleEvents.SnapshotFailureEmitsNoSuccessEvent
+[       OK ] XeleEvents.SnapshotFailureEmitsNoSuccessEvent (177 ms)
+[ RUN      ] XeleEvents.InvalidFramesDoNotConfirm
+[       OK ] XeleEvents.InvalidFramesDoNotConfirm (266 ms)
+[ RUN      ] XeleEvents.ReconnectStartsNewEventEpoch
+[       OK ] XeleEvents.ReconnectStartsNewEventEpoch (156 ms)
+[ RUN      ] XeleEvents.ReleaseFromAnotherThreadDuringConnectEmitsNothing
+[       OK ] XeleEvents.ReleaseFromAnotherThreadDuringConnectEmitsNothing (630 ms)
+[ RUN      ] XeleEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing
+[       OK ] XeleEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing (108 ms)
+[ RUN      ] XeleEvents.V2StopDuringConnectDrainsWithoutEvents
+[       OK ] XeleEvents.V2StopDuringConnectDrainsWithoutEvents (420 ms)
+[----------] 7 tests from XeleEvents (3169 ms total)
+
+[----------] 6 tests from UdpEvents
+[ RUN      ] UdpEvents.ConnectThenLoginOnlyAfterFirstValidMessage
+[       OK ] UdpEvents.ConnectThenLoginOnlyAfterFirstValidMessage (1147 ms)
+[ RUN      ] UdpEvents.PartialConnectFailureEmitsNoSuccessEvent
+[       OK ] UdpEvents.PartialConnectFailureEmitsNoSuccessEvent (838 ms)
+[ RUN      ] UdpEvents.InvalidMessagesDoNotConfirm
+[       OK ] UdpEvents.InvalidMessagesDoNotConfirm (148 ms)
+[ RUN      ] UdpEvents.ReconnectStartsNewEventEpoch
+[       OK ] UdpEvents.ReconnectStartsNewEventEpoch (271 ms)
+[ RUN      ] UdpEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing
+[       OK ] UdpEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing (100 ms)
+[ RUN      ] UdpEvents.V2StopFromLogCallbackDuringConnectDrainsWithoutEvents
+[       OK ] UdpEvents.V2StopFromLogCallbackDuringConnectDrainsWithoutEvents (47 ms)
+[----------] 6 tests from UdpEvents (2554 ms total)
+
+[----------] Global test environment tear-down
+[==========] 13 tests from 2 test suites ran. (5724 ms total)
+[  PASSED  ] 13 tests.

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="4" failures="3" disabled="0" errors="0" time="0.042" timestamp="2026-11-05T13:04:51.255" name="AllTests">
+  <testsuite name="I03R132BtReaderBudget" tests="4" failures="3" disabled="0" skipped="0" errors="0" time="0.042" timestamp="2026-11-05T13:04:51.255">
+    <testcase name="DefaultBudgetReadsCompressedHistory" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp" line="122" status="run" result="completed" time="0.013" timestamp="2026-11-05T13:04:51.255" classname="I03R132BtReaderBudget" />
+    <testcase name="ConfiguredRatioCeilingRejectsTheCompressedBlock" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp" line="136" status="run" result="completed" time="0.008" timestamp="2026-11-05T13:04:51.269" classname="I03R132BtReaderBudget">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:144&#x0A;Expected equality of these values:&#x0A;  5u&#x0A;    Which is: 5&#x0A;  WTSCmpHelper::uncompress_max_ratio()&#x0A;    Which is: 1000&#x0A;store config must reach this module&apos;s budget&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:144
+Expected equality of these values:
+  5u
+    Which is: 5
+  WTSCmpHelper::uncompress_max_ratio()
+    Which is: 1000
+store config must reach this module's budget
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:147&#x0A;Value of: reader.read_raw_bars(&quot;SHFE&quot;, &quot;rb2401&quot;, KP_Minute1, buffer)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:147
+Value of: reader.read_raw_bars("SHFE", "rb2401", KP_Minute1, buffer)
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:148&#x0A;Value of: sink.has_error(&quot;Processing back&quot;)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;rejected block must be reported&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:148
+Value of: sink.has_error("Processing back")
+  Actual: false
+Expected: true
+rejected block must be reported
+]]></failure>
+    </testcase>
+    <testcase name="YamlStyleDigitStringIsAccepted" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp" line="154" status="run" result="completed" time="0.008" timestamp="2026-11-05T13:04:51.277" classname="I03R132BtReaderBudget">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:162&#x0A;Expected equality of these values:&#x0A;  4096u&#x0A;    Which is: 4096&#x0A;  WTSCmpHelper::uncompress_max_bytes()&#x0A;    Which is: 1073741824&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:162
+Expected equality of these values:
+  4096u
+    Which is: 4096
+  WTSCmpHelper::uncompress_max_bytes()
+    Which is: 1073741824
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:164&#x0A;Value of: reader.read_raw_bars(&quot;SHFE&quot;, &quot;rb2401&quot;, KP_Minute1, buffer)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;declared size above the configured 4 KiB ceiling&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:164
+Value of: reader.read_raw_bars("SHFE", "rb2401", KP_Minute1, buffer)
+  Actual: true
+Expected: false
+declared size above the configured 4 KiB ceiling
+]]></failure>
+    </testcase>
+    <testcase name="InvalidBudgetFailsClosedForCompressedBlocks" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp" line="168" status="run" result="completed" time="0.012" timestamp="2026-11-05T13:04:51.285" classname="I03R132BtReaderBudget">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:176&#x0A;Value of: sink.has_error(&quot;uncompress_max_ratio&quot;)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;invalid budget must be diagnosed&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:176
+Value of: sink.has_error("uncompress_max_ratio")
+  Actual: false
+Expected: true
+invalid budget must be diagnosed
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:179&#x0A;Value of: reader.read_raw_bars(&quot;SHFE&quot;, &quot;rb2401&quot;, KP_Minute1, buffer)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;an invalid budget must not fall back to an unbounded or default budget&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/i03_r132_btreader_budget_test.cpp:179
+Value of: reader.read_raw_bars("SHFE", "rb2401", KP_Minute1, buffer)
+  Actual: true
+Expected: false
+an invalid budget must not fall back to an unbounded or default budget
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

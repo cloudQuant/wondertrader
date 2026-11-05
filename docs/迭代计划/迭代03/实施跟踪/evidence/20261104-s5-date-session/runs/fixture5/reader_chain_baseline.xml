@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="4" failures="3" disabled="0" errors="0" time="0.121" timestamp="2026-11-04T11:57:55.619" name="AllTests">
+  <testsuite name="ReaderChain" tests="4" failures="3" disabled="0" skipped="0" errors="0" time="0.121" timestamp="2026-11-04T11:57:55.619">
+    <testcase name="RdmValidRangeMapsEndpointsAndManagerCurrentDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp" line="87" status="run" result="completed" time="0.051" timestamp="2026-11-04T11:57:55.619" classname="ReaderChain" />
+    <testcase name="RdmInvalidRangeEndpointsStopBeforeMappingAndSlicing" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp" line="104" status="run" result="completed" time="0.043" timestamp="2026-11-04T11:57:55.681" classname="ReaderChain">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:119&#x0A;Expected equality of these values:&#x0A;  nullptr&#x0A;    Which is: NULL&#x0A;  reader.readTickSliceByCount(&quot;EX.P.2406&quot;, 10, invalidDate)&#x0A;    Which is: 0x60d0000002b0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:119
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  reader.readTickSliceByCount("EX.P.2406", 10, invalidDate)
+    Which is: 0x60d0000002b0
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:120&#x0A;Value of: anyInvalidDate(mgr)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;an invalid endpoint reached the legacy virtual&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:120
+Value of: anyInvalidDate(mgr)
+  Actual: true
+Expected: false
+an invalid endpoint reached the legacy virtual
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:121&#x0A;Value of: sink.errors.empty()&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:121
+Value of: sink.errors.empty()
+  Actual: true
+Expected: false
+]]></failure>
+    </testcase>
+    <testcase name="RdmMissingSessionAndClockFailureStopTheRead" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp" line="125" status="run" result="completed" time="0.002" timestamp="2026-11-04T11:57:55.725" classname="ReaderChain">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:134&#x0A;Value of: mgr.calcCalls.empty()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:134
+Value of: mgr.calcCalls.empty()
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:149&#x0A;Expected equality of these values:&#x0A;  nullptr&#x0A;    Which is: NULL&#x0A;  byRange&#x0A;    Which is: 0x60d000000520&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:149
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  byRange
+    Which is: 0x60d000000520
+]]></failure>
+    </testcase>
+    <testcase name="LiveReaderInvalidEndAndClockFailureStopTheRead" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp" line="155" status="run" result="completed" time="0.012" timestamp="2026-11-04T11:57:55.728" classname="ReaderChain">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:164&#x0A;Expected equality of these values:&#x0A;  nullptr&#x0A;    Which is: NULL&#x0A;  reader.readKlineSlice(&quot;EX.P.2406&quot;, KP_Minute1, 10, 202402301000ULL)&#x0A;    Which is: 0x60d000000790&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:164
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  reader.readKlineSlice("EX.P.2406", KP_Minute1, 10, 202402301000ULL)
+    Which is: 0x60d000000790
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:165&#x0A;Value of: anyInvalidDate(mgr)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:165
+Value of: anyInvalidDate(mgr)
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:171&#x0A;Value of: anyInvalidDate(mgr)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/reader_test.cpp:171
+Value of: anyInvalidDate(mgr)
+  Actual: true
+Expected: false
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

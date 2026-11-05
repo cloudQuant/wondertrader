@@ -36,6 +36,15 @@ public:
 		_spi = nullptr;
 	}
 
+	// K02=B (2026-11-04): run() now waits for a terminal result, so the fake drives
+	// a successful final instrument packet as soon as the API is initialized.
+	void Init() override
+	{
+		R114TraderApi::Init();
+		if (_spi != nullptr)
+			_spi->OnRspQryInstrument(nullptr, nullptr, 1, true);
+	}
+
 private:
 	CTraderSpi* _spi = nullptr;
 };

@@ -423,8 +423,8 @@ TEST(q04_trader_buysell, unknown_contract_is_rejected_through_strategy_context)
 	EXPECT_EQ("SHFE", env._api._entrusts[1]._exchg);
 }
 
-// The missing-default action-rule case remains disabled and separate.
-TEST(DISABLED_q04_trader_buysell, missing_default_action_group)
+// 迭代03 最终验收复核后启用（原禁用：缺 default 动作组，BUG-N01-001 同源）。
+TEST(q04_trader_buysell, missing_default_action_group)
 {
 	// 品种没有任何动作规则且没有 default 组:
 	//   ActionPolicyMgr::getActionRules 返回 _rules.end() 解引用(BUG-N03-002 同源)

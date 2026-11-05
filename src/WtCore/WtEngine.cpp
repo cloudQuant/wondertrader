@@ -33,7 +33,12 @@
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
+#include <rapidjson/writer.h>
+#include "../Share/FeeSchedule.hpp"
+#include "../Includes/IRiskMonPluginV2.h"
+#include <mutex>
 #include <cctype>
+#include <cerrno>
 #include <cmath>
 #include <cstdlib>
 #include <exception>
@@ -43,8 +48,127 @@ namespace rj = rapidjson;
 
 USING_NS_WTP;
 
+NS_WTP_BEGIN
+/*
+ * Context lent to a plugin risk monitor (card 9a, BUG-I02-NEW-034). While the
+ * engine is alive every call is forwarded. When a monitor without a proven
+ * synchronous stop is quarantined, the proxy is detached: it keeps a reference
+ * to the fund object, answers late calls without touching the engine, and is
+ * never destroyed.
+ */
+class WtRiskContextProxy final : public WtPortContext
+{
+public:
+	explicit WtRiskContextProxy(WtEngine* engine) : _engine(engine), _fund(NULL) {}
+
+	WTSPortFundInfo* getFundInfo() override
+	{
+		std::lock_guard<std::recursive_mutex> lock(_mtx);
+		return _engine ? _engine->getFundInfo() : _fund;
+	}
+	void setVolScale(double scale) override
+	{
+		std::lock_guard<std::recursive_mutex> lock(_mtx);
+		if (_engine) _engine->setVolScale(scale);
+	}
+	bool isInTrading() override
+	{
+		std::lock_guard<std::recursive_mutex> lock(_mtx);
+		return _engine ? _engine->isInTrading() : false;
+	}
+	void writeRiskLog(const char* message) override
+	{
+		std::lock_guard<std::recursive_mutex> lock(_mtx);
+		if (_engine) _engine->writeRiskLog(message);
+	}
+	uint32_t getCurDate() override
+	{
+		std::lock_guard<std::recursive_mutex> lock(_mtx);
+		return _engine ? _engine->getCurDate() : 0;
+	}
+	uint32_t getCurTime() override
+	{
+		std::lock_guard<std::recursive_mutex> lock(_mtx);
+		return _engine ? _engine->getCurTime() : 0;
+	}
+	uint32_t getTradingDate() override
+	{
+		std::lock_guard<std::recursive_mutex> lock(_mtx);
+		return _engine ? _engine->getTradingDate() : 0;
+	}
+	uint32_t transTimeToMin(uint32_t uTime) override
+	{
+		std::lock_guard<std::recursive_mutex> lock(_mtx);
+		return _engine ? _engine->transTimeToMin(uTime) : 0;
+	}
+
+	// Waits for in-flight forwarded calls, then stops forwarding. The fund
+	// reference (if any) is owned by the proxy from now on.
+	void detach(WTSPortFundInfo* retainedFund)
+	{
+		std::lock_guard<std::recursive_mutex> lock(_mtx);
+		_engine = NULL;
+		_fund = retainedFund;
+	}
+
+private:
+	std::recursive_mutex	_mtx;
+	WtEngine*				_engine;
+	WTSPortFundInfo*		_fund;
+};
+NS_WTP_END
+
 namespace
 {
+// Card 13d: a YAML fee template in the versioned envelope is converted to the
+// JSON form accepted by wt_fee::Schedule. Plain scalars become booleans or
+// numbers when they parse completely; quoted scalars stay strings so that the
+// strict v2 parser rejects them. Sequences and nulls are not part of the format.
+bool feeYamlToJson(const YAML::Node& node, rj::Writer<rj::StringBuffer>& writer, int depth)
+{
+	if (depth > 8)
+		return false;
+	if (node.IsMap())
+	{
+		writer.StartObject();
+		for (const auto& item : node)
+		{
+			if (!item.first.IsScalar())
+				return false;
+			const std::string key = item.first.as<std::string>();
+			writer.Key(key.c_str(), (rj::SizeType)key.size());
+			if (!feeYamlToJson(item.second, writer, depth + 1))
+				return false;
+		}
+		writer.EndObject();
+		return true;
+	}
+	if (!node.IsScalar())
+		return false;
+	const std::string text = node.Scalar();
+	if (node.Tag() != "!")
+	{
+		if (text == "true" || text == "True" || text == "TRUE")
+			return writer.Bool(true);
+		if (text == "false" || text == "False" || text == "FALSE")
+			return writer.Bool(false);
+		if (!text.empty())
+		{
+			// Integers stay integers (the envelope's "version" must be an int).
+			char* end = NULL;
+			errno = 0;
+			const long long integer = std::strtoll(text.c_str(), &end, 10);
+			if (errno == 0 && end == text.c_str() + text.size())
+				return writer.Int64(integer);
+			end = NULL;
+			const double value = std::strtod(text.c_str(), &end);
+			if (end == text.c_str() + text.size() && std::isfinite(value))
+				return writer.Double(value);
+		}
+	}
+	return writer.String(text.c_str(), (rj::SizeType)text.size());
+}
+
 thread_local const WtEngine* g_task_loop_engine = NULL;
 
 class TaskLoopThreadMarker
@@ -68,27 +192,120 @@ private:
 
 WtEngine::WtEngine()
 	: _fund_udt_span(0)
+	// BUG-I02-NEW-130: an engine whose init() never ran (for example the
+	// unconfigured sibling engines of a runner) must report missing metadata
+	// rather than dereference indeterminate manager pointers.
+	, _base_data_mgr(NULL)
+	, _hot_mgr(NULL)
+	, _data_mgr(NULL)
 	, _evt_listener(NULL)
 	, _notifier(NULL)
+	, _fee_error_count(0)
 	, _port_fund(NULL)
 	, _terminated(false)
+	, _risk_ctx(NULL)
+	, _risk_caps(NULL)
+	, _risk_mon_stop_proven(true)
+	, _risk_mon_stopped(false)
 	, _risk_volscale(1.0)
 	, _risk_date(0)
 	, _adapter_mgr(NULL)
 	, _ready(false)
 	, _fee_config_valid(true)
 {
-	TimeUtils::getDateTime(_cur_date, _cur_time);
-	_cur_secs = _cur_time % 100000;
-	_cur_time /= 100000;
-	_cur_raw_time = _cur_time;
-	_cur_tdate = _cur_date;
+	_risk_fact._module_inst = NULL;
+	_risk_fact._fact = NULL;
+	_risk_fact._creator = NULL;
+	_risk_fact._remover = NULL;
 
-	WtHelper::setTime(_cur_date, _cur_time, _cur_secs);
+	uint32_t curDate = 0;
+	uint32_t curTime = 0;
+	TimeUtils::getDateTime(curDate, curTime);
+	const uint32_t curSecs = curTime % 100000;
+	curTime /= 100000;
+	_cur_date = curDate;
+	_cur_secs = curSecs;
+	_cur_time = curTime;
+	_cur_raw_time = curTime;
+	_cur_tdate = curDate;
+
+	WtHelper::setTime(curDate, curTime, curSecs);
+}
+
+WtEngine::~WtEngine()
+{
+	// getFundInfo() lends _port_fund to the task worker and to the risk
+	// monitor (through WtPortContext). Release the engine reference only after
+	// both borrowers are stopped. If this destructor runs on the engine's own
+	// task worker, the worker cannot be joined here; keep the fund alive
+	// (bounded, one object) rather than risk a use-after-free.
+	WtEngine::release();
+	stop_risk_monitor();
+
+	if (!_risk_mon_stop_proven && _risk_mon)
+	{
+		// Card 9a quarantine: the monitor may still run. Keep the monitor
+		// object (one leaked owner), its module, the detached context and the
+		// fund it may read alive until process exit.
+		new WtRiskMonPtr(_risk_mon);
+		_risk_ctx = NULL;	// owned by the quarantine from now on
+		_port_fund = NULL;	// reference transferred to the detached context
+		return;
+	}
+
+	if (_risk_ctx != NULL)
+	{
+		// The stopped plugin monitor is destroyed before the context it holds.
+		_risk_mon.reset();
+		delete _risk_ctx;
+		_risk_ctx = NULL;
+
+		// I03-NEW-062: with no monitor left, release the factory through the
+		// verified by-value deleter (never through the legacy by-reference
+		// typedef). Modules without it keep their factory with the module.
+		WtRiskMonPluginV2DestroyFactoryFn destroyFactory = wt_riskmon_plugin::factoryDestroyer(_risk_caps);
+		if (destroyFactory != NULL && _risk_fact._fact != NULL)
+		{
+			try
+			{
+				destroyFactory(static_cast<void*>(_risk_fact._fact));
+			}
+			catch (...)
+			{
+			}
+			_risk_fact._fact = NULL;
+		}
+	}
+
+	if (_port_fund != NULL && g_task_loop_engine != this)
+	{
+		_port_fund->release();
+		_port_fund = NULL;
+	}
+}
+
+void WtEngine::stop_risk_monitor()
+{
+	// Called by release() on the owner thread and again by the destructor;
+	// the monitor is stopped exactly once.
+	if (_risk_mon_stopped || !_risk_mon || _risk_mon->self() == NULL)
+		return;
+	_risk_mon_stopped = true;
+	_risk_mon->self()->stop();
+	if (!_risk_mon_stop_proven && _risk_ctx != NULL)
+	{
+		if (_port_fund != NULL)
+			_port_fund->retain();
+		_risk_ctx->detach(_port_fund);
+		WTSLogger::log_by_cat("risk", LL_ERROR,
+			"Risk monitor module {} does not declare a synchronous stop; monitor, module and fund object stay quarantined until exit",
+			_risk_fact._module_path.c_str());
+	}
 }
 
 void WtEngine::set_date_time(uint32_t curDate, uint32_t curTime, uint32_t curSecs /* = 0 */, uint32_t rawTime /* = 0 */)
 {
+	// I03-NEW-115: each clock field is a relaxed atomic (WtEngineClockField).
 	_cur_date = curDate;
 	_cur_time = curTime;
 	_cur_secs = curSecs;
@@ -98,30 +315,36 @@ void WtEngine::set_date_time(uint32_t curDate, uint32_t curTime, uint32_t curSec
 
 	_cur_raw_time = rawTime;
 
-	WtHelper::setTime(_cur_date, _cur_raw_time, _cur_secs);
+	WtHelper::setTime(curDate, rawTime, curSecs);
 }
 
 void WtEngine::set_trading_date(uint32_t curTDate)
 {
-	_cur_tdate = curTDate; 
+	_cur_tdate = curTDate;
 
 	WtHelper::setTDate(curTDate);
 }
 
 WTSCommodityInfo* WtEngine::get_commodity_info(const char* stdCode)
 {
+	if (_base_data_mgr == NULL || stdCode == NULL)
+		return NULL;
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	return _base_data_mgr->getCommodity(codeInfo._exchg, codeInfo._product);
 }
 
 WTSContractInfo* WtEngine::get_contract_info(const char* stdCode)
 {
+	if (_base_data_mgr == NULL || stdCode == NULL)
+		return NULL;
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	return _base_data_mgr->getContract(cInfo._code, cInfo._exchg);
 }
 
 std::string WtEngine::get_rawcode(const char* stdCode)
 {
+	if (_hot_mgr == NULL || stdCode == NULL)
+		return "";
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	if (cInfo.hasRule())
 	{
@@ -134,6 +357,9 @@ std::string WtEngine::get_rawcode(const char* stdCode)
 
 WTSSessionInfo* WtEngine::get_session_info(const char* sid, bool isCode /* = false */)
 {
+	if (_base_data_mgr == NULL || sid == NULL)
+		return NULL;
+
 	if (!isCode)
 		return _base_data_mgr->getSession(sid);
 
@@ -147,30 +373,35 @@ WTSSessionInfo* WtEngine::get_session_info(const char* sid, bool isCode /* = fal
 
 void WtEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 {
-	_price_map[stdCode] = curTick->price();
+	set_cur_price(stdCode, curTick->price());
 
 	//先检查是否要信号要触发
 	{
 		bool bTriggered = false;
-		auto it = _sig_map.find(stdCode);
-		if (it != _sig_map.end())
 		{
-			WTSSessionInfo* sInfo = get_session_info(stdCode, true);
-
-			if (sInfo == NULL)
+			// I03-NEW-124: consume the pending signal under _sig_mtx, the lock
+			// handle_pos_change() holds for its read-modify-write of the target.
+			SpinLock sigLock(_sig_mtx);
+			auto it = _sig_map.find(stdCode);
+			if (it != _sig_map.end())
 			{
-				WTSLogger::error("Pending position signal for {} retained: trading session metadata is unavailable", stdCode);
-			}
-			else if (sInfo->isInTradingTime(_cur_raw_time, true))
-			{
-				const SigInfo& sInfo = it->second;
-				double pos = sInfo._volume;
-				std::string code = stdCode;
-				do_set_position(code.c_str(), pos, curTick->price());
-				_sig_map.erase(it);
-				bTriggered = true;
-			}
+				WTSSessionInfo* sInfo = get_session_info(stdCode, true);
 
+				if (sInfo == NULL)
+				{
+					WTSLogger::error("Pending position signal for {} retained: trading session metadata is unavailable", stdCode);
+				}
+				else if (sInfo->isInTradingTime(_cur_raw_time, true))
+				{
+					const SigInfo& sInfo = it->second;
+					double pos = sInfo._volume;
+					std::string code = stdCode;
+					do_set_position(code.c_str(), pos, curTick->price());
+					_sig_map.erase(it);
+					bTriggered = true;
+				}
+
+			}
 		}
 
 		if(bTriggered)
@@ -184,11 +415,18 @@ void WtEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 	std::string code = stdCode;
 	double price = curTick->price();
 	push_task([this, code, price]{
-		auto it = _pos_map.find(code);
-		if (it == _pos_map.end())
-			return;
+		// I03-NEW-115: the engine thread may insert into _pos_map at the same
+		// time (an insert can relocate the map storage). Look the position up
+		// and copy its owner under _pos_mtx, then lock only the position.
+		PosInfoPtr pInfo;
+		{
+			SpinLock mapLock(_pos_mtx);
+			auto it = _pos_map.find(code);
+			if (it == _pos_map.end())
+				return;
+			pInfo = it->second;
+		}
 
-		PosInfoPtr& pInfo = it->second;
 		SpinLock lock(pInfo->_mtx);
 		if (pInfo->_volume == 0)
 		{
@@ -214,32 +452,74 @@ void WtEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 	});
 }
 
+std::vector<std::pair<std::string, WtEngine::PosInfoPtr>> WtEngine::snapshot_positions()
+{
+	std::vector<std::pair<std::string, PosInfoPtr>> ret;
+	SpinLock lock(_pos_mtx);
+	ret.reserve(_pos_map.size());
+	for (const auto& v : _pos_map)
+		ret.emplace_back(v.first, v.second);
+	return ret;
+}
+
+void WtEngine::set_cur_price(const char* stdCode, double price)
+{
+	SpinLock lock(_price_mtx);
+	_price_map[stdCode] = price;
+}
+
+WtEngine::PosInfoPtr WtEngine::get_or_create_position(const char* stdCode)
+{
+	SpinLock lock(_pos_mtx);
+	PosInfoPtr& slot = _pos_map[stdCode];
+	if (slot == NULL)
+		slot = std::make_shared<PosInfo>();
+	return slot;
+}
+
 void WtEngine::update_fund_dynprofit()
 {
-	WTSFundStruct& fundInfo = _port_fund->fundInfo();
-	if (fundInfo._last_date == _cur_tdate)
-	{
-		//上次结算日期等于当前交易日,说明已经结算,不再更新了
+	/*
+	 *	I03-NEW-115: runs on the task worker (and in getFundInfo callers)
+	 *	while the engine thread settles, trades and saves. Lock order:
+	 *	_pos_mtx, then each PosInfo::_mtx, then _fund_mtx; none is nested
+	 *	here. The settlement check is repeated under _fund_mtx.
+	 */
+	if (_port_fund == NULL)
 		return;
-	}
 
 	int64_t now = TimeUtils::getLocalTimeNow();
-	if(_fund_udt_span != 0)
 	{
-		if (now - fundInfo._update_time < _fund_udt_span * 1000)
+		SpinLock fundLock(_fund_mtx);
+		const WTSFundStruct& fundInfo = _port_fund->fundInfo();
+		if (fundInfo._last_date == _cur_tdate)
+		{
+			//上次结算日期等于当前交易日,说明已经结算,不再更新了
 			return;
+		}
+
+		if(_fund_udt_span != 0)
+		{
+			if (now - fundInfo._update_time < _fund_udt_span * 1000)
+				return;
+		}
 	}
 
 	double profit = 0.0;
 	{
-		SpinLock lock(_pos_mtx);
-		for (const auto& v : _pos_map)
+		const auto positions = snapshot_positions();
+		for (const auto& v : positions)
 		{
 			const PosInfoPtr& pItem = v.second;
+			SpinLock posLock(pItem->_mtx);
 			profit += pItem->_dynprofit;
 		}
 	}
-	
+
+	SpinLock fundLock(_fund_mtx);
+	WTSFundStruct& fundInfo = _port_fund->fundInfo();
+	if (fundInfo._last_date == _cur_tdate)
+		return;	//在汇总期间已经结算, 不再更新
 
 	fundInfo._dynprofit = profit;
 	double dynbal = fundInfo._balance + profit;
@@ -354,9 +634,35 @@ void WtEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, IHot
 void WtEngine::on_session_end()
 {
 	//资金结算
-	WTSFundStruct& fundInfo = _port_fund->fundInfo();
-	if (fundInfo._last_date < _cur_tdate)
+	// I03-NEW-115: settle a copy under _fund_mtx; the record is written and
+	// save_datas() runs after the lock is released.
+	const uint32_t curTDate = _cur_tdate;
+	bool bSettled = false;
+	WTSFundStruct settledInfo;
+	if (_port_fund != NULL)
 	{
+		SpinLock fundLock(_fund_mtx);
+		WTSFundStruct& fundInfo = _port_fund->fundInfo();
+		if (fundInfo._last_date < curTDate)
+		{
+			settledInfo = fundInfo;
+			bSettled = true;
+
+			fundInfo._last_date = curTDate;
+			fundInfo._predynbal = fundInfo._balance + fundInfo._dynprofit;
+			fundInfo._prebalance = fundInfo._balance;
+			fundInfo._profit = 0;
+			fundInfo._fees = 0;
+			fundInfo._max_dyn_bal = DBL_MAX;
+			fundInfo._min_dyn_bal = DBL_MAX;
+			fundInfo._max_time = 0;
+			fundInfo._min_time = 0;
+		}
+	}
+
+	if (bSettled)
+	{
+		const WTSFundStruct& fundInfo = settledInfo;
 		std::string filename = WtHelper::getPortifolioDir();
 		filename += "funds.csv";
 		BoostFilePtr fund_log(new BoostFile());
@@ -376,21 +682,11 @@ void WtEngine::on_session_end()
 		//可能这里还需要写一条资金记录
 		//date,predynbalance,prebalance,balance,closeprofit,dynprofit,fee,maxdynbalance,maxtime,mindynbalance,mintime,mdmaxbalance,mdmaxdate,mdminbalance,mdmindate
 		fund_log->write_file(fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n", 
-			_cur_tdate, fundInfo._predynbal, fundInfo._prebalance, fundInfo._balance, 
+			curTDate, fundInfo._predynbal, fundInfo._prebalance, fundInfo._balance, 
 			fundInfo._profit, fundInfo._dynprofit, fundInfo._fees, fundInfo._max_dyn_bal,
 			fundInfo._max_time, fundInfo._min_dyn_bal, fundInfo._min_time,
 			fundInfo._max_md_dyn_bal._dyn_balance, fundInfo._max_md_dyn_bal._date,
 			fundInfo._min_md_dyn_bal._dyn_balance, fundInfo._min_md_dyn_bal._date));
-
-		fundInfo._last_date = _cur_tdate;
-		fundInfo._predynbal = fundInfo._balance + fundInfo._dynprofit;
-		fundInfo._prebalance = fundInfo._balance;
-		fundInfo._profit = 0;
-		fundInfo._fees = 0;
-		fundInfo._max_dyn_bal = DBL_MAX;
-		fundInfo._min_dyn_bal = DBL_MAX;
-		fundInfo._max_time = 0;
-		fundInfo._min_time = 0;
 	}
 	save_datas();
 }
@@ -402,12 +698,21 @@ void WtEngine::on_session_begin()
 
 void WtEngine::save_datas()
 {
+	// I03-NEW-124: one writer at a time (the CTA pool saves concurrently).
+	StdUniqueLock saveLock(_save_mtx);
+
 	rj::Document root(rj::kObjectType);
 	rj::Document::AllocatorType &allocator = root.GetAllocator();
 
 	if (_port_fund != NULL)
 	{//保存资金数据
-		const WTSFundStruct& fundInfo = _port_fund->fundInfo();
+		// I03-NEW-115: serialize a copy taken under _fund_mtx.
+		WTSFundStruct fundSnapshot;
+		{
+			SpinLock fundLock(_fund_mtx);
+			fundSnapshot = _port_fund->fundInfo();
+		}
+		const WTSFundStruct& fundInfo = fundSnapshot;
 		rj::Value jFund(rj::kObjectType);
 		jFund.AddMember("predynbal", fundInfo._predynbal, allocator);
 		jFund.AddMember("balance", fundInfo._balance, allocator);
@@ -422,7 +727,7 @@ void WtEngine::save_datas()
 		jFund.AddMember("min_time", fundInfo._min_time, allocator);
 
 		jFund.AddMember("last_date", fundInfo._last_date, allocator);
-		jFund.AddMember("date", _cur_tdate, allocator);
+		jFund.AddMember("date", _cur_tdate.load(), allocator);
 
 		rj::Value jMaxMD(rj::kObjectType);
 		jMaxMD.AddMember("date", fundInfo._max_md_dyn_bal._date, allocator);
@@ -443,10 +748,15 @@ void WtEngine::save_datas()
 	{//持仓数据保存
 		rj::Value jPos(rj::kArrayType);
 
-		for (auto it = _pos_map.begin(); it != _pos_map.end(); it++)
+		// I03-NEW-115: iterate a snapshot taken under _pos_mtx (map order is
+		// kept) and read each position under its own lock. No caller holds a
+		// PosInfo::_mtx or _pos_mtx when calling save_datas().
+		const auto positions = snapshot_positions();
+		for (auto it = positions.begin(); it != positions.end(); it++)
 		{
 			const char* stdCode = it->first.c_str();
 			const PosInfoPtr& pInfo = it->second;
+			SpinLock posLock(pInfo->_mtx);
 
 			rj::Value pItem(rj::kObjectType);
 			pItem.AddMember("code", rj::Value(stdCode, allocator), allocator);
@@ -508,7 +818,13 @@ void WtEngine::save_datas()
 
 void WtEngine::load_datas()
 {
-	_port_fund = WTSPortFundInfo::create();
+	// The engine owns exactly one fund object for its lifetime. A repeated
+	// load must not overwrite (and leak) a pointer that may already be lent
+	// out through getFundInfo(); reset its contents in place instead.
+	if (_port_fund == NULL)
+		_port_fund = WTSPortFundInfo::create();
+	else
+		_port_fund->fundInfo() = WTSFundStruct();
 
 	std::string filename = WtHelper::getPortifolioDir();
 	filename += "datas.json";
@@ -627,23 +943,29 @@ void WtEngine::load_datas()
 
 WTSTickSlice* WtEngine::get_tick_slice(uint32_t /*sid*/, const char* code, uint32_t count)
 {
+	if (_data_mgr == NULL)
+		return NULL;
 	return _data_mgr->get_tick_slice(code, count);
 }
 
 WTSTickData* WtEngine::get_last_tick(uint32_t /*sid*/, const char* stdCode)
 {
+	if (_data_mgr == NULL)
+		return NULL;
 	return _data_mgr->grab_last_tick(stdCode);
 }
 
 WTSKlineSlice* WtEngine::get_kline_slice(uint32_t sid, const char* stdCode, const char* period, uint32_t count, uint32_t times /* = 1 */, uint64_t etime /* = 0 */)
 {
+	if (_base_data_mgr == NULL || _data_mgr == NULL || stdCode == NULL || period == NULL)
+		return NULL;
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* cInfo = _base_data_mgr->getCommodity(codeInfo._exchg, codeInfo._product);
 	if (cInfo == NULL)
 		return NULL;
 
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}-{}-{}", stdCode, period, times);
+	// I03-NEW-039: caller stdCode is unbounded; no fixed 64-byte key buffer
+	std::string key = fmt::format("{}-{}-{}", stdCode, period, times);
 
 	SubList& sids = _bar_sub_map[key];
 	sids[sid] = std::make_pair(sid, 0);
@@ -688,7 +1010,8 @@ void WtEngine::handle_push_quote(WTSTickData* curTick)
 	WTSContractInfo* cInfo = curTick->getContractInfo();
 
 	//if(hotFlag == 1)
-	if(!cInfo->isFlat())
+	// I03-NEW-094: a tick without contract metadata has no hot-code fan-out.
+	if(cInfo != NULL && !cInfo->isFlat())
 	{
 		auto hotCodes = cInfo->getHotCodes();
 		for (const std::string& hotCode : hotCodes)
@@ -713,43 +1036,54 @@ void WtEngine::handle_push_quote(WTSTickData* curTick)
 
 double WtEngine::get_cur_price(const char* stdCode)
 {
+	if (stdCode == NULL || stdCode[0] == '\0')
+		return 0.0;
+
 	auto len = strlen(stdCode);
 	char lastChar = stdCode[len - 1];
 	//前复权直接读取标准合约代码
 	bool bAdjusted = (lastChar == SUFFIX_QFQ || lastChar == SUFFIX_HFQ);
 	//前复权需要去掉－，后复权和未复权都直接查找
 	std::string sCode = (lastChar == SUFFIX_QFQ) ? std::string(stdCode, len - 1) : stdCode;
-	auto it = _price_map.find(sCode);
-	if(it == _price_map.end())
+	// I03-NEW-124: strategy threads read the cache while the engine thread
+	// inserts into it. _price_mtx is a leaf lock and is not held across the
+	// data manager call below.
 	{
-		//找不到的时候，先读取未复权的tick数据
-		std::string fCode = bAdjusted ? std::string(stdCode, len - 1) : stdCode;
-		WTSTickData* lastTick = _data_mgr->grab_last_tick(fCode.c_str());
-		if (lastTick == NULL)
-			return 0.0;
-
-		WTSContractInfo* cInfo = lastTick->getContractInfo();
-
-		double ret = lastTick->price();
-		lastTick->release();
-
-		//如果是后复权，则进行复权处理
-		if (lastChar == SUFFIX_HFQ)
-		{
-			ret *= get_exright_factor(stdCode, cInfo->getCommInfo());
-		}
-
-		_price_map[sCode] = ret;
-		return ret;
+		SpinLock lock(_price_mtx);
+		auto it = _price_map.find(sCode);
+		if (it != _price_map.end())
+			return it->second;
 	}
-	else
+
+	//找不到的时候，先读取未复权的tick数据
+	if (_data_mgr == NULL)
+		return 0.0;
+	std::string fCode = bAdjusted ? std::string(stdCode, len - 1) : stdCode;
+	WTSTickData* lastTick = _data_mgr->grab_last_tick(fCode.c_str());
+	if (lastTick == NULL)
+		return 0.0;
+
+	WTSContractInfo* cInfo = lastTick->getContractInfo();
+
+	double ret = lastTick->price();
+	lastTick->release();
+
+	//如果是后复权，则进行复权处理
+	if (lastChar == SUFFIX_HFQ)
 	{
-		return it->second;
+		ret *= get_exright_factor(stdCode, cInfo->getCommInfo());
 	}
+
+	// A price another thread stored meanwhile (on_tick) is kept: it is newer.
+	SpinLock lock(_price_mtx);
+	return _price_map.emplace(sCode, ret).first->second;
 }
 
 double WtEngine::get_day_price(const char* stdCode, int flag /* = 0 */)
 {
+	if (stdCode == NULL || stdCode[0] == '\0')
+		return 0.0;
+
 	auto len = strlen(stdCode);
 	char lastChar = stdCode[len - 1];
 	//前复权直接读取标准合约代码
@@ -758,6 +1092,8 @@ double WtEngine::get_day_price(const char* stdCode, int flag /* = 0 */)
 	std::string sCode = (lastChar == SUFFIX_QFQ) ? std::string(stdCode, len - 1) : stdCode;
 
 	//找不到的时候，先读取未复权的tick数据
+	if (_data_mgr == NULL)
+		return 0.0;
 	std::string fCode = bAdjusted ? std::string(stdCode, len - 1) : stdCode;
 	WTSTickData* lastTick = _data_mgr->grab_last_tick(fCode.c_str());
 	if (lastTick == NULL)
@@ -799,8 +1135,8 @@ double WtEngine::get_exright_factor(const char* stdCode, WTSCommodityInfo* commI
 		return 1.0;
 
 	if (commInfo->isStock())
-		return _data_mgr->get_adjusting_factor(stdCode, get_trading_date());
-	else
+		return _data_mgr != NULL ? _data_mgr->get_adjusting_factor(stdCode, get_trading_date()) : 1.0;
+	else if (_hot_mgr != NULL)
 	{
 		const char* ruleTag = _hot_mgr->getRuleTag(stdCode);
 		if(strlen(ruleTag) > 0)
@@ -822,8 +1158,10 @@ void WtEngine::sub_tick(uint32_t sid, const char* stdCode)
 {
 	//如果是主力合约代码, 如SHFE.ag.HOT, 那么要转换成原合约代码, SHFE.ag.1912
 	//因为执行器只识别原合约代码
-	const char* ruleTag = _hot_mgr->getRuleTag(stdCode);
-	if(strlen(ruleTag) > 0)
+	if (stdCode == NULL || stdCode[0] == '\0')
+		return;
+	const char* ruleTag = (_hot_mgr != NULL) ? _hot_mgr->getRuleTag(stdCode) : "";
+	if(ruleTag != NULL && strlen(ruleTag) > 0)
 	{
 		//SubList& sids = _tick_sub_map[stdCode];
 		//sids[sid] = std::make_pair(sid, 0);
@@ -885,8 +1223,13 @@ void WtEngine::sub_tick(uint32_t sid, const char* stdCode)
 void WtEngine::load_fees(const char* filename)
 {
 	_fee_config_valid = true;
-	if (strlen(filename) == 0)
+	if (filename == NULL || filename[0] == '\0')
 		return;
+
+	// A configured template must be read and validated before the engine can
+	// start. In particular, a parse/read error must not silently revive an old
+	// fee snapshot or turn an unsupported template into zero-cost trading.
+	_fee_config_valid = false;
 
 	if (!StdFile::exists(filename))
 	{
@@ -994,8 +1337,97 @@ void WtEngine::load_fees(const char* filename)
 			cfg->release();
 			return;
 		}
-		for (const auto& item : rawYaml)
-			rawKeys.emplace_back(item.first.as<std::string>());
+		try
+		{
+			for (const auto& item : rawYaml)
+				rawKeys.emplace_back(item.first.as<std::string>());
+		}
+		catch (const YAML::Exception& e)
+		{
+			WTSLogger::error("Fee templates file {} has an invalid key: {}", filename, e.what());
+			cfg->release();
+			return;
+		}
+	}
+
+	// Card 13d (I03-NEW-008): a versioned envelope carries contract-level and
+	// product-level rates. It is parsed strictly by wt_fee::Schedule and the
+	// whole file is rejected on any error; live fills then use
+	// calc_fee_checked (contract first, product fallback, missing is an error).
+	bool versionedEnvelope = false;
+	for (const std::string& key : rawKeys)
+		if (key == "version" || key == "contracts" || key == "products")
+			versionedEnvelope = true;
+	if (versionedEnvelope)
+	{
+		std::string json;
+		if (isJsonTemplate)
+			json = rawContent;
+		else
+		{
+			rj::StringBuffer buffer;
+			rj::Writer<rj::StringBuffer> writer(buffer);
+			bool converted = false;
+			try
+			{
+				converted = feeYamlToJson(rawYaml, writer, 0);
+			}
+			catch (const YAML::Exception&)
+			{
+				converted = false;
+			}
+			if (!converted)
+			{
+				WTSLogger::error("Fee templates file {} has an invalid versioned YAML structure", filename);
+				cfg->release();
+				return;
+			}
+			json.assign(buffer.GetString(), buffer.GetSize());
+		}
+
+		wt_fee::Schedule schedule;
+		std::string scheduleError;
+		if (!schedule.loadJson(json, scheduleError))
+		{
+			WTSLogger::error("Fee templates file {} is invalid: {}", filename, scheduleError);
+			cfg->release();
+			return;
+		}
+
+		auto toItem = [](const wt_fee::Rates& rates) {
+			FeeItem item;
+			item._open = rates.open;
+			item._close = rates.close;
+			item._close_today = rates.close_today;
+			item._by_volume = rates.by_volume;
+			item._min_fee = rates.min_fee;
+			return item;
+		};
+		FeeMap products, contracts;
+		for (const auto& entry : schedule.productRates())
+		{
+			products[entry.first] = toItem(entry.second);
+			const StringVector& ay = StrUtil::split(entry.first, ".");
+			WTSCommodityInfo* commInfo = (ay.size() == 2) ? _base_data_mgr->getCommodity(ay[0].c_str(), ay[1].c_str()) : NULL;
+			if (commInfo == NULL)
+			{
+				WTSLogger::warn("Fee template product '{}' does not match a registered commodity", entry.first);
+				continue;
+			}
+			// Legacy consumers outside WtCore still read the commodity rates.
+			commInfo->setFeeRates(entry.second.open, entry.second.close, entry.second.close_today, entry.second.by_volume);
+			commInfo->setMarginRate(entry.second.margin);
+		}
+		for (const auto& entry : schedule.contractRates())
+			contracts[entry.first] = toItem(entry.second);
+
+		_fee_map.swap(products);
+		_contract_fee_map.swap(contracts);
+		cfg->release();
+		_fee_config_valid = true;
+		WTSLogger::info("{} product and {} contract fee templates loaded (version 2)",
+			_fee_map.size(), _contract_fee_map.size());
+		return;
 	}
 
 	auto readNumber = [](WTSVariant* field, double& value)
@@ -1054,9 +1486,10 @@ void WtEngine::load_fees(const char* filename)
 		double close;
 		double closeToday;
 		double margin;
+		double minFee;
 		bool byVolume;
 
-		StagedFee() : commodity(NULL), open(0.0), close(0.0), closeToday(0.0), margin(0.0), byVolume(false) {}
+		StagedFee() : commodity(NULL), open(0.0), close(0.0), closeToday(0.0), margin(0.0), minFee(0.0), byVolume(false) {}
 	};
 	wt_hashmap<std::string, StagedFee> stagedFees;
 	std::string validationError;
@@ -1109,6 +1542,9 @@ void WtEngine::load_fees(const char* filename)
 		double minFee = 0.0;
 		if (validationError.empty() && minFeeItem != NULL && !readNumber(minFeeItem, minFee))
 			validationError = fmt::format("fee entry '{}' has an invalid numeric 'minfee'", fullPid);
+		else if (validationError.empty() && minFee < 0)
+			validationError = fmt::format("fee entry '{}' has a negative 'minfee'", fullPid);
+		staged.minFee = minFee;
 
 		if (!validationError.empty())
 			break;
@@ -1121,6 +1557,11 @@ void WtEngine::load_fees(const char* filename)
 		return;
 	}
 
+	// Legacy files keep their historical merge semantics (entries absent from
+	// the file, or null, keep their previous rates). They carry no
+	// contract-level rows, so contract rates from an earlier versioned file
+	// do not survive a legacy reload.
+	_contract_fee_map.clear();
 	for (const auto& stagedFee : stagedFees)
 	{
 		const StagedFee& staged = stagedFee.second;
@@ -1132,63 +1573,145 @@ void WtEngine::load_fees(const char* filename)
 		fItem._close = staged.close;
 		fItem._close_today = staged.closeToday;
 		fItem._by_volume = staged.byVolume;
+		fItem._min_fee = staged.minFee;
 	}
 
 	cfg->release();
+	_fee_config_valid = true;
 
 	WTSLogger::info("{} fee templates loaded", _fee_map.size());
 }
 
-double WtEngine::calc_fee(const char* stdCode, double price, double qty, uint32_t offset)
+bool WtEngine::calc_fee_checked(const char* stdCode, double price, double qty, uint32_t offset,
+	double& fee, std::string& error)
 {
-	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
-	const char* stdPID = codeInfo.stdCommID();
-	auto it = _fee_map.find(stdPID);
-	if (it == _fee_map.end())
+	fee = 0.0;
+	error.clear();
+	if (stdCode == NULL || stdCode[0] == '\0')
 	{
-		WTSLogger::warn("Fee template of {} not found, return 0.0 as default", stdPID);
-		return 0.0;
+		error = "missing code";
+		return false;
+	}
+	if (_base_data_mgr == NULL)
+	{
+		error = "engine base data is unavailable";
+		return false;
 	}
 
-	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(stdPID);
-	if (commInfo == NULL)
-		return 0.0;
-
-	const FeeItem& fItem = it->second;
-	double ret = 0.0;
-	if (fItem._by_volume)
+	// Card 13d: fees belong to the actual fill contract. A continuous code is
+	// mapped to the contract of the current trading day.
+	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+	std::string rawCode = cInfo._code;
+	if (cInfo.hasRule())
 	{
-		switch (offset)
+		const char* mapped = (_hot_mgr != NULL) ?
+			_hot_mgr->getCustomRawCode(cInfo._ruletag, cInfo.stdCommID(), _cur_tdate) : NULL;
+		if (mapped == NULL || mapped[0] == '\0')
 		{
-		case 0: ret = fItem._open * qty; break;
-		case 1: ret = fItem._close * qty; break;
-		case 2: ret = fItem._close_today * qty; break;
-		default: ret = 0.0; break;
+			error = "continuous code has no actual contract on the current trading day";
+			return false;
 		}
+		rawCode = mapped;
 	}
+	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	WTSContractInfo* contract = _base_data_mgr->getContract(rawCode.c_str(), cInfo._exchg);
+	if (commInfo == NULL || contract == NULL || contract->getCommInfo() != commInfo)
+	{
+		error = "fill contract does not match registered commodity metadata";
+		return false;
+	}
+
+	wt_fee::Context context;
+	context.physical_contract = contract->getFullCode();
+	context.product = commInfo->getFullPid();
+	// Same rule as WTSBaseDataMgr::loadContracts: a contract without its own
+	// volume scale uses its commodity's.
+	context.volume_scale = contract->getVolScale() != 0 ? contract->getVolScale() : commInfo->getVolScale();
+	const FeeItem* item = NULL;
+	auto cit = _contract_fee_map.find(context.physical_contract);
+	if (cit != _contract_fee_map.end())
+		item = &cit->second;
 	else
 	{
-		const double amount = price * qty * commInfo->getVolScale();
-		switch (offset)
-		{
-		case 0: ret = fItem._open * amount; break;
-		case 1: ret = fItem._close * amount; break;
-		case 2: ret = fItem._close_today * amount; break;
-		default: ret = 0.0; break;
-		}
+		auto pit = _fee_map.find(context.product);
+		if (pit != _fee_map.end())
+			item = &pit->second;
 	}
+	if (item == NULL)
+	{
+		error = "no fee template for " + context.physical_contract;
+		return false;
+	}
+	context.rates.open = item->_open;
+	context.rates.close = item->_close;
+	context.rates.close_today = item->_close_today;
+	context.rates.by_volume = item->_by_volume;
+	// Decision K10=A (2026-11-04): live fills apply the optional per-fill
+	// minimum exactly like the backtest FeeSchedule rule (qty > 0, rate > 0).
+	context.rates.min_fee = item->_min_fee;
 
-	// Match the commodity fee calculation without narrowing a large fee
-	// through int32_t. Values outside the exact safe conversion range retain
-	// their computed precision.
-	const double cents = ret * 100.0 + 0.5;
-	constexpr double kSafeCentsLimit = 9007199254740991.0; // 2^53 - 1
-	if (!(cents > -kSafeCentsLimit && cents < kSafeCentsLimit))
-		return ret;
-	return static_cast<int64_t>(cents) / 100.0;
+	const wt_fee::CalculationResult result = wt_fee::calculate(context, price, qty, offset);
+	switch (result.status)
+	{
+	case wt_fee::CalculationStatus::ok:
+		fee = result.value;
+		return true;
+	case wt_fee::CalculationStatus::invalid_input:
+		error = "invalid price, quantity or offset";
+		return false;
+	case wt_fee::CalculationStatus::invalid_context:
+		error = "invalid fee template or contract metadata for " + context.physical_contract;
+		return false;
+	default:
+		error = "fee calculation overflow for " + context.physical_contract;
+		return false;
+	}
+}
+
+void WtEngine::report_fee_error(const char* stdCode, const std::string& message)
+{
+	const std::string code = stdCode ? stdCode : "";
+	const std::string text = code + ": " + message;
+	bool firstForCode = false;
+	{
+		StdUniqueLock lock(_fee_error_mtx);
+		_last_fee_error = text;
+		firstForCode = _fee_error_codes.insert(code).second;
+	}
+	_fee_error_count.fetch_add(1);
+	// The fill itself is kept; the accounting gap is made observable.
+	if (firstForCode)
+		WTSLogger::error("Fee accounting failed, fill kept with zero fee: {}", text);
+}
+
+std::string WtEngine::last_fee_error() const
+{
+	StdUniqueLock lock(_fee_error_mtx);
+	return _last_fee_error;
+}
+
+double WtEngine::calc_fee(const char* stdCode, double price, double qty, uint32_t offset)
+{
+	// Legacy signature: it cannot carry a failure, so a failure is reported
+	// through report_fee_error/fee_error_count and 0.0 is returned.
+	double fee = 0.0;
+	std::string error;
+	if (!calc_fee_checked(stdCode, price, qty, offset, fee, error))
+	{
+		report_fee_error(stdCode, error);
+		return 0.0;
+	}
+	return fee;
 }
 
 void WtEngine::append_signal(const char* stdCode, double qty, bool bStandBy /* = true */)
+{
+	// I03-NEW-124: a target change is one step under _sig_mtx.
+	SpinLock sigLock(_sig_mtx);
+	append_signal_locked(stdCode, qty, bStandBy);
+}
+
+void WtEngine::append_signal_locked(const char* stdCode, double qty, bool bStandBy)
 {
 	/*
 	 *	By Wesley @ 2021.12.16
@@ -1228,16 +1751,9 @@ void WtEngine::append_signal(const char* stdCode, double qty, bool bStandBy /* =
 
 void WtEngine::do_set_position(const char* stdCode, double qty, double curPx /* = -1 */)
 {
-	{
-		SpinLock lock(_pos_mtx);
-		auto it = _pos_map.find(stdCode);
-		if (it == _pos_map.end())
-		{
-			_pos_map[stdCode] = std::make_shared<PosInfo>();
-		}
-	}
-
-	PosInfoPtr& pInfo = _pos_map[stdCode];
+	// I03-NEW-115: find/insert and copy the owner under _pos_mtx; a reference
+	// into the map would dangle once another insert relocates its storage.
+	PosInfoPtr pInfo = get_or_create_position(stdCode);
 
 	SpinLock lock(pInfo->_mtx);
 
@@ -1255,6 +1771,8 @@ void WtEngine::do_set_position(const char* stdCode, double qty, double curPx /* 
 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(codeInfo._exchg, codeInfo._product);
 
+	// I03-NEW-115: fundInfo is only touched inside short _fund_mtx scopes
+	// (lock order: PosInfo::_mtx -> _fund_mtx).
 	WTSFundStruct& fundInfo = _port_fund->fundInfo();
 
 	if (decimal::gt(pInfo->_volume*diff, 0))//当前持仓和目标仓位方向一致, 增加一条明细, 增加数量即可
@@ -1269,9 +1787,13 @@ void WtEngine::do_set_position(const char* stdCode, double qty, double curPx /* 
 		dInfo._opentdate = curTDate;
 		pInfo->_details.emplace_back(dInfo);
 
-		double fee = commInfo->calcFee(curPx, abs(qty), 0);
-		fundInfo._fees += fee;
-		fundInfo._balance -= fee;
+		// Fee of the opened increment (the logged quantity), not of the target.
+		double fee = calc_fee(stdCode, curPx, abs(diff), 0);
+		{
+			SpinLock fundLock(_fund_mtx);
+			fundInfo._fees += fee;
+			fundInfo._balance -= fee;
+		}
 
 		log_trade(stdCode, dInfo._long, true, curTm, curPx, abs(diff), fee);
 	}
@@ -1308,12 +1830,15 @@ void WtEngine::do_set_position(const char* stdCode, double qty, double curPx /* 
 				profit *= -1;
 			pInfo->_closeprofit += profit;
 			pInfo->_dynprofit = pInfo->_dynprofit*dInfo._volume / (dInfo._volume + maxQty);//浮盈也要做等比缩放
-			fundInfo._profit += profit;
-			fundInfo._balance += profit;
 
-			double fee = commInfo->calcFee(curPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
-			fundInfo._fees += fee;
-			fundInfo._balance -= fee;
+			double fee = calc_fee(stdCode, curPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
+			{
+				SpinLock fundLock(_fund_mtx);
+				fundInfo._profit += profit;
+				fundInfo._balance += profit;
+				fundInfo._fees += fee;
+				fundInfo._balance -= fee;
+			}
 
 			//这里写成交记录
 			log_trade(stdCode, dInfo._long, false, curTm, curPx, maxQty, fee);
@@ -1347,9 +1872,12 @@ void WtEngine::do_set_position(const char* stdCode, double qty, double curPx /* 
 			pInfo->_details.emplace_back(dInfo);
 
 			//这里还需要写一笔成交记录
-			double fee = commInfo->calcFee(curPx, abs(qty), 0);
-			fundInfo._fees += fee;
-			fundInfo._balance -= fee;
+			double fee = calc_fee(stdCode, curPx, abs(left), 0);
+			{
+				SpinLock fundLock(_fund_mtx);
+				fundInfo._fees += fee;
+				fundInfo._balance -= fee;
+			}
 
 			log_trade(stdCode, dInfo._long, true, curTm, curPx, abs(left), fee);
 		}
@@ -1430,6 +1958,10 @@ void WtEngine::release()
 		if (_thrd_task == taskThread)
 			_thrd_task.reset();
 	}
+
+	// After the task worker: stop the risk monitor before any derived engine
+	// member it may reach through its context is torn down.
+	stop_risk_monitor();
 }
 
 bool WtEngine::init_riskmon(WTSVariant* cfg)
@@ -1439,6 +1971,13 @@ bool WtEngine::init_riskmon(WTSVariant* cfg)
 
 	if (!cfg->getBoolean("active"))
 		return false;
+
+	if (_risk_mon)
+	{
+		// Card 9c=A: a repeated initialization keeps the original monitor.
+		WTSLogger::log_by_cat("risk", LL_ERROR, "Risk monitor is already initialized; repeated initialization rejected");
+		return false;
+	}
 
 	std::string module = DLLHelper::wrap_module(cfg->getCString("module"));
 	//先看工作目录下是否有对应模块
@@ -1467,11 +2006,63 @@ bool WtEngine::init_riskmon(WTSVariant* cfg)
 	_risk_fact._creator = creator;
 	_risk_fact._remover = (FuncDeleteRiskMonFact)DLLHelper::get_symbol(hInst, "deleteRiskMonFact");
 	_risk_fact._fact = _risk_fact._creator();
+	if (_risk_fact._fact == NULL)
+	{
+		// The module stays resident with the other retained plugin owners; no
+		// factory exists, so no monitor or wrapper can be installed.
+		WTSLogger::log_by_cat("risk", LL_ERROR, "Riskmon module {} returned no factory", module.c_str());
+		return false;
+	}
+
+	// Card 9a: only a module declaring a synchronous stop may later have its
+	// monitor destroyed and the fund released; others are quarantined at stop.
+	WtRiskMonPluginV2GetterFn capsGetter = (WtRiskMonPluginV2GetterFn)DLLHelper::get_symbol(hInst, WT_RISKMON_PLUGIN_V2_GETTER_SYMBOL);
+	const WtRiskMonPluginCapsV2* caps = NULL;
+	if (capsGetter != NULL)
+	{
+		try
+		{
+			caps = capsGetter(WT_RISKMON_PLUGIN_V2_ABI_MAJOR);
+		}
+		catch (...)
+		{
+			caps = NULL;
+		}
+	}
+	_risk_caps = wt_riskmon_plugin::wellFormed(caps) ? caps : NULL;
+	_risk_mon_stop_proven = wt_riskmon_plugin::declaresSyncStop(caps);
+	_risk_mon_stopped = false;
+	if (!_risk_mon_stop_proven)
+		WTSLogger::log_by_cat("risk", LL_WARN,
+			"Risk monitor module {} does not declare a synchronous stop (IRiskMonPluginV2); it will be quarantined at shutdown",
+			module.c_str());
 
 	const char* name = cfg->getCString("name");
-	
-	_risk_mon.reset(new WtRiskMonWrapper(_risk_fact._fact->createRiskMonotor(name), _risk_fact._fact));
-	_risk_mon->self()->init(this, cfg);
+	WtRiskMonitor* monitor = _risk_fact._fact->createRiskMonotor(name);
+	if (monitor == NULL)
+	{
+		// Same failure contract as an incompatible module: report false and keep
+		// the engine without a risk wrapper instead of calling init on NULL.
+		WTSLogger::log_by_cat("risk", LL_ERROR, "Riskmon {} is not provided by module {}", name, module.c_str());
+		// I03-NEW-062: no monitor exists; a verified deleter may free the factory.
+		WtRiskMonPluginV2DestroyFactoryFn destroyFactory = wt_riskmon_plugin::factoryDestroyer(_risk_caps);
+		if (destroyFactory != NULL)
+		{
+			try
+			{
+				destroyFactory(static_cast<void*>(_risk_fact._fact));
+			}
+			catch (...)
+			{
+			}
+			_risk_fact._fact = NULL;
+		}
+		return false;
+	}
+
+	_risk_ctx = new WtRiskContextProxy(this);
+	_risk_mon.reset(new WtRiskMonWrapper(monitor, _risk_fact._fact));
+	_risk_mon->self()->init(_risk_ctx, cfg);
 
 	return true;
 }

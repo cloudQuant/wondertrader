@@ -9,6 +9,7 @@
  */
 #pragma once
 
+#include <atomic>
 #include <string>
 #include <queue>
 #include <unordered_set>
@@ -36,6 +37,10 @@ USING_NS_WTP;
 class TraderDD : public ITraderApi
 {
 public:
+	// BUG-L01-014: host features declared through setTraderSpiFeatures.
+	void setSpiFeatures(uint64_t features) { m_spiFeatures.store(features); }
+	std::atomic<uint64_t>	m_spiFeatures{ 0 };
+
 	TraderDD();
 	virtual ~TraderDD();
 

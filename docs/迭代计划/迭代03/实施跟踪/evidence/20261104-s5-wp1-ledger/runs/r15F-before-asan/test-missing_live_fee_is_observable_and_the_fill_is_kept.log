@@ -1,0 +1,25 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R15CtxTest.missing_live_fee_is_observable_and_the_fill_is_kept
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R15CtxTest
+[ RUN      ] R15CtxTest.missing_live_fee_is_observable_and_the_fill_is_kept
+/tmp/wt-i03-s5-wp1-ledger-run/r15F-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1291: Failure
+Expected: (_eng.fee_error_count()) > (errorsBefore), actual: 0 vs 0
+a missing fee is an observable error
+
+/tmp/wt-i03-s5-wp1-ledger-run/r15F-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1292: Failure
+Value of: _eng.last_fee_error().empty()
+  Actual: true
+Expected: false
+
+[  FAILED  ] R15CtxTest.missing_live_fee_is_observable_and_the_fill_is_kept (5 ms)
+[----------] 1 test from R15CtxTest (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (5 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R15CtxTest.missing_live_fee_is_observable_and_the_fill_is_kept
+
+ 1 FAILED TEST

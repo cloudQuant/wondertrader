@@ -109,7 +109,7 @@ TEST(R76ParserUDPTest, InitAcceptsIpv6HostAndZeroPorts)
 
 /// init 可重复应用，后一次覆盖两个 endpoint；不产生任何回调
 /// （ParserUDP.cpp:98-113）
-TEST(R76ParserUDPTest, InitIsRepeatableAndOverwritesEndpoints)
+TEST(R76ParserUDPTest, InitRejectsRepeatWithoutOverwritingEndpoints)
 {
 	ParserUDP parser;
 	R76UdpSink sink;
@@ -118,7 +118,7 @@ TEST(R76ParserUDPTest, InitIsRepeatableAndOverwritesEndpoints)
 	WTSVariant* first = makeCfg("127.0.0.1", 18001, 18002, 10);
 	WTSVariant* second = makeCfg("10.20.30.40", 18003, 18004, 20);
 	ASSERT_TRUE(parser.init(first));
-	ASSERT_TRUE(parser.init(second));
+	ASSERT_FALSE(parser.init(second));
 	first->release();
 	second->release();
 

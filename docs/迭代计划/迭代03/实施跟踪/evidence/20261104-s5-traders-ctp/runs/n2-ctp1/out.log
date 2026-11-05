@@ -1,0 +1,275 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 80 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from gate_placeholder_TraderCTP
+[ RUN      ] gate_placeholder_TraderCTP.compiles_with_module_flags
+[       OK ] gate_placeholder_TraderCTP.compiles_with_module_flags (0 ms)
+[----------] 1 test from gate_placeholder_TraderCTP (0 ms total)
+
+[----------] 10 tests from I03S5TraderCTPLifecycle
+[ RUN      ] I03S5TraderCTPLifecycle.NoFinalFrameDisconnectIsBoundedJoinsAndReleasesOnce
+[       OK ] I03S5TraderCTPLifecycle.NoFinalFrameDisconnectIsBoundedJoinsAndReleasesOnce (8 ms)
+[ RUN      ] I03S5TraderCTPLifecycle.FinalFrameThenDisconnectReleasesOnce
+[       OK ] I03S5TraderCTPLifecycle.FinalFrameThenDisconnectReleasesOnce (7 ms)
+[ RUN      ] I03S5TraderCTPLifecycle.ErrorFinalFrameThenLateErrorCallbackIsIgnored
+[       OK ] I03S5TraderCTPLifecycle.ErrorFinalFrameThenLateErrorCallbackIsIgnored (56 ms)
+[ RUN      ] I03S5TraderCTPLifecycle.SynchronousQueryRejectReleasesGateForNextQuery
+[       OK ] I03S5TraderCTPLifecycle.SynchronousQueryRejectReleasesGateForNextQuery (1022 ms)
+[ RUN      ] I03S5TraderCTPLifecycle.WorkerBlockedInsideSdkRequestIsUncertainThenRetrySucceeds
+[       OK ] I03S5TraderCTPLifecycle.WorkerBlockedInsideSdkRequestIsUncertainThenRetrySucceeds (318 ms)
+[ RUN      ] I03S5TraderCTPLifecycle.ReleaseFromCallbackIsDeferredToSafePoint
+[       OK ] I03S5TraderCTPLifecycle.ReleaseFromCallbackIsDeferredToSafePoint (21 ms)
+[ RUN      ] I03S5TraderCTPLifecycle.ReleaseNeverOverlapsInFlightOrderInsert
+[       OK ] I03S5TraderCTPLifecycle.ReleaseNeverOverlapsInFlightOrderInsert (220 ms)
+[ RUN      ] I03S5TraderCTPLifecycle.RepeatedConnectKeepsApiAndConnectAfterReleaseIsRejected
+[       OK ] I03S5TraderCTPLifecycle.RepeatedConnectKeepsApiAndConnectAfterReleaseIsRejected (4 ms)
+[ RUN      ] I03S5TraderCTPLifecycle.ConnectFailuresAreObservableEvents
+[       OK ] I03S5TraderCTPLifecycle.ConnectFailuresAreObservableEvents (3 ms)
+[ RUN      ] I03S5TraderCTPLifecycle.FactoryRemoverQuarantinesInstanceWithSdkAndDeletesOthers
+[TraderCTP] deleteTrader retained the instance (stop state: released); quarantined until process exit
+[       OK ] I03S5TraderCTPLifecycle.FactoryRemoverQuarantinesInstanceWithSdkAndDeletesOthers (3 ms)
+[----------] 10 tests from I03S5TraderCTPLifecycle (1667 ms total)
+
+[----------] 1 test from I03S5TraderCTPOrderState
+[ RUN      ] I03S5TraderCTPOrderState.KnownCtpStatusesKeepWtsMeaning
+[       OK ] I03S5TraderCTPOrderState.KnownCtpStatusesKeepWtsMeaning (4 ms)
+[ DISABLED ] I03S5TraderCTPOrderState.DISABLED_T2CTP07_TouchedIsNotReportedAsUntouched_PendingDecision
+[----------] 1 test from I03S5TraderCTPOrderState (4 ms total)
+
+[----------] 43 tests from T25TraderCTPTest
+[ RUN      ] T25TraderCTPTest.plugin_entry_points_build_and_destroy_trader
+[       OK ] T25TraderCTPTest.plugin_entry_points_build_and_destroy_trader (0 ms)
+[ RUN      ] T25TraderCTPTest.init_falls_back_to_ctptdflow_and_ignores_non_string_front
+[       OK ] T25TraderCTPTest.init_falls_back_to_ctptdflow_and_ignores_non_string_front (1 ms)
+[ RUN      ] T25TraderCTPTest.init_keeps_trailing_slash_of_given_flowdir
+[       OK ] T25TraderCTPTest.init_keeps_trailing_slash_of_given_flowdir (0 ms)
+[ RUN      ] T25TraderCTPTest.str_to_time_strips_colons_and_parses_to_uint
+[       OK ] T25TraderCTPTest.str_to_time_strips_colons_and_parses_to_uint (0 ms)
+[ RUN      ] T25TraderCTPTest.login_rsp_with_error_marks_login_failed_and_never_queries_confirm
+[       OK ] T25TraderCTPTest.login_rsp_with_error_marks_login_failed_and_never_queries_confirm (0 ms)
+[ RUN      ] T25TraderCTPTest.login_rsp_with_null_rspinfo_is_taken_as_success
+[       OK ] T25TraderCTPTest.login_rsp_with_null_rspinfo_is_taken_as_success (3 ms)
+[ RUN      ] T25TraderCTPTest.do_login_send_failure_is_logged_without_waiting_for_response
+[       OK ] T25TraderCTPTest.do_login_send_failure_is_logged_without_waiting_for_response (0 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_and_action_send_failures_return_error_and_are_logged
+[       OK ] T25TraderCTPTest.order_insert_and_action_send_failures_return_error_and_are_logged (3 ms)
+[ RUN      ] T25TraderCTPTest.authenticate_sync_failure_returns_error_without_waiting_for_login
+[       OK ] T25TraderCTPTest.authenticate_sync_failure_returns_error_without_waiting_for_login (1 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_without_usertag_allocates_identity_and_cache
+[       OK ] T25TraderCTPTest.order_insert_without_usertag_allocates_identity_and_cache (3 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_rejects_malformed_entrust_id_when_usertag_set
+[       OK ] T25TraderCTPTest.order_insert_rejects_malformed_entrust_id_when_usertag_set (4 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_wraps_bestprice_lastprice_and_every_offset
+[       OK ] T25TraderCTPTest.order_insert_wraps_bestprice_lastprice_and_every_offset (3 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_direction_flag_is_swapped_for_short_close
+[       OK ] T25TraderCTPTest.order_insert_direction_flag_is_swapped_for_short_close (3 ms)
+[ RUN      ] T25TraderCTPTest.order_action_rejects_entrust_id_with_only_one_hash
+[       OK ] T25TraderCTPTest.order_action_rejects_entrust_id_with_only_one_hash (3 ms)
+[ RUN      ] T25TraderCTPTest.disconnect_without_worker_only_queues_release
+[       OK ] T25TraderCTPTest.disconnect_without_worker_only_queues_release (0 ms)
+[ RUN      ] T25TraderCTPTest.release_after_ready_clears_api_and_every_container
+[       OK ] T25TraderCTPTest.release_after_ready_clears_api_and_every_container (3 ms)
+[ RUN      ] T25TraderCTPTest.connect_with_stub_creator_wires_spi_fronts_and_worker_sends_query
+[       OK ] T25TraderCTPTest.connect_with_stub_creator_wires_spi_fronts_and_worker_sends_query (16 ms)
+[ RUN      ] T25TraderCTPTest.settlement_confirm_older_than_trading_day_goes_through_confirm
+[       OK ] T25TraderCTPTest.settlement_confirm_older_than_trading_day_goes_through_confirm (7 ms)
+[ RUN      ] T25TraderCTPTest.settlement_confirm_query_with_null_field_or_error_keeps_or_skips_state
+[       OK ] T25TraderCTPTest.settlement_confirm_query_with_null_field_or_error_keeps_or_skips_state (7 ms)
+[ RUN      ] T25TraderCTPTest.settlement_confirm_rsp_only_acts_in_confirm_qryed_state
+[       OK ] T25TraderCTPTest.settlement_confirm_rsp_only_acts_in_confirm_qryed_state (8 ms)
+[ RUN      ] T25TraderCTPTest.confirm_send_failure_fails_login_without_waiting_for_callback
+[       OK ] T25TraderCTPTest.confirm_send_failure_fails_login_without_waiting_for_callback (14 ms)
+[ RUN      ] T25TraderCTPTest.query_confirm_send_failure_is_logged_inside_worker_item
+[       OK ] T25TraderCTPTest.query_confirm_send_failure_is_logged_inside_worker_item (23 ms)
+[ RUN      ] T25TraderCTPTest.query_confirm_sync_failure_clears_gate_and_worker_releases
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp:1250: Failure
+Value of: waitUntil([this]() { return api_.n_qry_confirm_.load() == 1 && !trader_.inQuery() && sink_.hasLog("Sending query of settlement data confirming state failed: 7"); })
+  Actual: false
+Expected: true
+同步拒绝后查询 gate 或失败日志未完成
+
+[  FAILED  ] T25TraderCTPTest.query_confirm_sync_failure_clears_gate_and_worker_releases (9938 ms)
+[ RUN      ] T25TraderCTPTest.position_cover_today_short_today_row_subtracts_long_frozen
+[       OK ] T25TraderCTPTest.position_cover_today_short_today_row_subtracts_long_frozen (102 ms)
+[ RUN      ] T25TraderCTPTest.position_cover_today_history_rows_clamp_negative_availability
+[       OK ] T25TraderCTPTest.position_cover_today_history_rows_clamp_negative_availability (19 ms)
+[ RUN      ] T25TraderCTPTest.position_direct_cover_splits_new_pre_and_both_freeze_sides
+[       OK ] T25TraderCTPTest.position_direct_cover_splits_new_pre_and_both_freeze_sides (17 ms)
+[ RUN      ] T25TraderCTPTest.position_combination_skips_availability_and_zero_margin_clears_it
+[       OK ] T25TraderCTPTest.position_combination_skips_availability_and_zero_margin_clears_it (21 ms)
+[ RUN      ] T25TraderCTPTest.position_zero_total_sets_avg_price_to_zero_and_still_pushes
+[       OK ] T25TraderCTPTest.position_zero_total_sets_avg_price_to_zero_and_still_pushes (11 ms)
+[ RUN      ] T25TraderCTPTest.position_error_last_row_pushs_accumulated_then_map_is_reset
+[       OK ] T25TraderCTPTest.position_error_last_row_pushs_accumulated_then_map_is_reset (26 ms)
+[ RUN      ] T25TraderCTPTest.usertag_round_trips_from_eid_cache_into_order_then_trade
+[       OK ] T25TraderCTPTest.usertag_round_trips_from_eid_cache_into_order_then_trade (36 ms)
+[ RUN      ] T25TraderCTPTest.order_rsp_maps_rejected_submit_status_and_mv_volume_and_reverse_types
+[       OK ] T25TraderCTPTest.order_rsp_maps_rejected_submit_status_and_mv_volume_and_reverse_types (7 ms)
+[ RUN      ] T25TraderCTPTest.entrust_rsp_maps_ioc_cv_to_fok_and_usertag_from_cache
+[       OK ] T25TraderCTPTest.entrust_rsp_maps_ioc_cv_to_fok_and_usertag_from_cache (10 ms)
+[ RUN      ] T25TraderCTPTest.rsp_order_insert_with_unknown_contract_pushes_only_trader_error
+[       OK ] T25TraderCTPTest.rsp_order_insert_with_unknown_contract_pushes_only_trader_error (25 ms)
+[ RUN      ] T25TraderCTPTest.rsp_order_action_error_carries_action_fields_and_bare_message
+[       OK ] T25TraderCTPTest.rsp_order_action_error_carries_action_fields_and_bare_message (22 ms)
+[ RUN      ] T25TraderCTPTest.trade_with_unknown_contract_is_dropped_by_both_channels
+[       OK ] T25TraderCTPTest.trade_with_unknown_contract_is_dropped_by_both_channels (34 ms)
+[ RUN      ] T25TraderCTPTest.qry_order_and_trade_rows_accumulate_and_clear_after_last
+[       OK ] T25TraderCTPTest.qry_order_and_trade_rows_accumulate_and_clear_after_last (15 ms)
+[ RUN      ] T25TraderCTPTest.settlement_info_concatenates_rows_and_pushes_only_when_non_empty
+[       OK ] T25TraderCTPTest.settlement_info_concatenates_rows_and_pushes_only_when_non_empty (3 ms)
+[ RUN      ] T25TraderCTPTest.unsupported_time_condition_keeps_other_order_mappings
+[       OK ] T25TraderCTPTest.unsupported_time_condition_keeps_other_order_mappings (5 ms)
+[ RUN      ] T25TraderCTPTest.front_and_heartbeat_paths_are_quiet_when_sink_is_unregistered
+[       OK ] T25TraderCTPTest.front_and_heartbeat_paths_are_quiet_when_sink_is_unregistered (8 ms)
+[ RUN      ] T25TraderCTPTest.front_disconnect_resets_state_and_logout_reports_reason
+[       OK ] T25TraderCTPTest.front_disconnect_resets_state_and_logout_reports_reason (30 ms)
+[ RUN      ] T25TraderCTPTest.confirm_guard_rejects_when_api_is_gone_or_state_moved_on
+[       OK ] T25TraderCTPTest.confirm_guard_rejects_when_api_is_gone_or_state_moved_on (25 ms)
+[ RUN      ] T25TraderCTPTest.login_warns_and_continues_when_cache_dir_is_not_writable
+[       OK ] T25TraderCTPTest.login_warns_and_continues_when_cache_dir_is_not_writable (21 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_rejects_when_user_tag_cache_init_failed
+[       OK ] T25TraderCTPTest.order_insert_rejects_when_user_tag_cache_init_failed (2 ms)
+[ DISABLED ] T25TraderCTPTest.DISABLED_settlement_info_last_row_without_payload_crashes
+[ DISABLED ] T25TraderCTPTest.DISABLED_rsp_error_with_null_sink_crashes
+[ DISABLED ] T25TraderCTPTest.DISABLED_disconnect_hangs_when_no_response_clears_in_query
+[ DISABLED ] T25TraderCTPTest.DISABLED_plugin_created_trader_has_indeterminate_sink
+[----------] 43 tests from T25TraderCTPTest (10533 ms total)
+
+[----------] 25 tests from T2TraderCTPTest
+[ RUN      ] T2TraderCTPTest.init_reads_broker_user_and_defaults
+[       OK ] T2TraderCTPTest.init_reads_broker_user_and_defaults (11 ms)
+[ RUN      ] T2TraderCTPTest.init_accepts_front_array_and_quick_flag
+[       OK ] T2TraderCTPTest.init_accepts_front_array_and_quick_flag (3 ms)
+[ RUN      ] T2TraderCTPTest.release_without_api_only_marks_stopped
+[       OK ] T2TraderCTPTest.release_without_api_only_marks_stopped (9 ms)
+[ RUN      ] T2TraderCTPTest.connect_rejects_missing_creator_without_starting_worker
+[       OK ] T2TraderCTPTest.connect_rejects_missing_creator_without_starting_worker (5 ms)
+[ RUN      ] T2TraderCTPTest.connect_rejects_null_api_created_by_creator
+[       OK ] T2TraderCTPTest.connect_rejects_null_api_created_by_creator (1 ms)
+[ RUN      ] T2TraderCTPTest.login_logout_and_queries_rejected_without_api
+[       OK ] T2TraderCTPTest.login_logout_and_queries_rejected_without_api (10 ms)
+[ RUN      ] T2TraderCTPTest.order_and_query_rejected_when_state_not_ready
+[       OK ] T2TraderCTPTest.order_and_query_rejected_when_state_not_ready (3 ms)
+[ RUN      ] T2TraderCTPTest.authenticate_failure_marks_login_failed_and_reports
+[       OK ] T2TraderCTPTest.authenticate_failure_marks_login_failed_and_reports (0 ms)
+[ RUN      ] T2TraderCTPTest.login_rsp_carries_credentials_and_session_params
+[       OK ] T2TraderCTPTest.login_rsp_carries_credentials_and_session_params (11 ms)
+[ RUN      ] T2TraderCTPTest.settlement_unconfirmed_goes_through_confirm
+[       OK ] T2TraderCTPTest.settlement_unconfirmed_goes_through_confirm (37 ms)
+[ RUN      ] T2TraderCTPTest.make_entrust_id_is_fixed_width_and_increments_ref
+[       OK ] T2TraderCTPTest.make_entrust_id_is_fixed_width_and_increments_ref (3 ms)
+[ RUN      ] T2TraderCTPTest.make_entrust_id_is_rejected_until_login_session_exists
+[       OK ] T2TraderCTPTest.make_entrust_id_is_rejected_until_login_session_exists (7 ms)
+[ RUN      ] T2TraderCTPTest.order_insert_maps_types_and_ref_for_shfe
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:724: Failure
+Expected equality of these values:
+  "TAG-A"
+  sink_.push_order_usertag_
+    Which is: "012345#0000000067#001001"
+
+[  FAILED  ] T2TraderCTPTest.order_insert_maps_types_and_ref_for_shfe (38 ms)
+[ RUN      ] T2TraderCTPTest.order_insert_cffex_anyprice_and_close_offsets
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:752: Failure
+Expected equality of these values:
+  0
+  trader_.orderInsert(e)
+    Which is: -1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:754: Failure
+Expected equality of these values:
+  '1'
+    Which is: '1' (49, 0x31)
+  api_.order_.CombOffsetFlag[0]
+    Which is: '3' (51, 0x33)
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:755: Failure
+Expected equality of these values:
+  '3'
+    Which is: '3' (51, 0x33)
+  api_.order_.TimeCondition
+    Which is: '1' (49, 0x31)
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:756: Failure
+Expected equality of these values:
+  '1'
+    Which is: '1' (49, 0x31)
+  api_.order_.VolumeCondition
+    Which is: '3' (51, 0x33)
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:757: Failure
+Expected equality of these values:
+  2
+  api_.n_insert_
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:761: Failure
+Expected equality of these values:
+  0
+  trader_.orderInsert(e)
+    Which is: -1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:762: Failure
+Expected equality of these values:
+  '2'
+    Which is: '2' (50, 0x32)
+  api_.order_.CombOffsetFlag[0]
+    Which is: '3' (51, 0x33)
+
+[  FAILED  ] T2TraderCTPTest.order_insert_cffex_anyprice_and_close_offsets (45 ms)
+[ RUN      ] T2TraderCTPTest.order_action_rejects_bad_entrust_id_and_builds_cancel
+[       OK ] T2TraderCTPTest.order_action_rejects_bad_entrust_id_and_builds_cancel (21 ms)
+[ RUN      ] T2TraderCTPTest.queries_enqueue_then_send_on_drain
+[       OK ] T2TraderCTPTest.queries_enqueue_then_send_on_drain (14 ms)
+[ RUN      ] T2TraderCTPTest.rtn_order_conversion_maps_state_and_night_date
+[       OK ] T2TraderCTPTest.rtn_order_conversion_maps_state_and_night_date (38 ms)
+[ RUN      ] T2TraderCTPTest.rtn_order_untouched_and_known_states_keep_wts_meaning
+[       OK ] T2TraderCTPTest.rtn_order_untouched_and_known_states_keep_wts_meaning (18 ms)
+[ RUN      ] T2TraderCTPTest.queried_order_untouched_and_known_states_keep_wts_meaning
+[       OK ] T2TraderCTPTest.queried_order_untouched_and_known_states_keep_wts_meaning (7 ms)
+[ RUN      ] T2TraderCTPTest.instrument_statuses_keep_existing_0_to_6_mapping
+[       OK ] T2TraderCTPTest.instrument_statuses_keep_existing_0_to_6_mapping (3 ms)
+[ RUN      ] T2TraderCTPTest.trade_conversion_amount_and_usertag_chain
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:1027: Failure
+Expected equality of these values:
+  "TAG-CHAIN"
+  sink_.push_order_usertag_
+    Which is: "012345#0000000067#001001"
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:1050: Failure
+Expected equality of these values:
+  "TAG-CHAIN"
+  sink_.push_trade_usertag_
+    Which is: ""
+
+[  FAILED  ] T2TraderCTPTest.trade_conversion_amount_and_usertag_chain (15 ms)
+[ RUN      ] T2TraderCTPTest.rsp_order_insert_and_action_error_paths
+[       OK ] T2TraderCTPTest.rsp_order_insert_and_action_error_paths (31 ms)
+[ RUN      ] T2TraderCTPTest.rsp_account_position_and_settlement
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp:1118: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  trader_.queryDepth()
+    Which is: 0
+
+[  FAILED  ] T2TraderCTPTest.rsp_account_position_and_settlement (14 ms)
+[ RUN      ] T2TraderCTPTest.rsp_qry_order_and_trade_arrays
+[       OK ] T2TraderCTPTest.rsp_qry_order_and_trade_arrays (1 ms)
+[ RUN      ] T2TraderCTPTest.front_events_and_logout_and_status_pushes
+[       OK ] T2TraderCTPTest.front_events_and_logout_and_status_pushes (1 ms)
+[ DISABLED ] T2TraderCTPTest.DISABLED_connect_starts_worker_thread_and_needs_real_front
+[----------] 25 tests from T2TraderCTPTest (359 ms total)
+
+[----------] Global test environment tear-down
+[==========] 80 tests from 5 test suites ran. (12566 ms total)
+[  PASSED  ] 75 tests.
+[  FAILED  ] 5 tests, listed below:
+[  FAILED  ] T25TraderCTPTest.query_confirm_sync_failure_clears_gate_and_worker_releases
+[  FAILED  ] T2TraderCTPTest.order_insert_maps_types_and_ref_for_shfe
+[  FAILED  ] T2TraderCTPTest.order_insert_cffex_anyprice_and_close_offsets
+[  FAILED  ] T2TraderCTPTest.trade_conversion_amount_and_usertag_chain
+[  FAILED  ] T2TraderCTPTest.rsp_account_position_and_settlement
+
+ 5 FAILED TESTS
+  YOU HAVE 6 DISABLED TESTS
+

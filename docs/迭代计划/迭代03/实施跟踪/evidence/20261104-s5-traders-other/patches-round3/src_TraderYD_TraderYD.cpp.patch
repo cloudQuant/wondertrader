@@ -1,0 +1,27 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before-round3/src/TraderYD/TraderYD.cpp	2026-11-04 20:11:18
++++ src/TraderYD/TraderYD.cpp	2026-11-04 21:24:45
+@@ -376,6 +376,24 @@
+ 		// ydApi.h: the listener must outlive notifyAfterApiDestroy().
+ 		std::fprintf(stderr, "[TraderYD] Destroyed before notifyAfterApiDestroy/callback drain; use deleteTrader\n");
+ 		std::abort();
++	}
++
++	// I03-NEW-067: the result containers are created lazily by YD callbacks and
++	// owned by this instance; release() only clears them. The worker, host calls
++	// and callbacks are proven drained above, so return ownership exactly once.
++	DataMap** maps[] = { &m_mapOrders, &m_mapPosition, &m_mapTrades };
++	for (DataMap** slot : maps)
++	{
++		if (*slot != NULL)
++		{
++			(*slot)->release();
++			*slot = NULL;
++		}
++	}
++	if (m_ayFunds != NULL)
++	{
++		m_ayFunds->release();
++		m_ayFunds = NULL;
+ 	}
+ }
+ 

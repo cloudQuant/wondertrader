@@ -1,0 +1,46 @@
+Note: Google Test filter = MwAd.SyncDbFailureDoesNotPublishAndSameTickRetrySucceeds
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from MwAd
+[ RUN      ] MwAd.SyncDbFailureDoesNotPublishAndSameTickRetrySucceeds
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:106: Failure
+Expected: ok = _writer->writeTick(t1, 0) doesn't throw an exception.
+  Actual: it throws boost::filesystem::filesystem_error with description "boost::filesystem::create_directories: File exists [system:17]: "/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r4_wad_1984_0/ticks/SHFE/rb2210", "/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r4_wad_1984_0/ticks/SHFE/rb2210"".
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:108: Failure
+Value of: ok
+  Actual: true
+Expected: false
+sync writeTick must report the persistence failure
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:110: Failure
+Value of: cur == __null
+  Actual: false
+Expected: true
+cache advanced although the tick was not persisted
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:123: Failure
+Expected equality of these values:
+  cur->actiontime()
+    Which is: 93000200
+  93000000u
+    Which is: 93000000
+retry must not see a shifted duplicate
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:133: Failure
+Expected equality of these values:
+  stored.action_time
+    Which is: 93000200
+  93000000u
+    Which is: 93000000
+
+[  FAILED  ] MwAd.SyncDbFailureDoesNotPublishAndSameTickRetrySucceeds (4 ms)
+[----------] 1 test from MwAd (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (4 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] MwAd.SyncDbFailureDoesNotPublishAndSameTickRetrySucceeds
+
+ 1 FAILED TEST

@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include "WtCore/WtExecuterFactory.h"
@@ -505,7 +506,7 @@ protected:
 	{
 		const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
 		_root = fs::temp_directory_path() /
-			("wt_exec_v2_quiesce_" + std::to_string(stamp) +
+			("wt_exec_v2_quiesce_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(stamp) +
 				"_" + std::to_string(reinterpret_cast<std::uintptr_t>(this)));
 		std::error_code ec;
 		fs::create_directories(_root, ec);

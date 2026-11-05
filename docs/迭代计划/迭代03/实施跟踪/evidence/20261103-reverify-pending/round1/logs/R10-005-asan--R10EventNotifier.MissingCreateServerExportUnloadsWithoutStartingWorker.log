@@ -1,0 +1,52 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R10EventNotifier.MissingCreateServerExportUnloadsWithoutStartingWorker
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R10EventNotifier
+[ RUN      ] R10EventNotifier.MissingCreateServerExportUnloadsWithoutStartingWorker
+[       OK ] R10EventNotifier.MissingCreateServerExportUnloadsWithoutStartingWorker (364 ms)
+[----------] 1 test from R10EventNotifier (364 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (365 ms total)
+[  PASSED  ] 1 test.
+
+=================================================================
+==86036==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 137 byte(s) in 1 object(s) allocated from:
+    #0 0x00011035577c in strdup+0xfc (libclang_rt.asan_osx_dynamic.dylib:arm64+0x4d77c)
+    #1 0x000110e00268 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__get_long_pointer[abi:nqe220108]() string:2242
+    #2 0x000110e00694 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__set_short_size[abi:nqe220108](unsigned long) string:2207
+    #3 0x000110e018a4 in unsigned long long std::__1::__cxx_atomic_load[abi:nqe220108]<unsigned long long>(std::__1::__cxx_atomic_base_impl<unsigned long long> const*, std::__1::memory_order) c11.h
+    #4 0x00018803ce2c in invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const::$_0::operator()() const+0xb0 (dyld:arm64e+0x4ce2c)
+    #5 0x000188048110 in invocation function for block in dyld3::MachOAnalyzer::forEachInitializer(Diagnostics&, dyld3::MachOAnalyzer::VMAddrConverter const&, void (unsigned int) block_pointer, void const*) const+0x13c (dyld:arm64e+0x58110)
+    #6 0x00018807e85c in invocation function for block in mach_o::UnsafeHeader::forEachSection(void (mach_o::UnsafeHeader::SectionInfo const&, bool&) block_pointer) const+0x134 (dyld:arm64e+0x8e85c)
+    #7 0x00018807b390 in mach_o::UnsafeHeader::forEachLoadCommand(void (load_command const*, bool&) block_pointer) const+0xcc (dyld:arm64e+0x8b390)
+    #8 0x00018807cc38 in mach_o::UnsafeHeader::forEachSection(void (mach_o::UnsafeHeader::SectionInfo const&, bool&) block_pointer) const+0x78 (dyld:arm64e+0x8cc38)
+    #9 0x000188047c04 in dyld3::MachOAnalyzer::forEachInitializer(Diagnostics&, dyld3::MachOAnalyzer::VMAddrConverter const&, void (unsigned int) block_pointer, void const*) const+0x200 (dyld:arm64e+0x57c04)
+    #10 0x0001880377d0 in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const+0x20c (dyld:arm64e+0x477d0)
+    #11 0x000188030408 in dyld4::JustInTimeLoader::runInitializers(dyld4::RuntimeState&) const+0x20 (dyld:arm64e+0x40408)
+    #12 0x000188037eec in dyld4::Loader::runInitializersBottomUp(dyld4::RuntimeState&, lsl::Vector<AuthenticatedValue<dyld4::Loader const*>>&, lsl::Vector<AuthenticatedValue<dyld4::Loader const*>>&) const+0x234 (dyld:arm64e+0x47eec)
+    #13 0x00018803cec4 in dyld4::Loader::runInitializersBottomUpPlusUpwardLinks(dyld4::RuntimeState&) const::$_0::operator()() const+0x70 (dyld:arm64e+0x4cec4)
+    #14 0x0001880381d4 in dyld4::Loader::runInitializersBottomUpPlusUpwardLinks(dyld4::RuntimeState&) const+0x2c8 (dyld:arm64e+0x481d4)
+    #15 0x0001880082a8 in dyld4::APIs::dlopen_from(char const*, int, void*)::$_0::operator()() const+0x90c (dyld:arm64e+0x182a8)
+    #16 0x000187ffbfe0 in dyld4::APIs::dlopen_from(char const*, int, void*)+0x458 (dyld:arm64e+0xbfe0)
+    #17 0x000187ffbae0 in dyld4::APIs::dlopen(char const*, int)+0x74 (dyld:arm64e+0xbae0)
+    #18 0x0001103481c0 in dlopen+0x114 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x401c0)
+    #19 0x000102d2fa20 in DLLHelper::load_library(char const*) DLLHelper.hpp:34
+    #20 0x000104371e18 in wtp::EventNotifier::init(wtp::WTSVariant*) EventNotifier.cpp:121
+    #21 0x000102d33ff0 in R10EventNotifier_MissingCreateServerExportUnloadsWithoutStartingWorker_Test::TestBody() r10_event_notifier_missing_register_test.cpp:258
+    #22 0x000105b82da4 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (CoverageTests_wtcore:arm64+0x1039e2da4)
+    #23 0x000105b82cec in testing::Test::Run()+0xcc (CoverageTests_wtcore:arm64+0x1039e2cec)
+    #24 0x000105b838cc in testing::TestInfo::Run()+0xd0 (CoverageTests_wtcore:arm64+0x1039e38cc)
+    #25 0x000105b84350 in testing::TestSuite::Run()+0x1c4 (CoverageTests_wtcore:arm64+0x1039e4350)
+    #26 0x000105b8f778 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (CoverageTests_wtcore:arm64+0x1039ef778)
+    #27 0x000105b8f124 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (CoverageTests_wtcore:arm64+0x1039ef124)
+    #28 0x000105b8f088 in testing::UnitTest::Run()+0x78 (CoverageTests_wtcore:arm64+0x1039ef088)
+    #29 0x0001056a3ea8 in main+0x40 (CoverageTests_wtcore:arm64+0x103503ea8)
+
+Objects leaked above:
+0x60d000007af0 (137 bytes)
+
+SUMMARY: AddressSanitizer: 137 byte(s) leaked in 1 allocation(s).

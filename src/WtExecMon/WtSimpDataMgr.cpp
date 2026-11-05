@@ -14,6 +14,7 @@
 #include "../Share/StrUtil.hpp"
 #include "../Includes/WTSDataDef.hpp"
 #include "../Includes/WTSVariant.hpp"
+#include "../Includes/DateMappingBinding.h"
 #include "../Share/DLLHelper.hpp"
 #include "../Includes/WTSSessionInfo.hpp"
 
@@ -93,6 +94,16 @@ bool WtSimpDataMgr::initStore(WTSVariant* cfg)
 		DLLHelper::free_library(hInst);
 		return false;
 	}
+
+	// K31=A: inject the runner's DateMappingV1 table before init when the module exports the binder.
+	const int bound = wtp::bindDateMappingV1(DLLHelper::get_symbol(hInst, WT_BIND_DATA_READER_DATE_MAPPING_V1),
+		_reader, _runner->get_date_mapping());
+	if (bound == 1)
+		WTSLogger::info("Data reader {} bound to the host date mapping table", module.c_str());
+	else if (bound == 0)
+		WTSLogger::warn("Data reader {} rejected the host date mapping table; it keeps the legacy mapping path", module.c_str());
+	else
+		WTSLogger::info("Data reader {} has no date mapping binder; it keeps the legacy mapping path", module.c_str());
 
 	_reader->init(cfg, this);
 	_s_info = sessionInfo;
@@ -214,7 +225,7 @@ WTSKlineSlice* WtSimpDataMgr::get_kline_slice(const char* stdCode, WTSKlinePerio
 	if (_reader == NULL)
 		return NULL;
 
-	std::string key = fmtutil::format<64>("{}-{}", stdCode, (uint32_t)period);
+	std::string key = fmt::format("{}-{}", stdCode, (uint32_t)period);
 
 	if (times == 1)
 	{
@@ -227,7 +238,7 @@ WTSKlineSlice* WtSimpDataMgr::get_kline_slice(const char* stdCode, WTSKlinePerio
 	if (_bars_cache == NULL)
 		_bars_cache = DataCacheMap::create();
 
-	key = fmtutil::format<64>("{}-{}-{}", stdCode, (uint32_t)period, times);
+	key = fmt::format("{}-{}-{}", stdCode, (uint32_t)period, times);
 
 	WTSKlineData* kData = (WTSKlineData*)_bars_cache->get(key);
 	//如果缓存里的K线条数大于请求的条数, 则直接返回

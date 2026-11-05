@@ -262,7 +262,11 @@ TEST_F(R90CtaEngine, RunExportsMarkerAndTickerWrappers)
 
     // ticker 线程按本机墙钟判断是否在交易时段；加一段 0-2400 使线程首轮即进入
     // 10ms 短睡而非 10s 长睡，release() 可立即 join（不依赖具体运行时点）。
-    sess->addTradingSection(0, 2400);
+    // 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒；K30（2026-11-04）：已有 900-1500
+    // 时再追加重叠/全天段同样被拒。改为把产品会话 TRADING 替换为单一全天段 0-0（迭代03 第五会话 int2 归因更新）。
+    sess = bd.regisSession("TRADING", 0, 0);
+    ASSERT_NE(nullptr, sess);
+    ASSERT_EQ(1u, sess->getSectionCount());
 
     engine.notify_chart_marker(20250110093100000ULL, "r90run", 3500.0, "icon", "tag");
     engine.notify_chart_index(20250110093100000ULL, "r90run", "idx", "line", 1.0);
@@ -279,7 +283,9 @@ TEST_F(R90CtaEngine, RunExportsMarkerAndTickerWrappers)
     EXPECT_NE(std::string::npos, body.find("CTA"));
     EXPECT_NE(std::string::npos, body.find("r90run"));
 
-    // ticker 已创建：handle_push_quote 转发一笔行情
+    // ticker 已创建：handle_push_quote 转发一笔行情。WtCtaEngine::on_tick 只向订阅了该代码的上下文投递，
+    // 本用例的上下文 on_init 不订阅，原断言在迭代02 证据（20261030-n02-002）中即未覆盖到；先订阅再推送。
+    static_cast<R90Ctx*>(ctx.get())->stra_sub_ticks(kCode);
     WTSTickData* rt = makeTick(3500.0);
     engine.handle_push_quote(rt);
     rt->release();

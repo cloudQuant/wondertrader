@@ -1,0 +1,48 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q05DataManagerTest.*
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from Q05DataManagerTest
+[ RUN      ] Q05DataManagerTest.InitFailsOnMissingModuleButKeepsSinkTargets
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q05_dm_45008_0/bin/libq05_no_such_writer_module.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q05_dm_45008_0/bin/libq05_no_such_writer_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q05_dm_45008_0/bin/libq05_no_such_writer_module.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q05_dm_45008_0/bin/libq05_no_such_writer_module.dylib' (no such file)
+/tmp/wt-i03-s5-dt-writer-after/src/TestUnits/coverage/q05_dtsrv/q05_dtcore_datamgr_test.cpp:115: Failure
+Expected equality of these values:
+  dm.getBDMgr()
+    Which is: NULL
+  static_cast<IBaseDataMgr*>(&_bdMgr)
+    Which is: 0x105d1b0d8
+
+/tmp/wt-i03-s5-dt-writer-after/src/TestUnits/coverage/q05_dtsrv/q05_dtcore_datamgr_test.cpp:118: Failure
+Value of: dm.canSessionReceive("SSE")
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-dt-writer-after/src/TestUnits/coverage/q05_dtsrv/q05_dtcore_datamgr_test.cpp:119: Failure
+Value of: dm.canSessionReceive("UNKNOWN")
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-dt-writer-after/src/TestUnits/coverage/q05_dtsrv/q05_dtcore_datamgr_test.cpp:125: Failure
+Expected equality of these values:
+  dm.getTradingDate("a60")
+    Which is: 0
+  _bdMgr.getTradingDate("a60")
+    Which is: 20261104
+
+[  FAILED  ] Q05DataManagerTest.InitFailsOnMissingModuleButKeepsSinkTargets (23 ms)
+[ RUN      ] Q05DataManagerTest.NullStateMonitorMeansAlldayMode
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q05_dm_45008_1/bin/libq05_no_such_writer_module.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q05_dm_45008_1/bin/libq05_no_such_writer_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q05_dm_45008_1/bin/libq05_no_such_writer_module.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/q05_dm_45008_1/bin/libq05_no_such_writer_module.dylib' (no such file)
+[       OK ] Q05DataManagerTest.NullStateMonitorMeansAlldayMode (4 ms)
+[ RUN      ] Q05DataManagerTest.WriterGuardsReturnDefaults
+[       OK ] Q05DataManagerTest.WriterGuardsReturnDefaults (8 ms)
+[ RUN      ] Q05DataManagerTest.BroadcastFanoutSkipsNullCaster
+[       OK ] Q05DataManagerTest.BroadcastFanoutSkipsNullCaster (1 ms)
+[----------] 4 tests from Q05DataManagerTest (38 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (38 ms total)
+[  PASSED  ] 3 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Q05DataManagerTest.InitFailsOnMissingModuleButKeepsSinkTargets
+
+ 1 FAILED TEST

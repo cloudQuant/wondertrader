@@ -16,6 +16,7 @@
  * 同链必 duplicate，见 CMakeLists 注释与 BUG-L00-003）。
  * 只读生产代码；缺陷见 docs/迭代计划/迭代01/bugs/R6_porter_runner.md。
  */
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <chrono>
@@ -49,7 +50,7 @@ namespace {
 		EmptyFactoryDir()
 		{
 			const auto nonce = std::chrono::steady_clock::now().time_since_epoch().count();
-			_path = std_fs::temp_directory_path() / ("r6_factory_dir_" + std::to_string(nonce));
+			_path = std_fs::temp_directory_path() / ("r6_factory_dir_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(nonce));
 			std::error_code ec;
 			_ok = std_fs::create_directory(_path, ec) && !ec;
 		}
@@ -112,7 +113,7 @@ namespace {
 		R6ConfigTempDir()
 		{
 			const auto nonce = std::chrono::steady_clock::now().time_since_epoch().count();
-			_path = std_fs::temp_directory_path() / ("r6_config_" + std::to_string(nonce));
+			_path = std_fs::temp_directory_path() / ("r6_config_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(nonce));
 			std::error_code ec;
 			_ok = std_fs::create_directories(_path, ec) && !ec;
 		}
@@ -434,10 +435,12 @@ TEST(R6PorterExtExecuter, executer_callbacks_fire_on_the_runner_that_registered_
  * 触发条件：
  *  C1 config() 的空配置和必需 basefiles 检查已有启用用例，失败后 run() 安全拒绝。
  *  C2 createExtParser() 在未配置时已有 false 返回守卫；由本地与公开 C API 用例覆盖。
- *  C3 get_raw_stdcode()（361~366）同理解引用 _engine —— 同族缺陷已由
- *     q06 侧 BUG-Q06-002 登记，这里只保留用例形状。
- *  C4 feedAdjFactors()（277~280）不判空即调 _feeder_fcts（构造列表里没有它）
- *     -> 跳飞指针；同族缺陷 = BUG-Q06-004。
+ *  C3 get_raw_stdcode() 未 config 时解引用空 _engine（BUG-Q06-002 同族）——
+ *     I03-NEW-128 已修为返回空串并记录诊断，改为启用的合同用例
+ *     R6PorterRawCode.get_raw_stdcode_without_engine_fails_closed。
+ *  C4 feedAdjFactors() 不判空即调 _feeder_fcts（BUG-Q06-004/R46-001）——
+ *     I03-NEW-129 已修为未注册时告警并返回，改为启用的合同用例
+ *     R6PorterFeed.feed_adj_factors_without_feeder_fails_closed。
  *  C5 run()（1091~1124）：_engine 为空段错误；非空则起引擎线程并在
  *     `while(!_to_exit) sleep(10ms)` 上挂死。
  *  C6 release()（1141~1155）：`WTSLogger::stop()` 会把进程级 m_bStopped 置位并
@@ -494,18 +497,97 @@ TEST(R6PorterExtParser, create_ext_parser_without_engine_returns_false)
 	EXPECT_FALSE(r.createExtParser("r6parser"));
 }
 
-TEST(R6PorterRawCode, DISABLED_get_raw_stdcode_without_engine_crashes)
+/*
+ * I03-NEW-128（卡 4a）：未 config 时没有引擎，get_raw_stdcode 返回空串（失败值）
+ * 并记录诊断；改前解引用空 _engine 崩溃（WtRtRunner.cpp get_raw_stdcode）。
+ * 原 DISABLED_ 用例断言的 "IF2108" 是有引擎时的成功路径，不属于本合同。
+ */
+TEST(R6PorterRawCode, get_raw_stdcode_without_engine_fails_closed)
 {
 	WtRtRunner r;
-	EXPECT_STREQ(r.get_raw_stdcode("IF2108.CFFEX"), "IF2108");	// C3
+	ASSERT_EQ(nullptr, r.getEngine());
+
+	const char* raw = r.get_raw_stdcode("CFFEX.IF.2108");	// C3
+	ASSERT_NE(nullptr, raw);
+	EXPECT_STREQ("", raw);
+
+	raw = r.get_raw_stdcode(NULL);
+	ASSERT_NE(nullptr, raw);
+	EXPECT_STREQ("", raw);
+	EXPECT_EQ(nullptr, r.getEngine());
 }
 
-TEST(R6PorterFeed, DISABLED_feed_adj_factors_without_feeder_jumps_to_garbage)
+namespace {
+	struct R6FactorProbe
+	{
+		int			calls = 0;
+		void*		obj = nullptr;
+		std::string	code;
+		uint32_t	count = 0;
+		uint32_t	dates[2] = { 0, 0 };
+		double		factors[2] = { 0, 0 };
+	};
+	R6FactorProbe g_r6_factor_probe;
+	WtRtRunner* g_r6_feed_runner = nullptr;
+
+	void r6_read_factors(void* obj, const char* stdCode, uint32_t* dates, double* factors, uint32_t count)
+	{
+		g_r6_factor_probe.calls++;
+		g_r6_factor_probe.obj = obj;
+		g_r6_factor_probe.code = stdCode == NULL ? "<null>" : stdCode;
+		g_r6_factor_probe.count = count;
+		for (uint32_t i = 0; i < count && i < 2; i++)
+		{
+			g_r6_factor_probe.dates[i] = dates[i];
+			g_r6_factor_probe.factors[i] = factors[i];
+		}
+	}
+
+	// The host side of an extended factor loader: it answers a load request
+	// by feeding the factors back through the runner, as wtpy does.
+	bool PORTER_FLAG r6_load_adj_factors(const char* stdCode)
+	{
+		uint32_t dates[2] = { 20210104, 20210601 };
+		double factors[2] = { 1.0, 1.25 };
+		g_r6_feed_runner->feedAdjFactors(stdCode, dates, factors, 2);
+		return true;
+	}
+}
+
+/*
+ * I03-NEW-129（BUG-Q06-004/R46-001）：未注册扩展复权因子加载器、或尚未通过
+ * loadAdjFactors 装入 feeder 时，feedAdjFactors 告警并返回，不调用空函数指针；
+ * 改前直接调用 _feeder_fcts（NULL）崩溃。最后一段为正向对照：装入 feeder 后
+ * 加载器回灌的因子原样转交。
+ */
+TEST(R6PorterFeed, feed_adj_factors_without_feeder_fails_closed)
 {
+	g_r6_factor_probe = R6FactorProbe();
 	WtRtRunner r;
 	uint32_t dates[1] = { 20210104 };
 	double factors[1] = { 1.0 };
-	r.feedAdjFactors("IF2108", dates, factors, 1);	// C4
+
+	// No loader registered, no feeder.
+	r.feedAdjFactors("SSE.STK.600000", dates, factors, 1);	// C4
+	// A loader is registered, but no load request has installed a feeder yet.
+	g_r6_feed_runner = &r;
+	r.registerExtDataLoader(NULL, NULL, r6_load_adj_factors);
+	r.feedAdjFactors("SSE.STK.600000", dates, factors, 1);
+	EXPECT_EQ(0, g_r6_factor_probe.calls);
+
+	// Positive control: a load request installs the feeder, and the factors the
+	// loader feeds back are forwarded exactly.
+	int owner = 0;
+	ASSERT_TRUE(r.loadAdjFactors(&owner, "SSE.STK.600000", r6_read_factors));
+	g_r6_feed_runner = nullptr;
+	EXPECT_EQ(1, g_r6_factor_probe.calls);
+	EXPECT_EQ(&owner, g_r6_factor_probe.obj);
+	EXPECT_EQ("SSE.STK.600000", g_r6_factor_probe.code);
+	EXPECT_EQ(2u, g_r6_factor_probe.count);
+	EXPECT_EQ(20210104u, g_r6_factor_probe.dates[0]);
+	EXPECT_EQ(20210601u, g_r6_factor_probe.dates[1]);
+	EXPECT_DOUBLE_EQ(1.0, g_r6_factor_probe.factors[0]);
+	EXPECT_DOUBLE_EQ(1.25, g_r6_factor_probe.factors[1]);
 }
 
 TEST(R6PorterRunRelease, DISABLED_run_without_engine_and_release_global_logger_stop)

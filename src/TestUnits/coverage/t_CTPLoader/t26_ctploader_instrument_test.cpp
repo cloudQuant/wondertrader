@@ -34,6 +34,11 @@ namespace
 	// 登录一次把 _trading_day 写成 atoi(trading_day_)；返回不析构的 spi（worker 已起）
 	// g_login_stub 让用例收尾时能确认队列已排空（worker 停止打 stderr 后才允许退场）
 	T26CtpApiStub* g_login_stub = NULL;
+	// I03-NEW-136: request id the login-triggered query worker actually issued. CTPLoader
+	// accepts instrument responses only for the request in flight (non-fee mode), so a
+	// hard-coded id raced with the worker: once the worker had issued its query, feed(7)
+	// was ignored as "not in flight" and _contracts stayed empty (intermittent failure).
+	int g_login_reqid = 0;
 
 	CTraderSpi* login_for_trading_day(const std::string& day)
 	{
@@ -45,6 +50,10 @@ namespace
 		auto ok = t26::ok_rsp();
 		CTraderSpi* spi = new CTraderSpi();
 		spi->OnRspUserLogin(&rsp, &ok, 1, true);
+		// wait until the worker has issued the instrument query, then answer that request
+		g_login_reqid = 0;
+		if (t26::wait_for([&stub]() { return stub.n_qry_inst_ >= 1u; }) && !stub.qry_inst_reqids_.empty())
+			g_login_reqid = stub.qry_inst_reqids_.back();
 		return spi;
 	}
 
@@ -61,7 +70,7 @@ namespace
 	void feed(CTraderSpi& spi, CThostFtdcInstrumentField& f)
 	{
 		auto ok = t26::ok_rsp();
-		spi.OnRspQryInstrument(&f, &ok, 7, false);
+		spi.OnRspQryInstrument(&f, &ok, g_login_reqid != 0 ? g_login_reqid : 7, false);
 	}
 }
 

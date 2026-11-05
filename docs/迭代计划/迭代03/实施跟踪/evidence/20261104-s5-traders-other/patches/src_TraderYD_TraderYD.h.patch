@@ -1,0 +1,27 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before/src/TraderYD/TraderYD.h	2026-10-27 12:44:19
++++ src/TraderYD/TraderYD.h	2026-11-04 17:56:32
+@@ -12,6 +12,7 @@
+ #include <string>
+ #include <queue>
+ #include <stdint.h>
++#include <unordered_map>
+ 
+ #include "../Includes/WTSTypes.h"
+ #include "../Includes/ITraderApi.h"
+@@ -159,6 +160,16 @@
+ 	DataMap*					m_mapOrders;
+ 	WTSArray*					m_ayFunds;
+ 
++	// BUG-R93-006: yesterday/today quantities frozen by each close order when it
++	// was first seen, keyed by order id, so a cancel restores the order's own
++	// sources instead of inferring them from the position-wide totals.
++	struct FrozenSources
++	{
++		double	_pre;
++		double	_new;
++	};
++	std::unordered_map<std::string, FrozenSources>	m_mapFrozen;
++
+ 	IBaseDataMgr*				m_bdMgr;
+ 
+ 	typedef std::queue<CommonExecuter>	QueryQue;

@@ -1,0 +1,41 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = C3TickerLeapSecond.Hft
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from C3TickerLeapSecond
+[ RUN      ] C3TickerLeapSecond.Hft
+==================
+WARNING: ThreadSanitizer: data race (pid=59686)
+  Write of size 4 at 0x00016bc6213c by main thread:
+    #0 wtp::WtHftRtTicker::on_tick(wtp::WTSTickData*) WtHftTicker.cpp:157 (test:arm64+0x1003717e4)
+    #1 void expectLeapSecondRejected<R202NextDayEngine<(anonymous namespace)::R202HftEngine>, wtp::WtHftRtTicker>()::'lambda'(unsigned int)::operator()(unsigned int) const merged.cpp:669 (test:arm64+0x100065b14)
+    #2 void expectLeapSecondRejected<R202NextDayEngine<(anonymous namespace)::R202HftEngine>, wtp::WtHftRtTicker>() merged.cpp:672 (test:arm64+0x10000f1c4)
+    #3 C3TickerLeapSecond_Hft_Test::TestBody() merged.cpp:687 (test:arm64+0x10000ee20)
+    #4 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (test:arm64+0x100463e84)
+
+  Previous read of size 4 at 0x00016bc6213c by thread T1:
+    #0 wtp::WtHftRtTicker::run()::$_1::operator()() const WtHftTicker.cpp:292 (test:arm64+0x1003751e8)
+    #1 std::__1::__invoke_result_impl<void, wtp::WtHftRtTicker::run()::$_1>::type std::__1::__invoke[abi:nqe220108]<wtp::WtHftRtTicker::run()::$_1>(wtp::WtHftRtTicker::run()::$_1&&) invoke.h:90 (test:arm64+0x1003750a8)
+    #2 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::WtHftRtTicker::run()::$_1, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::WtHftRtTicker::run()::$_1>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (test:arm64+0x100375050)
+    #3 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::WtHftRtTicker::run()::$_1>>(void*) thread.h:169 (test:arm64+0x100374c4c)
+
+  Location is stack of main thread.
+
+  Thread T1 (tid=5246220, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (test:arm64+0x1002cebf8)
+    #2 std::__1::thread::thread[abi:nqe220108]<wtp::WtHftRtTicker::run()::$_1, 0>(wtp::WtHftRtTicker::run()::$_1&&) thread.h:218 (test:arm64+0x100374a28)
+    #3 std::__1::thread::thread[abi:nqe220108]<wtp::WtHftRtTicker::run()::$_1, 0>(wtp::WtHftRtTicker::run()::$_1&&) thread.h:209 (test:arm64+0x10037494c)
+    #4 void std::__1::allocator<std::__1::thread>::construct[abi:nqe220108]<std::__1::thread, wtp::WtHftRtTicker::run()::$_1>(std::__1::thread*, wtp::WtHftRtTicker::run()::$_1&&) allocator.h:141 (test:arm64+0x1003748e0)
+    #5 void std::__1::allocator_traits<std::__1::allocator<std::__1::thread>>::construct[abi:nqe220108]<std::__1::thread, wtp::WtHftRtTicker::run()::$_1, 0>(std::__1::allocator<std::__1::thread>&, std::__1::thread*, wtp::WtHftRtTicker::run()::$_1&&) allocator_traits.h:296 (test:arm64+0x100374654)
+    #6 std::__1::__shared_ptr_emplace<std::__1::thread, std::__1::allocator<std::__1::thread>>::__shared_ptr_emplace[abi:nqe220108]<wtp::WtHftRtTicker::run()::$_1, std::__1::allocator<std::__1::thread>, 0>(std::__1::allocator<std::__1::thread>, wtp::WtHftRtTicker::run()::$_1&&) shared_ptr.h:161 (test:arm64+0x1003744f0)
+    #7 std::__1::__shared_ptr_emplace<std::__1::thread, std::__1::allocator<std::__1::thread>>::__shared_ptr_emplace[abi:nqe220108]<wtp::WtHftRtTicker::run()::$_1, std::__1::allocator<std::__1::thread>, 0>(std::__1::allocator<std::__1::thread>, wtp::WtHftRtTicker::run()::$_1&&) shared_ptr.h:158 (test:arm64+0x100373ebc)
+    #8 std::__1::shared_ptr<std::__1::thread> std::__1::allocate_shared[abi:nqe220108]<std::__1::thread, std::__1::allocator<std::__1::thread>, wtp::WtHftRtTicker::run()::$_1, 0>(std::__1::allocator<std::__1::thread> const&, wtp::WtHftRtTicker::run()::$_1&&) shared_ptr.h:682 (test:arm64+0x100373cfc)
+    #9 std::__1::shared_ptr<std::__1::thread> std::__1::make_shared[abi:nqe220108]<std::__1::thread, wtp::WtHftRtTicker::run()::$_1, 0>(wtp::WtHftRtTicker::run()::$_1&&) shared_ptr.h:690 (test:arm64+0x1003728e4)
+    #10 wtp::WtHftRtTicker::run() WtHftTicker.cpp:288 (test:arm64+0x100372614)
+    #11 void expectLeapSecondRejected<R202NextDayEngine<(anonymous namespace)::R202HftEngine>, wtp::WtHftRtTicker>() merged.cpp:665 (test:arm64+0x10000f174)
+    #12 C3TickerLeapSecond_Hft_Test::TestBody() merged.cpp:687 (test:arm64+0x10000ee20)
+    #13 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (test:arm64+0x100463e84)
+
+SUMMARY: ThreadSanitizer: data race WtHftTicker.cpp:157 in wtp::WtHftRtTicker::on_tick(wtp::WTSTickData*)
+==================

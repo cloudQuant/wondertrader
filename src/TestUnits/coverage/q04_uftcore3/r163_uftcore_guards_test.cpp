@@ -190,7 +190,8 @@ TEST(R163UftEngine, DeadSliceAccessorsAndEmptyBarDispatch)
 	r123::SessionBaseDataMgr bd;
 	WTSSessionInfo* session = WTSSessionInfo::create("R163ALL", "r163 allday", 0);
 	ASSERT_NE(nullptr, session);
-	session->addTradingSection(0, 2400);
+	// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；R12-13 后 ticker 对无法映射的交易日 fail-closed（迭代03 第五会话）。
+	session->addTradingSection(0, 0);
 	bd._session = session;
 
 	{

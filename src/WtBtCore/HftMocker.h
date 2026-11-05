@@ -19,6 +19,7 @@
 #include "../Includes/FasterDefs.h"
 #include "../Includes/IHftStraCtx.h"
 #include "../Includes/HftStrategyDefs.h"
+#include "../Includes/IStrategyPluginV2.h"
 
 #include "../Share/StdUtils.hpp"
 #include "../Share/DLLHelper.hpp"
@@ -59,6 +60,9 @@ private:
 	bool init_hft_factory_impl(WTSVariant* cfg, DllHandle module,
 		const std::string& modulePath, FuncCreateHftStraFact creator,
 		FuncDeleteHftStraFact remover);
+	bool init_hft_factory_core(WTSVariant* cfg, DllHandle module,
+		const std::string& modulePath, FuncCreateHftStraFact creator,
+		FuncDeleteHftStraFact remover, const WtStrategyPluginApiV2* api);
 	void release_hft_factory() noexcept;
 
 	/**
@@ -594,6 +598,11 @@ public:
 	 */
 	virtual void on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag);
 
+protected:
+	bool apply_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag);
+
+public:
+
 	/**
 	 * @brief 订单状态回调
 	 * @param localid 订单的本地ID
@@ -697,7 +706,9 @@ private:
 	 * @details 直接设置指定合约的持仓量，不通过交易而是直接修改持仓数据
 	 *          通常用于以特定持仓量和价格初始化策略的持仓
 	 */
-	void	do_set_position(const char* stdCode, double qty, double price = 0.0, const char* userTag = "");
+	bool	do_set_position(const char* stdCode, double qty, double price, const char* userTag, const std::vector<double>& fees);
+	std::function<bool()> trade_state_guard(const std::string& key);
+	bool plan_trade_fees(const char* stdCode, bool isBuy, const std::vector<double>& volumes, double price, const wt_fee::Context& context, std::vector<std::vector<double>>& fees);
 	/**
 	 * @brief 更新动态持仓盈亏
 	 * @param stdCode 标准化的合约代码
@@ -825,6 +836,11 @@ private:
 		FuncDeleteHftStraFact	_remover;
 
 		/**
+		 * @brief 已校验的版本化插件表（卡4b=A）；为空表示测试注入的旧接口
+		 */
+		const WtStrategyPluginApiV2* _api;
+
+		/**
 		 * @brief 构造函数
 		 * @details 初始化策略工厂信息结构
 		 */
@@ -834,6 +850,7 @@ private:
 			_fact = NULL;
 			_creator = NULL;
 			_remover = NULL;
+			_api = NULL;
 		}
 
 		/**
@@ -849,14 +866,26 @@ private:
 		{
 			if (_fact)
 			{
-				if (_remover == NULL)
+				if (_api != NULL)
+				{
+					// Card 9a: keep a plugin without the teardown promise loaded.
+					if (!wt_stra_plugin::hasSyncTeardown(_api))
+					{
+						pin();
+						return;
+					}
+				}
+				else if (_remover == NULL)
 				{
 					pin();
 					return;
 				}
 				try
 				{
-					_remover(_fact);
+					if (_api != NULL)
+						_api->destroy_factory(static_cast<void*>(_fact));
+					else
+						_remover(_fact);
 				}
 				catch (...)
 				{
@@ -883,6 +912,7 @@ private:
 			_fact = NULL;
 			_creator = NULL;
 			_remover = NULL;
+			_api = NULL;
 		}
 	} StraFactInfo;
 	/**
@@ -1189,6 +1219,12 @@ private:
 	 * @details 存储所有合约的持仓信息，键为合约代码，值为相应的持仓信息
 	 */
 	PositionMap		_pos_map;
+
+	/**
+	 * @brief 冻结量所属交易日
+	 * @details 卡3 3d=C：session-begin 仅在交易日与冻结量所属交易日不同时清零冻结量
+	 */
+	uint32_t		_frozen_tdate = 0;
 
 	/**
 	 * @brief 交易日志流

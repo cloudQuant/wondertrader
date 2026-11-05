@@ -10,6 +10,8 @@
  */
 #pragma once
 #include "ITrdNotifySink.h"
+#include "ExecOwnerModes.h"
+#include "OwnerClaimLease.h"
 #include "IExecCommand.h"
 #include "ExecCommandQuiesce.h"
 #include "ExecUnitInitStatus.h"
@@ -17,6 +19,8 @@
 #include "../Includes/ExecuteDefs.h"
 #include <Share/threadpool.hpp>
 #include "../Share/SpinMutex.hpp"
+#include "../Share/ExecutionGroups.hpp"
+#include "AccountNetPositionLimits.h"
 #include <atomic>
 #include <condition_variable>
 #include <deque>
@@ -63,6 +67,14 @@ public:
 	 * \details 根据传入的参数配置初始化套利执行器，设置参数如自动清理模式、放大倍数等
 	 */
 	bool init(WTSVariant* params);
+
+	/*!
+	 * \brief Pure eager validation of a complete executer configuration.
+	 * \details Reads only; never retains, allocates runtime state, loads modules or
+	 * creates units. init() runs the same check before any side effect, and runners
+	 * call it for every active entry before constructing any executer (card 8b=A).
+	 */
+	static bool validateConfig(WTSVariant* params, std::string& error);
 
 	/*!
 	 * \brief 设置交易适配器
@@ -175,6 +187,8 @@ private:
 	uint64_t beginPositionBatch();
 	void set_position_with_sequence(const wt_hashmap<std::string, double>& targets,
 		uint64_t sequence);
+	void submitTargetBatch(const wt_hashmap<std::string, double>& targets,
+		bool incremental, uint64_t sequence = 0);
 	std::vector<std::string> snapshotMissingTargets(
 		const wt_hashmap<std::string, double>& targets);
 	void clearMissingTargets(const std::vector<std::string>& codes,
@@ -426,6 +440,10 @@ private:
 	 * \details 提供交易接口的适配器，用于发送交易指令
 	 */
 	TraderAdapter*		_trader;
+	ExecOwnerModes		_owner_modes;	///< per-contract shared/non-shared owner mode (cards 5b/5c)
+	// I03-NEW-089: returns this owner's contract claims when it is rebound to
+	// another account gate or destroyed (the gate is held weakly).
+	OwnerClaimLease		_owner_claims;
 
 	/*!
 	 * \brief 执行器工厂指针
@@ -517,6 +535,9 @@ private:
 	 * \details 存储合约代码到所属组的映射关系
 	 */
 	CodeGroups				_code_to_groups;
+	execution_groups::Groups _group_rules;
+	// Card 8 (2026-11-03): per-contract account net-position limit declaration.
+	account_net_limits::Limits _account_limits;
 
 		/*!
 	 * \brief 自动清理包含品种集合
@@ -542,6 +563,7 @@ private:
 	 */
 	wt_hashmap<std::string, double> _target_pos;
 	mutable std::mutex _mtx_positions;
+	uint64_t _target_revision = 0;
 	std::map<std::string, uint64_t> _target_update_sequences;
 	std::map<std::string, bool> _target_dispatch_allowed;
 	uint64_t _next_position_sequence = 1;

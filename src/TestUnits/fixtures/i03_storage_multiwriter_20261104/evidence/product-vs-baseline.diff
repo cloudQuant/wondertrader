@@ -1,0 +1,2329 @@
+--- /tmp/wt-i03-storage-mw-20261104/baseline/src/WtDataStorage/WtDataWriter.h	2026-11-02 16:22:26
++++ src/WtDataStorage/WtDataWriter.h	2026-11-04 02:46:04
+@@ -10,6 +10,7 @@
+ 
+ #pragma once
+ #include "DataDefine.h"
++#include "RTBlockPublish.hpp"
+ 
+ #include "../Includes/FasterDefs.h"
+ #include "../Includes/IDataWriter.h"
+@@ -72,6 +73,35 @@
+ 	void* resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount);
+ 
+ 	/*!
++	 * 卡13 多 writer 发布协议（见 RTBlockPublish.hpp）：调用方已持有该文件的跨进程发布锁。
++	 * 若其他 writer 已扩容并发布更大的 capacity，则先重新映射本进程视图；返回新的块地址，失败返回 NULL 且保留旧映射。
++	 */
++	template<typename HeaderType, typename T>
++	void* syncPublishedMapping(BoostMFPtr& mfPtr);
++
++	/*!
++	 * 卡13：发布锁日志显示上一持锁者在结构性变更中途退出时，按物理文件长度校正 header（capacity/size 不越过物理记录数）。
++	 */
++	template<typename HeaderType, typename T>
++	bool reconcilePublished(BoostMFPtr& mfPtr, const char* tag);
++
++	/*!
++	 * 卡13：在跨进程发布锁内完成 prepare（同步映射、必要时扩容、写入未发布槽位）后，以一次 release 存储发布 _size。
++	 */
++	template<typename HeaderType, typename T, typename PairT>
++	bool appendPublished(PairT& pair, const T& rec, const char* fullCode, const char* what);
++
++	/*!
++	 * 卡13：取得跨进程发布锁后的 prepare 阶段：崩溃恢复校正、同步其他 writer 的扩容、保证至少一个未发布槽位。
++	 * 成功返回块地址（pair._block 同步更新），调用方在 lock 生命周期内写入并发布。
++	 */
++	template<typename HeaderType, typename T, typename PairT>
++	void* preparePublished(PairT& pair, wt_rtpub::PublishLock& lock, const char* fullCode, const char* what);
++
++	/*! 卡13 测试钩子：发布 _size 前调用（仅 WT_DATA_WRITER_TEST_HOOKS 构建生效）。 */
++	void notifyBeforePublish(const char* path, uint32_t slot);
++
++	/*!
+ 	 * \brief 处理循环
+ 	 * 
+ 	 * \details 异步处理数据的工作线程函数，从任务队列中获取并处理数据
+@@ -501,6 +531,7 @@
+ 	 * \details 以合约标识为键，缓存索引为值的哈希映射，用于快速查找指定合约的Tick数据
+ 	 */
+ 	wt_hashmap<std::string, uint32_t> _tick_cache_idx;
++	uint32_t		_tick_cache_scanned = 0;	///< 卡13：本进程已扫描进索引的缓存项数；其他 writer 新增的项在发布锁内补扫
+ 
+ 	/*!
+ 	 * \brief Tick缓存文件
+--- /tmp/wt-i03-storage-mw-20261104/baseline/src/WtDataStorage/WtDataWriter.cpp	2026-11-02 17:49:27
++++ src/WtDataStorage/WtDataWriter.cpp	2026-11-04 03:08:15
+@@ -143,6 +143,25 @@
+ static const uint32_t CACHE_SIZE_STEP = 200;
+ static const uint32_t HFT_SIZE_STEP = 2500;
+ 
++// 卡13：发布协议依赖的磁盘布局（只读断言，不改变格式）
++static_assert(sizeof(BlockHeader) == wt_rtpub::RT_SIZE_OFFSET, "RT header size offset changed");
++static_assert(sizeof(RTBlockHeader) == wt_rtpub::RT_CAPACITY_OFFSET + sizeof(uint32_t), "RT header capacity offset changed");
++static_assert(sizeof(RTTickBlock) == sizeof(RTDayBlockHeader) && sizeof(RTTransBlock) == sizeof(RTDayBlockHeader)
++	&& sizeof(RTOrdDtlBlock) == sizeof(RTDayBlockHeader) && sizeof(RTOrdQueBlock) == sizeof(RTDayBlockHeader)
++	&& sizeof(RTKlineBlock) == sizeof(RTDayBlockHeader) && sizeof(RTTickCache) == sizeof(RTBlockHeader),
++	"RT record arrays must start right after the header");
++
++static void initRTDayHeader(RTDayBlockHeader& h, BlockType type, uint32_t capacity, uint32_t date)
++{
++	memset(&h, 0, sizeof(h));
++	memcpy(h._blk_flag, BLK_FLAG, FLAG_SIZE);
++	h._type = (uint16_t)type;
++	h._version = BLOCK_VERSION_RAW_V2;
++	h._size = 0;
++	h._capacity = capacity;
++	h._date = date;
++}
++
+ const char CMD_CLEAR_CACHE[] = "CMD_CLEAR_CACHE";
+ const char MARKER_FILE[] = "marker.ini";
+ 
+@@ -544,13 +563,35 @@
+ 
+ 	bool bNew = false;
+ 	std::string filename = _base_dir + _cache_file;
++	// 卡13：缓存文件的创建/初始化/首次扫描在跨进程发布锁与结构性日志内完成
++	wt_rtpub::PublishLock publishLock;
++	if (!publishLock.acquire(filename))
++	{
++		pipe_writer_log(_sink, LL_ERROR, "{}", publishLock.error());
++		return;
++	}
++	wt_rtpub::StructuralGuard structural(publishLock, TOTAL_CODES);
++	if (!structural.begun())
++	{
++		pipe_writer_log(_sink, LL_ERROR, "Cannot journal structural change of {}", filename);
++		return;
++	}
+ 	if (!StdFile::exists(filename.c_str()))
+ 	{
+ 		uint64_t uSize = sizeof(RTTickCache) + sizeof(TickCacheItem) * TOTAL_CODES;
+-		BoostFile bf;
+-		bf.create_new_file(filename.c_str());
+-		bf.truncate_file((uint32_t)uSize);
+-		bf.close_file();
++		RTBlockHeader header;
++		memset(&header, 0, sizeof(header));
++		memcpy(header._blk_flag, BLK_FLAG, FLAG_SIZE);
++		header._type = BT_RT_Cache;
++		header._version = 1;
++		header._size = 0;
++		header._capacity = TOTAL_CODES;
++		std::string publishErr;
++		if (!wt_rtpub::publishNewBlockFile(filename, &header, sizeof(header), uSize, publishErr))
++		{
++			pipe_writer_log(_sink, LL_ERROR, "{}", publishErr);
++			return;
++		}
+ 		bNew = true;
+ 	}
+ 
+@@ -578,6 +619,7 @@
+ 			_tick_cache_idx[key] = i;
+ 		}
+ 	}
++	_tick_cache_scanned = _tick_cache_block->_size;
+ }
+ 
+ bool WtDataWriter::resizeTickCache(uint32_t nCount)
+@@ -636,7 +678,8 @@
+ 			return false;
+ 		}
+ 
+-		newBlock->_capacity = nCount;
++		// 卡13：容量在扩展与映射完成后以 release 存储发布
++		wt_rtpub::publishCapacity(newBlock, nCount);
+ 		// Keep the old mapping alive until the block pointer is moved to the new address.
+ 		_tick_cache_file.swap(newFile);
+ 		_tick_cache_block = newBlock;
+@@ -831,7 +874,15 @@
+ 	RTBlockHeader* newBlock = (RTBlockHeader*)pNewMf->addr();
+ 	if (newBlock == NULL)
+ 		return NULL;
+-	newBlock->_capacity = nCount;
++#if defined(WT_DATA_WRITER_TEST_HOOKS)
++	{
++		p10_writer_test_hooks::Hooks extendHooks;
++		if (copy_p10_test_hooks(this, extendHooks) && extendHooks.after_rt_extend_before_capacity != nullptr)
++			extendHooks.after_rt_extend_before_capacity(extendHooks.context, filename.c_str());
++	}
++#endif
++	// 卡13：容量只在文件扩展、映射校验之后以 release 存储发布
++	wt_rtpub::publishCapacity(newBlock, nCount);
+ 	// Keep the previous mapping alive until the expanded file is mapped and
+ 	// validated. A failed remap must not discard the writer's last usable view.
+ 	mfPtr.swap(pNewMf);
+@@ -839,6 +890,159 @@
+ 	return mfPtr->addr();
+ }
+ 
++void WtDataWriter::notifyBeforePublish(const char* path, uint32_t slot)
++{
++#if defined(WT_DATA_WRITER_TEST_HOOKS)
++	p10_writer_test_hooks::Hooks hooks;
++	if (copy_p10_test_hooks(this, hooks) && hooks.before_rt_publish != nullptr)
++		hooks.before_rt_publish(hooks.context, path, slot);
++#else
++	(void)path;
++	(void)slot;
++#endif
++}
++
++template<typename HeaderType, typename T>
++void* WtDataWriter::syncPublishedMapping(BoostMFPtr& mfPtr)
++{
++	if (mfPtr == NULL || mfPtr->addr() == NULL)
++		return NULL;
++	const uint32_t capacity = wt_rtpub::publishedCapacity(mfPtr->addr());
++	if (capacity <= wt_rtpub::mappedRecords(mfPtr->size(), sizeof(HeaderType), sizeof(T)))
++		return mfPtr->addr();
++
++	// Another writer grew the file and published a larger capacity: remap before any slot is touched.
++	const std::string filename = mfPtr->filename();
++	BoostMFPtr fresh(new BoostMappingFile());
++	try
++	{
++		if (!fresh->map(filename.c_str()))
++		{
++			pipe_writer_log(_sink, LL_ERROR, "Cannot remap RT block {} grown by another writer", filename);
++			return NULL;
++		}
++	}
++	catch (std::exception& ex)
++	{
++		pipe_writer_log(_sink, LL_ERROR, "Exception while remapping RT block {} grown by another writer: {}", filename, ex.what());
++		return NULL;
++	}
++	if (fresh->addr() == NULL
++		|| wt_rtpub::mappedRecords(fresh->size(), sizeof(HeaderType), sizeof(T)) < wt_rtpub::publishedCapacity(fresh->addr()))
++	{
++		pipe_writer_log(_sink, LL_ERROR, "RT block {} is shorter than its published capacity; refusing to write", filename);
++		return NULL;
++	}
++	mfPtr.swap(fresh);
++	return mfPtr->addr();
++}
++
++template<typename HeaderType, typename T>
++bool WtDataWriter::reconcilePublished(BoostMFPtr& mfPtr, const char* tag)
++{
++	if (mfPtr == NULL || mfPtr->addr() == NULL)
++		return false;
++	const std::string filename = mfPtr->filename();
++	boost::system::error_code ec;
++	const uintmax_t physical = fs::file_size(filename, ec);
++	if (ec)
++	{
++		pipe_writer_log(_sink, LL_ERROR, "Cannot stat RT {} block {} during recovery: {}", tag, filename, ec.message());
++		return false;
++	}
++	void* base = mfPtr->addr();
++	const uint32_t physRecords = wt_rtpub::mappedRecords((uint64_t)physical, sizeof(HeaderType), sizeof(T));
++	uint32_t capacity = wt_rtpub::publishedCapacity(base);
++	if (capacity > physRecords)
++	{
++		capacity = physRecords;
++		wt_rtpub::publishCapacity(base, capacity);
++	}
++	uint32_t size = wt_rtpub::publishedSize(base);
++	if (size > capacity)
++	{
++		size = capacity;
++		wt_rtpub::publishSize(base, size);
++	}
++	pipe_writer_log(_sink, LL_WARN, "RT {} block {} recovered after an interrupted structural change: capacity {}, size {}",
++		tag, filename, capacity, size);
++	return true;
++}
++
++template<typename HeaderType, typename T, typename PairT>
++void* WtDataWriter::preparePublished(PairT& pair, wt_rtpub::PublishLock& lock, const char* fullCode, const char* what)
++{
++	if (pair._file == NULL || pair._block == NULL)
++		return NULL;
++	const std::string filename = pair._file->filename();
++	if (!lock.acquire(filename))
++	{
++		pipe_writer_log(_sink, LL_ERROR, "RT {} block of {}: {}", what, fullCode, lock.error());
++		return NULL;
++	}
++	if (lock.recovered())
++	{
++		if (!reconcilePublished<HeaderType, T>(pair._file, what) || !lock.endStructural())
++		{
++			pipe_writer_log(_sink, LL_ERROR, "RT {} block of {} could not be recovered; refusing to write", what, fullCode);
++			return NULL;
++		}
++	}
++
++	void* base = syncPublishedMapping<HeaderType, T>(pair._file);
++	if (base == NULL)
++		return NULL;
++	pair._block = (decltype(pair._block))base;
++
++	const uint32_t size = wt_rtpub::publishedSize(base);
++	const uint32_t capacity = wt_rtpub::publishedCapacity(base);
++	if (size > capacity)
++	{
++		pipe_writer_log(_sink, LL_ERROR, "RT {} block of {} publishes size {} beyond capacity {}; refusing to write", what, fullCode, size, capacity);
++		return NULL;
++	}
++	if (size < capacity)
++		return base;
++
++	if (capacity == 0 || capacity > UINT32_MAX / 2)
++	{
++		pipe_writer_log(_sink, LL_ERROR, "RT {} block of {} cannot grow from capacity {}", what, fullCode, capacity);
++		return NULL;
++	}
++	pair._file->sync();
++	wt_rtpub::StructuralGuard structural(lock, (uint64_t)capacity * 2);
++	if (!structural.begun())
++	{
++		pipe_writer_log(_sink, LL_ERROR, "Cannot journal expansion of RT {} block of {}", what, fullCode);
++		return NULL;
++	}
++	base = resizeRTBlock<HeaderType, T>(pair._file, capacity * 2);
++	if (base == NULL)
++	{
++		pipe_writer_log(_sink, LL_ERROR, "RT {} block of {} could not be expanded", what, fullCode);
++		return NULL;
++	}
++	pair._block = (decltype(pair._block))base;
++	pipe_writer_log(_sink, LL_DEBUG, "RT {} block of {} resized to {}", what, fullCode, capacity * 2);
++	return base;
++}
++
++template<typename HeaderType, typename T, typename PairT>
++bool WtDataWriter::appendPublished(PairT& pair, const T& rec, const char* fullCode, const char* what)
++{
++	wt_rtpub::PublishLock lock;
++	void* base = preparePublished<HeaderType, T>(pair, lock, fullCode, what);
++	if (base == NULL)
++		return false;
++	// Prepare: payload goes into the first unpublished slot (invisible to readers).
++	const uint32_t slot = wt_rtpub::publishedSize(base);
++	memcpy(static_cast<char*>(base) + sizeof(HeaderType) + (std::size_t)slot * sizeof(T), &rec, sizeof(T));
++	notifyBeforePublish(pair._file->filename(), slot);
++	// Publish: one aligned release store; readers observe either slot-1 or slot+1 records.
++	wt_rtpub::publishSize(base, slot + 1);
++	return true;
++}
++
+ bool WtDataWriter::writeTick(WTSTickData* curTick, uint32_t procFlag)
+ {
+ 	OperationGuard operation(*this);
+@@ -947,24 +1151,10 @@
+ 		if (!pBlockPair)
+ 			break;
+ 
+-		//先检查容量够不够,不够要扩
+-		RTOrdQueBlock* blk = pBlockPair->_block;
+-		if (blk->_size >= blk->_capacity)
+-		{
+-			pBlockPair->_file->sync();
+-			RTOrdQueBlock* expanded = (RTOrdQueBlock*)resizeRTBlock<RTDayBlockHeader, WTSOrdQueStruct>(pBlockPair->_file, blk->_capacity * 2);
+-			if (expanded == NULL)
+-			{
+-				pipe_writer_log(_sink, LL_ERROR, "RT order-queue block of {} could not be expanded", ct->getFullCode());
+-				break;
+-			}
+-			pBlockPair->_block = expanded;
+-			blk = expanded;
+-		}
++		// 卡13：跨进程发布锁内 prepare（同步其他 writer 的扩容、必要时扩容、写未发布槽位）后发布 _size
++		if (!appendPublished<RTDayBlockHeader, WTSOrdQueStruct>(*pBlockPair.get(), curOrdQue->getOrdQueStruct(), ct->getFullCode(), "order-queue"))
++			break;
+ 
+-		memcpy(&blk->_queues[blk->_size], &curOrdQue->getOrdQueStruct(), sizeof(WTSOrdQueStruct));
+-		blk->_size += 1;
+-
+ 		_sink->broadcastOrdQue(curOrdQue);
+ 
+ 		static wt_hashmap<std::string, uint64_t> _tcnt_map;
+@@ -1007,24 +1197,10 @@
+ 		if (!pBlockPair)
+ 			break;
+ 
+-		//先检查容量够不够,不够要扩
+-		RTOrdDtlBlock* blk = pBlockPair->_block;
+-		if (blk->_size >= blk->_capacity)
+-		{
+-			pBlockPair->_file->sync();
+-			RTOrdDtlBlock* expanded = (RTOrdDtlBlock*)resizeRTBlock<RTDayBlockHeader, WTSOrdDtlStruct>(pBlockPair->_file, blk->_capacity * 2);
+-			if (expanded == NULL)
+-			{
+-				pipe_writer_log(_sink, LL_ERROR, "RT order-detail block of {} could not be expanded", ct->getFullCode());
+-				break;
+-			}
+-			pBlockPair->_block = expanded;
+-			blk = expanded;
+-		}
++		// 卡13：跨进程发布锁内 prepare（同步其他 writer 的扩容、必要时扩容、写未发布槽位）后发布 _size
++		if (!appendPublished<RTDayBlockHeader, WTSOrdDtlStruct>(*pBlockPair.get(), curOrdDtl->getOrdDtlStruct(), ct->getFullCode(), "order-detail"))
++			break;
+ 
+-		memcpy(&blk->_details[blk->_size], &curOrdDtl->getOrdDtlStruct(), sizeof(WTSOrdDtlStruct));
+-		blk->_size += 1;
+-
+ 		_sink->broadcastOrdDtl(curOrdDtl);
+ 
+ 		static wt_hashmap<std::string, uint64_t> _tcnt_map;
+@@ -1067,24 +1243,10 @@
+ 		if (!pBlockPair)
+ 			break;
+ 
+-		//先检查容量够不够,不够要扩
+-		RTTransBlock* blk = pBlockPair->_block;
+-		if (blk->_size >= blk->_capacity)
+-		{
+-			pBlockPair->_file->sync();
+-			RTTransBlock* expanded = (RTTransBlock*)resizeRTBlock<RTDayBlockHeader, WTSTransStruct>(pBlockPair->_file, blk->_capacity * 2);
+-			if (expanded == NULL)
+-			{
+-				pipe_writer_log(_sink, LL_ERROR, "RT transaction block of {} could not be expanded", ct->getFullCode());
+-				break;
+-			}
+-			pBlockPair->_block = expanded;
+-			blk = expanded;
+-		}
++		// 卡13：跨进程发布锁内 prepare（同步其他 writer 的扩容、必要时扩容、写未发布槽位）后发布 _size
++		if (!appendPublished<RTDayBlockHeader, WTSTransStruct>(*pBlockPair.get(), curTrans->getTransStruct(), ct->getFullCode(), "transaction"))
++			break;
+ 
+-		memcpy(&blk->_trans[blk->_size], &curTrans->getTransStruct(), sizeof(WTSTransStruct));
+-		blk->_size += 1;
+-
+ 		_sink->broadcastTrans(curTrans);
+ 
+ 		static wt_hashmap<std::string, uint64_t> _tcnt_map;
+@@ -1181,30 +1343,15 @@
+ 	if (!pBlockPair)
+ 		return;
+ 
+-	//先检查容量够不够,不够要扩
+-	RTTickBlock* blk = pBlockPair->_block;
+-	if(blk && blk->_size >= blk->_capacity)
++	if (pBlockPair->_block == NULL)
+ 	{
+-		pBlockPair->_file->sync();
+-		RTTickBlock* expanded = (RTTickBlock*)resizeRTBlock<RTDayBlockHeader, WTSTickStruct>(pBlockPair->_file, blk->_capacity * 2);
+-		if (expanded == NULL)
+-		{
+-			pipe_writer_log(_sink, LL_ERROR, "RT tick block of {} could not be expanded", ct->getFullCode());
+-			return;
+-		}
+-		pBlockPair->_block = expanded;
+-		blk = expanded;
+-		pipe_writer_log(_sink, LL_DEBUG, "RT tick block of {} resized to {}", ct->getFullCode(), blk->_capacity);
+-	}
+-	
+-	if (blk == NULL)
+-	{
+ 		pipe_writer_log(_sink, LL_DEBUG, "RT tick block of {} is not valid", ct->getFullCode());
+ 		return;
+ 	}
+ 
+-	memcpy(&blk->_ticks[blk->_size], &curTick->getTickStruct(), sizeof(WTSTickStruct));
+-	blk->_size += 1;
++	// 卡13：跨进程发布锁内 prepare（同步其他 writer 的扩容、必要时扩容、写未发布槽位）后发布 _size
++	if (!appendPublished<RTDayBlockHeader, WTSTickStruct>(*pBlockPair.get(), curTick->getTickStruct(), ct->getFullCode(), "tick"))
++		return;
+ 
+ 	if(_save_tick_log && pBlockPair->_fstream)
+ 	{
+@@ -1252,21 +1399,40 @@
+ 		path += ct->getCode();
+ 		path += ".dmb";
+ 
++		if (!bAutoCreate && !StdFile::exists(path.c_str()))
++			return {};
++		// 卡13：创建、映射、换日重置与修复均在跨进程发布锁与结构性日志内完成
++		wt_rtpub::PublishLock publishLock;
++		if (!publishLock.acquire(path))
++		{
++			defer_writer_log(lease, LL_ERROR, "{}", publishLock.error());
++			return {};
++		}
++		wt_rtpub::StructuralGuard structural(publishLock, 0);
++		if (!structural.begun())
++		{
++			defer_writer_log(lease, LL_ERROR, "Cannot journal structural change of {}", path.c_str());
++			return {};
++		}
++		if (publishLock.recovered())
++			defer_writer_log(lease, LL_WARN, "Previous writer (pid {}) of {} exited during a structural change; header is revalidated",
++				publishLock.recoveredPid(), path.c_str());
++
+ 		bool isNew = false;
+ 		if (!StdFile::exists(path.c_str()))
+ 		{
+-			if (!bAutoCreate)
+-				return {};
+-
+ 			defer_writer_log(lease, LL_INFO, "Data file {} not exists, initializing...", path.c_str());
+ 
+ 			uint64_t uSize = sizeof(RTDayBlockHeader) + sizeof(WTSOrdQueStruct) * HFT_SIZE_STEP;
++			RTDayBlockHeader header;
++			initRTDayHeader(header, BT_RT_OrdQueue, HFT_SIZE_STEP, curDate);
++			std::string publishErr;
++			if (!wt_rtpub::publishNewBlockFile(path, &header, sizeof(header), uSize, publishErr))
++			{
++				defer_writer_log(lease, LL_ERROR, "{}", publishErr);
++				return {};
++			}
+ 
+-			BoostFile bf;
+-			bf.create_new_file(path.c_str());
+-			bf.truncate_file((uint32_t)uSize);
+-			bf.close_file();
+-
+ 			isNew = true;
+ 		}
+ 
+@@ -1382,21 +1548,40 @@
+ 		path += ct->getCode();
+ 		path += ".dmb";
+ 
++		if (!bAutoCreate && !StdFile::exists(path.c_str()))
++			return {};
++		// 卡13：创建、映射、换日重置与修复均在跨进程发布锁与结构性日志内完成
++		wt_rtpub::PublishLock publishLock;
++		if (!publishLock.acquire(path))
++		{
++			defer_writer_log(lease, LL_ERROR, "{}", publishLock.error());
++			return {};
++		}
++		wt_rtpub::StructuralGuard structural(publishLock, 0);
++		if (!structural.begun())
++		{
++			defer_writer_log(lease, LL_ERROR, "Cannot journal structural change of {}", path.c_str());
++			return {};
++		}
++		if (publishLock.recovered())
++			defer_writer_log(lease, LL_WARN, "Previous writer (pid {}) of {} exited during a structural change; header is revalidated",
++				publishLock.recoveredPid(), path.c_str());
++
+ 		bool isNew = false;
+ 		if (!StdFile::exists(path.c_str()))
+ 		{
+-			if (!bAutoCreate)
+-				return {};
+-
+ 			defer_writer_log(lease, LL_INFO, "Data file {} not exists, initializing...", path.c_str());
+ 
+ 			uint64_t uSize = sizeof(RTDayBlockHeader) + sizeof(WTSOrdDtlStruct) * HFT_SIZE_STEP;
++			RTDayBlockHeader header;
++			initRTDayHeader(header, BT_RT_OrdDetail, HFT_SIZE_STEP, curDate);
++			std::string publishErr;
++			if (!wt_rtpub::publishNewBlockFile(path, &header, sizeof(header), uSize, publishErr))
++			{
++				defer_writer_log(lease, LL_ERROR, "{}", publishErr);
++				return {};
++			}
+ 
+-			BoostFile bf;
+-			bf.create_new_file(path.c_str());
+-			bf.truncate_file((uint32_t)uSize);
+-			bf.close_file();
+-
+ 			isNew = true;
+ 		}
+ 
+@@ -1496,21 +1681,40 @@
+ 		path += ct->getCode();
+ 		path += ".dmb";
+ 
++		if (!bAutoCreate && !StdFile::exists(path.c_str()))
++			return {};
++		// 卡13：创建、映射、换日重置与修复均在跨进程发布锁与结构性日志内完成
++		wt_rtpub::PublishLock publishLock;
++		if (!publishLock.acquire(path))
++		{
++			defer_writer_log(lease, LL_ERROR, "{}", publishLock.error());
++			return {};
++		}
++		wt_rtpub::StructuralGuard structural(publishLock, 0);
++		if (!structural.begun())
++		{
++			defer_writer_log(lease, LL_ERROR, "Cannot journal structural change of {}", path.c_str());
++			return {};
++		}
++		if (publishLock.recovered())
++			defer_writer_log(lease, LL_WARN, "Previous writer (pid {}) of {} exited during a structural change; header is revalidated",
++				publishLock.recoveredPid(), path.c_str());
++
+ 		bool isNew = false;
+ 		if (!StdFile::exists(path.c_str()))
+ 		{
+-			if (!bAutoCreate)
+-				return {};
+-
+ 			defer_writer_log(lease, LL_INFO, "Data file {} not exists, initializing...", path.c_str());
+ 
+ 			uint64_t uSize = sizeof(RTDayBlockHeader) + sizeof(WTSTransStruct) * HFT_SIZE_STEP;
++			RTDayBlockHeader header;
++			initRTDayHeader(header, BT_RT_Trnsctn, HFT_SIZE_STEP, curDate);
++			std::string publishErr;
++			if (!wt_rtpub::publishNewBlockFile(path, &header, sizeof(header), uSize, publishErr))
++			{
++				defer_writer_log(lease, LL_ERROR, "{}", publishErr);
++				return {};
++			}
+ 
+-			BoostFile bf;
+-			bf.create_new_file(path.c_str());
+-			bf.truncate_file((uint32_t)uSize);
+-			bf.close_file();
+-
+ 			isNew = true;
+ 		}
+ 
+@@ -1619,19 +1823,39 @@
+ 		path += ct->getCode();
+ 		path += ".dmb";
+ 
++		if (!bAutoCreate && !StdFile::exists(path.c_str()))
++			return {};
++		// 卡13：创建、映射、换日重置与修复均在跨进程发布锁与结构性日志内完成
++		wt_rtpub::PublishLock publishLock;
++		if (!publishLock.acquire(path))
++		{
++			defer_writer_log(lease, LL_ERROR, "{}", publishLock.error());
++			return {};
++		}
++		wt_rtpub::StructuralGuard structural(publishLock, 0);
++		if (!structural.begun())
++		{
++			defer_writer_log(lease, LL_ERROR, "Cannot journal structural change of {}", path.c_str());
++			return {};
++		}
++		if (publishLock.recovered())
++			defer_writer_log(lease, LL_WARN, "Previous writer (pid {}) of {} exited during a structural change; header is revalidated",
++				publishLock.recoveredPid(), path.c_str());
++
+ 		bool isNew = false;
+ 		if (!StdFile::exists(path.c_str()))
+ 		{
+-			if (!bAutoCreate)
+-				return {};
+-
+ 			defer_writer_log(lease, LL_INFO, "Data file {} not exists, initializing...", path.c_str());
+-			
++
+ 			uint64_t uSize = sizeof(RTTickBlock) + sizeof(WTSTickStruct) * HFT_SIZE_STEP;
+-			BoostFile bf;
+-			bf.create_new_file(path.c_str());
+-			bf.truncate_file((uint32_t)uSize);
+-			bf.close_file();
++			RTDayBlockHeader header;
++			initRTDayHeader(header, BT_RT_Ticks, HFT_SIZE_STEP, curDate);
++			std::string publishErr;
++			if (!wt_rtpub::publishNewBlockFile(path, &header, sizeof(header), uSize, publishErr))
++			{
++				defer_writer_log(lease, LL_ERROR, "{}", publishErr);
++				return {};
++			}
+ 
+ 			isNew = true;
+ 		}
+@@ -1729,19 +1953,11 @@
+ 		BlockLease<KBlockPair> pBlockPair = getKlineBlock(ct, KP_Minute1);
+ 		if (pBlockPair && pBlockPair->_block)
+ 		{
++			// 卡13：读改写最后一根 K 线或追加新 K 线均在跨进程发布锁内完成
++			wt_rtpub::PublishLock publishLock;
++			if (preparePublished<RTKlineBlock, WTSBarStruct>(*pBlockPair.get(), publishLock, ct->getFullCode(), "1-minute") == NULL)
++				return;
+ 			RTKlineBlock* blk = pBlockPair->_block;
+-			if (blk->_size == blk->_capacity)
+-			{
+-				pBlockPair->_file->sync();
+-				RTKlineBlock* expanded = (RTKlineBlock*)resizeRTBlock<RTKlineBlock, WTSBarStruct>(pBlockPair->_file, blk->_capacity * 2);
+-				if (expanded == NULL)
+-				{
+-					pipe_writer_log(_sink, LL_ERROR, "RT 1-minute block of {} could not be expanded", ct->getFullCode());
+-					return;
+-				}
+-				pBlockPair->_block = expanded;
+-				blk = expanded;
+-			}
+ 
+ 			WTSBarStruct* lastBar = NULL;
+ 			if (blk->_size > 0)
+@@ -1766,10 +1982,13 @@
+ 			}
+ 
+ 			WTSBarStruct* newBar = NULL;
++			WTSBarStruct stagedBar;
+ 			if (bNew)
+ 			{
+-				newBar = &blk->_bars[blk->_size];
+-				blk->_size += 1;
++				// 卡13：新 K 线先在未发布槽位准备完整内容，最后才发布 _size
++				const uint32_t newSlot = wt_rtpub::publishedSize(blk);
++				memset(&stagedBar, 0, sizeof(stagedBar));
++				newBar = &stagedBar;
+ 
+ 				newBar->date = curTick->tradingdate();
+ 				newBar->time = barTime;
+@@ -1794,6 +2013,11 @@
+ 					newBar->hold = curTick->openinterest();
+ 					newBar->add = curTick->additional();
+ 				}
++
++				memcpy(&blk->_bars[newSlot], &stagedBar, sizeof(WTSBarStruct));
++				notifyBeforePublish(pBlockPair->_file->filename(), newSlot);
++				wt_rtpub::publishSize(blk, newSlot + 1);
++				newBar = &blk->_bars[newSlot];
+ 			}
+ 			else if (! (_skip_notrade_tick && tickNoTrade))
+ 			{
+@@ -1841,19 +2065,11 @@
+ 		BlockLease<KBlockPair> pBlockPair = getKlineBlock(ct, KP_Minute5);
+ 		if (pBlockPair && pBlockPair->_block)
+ 		{
++			// 卡13：读改写最后一根 K 线或追加新 K 线均在跨进程发布锁内完成
++			wt_rtpub::PublishLock publishLock;
++			if (preparePublished<RTKlineBlock, WTSBarStruct>(*pBlockPair.get(), publishLock, ct->getFullCode(), "5-minute") == NULL)
++				return;
+ 			RTKlineBlock* blk = pBlockPair->_block;
+-			if (blk->_size == blk->_capacity)
+-			{
+-				pBlockPair->_file->sync();
+-				RTKlineBlock* expanded = (RTKlineBlock*)resizeRTBlock<RTKlineBlock, WTSBarStruct>(pBlockPair->_file, blk->_capacity * 2);
+-				if (expanded == NULL)
+-				{
+-					pipe_writer_log(_sink, LL_ERROR, "RT 5-minute block of {} could not be expanded", ct->getFullCode());
+-					return;
+-				}
+-				pBlockPair->_block = expanded;
+-				blk = expanded;
+-			}
+ 
+ 			WTSBarStruct* lastBar = NULL;
+ 			if (blk->_size > 0)
+@@ -1877,10 +2093,13 @@
+ 			}
+ 
+ 			WTSBarStruct* newBar = NULL;
++			WTSBarStruct stagedBar;
+ 			if (bNew)
+ 			{
+-				newBar = &blk->_bars[blk->_size];
+-				blk->_size += 1;
++				// 卡13：新 K 线先在未发布槽位准备完整内容，最后才发布 _size
++				const uint32_t newSlot = wt_rtpub::publishedSize(blk);
++				memset(&stagedBar, 0, sizeof(stagedBar));
++				newBar = &stagedBar;
+ 
+ 				newBar->date = curTick->tradingdate();
+ 				newBar->time = barTime;
+@@ -1905,6 +2124,11 @@
+ 					newBar->hold = curTick->openinterest();
+ 					newBar->add = curTick->additional();
+ 				}
++
++				memcpy(&blk->_bars[newSlot], &stagedBar, sizeof(WTSBarStruct));
++				notifyBeforePublish(pBlockPair->_file->filename(), newSlot);
++				wt_rtpub::publishSize(blk, newSlot + 1);
++				newBar = &blk->_bars[newSlot];
+ 			}
+ 			else if (! (_skip_notrade_tick && tickNoTrade))
+ 			{
+@@ -2014,19 +2238,40 @@
+ 		s += 4;
+ 		s[0] = '\0';
+ 
++		if (!bAutoCreate && !StdFile::exists(path))
++			return {};
++		// 卡13：创建与映射在跨进程发布锁与结构性日志内完成
++		const std::string pathStr(path);
++		wt_rtpub::PublishLock publishLock;
++		if (!publishLock.acquire(pathStr))
++		{
++			defer_writer_log(lease, LL_ERROR, "{}", publishLock.error());
++			return {};
++		}
++		wt_rtpub::StructuralGuard structural(publishLock, 0);
++		if (!structural.begun())
++		{
++			defer_writer_log(lease, LL_ERROR, "Cannot journal structural change of {}", path);
++			return {};
++		}
++		if (publishLock.recovered())
++			defer_writer_log(lease, LL_WARN, "Previous writer (pid {}) of {} exited during a structural change; header is revalidated",
++				publishLock.recoveredPid(), path);
++
+ 		bool isNew = false;
+ 		if (!StdFile::exists(path))
+ 		{
+-			if (!bAutoCreate)
+-				return {};
+-
+ 			defer_writer_log(lease, LL_INFO, "Data file {} not exists, initializing...", path);
+ 
+ 			uint64_t uSize = sizeof(RTKlineBlock) + sizeof(WTSBarStruct) * totalMins;	//预分配按照K线条数分配
+-			BoostFile bf;
+-			bf.create_new_file(path);
+-			bf.truncate_file((uint32_t)uSize);
+-			bf.close_file();
++			RTDayBlockHeader header;
++			initRTDayHeader(header, bType, totalMins, TimeUtils::getCurDate());
++			std::string publishErr;
++			if (!wt_rtpub::publishNewBlockFile(pathStr, &header, sizeof(header), uSize, publishErr))
++			{
++				defer_writer_log(lease, LL_ERROR, "{}", publishErr);
++				return {};
++			}
+ 
+ 			isNew = true;
+ 		}
+@@ -2185,22 +2430,60 @@
+ 		return false;
+ 	}
+ 
++	// 卡13：文件型缓存的读改写在跨进程发布锁内完成；先同步其他 writer 的扩容并补扫其新增的缓存项。
++	// 没有映射文件的缓存（仅进程内）不存在跨进程共享，跳过发布锁。
++	wt_rtpub::PublishLock publishLock;
++	if (_tick_cache_file != NULL)
++	{
++		if (!publishLock.acquire(_tick_cache_file->filename()))
++		{
++			pipe_writer_log(_sink, LL_ERROR, "Tick cache publish lock unavailable: {}", publishLock.error());
++			return false;
++		}
++		if (publishLock.recovered())
++		{
++			if (!reconcilePublished<RTTickCache, TickCacheItem>(_tick_cache_file, "cache") || !publishLock.endStructural())
++				return false;
++		}
++		void* cacheBase = syncPublishedMapping<RTTickCache, TickCacheItem>(_tick_cache_file);
++		if (cacheBase == NULL)
++			return false;
++		_tick_cache_block = (RTTickCache*)cacheBase;
++	}
++	{
++		const void* cacheBase = _tick_cache_block;
++		const uint32_t published = min(wt_rtpub::publishedSize(cacheBase), wt_rtpub::publishedCapacity(cacheBase));
++		for (uint32_t i = _tick_cache_scanned; i < published; i++)
++		{
++			const TickCacheItem& item = _tick_cache_block->_ticks[i];
++			std::string foreignKey = fmt::format("{}.{}", item._tick.exchg, item._tick.code);
++			if (_tick_cache_idx.find(foreignKey) == _tick_cache_idx.end())
++				_tick_cache_idx[foreignKey] = i;
++		}
++		if (published > _tick_cache_scanned)
++			_tick_cache_scanned = published;
++	}
++
+ 	const char* key = ct->getFullCode();
+ 	uint32_t idx = 0;
++	bool bNewCode = false;
++	TickCacheItem stagedItem;
+ 	auto it = _tick_cache_idx.find(key);
+ 	if (it == _tick_cache_idx.end())
+ 	{
+-		idx = _tick_cache_block->_size;
+-		if (_tick_cache_block->_size + 1 >= _tick_cache_block->_capacity)
++		idx = wt_rtpub::publishedSize(_tick_cache_block);
++		if (idx + 1 >= wt_rtpub::publishedCapacity(_tick_cache_block))
+ 		{
+-			if (!resizeTickCache(_tick_cache_block->_capacity + CACHE_SIZE_STEP))
++			wt_rtpub::StructuralGuard structural(publishLock, (uint64_t)_tick_cache_block->_capacity + CACHE_SIZE_STEP);
++			if (!structural.begun() || !resizeTickCache(_tick_cache_block->_capacity + CACHE_SIZE_STEP))
+ 				return false;
+ 
+ 			pipe_writer_log(_sink, LL_INFO, "Tick Cache resized to {} items", _tick_cache_block->_capacity);
+ 		}
+ 
+-		_tick_cache_idx[key] = idx;
+-		_tick_cache_block->_size += 1;
++		// 新合约的缓存项先在本地暂存，全部校验/预处理成功后才写入槽位并发布 _size
++		memset(&stagedItem, 0, sizeof(stagedItem));
++		bNewCode = true;
+ 	}
+ 	else
+ 	{
+@@ -2208,7 +2491,7 @@
+ 	}
+ 
+ 
+-	TickCacheItem& cache = _tick_cache_block->_ticks[idx];
++	TickCacheItem& cache = bNewCode ? stagedItem : _tick_cache_block->_ticks[idx];
+ 	if (curTick->tradingdate() < cache._date)
+ 	{
+ 		pipe_writer_log(_sink, LL_INFO, "Tradingday[{}] of {} is less than cached tradingday[{}]", curTick->tradingdate(), curTick->code(), cache._date);
+@@ -2305,6 +2588,15 @@
+ 		//pipe_writer_log(_sink, LL_DEBUG, "Tick cache data updated {}[{}.{}]", newTick.code, newTick.action_date, newTick.action_time);
+ 	}
+ 
++	if (bNewCode)
++	{
++		memcpy(&_tick_cache_block->_ticks[idx], &stagedItem, sizeof(TickCacheItem));
++		notifyBeforePublish(_tick_cache_file != NULL ? _tick_cache_file->filename() : "", idx);
++		wt_rtpub::publishSize(_tick_cache_block, idx + 1);
++		_tick_cache_idx[key] = idx;
++		_tick_cache_scanned = idx + 1;
++	}
++
+ 	return true;
+ }
+ 
+@@ -3137,6 +3429,7 @@
+ 
+ 				//索引替换
+ 				_tick_cache_idx = newIdxMap;
++				_tick_cache_scanned = (uint32_t)newIdxMap.size();
+ 				_tick_cache_file->close();
+ 				_tick_cache_block = NULL;
+ 
+--- /tmp/wt-i03-storage-mw-20261104/baseline/src/WtDataStorage/WtDataReader.cpp	2026-11-03 21:41:40
++++ src/WtDataStorage/WtDataReader.cpp	2026-11-04 02:49:36
+@@ -1,4 +1,5 @@
+ ﻿#include "WtDataReader.h"
++#include "RTBlockPublish.hpp"
+ 
+ #include "../Includes/WTSVariant.hpp"
+ #include "../Share/TimeUtils.hpp"
+@@ -612,8 +613,12 @@
+ 			return NULL;
+ 
+ 		RTTickBlock* tBlock = tPair->_block;
++		// 卡13：只读取已发布且落在本进程映射内的记录
++		const uint32_t visible = wt_rtpub::visibleRecords(tBlock, tPair->_file->size(), sizeof(RTTickBlock), sizeof(WTSTickStruct));
++		if (visible == 0)
++			return NULL;
+ 
+-		WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + (tBlock->_size - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b){
++		WTSTickStruct* pTick = std::lower_bound(tBlock->_ticks, tBlock->_ticks + (visible - 1), eTick, [](const WTSTickStruct& a, const WTSTickStruct& b){
+ 			if (a.action_date != b.action_date)
+ 				return a.action_date < b.action_date;
+ 			else
+@@ -761,8 +766,12 @@
+ 			return NULL;
+ 
+ 		RTOrdQueBlock* rtBlock = tPair->_block;
++		// 卡13：只读取已发布且落在本进程映射内的记录
++		const uint32_t visible = wt_rtpub::visibleRecords(rtBlock, tPair->_file->size(), sizeof(RTOrdQueBlock), sizeof(WTSOrdQueStruct));
++		if (visible == 0)
++			return NULL;
+ 
+-		WTSOrdQueStruct* pItem = std::lower_bound(rtBlock->_queues, rtBlock->_queues + (rtBlock->_size - 1), eTick, [](const WTSOrdQueStruct& a, const WTSOrdQueStruct& b) {
++		WTSOrdQueStruct* pItem = std::lower_bound(rtBlock->_queues, rtBlock->_queues + (visible - 1), eTick, [](const WTSOrdQueStruct& a, const WTSOrdQueStruct& b) {
+ 			if (a.action_date != b.action_date)
+ 				return a.action_date < b.action_date;
+ 			else
+@@ -973,8 +982,12 @@
+ 			return NULL;
+ 
+ 		RTOrdDtlBlock* rtBlock = tPair->_block;
++		// 卡13：只读取已发布且落在本进程映射内的记录
++		const uint32_t visible = wt_rtpub::visibleRecords(rtBlock, tPair->_file->size(), sizeof(RTOrdDtlBlock), sizeof(WTSOrdDtlStruct));
++		if (visible == 0)
++			return NULL;
+ 
+-		WTSOrdDtlStruct* pItem = std::lower_bound(rtBlock->_details, rtBlock->_details + (rtBlock->_size - 1), eTick, [](const WTSOrdDtlStruct& a, const WTSOrdDtlStruct& b) {
++		WTSOrdDtlStruct* pItem = std::lower_bound(rtBlock->_details, rtBlock->_details + (visible - 1), eTick, [](const WTSOrdDtlStruct& a, const WTSOrdDtlStruct& b) {
+ 			if (a.action_date != b.action_date)
+ 				return a.action_date < b.action_date;
+ 			else
+@@ -1185,8 +1198,12 @@
+ 			return NULL;
+ 
+ 		RTTransBlock* rtBlock = tPair->_block;
++		// 卡13：只读取已发布且落在本进程映射内的记录
++		const uint32_t visible = wt_rtpub::visibleRecords(rtBlock, tPair->_file->size(), sizeof(RTTransBlock), sizeof(WTSTransStruct));
++		if (visible == 0)
++			return NULL;
+ 
+-		WTSTransStruct* pItem = std::lower_bound(rtBlock->_trans, rtBlock->_trans + (rtBlock->_size - 1), eTick, [](const WTSTransStruct& a, const WTSTransStruct& b) {
++		WTSTransStruct* pItem = std::lower_bound(rtBlock->_trans, rtBlock->_trans + (visible - 1), eTick, [](const WTSTransStruct& a, const WTSTransStruct& b) {
+ 			if (a.action_date != b.action_date)
+ 				return a.action_date < b.action_date;
+ 			else
+@@ -2335,11 +2352,14 @@
+ 
+ 		//读取实时的
+ 		RTKlineBlockPair* kPair = getRTKilneBlock(cInfo._exchg, curCode, period);
+-		if (kPair != NULL && kPair->_block && kPair->_block->_size>0)
++		// 卡13：只读取已发布且落在本进程映射内的记录
++		const uint32_t visibleBars = (kPair != NULL && kPair->_block && kPair->_file)
++			? wt_rtpub::visibleRecords(kPair->_block, kPair->_file->size(), sizeof(RTKlineBlock), sizeof(WTSBarStruct)) : 0;
++		if (visibleBars > 0)
+ 		{
+ 			//读取当日的数据
+ 			WTSBarStruct* pBar = NULL;
+-			pBar = std::lower_bound(kPair->_block->_bars, kPair->_block->_bars + (kPair->_block->_size - 1), bar, [period](const WTSBarStruct& a, const WTSBarStruct& b) {
++			pBar = std::lower_bound(kPair->_block->_bars, kPair->_block->_bars + (visibleBars - 1), bar, [period](const WTSBarStruct& a, const WTSBarStruct& b) {
+ 				if (period == KP_DAY)
+ 					return a.date < b.date;
+ 				else
+@@ -2350,7 +2370,7 @@
+ 			if (pBar != NULL)
+ 				idx = pBar - kPair->_block->_bars;
+ 			else
+-				idx = kPair->_block->_size;
++				idx = visibleBars;
+ 
+ 			if ((period == KP_DAY && pBar->date > bar.date) || (period != KP_DAY && pBar->time > bar.time))
+ 			{
+@@ -2512,7 +2532,9 @@
+ 		block._block = (RTTickBlock*)block._file->addr();
+ 		block._last_cap = block._block->_capacity;
+ 	}
+-	else if (block._last_cap != block._block->_capacity)
++	// 卡13：除容量变化外，若已发布容量超过本进程映射覆盖的记录数（映射早于扩容）也要重新映射
++	else if (block._last_cap != block._block->_capacity
++		|| wt_rtpub::publishedCapacity(block._block) > wt_rtpub::mappedRecords(block._file->size(), sizeof(RTTickBlock), sizeof(WTSTickStruct)))
+ 	{
+ 		//说明文件大小已变, 需要重新映射
+ 		block._file.reset(new BoostMappingFile());
+@@ -2567,7 +2589,9 @@
+ 		block._block = (RTOrdDtlBlock*)block._file->addr();
+ 		block._last_cap = block._block->_capacity;
+ 	}
+-	else if (block._last_cap != block._block->_capacity)
++	// 卡13：除容量变化外，若已发布容量超过本进程映射覆盖的记录数（映射早于扩容）也要重新映射
++	else if (block._last_cap != block._block->_capacity
++		|| wt_rtpub::publishedCapacity(block._block) > wt_rtpub::mappedRecords(block._file->size(), sizeof(RTOrdDtlBlock), sizeof(WTSOrdDtlStruct)))
+ 	{
+ 		//说明文件大小已变, 需要重新映射
+ 		block._file.reset(new BoostMappingFile());
+@@ -2622,7 +2646,9 @@
+ 		block._block = (RTOrdQueBlock*)block._file->addr();
+ 		block._last_cap = block._block->_capacity;
+ 	}
+-	else if (block._last_cap != block._block->_capacity)
++	// 卡13：除容量变化外，若已发布容量超过本进程映射覆盖的记录数（映射早于扩容）也要重新映射
++	else if (block._last_cap != block._block->_capacity
++		|| wt_rtpub::publishedCapacity(block._block) > wt_rtpub::mappedRecords(block._file->size(), sizeof(RTOrdQueBlock), sizeof(WTSOrdQueStruct)))
+ 	{
+ 		//说明文件大小已变, 需要重新映射
+ 		block._file.reset(new BoostMappingFile());
+@@ -2677,7 +2703,9 @@
+ 		block._block = (RTTransBlock*)block._file->addr();
+ 		block._last_cap = block._block->_capacity;
+ 	}
+-	else if (block._last_cap != block._block->_capacity)
++	// 卡13：除容量变化外，若已发布容量超过本进程映射覆盖的记录数（映射早于扩容）也要重新映射
++	else if (block._last_cap != block._block->_capacity
++		|| wt_rtpub::publishedCapacity(block._block) > wt_rtpub::mappedRecords(block._file->size(), sizeof(RTTransBlock), sizeof(WTSTransStruct)))
+ 	{
+ 		//说明文件大小已变, 需要重新映射
+ 		block._file.reset(new BoostMappingFile());
+@@ -2754,7 +2782,9 @@
+ 		block._last_cap = block._block->_capacity;
+ 		pipe_reader_log(_sink, LL_DEBUG, "RT {} block of {}.{} loaded", subdir.c_str(), exchg, code);
+ 	}
+-	else if (block._last_cap != block._block->_capacity)
++	// 卡13：除容量变化外，若已发布容量超过本进程映射覆盖的记录数（映射早于扩容）也要重新映射
++	else if (block._last_cap != block._block->_capacity
++		|| wt_rtpub::publishedCapacity(block._block) > wt_rtpub::mappedRecords(block._file->size(), sizeof(RTKlineBlock), sizeof(WTSBarStruct)))
+ 	{
+ 		//说明文件大小已变, 需要重新映射
+ 		pipe_reader_log(_sink, LL_DEBUG, "RT {} block of {}.{} expanded to {}, remapping...", subdir.c_str(), exchg, code, block._block->_capacity);
+@@ -2805,7 +2835,8 @@
+ 
+ 				for (;;)
+ 				{
+-					if (kBlk->_block->_size <= preCnt)
++					if (kBlk->_block == NULL || kBlk->_file == NULL
++						|| wt_rtpub::visibleRecords(kBlk->_block, kBlk->_file->size(), sizeof(RTKlineBlock), sizeof(WTSBarStruct)) <= preCnt)
+ 						break;
+ 
+ 					WTSBarStruct& nextBar = kBlk->_block->_bars[preCnt];
+--- /tmp/wt-i03-storage-mw-20261104/baseline/src/WtDataStorageAD/WtDataWriterAD.h	2026-10-31 17:58:00
++++ src/WtDataStorageAD/WtDataWriterAD.h	2026-11-04 03:14:26
+@@ -9,6 +9,9 @@
+ #include "../Share/BoostMappingFile.hpp"
+ 
+ #include <queue>
++#include <atomic>
++#include <functional>
++#include <set>
+ 
+ typedef std::shared_ptr<BoostMappingFile> BoostMFPtr;
+ 
+@@ -94,6 +97,12 @@
+ 	 */
+ 	virtual WTSTickData* getCurTick(const char* code, const char* exchg = "") override;
+ 
++	/**
++	 * @brief 卡13：tick 持久化（LMDB 提交）失败次数
++	 * @details 失败的 tick 不推进缓存、不广播；同步模式 writeTick 返回 false，异步模式经此计数与错误日志观察
++	 */
++	uint64_t tickPersistFailures() const { return _tick_persist_failures.load(std::memory_order_acquire); }
++
+ private:
+ 	/**
+ 	 * @brief 基础数据管理器指针
+@@ -177,6 +186,9 @@
+ 		 */
+ 		RTBarCache*		_cache_block;
+ 
++		/// 卡13：本进程已扫描进 _idx 的缓存项数；其他 writer 新增项在发布锁内补扫
++		uint32_t		_scanned = 0;
++
+ 		/**
+ 		 * @brief 构造函数
+ 		 * @details 初始化缓存块和文件指针为NULL
+@@ -344,6 +356,22 @@
+ 	WtLMDBMap	_tick_dbs;
+ 
+ 	/**
++	 * @brief 卡13（13c=A）：键布局未知或含旧版零日期键而被隔离的数据库目录；不再写入、不再重复探测
++	 */
++	std::set<std::string>	_quarantined_dbs;
++
++	/// 卡13：tick 持久化失败计数
++	std::atomic<uint64_t>	_tick_persist_failures{0};
++
++	/// 卡13：本进程已扫描进索引的 tick 缓存项数；其他 writer 新增项在发布锁内补扫
++	uint32_t	_tick_cache_scanned = 0;
++
++	/**
++	 * @brief 卡13（13c=A）：打开已有库后探测键布局；首/末键长度不等于当前键结构，或 tick 库首键日期为零时隔离
++	 */
++	bool	checkLmdbKeyLayout(WtLMDB& db, const std::string& path, std::size_t keySize, bool isTick);
++
++	/**
+ 	 * @brief 获取K线数据库
+ 	 * @param exchg 交易所代码
+ 	 * @param period K线周期类型（分钟、1分钟、5分钟等）
+@@ -376,7 +404,8 @@
+ 	 * @return bool 更新是否成功
+ 	 * @details 将新的Tick数据更新到内存缓存中，并根据处理标志进行不同的处理
+ 	 */
+-	bool updateTickCache(WTSContractInfo* ct, WTSTickData* curTick, uint32_t procFlag);
++	bool updateTickCache(WTSContractInfo* ct, WTSTickData* curTick, uint32_t procFlag,
++		const std::function<bool()>& commitBeforePublish = std::function<bool()>());
+ 
+ 	/**
+ 	 * @brief 更新K线缓存
+@@ -393,6 +422,11 @@
+ 	 * @details 将Tick数据写入到LMDB数据库中进行持久化存储
+ 	 */
+ 	void pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick);
++
++	/**
++	 * @brief 卡13：在 tick 缓存发布前提交 LMDB；失败返回 false，调用方不得发布缓存/广播/调用外部 dumper
++	 */
++	bool commitTickToDb(WTSContractInfo* ct, WTSTickData* curTick);
+ 
+ 	/**
+ 	 * @brief 将日K线数据写入数据库
+--- /tmp/wt-i03-storage-mw-20261104/baseline/src/WtDataStorageAD/WtDataWriterAD.cpp	2026-11-02 21:51:29
++++ src/WtDataStorageAD/WtDataWriterAD.cpp	2026-11-04 03:14:26
+@@ -1,5 +1,6 @@
+ ﻿#include "WtDataWriterAD.h"
+ #include "LMDBKeys.h"
++#include "../WtDataStorage/RTBlockPublish.hpp"
+ 
+ #include "../Includes/WTSSessionInfo.hpp"
+ #include "../Includes/WTSContractInfo.hpp"
+@@ -140,6 +141,28 @@
+ 		std::memcpy(bytes + offsetof(BarCacheItem, _bar), &item._bar, sizeof(item._bar));
+ 	}
+ 
++	// 卡13：持发布锁时创建 RT 缓存文件；其他 writer 已创建则改为打开已有文件（bNew=false）
++	bool createRTCacheFileLocked(const std::string& path, std::size_t recordBytes, bool& bNew, std::string& err)
++	{
++		if (!bNew)
++			return true;
++		boost::system::error_code ec;
++		if (boost::filesystem::exists(path, ec))
++		{
++			bNew = false;
++			return true;
++		}
++		RTBlockHeader header;
++		memset(&header, 0, sizeof(header));
++		memcpy(header._blk_flag, BLK_FLAG, FLAG_SIZE);
++		header._type = BT_RT_Cache;
++		header._version = 1;
++		header._size = 0;
++		header._capacity = CACHE_SIZE_STEP_AD;
++		return wt_rtpub::publishNewBlockFile(path, &header, sizeof(header),
++			sizeof(RTBlockHeader) + (uint64_t)recordBytes * CACHE_SIZE_STEP_AD, err);
++	}
++
+ 	bool validateBarCacheIdentities(const RTBarCache* cache, IDataWriterSink* sink, const char* period)
+ 	{
+ 		for (uint32_t i = 0; i < cache->_size; ++i)
+@@ -341,6 +364,7 @@
+ 		if (!fresh)
+ 			return;
+ 		_tick_cache_idx.clear();
++		_tick_cache_scanned = 0;
+ 		_tick_cache_block = NULL;
+ 		_tick_cache_file.reset();
+ 		for (RTBarCacheWrapper* cache : {&_m1_cache, &_m5_cache, &_d1_cache})
+@@ -485,16 +509,41 @@
+ 
+ 	if (_tick_cache_file == NULL)
+ 	{
++		// 卡13：tick 缓存的创建、映射与首次扫描在跨进程发布锁与结构性日志内完成
++		wt_rtpub::PublishLock publishLock;
++		if (!publishLock.acquire(tickFilename))
++		{
++			pipe_writer_log(_sink, LL_ERROR, "{}", publishLock.error());
++			return false;
++		}
++		wt_rtpub::StructuralGuard structural(publishLock, CACHE_SIZE_STEP_AD);
++		if (!structural.begun())
++		{
++			pipe_writer_log(_sink, LL_ERROR, "Cannot journal structural change of {}", tickFilename);
++			return false;
++		}
+ 		if (bNewTick)
+ 		{
++			boost::system::error_code existsEc;
++			if (boost::filesystem::exists(tickFilename, existsEc))
++				bNewTick = false;	// another writer created it while this one validated
++		}
++		if (bNewTick)
++		{
+ 			uint64_t uSize = sizeof(RTTickCache) + sizeof(TickCacheItem) * CACHE_SIZE_STEP_AD;
+-			BoostFile bf;
+-			if (!bf.create_new_file(tickFilename.c_str()) || !bf.truncate_file((std::size_t)uSize))
++			RTBlockHeader header;
++			memset(&header, 0, sizeof(header));
++			memcpy(header._blk_flag, BLK_FLAG, FLAG_SIZE);
++			header._type = BT_RT_Cache;
++			header._version = 1;
++			header._size = 0;
++			header._capacity = CACHE_SIZE_STEP_AD;
++			std::string publishErr;
++			if (!wt_rtpub::publishNewBlockFile(tickFilename, &header, sizeof(header), uSize, publishErr))
+ 			{
+-				pipe_writer_log(_sink, LL_ERROR, "Cannot create tick cache file {}", tickFilename);
++				pipe_writer_log(_sink, LL_ERROR, "Cannot create tick cache file {}: {}", tickFilename, publishErr);
+ 				return false;
+ 			}
+-			bf.close_file();
+ 		}
+ 
+ 		_tick_cache_file.reset(new BoostMappingFile);
+@@ -556,21 +605,25 @@
+ 				_tick_cache_idx[key] = i;
+ 			}
+ 		}
++		_tick_cache_scanned = wt_rtpub::publishedSize(_tick_cache_block);
+ 	}
+ 
+ 	if (_m1_cache.empty())
+ 	{
+-		if (bNewM1)
++		// 卡13：创建/映射/首次扫描在跨进程发布锁与结构性日志内完成，不截断其他 writer 已创建的文件
++		wt_rtpub::PublishLock m1Lock;
++		if (!m1Lock.acquire(m1Filename))
+ 		{
+-			uint64_t uSize = sizeof(RTBarCache) + sizeof(BarCacheItem) * CACHE_SIZE_STEP_AD;
+-			BoostFile bf;
+-			if (!bf.create_new_file(m1Filename.c_str()) || !bf.truncate_file((std::size_t)uSize))
+-			{
+-				pipe_writer_log(_sink, LL_ERROR, "Cannot create m1 cache file {}", m1Filename);
+-				return false;
+-			}
+-			bf.close_file();
++			pipe_writer_log(_sink, LL_ERROR, "{}", m1Lock.error());
++			return false;
+ 		}
++		wt_rtpub::StructuralGuard m1Structural(m1Lock, CACHE_SIZE_STEP_AD);
++		std::string m1Err;
++		if (!m1Structural.begun() || !createRTCacheFileLocked(m1Filename, sizeof(BarCacheItem), bNewM1, m1Err))
++		{
++			pipe_writer_log(_sink, LL_ERROR, "Cannot create m1 cache file {} {}", m1Filename, m1Err);
++			return false;
++		}
+ 
+ 		_m1_cache._file_ptr.reset(new BoostMappingFile);
+ 		if (!_m1_cache._file_ptr->map(m1Filename.c_str()))
+@@ -623,21 +676,25 @@
+ 				_m1_cache._idx[key] = i;
+ 			}
+ 		}
++		_m1_cache._scanned = wt_rtpub::publishedSize(_m1_cache._cache_block);
+ 	}
+ 
+ 	if (_m5_cache.empty())
+ 	{
+-		if (bNewM5)
++		// 卡13：创建/映射/首次扫描在跨进程发布锁与结构性日志内完成，不截断其他 writer 已创建的文件
++		wt_rtpub::PublishLock m5Lock;
++		if (!m5Lock.acquire(m5Filename))
+ 		{
+-			uint64_t uSize = sizeof(RTBarCache) + sizeof(BarCacheItem) * CACHE_SIZE_STEP_AD;
+-			BoostFile bf;
+-			if (!bf.create_new_file(m5Filename.c_str()) || !bf.truncate_file((std::size_t)uSize))
+-			{
+-				pipe_writer_log(_sink, LL_ERROR, "Cannot create m5 cache file {}", m5Filename);
+-				return false;
+-			}
+-			bf.close_file();
++			pipe_writer_log(_sink, LL_ERROR, "{}", m5Lock.error());
++			return false;
+ 		}
++		wt_rtpub::StructuralGuard m5Structural(m5Lock, CACHE_SIZE_STEP_AD);
++		std::string m5Err;
++		if (!m5Structural.begun() || !createRTCacheFileLocked(m5Filename, sizeof(BarCacheItem), bNewM5, m5Err))
++		{
++			pipe_writer_log(_sink, LL_ERROR, "Cannot create m5 cache file {} {}", m5Filename, m5Err);
++			return false;
++		}
+ 
+ 		_m5_cache._file_ptr.reset(new BoostMappingFile);
+ 		if (!_m5_cache._file_ptr->map(m5Filename.c_str()))
+@@ -690,21 +747,25 @@
+ 				_m5_cache._idx[key] = i;
+ 			}
+ 		}
++		_m5_cache._scanned = wt_rtpub::publishedSize(_m5_cache._cache_block);
+ 	}
+ 
+ 	if (_d1_cache.empty())
+ 	{
+-		if (bNewD1)
++		// 卡13：创建/映射/首次扫描在跨进程发布锁与结构性日志内完成，不截断其他 writer 已创建的文件
++		wt_rtpub::PublishLock d1Lock;
++		if (!d1Lock.acquire(d1Filename))
+ 		{
+-			uint64_t uSize = sizeof(RTBarCache) + sizeof(BarCacheItem) * CACHE_SIZE_STEP_AD;
+-			BoostFile bf;
+-			if (!bf.create_new_file(d1Filename.c_str()) || !bf.truncate_file((std::size_t)uSize))
+-			{
+-				pipe_writer_log(_sink, LL_ERROR, "Cannot create day cache file {}", d1Filename);
+-				return false;
+-			}
+-			bf.close_file();
++			pipe_writer_log(_sink, LL_ERROR, "{}", d1Lock.error());
++			return false;
+ 		}
++		wt_rtpub::StructuralGuard d1Structural(d1Lock, CACHE_SIZE_STEP_AD);
++		std::string d1Err;
++		if (!d1Structural.begun() || !createRTCacheFileLocked(d1Filename, sizeof(BarCacheItem), bNewD1, d1Err))
++		{
++			pipe_writer_log(_sink, LL_ERROR, "Cannot create day cache file {} {}", d1Filename, d1Err);
++			return false;
++		}
+ 
+ 		_d1_cache._file_ptr.reset(new BoostMappingFile);
+ 		if (!_d1_cache._file_ptr->map(d1Filename.c_str()))
+@@ -757,6 +818,7 @@
+ 				_d1_cache._idx[key] = i;
+ 			}
+ 		}
++		_d1_cache._scanned = wt_rtpub::publishedSize(_d1_cache._cache_block);
+ 	}
+ 	return true;
+ }
+@@ -814,7 +876,8 @@
+ 		}
+ 
+ 		// Publish the new capacity only after the file has been extended and remapped.
+-		newBlock->_capacity = nCount;
++		// 卡13：以 release 存储发布，供其他进程按协议读取
++		wt_rtpub::publishCapacity(newBlock, nCount);
+ 		mfPtr.swap(newMf);
+ 		return true;
+ 	}
+@@ -856,7 +919,9 @@
+ 
+ 	curTick->retain();
+ 	std::shared_ptr<WTSTickData> tick_ref(curTick, [](WTSTickData* tick) { tick->release(); });
+-	return pushTask([this, tick_ref, procFlag](){
++	// 卡13：同步模式把持久化结果回传给调用方；异步模式只表示已接收，失败经计数与日志观察
++	auto persisted = std::make_shared<std::atomic<bool>>(true);
++	const bool accepted = pushTask([this, tick_ref, procFlag, persisted](){
+ 		WTSTickData* curTick = tick_ref.get();
+ 
+ 		do
+@@ -883,11 +948,28 @@
+ 			if (!_sink->canSessionReceive(commInfo->getSession()))
+ 				break;
+ 
+-			//先更新缓存
+-			if (!updateTickCache(ct, curTick, procFlag))
++			// 卡13（13a=A）：先在缓存锁内准备缓存项，LMDB 提交成功后才发布缓存；
++			// 提交失败时缓存、K线、广播与外部 dumper 均不推进，同一 tick 可原样重试
++			bool persistFailed = false;
++			auto commit = [this, ct, curTick, &persistFailed]() -> bool {
++				if (_disable_tick)
++					return true;
++				if (commitTickToDb(ct, curTick))
++					return true;
++				persistFailed = true;
++				return false;
++			};
++			if (!updateTickCache(ct, curTick, procFlag, commit))
++			{
++				if (persistFailed)
++				{
++					_tick_persist_failures.fetch_add(1, std::memory_order_acq_rel);
++					persisted->store(false, std::memory_order_release);
++				}
+ 				break;
++			}
+ 
+-			//写到tick缓存
++			//LMDB 已提交，再写外部 dumper
+ 			if(!_disable_tick)
+ 				pipeToTicks(ct, curTick);
+ 
+@@ -909,6 +991,9 @@
+ 			}
+ 		} while (false);
+ 	});
++	if (!accepted)
++		return false;
++	return _async_task ? true : persisted->load(std::memory_order_acquire);
+ }
+ 
+ bool WtDataWriterAD::pushTask(TaskInfo task)
+@@ -929,30 +1014,44 @@
+ 	return true;
+ }
+ 
+-void WtDataWriterAD::pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick)
++bool WtDataWriterAD::commitTickToDb(WTSContractInfo* ct, WTSTickData* curTick)
+ {
+ 	if (ct == NULL || curTick == NULL || !lmdbKeyIdentityValid(ct->getExchg(), ct->getCode()))
+ 	{
+ 		pipe_writer_log(_sink, LL_ERROR, "Cannot persist tick with invalid LMDB identity");
+-		return;
++		return false;
+ 	}
+ 	//直接落地
+ 	WtLMDBPtr db = get_t_db(ct->getExchg(), ct->getCode());
+-	if (db)
++	if (!db)
+ 	{
+-		//这里要把时间转成便宜时间，并用交易日作为date
+-		//这样可以根据交易日筛选历史tick数据
+-		uint32_t actTime = curTick->actiontime();
+-		uint32_t offTime = ct->getCommInfo()->getSessionInfo()->offsetTime(actTime / 100000, true) * 100000 + actTime % 100000;
++		pipe_writer_log(_sink, LL_ERROR, "Tick db of {} unavailable; tick is not published", ct->getFullCode());
++		return false;
++	}
+ 
+-		LMDBHftKey key(ct->getExchg(), ct->getCode(), curTick->tradingdate(), offTime);
+-		WtLMDBQuery query(*db);
+-		if (!query.put_and_commit((void*)&key, sizeof(key), &curTick->getTickStruct(), sizeof(WTSTickStruct)))
+-		{
+-			pipe_writer_log(_sink, LL_ERROR, "pipe tick of {} to db failed: {}", ct->getFullCode(), db->errmsg());
+-		}
++	//这里要把时间转成便宜时间，并用交易日作为date
++	//这样可以根据交易日筛选历史tick数据
++	uint32_t actTime = curTick->actiontime();
++	uint32_t offTime = ct->getCommInfo()->getSessionInfo()->offsetTime(actTime / 100000, true) * 100000 + actTime % 100000;
++
++	LMDBHftKey key(ct->getExchg(), ct->getCode(), curTick->tradingdate(), offTime);
++	WtLMDBQuery query(*db);
++	if (!query.put_and_commit((void*)&key, sizeof(key), &curTick->getTickStruct(), sizeof(WTSTickStruct)))
++	{
++		pipe_writer_log(_sink, LL_ERROR, "pipe tick of {} to db failed: {}", ct->getFullCode(), db->errmsg());
++		return false;
+ 	}
++	return true;
++}
+ 
++void WtDataWriterAD::pipeToTicks(WTSContractInfo* ct, WTSTickData* curTick)
++{
++	if (ct == NULL || curTick == NULL || !lmdbKeyIdentityValid(ct->getExchg(), ct->getCode()))
++	{
++		pipe_writer_log(_sink, LL_ERROR, "Cannot persist tick with invalid LMDB identity");
++		return;
++	}
++
+ 	for(auto& item : _dumpers)
+ 	{
+ 		const char* id = item.first.c_str();
+@@ -1014,7 +1113,12 @@
+ 		return;
+ 	}
+ 	//直接落地
+-	WtLMDBPtr db = get_k_db(ct->getExchg(), KP_Minute1);
++	// 卡13/R32-003/R100-003：v1 LMDB 分钟键为 uint32，迁移合同落地前拒绝不可表示的时间，不得静默回绕
++	WtLMDBPtr db;
++	if (bar.time > (uint64_t)UINT32_MAX)
++		pipe_writer_log(_sink, LL_ERROR, "m1 bar time {} of {} is not representable in the v1 LMDB key; db write refused", bar.time, ct->getFullCode());
++	else
++		db = get_k_db(ct->getExchg(), KP_Minute1);
+ 	if(db)
+ 	{
+ 		LMDBBarKey key(ct->getExchg(), ct->getCode(), (uint32_t)bar.time);
+@@ -1052,7 +1156,12 @@
+ 		return;
+ 	}
+ 	//直接落地
+-	WtLMDBPtr db = get_k_db(ct->getExchg(), KP_Minute5);
++	// 卡13/R32-003/R100-003：v1 LMDB 分钟键为 uint32，迁移合同落地前拒绝不可表示的时间，不得静默回绕
++	WtLMDBPtr db;
++	if (bar.time > (uint64_t)UINT32_MAX)
++		pipe_writer_log(_sink, LL_ERROR, "m5 bar time {} of {} is not representable in the v1 LMDB key; db write refused", bar.time, ct->getFullCode());
++	else
++		db = get_k_db(ct->getExchg(), KP_Minute5);
+ 	if (db)
+ 	{
+ 		LMDBBarKey key(ct->getExchg(), ct->getCode(), (uint32_t)bar.time);
+@@ -1102,8 +1211,62 @@
+ 
+ 	std::string key = fmtutil::format<64>("{}.{}", curTick->exchg(), curTick->code());
+ 	auto prepareBarCacheItem = [this, &key](RTBarCacheWrapper& cache, const char* period,
+-		uint32_t& idx, bool& bNewCode) -> bool {
++		uint32_t& idx, bool& bNewCode, wt_rtpub::PublishLock& publishLock) -> bool {
+ 		bNewCode = false;
++		// 卡13：持跨进程发布锁；同步其他 writer 的扩容映射并补扫其新增缓存项
++		if (cache._file_ptr != NULL)
++		{
++			if (!publishLock.acquire(cache._file_ptr->filename()))
++			{
++				pipe_writer_log(_sink, LL_ERROR, "{} bar cache publish lock unavailable: {}", period, publishLock.error());
++				return false;
++			}
++			if (publishLock.recovered())
++			{
++				boost::system::error_code sizeEc;
++				const uintmax_t physical = boost::filesystem::file_size(cache._file_ptr->filename(), sizeEc);
++				if (sizeEc)
++					return false;
++				const uint32_t physRecords = wt_rtpub::mappedRecords((uint64_t)physical, sizeof(RTBarCache), sizeof(BarCacheItem));
++				if (wt_rtpub::publishedCapacity(cache._cache_block) > physRecords)
++					wt_rtpub::publishCapacity(cache._cache_block, physRecords);
++				if (wt_rtpub::publishedSize(cache._cache_block) > wt_rtpub::publishedCapacity(cache._cache_block))
++					wt_rtpub::publishSize(cache._cache_block, wt_rtpub::publishedCapacity(cache._cache_block));
++				pipe_writer_log(_sink, LL_WARN, "{} bar cache recovered after an interrupted structural change by pid {}", period, publishLock.recoveredPid());
++				if (!publishLock.endStructural())
++					return false;
++			}
++			if (wt_rtpub::publishedCapacity(cache._cache_block) >
++				wt_rtpub::mappedRecords(cache._file_ptr->size(), sizeof(RTBarCache), sizeof(BarCacheItem)))
++			{
++				BoostMFPtr fresh(new BoostMappingFile());
++				if (!fresh->map(cache._file_ptr->filename()) || fresh->addr() == NULL ||
++					wt_rtpub::mappedRecords(fresh->size(), sizeof(RTBarCache), sizeof(BarCacheItem)) < wt_rtpub::publishedCapacity(fresh->addr()))
++				{
++					pipe_writer_log(_sink, LL_ERROR, "Cannot remap {} bar cache grown by another writer", period);
++					return false;
++				}
++				cache._file_ptr.swap(fresh);
++				cache._cache_block = (RTBarCache*)cache._file_ptr->addr();
++			}
++			const uint32_t published = std::min(wt_rtpub::publishedSize(cache._cache_block), wt_rtpub::publishedCapacity(cache._cache_block));
++			for (uint32_t i = cache._scanned; i < published; i++)
++			{
++				AlignedBarCacheItem foreign;
++				loadBarCacheItem(cache._cache_block, i, foreign);
++				if (std::memchr(foreign._exchg, '\0', sizeof(foreign._exchg)) == NULL ||
++					std::memchr(foreign._code, '\0', sizeof(foreign._code)) == NULL)
++				{
++					pipe_writer_log(_sink, LL_ERROR, "Invalid {} bar cache identity at index {} published by another writer", period, i);
++					return false;
++				}
++				std::string foreignKey = fmtutil::format<64>("{}.{}", foreign._exchg, foreign._code);
++				if (cache._idx.find(foreignKey) == cache._idx.end())
++					cache._idx[foreignKey] = i;
++			}
++			if (published > cache._scanned)
++				cache._scanned = published;
++		}
+ 		wt_hashmap<std::string, uint32_t>::iterator found = cache._idx.find(key);
+ 		if (found != cache._idx.end())
+ 		{
+@@ -1116,7 +1279,7 @@
+ 			return true;
+ 		}
+ 
+-		idx = cache._cache_block->_size;
++		idx = wt_rtpub::publishedSize(cache._cache_block);
+ 		if (idx == UINT32_MAX)
+ 		{
+ 			pipe_writer_log(_sink, LL_ERROR, "{} bar cache size is exhausted; skipping {}", period, key);
+@@ -1134,7 +1297,8 @@
+ 			}
+ 
+ 			const uint32_t newCapacity = capacity + CACHE_SIZE_STEP_AD;
+-			if (!resizeRTBlock<RTBarCache, BarCacheItem>(cache._file_ptr, newCapacity))
++			wt_rtpub::StructuralGuard structural(publishLock, newCapacity);
++			if (!structural.begun() || !resizeRTBlock<RTBarCache, BarCacheItem>(cache._file_ptr, newCapacity))
+ 			{
+ 				pipe_writer_log(_sink, LL_ERROR, "{} bar cache expansion failed; skipping {}", period, key);
+ 				return false;
+@@ -1154,9 +1318,10 @@
+ 	if (!_disable_day && _d1_cache._cache_block)
+ 	{
+ 		StdUniqueLock lock(_d1_cache._mtx);
++		wt_rtpub::PublishLock barPublishLock;
+ 		uint32_t idx = 0;
+ 		bool bNewCode = false;
+-		if (!prepareBarCacheItem(_d1_cache, "day", idx, bNewCode))
++		if (!prepareBarCacheItem(_d1_cache, "day", idx, bNewCode, barPublishLock))
+ 		{
+ 			// Keep this stream unchanged and continue updating the other bar caches.
+ 		}
+@@ -1229,17 +1394,21 @@
+ 
+ 		storeBarCacheItem(_d1_cache._cache_block, idx, item);
+ 		if (bNewCode)
+-			_d1_cache._cache_block->_size = idx + 1;
++		{
++			wt_rtpub::publishSize(_d1_cache._cache_block, idx + 1);
++			_d1_cache._scanned = idx + 1;
+ 		}
++		}
+ 	}
+ 
+ 	//更新1分钟线
+ 	if (!_disable_min1 && _m1_cache._cache_block)
+ 	{
+ 		StdUniqueLock lock(_m1_cache._mtx);
++		wt_rtpub::PublishLock barPublishLock;
+ 		uint32_t idx = 0;
+ 		bool bNewCode = false;
+-		if (!prepareBarCacheItem(_m1_cache, "m1", idx, bNewCode))
++		if (!prepareBarCacheItem(_m1_cache, "m1", idx, bNewCode, barPublishLock))
+ 		{
+ 			// Keep this stream unchanged and continue updating the other bar caches.
+ 		}
+@@ -1328,17 +1497,21 @@
+ 
+ 		storeBarCacheItem(_m1_cache._cache_block, idx, item);
+ 		if (bNewCode)
+-			_m1_cache._cache_block->_size = idx + 1;
++		{
++			wt_rtpub::publishSize(_m1_cache._cache_block, idx + 1);
++			_m1_cache._scanned = idx + 1;
+ 		}
++		}
+ 	}
+ 
+ 	//更新5分钟线
+ 	if (!_disable_min5 && _m5_cache._cache_block)
+ 	{
+ 		StdUniqueLock lock(_m5_cache._mtx);
++		wt_rtpub::PublishLock barPublishLock;
+ 		uint32_t idx = 0;
+ 		bool bNewCode = false;
+-		if (!prepareBarCacheItem(_m5_cache, "m5", idx, bNewCode))
++		if (!prepareBarCacheItem(_m5_cache, "m5", idx, bNewCode, barPublishLock))
+ 		{
+ 			// Keep this stream unchanged and continue processing the current tick.
+ 		}
+@@ -1404,8 +1577,11 @@
+ 
+ 		storeBarCacheItem(_m5_cache._cache_block, idx, item);
+ 		if (bNewCode)
+-			_m5_cache._cache_block->_size = idx + 1;
++		{
++			wt_rtpub::publishSize(_m5_cache._cache_block, idx + 1);
++			_m5_cache._scanned = idx + 1;
+ 		}
++		}
+ 	}
+ }
+ 
+@@ -1432,8 +1608,78 @@
+ 	return WTSTickData::create(item._tick);
+ }
+ 
+-bool WtDataWriterAD::updateTickCache(WTSContractInfo* /*ct*/, WTSTickData* curTick, uint32_t procFlag)
++bool WtDataWriterAD::checkLmdbKeyLayout(WtLMDB& db, const std::string& path, std::size_t keySize, bool isTick)
+ {
++	MDB_txn* txn = NULL;
++	int rc = mdb_txn_begin(db.env(), NULL, MDB_RDONLY, &txn);
++	if (rc != MDB_SUCCESS)
++	{
++		pipe_writer_log(_sink, LL_ERROR, "Cannot probe LMDB key layout at {}: {}", path, mdb_strerror(rc));
++		return false;
++	}
++	const MDB_dbi dbi = db.update_dbi(txn);
++	if (db.has_error())
++	{
++		mdb_txn_abort(txn);
++		pipe_writer_log(_sink, LL_ERROR, "Cannot open LMDB at {} for key layout probe: {}", path, db.errmsg());
++		return false;
++	}
++
++	bool ok = true;
++	std::string reason;
++	MDB_cursor* cursor = NULL;
++	rc = mdb_cursor_open(txn, dbi, &cursor);
++	if (rc != MDB_SUCCESS)
++	{
++		ok = false;
++		reason = mdb_strerror(rc);
++	}
++	else
++	{
++		const MDB_cursor_op ops[2] = { MDB_FIRST, MDB_LAST };
++		for (const MDB_cursor_op op : ops)
++		{
++			MDB_val key, val;
++			rc = mdb_cursor_get(cursor, &key, &val, op);
++			if (rc == MDB_NOTFOUND)
++				break;	// empty database: nothing to migrate
++			if (rc != MDB_SUCCESS)
++			{
++				ok = false;
++				reason = mdb_strerror(rc);
++				break;
++			}
++			if (key.mv_size != keySize)
++			{
++				ok = false;
++				reason = "key size " + std::to_string(key.mv_size) + " differs from current " + std::to_string(keySize);
++				break;
++			}
++			if (isTick && op == MDB_FIRST)
++			{
++				// Keys of one contract sort by big-endian trading date; a zero date sorts first.
++				uint32_t date = 0;
++				memcpy(&date, static_cast<const char*>(key.mv_data) + MAX_EXCHANGE_LENGTH + MAX_INSTRUMENT_LENGTH, sizeof(date));
++				if (date == 0)
++				{
++					ok = false;
++					reason = "legacy tick key with zero trading date (records may have overwritten each other)";
++					break;
++				}
++			}
++		}
++		mdb_cursor_close(cursor);
++	}
++	// A read-only commit keeps the dbi handle opened above for later writes.
++	mdb_txn_commit(txn);
++	if (!ok)
++		pipe_writer_log(_sink, LL_ERROR, "LMDB at {} quarantined, unknown key format (13c fail-closed): {}", path, reason);
++	return ok;
++}
++
++bool WtDataWriterAD::updateTickCache(WTSContractInfo* /*ct*/, WTSTickData* curTick, uint32_t procFlag,
++	const std::function<bool()>& commitBeforePublish)
++{
+ 	if (curTick == NULL || _tick_cache_block == NULL)
+ 	{
+ 		pipe_writer_log(_sink, LL_ERROR, "Tick cache data not initialized");
+@@ -1447,6 +1693,63 @@
+ 	}
+ 
+ 	StdUniqueLock lock(_mtx_tick_cache);
++	// 卡13：缓存读改写在跨进程发布锁内完成；先同步其他 writer 的扩容并补扫其新增的缓存项
++	wt_rtpub::PublishLock publishLock;
++	if (_tick_cache_file == NULL || !publishLock.acquire(_tick_cache_file->filename()))
++	{
++		pipe_writer_log(_sink, LL_ERROR, "Tick cache publish lock unavailable: {}", publishLock.error());
++		return false;
++	}
++	if (publishLock.recovered())
++	{
++		boost::system::error_code sizeEc;
++		const uintmax_t physical = boost::filesystem::file_size(_tick_cache_file->filename(), sizeEc);
++		if (sizeEc)
++			return false;
++		const uint32_t physRecords = wt_rtpub::mappedRecords((uint64_t)physical, sizeof(RTTickCache), sizeof(TickCacheItem));
++		if (wt_rtpub::publishedCapacity(_tick_cache_block) > physRecords)
++			wt_rtpub::publishCapacity(_tick_cache_block, physRecords);
++		if (wt_rtpub::publishedSize(_tick_cache_block) > wt_rtpub::publishedCapacity(_tick_cache_block))
++			wt_rtpub::publishSize(_tick_cache_block, wt_rtpub::publishedCapacity(_tick_cache_block));
++		pipe_writer_log(_sink, LL_WARN, "Tick cache recovered after an interrupted structural change by pid {}", publishLock.recoveredPid());
++		if (!publishLock.endStructural())
++			return false;
++	}
++	if (wt_rtpub::publishedCapacity(_tick_cache_block) >
++		wt_rtpub::mappedRecords(_tick_cache_file->size(), sizeof(RTTickCache), sizeof(TickCacheItem)))
++	{
++		BoostMFPtr fresh(new BoostMappingFile());
++		if (!fresh->map(_tick_cache_file->filename()) || fresh->addr() == NULL ||
++			wt_rtpub::mappedRecords(fresh->size(), sizeof(RTTickCache), sizeof(TickCacheItem)) < wt_rtpub::publishedCapacity(fresh->addr()))
++		{
++			pipe_writer_log(_sink, LL_ERROR, "Cannot remap tick cache grown by another writer");
++			return false;
++		}
++		_tick_cache_file.swap(fresh);
++		_tick_cache_block = (RTTickCache*)_tick_cache_file->addr();
++	}
++	{
++		const uint32_t published = std::min(wt_rtpub::publishedSize(_tick_cache_block), wt_rtpub::publishedCapacity(_tick_cache_block));
++		for (uint32_t i = _tick_cache_scanned; i < published; i++)
++		{
++			AlignedTickCacheItem foreign;
++			loadTickCacheItem(_tick_cache_block, i, foreign);
++			if (std::memchr(foreign._tick.exchg, '\0', sizeof(foreign._tick.exchg)) == NULL ||
++				std::memchr(foreign._tick.code, '\0', sizeof(foreign._tick.code)) == NULL)
++			{
++				pipe_writer_log(_sink, LL_ERROR, "Invalid tick cache identity at index {} published by another writer", i);
++				return false;
++			}
++			std::string foreignKey = fmtutil::format<64>("{}.{}", foreign._tick.exchg, foreign._tick.code);
++			if (_tick_cache_idx.find(foreignKey) == _tick_cache_idx.end())
++				_tick_cache_idx[foreignKey] = i;
++		}
++		if (published > _tick_cache_scanned)
++			_tick_cache_scanned = published;
++	}
++	// 保存预处理前的 tick；持久化失败时恢复，保证同一 tick 可原样重试
++	const WTSTickStruct originalTick = curTick->getTickStruct();
++
+ 	std::string key = fmtutil::format<64>("{}.{}", curTick->exchg(), curTick->code());
+ 	uint32_t idx = 0;
+ 	bool bNewCode = false;
+@@ -1454,7 +1757,7 @@
+ 	wt_hashmap<std::string, uint32_t>::iterator found = _tick_cache_idx.find(key);
+ 	if (found == _tick_cache_idx.end())
+ 	{
+-		idx = _tick_cache_block->_size;
++		idx = wt_rtpub::publishedSize(_tick_cache_block);
+ 		if (idx == UINT32_MAX)
+ 		{
+ 			pipe_writer_log(_sink, LL_ERROR, "Tick cache size is exhausted; skipping {}", key);
+@@ -1471,7 +1774,8 @@
+ 				return false;
+ 			}
+ 
+-			if (!resizeRTBlock<RTTickCache, TickCacheItem>(_tick_cache_file, capacity + CACHE_SIZE_STEP_AD))
++			wt_rtpub::StructuralGuard structural(publishLock, (uint64_t)capacity + CACHE_SIZE_STEP_AD);
++			if (!structural.begun() || !resizeRTBlock<RTTickCache, TickCacheItem>(_tick_cache_file, capacity + CACHE_SIZE_STEP_AD))
+ 			{
+ 				pipe_writer_log(_sink, LL_ERROR, "Tick cache expansion failed; skipping {}", key);
+ 				return false;
+@@ -1618,6 +1922,12 @@
+ 		}
+ 	}
+ 
++	// 卡13（13a=A）：缓存项已完整准备；先由调用方提交持久化，成功后才发布索引/内容/_size
++	if (commitBeforePublish && !commitBeforePublish())
++	{
++		curTick->getTickStruct() = originalTick;
++		return false;
++	}
+ 	if (bNewCode)
+ 	{
+ 		// Commit data, index, and size only after the cache entry has been fully prepared.
+@@ -1625,7 +1935,10 @@
+ 	}
+ 	storeTickCacheItem(_tick_cache_block, idx, item);
+ 	if (bNewCode)
+-		_tick_cache_block->_size = idx + 1;
++	{
++		wt_rtpub::publishSize(_tick_cache_block, idx + 1);
++		_tick_cache_scanned = idx + 1;
++	}
+ 
+ 	return true;
+ }
+@@ -1663,12 +1976,25 @@
+ 
+ 	WtLMDBPtr dbPtr(new WtLMDB(false));
+ 	std::string path = fmtutil::format("{}{}/{}/", _base_dir.c_str(), subdir.c_str(), exchg);
+-	boost::filesystem::create_directories(path);
++	if (_quarantined_dbs.count(path) != 0)
++		return WtLMDBPtr();
++	boost::system::error_code ec;
++	boost::filesystem::create_directories(path, ec);
++	if (ec)
++	{
++		pipe_writer_log(_sink, LL_ERROR, "Cannot create {} db directory {}: {}", subdir, path, ec.message());
++		return WtLMDBPtr();
++	}
+ 	if(!dbPtr->open(path.c_str(), _kline_mapsize))
+ 	{
+ 		if (_sink) pipe_writer_log(_sink, LL_ERROR, "Opening {} db at {} failed: {}", subdir, path, dbPtr->errmsg());
+ 		return WtLMDBPtr();
+ 	}
++	if (!checkLmdbKeyLayout(*dbPtr, path, sizeof(LMDBBarKey), false))
++	{
++		_quarantined_dbs.insert(path);
++		return WtLMDBPtr();
++	}
+ 
+ 	(*the_map)[exchg] = dbPtr;
+ #ifdef WT_DATAWRITERAD_TEST_SEAMS
+@@ -1691,10 +2017,23 @@
+ 
+ 	WtLMDBPtr dbPtr(new WtLMDB(false));
+ 	std::string path = fmtutil::format("{}ticks/{}/{}", _base_dir.c_str(), exchg, code);
+-	boost::filesystem::create_directories(path);
++	if (_quarantined_dbs.count(path) != 0)
++		return WtLMDBPtr();
++	boost::system::error_code ec;
++	boost::filesystem::create_directories(path, ec);
++	if (ec)
++	{
++		pipe_writer_log(_sink, LL_ERROR, "Cannot create tick db directory {}: {}", path, ec.message());
++		return WtLMDBPtr();
++	}
+ 	if (!dbPtr->open(path.c_str(), _tick_mapsize))
+ 	{
+ 		if (_sink) pipe_writer_log(_sink, LL_ERROR, "Opening tick db at {} failed: {}", path, dbPtr->errmsg());
++		return WtLMDBPtr();
++	}
++	if (!checkLmdbKeyLayout(*dbPtr, path, sizeof(LMDBHftKey), true))
++	{
++		_quarantined_dbs.insert(path);
+ 		return WtLMDBPtr();
+ 	}
+ 
+--- /tmp/wt-i03-storage-mw-20261104/baseline/src/TestUnits/coverage/p10_storage_writer/p10_writer_test_hooks.h	2026-11-01 21:42:56
++++ src/TestUnits/coverage/p10_storage_writer/p10_writer_test_hooks.h	2026-11-04 02:45:18
+@@ -19,6 +19,13 @@
+ 		bool (*simulate_next_rt_resize_short_write)(void*, const char*, uint64_t, uint64_t) noexcept = nullptr;
+ 		bool skip_initial_check_wait = false;
+ 		bool (*fail_next_tick_cache_resize_map)(void*, bool old_mapping_retained) noexcept = nullptr;
++		// Card 13 multi-writer crash points (appended; existing fields unchanged).
++		// Called with the cross-process publish lock held, after the record payload is
++		// written into the first unpublished slot and before the size release-store.
++		void (*before_rt_publish)(void*, const char* path, uint32_t slot) noexcept = nullptr;
++		// Called inside resizeRTBlock after the file has been extended and before the new
++		// capacity is published (journal is in PREPARING state).
++		void (*after_rt_extend_before_capacity)(void*, const char* path) noexcept = nullptr;
+ 	};
+ 
+ 	bool install(::WtDataWriter* writer, const Hooks& hooks) noexcept;
+--- /dev/null	2026-11-04 03:17:51
++++ src/WtDataStorage/RTBlockPublish.hpp	2026-11-04 02:46:15
+@@ -0,0 +1,443 @@
++/*!
++ * \file RTBlockPublish.hpp
++ * \brief Cross-process multi-writer publish protocol for RT mmap blocks
++ *        (iteration 03, decision card 13: 13a=A prepare-then-publish, 13b=B multi-writer).
++ *
++ * Protocol summary (see src/TestUnits/fixtures/i03_storage_multiwriter_20261104/README.md):
++ *  - Every RT block file `X.dmb` has a sidecar `X.dmb.wlk`. A cooperating writer takes a
++ *    blocking exclusive lock on the sidecar for the duration of one prepare+publish step.
++ *    A second writer waits; it is never rejected (13b=B).
++ *  - Prepare: under the lock the writer first makes its own mapping cover the published
++ *    capacity (another writer may have grown the file), grows the block if needed, and
++ *    writes the record payload into the first unpublished slot.
++ *  - Publish: a single aligned 32-bit release store of the header `_size`. Capacity is
++ *    published only after the file has been extended and remapped. A writer that dies
++ *    before the size store leaves an invisible slot that the next writer overwrites.
++ *  - Structural changes (create/initialise/resize/day reset) are bracketed by a journal
++ *    record in the sidecar (state PREPARING -> IDLE, generation++). A sidecar found in
++ *    PREPARING state by the next lock holder means the previous holder died mid-change;
++ *    the holder reconciles the header against the physical file before continuing.
++ *  - Readers never take the lock. They read `_size`/`_capacity` with acquire loads and
++ *    clamp the visible count to the records covered by *their own* mapping.
++ *
++ * Out of protocol: writers built before this change, non-cooperating processes, power
++ * loss (no fsync), network file systems, and end-of-day maintenance (transHisData).
++ */
++#pragma once
++
++#include <cstddef>
++#include <cstdint>
++#include <cstring>
++#include <string>
++
++#ifdef _WIN32
++#ifndef WIN32_LEAN_AND_MEAN
++#define WIN32_LEAN_AND_MEAN
++#endif
++#include <windows.h>
++#else
++#include <cerrno>
++#include <fcntl.h>
++#include <sys/file.h>
++#include <sys/stat.h>
++#include <unistd.h>
++#endif
++
++namespace wt_rtpub
++{
++	// RTBlockHeader is #pragma pack(1): BlockHeader(8 flag + 2 type + 2 version) = 12 bytes,
++	// followed by uint32 _size and uint32 _capacity. Mappings are page aligned, so both
++	// fields are naturally 4-byte aligned in memory.
++	static const std::size_t RT_SIZE_OFFSET = 12;
++	static const std::size_t RT_CAPACITY_OFFSET = 16;
++
++	inline uint32_t loadAcquire(const void* base, std::size_t offset)
++	{
++		const uint32_t* p = reinterpret_cast<const uint32_t*>(static_cast<const char*>(base) + offset);
++#ifdef _MSC_VER
++		return (uint32_t)InterlockedCompareExchange((volatile LONG*)p, 0, 0);
++#else
++		return __atomic_load_n(p, __ATOMIC_ACQUIRE);
++#endif
++	}
++
++	inline void storeRelease(void* base, std::size_t offset, uint32_t value)
++	{
++		uint32_t* p = reinterpret_cast<uint32_t*>(static_cast<char*>(base) + offset);
++#ifdef _MSC_VER
++		InterlockedExchange((volatile LONG*)p, (LONG)value);
++#else
++		__atomic_store_n(p, value, __ATOMIC_RELEASE);
++#endif
++	}
++
++	inline uint32_t publishedSize(const void* base) { return loadAcquire(base, RT_SIZE_OFFSET); }
++	inline uint32_t publishedCapacity(const void* base) { return loadAcquire(base, RT_CAPACITY_OFFSET); }
++	inline void publishSize(void* base, uint32_t v) { storeRelease(base, RT_SIZE_OFFSET, v); }
++	inline void publishCapacity(void* base, uint32_t v) { storeRelease(base, RT_CAPACITY_OFFSET, v); }
++
++	/// Number of whole records covered by a mapping (0 when the mapping is shorter than the header).
++	inline uint32_t mappedRecords(uint64_t mappedBytes, uint64_t headerBytes, uint64_t recordBytes)
++	{
++		if (recordBytes == 0 || mappedBytes < headerBytes)
++			return 0;
++		const uint64_t n = (mappedBytes - headerBytes) / recordBytes;
++		return n > 0xFFFFFFFFull ? 0xFFFFFFFFu : (uint32_t)n;
++	}
++
++	/// Reader-side visibility rule: published records that are also inside the caller's mapping.
++	inline uint32_t visibleRecords(const void* base, uint64_t mappedBytes, uint64_t headerBytes, uint64_t recordBytes)
++	{
++		if (base == nullptr || mappedBytes < headerBytes || headerBytes < RT_CAPACITY_OFFSET + sizeof(uint32_t))
++			return 0;
++		uint32_t n = publishedSize(base);
++		const uint32_t cap = publishedCapacity(base);
++		const uint32_t mapped = mappedRecords(mappedBytes, headerBytes, recordBytes);
++		if (n > cap) n = cap;
++		if (n > mapped) n = mapped;
++		return n;
++	}
++
++	enum JournalState : uint32_t
++	{
++		JS_IDLE = 0,
++		JS_PREPARING = 1
++	};
++
++#pragma pack(push, 1)
++	struct Journal
++	{
++		char		_magic[8];		///< "WTRTPUB"
++		uint32_t	_version;		///< 1
++		uint32_t	_state;			///< JournalState
++		uint64_t	_generation;	///< incremented by every structural begin and recovery
++		int64_t		_owner_pid;		///< pid of the last structural writer
++		uint64_t	_target;		///< capacity targeted by the pending structural change
++	};
++#pragma pack(pop)
++
++	static const char JOURNAL_MAGIC[8] = { 'W','T','R','T','P','U','B','\0' };
++
++	/*!
++	 * Blocking, cross-process, per-file publish lock with a crash journal.
++	 * Not copyable. Locks are released automatically by the OS when the holder dies.
++	 */
++	class PublishLock
++	{
++	public:
++		PublishLock() = default;
++		~PublishLock() { release(); }
++		PublishLock(const PublishLock&) = delete;
++		PublishLock& operator=(const PublishLock&) = delete;
++
++		static std::string sidecarPath(const std::string& dataPath) { return dataPath + ".wlk"; }
++
++		/// Blocks until the lock is held. Returns false (fail closed) on I/O errors or on a
++		/// sidecar with unknown content; error() then describes the reason.
++		bool acquire(const std::string& dataPath)
++		{
++			release();
++			_recovered = false;
++			_recovered_pid = 0;
++			const std::string lockPath = sidecarPath(dataPath);
++#ifdef _WIN32
++			_h = CreateFileA(lockPath.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
++				NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
++			if (_h == INVALID_HANDLE_VALUE)
++			{
++				_err = "cannot open publish lock " + lockPath;
++				return false;
++			}
++			OVERLAPPED ov;
++			memset(&ov, 0, sizeof(ov));
++			ov.Offset = 0x10000;	// lock a byte beyond the journal so journal I/O is not blocked
++			if (!LockFileEx(_h, LOCKFILE_EXCLUSIVE_LOCK, 0, 1, 0, &ov))
++			{
++				_err = "cannot lock publish lock " + lockPath;
++				CloseHandle(_h);
++				_h = INVALID_HANDLE_VALUE;
++				return false;
++			}
++#else
++			_fd = ::open(lockPath.c_str(), O_RDWR | O_CREAT | O_CLOEXEC, 0644);
++			if (_fd < 0)
++			{
++				_err = "cannot open publish lock " + lockPath + ": " + strerror(errno);
++				return false;
++			}
++			int rc;
++			do { rc = ::flock(_fd, LOCK_EX); } while (rc != 0 && errno == EINTR);
++			if (rc != 0)
++			{
++				_err = "cannot lock publish lock " + lockPath + ": " + strerror(errno);
++				::close(_fd);
++				_fd = -1;
++				return false;
++			}
++#endif
++			_held = true;
++
++			Journal j;
++			memset(&j, 0, sizeof(j));
++			const long got = readJournal(j);
++			if (got < 0)
++			{
++				_err = "cannot read publish journal " + lockPath;
++				release();
++				return false;
++			}
++			if (got == 0)
++			{
++				memcpy(j._magic, JOURNAL_MAGIC, sizeof(j._magic));
++				j._version = 1;
++				j._state = JS_IDLE;
++				if (!writeJournal(j))
++				{
++					_err = "cannot initialise publish journal " + lockPath;
++					release();
++					return false;
++				}
++			}
++			else if (got != (long)sizeof(Journal) || memcmp(j._magic, JOURNAL_MAGIC, sizeof(j._magic)) != 0
++				|| j._version != 1 || (j._state != JS_IDLE && j._state != JS_PREPARING))
++			{
++				// 13c=A: unknown sidecar content is never guessed; the block is quarantined.
++				_err = "publish journal " + lockPath + " has unknown format; refusing to write";
++				release();
++				return false;
++			}
++			_journal = j;
++			if (j._state == JS_PREPARING)
++			{
++				// We hold the lock, so the previous structural writer is gone.
++				_recovered = true;
++				_recovered_pid = j._owner_pid;
++			}
++			return true;
++		}
++
++		bool held() const { return _held; }
++		bool recovered() const { return _recovered; }
++		int64_t recoveredPid() const { return _recovered_pid; }
++		uint64_t generation() const { return _journal._generation; }
++		const std::string& error() const { return _err; }
++
++		/// Marks a structural change as in progress (crash-detectable).
++		bool beginStructural(uint64_t target)
++		{
++			if (!_held)
++				return false;
++			Journal j = _journal;
++			j._state = JS_PREPARING;
++			j._generation += 1;
++			j._owner_pid = currentPid();
++			j._target = target;
++			if (!writeJournal(j))
++				return false;
++			_journal = j;
++			return true;
++		}
++
++		/// Marks the structural change (or a crash recovery) as complete.
++		bool endStructural()
++		{
++			if (!_held)
++				return false;
++			Journal j = _journal;
++			j._state = JS_IDLE;
++			if (!writeJournal(j))
++				return false;
++			_journal = j;
++			_recovered = false;
++			return true;
++		}
++
++		void release()
++		{
++#ifdef _WIN32
++			if (_h != INVALID_HANDLE_VALUE)
++			{
++				if (_held)
++				{
++					OVERLAPPED ov;
++					memset(&ov, 0, sizeof(ov));
++					ov.Offset = 0x10000;
++					UnlockFileEx(_h, 0, 1, 0, &ov);
++				}
++				CloseHandle(_h);
++				_h = INVALID_HANDLE_VALUE;
++			}
++#else
++			if (_fd >= 0)
++			{
++				// Closing the descriptor drops the flock.
++				::close(_fd);
++				_fd = -1;
++			}
++#endif
++			_held = false;
++		}
++
++	private:
++		static int64_t currentPid()
++		{
++#ifdef _WIN32
++			return (int64_t)GetCurrentProcessId();
++#else
++			return (int64_t)::getpid();
++#endif
++		}
++
++		long readJournal(Journal& j)
++		{
++#ifdef _WIN32
++			OVERLAPPED ov;
++			memset(&ov, 0, sizeof(ov));
++			DWORD got = 0;
++			if (!ReadFile(_h, &j, sizeof(j), &got, &ov))
++			{
++				if (GetLastError() == ERROR_HANDLE_EOF)
++					return 0;
++				return -1;
++			}
++			return (long)got;
++#else
++			std::size_t total = 0;
++			char* p = reinterpret_cast<char*>(&j);
++			while (total < sizeof(j))
++			{
++				const ssize_t n = ::pread(_fd, p + total, sizeof(j) - total, (off_t)total);
++				if (n < 0)
++				{
++					if (errno == EINTR) continue;
++					return -1;
++				}
++				if (n == 0)
++					break;
++				total += (std::size_t)n;
++			}
++			return (long)total;
++#endif
++		}
++
++		bool writeJournal(const Journal& j)
++		{
++#ifdef _WIN32
++			OVERLAPPED ov;
++			memset(&ov, 0, sizeof(ov));
++			DWORD put = 0;
++			return WriteFile(_h, &j, sizeof(j), &put, &ov) && put == sizeof(j);
++#else
++			std::size_t total = 0;
++			const char* p = reinterpret_cast<const char*>(&j);
++			while (total < sizeof(j))
++			{
++				const ssize_t n = ::pwrite(_fd, p + total, sizeof(j) - total, (off_t)total);
++				if (n < 0)
++				{
++					if (errno == EINTR) continue;
++					return false;
++				}
++				if (n == 0)
++					return false;
++				total += (std::size_t)n;
++			}
++			return true;
++#endif
++		}
++
++	private:
++#ifdef _WIN32
++		HANDLE		_h = INVALID_HANDLE_VALUE;
++#else
++		int			_fd = -1;
++#endif
++		bool		_held = false;
++		bool		_recovered = false;
++		int64_t		_recovered_pid = 0;
++		Journal		_journal{};
++		std::string	_err;
++	};
++
++	/// Brackets a structural change; marks the journal IDLE again on every exit path of a
++	/// live process. Only a process that dies inside the scope leaves PREPARING behind.
++	class StructuralGuard
++	{
++	public:
++		StructuralGuard(PublishLock& lock, uint64_t target) : _lock(lock), _begun(lock.beginStructural(target)) {}
++		~StructuralGuard() { if (_begun) _lock.endStructural(); }
++		StructuralGuard(const StructuralGuard&) = delete;
++		StructuralGuard& operator=(const StructuralGuard&) = delete;
++		bool begun() const { return _begun; }
++	private:
++		PublishLock&	_lock;
++		bool			_begun;
++	};
++
++	/// Prepare-then-publish creation of a new block file: the fully initialised image is
++	/// written to a private temporary file and renamed into place (caller holds the lock).
++	/// A crash leaves either no block file or a complete one, never a half-initialised header.
++	inline bool publishNewBlockFile(const std::string& path, const void* header, std::size_t headerBytes,
++		uint64_t totalBytes, std::string& err)
++	{
++		if (totalBytes < headerBytes || totalBytes > (uint64_t)0x7FFFFFFF)
++		{
++			err = "invalid block size for " + path;
++			return false;
++		}
++#ifdef _WIN32
++		const std::string tmp = path + ".wtnew." + std::to_string((unsigned long)GetCurrentProcessId());
++		HANDLE h = CreateFileA(tmp.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
++		if (h == INVALID_HANDLE_VALUE)
++		{
++			err = "cannot create " + tmp;
++			return false;
++		}
++		std::string buf((std::size_t)totalBytes, '\0');
++		memcpy(&buf[0], header, headerBytes);
++		DWORD put = 0;
++		const bool ok = WriteFile(h, buf.data(), (DWORD)buf.size(), &put, NULL) && put == buf.size();
++		CloseHandle(h);
++		if (!ok || !MoveFileExA(tmp.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING))
++		{
++			DeleteFileA(tmp.c_str());
++			err = "cannot publish new block file " + path;
++			return false;
++		}
++		return true;
++#else
++		const std::string tmp = path + ".wtnew." + std::to_string((long)::getpid());
++		const int fd = ::open(tmp.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
++		if (fd < 0)
++		{
++			err = "cannot create " + tmp + ": " + strerror(errno);
++			return false;
++		}
++		std::string buf((std::size_t)totalBytes, '\0');
++		memcpy(&buf[0], header, headerBytes);
++		std::size_t total = 0;
++		bool ok = true;
++		while (total < buf.size())
++		{
++			const ssize_t n = ::write(fd, buf.data() + total, buf.size() - total);
++			if (n < 0 && errno == EINTR)
++				continue;
++			if (n <= 0)
++			{
++				ok = false;
++				break;
++			}
++			total += (std::size_t)n;
++		}
++		if (::close(fd) != 0)
++			ok = false;
++		if (!ok || ::rename(tmp.c_str(), path.c_str()) != 0)
++		{
++			::unlink(tmp.c_str());
++			err = "cannot publish new block file " + path;
++			return false;
++		}
++		return true;
++#endif
++	}
++}

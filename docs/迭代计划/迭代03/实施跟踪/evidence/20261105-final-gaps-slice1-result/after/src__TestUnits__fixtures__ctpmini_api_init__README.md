@@ -1,0 +1,16 @@
+# ParserCTPMini initialization and module-retention checks
+
+On macOS arm64, configure and build the `CoverageTests_t_ParserCTPMini` Ninja target in an isolated directory, then run from the repository root:
+
+```
+/Users/yunjinqi/opt/anaconda3/bin/conda run -n base python src/TestUnits/fixtures/ctpmini_api_init/run.py /path/to/ninja-build src/ParserCTPMini/ParserCTPMini.cpp /tmp/ctpmini-init-current
+/Users/yunjinqi/opt/anaconda3/bin/conda run -n base python src/TestUnits/fixtures/ctpmini_api_init/run_unload.py /path/to/ninja-build src/ParserCTPMini/ParserCTPMini.cpp /tmp/ctpmini-init-unload
+```
+
+Output directories must be new. The first harness compiles the product TU with loader spies and exercises isolated missing-library, missing-symbol, null-API, null-config, duplicate-init and successful cases. It checks loader counts, repeated release and connect returning false when there is no API. Following card 9 9c=A (I03-NEW-121, 2026-11-05), a failed instance never initializes again: one that retained a module rejects a second init before release ("initialization disabled"), and after release every failure mode rejects init without a new load attempt; a new parser instance may retry and succeeds with a different fake module. Whether an instance whose failure loaded no module (missing-library, null-config) may retry before release is not asserted (the product currently allows it; not covered by 9c). It does not prove cross-instance isolation of the same module.
+
+The second harness redirects only module-directory discovery and uses real `dlopen`/`dlsym` on two physical fake dynamic libraries. Their unload destructors write markers: no marker must exist after failed initialization, repeated release or parser destruction while the process is live. Markers may appear normally at process exit. Neither fixture contacts a real vendor or creates symlinks.
+
+For the first harness, a copy of original pre-fix source can be supplied as the second argument for crash red controls (the expected baseline exit codes in `run.py` predate the I03-NEW-121 rewrite and were not re-checked, because the baseline sources are not in the repository); a specially constructed `unload-baseline.cpp` models the intermediate candidate that closes failed modules, and `connect-baseline.cpp` models the no-API true return. The second harness accepts the unload baseline for early-unload red controls. Commands, per-case logs, exit codes and input hashes are recorded under the chosen output directory. These local checks do not establish same-module cross-instance/concurrent isolation, real vendor callback drain, platform portability or full regression acceptance.
+
+The `cross-instance` mode follows decision K16=A (2026-11-04): after one parser failed on a module, another parser instance may load the same module again; that second failure is isolated like the first (module retained and never closed, both instances stay disabled, connect returns false). It now runs as part of `run.py` for the current source (not for baseline variants) and must exit 0. It still does not establish concurrent loading or real vendor callback drain.

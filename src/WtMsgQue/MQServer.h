@@ -9,6 +9,7 @@
  */
 #pragma once
 
+#include <atomic>
 #include <queue>
 
 #include "../Includes/WTSMarcos.h"
@@ -41,9 +42,10 @@ private:
 
 	StdThreadPtr	m_thrdCast;
 	SpinMutex		m_mtxCast;
-	bool			m_bTerminated;
-	bool			m_bTimeout;
-	uint64_t		m_uLastHBTime;
+	// I03-NEW-116: shared between publish()/~MQServer() and the cast thread.
+	std::atomic<bool>		m_bTerminated;
+	std::atomic<bool>		m_bTimeout;
+	std::atomic<uint64_t>	m_uLastHBTime{ 0 };
 
 	std::atomic<uint64_t>		m_uTotalPacks = 0;
 	std::atomic<uint64_t>		m_uTotalSents = 0;

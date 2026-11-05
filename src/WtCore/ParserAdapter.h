@@ -8,12 +8,16 @@
  * \brief 
  */
 #pragma once
+#include <atomic>
 #include <memory>
+#include <mutex>
 #include <vector>
 #include <boost/core/noncopyable.hpp>
 
 #include "../Includes/FasterDefs.h"
 #include "../Includes/IParserApi.h"
+#include "../Includes/IParserLifecycleV2.h"
+#include "../Includes/DateMappingV1.h"
 #include "../Share/DLLHelper.hpp"
 
 
@@ -39,29 +43,25 @@ public:
 	virtual ~ParserAdapter();
 
 public:
-	// A non-null API passed to initExt transfers to this adapter immediately,
-	// including when this adapter is busy or initialization later fails. A
-	// rejected API is retained until release(); repeated submissions of an API
-	// already owned here do not create another owner. The caller must keep an
-	// initExt API's module mapped through release(). For init(), this adapter
-	// retains the config and loaded module while it owns the API.
-	// IParserApi::release() is not a callback-drain guarantee. Call release(),
-	// destroy the adapter, unload an initExt API's module, or release borrowed
-	// dependencies only after a provider-specific barrier proves callbacks and
-	// other API use have stopped. Without such a barrier, keep the adapter and
-	// its borrowed dependency graph quarantined; do not infer safety from release().
-	// If API release or its remover throws, hasApi() remains true and subsequent
-	// release() calls are no-ops because teardown may have partially completed.
-	// Both initialization paths require a non-null base-data manager. A non-null
-	// initExt API is still retained when that precondition fails, without calling
-	// into the provider.
+	// Dynamic providers must expose and pass the V2 lifecycle preflight before
+	// createParser. A non-null initExt API still transfers ownership, but has no
+	// V2 proof: this adapter retains it and cannot destroy it. Owners must retain
+	// the adapter, provider module and all borrowed host objects while hasApi().
+	// Destruction of an adapter/whole owner graph is not itself a drain barrier.
+	// K31=A：登记宿主的 DateMappingV1 表（须在 init 前调用）；解析模块导出 bindParserDateMappingV1 时注入。
+	void	setDateMapping(const DateMappingV1& table) { _date_mapping = table; _has_date_mapping = true; }
 	bool	init(const char* id, WTSVariant* cfg, IParserStub* stub, IBaseDataMgr* bgMgr, IHotMgr* hotMgr = NULL);
 
 	bool	initExt(const char* id, IParserApi* api, IParserStub* stub, IBaseDataMgr* bgMgr, IHotMgr* hotMgr = NULL);
-	bool	isInitialized() const { return _initialized; }
+	bool	isInitialized() const { return _initialized.load() && !_stopped.load(); }
 	// True while an API owner is retained or creation/teardown left its exact
 	// state uncertain. A teardown exception is sticky and cannot be retried.
-	bool	hasApi() const noexcept { return _parser_api != NULL || !_rejected_external_apis.empty() || _api_creation_uncertain || _release_uncertain; }
+	bool	hasApi() const noexcept;
+
+	// Nonblocking, retryable stages. finish only destroys after an accepted
+	// request, a successful current-thread can_wait and a DRAINED zero-time poll.
+	bool	requestStopLifecycle() noexcept;
+	bool	finishReleaseLifecycle() noexcept;
 
 	void	release();
 
@@ -106,14 +106,24 @@ private:
 	friend struct ParserAdapterTestAccess;
 
 	void retainRejectedExternalApi(IParserApi* api);
+	void retainContendedExternalApi(IParserApi* api) noexcept;
+	bool hasApiUnlocked() const noexcept;
+	struct RetainedExternalNode { IParserApi* api; RetainedExternalNode* next; };
 
 	IParserApi*			_parser_api;
 	std::vector<IParserApi*> _rejected_external_apis;
+	std::atomic<RetainedExternalNode*> _contended_external_apis;
 	FuncDeleteParser	_remover;
 	DllHandle			_module_handle;
+	const WtParserLifecycleApiV2* _lifecycle;
+	mutable std::recursive_mutex _lifecycle_mutex;
+	bool				_operation_active;
+	bool				_stop_accepted;
+	// Decision K15=A: an initExt API was told to stop once (not a drain proof).
+	bool				_external_stop_notified;
 
-	bool				_stopped;
-	bool				_initialized;
+	std::atomic<bool>	_stopped;
+	std::atomic<bool>	_initialized;
 	bool				_api_creation_uncertain;
 	bool				_release_uncertain;
 	bool				_remover_pending;
@@ -130,6 +140,8 @@ private:
 	typedef wt_hashset<std::string>	ExchgFilter;
 	ExchgFilter			_filters;
 	IBaseDataMgr*		_bd_mgr;
+	DateMappingV1		_date_mapping{};
+	bool				_has_date_mapping = false;
 	IHotMgr*			_hot_mgr;
 	IParserStub*		_stub;
 	WTSVariant*			_cfg;
@@ -142,14 +154,20 @@ typedef wt_hashmap<std::string, ParserAdapterPtr>	ParserAdapterMap;
 class ParserAdapterMgr : private boost::noncopyable
 {
 public:
-	// The caller must establish provider-specific callback quiescence before
-	// invoking this teardown pass; Manager release() is not itself a drain.
+	// First request every adapter, then poll each one. Retain the manager and
+	// borrowed graph while hasQuarantinedAdapters() remains true. Manager map
+	// access still requires external synchronization.
 	void	release();
+	bool	requestStopLifecycleAll() noexcept;
+	bool	finishReleaseLifecycleAll() noexcept;
 	// After release(), true means at least one adapter still retains an API or
 	// an uncertain provider owner and this manager must remain quarantined.
 	bool	hasQuarantinedAdapters() const noexcept;
 
 	void	run();
+	// True only if every connection command in this invocation was submitted.
+	// This does not indicate that any provider has connected or is ready.
+	bool	runWithResult();
 
 	ParserAdapterPtr getAdapter(const char* id);
 

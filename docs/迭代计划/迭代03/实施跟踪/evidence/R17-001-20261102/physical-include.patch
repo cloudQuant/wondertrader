@@ -1,0 +1,10 @@
+--- /tmp/wt-i03-r17-20261102/original-root-cmake	2026-11-02 10:42:48
++++ /tmp/wt-i03-r17-20261102/snapshot/src/CMakeLists.txt	2026-11-02 10:39:03
+@@ -213,6 +213,7 @@
+ INCLUDE_DIRECTORIES(SYSTEM ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+ #basic libraries
++include_directories(BEFORE "/opt/homebrew/Cellar/boost/1.88.0/include")
+ ADD_SUBDIRECTORY(WTSUtils)
+ link_iconv_to_target(WTSUtils)
+ ADD_SUBDIRECTORY(WTSTools)

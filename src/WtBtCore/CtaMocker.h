@@ -19,6 +19,7 @@
 #include "../Includes/FasterDefs.h"
 #include "../Includes/ICtaStraCtx.h"
 #include "../Includes/CtaStrategyDefs.h"
+#include "../Includes/IStrategyPluginV2.h"
 #include "../Includes/WTSDataDef.hpp"
 #include "../Includes/WTSCollection.hpp"
 
@@ -203,7 +204,7 @@ private:
 	 * @param price 交易价格，默认为0.0（市价单）
 	 * @param userTag 用户标记，默认为空字符串
 	 */
-	void	do_set_position(const char* stdCode, double qty, double price = 0.0, const char* userTag = "");
+	bool	do_set_position(const char* stdCode, double qty, double price, const char* userTag, const WTSContractInfo* fillContract);
 	/**
 	 * @brief 添加信号
 	 * @details 添加交易信号到信号列表中
@@ -230,7 +231,7 @@ private:
 	 * @param last_px 上一次价格
 	 * @param cur_px 当前价格
 	 */
-	void	proc_tick(const char* stdCode, double last_px, double cur_px);
+	bool	proc_tick(const char* stdCode, double last_px, double cur_px, const WTSContractInfo* fillContract = nullptr);
 
 public:
 	/**
@@ -996,6 +997,7 @@ protected:
 		FuncCreateStraFact	_creator;		///< 创建工厂函数指针
 		FuncDeleteStraFact	_remover;		///< 删除工厂函数指针
 		bool			_preserve_module;	///< 清理失败时保留插件代码，避免卸载仍有活对象的模块
+		const WtStrategyPluginApiV2* _api;	///< 已校验的版本化插件表（卡4b=A）；为空表示测试注入的旧接口
 
 		/**
 		 * @brief 构造函数
@@ -1008,6 +1010,7 @@ protected:
 			_creator = NULL;
 			_remover = NULL;
 			_preserve_module = false;
+			_api = NULL;
 		}
 
 		void preserve()
@@ -1018,6 +1021,7 @@ protected:
 			_module_inst = NULL;
 			_creator = NULL;
 			_remover = NULL;
+			_api = NULL;
 			_preserve_module = true;
 		}
 
@@ -1028,19 +1032,41 @@ protected:
 
 			if (_fact != NULL)
 			{
-				if (_remover == NULL)
+				if (_api != NULL)
 				{
-					preserve();
-					return;
+					// Card 9a: only a plugin promising synchronous teardown is
+					// destroyed and unloaded; otherwise keep it to process exit.
+					if (!wt_stra_plugin::hasSyncTeardown(_api))
+					{
+						preserve();
+						return;
+					}
+					try
+					{
+						_api->destroy_factory(static_cast<void*>(_fact));
+					}
+					catch (...)
+					{
+						preserve();
+						return;
+					}
 				}
-				try
+				else
 				{
-					_remover(_fact);
-				}
-				catch (...)
-				{
-					preserve();
-					return;
+					if (_remover == NULL)
+					{
+						preserve();
+						return;
+					}
+					try
+					{
+						_remover(_fact);
+					}
+					catch (...)
+					{
+						preserve();
+						return;
+					}
 				}
 				_fact = NULL;
 			}
@@ -1052,6 +1078,7 @@ protected:
 			}
 			_creator = NULL;
 			_remover = NULL;
+			_api = NULL;
 			_module_path.clear();
 		}
 
@@ -1085,6 +1112,7 @@ protected:
 	bool			_persist_data;		///< 是否对回测结果持久化
 
 	uint32_t		_cur_tdate;			///< 当前交易日，格式为YYYYMMDD
+	uint32_t		_frozen_tdate = 0;	///< 冻结量所属交易日（卡3 3d=C：session-begin 仅在交易日不同时清零冻结量）
 	uint32_t		_cur_bartime;		///< 当前K线时间，格式为HHMMSS
 	uint64_t		_last_cond_min;		///< 最近条件检查时间，以分钟为单位
 

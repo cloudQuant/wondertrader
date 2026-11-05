@@ -1,0 +1,43 @@
+cmake_minimum_required(VERSION 3.16)
+project(i03_parser_xele_v2 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+get_filename_component(ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../.." ABSOLUTE)
+set(FIXTURE "${CMAKE_CURRENT_SOURCE_DIR}")
+set(WT_BUILD "" CACHE PATH "Build providing static dependencies")
+# Current module (ordinary, no test hooks).
+add_library(ParserXeleSkt SHARED "${ROOT}/src/ParserXeleSkt/ParserXeleSkt.cpp")
+set_target_properties(ParserXeleSkt PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/parsers")
+# Current module with fault-injection hooks only.
+add_library(ParserXeleSktFault SHARED "${ROOT}/src/ParserXeleSkt/ParserXeleSkt.cpp")
+target_compile_definitions(ParserXeleSktFault PRIVATE WT_PARSERXELE_TEST_HOOKS)
+set_target_properties(ParserXeleSktFault PROPERTIES OUTPUT_NAME ParserXeleSkt LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/fault/parsers")
+# Saved pre-change source (git HEAD ccaad010) for the red control. Its relative
+# "../Includes" and "../Share" includes resolve through src/ParserXeleSkt.
+add_library(ParserXeleSktBaseline SHARED "${FIXTURE}/baseline/ParserXeleSkt.cpp")
+target_include_directories(ParserXeleSktBaseline PRIVATE "${ROOT}/src/ParserXeleSkt")
+set_target_properties(ParserXeleSktBaseline PROPERTIES OUTPUT_NAME ParserXeleSkt LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/baseline/parsers")
+add_executable(i03_parser_xele_v2 check.cpp "${ROOT}/src/WtCore/ParserAdapter.cpp")
+add_executable(i03_parser_xele_scenarios scenarios.cpp)
+target_compile_definitions(i03_parser_xele_scenarios PRIVATE XELE_MODULE_PATH="./parsers/libParserXeleSkt.dylib")
+add_executable(i03_parser_xele_scenarios_baseline scenarios.cpp)
+target_compile_definitions(i03_parser_xele_scenarios_baseline PRIVATE XELE_MODULE_PATH="./baseline/parsers/libParserXeleSkt.dylib")
+add_executable(i03_parser_xele_legacy "${ROOT}/src/ParserXeleSkt/ParserXeleSkt.cpp"
+ "${ROOT}/src/TestUnits/coverage/t_ParserXeleSkt/t2_parserxele_lifecycle_test.cpp"
+ "${ROOT}/src/TestUnits/coverage/t_ParserXeleSkt/r76_xele_boundary_test.cpp")
+add_executable(i03_parser_xele_prepare "${ROOT}/src/ParserXeleSkt/ParserXeleSkt.cpp" prepare_transaction.cpp)
+set(ALL_TARGETS ParserXeleSkt ParserXeleSktFault ParserXeleSktBaseline i03_parser_xele_v2
+ i03_parser_xele_scenarios i03_parser_xele_scenarios_baseline i03_parser_xele_legacy i03_parser_xele_prepare)
+foreach(target ${ALL_TARGETS})
+ target_include_directories(${target} PRIVATE "${ROOT}/src" /opt/homebrew/include /opt/homebrew/Cellar/boost/1.88.0/include)
+ target_compile_definitions(${target} PRIVATE FMT_HEADER_ONLY SPDLOG_FMT_EXTERNAL)
+ target_compile_options(${target} PRIVATE -include "${ROOT}/src/Share/fmt_enum_compat.h")
+ target_link_directories(${target} PRIVATE /opt/homebrew/lib)
+ target_link_libraries(${target} PRIVATE boost_filesystem boost_thread pthread dl /usr/local/lib/libiconv.dylib)
+endforeach()
+foreach(target ParserXeleSkt ParserXeleSktFault)
+ target_compile_options(${target} PRIVATE -Wall -Wextra)
+endforeach()
+foreach(target i03_parser_xele_v2 i03_parser_xele_scenarios i03_parser_xele_scenarios_baseline i03_parser_xele_legacy i03_parser_xele_prepare)
+ target_link_options(${target} PRIVATE -fprofile-instr-generate)
+ target_link_libraries(${target} PRIVATE "${WT_BUILD}/build_x64/Debug/libs/libWtCore.a" "${WT_BUILD}/build_x64/Debug/libs/libWTSTools.a" "${WT_BUILD}/build_x64/Debug/libs/libWTSUtils.a" /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a)
+endforeach()

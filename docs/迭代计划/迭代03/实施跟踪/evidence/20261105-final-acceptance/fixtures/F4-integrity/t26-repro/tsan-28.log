@@ -1,0 +1,78 @@
+--->>> Name confirmed automatically: SHFE.rb2510
+--->>> warning: No session configured for SHFE.rb
+--->>> Quering instruments: request 1 sent, awaiting confirmation
+--->>> Quering queue left: 2
+--->>> Quering commission ratio: request 2 sent, awaiting confirmation
+--->>> Quering queue left: 1
+--->>> Quering margin ratio: request 3 sent, awaiting confirmation
+--->>> Quering queue left: 0
+--->>> CTP fee query timed out--->>> CTP fee query timed out
+==================
+WARNING: ThreadSanitizer: data race (pid=43078)
+  Write of size 8 at 0x0001f4559950 by thread T2:
+    #0 std::__1::ios_base::width[abi:nqe220108](long) ios:501 (tsan-query-probe:arm64+0x10000789c)
+    #1 std::__1::ostreambuf_iterator<char, std::__1::char_traits<char>> std::__1::__pad_and_output[abi:nqe220108]<char, std::__1::char_traits<char>>(std::__1::ostreambuf_iterator<char, std::__1::char_traits<char>>, char const*, char const*, char const*, std::__1::ios_base&, char) pad_and_output.h:79 (tsan-query-probe:arm64+0x10000789c)
+    #2 std::__1::basic_ostream<char, std::__1::char_traits<char>>& std::__1::__put_character_sequence[abi:nqe220108]<char, std::__1::char_traits<char>>(std::__1::basic_ostream<char, std::__1::char_traits<char>>&, char const*, unsigned long) put_character_sequence.h:37 (tsan-query-probe:arm64+0x1000075c4)
+    #3 std::__1::basic_ostream<char, std::__1::char_traits<char>>& std::__1::operator<<[abi:nqe220108]<std::__1::char_traits<char>>(std::__1::basic_ostream<char, std::__1::char_traits<char>>&, char const*) basic_ostream.h:438 (tsan-query-probe:arm64+0x100016080)
+    #4 CTraderSpi::RunQueryWorker() TraderSpi.cpp:833 (tsan-query-probe:arm64+0x100016080)
+    #5 CTraderSpi::AppendQuery(std::__1::function<bool ()> const&)::$_0::operator()() const TraderSpi.cpp:617 (tsan-query-probe:arm64+0x10003dd88)
+    #6 std::__1::__invoke_result_impl<void, CTraderSpi::AppendQuery(std::__1::function<bool ()> const&)::$_0&>::type std::__1::__invoke[abi:nqe220108]<CTraderSpi::AppendQuery(std::__1::function<bool ()> const&)::$_0&>(CTraderSpi::AppendQuery(std::__1::function<bool ()> const&)::$_0&) invoke.h:90 (tsan-query-probe:arm64+0x10003dd88)
+    #7 void std::__1::__invoke_void_return_wrapper<void, true>::__call[abi:nqe220108]<CTraderSpi::AppendQuery(std::__1::function<bool ()> const&)::$_0&>(CTraderSpi::AppendQuery(std::__1::function<bool ()> const&)::$_0&) invoke.h:350 (tsan-query-probe:arm64+0x10003dd88)
+    #8 void std::__1::__invoke_r[abi:nqe220108]<void, CTraderSpi::AppendQuery(std::__1::function<bool ()> const&)::$_0&>(CTraderSpi::AppendQuery(std::__1::function<bool ()> const&)::$_0&) invoke.h:356 (tsan-query-probe:arm64+0x10003dd88)
+    #9 std::__1::__function::__func<CTraderSpi::AppendQuery(std::__1::function<bool ()> const&)::$_0, void ()>::operator()() function.h:172 (tsan-query-probe:arm64+0x10003dd88)
+    #10 std::__1::__function::__value_func<void ()>::operator()[abi:nqe220108]() const function.h:273 (tsan-query-probe:arm64+0x10002153c)
+    #11 std::__1::function<void ()>::operator()() const function.h:754 (tsan-query-probe:arm64+0x10002153c)
+    #12 CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0::operator()() const TraderSpi.cpp:420 (tsan-query-probe:arm64+0x10002153c)
+    #13 std::__1::__invoke_result_impl<void, CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&>::type std::__1::__invoke[abi:nqe220108]<CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&>(CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&) invoke.h:90 (tsan-query-probe:arm64+0x10002153c)
+    #14 void std::__1::__invoke_void_return_wrapper<void, true>::__call[abi:nqe220108]<CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&>(CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&) invoke.h:350 (tsan-query-probe:arm64+0x10002153c)
+    #15 void std::__1::__invoke_r[abi:nqe220108]<void, CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&>(CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&) invoke.h:356 (tsan-query-probe:arm64+0x10002153c)
+    #16 std::__1::__function::__func<CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0, void ()>::operator()() function.h:172 (tsan-query-probe:arm64+0x10002153c)
+    #17 std::__1::__function::__value_func<void ()>::operator()[abi:nqe220108]() const function.h:273 (tsan-query-probe:arm64+0x10003c230)
+    #18 std::__1::function<void ()>::operator()() const function.h:754 (tsan-query-probe:arm64+0x10003c230)
+    #19 boost::detail::thread_data<std::__1::function<void ()>>::run() thread.hpp:120 (tsan-query-probe:arm64+0x10003c230)
+    #20 boost::(anonymous namespace)::thread_proxy(void*) thread.cpp:177 (tsan-query-probe:arm64+0x1000a7fb8)
+
+  Previous read of size 8 at 0x0001f4559950 by thread T1:
+    #0 std::__1::ios_base::width[abi:nqe220108]() const ios:497 (tsan-query-probe:arm64+0x1000076e8)
+    #1 std::__1::ostreambuf_iterator<char, std::__1::char_traits<char>> std::__1::__pad_and_output[abi:nqe220108]<char, std::__1::char_traits<char>>(std::__1::ostreambuf_iterator<char, std::__1::char_traits<char>>, char const*, char const*, char const*, std::__1::ios_base&, char) pad_and_output.h:53 (tsan-query-probe:arm64+0x1000076e8)
+    #2 std::__1::basic_ostream<char, std::__1::char_traits<char>>& std::__1::__put_character_sequence[abi:nqe220108]<char, std::__1::char_traits<char>>(std::__1::basic_ostream<char, std::__1::char_traits<char>>&, char const*, unsigned long) put_character_sequence.h:37 (tsan-query-probe:arm64+0x1000075c4)
+    #3 std::__1::basic_ostream<char, std::__1::char_traits<char>>& std::__1::operator<<[abi:nqe220108]<std::__1::char_traits<char>>(std::__1::basic_ostream<char, std::__1::char_traits<char>>&, char const*) basic_ostream.h:438 (tsan-query-probe:arm64+0x10000f85c)
+    #4 CTraderSpi::RunFeeWatchdog() TraderSpi.cpp:774 (tsan-query-probe:arm64+0x10000f85c)
+    #5 CTraderSpi::ReqQryInstrument()::$_0::operator()() const TraderSpi.cpp:532 (tsan-query-probe:arm64+0x10003bd64)
+    #6 std::__1::__invoke_result_impl<void, CTraderSpi::ReqQryInstrument()::$_0&>::type std::__1::__invoke[abi:nqe220108]<CTraderSpi::ReqQryInstrument()::$_0&>(CTraderSpi::ReqQryInstrument()::$_0&) invoke.h:90 (tsan-query-probe:arm64+0x10003bd64)
+    #7 void std::__1::__invoke_void_return_wrapper<void, true>::__call[abi:nqe220108]<CTraderSpi::ReqQryInstrument()::$_0&>(CTraderSpi::ReqQryInstrument()::$_0&) invoke.h:350 (tsan-query-probe:arm64+0x10003bd64)
+    #8 void std::__1::__invoke_r[abi:nqe220108]<void, CTraderSpi::ReqQryInstrument()::$_0&>(CTraderSpi::ReqQryInstrument()::$_0&) invoke.h:356 (tsan-query-probe:arm64+0x10003bd64)
+    #9 std::__1::__function::__func<CTraderSpi::ReqQryInstrument()::$_0, void ()>::operator()() function.h:172 (tsan-query-probe:arm64+0x10003bd64)
+    #10 std::__1::__function::__value_func<void ()>::operator()[abi:nqe220108]() const function.h:273 (tsan-query-probe:arm64+0x10002153c)
+    #11 std::__1::function<void ()>::operator()() const function.h:754 (tsan-query-probe:arm64+0x10002153c)
+    #12 CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0::operator()() const TraderSpi.cpp:420 (tsan-query-probe:arm64+0x10002153c)
+    #13 std::__1::__invoke_result_impl<void, CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&>::type std::__1::__invoke[abi:nqe220108]<CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&>(CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&) invoke.h:90 (tsan-query-probe:arm64+0x10002153c)
+    #14 void std::__1::__invoke_void_return_wrapper<void, true>::__call[abi:nqe220108]<CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&>(CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&) invoke.h:350 (tsan-query-probe:arm64+0x10002153c)
+    #15 void std::__1::__invoke_r[abi:nqe220108]<void, CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&>(CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0&) invoke.h:356 (tsan-query-probe:arm64+0x10002153c)
+    #16 std::__1::__function::__func<CTraderSpi::CountedThread(std::__1::function<void ()>)::$_0, void ()>::operator()() function.h:172 (tsan-query-probe:arm64+0x10002153c)
+    #17 std::__1::__function::__value_func<void ()>::operator()[abi:nqe220108]() const function.h:273 (tsan-query-probe:arm64+0x10003c230)
+    #18 std::__1::function<void ()>::operator()() const function.h:754 (tsan-query-probe:arm64+0x10003c230)
+    #19 boost::detail::thread_data<std::__1::function<void ()>>::run() thread.hpp:120 (tsan-query-probe:arm64+0x10003c230)
+    #20 boost::(anonymous namespace)::thread_proxy(void*) thread.cpp:177 (tsan-query-probe:arm64+0x1000a7fb8)
+
+  Location is global 'std::__1::cerr' at 0x0001f4559930 (libc++.1.dylib+0x6c27c950)
+
+  Thread T2 (tid=10045047, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 boost::thread::start_thread_noexcept() thread.cpp:261 (tsan-query-probe:arm64+0x1000a7e80)
+    #2 boost::thread::thread<std::__1::function<void ()>>(std::__1::function<void ()>&&) thread.hpp:268 (tsan-query-probe:arm64+0x10000d3b4)
+    #3 CTraderSpi::AppendQuery(std::__1::function<bool ()> const&) TraderSpi.cpp:617 (tsan-query-probe:arm64+0x10000d3b4)
+    #4 CTraderSpi::ReqQryInstrument() TraderSpi.cpp:534 (tsan-query-probe:arm64+0x10000d0ac)
+    #5 CTraderSpiQueueTestAccess::start(CTraderSpi&) query_probe.cpp:28 (tsan-query-probe:arm64+0x100001404)
+    #6 main query_probe.cpp:132 (tsan-query-probe:arm64+0x100001404)
+
+  Thread T1 (tid=10045046, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 boost::thread::start_thread_noexcept() thread.cpp:261 (tsan-query-probe:arm64+0x1000a7e80)
+    #2 boost::thread::thread<std::__1::function<void ()>>(std::__1::function<void ()>&&) thread.hpp:268 (tsan-query-probe:arm64+0x10000ceec)
+    #3 CTraderSpi::ReqQryInstrument() TraderSpi.cpp:532 (tsan-query-probe:arm64+0x10000ceec)
+    #4 CTraderSpiQueueTestAccess::start(CTraderSpi&) query_probe.cpp:28 (tsan-query-probe:arm64+0x100001404)
+    #5 main query_probe.cpp:132 (tsan-query-probe:arm64+0x100001404)
+
+SUMMARY: ThreadSanitizer: data race ios:501 in std::__1::ios_base::width[abi:nqe220108](long)
+==================

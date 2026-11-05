@@ -1,0 +1,806 @@
+[ RUN      ] HisDataReplayerRuntimeTest.defaultsAfterInit
+[       OK ] HisDataReplayerRuntimeTest.defaultsAfterInit (4 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.priceMapRoundTrip
+[       OK ] HisDataReplayerRuntimeTest.priceMapRoundTrip (1 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.dayPriceWithEmptyCache
+[       OK ] HisDataReplayerRuntimeTest.dayPriceWithEmptyCache (0 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.sessionInfoLookup
+[       OK ] HisDataReplayerRuntimeTest.sessionInfoLookup (0 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.rawcodeWithoutRuleIsEmpty
+[       OK ] HisDataReplayerRuntimeTest.rawcodeWithoutRuleIsEmpty (1 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.calcFeeForUnconfiguredCode
+[       OK ] HisDataReplayerRuntimeTest.calcFeeForUnconfiguredCode (2 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.amountBasedFeeRequiresCommodityAtInit
+[       OK ] HisDataReplayerRuntimeTest.amountBasedFeeRequiresCommodityAtInit (1 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.amountBasedFeeUsesPhysicalContractVolumeScale
+[       OK ] HisDataReplayerRuntimeTest.amountBasedFeeUsesPhysicalContractVolumeScale (1 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.volumeBasedFeeInitAllowsMissingCommodityButFillRequiresMetadata
+[       OK ] HisDataReplayerRuntimeTest.volumeBasedFeeInitAllowsMissingCommodityButFillRequiresMetadata (1 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.volumeBasedFeeUsesVerifiedPhysicalContract
+[       OK ] HisDataReplayerRuntimeTest.volumeBasedFeeUsesVerifiedPhysicalContract (1 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.stopAndClearCacheAreSafeWhenIdle
+[       OK ] HisDataReplayerRuntimeTest.stopAndClearCacheAreSafeWhenIdle (36 ms)
+[ RUN      ] HisDataReplayerRuntimeTest.lastTickMissingReturnsNull
+[       OK ] HisDataReplayerRuntimeTest.lastTickMissingReturnsNull (1 ms)
+[ RUN      ] P04ReplayTermTest.tickModeWithoutTickDataStillTerminates
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:176: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] P04ReplayTermTest.tickModeWithoutTickDataStillTerminates (9 ms)
+[ RUN      ] P04ReplayTermTest.invertedTimeRangeIsRejectedBeforePrepare
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:210: Failure
+[  FAILED  ] P04ReplayTermTest.invertedTimeRangeIsRejectedBeforePrepare (1 ms)
+[ RUN      ] P04ReplayTermTest.orderedRangeBeforeFirstBarStopsWithoutBars
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:227: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] P04ReplayTermTest.orderedRangeBeforeFirstBarStopsWithoutBars (6 ms)
+[ RUN      ] P04ReplayTermTest.secondCodeReplaysItsOwnBars
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:259: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] P04ReplayTermTest.secondCodeReplaysItsOwnBars (3 ms)
+[ RUN      ] P04ReplayTermTest.emptyCacheQueryApisAreStable
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp:284: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] P04ReplayTermTest.emptyCacheQueryApisAreStable (3 ms)
+[ RUN      ] P04ReplayerConfigTest.initReadsEveryScalarSwitch
+[       OK ] P04ReplayerConfigTest.initReadsEveryScalarSwitch (1 ms)
+[ RUN      ] P04ReplayerConfigTest.cfgTimeRangeIsUsedOnlyWhenUnset
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:199: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] P04ReplayerConfigTest.cfgTimeRangeIsUsedOnlyWhenUnset (18 ms)
+[ RUN      ] P04ReplayerConfigTest.prepareAdvancesDateAndTradingDate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:224: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] P04ReplayerConfigTest.prepareAdvancesDateAndTradingDate (2 ms)
+[ RUN      ] P04ReplayerConfigTest.runWithoutAnyDataEndsReplay
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:259: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] P04ReplayerConfigTest.runWithoutAnyDataEndsReplay (1 ms)
+[ RUN      ] P04ReplayerConfigTest.stopBeforePrepareIsNoop
+[       OK ] P04ReplayerConfigTest.stopBeforePrepareIsNoop (1 ms)
+[ RUN      ] P04ReplayerConfigTest.missingBasefilesEntriesStillInit
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:305: Failure
+[  FAILED  ] P04ReplayerConfigTest.missingBasefilesEntriesStillInit (0 ms)
+[ RUN      ] P04ReplayerConfigTest.loadedBasefilesGiveCommodityAndSession
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:331: Failure
+[  FAILED  ] P04ReplayerConfigTest.loadedBasefilesGiveCommodityAndSession (1 ms)
+[ RUN      ] P04ReplayerConfigTest.missingFeesFileLeavesEmptyFeeMap
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:342: Failure
+Value of: replayer.init(cfg)
+  Actual: false
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:344: Failure
+[  FAILED  ] P04ReplayerConfigTest.missingFeesFileLeavesEmptyFeeMap (1 ms)
+[ RUN      ] P04ReplayerConfigTest.clearCacheWipesPriceMap
+[       OK ] P04ReplayerConfigTest.clearCacheWipesPriceMap (0 ms)
+[ RUN      ] P04ReplayerConfigTest.registerTaskAcceptsEveryPeriodTag
+[       OK ] P04ReplayerConfigTest.registerTaskAcceptsEveryPeriodTag (1 ms)
+[ RUN      ] P04ReplayerConfigTest.initWithValidBasefilesStillLoadsBaseData
+[       OK ] P04ReplayerConfigTest.initWithValidBasefilesStillLoadsBaseData (1 ms)
+[ RUN      ] P04ReplayerConfigTest.initWithoutBasefilesReportsFailure
+[       OK ] P04ReplayerConfigTest.initWithoutBasefilesReportsFailure (3 ms)
+[ RUN      ] P04ReplayCsvTest.dailyBarsReplayFullTradingDayCycle
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:320: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] P04ReplayCsvTest.dailyBarsReplayFullTradingDayCycle (7 ms)
+[ RUN      ] P04ReplayCsvTest.prepareAfterRunResetsClock
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:382: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] P04ReplayCsvTest.prepareAfterRunResetsClock (1 ms)
+[ RUN      ] P04ReplayCsvTest.csvBarsTransferedToDsbAndReRead
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:428: Failure
+Value of: first.prepare()
+  Actual: false
+[  FAILED  ] P04ReplayCsvTest.csvBarsTransferedToDsbAndReRead (2 ms)
+[ RUN      ] P04ReplayCsvTest.missingCsvFileYieldsNullSlice
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:492: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] P04ReplayCsvTest.missingCsvFileYieldsNullSlice (1 ms)
+[ RUN      ] P04ReplayCsvTest.failedMainBarsLoadDoesNotPoisonReplayAndCanRetry
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:552: Failure
+Actual msg:
+[  FAILED  ] P04ReplayCsvTest.failedMainBarsLoadDoesNotPoisonReplayAndCanRetry (5 ms)
+[ RUN      ] P04ReplayCsvTest.failedBinaryRawBarsLoadCanBeRetriedSafely
+[ RUN      ] P04ReplayCsvTest.emptyCsvReturnsNullAndReplayCompletesInChild
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp:672: Failure
+Actual msg:
+[  FAILED  ] P04ReplayCsvTest.emptyCsvReturnsNullAndReplayCompletesInChild (7 ms)
+[ RUN      ] R43ReplayerInitBasefilesTest.optionalBasefilesAllLoaded
+[       OK ] R43ReplayerInitBasefilesTest.optionalBasefilesAllLoaded (396 ms)
+[ RUN      ] R43ReplayerInitBasefilesTest.storePathOverridesRootPath
+[       OK ] R43ReplayerInitBasefilesTest.storePathOverridesRootPath (4 ms)
+[ RUN      ] R43ReplayerInitBasefilesTest.configuredSessionLoadFailuresFailInit
+[       OK ] R43ReplayerInitBasefilesTest.configuredSessionLoadFailuresFailInit (1 ms)
+[ RUN      ] R43ReplayerInitBasefilesTest.configuredCommodityLoadFailuresFailInit
+[       OK ] R43ReplayerInitBasefilesTest.configuredCommodityLoadFailuresFailInit (1 ms)
+[ RUN      ] R43ReplayerInitBasefilesTest.configuredCommodityArrayLoadFailuresFailInit
+[       OK ] R43ReplayerInitBasefilesTest.configuredCommodityArrayLoadFailuresFailInit (4 ms)
+[ RUN      ] R43ReplayerInitBasefilesTest.requiredAndOptionalFailureDiagnosticsContainPaths
+Note: Google Test filter = R43ReplayerInitBasefilesTest.requiredAndOptionalFailureDiagnosticsContainPaths
+[ RUN      ] R43ReplayerInitBasefilesTest.requiredAndOptionalFailureDiagnosticsContainPaths
+[       OK ] R43ReplayerInitBasefilesTest.requiredAndOptionalFailureDiagnosticsContainPaths (32 ms)
+[       OK ] R43ReplayerInitBasefilesTest.requiredAndOptionalFailureDiagnosticsContainPaths (818 ms)
+[ RUN      ] R43ReplayerInitBasefilesTest.adjFactorFileParsed
+[       OK ] R43ReplayerInitBasefilesTest.adjFactorFileParsed (3 ms)
+[ RUN      ] R43ReplayerInitBasefilesTest.badAdjFactorFileDoesNotBreakInit
+[       OK ] R43ReplayerInitBasefilesTest.badAdjFactorFileDoesNotBreakInit (1 ms)
+[ RUN      ] R43ReplayerTickCsvTest.csvTickDsbReplaysWholeDay
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:395: Failure
+Value of: query.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.csvTickDsbReplaysWholeDay (4 ms)
+[ RUN      ] R43ReplayerTickCsvTest.pureTickRangeIncludesEveryMillisecondOfFourteenDigitEndSecond
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:496: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.pureTickRangeIncludesEveryMillisecondOfFourteenDigitEndSecond (2 ms)
+[ RUN      ] R43ReplayerTickCsvTest.sessionBeginClockUsesRangeStartThenNextNaturalSessionOpen
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:530: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.sessionBeginClockUsesRangeStartThenNextNaturalSessionOpen (2 ms)
+[ RUN      ] R43ReplayerTickCsvTest.twelveDigitBoundsIncludeWholeStartAndEndMinutes
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:560: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.twelveDigitBoundsIncludeWholeStartAndEndMinutes (2 ms)
+[ RUN      ] R43ReplayerTickCsvTest.mixedPrecisionUsesMinuteStartAndSecondInclusiveEnd
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:588: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.mixedPrecisionUsesMinuteStartAndSecondInclusiveEnd (1 ms)
+[ RUN      ] R43ReplayerTickCsvTest.mainBarsWithoutAClosedBarStillReplayInRangeTicksOnly
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:623: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.mainBarsWithoutAClosedBarStillReplayInRangeTicksOnly (1 ms)
+[ RUN      ] R43ReplayerTickCsvTest.overnightTickRangeLoadsByTradingDateAndFiltersByActionDate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:658: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.overnightTickRangeLoadsByTradingDateAndFiltersByActionDate (4 ms)
+[ RUN      ] R43ReplayerTickCsvTest.nightSessionBeginClockUsesNaturalOpenAcrossTradingDates
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:690: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.nightSessionBeginClockUsesNaturalOpenAcrossTradingDates (8 ms)
+[ RUN      ] R43ReplayerTickCsvTest.mainBarsUseReplayableHftSessionForMixedNaturalDate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:759: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.mainBarsUseReplayableHftSessionForMixedNaturalDate (8 ms)
+[ RUN      ] R43ReplayerTickCsvTest.replayableHftEventsKeepLaterSessionBoundary
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:829: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.replayableHftEventsKeepLaterSessionBoundary (5 ms)
+[ RUN      ] R43ReplayerTickCsvTest.missingInRangeHftEventsKeepLaterSessionBoundary
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:886: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.missingInRangeHftEventsKeepLaterSessionBoundary (7 ms)
+[ RUN      ] R43ReplayerTickCsvTest.mainBarWithoutInRangeHftEventsKeepsLaterSessionBoundary
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:939: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.mainBarWithoutInRangeHftEventsKeepsLaterSessionBoundary (5 ms)
+[ RUN      ] R43ReplayerTickCsvTest.mainBarAndNightSessionBucketsReplayInNaturalTimeOrder
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1035: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.mainBarAndNightSessionBucketsReplayInNaturalTimeOrder (5 ms)
+[ RUN      ] R43ReplayerTickCsvTest.shortTickDsbRejected
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1092: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.shortTickDsbRejected (1 ms)
+[ RUN      ] R43ReplayerTickCsvTest.emptyTickDsbRejected
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1117: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.emptyTickDsbRejected (1 ms)
+[ RUN      ] R43ReplayerTickCsvTest.trailingSuffixSubscriptionsStripFlag
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1141: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.trailingSuffixSubscriptionsStripFlag (0 ms)
+[ RUN      ] R43ReplayerTickCsvTest.barsWithTicksUseHftReplayPath
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1207: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.barsWithTicksUseHftReplayPath (1 ms)
+[ RUN      ] R43ReplayerTickCsvTest.finalMainBarFlushesOnlyInRangeTicksWithoutAnotherBar
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1280: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.finalMainBarFlushesOnlyInRangeTicksWithoutAnotherBar (3 ms)
+[ RUN      ] R43ReplayerTickCsvTest.stopDuringBarReplayTerminatesCleanly
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp:1315: Failure
+Value of: replayer.prepare()
+  Actual: false
+[  FAILED  ] R43ReplayerTickCsvTest.stopDuringBarReplayTerminatesCleanly (1 ms)
+[ RUN      ] P07MinuteReplayTest.minuteBarsReplaySimulatesOhlcTicks
+[       OK ] P07MinuteReplayTest.minuteBarsReplaySimulatesOhlcTicks (4 ms)
+[ RUN      ] P07MinuteReplayTest.minuteSliceCursorAdvancesDuringReplay
+[       OK ] P07MinuteReplayTest.minuteSliceCursorAdvancesDuringReplay (5 ms)
+[ RUN      ] P07MinuteReplayTest.sameTimeCloseCallbacksReadCrossPeriodAndDrainAllDueBars
+[       OK ] P07MinuteReplayTest.sameTimeCloseCallbacksReadCrossPeriodAndDrainAllDueBars (3 ms)
+[ RUN      ] P07MinuteReplayTest.simulatedTickCallbackQueriesAndAddsSeriesWithoutDroppingCloses
+[       OK ] P07MinuteReplayTest.simulatedTickCallbackQueriesAndAddsSeriesWithoutDroppingCloses (16 ms)
+[ RUN      ] P07MinuteReplayTest.tickCallbackSubscriptionsStartAtNextCompleteBar
+[       OK ] P07MinuteReplayTest.tickCallbackSubscriptionsStartAtNextCompleteBar (58 ms)
+[ RUN      ] P07MinuteReplayTest.m15RequestDoesNotEmitCloseForInternalRawM5
+[       OK ] P07MinuteReplayTest.m15RequestDoesNotEmitCloseForInternalRawM5 (44 ms)
+[ RUN      ] P07MinuteReplayTest.simulatedTickCallbackExceptionAllowsReplayRetry
+[       OK ] P07MinuteReplayTest.simulatedTickCallbackExceptionAllowsReplayRetry (11 ms)
+[ RUN      ] P07MinuteReplayTest.unsubscribedTickCallbackExceptionReloadsBarsOnRetry
+[       OK ] P07MinuteReplayTest.unsubscribedTickCallbackExceptionReloadsBarsOnRetry (17 ms)
+[ RUN      ] P07MinuteReplayTest.unsubscribedTickCallbackQueriesDoNotConsumeCurrentOrLaterCloses
+[       OK ] P07MinuteReplayTest.unsubscribedTickCallbackQueriesDoNotConsumeCurrentOrLaterCloses (24 ms)
+[ RUN      ] P07MinuteReplayTest.callbackActivatingCachedRawM5SeriesKeepsFutureCloses
+[       OK ] P07MinuteReplayTest.callbackActivatingCachedRawM5SeriesKeepsFutureCloses (12 ms)
+[ RUN      ] P07MinuteReplayTest.throwingBarCloseCallbackAbortsAndClearsRunningState
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp:1246: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp:1269: Failure
+[  FAILED  ] P07MinuteReplayTest.throwingBarCloseCallbackAbortsAndClearsRunningState (11 ms)
+[ RUN      ] P07MinuteReplayTest.throwingInitCallbackLeavesReplayerRetryable
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp:1299: Failure
+[  FAILED  ] P07MinuteReplayTest.throwingInitCallbackLeavesReplayerRetryable (20 ms)
+[ RUN      ] P07MinuteReplayTest.closeCallbackCanAddSeriesWithoutInvalidatingReplay
+[       OK ] P07MinuteReplayTest.closeCallbackCanAddSeriesWithoutInvalidatingReplay (33 ms)
+[ RUN      ] P07MinuteReplayTest.m15SliceResamplesFromM5Bars
+[       OK ] P07MinuteReplayTest.m15SliceResamplesFromM5Bars (5 ms)
+[ RUN      ] P07MinuteReplayTest.unsubscribedTickCodeFeedsSimTicks
+[       OK ] P07MinuteReplayTest.unsubscribedTickCodeFeedsSimTicks (22 ms)
+[ RUN      ] P07MinuteReplayTest.secondPrecisionRangeRoundsBarBoundsAndKeepsMinuteEndInclusive
+[       OK ] P07MinuteReplayTest.secondPrecisionRangeRoundsBarBoundsAndKeepsMinuteEndInclusive (6 ms)
+[ RUN      ] P07MinuteReplayTest.explicitRangeUsesSameSecondPrecisionBarBounds
+[       OK ] P07MinuteReplayTest.explicitRangeUsesSameSecondPrecisionBarBounds (16 ms)
+[ RUN      ] P07MinuteReplayTest.secondOnlyRangeHasNoWholeMinuteBars
+[       OK ] P07MinuteReplayTest.secondOnlyRangeHasNoWholeMinuteBars (6 ms)
+[ RUN      ] P07MinuteReplayTest.secondPrecisionStartRoundsAcrossCalendarDate
+[       OK ] P07MinuteReplayTest.secondPrecisionStartRoundsAcrossCalendarDate (12 ms)
+[ RUN      ] P07MinuteReplayTest.dailyBarsMustCloseInsideTheRequestedMinuteBounds
+[       OK ] P07MinuteReplayTest.dailyBarsMustCloseInsideTheRequestedMinuteBounds (15 ms)
+[ RUN      ] P07MinuteReplayTest.dailyBarsStartingAfterCloseBeginOnTheNextNaturalDate
+[       OK ] P07MinuteReplayTest.dailyBarsStartingAfterCloseBeginOnTheNextNaturalDate (18 ms)
+[ RUN      ] P07MinuteReplayTest.nightSessionDailyBarUsesItsTradingDateClose
+[       OK ] P07MinuteReplayTest.nightSessionDailyBarUsesItsTradingDateClose (62 ms)
+[ RUN      ] P07TaskScheduleTest.taskParametersAreBoundedAndInvalidReregistrationPreservesTask
+[       OK ] P07TaskScheduleTest.taskParametersAreBoundedAndInvalidReregistrationPreservesTask (25 ms)
+[ RUN      ] P07TaskScheduleTest.dailyTaskFiresOncePerTradingDay
+[       OK ] P07TaskScheduleTest.dailyTaskFiresOncePerTradingDay (16 ms)
+[ RUN      ] P07TaskScheduleTest.weeklyTaskFiresOnlyOnTargetWeekday
+[       OK ] P07TaskScheduleTest.weeklyTaskFiresOnlyOnTargetWeekday (2 ms)
+[ RUN      ] P07TaskScheduleTest.monthlyTaskUsesDayOfMonthContract
+[       OK ] P07TaskScheduleTest.monthlyTaskUsesDayOfMonthContract (4 ms)
+[ RUN      ] P07TaskScheduleTest.dailyTaskDoesNotDispatchAfterRangeEnd
+[       OK ] P07TaskScheduleTest.dailyTaskDoesNotDispatchAfterRangeEnd (5 ms)
+[ RUN      ] P07TaskScheduleTest.dailyTaskSkipsCloseBeforeRangeStartAndFiresNextDate
+[       OK ] P07TaskScheduleTest.dailyTaskSkipsCloseBeforeRangeStartAndFiresNextDate (1 ms)
+[ RUN      ] P07TaskScheduleTest.nightSessionDailyTaskDoesNotDispatchPastNaturalDateEnd
+[       OK ] P07TaskScheduleTest.nightSessionDailyTaskDoesNotDispatchPastNaturalDateEnd (12 ms)
+[ RUN      ] P07TaskScheduleTest.minuteStepAlignedBeyondRangeEndDoesNotDispatch
+[       OK ] P07TaskScheduleTest.minuteStepAlignedBeyondRangeEndDoesNotDispatch (4 ms)
+[ RUN      ] P07TaskScheduleTest.minuteTaskCeilsOffGridStartAndAdvancesByStep
+[       OK ] P07TaskScheduleTest.minuteTaskCeilsOffGridStartAndAdvancesByStep (20 ms)
+[ RUN      ] P07TaskScheduleTest.minuteTaskStartingOnBoundaryDispatchesThatBoundary
+[       OK ] P07TaskScheduleTest.minuteTaskStartingOnBoundaryDispatchesThatBoundary (1 ms)
+[ RUN      ] P07TaskScheduleTest.minuteTaskSkipsLunchGapAndResumesOnSessionLinearGrid
+[       OK ] P07TaskScheduleTest.minuteTaskSkipsLunchGapAndResumesOnSessionLinearGrid (1 ms)
+[ RUN      ] P07TaskScheduleTest.minuteTaskStartingInsideLunchMovesToNextSection
+[       OK ] P07TaskScheduleTest.minuteTaskStartingInsideLunchMovesToNextSection (1 ms)
+[ RUN      ] P07TaskScheduleTest.minuteTaskStepGridContinuesAcrossOffsetMidnight
+[       OK ] P07TaskScheduleTest.minuteTaskStepGridContinuesAcrossOffsetMidnight (1 ms)
+[ RUN      ] P07TaskScheduleTest.minuteTaskOffGridStartBeforeEndDoesNotRepeatEarlierTime
+[       OK ] P07TaskScheduleTest.minuteTaskOffGridStartBeforeEndDoesNotRepeatEarlierTime (1 ms)
+[ RUN      ] P07TaskScheduleTest.minuteTaskNearCloseDoesNotDispatchAfterRangeEnd
+[       OK ] P07TaskScheduleTest.minuteTaskNearCloseDoesNotDispatchAfterRangeEnd (1 ms)
+[ RUN      ] P07TaskScheduleTest.minuteTaskWithZeroStepFailsClosed
+[       OK ] P07TaskScheduleTest.minuteTaskWithZeroStepFailsClosed (1 ms)
+[ RUN      ] P07TaskScheduleTest.yearlyJanFirstTaskFiresOncePerYearAfterHoliday
+[       OK ] P07TaskScheduleTest.yearlyJanFirstTaskFiresOncePerYearAfterHoliday (3 ms)
+[ RUN      ] P07TaskScheduleTest.yearlyTaskDoesNotFireBeforeNewYearTarget
+[       OK ] P07TaskScheduleTest.yearlyTaskDoesNotFireBeforeNewYearTarget (1 ms)
+[ RUN      ] P07TaskScheduleTest.yearlyTaskFiresAtLastCalendarDay
+[       OK ] P07TaskScheduleTest.yearlyTaskFiresAtLastCalendarDay (32 ms)
+[ RUN      ] P07TaskScheduleTest.yearlyLeapDayFiresWhenTheCalendarDateExists
+[       OK ] P07TaskScheduleTest.yearlyLeapDayFiresWhenTheCalendarDateExists (12 ms)
+[ RUN      ] P07TaskScheduleTest.unknownPeriodNeverFiresButTerminates
+[       OK ] P07TaskScheduleTest.unknownPeriodNeverFiresButTerminates (1 ms)
+[ RUN      ] P07TaskScheduleTest.minuteTaskStepsThroughBothSections
+[       OK ] P07TaskScheduleTest.minuteTaskStepsThroughBothSections (1 ms)
+[ RUN      ] P07TaskScheduleTest.secondPrecisionRangeRoundsTaskStartAndIncludesEndMinute
+[       OK ] P07TaskScheduleTest.secondPrecisionRangeRoundsTaskStartAndIncludesEndMinute (10 ms)
+[ RUN      ] P07TaskScheduleTest.secondOnlyRangeDoesNotDispatchMinuteTasks
+[       OK ] P07TaskScheduleTest.secondOnlyRangeDoesNotDispatchMinuteTasks (2 ms)
+[ RUN      ] P07TaskScheduleTest.invalidConfigAndExplicitRangesFailClosed
+[       OK ] P07TaskScheduleTest.invalidConfigAndExplicitRangesFailClosed (0 ms)
+[ RUN      ] P07TickLoaderTest.tickOnlyReplayDrivesHftLoopPerDay
+[       OK ] P07TickLoaderTest.tickOnlyReplayDrivesHftLoopPerDay (14 ms)
+[ RUN      ] P07TickLoaderTest.externalTickLoaderAccumulatesSynchronousConcurrentChunks
+[       OK ] P07TickLoaderTest.externalTickLoaderAccumulatesSynchronousConcurrentChunks (63 ms)
+[ RUN      ] P07TickLoaderTest.externalTickLoaderCopiesEachExpiringCallbackChunk
+[       OK ] P07TickLoaderTest.externalTickLoaderCopiesEachExpiringCallbackChunk (15 ms)
+[ RUN      ] P07TickLoaderTest.externalTickLoaderChunksAreAvailableInHistoricalSlice
+[       OK ] P07TickLoaderTest.externalTickLoaderChunksAreAvailableInHistoricalSlice (3 ms)
+[ RUN      ] P07TickLoaderTest.singleItemHftStreamsReplayFinalRecord
+[       OK ] P07TickLoaderTest.singleItemHftStreamsReplayFinalRecord (9 ms)
+[ RUN      ] P07TickLoaderTest.invalidNonemptyTickLoaderCallbackFailsBeforeSessionBegin
+[       OK ] P07TickLoaderTest.invalidNonemptyTickLoaderCallbackFailsBeforeSessionBegin (1 ms)
+[ RUN      ] P07TickLoaderTest.invalidTickLoaderChunkAfterValidChunkFailsClosed
+[       OK ] P07TickLoaderTest.invalidTickLoaderChunkAfterValidChunkFailsClosed (1 ms)
+[ RUN      ] P07TickLoaderTest.emptyNullTickLoaderCallbackIsAValidEmptyBucket
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1100: Failure
+Value of: HisDataReplayerTestAccess::replay_terminated(replayer)
+  Actual: true
+[  FAILED  ] P07TickLoaderTest.emptyNullTickLoaderCallbackIsAValidEmptyBucket (1 ms)
+[ RUN      ] P07TickLoaderTest.failedTickLoaderResultFailsClosedWithoutDispatchingPartialChunk
+[       OK ] P07TickLoaderTest.failedTickLoaderResultFailsClosedWithoutDispatchingPartialChunk (1 ms)
+[ RUN      ] P07TickLoaderTest.emptyReplayBucketsStayBoundedAcrossLongNoDataRange
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1149: Failure
+Value of: HisDataReplayerTestAccess::replay_terminated(replayer)
+  Actual: true
+[  FAILED  ] P07TickLoaderTest.emptyReplayBucketsStayBoundedAcrossLongNoDataRange (1 ms)
+[ RUN      ] P07TickLoaderTest.overnightTickBucketAcrossWeekendUsesTradingCalendarAndResets
+[       OK ] P07TickLoaderTest.overnightTickBucketAcrossWeekendUsesTradingCalendarAndResets (444 ms)
+[ RUN      ] P07TickLoaderTest.continuous24HourReplayReadsFullSaturdayNaturalDateBucket
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1249: Failure
+Value of: replayer.init(cfg)
+  Actual: false
+[  FAILED  ] P07TickLoaderTest.continuous24HourReplayReadsFullSaturdayNaturalDateBucket (2 ms)
+[ RUN      ] P07TickLoaderTest.continuous24HourPositiveOffsetUsesNaturalDateCut
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1303: Failure
+Value of: replayer.init(cfg)
+  Actual: false
+[  FAILED  ] P07TickLoaderTest.continuous24HourPositiveOffsetUsesNaturalDateCut (2 ms)
+[ RUN      ] P07TickLoaderTest.continuous24HourNegativeOffsetUsesNaturalDateCut
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1374: Failure
+Value of: replayer.init(cfg)
+  Actual: false
+[  FAILED  ] P07TickLoaderTest.continuous24HourNegativeOffsetUsesNaturalDateCut (3 ms)
+[ RUN      ] P07TickLoaderTest.missingHftDateIsSkippedBeforeLaterValidDate
+[       OK ] P07TickLoaderTest.missingHftDateIsSkippedBeforeLaterValidDate (3 ms)
+[ RUN      ] P07TickLoaderTest.corruptHftFileStopsBeforeLaterValidDate
+[       OK ] P07TickLoaderTest.corruptHftFileStopsBeforeLaterValidDate (4 ms)
+[ RUN      ] P07TickLoaderTest.adjacentReplayWindowsDispatchOrdinaryCloseTickExactlyOnce
+[       OK ] P07TickLoaderTest.adjacentReplayWindowsDispatchOrdinaryCloseTickExactlyOnce (2 ms)
+[ RUN      ] P07TickLoaderTest.completedNaturalDateRangeRejectsBackwardScheduling
+[       OK ] P07TickLoaderTest.completedNaturalDateRangeRejectsBackwardScheduling (4 ms)
+[ RUN      ] P07TickLoaderTest.fatalLevel2ReadStopsBeforeSessionCallbacks
+[       OK ] P07TickLoaderTest.fatalLevel2ReadStopsBeforeSessionCallbacks (4 ms)
+[ RUN      ] P07TickLoaderTest.asynchronousOvernightBucketDrainsAfterMainBarAcrossWeekend
+[       OK ] P07TickLoaderTest.asynchronousOvernightBucketDrainsAfterMainBarAcrossWeekend (12 ms)
+[ RUN      ] P07TickLoaderTest.fourHftStreamsHonorInclusiveSecondRangeAndStableOrder
+[       OK ] P07TickLoaderTest.fourHftStreamsHonorInclusiveSecondRangeAndStableOrder (8 ms)
+[ RUN      ] P07TickLoaderTest.minuteEndIncludesLastSecondAndEndsFinalTradingDateOnce
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1825: Failure
+Value of: replayer.init(cfg)
+  Actual: false
+[  FAILED  ] P07TickLoaderTest.minuteEndIncludesLastSecondAndEndsFinalTradingDateOnce (5 ms)
+[ RUN      ] P07TickLoaderTest.sameTimestampOrdersRoundsAcrossCodesAndTradingDateBuckets
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1937: Failure
+Value of: replayer.init(cfg)
+  Actual: false
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1953: Failure
+Value of: replayer.prepare()
+  Actual: false
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1937: Failure
+Value of: replayer.init(cfg)
+  Actual: false
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1953: Failure
+Value of: replayer.prepare()
+  Actual: false
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:1960: Failure
+[  FAILED  ] P07TickLoaderTest.sameTimestampOrdersRoundsAcrossCodesAndTradingDateBuckets (19 ms)
+[ RUN      ] P07TickLoaderTest.level2OnlyReplayPreservesTransactionsAfterMissingOtherStreams
+[       OK ] P07TickLoaderTest.level2OnlyReplayPreservesTransactionsAfterMissingOtherStreams (5 ms)
+[ RUN      ] P07TickLoaderTest.unmappedReplayableLevel2SessionFailsClosed
+[       OK ] P07TickLoaderTest.unmappedReplayableLevel2SessionFailsClosed (3 ms)
+[ RUN      ] P07TickLoaderTest.finalBarHftDrainKeepsPreloadedTransactionsWhenOtherStreamsAreMissing
+[       OK ] P07TickLoaderTest.finalBarHftDrainKeepsPreloadedTransactionsWhenOtherStreamsAreMissing (4 ms)
+[ RUN      ] P07TickLoaderTest.historyQueriesDoNotMoveTickReplayCursor
+[       OK ] P07TickLoaderTest.historyQueriesDoNotMoveTickReplayCursor (2 ms)
+[ RUN      ] P07TickLoaderTest.replayPresenceProbesDoNotReplaceBorrowedHistorySlice
+[       OK ] P07TickLoaderTest.replayPresenceProbesDoNotReplaceBorrowedHistorySlice (13 ms)
+[ RUN      ] P07TickLoaderTest.level2CallbackExceptionsReleaseDataInBothReplayPaths
+[       OK ] P07TickLoaderTest.level2CallbackExceptionsReleaseDataInBothReplayPaths (22 ms)
+[ RUN      ] P07TickLoaderTest.hftTickCallbackExceptionAllowsReplayByDayRetry
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:2333: Failure
+[  FAILED  ] P07TickLoaderTest.hftTickCallbackExceptionAllowsReplayByDayRetry (6 ms)
+[ RUN      ] P07TickLoaderTest.hftTickCallbackExceptionAllowsBarReplayRetry
+[       OK ] P07TickLoaderTest.hftTickCallbackExceptionAllowsBarReplayRetry (5 ms)
+[ RUN      ] P07TickLoaderTest.realHftTickSubscriptionStartsAtNextCompleteBar
+[       OK ] P07TickLoaderTest.realHftTickSubscriptionStartsAtNextCompleteBar (137 ms)
+[ RUN      ] P07TickLoaderTest.level2AndOutOfRangeTicksDoNotSuppressOhlcFallback
+[       OK ] P07TickLoaderTest.level2AndOutOfRangeTicksDoNotSuppressOhlcFallback (6 ms)
+[ RUN      ] P07TickLoaderTest.level2StopDoesNotSynthesizeInterruptedBar
+[       OK ] P07TickLoaderTest.level2StopDoesNotSynthesizeInterruptedBar (3 ms)
+[ RUN      ] P07TickLoaderTest.rawTickSuppressesQfqAndHfqBarsForSameBaseCode
+[       OK ] P07TickLoaderTest.rawTickSuppressesQfqAndHfqBarsForSameBaseCode (5 ms)
+[ RUN      ] P07TickLoaderTest.tickInSessionGapIsSkippedUntilNextSession
+[       OK ] P07TickLoaderTest.tickInSessionGapIsSkippedUntilNextSession (3 ms)
+[ RUN      ] P07TickLoaderTest.emptyLevel2StreamsDoNotBlockTickReplay
+[       OK ] P07TickLoaderTest.emptyLevel2StreamsDoNotBlockTickReplay (7 ms)
+[ RUN      ] P07TickLoaderTest.lastTickAndDayPriceMatchCurrentCallbackTick
+[       OK ] P07TickLoaderTest.lastTickAndDayPriceMatchCurrentCallbackTick (2 ms)
+[ RUN      ] P07TickLoaderTest.loaderBarsDumpDsbAndReRead
+[       OK ] P07TickLoaderTest.loaderBarsDumpDsbAndReRead (5 ms)
+[ RUN      ] P07TickLoaderTest.loaderWithoutDataYieldsNullSlice
+[       OK ] P07TickLoaderTest.loaderWithoutDataYieldsNullSlice (2 ms)
+[ RUN      ] P07TickLoaderTest.calcFeeUsesLoadedFeeTemplate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3172: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3174: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3175: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3177: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3179: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3181: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3182: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3183: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3185: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3187: Failure
+[  FAILED  ] P07TickLoaderTest.calcFeeUsesLoadedFeeTemplate (1 ms)
+[ RUN      ] R67CsvBars.HourAndHalfHourResampleFromM5Csv
+[       OK ] R67CsvBars.HourAndHalfHourResampleFromM5Csv (4 ms)
+[ RUN      ] R67CsvBars.MinutePeriodQueriesDoNotExposeBarsBeforeTheirFirstClose
+[       OK ] R67CsvBars.MinutePeriodQueriesDoNotExposeBarsBeforeTheirFirstClose (118 ms)
+[ RUN      ] R67CsvBars.HalfHourBarsReplayEmitsHalfHourCloses
+[       OK ] R67CsvBars.HalfHourBarsReplayEmitsHalfHourCloses (3 ms)
+[ RUN      ] R67CsvBars.HalfHourReplayStartsAtRequestedBarBoundary
+[       OK ] R67CsvBars.HalfHourReplayStartsAtRequestedBarBoundary (7 ms)
+[ RUN      ] R67CsvBars.MinuteRequestsNarrowTickerKeyAndReuseRawCache
+[       OK ] R67CsvBars.MinuteRequestsNarrowTickerKeyAndReuseRawCache (7 ms)
+[ RUN      ] R67CsvBars.HourBarsReplayEmitsHourCloses
+[       OK ] R67CsvBars.HourBarsReplayEmitsHourCloses (54 ms)
+[ RUN      ] R67CsvBars.ShortBarDsbRejectedBeforeCsv
+[       OK ] R67CsvBars.ShortBarDsbRejectedBeforeCsv (24 ms)
+[ RUN      ] R67CsvBars.AutoMainPicksShortestPeriodAndDumpsState
+[       OK ] R67CsvBars.AutoMainPicksShortestPeriodAndDumpsState (4 ms)
+[ RUN      ] R67CsvBars.ZeroVolumeBarsSkippedWithNoSimFlag
+[       OK ] R67CsvBars.ZeroVolumeBarsSkippedWithNoSimFlag (21 ms)
+[ RUN      ] R67CsvBars.AdjustedDailyBarsSimulateStrippedTicks
+[       OK ] R67CsvBars.AdjustedDailyBarsSimulateStrippedTicks (21 ms)
+[ RUN      ] R67CsvBars.UnsubBarsWithoutCommodityOrSessionAreSkippedSafely
+[       OK ] R67CsvBars.UnsubBarsWithoutCommodityOrSessionAreSkippedSafely (16 ms)
+[ RUN      ] ReplayTimeRangeTest.acceptsMinuteAndSecondPrecisionAndPreservesInputs
+[       OK ] ReplayTimeRangeTest.acceptsMinuteAndSecondPrecisionAndPreservesInputs (0 ms)
+[ RUN      ] ReplayTimeRangeTest.numericOverloadAcceptsBothSupportedWidths
+[       OK ] ReplayTimeRangeTest.numericOverloadAcceptsBothSupportedWidths (0 ms)
+[ RUN      ] ReplayTimeRangeTest.twelveDigitEndIncludesTheWholeMinute
+[       OK ] ReplayTimeRangeTest.twelveDigitEndIncludesTheWholeMinute (0 ms)
+[ RUN      ] ReplayTimeRangeTest.fourteenDigitEndIncludesTheWholeSecond
+[       OK ] ReplayTimeRangeTest.fourteenDigitEndIncludesTheWholeSecond (0 ms)
+[ RUN      ] ReplayTimeRangeTest.barsRoundNonzeroStartSecondsUpAndEndSecondsDown
+[       OK ] ReplayTimeRangeTest.barsRoundNonzeroStartSecondsUpAndEndSecondsDown (0 ms)
+[ RUN      ] ReplayTimeRangeTest.aSecondOnlyIntervalCanContainNoWholeMinute
+[       OK ] ReplayTimeRangeTest.aSecondOnlyIntervalCanContainNoWholeMinute (0 ms)
+[ RUN      ] ReplayTimeRangeTest.minuteBoundaryStartAndEndRetainThatMinute
+[       OK ] ReplayTimeRangeTest.minuteBoundaryStartAndEndRetainThatMinute (0 ms)
+[ RUN      ] ReplayTimeRangeTest.crossingMidnightUsesContinuousCalendarSeconds
+[       OK ] ReplayTimeRangeTest.crossingMidnightUsesContinuousCalendarSeconds (0 ms)
+[ RUN      ] ReplayTimeRangeTest.crossingMonthAndYearBoundaryIsCorrect
+[       OK ] ReplayTimeRangeTest.crossingMonthAndYearBoundaryIsCorrect (0 ms)
+[ RUN      ] ReplayTimeRangeTest.leapDayAndLeapYearBoundariesAreCorrect
+[       OK ] ReplayTimeRangeTest.leapDayAndLeapYearBoundariesAreCorrect (0 ms)
+[ RUN      ] ReplayTimeRangeTest.rejectsInvalidLengths
+[       OK ] ReplayTimeRangeTest.rejectsInvalidLengths (0 ms)
+[ RUN      ] ReplayTimeRangeTest.rejectsNonDigits
+[       OK ] ReplayTimeRangeTest.rejectsNonDigits (0 ms)
+[ RUN      ] ReplayTimeRangeTest.rejectsInvalidGregorianDates
+[       OK ] ReplayTimeRangeTest.rejectsInvalidGregorianDates (0 ms)
+[ RUN      ] ReplayTimeRangeTest.rejectsInvalidClockFields
+[       OK ] ReplayTimeRangeTest.rejectsInvalidClockFields (0 ms)
+[ RUN      ] ReplayTimeRangeTest.rejectsReversedRangeWithoutChangingOutput
+[       OK ] ReplayTimeRangeTest.rejectsReversedRangeWithoutChangingOutput (0 ms)
+[ RUN      ] ReplayTimeRangeTest.equalInstantWithMixedPrecisionIsValid
+[       OK ] ReplayTimeRangeTest.equalInstantWithMixedPrecisionIsValid (0 ms)
+[ RUN      ] ReplayTimeRangeTest.secondPrecisionStartInsideMinutePrecisionEndIsValid
+[       OK ] ReplayTimeRangeTest.secondPrecisionStartInsideMinutePrecisionEndIsValid (0 ms)
+[ RUN      ] ReplayTimeRangeTest.startAtEndExclusiveIsRejected
+[       OK ] ReplayTimeRangeTest.startAtEndExclusiveIsRejected (0 ms)
+[ RUN      ] R103Fixture.R103Replayer_StoreConfigAndMissingAdjFile
+[       OK ] R103Fixture.R103Replayer_StoreConfigAndMissingAdjFile (2 ms)
+[ RUN      ] R103Fixture.R103Replayer_DayMultiPeriodCursorAndDump
+[       OK ] R103Fixture.R103Replayer_DayMultiPeriodCursorAndDump (6 ms)
+[ RUN      ] R103Fixture.R103Replayer_IntegratedMinuteHotBars
+[       OK ] R103Fixture.R103Replayer_IntegratedMinuteHotBars (6 ms)
+[ RUN      ] R103Fixture.R103Replayer_LoaderAutoTransDsbAndRuleFileName
+[       OK ] R103Fixture.R103Replayer_LoaderAutoTransDsbAndRuleFileName (85 ms)
+[ RUN      ] R103Fixture.R103Replayer_LoaderThrowsAndRawAdjustedBars
+[       OK ] R103Fixture.R103Replayer_LoaderThrowsAndRawAdjustedBars (3 ms)
+[ RUN      ] R103Fixture.R103Replayer_MinuteSliceCursorAndDayPrice
+[       OK ] R103Fixture.R103Replayer_MinuteSliceCursorAndDayPrice (2 ms)
+[ RUN      ] R103Fixture.R103Replayer_TaskCalendarBranches
+[       OK ] R103Fixture.R103Replayer_TaskCalendarBranches (6 ms)
+[ RUN      ] R103Fixture.R103Replayer_CsvTickDsbAndSliceFallback
+[       OK ] R103Fixture.R103Replayer_CsvTickDsbAndSliceFallback (4 ms)
+[ RUN      ] R103LastTickBoundaryTest.EmptyTickListReturnsNull
+[       OK ] R103LastTickBoundaryTest.EmptyTickListReturnsNull (1 ms)
+[ RUN      ] R103LastTickBoundaryTest.BeforeFirstTickReturnsNull
+[       OK ] R103LastTickBoundaryTest.BeforeFirstTickReturnsNull (1 ms)
+[ RUN      ] R103LastTickBoundaryTest.ExactCurrentTickIsReturned
+[       OK ] R103LastTickBoundaryTest.ExactCurrentTickIsReturned (3 ms)
+[ RUN      ] R103LastTickBoundaryTest.BetweenTicksReturnsPreviousTick
+[       OK ] R103LastTickBoundaryTest.BetweenTicksReturnsPreviousTick (1 ms)
+[ RUN      ] R103LastTickBoundaryTest.EmptyHistoricalSliceDoesNotHideCurrentTick
+[       OK ] R103LastTickBoundaryTest.EmptyHistoricalSliceDoesNotHideCurrentTick (1 ms)
+[ RUN      ] R103LastTickBoundaryTest.SameTimestampQueriesFollowDispatchedOrder
+[       OK ] R103LastTickBoundaryTest.SameTimestampQueriesFollowDispatchedOrder (2 ms)
+[ RUN      ] R103LastTickBoundaryTest.SubscribedTickIsUnavailableUntilDispatched
+[       OK ] R103LastTickBoundaryTest.SubscribedTickIsUnavailableUntilDispatched (3 ms)
+[ RUN      ] R103LastTickBoundaryTest.ReturnedSnapshotSurvivesLaterTicksAndReset
+[       OK ] R103LastTickBoundaryTest.ReturnedSnapshotSurvivesLaterTicksAndReset (2 ms)
+[ RUN      ] R103LastTickBoundaryTest.ConcurrentSnapshotReadDuringNextDispatch
+[       OK ] R103LastTickBoundaryTest.ConcurrentSnapshotReadDuringNextDispatch (31 ms)
+[ RUN      ] R103LastTickBoundaryTest.NewTradingDayAndPrepareDoNotReuseDispatchedTick
+[       OK ] R103LastTickBoundaryTest.NewTradingDayAndPrepareDoNotReuseDispatchedTick (3 ms)
+[ RUN      ] R103LastTickBoundaryTest.PrepareRerunResubscribesWithoutReusingOldSnapshot
+[       OK ] R103LastTickBoundaryTest.PrepareRerunResubscribesWithoutReusingOldSnapshot (3 ms)
+[ RUN      ] R103LastTickBoundaryTest.AdjustedQueryPreservesSeparateHistorySource
+[       OK ] R103LastTickBoundaryTest.AdjustedQueryPreservesSeparateHistorySource (2 ms)
+[ RUN      ] R103LastTickBoundaryTest.SyntheticFallbackIsTheCurrentDispatchedSnapshot
+[       OK ] R103LastTickBoundaryTest.SyntheticFallbackIsTheCurrentDispatchedSnapshot (3 ms)
+[ RUN      ] R103LastTickBoundaryTest.AdjustedSyntheticBarIsNotUsedAsRawTick
+[       OK ] R103LastTickBoundaryTest.AdjustedSyntheticBarIsNotUsedAsRawTick (4 ms)
+[ RUN      ] R103LastTickBoundaryTest.ReplayDoesNotUseStaleHistorySnapshot
+[       OK ] R103LastTickBoundaryTest.ReplayDoesNotUseStaleHistorySnapshot (2 ms)
+[ RUN      ] R103LastTickBoundaryTest.FilteredTickIsNotVisibleDuringOtherStreamCallback
+[       OK ] R103LastTickBoundaryTest.FilteredTickIsNotVisibleDuringOtherStreamCallback (3 ms)
+[ RUN      ] R103LastTickBoundaryTest.AfterTailReturnsTheDocumentedEmptyValue
+[       OK ] R103LastTickBoundaryTest.AfterTailReturnsTheDocumentedEmptyValue (2 ms)
+[ RUN      ] R2TickTest.marketSignalFilledByTickAndDumpsTrade
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:215: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:216: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:217: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:218: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:219: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:220: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:228: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:229: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:237: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:238: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:240: Failure
+[  FAILED  ] R2TickTest.marketSignalFilledByTickAndDumpsTrade (9 ms)
+[ RUN      ] R2TickTest.signalWithDespriceFillsAtTargetNotLastPrice
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:272: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:275: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:280: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:281: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:282: Failure
+[  FAILED  ] R2TickTest.signalWithDespriceFillsAtTargetNotLastPrice (5 ms)
+[ RUN      ] R2TickTest.exitLongSignalClosesPartOfPosition
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:311: Failure
+[  FAILED  ] R2TickTest.exitLongSignalClosesPartOfPosition (2 ms)
+[ RUN      ] R2TickTest.selHftUftTickUpdatesPriceMapWithoutStrategy
+[       OK ] R2TickTest.selHftUftTickUpdatesPriceMapWithoutStrategy (5 ms)
+[ RUN      ] R2LoaderTest.finalBarsFromLoaderCachedOnce
+[       OK ] R2LoaderTest.finalBarsFromLoaderCachedOnce (3 ms)
+[ RUN      ] R2LoaderTest.autoTransDumpsDsbAndSecondReplayerHitsDsb
+[       OK ] R2LoaderTest.autoTransDumpsDsbAndSecondReplayerHitsDsb (3 ms)
+[ RUN      ] R2LoaderTest.loaderBackedDailyReplayEmitsBarsAndDumpsState
+[       OK ] R2LoaderTest.loaderBackedDailyReplayEmitsBarsAndDumpsState (2 ms)
+[ RUN      ] R2LoaderTest.ticksFromLoaderFeedTickSliceAndLastTick
+[       OK ] R2LoaderTest.ticksFromLoaderFeedTickSliceAndLastTick (56 ms)
+[ RUN      ] R2LoaderTest.adjFactorsPreferLoaderThenFile
+[       OK ] R2LoaderTest.adjFactorsPreferLoaderThenFile (4 ms)
+[ RUN      ] R2LoaderTest.binModeWithLoaderCachesBarsViaRawInterface
+[       OK ] R2LoaderTest.binModeWithLoaderCachesBarsViaRawInterface (3 ms)
+[ RUN      ] R2LoaderTest.binModeWithoutLoaderOrDsbYieldsNoSlice
+[       OK ] R2LoaderTest.binModeWithoutLoaderOrDsbYieldsNoSlice (2 ms)
+[ RUN      ] R2PublicTest.PrepareWithoutSinkFailsBeforeStateChangesAndAllowsRetry
+[       OK ] R2PublicTest.PrepareWithoutSinkFailsBeforeStateChangesAndAllowsRetry (72 ms)
+[ RUN      ] R2PublicTest.feeTemplateAndCalcFeeMatrix
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:237: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:239: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:241: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:243: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:245: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:251: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:252: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:253: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:255: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:177: Failure
+Value of: replayer.init(cfg, __null, __null)
+  Actual: false
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:261: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:177: Failure
+Value of: replayer.init(cfg, __null, __null)
+  Actual: false
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:272: Failure
+[  FAILED  ] R2PublicTest.feeTemplateAndCalcFeeMatrix (59 ms)
+[ RUN      ] R2PublicTest.level2DataRefusedInCsvMode
+[       OK ] R2PublicTest.level2DataRefusedInCsvMode (18 ms)
+[ RUN      ] R2PublicTest.stopBeforeRunQuitsReplayEarly
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:333: Failure
+[  FAILED  ] R2PublicTest.stopBeforeRunQuitsReplayEarly (17 ms)
+[ RUN      ] R2PublicTest.clearCacheForcesReloadOnNextPrepare
+[       OK ] R2PublicTest.clearCacheForcesReloadOnNextPrepare (6 ms)
+[ RUN      ] R2PublicTest.registeredTaskSwitchesToTaskReplayAndSchedules
+[       OK ] R2PublicTest.registeredTaskSwitchesToTaskReplayAndSchedules (15 ms)
+[ RUN      ] R2PublicTest.metadataAndTimelineQueries
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:415: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp:418: Failure
+[  FAILED  ] R2PublicTest.metadataAndTimelineQueries (36 ms)
+[ RUN      ] R67LoaderGap.ShortAutoTransDsbFallsBackToLoader
+[       OK ] R67LoaderGap.ShortAutoTransDsbFallsBackToLoader (2 ms)
+[ RUN      ] R67LoaderGap.AutoTransFalseIgnoresExistingDsb
+[       OK ] R67LoaderGap.AutoTransFalseIgnoresExistingDsb (2 ms)
+[ RUN      ] R67LoaderGap.HourResampledFromLoaderMinuteBars
+[       OK ] R67LoaderGap.HourResampledFromLoaderMinuteBars (1 ms)
+[ RUN      ] R67LoaderGap.TickReplayStopsOnTerminate
+[       OK ] R67LoaderGap.TickReplayStopsOnTerminate (5 ms)
+[ RUN      ] R67LoaderGap.UnsubscribedDailyBarsViaLoaderFeedSimTicks
+[       OK ] R67LoaderGap.UnsubscribedDailyBarsViaLoaderFeedSimTicks (7 ms)
+[ RUN      ] R67LoaderGap.UnsubscribedMinuteBarsViaLoaderAdvanceCursor
+[       OK ] R67LoaderGap.UnsubscribedMinuteBarsViaLoaderAdvanceCursor (65 ms)
+[ RUN      ] R67LoaderGap.CacheClearDaysEvictsUntouchedBars
+[       OK ] R67LoaderGap.CacheClearDaysEvictsUntouchedBars (18 ms)
+[ RUN      ] R67LoaderGap.EmptyLoaderSuccessReturnsNoBars
+[       OK ] R67LoaderGap.EmptyLoaderSuccessReturnsNoBars (2 ms)
+[ RUN      ] R67LoaderGap.EmptyLoaderFailureCanRetryWhenBarsBecomeAvailable
+[       OK ] R67LoaderGap.EmptyLoaderFailureCanRetryWhenBarsBecomeAvailable (2 ms)
+[ RUN      ] R80ConfigTick.ContractArrayMalformedFeesAndAdjEntries
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_config_tick_test.cpp:99: Failure
+Value of: rp.init(cfg)
+  Actual: false
+[  FAILED  ] R80ConfigTick.ContractArrayMalformedFeesAndAdjEntries (27 ms)
+[ RUN      ] R80ConfigTick.DumpStateUsesMinutePeriodNames
+[       OK ] R80ConfigTick.DumpStateUsesMinutePeriodNames (7 ms)
+[ RUN      ] R80ConfigTick.TickReplayResetsCursorAndSkipsEmptyLevel2
+[       OK ] R80ConfigTick.TickReplayResetsCursorAndSkipsEmptyLevel2 (2 ms)
+[ RUN      ] R80SliceUnsub.FutureFirstDailyBarYieldsNullSlice
+[       OK ] R80SliceUnsub.FutureFirstDailyBarYieldsNullSlice (3 ms)
+[ RUN      ] R80SliceUnsub.UnsubscribedMinuteBarsFeedSimTicks
+[       OK ] R80SliceUnsub.UnsubscribedMinuteBarsFeedSimTicks (3 ms)
+[ RUN      ] R80SliceUnsub.HotRuleFutureCsvUsesRuleDsbName
+[       OK ] R80SliceUnsub.HotRuleFutureCsvUsesRuleDsbName (252 ms)
+[ RUN      ] R80SliceUnsub.DayPriceReadsSimulatedDayCache
+[       OK ] R80SliceUnsub.DayPriceReadsSimulatedDayCache (2 ms)
+[ RUN      ] R80TaskBars.MinuteTaskReplaysSubscribedBars
+[       OK ] R80TaskBars.MinuteTaskReplaysSubscribedBars (10 ms)
+[ RUN      ] R80TaskCalendar.DailyTaskCrossesSpringFestivalHoliday
+[       OK ] R80TaskCalendar.DailyTaskCrossesSpringFestivalHoliday (4 ms)
+[ RUN      ] R80TaskCalendar.MonthlyTaskHolidayShiftFiresOnResume
+[       OK ] R80TaskCalendar.MonthlyTaskHolidayShiftFiresOnResume (2 ms)
+[ RUN      ] R80TaskCalendar.WeeklyTaskCatchUpAfterLongHoliday
+[       OK ] R80TaskCalendar.WeeklyTaskCatchUpAfterLongHoliday (3 ms)
+[ RUN      ] R80TaskCalendar.WeeklyTaskCatchUpAfterHolidayGap
+[       OK ] R80TaskCalendar.WeeklyTaskCatchUpAfterHolidayGap (1 ms)
+[ RUN      ] R80TaskCalendar.WeeklyTaskHolidayInsideWeek
+[       OK ] R80TaskCalendar.WeeklyTaskHolidayInsideWeek (1 ms)
+[ RUN      ] R91Fixture.R91BinBars_RawDailyBarsSliceAndReplay
+[       OK ] R91Fixture.R91BinBars_RawDailyBarsSliceAndReplay (2 ms)
+[ RUN      ] R91Fixture.R91BinBars_MissingBinBarsYieldNullSlice
+[       OK ] R91Fixture.R91BinBars_MissingBinBarsYieldNullSlice (2 ms)
+[ RUN      ] R91Fixture.R91BinBars_MissingMinuteBarsDoNotBlockValidDailyAutoReplay
+[       OK ] R91Fixture.R91BinBars_MissingMinuteBarsDoNotBlockValidDailyAutoReplay (3 ms)
+[ RUN      ] R91Fixture.R91BinBars_AdjustedForwardBarsConcatenate
+[       OK ] R91Fixture.R91BinBars_AdjustedForwardBarsConcatenate (9 ms)
+[ RUN      ] R91Fixture.R91BinBars_AdjustedBackwardBarsApplyFactorAndSkipMissingAdjusted
+[       OK ] R91Fixture.R91BinBars_AdjustedBackwardBarsApplyFactorAndSkipMissingAdjusted (11 ms)
+[ RUN      ] R91Fixture.R2AdjFactors_LongLegalKeyAndShortKeyLookup
+[       OK ] R91Fixture.R2AdjFactors_LongLegalKeyAndShortKeyLookup (0 ms)
+[ RUN      ] R91Fixture.R2AdjFactors_IndependentReplayCallsKeepTheirOwnLoaderKey
+[       OK ] R91Fixture.R2AdjFactors_IndependentReplayCallsKeepTheirOwnLoaderKey (5 ms)
+[ RUN      ] R91Fixture.R91BinBars_IntegratedForwardHotBarsMergeSections
+[       OK ] R91Fixture.R91BinBars_IntegratedForwardHotBarsMergeSections (13 ms)
+[ RUN      ] R91Fixture.R91BinHft_Level2SlicesLoadFromBin
+[       OK ] R91Fixture.R91BinHft_Level2SlicesLoadFromBin (5 ms)
+[ RUN      ] R91Fixture.R91BinHft_BarReplayUsesHftDatasAndDayPrice
+[       OK ] R91Fixture.R91BinHft_BarReplayUsesHftDatasAndDayPrice (7 ms)
+[ RUN      ] R91Fixture.R91BinHft_TickReplaySkipsPreOpenAndAdvancesSessions
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_hft_test.cpp:381: Failure
+[  FAILED  ] R91Fixture.R91BinHft_TickReplaySkipsPreOpenAndAdvancesSessions (53 ms)
+[ RUN      ] R91Fixture.R91BinHft_TransactionSliceLoadsWithoutOrderDetailMiss
+[       OK ] R91Fixture.R91BinHft_TransactionSliceLoadsWithoutOrderDetailMiss (2 ms)
+[ RUN      ] R91Fixture.R91BinHft_OrderDetailSliceLoadsFromBin
+[       OK ] R91Fixture.R91BinHft_OrderDetailSliceLoadsFromBin (2 ms)
+[ RUN      ] R91Fixture.R91BinHft_OrderQueueSliceLoadsFromBin
+[       OK ] R91Fixture.R91BinHft_OrderQueueSliceLoadsFromBin (2 ms)
+[ RUN      ] R91Fixture.R91BinHft_AllLevel2SlicesLoadWithoutTickCursor
+[       OK ] R91Fixture.R91BinHft_AllLevel2SlicesLoadWithoutTickCursor (8 ms)
+[ RUN      ] R91Fixture.R91BinHft_OrderDetailCacheMissDoesNotPoisonTransactionCache
+[       OK ] R91Fixture.R91BinHft_OrderDetailCacheMissDoesNotPoisonTransactionCache (6 ms)
+[ RUN      ] R91Fixture.R91BinHft_OrderQueueCacheMissDoesNotPoisonTransactionCache
+[       OK ] R91Fixture.R91BinHft_OrderQueueCacheMissDoesNotPoisonTransactionCache (3 ms)
+[ RUN      ] R91Fixture.R91BinHft_Level2SlicesRespectInclusiveEndAndCount
+[       OK ] R91Fixture.R91BinHft_Level2SlicesRespectInclusiveEndAndCount (7 ms)
+[ RUN      ] R91Fixture.R91BinReset_ReplayTwiceThenClearCacheReloads
+[       OK ] R91Fixture.R91BinReset_ReplayTwiceThenClearCacheReloads (27 ms)
+[ RUN      ] R91Fixture.R91BinMisc_EmptyInputsFeeAndInfoQueries
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:187: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:188: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:189: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:190: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:191: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:192: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:193: Failure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp:194: Failure
+[  FAILED  ] R91Fixture.R91BinMisc_EmptyInputsFeeAndInfoQueries (6 ms)
+[ RUN      ] S5R103LastTickInterval.ExactSameTimestampReturnsLastInsertedRecord
+[       OK ] S5R103LastTickInterval.ExactSameTimestampReturnsLastInsertedRecord (2 ms)
+[ RUN      ] S5R103LastTickInterval.ExactTailSameTimestampReturnsLastInsertedRecord
+[       OK ] S5R103LastTickInterval.ExactTailSameTimestampReturnsLastInsertedRecord (2 ms)
+[ RUN      ] S5R103LastTickInterval.BetweenGroupsReturnsLastRecordOfPreviousGroup
+[       OK ] S5R103LastTickInterval.BetweenGroupsReturnsLastRecordOfPreviousGroup (2 ms)
+[ RUN      ] S5R103LastTickInterval.AfterTailReturnsNull
+[       OK ] S5R103LastTickInterval.AfterTailReturnsNull (2 ms)
+[ RUN      ] S5R103LastTickInterval.BeforeFirstReturnsNull
+[       OK ] S5R103LastTickInterval.BeforeFirstReturnsNull (2 ms)
+[ RUN      ] S5R103LastTickInterval.SingleRecordExactAndAfterTail
+[       OK ] S5R103LastTickInterval.SingleRecordExactAndAfterTail (2 ms)
+[ RUN      ] S5Q02FrozenTDate.SelSameTradingDaySessionBeginKeepsFrozen
+[       OK ] S5Q02FrozenTDate.SelSameTradingDaySessionBeginKeepsFrozen (2 ms)
+[ RUN      ] S5Q02FrozenTDate.SelDumpPersistsFrozenAndTradingDate
+[       OK ] S5Q02FrozenTDate.SelDumpPersistsFrozenAndTradingDate (4 ms)
+[ RUN      ] S5Q02FrozenTDate.SelFrozenWithoutOwningSessionIsClearedByFirstSessionBegin
+[       OK ] S5Q02FrozenTDate.SelFrozenWithoutOwningSessionIsClearedByFirstSessionBegin (1 ms)
+[ RUN      ] S5Q02FrozenTDate.HftSameTradingDaySessionBeginKeepsFrozen
+[       OK ] S5Q02FrozenTDate.HftSameTradingDaySessionBeginKeepsFrozen (1 ms)
+[ RUN      ] S5Q02FrozenTDate.HftFrozenWithoutOwningSessionIsClearedByFirstSessionBegin
+[       OK ] S5Q02FrozenTDate.HftFrozenWithoutOwningSessionIsClearedByFirstSessionBegin (2 ms)
+[  FAILED  ] 56 tests, listed below:
+[  FAILED  ] P04ReplayTermTest.tickModeWithoutTickDataStillTerminates
+[  FAILED  ] P04ReplayTermTest.invertedTimeRangeIsRejectedBeforePrepare
+[  FAILED  ] P04ReplayTermTest.orderedRangeBeforeFirstBarStopsWithoutBars
+[  FAILED  ] P04ReplayTermTest.secondCodeReplaysItsOwnBars
+[  FAILED  ] P04ReplayTermTest.emptyCacheQueryApisAreStable
+[  FAILED  ] P04ReplayerConfigTest.cfgTimeRangeIsUsedOnlyWhenUnset
+[  FAILED  ] P04ReplayerConfigTest.prepareAdvancesDateAndTradingDate
+[  FAILED  ] P04ReplayerConfigTest.runWithoutAnyDataEndsReplay
+[  FAILED  ] P04ReplayerConfigTest.missingBasefilesEntriesStillInit
+[  FAILED  ] P04ReplayerConfigTest.loadedBasefilesGiveCommodityAndSession
+[  FAILED  ] P04ReplayerConfigTest.missingFeesFileLeavesEmptyFeeMap
+[  FAILED  ] P04ReplayCsvTest.dailyBarsReplayFullTradingDayCycle
+[  FAILED  ] P04ReplayCsvTest.prepareAfterRunResetsClock
+[  FAILED  ] P04ReplayCsvTest.csvBarsTransferedToDsbAndReRead
+[  FAILED  ] P04ReplayCsvTest.missingCsvFileYieldsNullSlice
+[  FAILED  ] P04ReplayCsvTest.failedMainBarsLoadDoesNotPoisonReplayAndCanRetry
+[  FAILED  ] P04ReplayCsvTest.emptyCsvReturnsNullAndReplayCompletesInChild
+[  FAILED  ] R43ReplayerTickCsvTest.csvTickDsbReplaysWholeDay
+[  FAILED  ] R43ReplayerTickCsvTest.pureTickRangeIncludesEveryMillisecondOfFourteenDigitEndSecond
+[  FAILED  ] R43ReplayerTickCsvTest.sessionBeginClockUsesRangeStartThenNextNaturalSessionOpen
+[  FAILED  ] R43ReplayerTickCsvTest.twelveDigitBoundsIncludeWholeStartAndEndMinutes
+[  FAILED  ] R43ReplayerTickCsvTest.mixedPrecisionUsesMinuteStartAndSecondInclusiveEnd
+[  FAILED  ] R43ReplayerTickCsvTest.mainBarsWithoutAClosedBarStillReplayInRangeTicksOnly
+[  FAILED  ] R43ReplayerTickCsvTest.overnightTickRangeLoadsByTradingDateAndFiltersByActionDate
+[  FAILED  ] R43ReplayerTickCsvTest.nightSessionBeginClockUsesNaturalOpenAcrossTradingDates
+[  FAILED  ] R43ReplayerTickCsvTest.mainBarsUseReplayableHftSessionForMixedNaturalDate
+[  FAILED  ] R43ReplayerTickCsvTest.replayableHftEventsKeepLaterSessionBoundary
+[  FAILED  ] R43ReplayerTickCsvTest.missingInRangeHftEventsKeepLaterSessionBoundary
+[  FAILED  ] R43ReplayerTickCsvTest.mainBarWithoutInRangeHftEventsKeepsLaterSessionBoundary
+[  FAILED  ] R43ReplayerTickCsvTest.mainBarAndNightSessionBucketsReplayInNaturalTimeOrder
+[  FAILED  ] R43ReplayerTickCsvTest.shortTickDsbRejected
+[  FAILED  ] R43ReplayerTickCsvTest.emptyTickDsbRejected
+[  FAILED  ] R43ReplayerTickCsvTest.trailingSuffixSubscriptionsStripFlag
+[  FAILED  ] R43ReplayerTickCsvTest.barsWithTicksUseHftReplayPath
+[  FAILED  ] R43ReplayerTickCsvTest.finalMainBarFlushesOnlyInRangeTicksWithoutAnotherBar
+[  FAILED  ] R43ReplayerTickCsvTest.stopDuringBarReplayTerminatesCleanly
+[  FAILED  ] P07MinuteReplayTest.throwingBarCloseCallbackAbortsAndClearsRunningState
+[  FAILED  ] P07MinuteReplayTest.throwingInitCallbackLeavesReplayerRetryable
+[  FAILED  ] P07TickLoaderTest.emptyNullTickLoaderCallbackIsAValidEmptyBucket
+[  FAILED  ] P07TickLoaderTest.emptyReplayBucketsStayBoundedAcrossLongNoDataRange
+[  FAILED  ] P07TickLoaderTest.continuous24HourReplayReadsFullSaturdayNaturalDateBucket
+[  FAILED  ] P07TickLoaderTest.continuous24HourPositiveOffsetUsesNaturalDateCut
+[  FAILED  ] P07TickLoaderTest.continuous24HourNegativeOffsetUsesNaturalDateCut
+[  FAILED  ] P07TickLoaderTest.minuteEndIncludesLastSecondAndEndsFinalTradingDateOnce
+[  FAILED  ] P07TickLoaderTest.sameTimestampOrdersRoundsAcrossCodesAndTradingDateBuckets
+[  FAILED  ] P07TickLoaderTest.hftTickCallbackExceptionAllowsReplayByDayRetry
+[  FAILED  ] P07TickLoaderTest.calcFeeUsesLoadedFeeTemplate
+[  FAILED  ] R2TickTest.marketSignalFilledByTickAndDumpsTrade
+[  FAILED  ] R2TickTest.signalWithDespriceFillsAtTargetNotLastPrice
+[  FAILED  ] R2TickTest.exitLongSignalClosesPartOfPosition
+[  FAILED  ] R2PublicTest.feeTemplateAndCalcFeeMatrix
+[  FAILED  ] R2PublicTest.stopBeforeRunQuitsReplayEarly
+[  FAILED  ] R2PublicTest.metadataAndTimelineQueries
+[  FAILED  ] R80ConfigTick.ContractArrayMalformedFeesAndAdjEntries
+[  FAILED  ] R91Fixture.R91BinHft_TickReplaySkipsPreOpenAndAdvancesSessions
+[  FAILED  ] R91Fixture.R91BinMisc_EmptyInputsFeeAndInfoQueries

@@ -1,0 +1,21 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp	2026-11-01 00:46:15
++++ src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp	2026-11-04 21:56:33
+@@ -129,12 +129,17 @@
+ 		policy << "default:\n    order: []\n";
+ 		policy.close();
+ 		std::filesystem::create_directory(std::string(directory) + "/data");
++		// 迭代03（I03-NEW-008 / 卡13d 费用门禁）：配置了的费用模板必须存在；本例验证 main
++		// 到达 run()，改用有效空模板（原 ./absent_fees.json，.before 见 s5-runners 证据）。
++		std::ofstream fees(std::string(directory) + "/fees.json");
++		fees << "{}";
++		fees.close();
+ 		std::ofstream config(std::string(directory) + "/config.yaml");
+ 		config << "basefiles:\n"
+ 			"    session: ./sessions.json\n"
+ 			"env:\n"
+ 			"    name: cta\n"
+-			"    fees: ./absent_fees.json\n"
++			"    fees: ./fees.json\n"
+ 			"    filters: ./absent_filters.yaml\n"
+ 			"    poolsize: 0\n"
+ 			"    product:\n"

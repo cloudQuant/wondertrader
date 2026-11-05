@@ -96,7 +96,8 @@ public:
 		OrderIDs ids{ nextId++ };
 		return ids;
 	}
-	bool cancel(uint32_t localid) override { byidCancels.push_back(localid); return true; }
+	bool cancelByIdRet = true;
+	bool cancel(uint32_t localid) override { byidCancels.push_back(localid); return cancelByIdRet; }
 	OrderIDs cancel(const char* stdCode, bool isBuy, double = 0) override
 	{
 		bydirCancels.push_back({ stdCode, isBuy });
@@ -616,8 +617,49 @@ TEST(r7_vwap, clear_target_dbl_max_exits_without_order)
 	EXPECT_EQ(ctx.buys.size(), 1u);
 	EXPECT_TRUE(ctx.sells.empty());
 	sendTick(unit, mkTick(kCode, 100100000, 10.60, 10.59, 10.61));
-	// L348 的 curPos==newVol 分支在 L319 之后不可达（见 BUG-R7-004），所以这里仍然没有清仓卖单
+	// 平仓后无持仓：清仓分支可达但可用多头为 0，仍不发单（BUG-R7-004 修复后的平仓对照）
 	EXPECT_TRUE(ctx.sells.empty());
+	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// BUG-R7-004（卡15最终复核的明确缺陷，迭代03 2026-11-04）：净持仓为零但有锁仓
+// （多 2、空 2）时清仓指令原被“差额为零即返回”挡住；修复后先卖出可用多头。
+//////////////////////////////////////////////////////////////////////////
+namespace
+{
+class LockedVwapCtx : public FakeCtx
+{
+public:
+	double getPosition(const char*, bool validOnly = true, int32_t flag = 3) override
+	{
+		const double lng = validOnly ? lockedLongAvail : lockedLong;
+		const double sht = validOnly ? lockedShortAvail : lockedShort;
+		if (flag == 1)
+			return lng;
+		if (flag == 2)
+			return sht;
+		return lng + sht;
+	}
+	double lockedLong = 2.0;
+	double lockedLongAvail = 2.0;
+	double lockedShort = -2.0;
+	double lockedShortAvail = -2.0;
+};
+}
+
+TEST(r7_vwap, clear_target_flattens_net_zero_locked_position)
+{
+	VwapFile vf(25.0);
+	LockedVwapCtx ctx;
+	ctx.comm = mkComm();
+	WtVWapExeUnit unit;
+	boot(unit, ctx, DBL_MAX, mkCfg());
+	sendTick(unit, mkTick(kCode, 100000000, 10.50, 10.49, 10.51));
+	ASSERT_EQ(ctx.sells.size(), 1u) << "net zero must not hide the gross long under a clear command";
+	EXPECT_GT(ctx.sells[0].qty, 0.0);
+	EXPECT_LE(ctx.sells[0].qty, 2.0) << "never more than the available long";
+	EXPECT_TRUE(ctx.buys.empty());
 	ctx.comm->release();
 }
 
@@ -1155,6 +1197,33 @@ TEST(r7_vwap, overnight_tick_with_action_date_equal_to_next_trading_date_fails_c
 	ctx.comm->release();
 }
 
+TEST(r7_vwap, unrepresentable_session_date_does_not_advance_high_water_or_order)
+{
+	VwapFile vf(VwapFile::V2Tag{}, "R7_NIGHT", 720, { {2100, 230} }, 331);
+	FakeCtx ctx;
+	ctx.setSession(WTSSessionInfo::create("R7_NIGHT", "R7_NIGHT", 720));
+	ctx.sess->addTradingSection(2100, 230);
+	ctx.comm = mkComm();
+	WtVWapExeUnit unit;
+	WTSVariant* cfg = mkCfg(5, 0, 0, 1.0, 10.0, 0, 0, 2100, 230);
+	unit.init(&ctx, kCode, cfg);
+	cfg->release();
+	ASSERT_TRUE(unit.initializationSucceeded());
+	unit.set_position(kCode, 1000);
+	unit.on_channel_ready();
+	// The +720-minute session would move this action date into year 10000,
+	// outside the checked YYYYMMDD domain. A rejected tick must not poison
+	// the timestamp watermark or place an order.
+	// 交易日字段须是合法日期（改前为 100000101，被更早的“非法日历日期”检查拦下，到不了会话偏移检查）。
+	sendTick(unit, mkTick(kCode, 210000000, 10.40, 10.39, 10.41, 0, 0, 99991231, 99991231));
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_EQ(0u, unit._tick_time_high_water);
+	EXPECT_TRUE(ctx.hasLog("session-adjusted date cannot be verified"));
+	sendTick(unit, mkTick(kCode, 210000000, 10.40, 10.39, 10.41, 0, 0, 20240101, 20240102));
+	EXPECT_EQ(1u, ctx.buys.size());
+	ctx.comm->release();
+}
+
 TEST(r7_vwap, profile_for_a_different_session_is_rejected)
 {
 	VwapFile vf(VwapFile::V2Tag{}, "OTHER", 0, { {930, 1130}, {1300, 1500} }, 241);
@@ -1513,4 +1582,48 @@ TEST(r7_vwap, timeout_without_verified_identity_keeps_monitor_and_never_cancels)
 		EXPECT_EQ(ctx.countLog("Expired order 9351"), 1u);
 	}
 	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 迭代03 WP1（卡5/N05-003，2026-11-04）：宿主通过保留配置键声明已按 owner 与不可复用
+// 身份核验撤单时，超时撤单经 ctx->cancel(localid) 发出且同一单只发一次；宿主拒绝核验
+// （cancel 返回 false）即转为持久隔离，不回退裸 ID、不重复撤单。未声明时保持原 fail-closed。
+//////////////////////////////////////////////////////////////////////////
+#include "Includes/IExecPluginV2.h"
+#ifndef WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY
+#define WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY "__wt_host_order_identity"
+#endif
+
+TEST(r7_vwap, wp1_timeout_with_host_verified_identity_cancels_once_or_latches)
+{
+	for (int refuse = 0; refuse < 2; ++refuse)
+	{
+		VwapFile vf(25.0);
+		FakeCtx ctx;
+		ctx.comm = mkComm();
+		ctx.cancelByIdRet = refuse == 0;
+		{
+			WtVWapExeUnit unit;
+			WTSVariant* cfg = mkCfg(5, 0, 0, 1.0, 10.0, 1);
+			cfg->append(WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY, (uint32_t)1);
+			unit.init(&ctx, kCode, cfg);
+			cfg->release();
+			unit.set_position(kCode, 0);
+			const uint32_t id = 9361;
+			unit._orders_mon.push_order(&id, 1, ctx.curTime);
+			sendTick(unit, mkTick(kCode, 93000000, 10.50, 10.49, 10.51));
+			ctx.curTime += 1000;
+			sendTick(unit, mkTick(kCode, 93002000, 10.50, 10.49, 10.51));
+			ASSERT_EQ(1u, ctx.byidCancels.size()) << "refuse=" << refuse;
+			EXPECT_EQ(id, ctx.byidCancels[0]);
+			EXPECT_TRUE(unit._orders_mon.has_order(id));
+			EXPECT_EQ(refuse == 1, unit._orders_mon.has_unverified_timeout());
+			EXPECT_EQ(refuse == 0, ctx.countLog("canceled with host-verified identity") == 1u);
+			EXPECT_EQ(refuse == 1, ctx.countLog("host could not verify its identity") == 1u);
+			ctx.curTime += 2000;
+			sendTick(unit, mkTick(kCode, 93004000, 10.50, 10.49, 10.51));
+			EXPECT_EQ(1u, ctx.byidCancels.size()) << "claimed or latched order is never re-cancelled";
+		}
+		ctx.comm->release();
+	}
 }

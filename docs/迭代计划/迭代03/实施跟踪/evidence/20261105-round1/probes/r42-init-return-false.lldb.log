@@ -1,0 +1,58 @@
+(lldb) target create "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/round1/build/build_x64/Debug/bin/TestUnits/CoverageTests_m_WtRunner"
+Current executable set to '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/round1/build/build_x64/Debug/bin/TestUnits/CoverageTests_m_WtRunner' (arm64).
+(lldb) settings set -- target.run-args  "--gtest_filter=R42HftTraderBinding.KnownTraderStillPublishesBoundContext"
+(lldb) breakpoint set -f WtRunner.cpp -l 1102
+Breakpoint 1: where = CoverageTests_m_WtRunner`WtRunner::initHftStrategies() + 160 at WtRunner.cpp:1102:3, address = 0x00000001000a3210
+(lldb) breakpoint set -f WtRunner.cpp -l 1108
+Breakpoint 2: where = CoverageTests_m_WtRunner`WtRunner::initHftStrategies() + 292 at WtRunner.cpp:1108:3, address = 0x00000001000a3294
+(lldb) breakpoint set -f WtRunner.cpp -l 1132
+Breakpoint 3: where = CoverageTests_m_WtRunner`WtRunner::initHftStrategies() + 732 at WtRunner.cpp:1132:4, address = 0x00000001000a344c
+(lldb) breakpoint set -f WtRunner.cpp -l 1144
+Breakpoint 4: where = CoverageTests_m_WtRunner`WtRunner::initHftStrategies() + 1208 at WtRunner.cpp:1144:4, address = 0x00000001000a3628
+(lldb) breakpoint set -f WtRunner.cpp -l 1151
+Breakpoint 5: where = CoverageTests_m_WtRunner`WtRunner::initHftStrategies() + 1532 at WtRunner.cpp:1151:4, address = 0x00000001000a376c
+(lldb) breakpoint set -f WtRunner.cpp -l 1163
+Breakpoint 6: where = CoverageTests_m_WtRunner`WtRunner::initHftStrategies() + 2000 at WtRunner.cpp:1163:4, address = 0x00000001000a3940
+(lldb) breakpoint set -f WtRunner.cpp -l 1168
+Breakpoint 7: where = CoverageTests_m_WtRunner`WtRunner::initHftStrategies() + 2244 at WtRunner.cpp:1168:4, address = 0x00000001000a3a34
+(lldb) breakpoint set -f WtRunner.cpp -l 1180
+Breakpoint 8: where = CoverageTests_m_WtRunner`WtRunner::initHftStrategies() + 2576 at WtRunner.cpp:1180:5, address = 0x00000001000a3b80
+(lldb) breakpoint set -f WtRunner.cpp -l 1186
+Breakpoint 9: where = CoverageTests_m_WtRunner`WtRunner::initHftStrategies() + 2680 at WtRunner.cpp:1186:4, address = 0x00000001000a3be8
+(lldb) breakpoint set -f WtRunner.cpp -l 1208
+Breakpoint 10: where = CoverageTests_m_WtRunner`WtRunner::initSelStrategies() + 140 at WtRunner.cpp:1208:3, address = 0x00000001000a3e84
+(lldb) run
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[0;33mNote: Google Test filter = R42HftTraderBinding.KnownTraderStillPublishesBoundContext
+[m[0;32m[==========] [mRunning 1 test from 1 test suite.
+[0;32m[----------] [mGlobal test environment set-up.
+[0;32m[----------] [m1 test from R42HftTraderBinding
+[0;32m[ RUN      ] [mR42HftTraderBinding.KnownTraderStillPublishesBoundContext
+[valid] SimpleHft rejected params: missing required parameter code
+Process 68225 launched: '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/round1/build/build_x64/Debug/bin/TestUnits/CoverageTests_m_WtRunner' (arm64)
+Process 68225 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 8.1
+    frame #0: 0x00000001000a3b80 CoverageTests_m_WtRunner`WtRunner::initHftStrategies(this=0x000000010228c510) at WtRunner.cpp:1180:5
+   1177				if (!item.strategy->self()->init(item.config->get("params")))
+   1178				{
+   1179					WTSLogger::error("Initializing HFT strategy {} ({}) failed", item.name, item.id);
+-> 1180					return false;
+    					^
+   1181				}
+   1182			}
+   1183			catch (...)
+Target 0: (CoverageTests_m_WtRunner) stopped.
+(lldb) bt
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 8.1
+  * frame #0: 0x00000001000a3b80 CoverageTests_m_WtRunner`WtRunner::initHftStrategies(this=0x000000010228c510) at WtRunner.cpp:1180:5
+    frame #1: 0x0000000100037f84 CoverageTests_m_WtRunner`R42HftTraderBinding_KnownTraderStillPublishesBoundContext_Test::TestBody(this=0x000000010228beb0) at r28_runner_main_test.cpp:142:2
+    frame #2: 0x00000001005433d4 CoverageTests_m_WtRunner`void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) + 104
+    frame #3: 0x000000010054331c CoverageTests_m_WtRunner`testing::Test::Run() + 208
+    frame #4: 0x0000000100543efc CoverageTests_m_WtRunner`testing::TestInfo::Run() + 212
+    frame #5: 0x0000000100544980 CoverageTests_m_WtRunner`testing::TestSuite::Run() + 456
+    frame #6: 0x000000010054fda8 CoverageTests_m_WtRunner`testing::internal::UnitTestImpl::RunAllTests() + 1328
+    frame #7: 0x000000010054f754 CoverageTests_m_WtRunner`bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) + 104
+    frame #8: 0x000000010054f6b8 CoverageTests_m_WtRunner`testing::UnitTest::Run() + 124
+    frame #9: 0x0000000100108c20 CoverageTests_m_WtRunner`main + 68
+    frame #10: 0x000000018800fe00 dyld`start + 6992
+(lldb) quit

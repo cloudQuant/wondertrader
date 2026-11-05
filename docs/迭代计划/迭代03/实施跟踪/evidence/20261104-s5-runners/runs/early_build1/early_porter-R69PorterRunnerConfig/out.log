@@ -1,0 +1,62 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R69PorterRunnerConfig.*
+[==========] Running 15 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 15 tests from R69PorterRunnerConfig
+[ RUN      ] R69PorterRunnerConfig.BasefilesStringFormsAndEmptyEnvNameBuildCtaEngine
+[       OK ] R69PorterRunnerConfig.BasefilesStringFormsAndEmptyEnvNameBuildCtaEngine (21 ms)
+[ RUN      ] R69PorterRunnerConfig.BasefilesArrayFormsAndInactiveInlineParserBuildCtaEngine
+[       OK ] R69PorterRunnerConfig.BasefilesArrayFormsAndInactiveInlineParserBuildCtaEngine (4 ms)
+[ RUN      ] R69PorterRunnerConfig.ActiveInlineParserWithoutModuleFailsConfig
+[       OK ] R69PorterRunnerConfig.ActiveInlineParserWithoutModuleFailsConfig (2 ms)
+[ RUN      ] R69PorterRunnerConfig.ParserFileMissingKeyFailsConfig
+[       OK ] R69PorterRunnerConfig.ParserFileMissingKeyFailsConfig (3 ms)
+[ RUN      ] R69PorterRunnerConfig.BrokenParserFileFailsConfig
+[       OK ] R69PorterRunnerConfig.BrokenParserFileFailsConfig (2 ms)
+[ RUN      ] R69PorterRunnerConfig.TraderAndExecuterFilesLoadWithRouterSections
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp:300: Failure
+Value of: r->config(cfg.c_str(), false)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R69PorterRunnerConfig.TraderAndExecuterFilesLoadWithRouterSections (2 ms)
+[ RUN      ] R69PorterRunnerConfig.TraderInitFailureInExternalFileFailsConfig
+dlopen(/private/tmp/wt-i03-s5-runners-cov/build_x64/Debug/bin/TestUnits/traders/libr69_module_that_does_not_exist.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-runners-cov/build_x64/Debug/bin/TestUnits/traders/libr69_module_that_does_not_exist.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-runners-cov/build_x64/Debug/bin/TestUnits/traders/libr69_module_that_does_not_exist.dylib' (no such file), '/private/tmp/wt-i03-s5-runners-cov/build_x64/Debug/bin/TestUnits/traders/libr69_module_that_does_not_exist.dylib' (no such file)
+[       OK ] R69PorterRunnerConfig.TraderInitFailureInExternalFileFailsConfig (2 ms)
+[ RUN      ] R69PorterRunnerConfig.MissingExecuterFileAndEmptyDataStillReturnTrue
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp:349: Failure
+Value of: r->config(cfg.c_str(), false)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R69PorterRunnerConfig.MissingExecuterFileAndEmptyDataStillReturnTrue (2 ms)
+[ RUN      ] R69PorterRunnerConfig.ExplicitMissingDataStoreModuleFailsConfigAndLeavesRunnerNotReady
+dlopen(/private/tmp/wt-i03-s5-runners-cov/build_x64/Debug/bin/TestUnits/libr69_no_such_data_storage.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-runners-cov/build_x64/Debug/bin/TestUnits/libr69_no_such_data_storage.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-runners-cov/build_x64/Debug/bin/TestUnits/libr69_no_such_data_storage.dylib' (no such file), '/private/tmp/wt-i03-s5-runners-cov/build_x64/Debug/bin/TestUnits/libr69_no_such_data_storage.dylib' (no such file)
+[       OK ] R69PorterRunnerConfig.ExplicitMissingDataStoreModuleFailsConfigAndLeavesRunnerNotReady (17 ms)
+[ RUN      ] R69PorterRunnerConfig.ValidDataStoreModuleLoadsAndServesKlineQuery
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp:430: Failure
+Expected: (nullptr) != (bars), actual: (nullptr) vs NULL
+the real WtDataStorage reader should return the fed history bars
+
+[  FAILED  ] R69PorterRunnerConfig.ValidDataStoreModuleLoadsAndServesKlineQuery (5 ms)
+[ RUN      ] R69PorterRunnerConfig.UnknownEnvNameFallsBackToHftEngine
+[       OK ] R69PorterRunnerConfig.UnknownEnvNameFallsBackToHftEngine (18 ms)
+[ RUN      ] R69PorterRunnerConfig.HotTagsRefreshAfterRulesLoadedLater
+[       OK ] R69PorterRunnerConfig.HotTagsRefreshAfterRulesLoadedLater (6 ms)
+[ RUN      ] R69PorterRunnerConfig.HotTagsAreIsolatedBetweenInstances
+[       OK ] R69PorterRunnerConfig.HotTagsAreIsolatedBetweenInstances (1 ms)
+[ RUN      ] R69PorterRunnerConfig.RepeatedHotTagQueriesDoNotDuplicateTags
+[       OK ] R69PorterRunnerConfig.RepeatedHotTagQueriesDoNotDuplicateTags (384 ms)
+[ RUN      ] R69PorterRunnerConfig.ReleaseClearsTagsAndHotCodesBeforeReload
+[       OK ] R69PorterRunnerConfig.ReleaseClearsTagsAndHotCodesBeforeReload (8 ms)
+[----------] 15 tests from R69PorterRunnerConfig (487 ms total)
+
+[----------] Global test environment tear-down
+[==========] 15 tests from 1 test suite ran. (488 ms total)
+[  PASSED  ] 12 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] R69PorterRunnerConfig.TraderAndExecuterFilesLoadWithRouterSections
+[  FAILED  ] R69PorterRunnerConfig.MissingExecuterFileAndEmptyDataStillReturnTrue
+[  FAILED  ] R69PorterRunnerConfig.ValidDataStoreModuleLoadsAndServesKlineQuery
+
+ 3 FAILED TESTS

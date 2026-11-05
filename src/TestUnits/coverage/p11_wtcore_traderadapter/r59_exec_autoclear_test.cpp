@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <map>
 #include <memory>
+#include <vector>
 #include <rapidjson/document.h>
 
 using namespace r59x;
@@ -80,6 +81,45 @@ private:
     std::shared_ptr<WtDiffExecuter> exe_;
     wtp::WtExecuterMgr manager_;
     wtp::WtExecQuiesceCoordinator coordinator_;
+};
+
+// 卡9（9a=A+C、9b=A）/ 迭代02 Local 宿主合同：WtLocalExecuter 只有在协调 quiesce
+// 发布完成后才能析构，否则 ~WtLocalExecuter 以 std::terminate fail-stop。栈上宿主
+// 通过不拥有所有权的 manager 条目驱动同一套 quiesce，随后再从 adapter 注销 sink；
+// 守卫须声明在全部宿主之后，以便先于它们析构。
+class R59LocalQuiesceScope
+{
+public:
+    explicit R59LocalQuiesceScope(WtLocalExecuter& local, wtp::TraderAdapter* trader = nullptr,
+        std::vector<wtp::ITrdNotifySink*> sinks = {})
+        : local_(local), trader_(trader), sinks_(std::move(sinks)) {}
+    R59LocalQuiesceScope(const R59LocalQuiesceScope&) = delete;
+    R59LocalQuiesceScope& operator=(const R59LocalQuiesceScope&) = delete;
+
+    ~R59LocalQuiesceScope()
+    {
+        wtp::WtExecuterMgr manager;
+        manager.add_executer(wtp::ExecCmdPtr(&local_, [](wtp::IExecCommand*) {}));
+        wtp::WtExecQuiesceCoordinator coordinator({ &manager });
+        if (!coordinator.quiesce_all() || !coordinator.is_complete() || !manager.wait_quiesced())
+        {
+            ADD_FAILURE() << "Local executor quiesce coordinator failed";
+            std::abort();
+        }
+        for (wtp::ITrdNotifySink* sink : sinks_)
+        {
+            if (trader_ != nullptr && !trader_->removeSink(sink))
+            {
+                ADD_FAILURE() << "TraderAdapter still has an active executor callback";
+                std::abort();
+            }
+        }
+    }
+
+private:
+    WtLocalExecuter& local_;
+    wtp::TraderAdapter* trader_;
+    std::vector<wtp::ITrdNotifySink*> sinks_;
 };
 
 const fs::path& exeFactBinDir()
@@ -322,6 +362,7 @@ const char* kDiffUnitCfg = R"json(
 TEST_F(R59Exec, local_auto_clear_checks_hot_code_and_filters)
 {
     WtLocalExecuter ex(&factory_, "r59_local_ac", &reader_);
+    R59LocalQuiesceScope exQuiesce(ex);
     ex.setStub(&stub_);
     wtp::WTSVariant* cfg = writeCfg("r59_local_ac.json", kLocalClearCfg);
     ASSERT_NE(nullptr, cfg);
@@ -340,6 +381,7 @@ TEST_F(R59Exec, local_auto_clear_checks_hot_code_and_filters)
 
     // 排除列表命中 -> 返回
     WtLocalExecuter excl(&factory_, "r59_local_ex", &reader_);
+    R59LocalQuiesceScope exclQuiesce(excl);
     excl.setStub(&stub_);
     wtp::WTSVariant* cfg2 = writeCfg("r59_local_ex.json", R"json(
     {"scale":1,"poolsize":0,
@@ -354,6 +396,7 @@ TEST_F(R59Exec, local_auto_clear_checks_hot_code_and_filters)
 
     // 包含列表非空但未命中 -> 返回
     WtLocalExecuter miss(&factory_, "r59_local_miss", &reader_);
+    R59LocalQuiesceScope missQuiesce(miss);
     miss.setStub(&stub_);
     wtp::WTSVariant* cfg3 = writeCfg("r59_local_miss.json", R"json(
     {"scale":1,"poolsize":0,
@@ -416,6 +459,7 @@ TEST_F(R59Exec, null_data_manager_and_pool_lifecycle)
         R"json({"scale":1,"poolsize":2,"policy":{"default":{"name":"r59.none"}}})json");
     ASSERT_NE(nullptr, cfg1);
     WtLocalExecuter local(&factory_, "r59_local_pool", nullptr);
+    R59LocalQuiesceScope localQuiesce(local);
     local.setStub(&stub_);
     ASSERT_TRUE(local.init(cfg1));
     cfg1->release();
@@ -515,10 +559,34 @@ TEST_F(R59Exec, set_trader_forwards_orders_only_while_channel_ready)
 
     TraderAdapter trader;
     build(trader, &pm);
+    // 卡5（5b=A、5c=A，WP1 账户门禁）：没有可核验宿主身份的执行单元时，执行器以非共享
+    // owner 下单，同账户同合约被首个 owner 独占。原 oracle 让三个执行器在同一账户同一合约
+    // 各下两单，与已裁定合同冲突；改为 Local/Arbi 使用不同合约，Diff 使用独立账户
+    // （未配置 account_id 的 adapter 各自私有门禁），转发断言保持不变。
+    r59x::R59FakeTraderApi api3;
+    TraderAdapter trader3;
+    ASSERT_TRUE(trader3.initExt("r59_fwd_diff_trader", &api3, &bd_, &pm));
+    ASSERT_TRUE(trader3.run());
+    trader3.onLoginResult(true, "r59", 20240510);
 
     WtLocalExecuter local(&factory_, "r59_local_fwd", &reader_);
     WtArbiExecuter arbi(&factory_, "r59_arbi_fwd", &reader_);
     WtDiffExecuter diff(&factory_, "r59_diff_fwd", nullptr, &bd_);
+    // Declared after all three hosts: quiesce Local, then unregister every sink.
+    R59LocalQuiesceScope localQuiesce(local, &trader, { &local, &arbi });
+    struct DiffSinkScope
+    {
+        TraderAdapter& trader;
+        wtp::ITrdNotifySink* sink;
+        ~DiffSinkScope()
+        {
+            if (!trader.removeSink(sink))
+            {
+                ADD_FAILURE() << "TraderAdapter still has an active Diff callback";
+                std::abort();
+            }
+        }
+    } diffSinkScope{ trader3, &diff };
     local.setStub(&stub_);
     arbi.setStub(&stub_);
     diff.setStub(&stub_);
@@ -539,19 +607,24 @@ TEST_F(R59Exec, set_trader_forwards_orders_only_while_channel_ready)
     // 与 runner 保持同一接线顺序：先绑定、再订阅，最后由订阅后的 ready 回调置位。
     local.setTrader(&trader);
     arbi.setTrader(&trader);
-    diff.setTrader(&trader);
+    diff.setTrader(&trader3);
     trader.addSink(&local);
     trader.addSink(&arbi);
-    trader.addSink(&diff);
+    trader3.addSink(&diff);
     makeReady(trader);
+    makeReady(trader3);
 
     EXPECT_EQ(1u, local.buy(kStdCode, 7000.0, 1.0).size());
     EXPECT_EQ(1u, local.sell(kStdCode, 7000.0, 1.0).size());
-    EXPECT_EQ(1u, arbi.buy(kStdCode, 7000.0, 1.0).size());
-    EXPECT_EQ(1u, arbi.sell(kStdCode, 7000.0, 1.0).size());
+    EXPECT_EQ(1u, arbi.buy(kStdAu, 7000.0, 1.0).size());
+    EXPECT_EQ(1u, arbi.sell(kStdAu, 7000.0, 1.0).size());
     EXPECT_EQ(1u, diff.buy(kStdCode, 7000.0, 1.0).size());
     EXPECT_EQ(1u, diff.sell(kStdCode, 7000.0, 1.0).size());
-    EXPECT_EQ(6u, api2_.n_insert_);
+    EXPECT_EQ(4u, api2_.n_insert_);
+    EXPECT_EQ(2u, api3.n_insert_);
+    // 卡5b/5c：同账户同合约已被 Local 以非共享 owner 独占，Arbi 的同合约委托被门禁拒绝。
+    EXPECT_TRUE(arbi.buy(kStdCode, 7000.0, 1.0).empty());
+    EXPECT_EQ(4u, api2_.n_insert_);
 
     // 撤单同样转发；无订单表时返回 false
     EXPECT_FALSE(local.cancel(424242u));

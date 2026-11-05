@@ -1,0 +1,24 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before-round2/src/TestUnits/coverage/t_TraderXTP/t5_xtp_api_test.cpp	2026-10-31 08:30:24
++++ src/TestUnits/coverage/t_TraderXTP/t5_xtp_api_test.cpp	2026-11-04 20:11:03
+@@ -330,7 +330,9 @@
+ 	void SetUp() override
+ 	{
+ 		WTSVariant* cfg = makeXTVCfg("xtp_t5_flow");
+-		ASSERT_TRUE(api_.init(cfg));
++		// BUG-R93-005 (s5): without the XTP vendor module init fails closed; the
++		// cases below only use the parsed configuration and callbacks.
++		ASSERT_FALSE(api_.init(cfg));
+ 		cfg->release();
+ 
+ 		// 现货分支（isStock 为真时方向恒 WDT_LONG）
+@@ -398,7 +400,9 @@
+ 	TraderXTP other;
+ 	XTPSink other_sink;
+ 	other.registerSpi(&other_sink);
+-	ASSERT_TRUE(other.init(cfg));
++	// BUG-R93-005 (s5): no XTP vendor module on this host -> explicit init failure;
++	// the flowdir default is applied while parsing, before the module load.
++	ASSERT_FALSE(other.init(cfg));
+ 	cfg->release();
+ 
+ 	other.release();

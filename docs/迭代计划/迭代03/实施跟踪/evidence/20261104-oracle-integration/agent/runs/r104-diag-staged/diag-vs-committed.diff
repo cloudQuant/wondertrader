@@ -1,0 +1,28 @@
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp	2026-11-04 08:46:27
++++ /tmp/wt-i03-oracle-20261104/diag-r104/r104_diag_test.cpp	2026-11-04 08:52:57
+@@ -48,7 +48,7 @@
+ #include "Share/StdUtils.hpp"
+ #include "Share/SpinMutex.hpp"
+ #include "WtCore/WtHelper.h"
+-#include "../n02_wtcore_engines/r160_common.h"
++#include "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r160_common.h"
+ 
+ // Expose only TraderAdapter's sink registry for this test's binding assertions.
+ #define private public
+@@ -155,7 +155,7 @@
+ {
+ 	return std::string("env:\n")
+ 		+ "    name: cta\n"
+-		+ "    fees: " + fixture("absent_fees.json") + "\n"
++		+ "    fees: " + fixture("diag_fees.json") + "\n"
+ 		+ "    filters: " + fixture("absent_filters.yaml") + "\n"
+ 		+ "    poolsize: 0\n";
+ }
+@@ -175,6 +175,7 @@
+ 	write_fixture("hots.json", kHots);
+ 	write_fixture("logcfg.yaml", kLogCfg);
+ 	write_fixture("actpolicy.yaml", kActPolicy);
++	write_fixture("diag_fees.json", "{}");
+ }
+ 
+ std::unique_ptr<WtRunner> make_runner()

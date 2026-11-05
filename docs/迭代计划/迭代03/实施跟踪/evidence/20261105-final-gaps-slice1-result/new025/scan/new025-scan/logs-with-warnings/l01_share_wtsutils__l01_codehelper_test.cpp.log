@@ -1,0 +1,26 @@
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l01_share_wtsutils/l01_codehelper_test.cpp:2:
+/opt/homebrew/include/gtest/gtest.h:1394:11: warning: comparison of integers of different signs: 'const unsigned long' and 'const int' [-Wsign-compare]
+ 1394 |   if (lhs == rhs) {
+      |       ~~~ ^  ~~~
+/opt/homebrew/include/gtest/gtest.h:1413:12: note: in instantiation of function template specialization 'testing::internal::CmpHelperEQ<unsigned long, int>' requested here
+ 1413 |     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
+      |            ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l01_share_wtsutils/l01_codehelper_test.cpp:559:2: note: in instantiation of function template specialization 'testing::internal::EqHelper::Compare<unsigned long, int, nullptr>' requested here
+  559 |         EXPECT_EQ(std::strlen(info._fullpid), MAX_INSTRUMENT_LENGTH - 1);
+      |         ^
+/opt/homebrew/include/gtest/gtest.h:1885:54: note: expanded from macro 'EXPECT_EQ'
+ 1885 |   EXPECT_PRED_FORMAT2(::testing::internal::EqHelper::Compare, val1, val2)
+      |                                                      ^
+/opt/homebrew/include/gtest/gtest.h:1476:28: warning: comparison of integers of different signs: 'const unsigned long' and 'const int' [-Wsign-compare]
+ 1476 | GTEST_IMPL_CMP_HELPER_(LT, <)
+      | ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+/opt/homebrew/include/gtest/gtest.h:1462:14: note: expanded from macro 'GTEST_IMPL_CMP_HELPER_'
+ 1462 |     if (val1 op val2) {                                                    \
+      |         ~~~~ ^  ~~~~
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l01_share_wtsutils/l01_codehelper_test.cpp:572:2: note: in instantiation of function template specialization 'testing::internal::CmpHelperLT<unsigned long, int>' requested here
+  572 |         EXPECT_LT(std::strlen(info._fullpid), MAX_INSTRUMENT_LENGTH);
+      |         ^
+/opt/homebrew/include/gtest/gtest.h:1891:44: note: expanded from macro 'EXPECT_LT'
+ 1891 |   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperLT, val1, val2)
+      |                                            ^
+2 warnings generated.

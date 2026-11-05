@@ -9,6 +9,7 @@
  */
 
 #include "WtTWapExeUnit.h"
+#include "../Includes/IExecPluginV2.h"
 
 #include "../Share/TimeUtils.hpp"
 #include "../Includes/WTSVariant.hpp"
@@ -19,8 +20,10 @@
 #include "../Includes/WTSSessionInfo.hpp"
 /***---end---23.5.18---zhaoyk***/
 #include <math.h>
+#include <algorithm>
 #include <cmath>
 #include <limits>
+#include <vector>
 
 
 extern const char* FACT_NAME;
@@ -118,6 +121,88 @@ inline bool is_clear(double target)
 {
 	return (target == DBL_MAX);
 }
+
+struct TwapPositionSnapshot
+{
+	double total;
+	double longTotal;
+	double shortTotal;
+	double longAvailable;
+	double shortAvailable;
+	double netAvailable;
+};
+
+// ExecuteContext has no atomic position snapshot or error status. Verify the
+// individual fields and reject values that change across two reads; this does
+// not detect ABA changes or distinguish a missing position from a real zero.
+static bool checkedTwapPosition(ExecuteContext* ctx, const char* code, TwapPositionSnapshot& out)
+{
+	auto read = [ctx, code]() {
+		return TwapPositionSnapshot{ctx->getPosition(code, false, 3),
+			ctx->getPosition(code, false, 1), ctx->getPosition(code, false, 2),
+			ctx->getPosition(code, true, 1), ctx->getPosition(code, true, 2),
+			ctx->getPosition(code, true, 3)};
+	};
+	const TwapPositionSnapshot first = read();
+	const TwapPositionSnapshot second = read();
+	if (!std::isfinite(first.total) || !std::isfinite(first.longTotal) || !std::isfinite(first.shortTotal) ||
+		!std::isfinite(first.longAvailable) || !std::isfinite(first.shortAvailable) || !std::isfinite(first.netAvailable) ||
+		first.total != second.total || first.longTotal != second.longTotal || first.shortTotal != second.shortTotal ||
+		first.longAvailable != second.longAvailable || first.shortAvailable != second.shortAvailable || first.netAvailable != second.netAvailable ||
+		first.longTotal < 0.0 || first.shortTotal > 0.0 || first.longAvailable < 0.0 || first.shortAvailable > 0.0 ||
+		first.longAvailable > first.longTotal || first.shortAvailable < first.shortTotal ||
+		first.total != first.longTotal + first.shortTotal || first.netAvailable != first.longAvailable + first.shortAvailable)
+		return false;
+	out = first;
+	return true;
+}
+
+// Preserve the order direction and never exceed either the target difference
+// or the canceled order's reported unfilled quantity. Commodity lot metadata
+// is not read here: legacy commodity objects have no initialization/ready
+// contract, and the provider's legal quantity rules require separate checks.
+static double boundedTwapQuantity(double delta, bool closing, double available, double desired, double maximum,
+	double minOpenLots)
+{
+	if (!std::isfinite(delta) || !std::isfinite(available) || !std::isfinite(desired) || !std::isfinite(maximum) ||
+		!std::isfinite(minOpenLots) || delta == 0.0 || desired <= 0.0 || maximum <= 0.0 || minOpenLots < 0.0)
+		return 0.0;
+	double limit = std::min(std::fabs(delta), maximum);
+	if (closing)
+		limit = std::min(limit, available);
+	const double quantity = std::min(desired, limit);
+	if (quantity <= 0.0 || (!closing && quantity < minOpenLots))
+		return 0.0;
+	return std::copysign(quantity, delta);
+}
+// Card E (BUG-R7-012): every TWAP order is sized in the exchange's minimum
+// legal unit taken from the commodity's lot metadata (lot step and minimum
+// order quantity). The result is the largest legal quantity not above the
+// requested magnitude; 0 means no legal order exists and the remainder stays
+// outstanding. No odd-lot exception is assumed for any market. rulesKnown is
+// false when the metadata is absent or invalid, in which case nothing may be
+// sent because legality cannot be established.
+static double legalTwapLotQuantity(WTSCommodityInfo* comm, double magnitude, bool& rulesKnown)
+{
+	rulesKnown = false;
+	if (comm == NULL)
+		return 0.0;
+	const double lotStep = comm->getLotsTick();
+	const double minLots = comm->getMinLots();
+	if (!std::isfinite(lotStep) || lotStep <= 0.0 || !std::isfinite(minLots) || minLots <= 0.0)
+		return 0.0;
+	rulesKnown = true;
+	if (!std::isfinite(magnitude) || magnitude <= 0.0)
+		return 0.0;
+	// A relative tolerance keeps exact multiples (e.g. 3 x 0.1) from being
+	// rounded down one step by binary floating-point error.
+	const double steps = std::floor(magnitude / lotStep * (1.0 + 1e-12) + 1e-9);
+	const double quantity = steps * lotStep;
+	if (!std::isfinite(quantity) || quantity <= 0.0 || quantity + 1e-9 * minLots < minLots)
+		return 0.0;
+	return std::min(quantity, magnitude);
+}
+
 /**
  * @brief 获取所属执行器工厂名称
  * @details 返回当前执行单元所属的工厂名称，用于执行器的工厂注册和搜寻
@@ -147,6 +232,8 @@ const char* WtTWapExeUnit::getName()
  */
 void WtTWapExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg)
 {
+	// Reserved host key (IExecPluginV2.h): automatic timeout cancels only with host-verified identity.
+	_host_order_identity = cfg != NULL && cfg->getUInt32(WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY) == 1;
 	_config_valid = false;
 	_target_pos = 0.0;
 	_target_pos_valid = false;
@@ -199,7 +286,7 @@ void WtTWapExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* c
 	WTSVariant* totalTimesValue = cfg->get("total_times");
 	const double totalTimes = totalTimesValue ? totalTimesValue->asDouble() : 0.0;
 	if (!std::isfinite(totalTimes) || totalTimes < 1.0 ||
-		totalTimes > static_cast<double>(std::numeric_limits<uint32_t>::max()))
+		totalTimes > static_cast<double>((std::numeric_limits<uint32_t>::max)()))
 	{
 		ctx->writeLog(fmt::format("TWAP init rejected for {}: total_times must be greater than zero and fit in uint32", stdCode).c_str());
 		return;
@@ -266,8 +353,17 @@ void WtTWapExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* c
  * @param price 委托价格
  * @param isCanceled 是否已撤销
  */
-void WtTWapExeUnit::on_order(uint32_t localid, const char* stdCode, bool /*isBuy*/, double leftover, double /*price*/, bool isCanceled)
+void WtTWapExeUnit::on_order(uint32_t localid, const char* stdCode, bool isBuy, double leftover, double /*price*/, bool isCanceled)
 {
+	// A provider may synchronously report before its IDs are returned and
+	// registered. The legacy callback does not carry a submission token.
+	if (_submission_in_progress.load(std::memory_order_acquire))
+	{
+		_submission_unverified.store(true, std::memory_order_release);
+		return;
+	}
+	if (stdCode == NULL || _code != stdCode)
+		return;
 	// 如果订单不在监控中，则忽略此回报
 	if (!_orders_mon.has_order(localid))
 		return;
@@ -305,11 +401,23 @@ void WtTWapExeUnit::on_order(uint32_t localid, const char* stdCode, bool /*isBuy
 			return;
 		}
 
-		// 获取当前实际仓位
-		double realPos = _ctx->getPosition(stdCode);
+		TwapPositionSnapshot position;
+		if (!checkedTwapPosition(_ctx, stdCode, position))
+		{
+			_ctx->writeLog(fmt::format("Order {} of {} canceled; position snapshot is inconsistent, retry held", localid, stdCode).c_str());
+			return;
+		}
 		
-		// 如果实际仓位与本轮目标仓位不一致，需要重新发单
-		if (!decimal::eq(realPos, _this_target))
+		// The cancellation's leftover is an upper bound, not proof that all
+		// fills have reached the position view. Never reverse the canceled order
+		// or enlarge its unfilled quantity to satisfy an opening minimum.
+		const double delta = _this_target - position.total;
+		const bool closing = delta > 0.0 ? position.shortTotal < 0.0 : position.longTotal > 0.0;
+		const double available = delta > 0.0 ? -position.shortAvailable : position.longAvailable;
+		const double retryQty = _comm_info && _last_tick && std::isfinite(leftover) &&
+			((isBuy && delta > 0.0) || (!isBuy && delta < 0.0))
+			? boundedTwapQuantity(delta, closing, available, leftover, leftover, _min_open_lots) : 0.0;
+		if (retryQty != 0.0)
 		{
 			/***---begin---23.5.22---zhaoyk***/
 			// 记录订单撤销后重发日志
@@ -318,11 +426,11 @@ void WtTWapExeUnit::on_order(uint32_t localid, const char* stdCode, bool /*isBuy
 			// 增加撤单次数，用于下次发单时的价格偏移
 			_cancel_times++;
 			
-			// 撤单后重新发单，确保发单数量不小于最小开仓数量
-			// fire_at_once(_this_target - realPos);
-			fire_at_once(max(_min_open_lots, _this_target - realPos));
+			fire_at_once(retryQty, closing);
 			/***---end---23.5.22---zhaoyk***/
 		}
+		else
+			_ctx->writeLog(fmt::format("Order {} of {} canceled; no bounded remaining slice to retry", localid, stdCode).c_str());
 	}
 	/***---begin---23.5.22---zhaoyk***/
 	// 处理异常情况：订单已撤销但撤单计数不为0，这可能是一个错误状态
@@ -350,6 +458,11 @@ void WtTWapExeUnit::on_channel_ready()
 
 	// 标记交易通道为就绪状态
 	_channel_ready = true;
+	if (_submission_unverified.load(std::memory_order_acquire))
+	{
+		_ctx->writeLog(fmt::format("TWAP order outcome for {} is unverified; automatic actions remain held", _code).c_str());
+		return;
+	}
 	
 	// 获取未完成的订单数量
 	double undone = _ctx->getUndoneQty(_code.c_str());
@@ -474,7 +587,7 @@ void WtTWapExeUnit::on_tick(WTSTickData* newTick)
 		
 		// 获取未完成订单数量和实际仓位
 		double undone = _ctx->getUndoneQty(stdCode);
-		double realPos = _ctx->getPosition(stdCode);
+		double realPos = _ctx->getPosition(stdCode, false);
 		
 		// 如果目标仓位与当前仓位加未完成订单不一致，需要调整仓位
 		if (!decimal::eq(newVol, undone + realPos))
@@ -495,6 +608,20 @@ void WtTWapExeUnit::on_tick(WTSTickData* newTick)
 		{			
 			// 没有端到端订单身份令牌时，不通过旧 localid 接口发起延迟自动撤单。
 			_orders_mon.check_orders_with_generation(_ord_sticky, now, [this, now](uint32_t localid, uint64_t generation) {
+				if (_host_order_identity)
+				{
+					// 迭代03 卡5 / N05-003：宿主按 owner 与不可复用身份核验后才撤单；核验失败即隔离，不回退裸 ID。
+					const int verified = _orders_mon.cancel_timeout_verified(localid, generation, _ord_sticky, now,
+						[this](uint32_t id) { return _ctx->cancel(id); });
+					if (verified > 0)
+					{
+					_cancel_cnt++;
+						_ctx->writeLog((std::string("Expired order ") + std::to_string(localid) + " of " + _code + " canceled with host-verified identity").c_str());
+					}
+					else if (verified < 0)
+						_ctx->writeLog((std::string("Expired order ") + std::to_string(localid) + " of " + _code + " cannot be auto-canceled: host could not verify its identity; order remains monitored").c_str());
+					return;
+				}
 				if (!_orders_mon.mark_unverified_timeout(localid, generation, _ord_sticky, now))
 					return; // 终态或 localid 已复用；不得复活旧快照
 				_ctx->writeLog(fmt::format("Expired order {} of {} cannot be auto-canceled: legacy localid is unverified; order remains monitored",
@@ -523,7 +650,11 @@ void WtTWapExeUnit::on_tick(WTSTickData* newTick)
  */
 void WtTWapExeUnit::on_trade(uint32_t /*localid*/, const char* /*stdCode*/, bool /*isBuy*/, double /*vol*/, double /*price*/)
 {
-	// 不在此处触发交易逻辑，而是在on_tick中处理
+	if (_submission_in_progress.load(std::memory_order_acquire))
+	{
+		_submission_unverified.store(true, std::memory_order_release);
+		return;
+	}
 }
 
 /**
@@ -536,6 +667,11 @@ void WtTWapExeUnit::on_trade(uint32_t /*localid*/, const char* /*stdCode*/, bool
  */
 void WtTWapExeUnit::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* /*message*/)
 {
+	if (_submission_in_progress.load(std::memory_order_acquire))
+	{
+		_submission_unverified.store(true, std::memory_order_release);
+		return;
+	}
 	// 如果委托失败，需要处理
 	if (!bSuccess)
 	{
@@ -557,12 +693,77 @@ void WtTWapExeUnit::on_entrust(uint32_t localid, const char* /*stdCode*/, bool b
  *          当发生撤单后重发或者需要立即执行交易时使用
  * @param qty 目标交易数量，正数表示买入，负数表示卖出
  */
-void WtTWapExeUnit::fire_at_once(double qty)
+bool WtTWapExeUnit::rememberOrders(const OrderIDs& ids, uint64_t now)
+{
+	std::vector<uint32_t> validIds;
+	bool verified = !ids.empty();
+	for (uint32_t id : ids)
+	{
+		if (id == 0 || id == (std::numeric_limits<uint32_t>::max)() ||
+			std::find(validIds.begin(), validIds.end(), id) != validIds.end() || _orders_mon.has_order(id))
+		{
+			verified = false;
+			continue;
+		}
+		validIds.push_back(id);
+	}
+	if (!verified)
+		_submission_unverified.store(true, std::memory_order_release);
+	if (!validIds.empty())
+		_orders_mon.push_order(validIds.data(), static_cast<uint32_t>(validIds.size()), now, isCanCancel);
+	if (!verified)
+		_ctx->writeLog(fmt::format("TWAP order outcome for {} is unverified; automatic actions held", _code).c_str());
+	return verified;
+}
+
+bool WtTWapExeUnit::submitOrder(bool isBuy, double price, double qty, bool forceClose, uint64_t now,
+	bool newSlice, double sliceTarget)
+{
+	if (_submission_unverified.load(std::memory_order_acquire) || _orders_mon.has_unverified_timeout())
+		return false;
+	bool expected = false;
+	if (!_submission_in_progress.compare_exchange_strong(expected, true, std::memory_order_acq_rel))
+		return false;
+	if (_submission_unverified.load(std::memory_order_acquire) || _orders_mon.has_unverified_timeout())
+	{
+		_submission_in_progress.store(false, std::memory_order_release);
+		return false;
+	}
+	try
+	{
+		const OrderIDs ids = isBuy ? _ctx->buy(_code.c_str(), price, qty, forceClose) :
+			_ctx->sell(_code.c_str(), price, qty, forceClose);
+		const bool verified = rememberOrders(ids, now);
+		if (verified && !_submission_unverified.load(std::memory_order_acquire) && newSlice)
+		{
+			_this_target = sliceTarget;
+			_this_target_valid = true;
+			_last_fire_time = now;
+			_fired_times += 1;
+		}
+		_submission_in_progress.store(false, std::memory_order_release);
+		if (_submission_unverified.load(std::memory_order_acquire))
+		{
+			_ctx->writeLog(fmt::format("TWAP order outcome for {} is unverified; automatic actions held", _code).c_str());
+			return false;
+		}
+		return verified;
+	}
+	catch (...)
+	{
+		_submission_unverified.store(true, std::memory_order_release);
+		_submission_in_progress.store(false, std::memory_order_release);
+		_ctx->writeLog(fmt::format("TWAP submission for {} threw; order outcome is unverified", _code).c_str());
+		return false;
+	}
+}
+
+void WtTWapExeUnit::fire_at_once(double qty, bool forceClose)
 {
 	if (!_this_target_valid)
 		return;
 
-	if (_orders_mon.has_unverified_timeout())
+	if (_submission_unverified.load(std::memory_order_acquire) || _orders_mon.has_unverified_timeout())
 		return;
 
 	if (!_config_valid)
@@ -572,12 +773,24 @@ void WtTWapExeUnit::fire_at_once(double qty)
 	if (decimal::eq(qty, 0))
 		return;
 
+	// Card E (BUG-R7-012): a retry may only send a legal quantity; the rest of
+	// the canceled slice stays outstanding for the next regular slice.
+	bool lotRulesKnown = false;
+	const double legalQty = legalTwapLotQuantity(_comm_info, std::fabs(qty), lotRulesKnown);
+	if (!lotRulesKnown || legalQty == 0.0)
+	{
+		_ctx->writeLog(fmt::format("TWAP retry of {} for {} held: {}", qty, _code,
+			lotRulesKnown ? "below the minimum legal order unit, remainder kept outstanding" :
+			"lot rules unavailable").c_str());
+		return;
+	}
+	qty = std::copysign(legalQty, qty);
+
 	// 增加行情数据引用计数，防止在使用过程中被释放
 	_last_tick->retain();
 	WTSTickData* curTick = _last_tick;
 	
-	// 获取合约代码和当前时间
-	const char* code = _code.c_str();
+	// 获取当前时间
 	uint64_t now = _ctx->getCurTime();
 	
 	// 根据数量正负确定交易方向，正数为买入，负数为卖出
@@ -625,18 +838,12 @@ void WtTWapExeUnit::fire_at_once(double qty)
 		isCanCancel = false;	//如果价格被修正为涨跌停价，订单不可撤销
 	}
 
-	OrderIDs ids;
-	if (_orders_mon.has_unverified_timeout())
+	if (_submission_unverified.load(std::memory_order_acquire) || _orders_mon.has_unverified_timeout())
 	{
 		curTick->release();
 		return;
 	}
-	if (qty > 0)
-		ids = _ctx->buy(code, targetPx, abs(qty));
-	else
-		ids = _ctx->sell(code, targetPx, abs(qty));
-
-	_orders_mon.push_order(ids.data(), ids.size(), now, isCanCancel);
+	(void)submitOrder(qty > 0, targetPx, abs(qty), forceClose, now);
 
 	curTick->release();
 }
@@ -649,7 +856,7 @@ void WtTWapExeUnit::fire_at_once(double qty)
  */
 void WtTWapExeUnit::do_calc()
 {
-	if (_orders_mon.has_unverified_timeout())
+	if (_submission_unverified.load(std::memory_order_acquire) || _orders_mon.has_unverified_timeout())
 		return;
 
 	if (!_config_valid)
@@ -682,8 +889,14 @@ void WtTWapExeUnit::do_calc()
 	// 获取真实目标仓位（处理清仓标记DBL_MAX的情况）
 	double newVol = get_real_target(_target_pos);
 	
-	// 获取当前实际仓位
-	double realPos = _ctx->getPosition(code);
+	TwapPositionSnapshot position;
+	if (!checkedTwapPosition(_ctx, code, position))
+	{
+		_ctx->writeLog(fmt::format("TWAP position snapshot for {} is inconsistent; order held", _code).c_str());
+		return;
+	}
+	// The target denotes total net exposure, not merely currently available lots.
+	double realPos = position.total;
 	
 	// 计算目标仓位与实际仓位的差值，即需要交易的数量
 	double diffQty = newVol - realPos;
@@ -697,7 +910,9 @@ void WtTWapExeUnit::do_calc()
 	}
 
 	// 如果目标仓位与实际仓位相等，则无需发单，直接返回
-	if (decimal::eq(diffQty, 0))
+	// BUG-R7-004（卡15复核）：清仓指令在净持仓为零时仍可能有锁仓（多空毛仓），
+	// 原先在此直接返回，使下方的清仓分支成为不可达代码；清仓时继续进入该分支。
+	if (decimal::eq(diffQty, 0) && !is_clear(_target_pos))
 		return;
 	
 	// 检查是否有与目标仓位变动方向相反的未完成订单
@@ -761,6 +976,10 @@ void WtTWapExeUnit::do_calc()
 
 		// 如果还有多头仓位，则将目标仓位设置为卖出指令，强制触发清仓                      
 		newVol = -min(lPos, _order_lots);
+		// The slice below is sized from diffQty; keep it in step with the forced
+		// closing target (net is zero here, so this sells available longs first;
+		// the remaining short is then bought back through the ordinary path).
+		diffQty = newVol - curPos;
 		
 		// 记录清仓过程触发日志
 		_ctx->writeLog(fmtutil::format("Clearing process triggered, target position of {} has been set to {}", _code.c_str(), newVol));
@@ -786,7 +1005,7 @@ void WtTWapExeUnit::do_calc()
 	/***---end---23.5.26---zhaoyk***/
 
 	// 计算剩余的发单次数
-	uint32_t leftTimes = _total_times - _fired_times;
+	uint32_t leftTimes = _fired_times >= _total_times ? 0 : _total_times - _fired_times;
 	
 	/***---begin---23.5.22---zhaoyk***/
 	// 记录当前发单次数日志
@@ -804,25 +1023,45 @@ void WtTWapExeUnit::do_calc()
 	// 计算本次发单数量
 	double curQty = 0;
 	
-	// 如果剩余次数为0，则需要全部发单（打板）
-	if (leftTimes == 0 && !decimal::eq(diffQty, 0))
+	// Preserve the existing TWAP slice sizing while capping the result to the
+	// target difference. Legal exchange increments require separate validation.
+	bNeedShowHand = leftTimes == 0;
+	const double desired = leftTimes == 0 ? std::fabs(diffQty) :
+		std::max(_min_open_lots, std::round(std::fabs(diffQty) / leftTimes));
+	const bool closing = diffQty > 0.0 ? position.shortTotal < 0.0 : position.longTotal > 0.0;
+	const double available = diffQty > 0.0 ? -position.shortAvailable : position.longAvailable;
+	curQty = boundedTwapQuantity(diffQty, closing, available, desired, std::fabs(diffQty), _min_open_lots);
+	if (curQty == 0.0)
 	{
-		// 标记需要打板
-		bNeedShowHand = true;
-		
-		// 取最小开仓数量和差异数量的最大值
-		curQty = max(_min_open_lots, diffQty); 
+		_ctx->writeLog(fmt::format("No bounded TWAP slice for {}: target difference {} remains outstanding", _code, diffQty).c_str());
+		return;
 	}
-	else {
-		// 如果还有剩余次数，则将差异数量平均分配
-		// 取最小开仓数量和平均分配数量的最大值，并保持原始符号
-		curQty = std::max(_min_open_lots, round(abs(diffQty) / leftTimes)) * abs(diffQty) / diffQty;
+	// Card E (BUG-R7-012): round the bounded slice down to the exchange's
+	// minimum legal unit (T+1 sells are already capped by available volume).
+	// A remainder smaller than one legal unit is never sent as an illegal lot;
+	// it stays outstanding and does not consume a TWAP slice.
+	{
+		bool lotRulesKnown = false;
+		const double legalQty = legalTwapLotQuantity(_comm_info, std::fabs(curQty), lotRulesKnown);
+		if (!lotRulesKnown)
+		{
+			_ctx->writeLog(fmt::format("TWAP slice for {} held: lot rules are unavailable, target difference {} remains outstanding",
+				_code, diffQty).c_str());
+			return;
+		}
+		if (legalQty == 0.0)
+		{
+			_ctx->writeLog(fmt::format("TWAP slice for {} held: {} is below the minimum legal order unit, target difference {} remains outstanding",
+				_code, std::fabs(curQty), diffQty).c_str());
+			return;
+		}
+		curQty = std::copysign(legalQty, curQty);
 	}
 	/***---end---23.5.22---zhaoyk***/
 	/***---end---23.5.22---zhaoyk***/
 	
-	// 设定本轮目标仓位（当前实际仓位 + 本次发单数量）
-	_this_target = realPos + curQty;
+	// Only publish this slice target once the host returns at least one order ID.
+	const double nextSliceTarget = realPos + curQty;
 
 	// Borrowed from _last_tick; the member owns this reference until the next tick or destruction.
 	WTSTickData* curTick = _last_tick;
@@ -871,19 +1110,9 @@ void WtTWapExeUnit::do_calc()
 		isCanCancel = false;	//如果价格被修正为涨跌停价，订单不可撤销
 	}
 	//最后发出指令
-	OrderIDs ids;
-	if (_orders_mon.has_unverified_timeout())
+	if (_submission_unverified.load(std::memory_order_acquire) || _orders_mon.has_unverified_timeout())
 		return;
-	if (curQty > 0)
-		ids = _ctx->buy(code, targetPx, abs(curQty));
-	else
-		ids = _ctx->sell(code, targetPx, abs(curQty));
-
-	_orders_mon.push_order(ids.data(), ids.size(), now, isCanCancel);
-	if (!ids.empty())
-		_this_target_valid = true;
-	_last_fire_time = now;
-	_fired_times += 1;
+	(void)submitOrder(curQty > 0, targetPx, abs(curQty), closing, now, true, nextSliceTarget);
 
 }
 

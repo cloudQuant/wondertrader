@@ -18,6 +18,8 @@
  */
 #include <gtest/gtest.h>
 
+#include <cmath>
+
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -148,6 +150,17 @@ namespace
 		bool positionMapNull() const { return m_mapPosition == nullptr; }
 		size_t positionMapSize() const { return m_mapPosition == nullptr ? 0 : m_mapPosition->size(); }
 		size_t queueSize() const { return m_queQuery.size(); }
+		/* BUG-R65-002：直接注入回调的用例需先登记在途持仓请求号，模拟 queryPositions 已发送。 */
+#ifdef WT_I03_SDK_EVENTS_BASELINE
+		/* 红色对照：修复前无在途请求号，登记为 no-op，查询返回 -1 以示"无跟踪"。 */
+		void expectPositionRequest(int) {}
+		int positionRequestInFlight() const { return -1; }
+#else
+		void expectPositionRequest(int requestId) { m_iPosQryReqID.store(requestId); }
+		int positionRequestInFlight() const { return m_iPosQryReqID.load(); }
+#endif
+		bool inQuery() const { return m_bInQuery; }
+		void setInQuery(bool value) { m_bInQuery = value; }
 		void drainQueue()
 		{
 			while (!m_queQuery.empty())
@@ -225,6 +238,13 @@ namespace
 		void onLoginResult(bool ok, const char* msg, uint32_t date) override
 		{
 			logins.emplace_back(ok, msg == nullptr ? "" : msg, date);
+		}
+		// BUG-L01-014
+		std::vector<std::string> unresolved_raw;
+		void onUnresolvedProviderReport(const char* kind, const char* reason, const char* raw) override
+		{
+			(void)reason;
+			unresolved_raw.push_back(std::string(kind ? kind : "") + "|" + (raw ? raw : ""));
 		}
 		void handleTraderLog(WTSLogLevel ll, const char* message) override
 		{
@@ -498,9 +518,17 @@ namespace
 		{
 			++n_calls_; ++qry_account; return stub_ret_;
 		}
-		int ReqQryInvestorPosition(CThostFtdcQryInvestorPositionField*, int) override
+		/* BUG-R65-002：记录请求号；可在 SDK 调用返回前同步回调，并单独控制持仓查询返回值。 */
+		std::vector<int> position_request_ids;
+		int position_ret = 0;
+		std::function<void(int)> position_sync_hook;
+		int ReqQryInvestorPosition(CThostFtdcQryInvestorPositionField*, int requestId) override
 		{
-			++n_calls_; ++qry_position; return stub_ret_;
+			++n_calls_; ++qry_position;
+			position_request_ids.push_back(requestId);
+			if (position_sync_hook)
+				position_sync_hook(requestId);
+			return position_ret != 0 ? position_ret : stub_ret_;
 		}
 		int ReqQryOrder(CThostFtdcQryOrderField*, int) override
 		{
@@ -597,14 +625,31 @@ TEST(R61_TraderCTPOpt, connect_subscribes_topics_and_disconnect_releases_api)
 	probe.disconnect();
 	EXPECT_EQ(1u, api.release_calls);
 
-	/* quick 分支：订阅 QUICK 主题 */
+	/* 迭代03 s5（卡9/T2-CTP-03 同型）改写：旧断言要求同实例 disconnect 后可再次 connect 新 API。
+	 * 旧 SDK 对象的迟到回调无法与新对象区分，实例改为单次使用：再次 connect 被拒绝且不调用 creator。
+	 * 原断言见证据 before/。 */
 	R61OptApi api2;
 	g_created_opt_api = &api2;
 	probe.setQuick(true);
 	probe.connect();
+	EXPECT_EQ(0u, api2.init_calls);
+	EXPECT_EQ(nullptr, probe.api());
+	EXPECT_TRUE(probe.workerNull());
+	probe.disconnect();
+	EXPECT_EQ(0u, api2.release_calls);
+
+	/* quick 分支：新实例订阅 QUICK 主题 */
+	R61OptProbe quick;
+	quick.harden();
+	quick.setFlowDir(tmp.path + "/");
+	quick.setBrokerUser("9999", "tester");
+	quick.setFront("tcp://127.0.0.1:1");
+	quick.setCreator(&r61_opt_creator);
+	quick.setQuick(true);
+	quick.connect();
 	EXPECT_EQ((int)THOST_TERT_QUICK, (int)api2.pub_topic);
 	EXPECT_EQ((int)THOST_TERT_QUICK, (int)api2.priv_topic);
-	probe.disconnect();
+	quick.disconnect();
 	EXPECT_EQ(1u, api2.release_calls);
 	g_created_opt_api = nullptr;
 }
@@ -824,14 +869,26 @@ TEST(R61_TraderCTPOpt, order_insert_and_cancel_fill_ctp_requests)
 	EXPECT_EQ(2, api.order.VolumeTotalOriginal);
 	EXPECT_EQ((int)THOST_FTDC_TC_IOC, (int)api.order.TimeCondition);
 	EXPECT_EQ((int)THOST_FTDC_VC_AV, (int)api.order.VolumeCondition);
-	EXPECT_EQ("0", std::string(api.order.OrderRef));
+	/* 迭代03 s5 / T2-CTP-08（卡6d 用户裁定：缺委托 ID 统一原子分配唯一 OrderRef）改写：
+	 * 旧断言要求无 tag 单取 m_orderRef 当前值 "0" 且第二单复用同一 OrderRef（BUG-R61-004），
+	 * 与 6d 冲突。现合同：缺 ID 分配 1、2…，写回委托 ID 与自动 tag；同一身份不重复提交。原断言见证据 before/。 */
+	EXPECT_EQ("1", std::string(api.order.OrderRef));
+	EXPECT_STREQ("000005#0000000006#000001", ent->getEntrustID());
+	EXPECT_STREQ("ctpopt-auto:000005#0000000006#000001", ent->getUserTag());
 
-	/* 发送失败日志 */
+	/* 发送失败日志：第二张无 tag 单分配不同 OrderRef */
+	WTSEntrust* ent2 = WTSEntrust::create("rb2610", 1, 3510.0, "CFFEX");
+	ent2->setContractInfo(fx.ct);
 	api.stub_ret_ = -7;
-	EXPECT_EQ(0, probe.orderInsert(ent));
+	EXPECT_EQ(0, probe.orderInsert(ent2));
 	EXPECT_TRUE(sink.hasLog("Order inserting failed"));
-	/* 无 userTag 的第二单仍复用同一 OrderRef（BUG-R61-004） */
-	EXPECT_EQ("0", std::string(api.order.OrderRef));
+	EXPECT_EQ("2", std::string(api.order.OrderRef));
+	/* 同一身份再次提交（含已发送失败）被拒绝，不调用 SDK */
+	api.stub_ret_ = 0;
+	EXPECT_EQ(-1, probe.orderInsert(ent));
+	EXPECT_EQ(-1, probe.orderInsert(ent2));
+	EXPECT_EQ(2u, api.order_calls);
+	ent2->release();
 
 	/* 带 userTag：orderRef 取 entrustID 的第三段，并写入 ini */
 	api.stub_ret_ = 0;
@@ -849,8 +906,8 @@ TEST(R61_TraderCTPOpt, order_insert_and_cancel_fill_ctp_requests)
 	act->setOrderID("SYS42");
 	EXPECT_EQ(0, probe.orderAction(act));
 	ASSERT_EQ(1u, api.action_calls);
-	EXPECT_EQ(5u, api.action.FrontID);
-	EXPECT_EQ(6u, api.action.SessionID);
+	EXPECT_EQ(5, api.action.FrontID);
+	EXPECT_EQ(6, api.action.SessionID);
 	EXPECT_EQ("42", std::string(api.action.OrderRef));
 	EXPECT_EQ((int)THOST_FTDC_AF_Delete, (int)api.action.ActionFlag);
 	EXPECT_EQ("rb2610", std::string(api.action.InstrumentID));
@@ -1056,15 +1113,30 @@ TEST(R61_TraderCTPOpt, option_exec_order_paths_fill_ctp_requests)
 	EXPECT_EQ(3, api.exec_order.Volume);
 	EXPECT_EQ("55", std::string(api.exec_order.ExecOrderRef));
 
-	api.stub_ret_ = -8;
-	EXPECT_EQ(0, probe.orderInsertOpt(ent));
-	EXPECT_TRUE(sink.hasLog("Option execution order inserting failed"));
+	/* 迭代03 s5 / T2-CTP-08（卡6d）改写：旧断言重复提交同一委托并期望无 tag 时 ExecOrderRef 取
+	 * m_orderRef 当前值 "0"（BUG-R61-004）。现合同：同一身份不重复提交；缺 ID 原子分配且高于已保留的
+	 * 预分配引用（55）；空 tag 补自动 tag。原断言见证据 before/。 */
+	EXPECT_EQ(-1, probe.orderInsertOpt(ent));
+	EXPECT_EQ(1u, api.exec_order_calls);
 
-	/* 无 userTag：ExecOrderRef 直接取 m_orderRef 当前值且不递增（BUG-R61-004） */
-	ent->setUserTag("");
+	WTSEntrust* failing = WTSEntrust::create("rb2610", 3, 0, "CFFEX", BT_EXECUTE);
+	failing->setContractInfo(fx.ct);
+	failing->setUserTag("exectag2");
+	failing->setEntrustID("000009#0000000010#000056");
+	api.stub_ret_ = -8;
+	EXPECT_EQ(0, probe.orderInsertOpt(failing));
+	EXPECT_TRUE(sink.hasLog("Option execution order inserting failed"));
+	EXPECT_EQ("56", std::string(api.exec_order.ExecOrderRef));
+	failing->release();
+
+	WTSEntrust* untagged = WTSEntrust::create("rb2610", 3, 0, "CFFEX", BT_EXECUTE);
+	untagged->setContractInfo(fx.ct);
 	api.stub_ret_ = 0;
-	EXPECT_EQ(0, probe.orderInsertOpt(ent));
-	EXPECT_EQ("0", std::string(api.exec_order.ExecOrderRef));
+	EXPECT_EQ(0, probe.orderInsertOpt(untagged));
+	EXPECT_EQ("57", std::string(api.exec_order.ExecOrderRef));
+	EXPECT_STREQ("000009#0000000010#000057", untagged->getEntrustID());
+	EXPECT_STREQ("ctpopt-auto:000009#0000000010#000057", untagged->getUserTag());
+	untagged->release();
 
 	/* 非行权业务 → 拒绝并记日志；空指针 → -1 */
 	ent->setBusinessType(BT_CASH);
@@ -1080,8 +1152,8 @@ TEST(R61_TraderCTPOpt, option_exec_order_paths_fill_ctp_requests)
 	api.stub_ret_ = 0;
 	EXPECT_EQ(0, probe.orderActionOpt(act));
 	ASSERT_EQ(1u, api.exec_action_calls);
-	EXPECT_EQ(9u, api.exec_action.FrontID);
-	EXPECT_EQ(10u, api.exec_action.SessionID);
+	EXPECT_EQ(9, api.exec_action.FrontID);
+	EXPECT_EQ(10, api.exec_action.SessionID);
 	EXPECT_EQ("55", std::string(api.exec_action.ExecOrderRef));
 	EXPECT_EQ((int)THOST_FTDC_AF_Delete, (int)api.exec_action.ActionFlag);
 	EXPECT_EQ("rb2610", std::string(api.exec_action.InstrumentID));
@@ -1353,6 +1425,8 @@ TEST(R61_TraderCTPOpt, position_query_covers_open_cover_combo_and_negative)
 	R61OptProbe probe;
 	probe.harden();
 	probe.registerSpi(&sink);
+	/* BUG-R65-002：同一批持仓回报必须回显同一在途请求号。 */
+	probe.expectPositionRequest(1);
 
 	CThostFtdcInvestorPositionField p;
 	std::memset(&p, 0, sizeof(p));
@@ -1379,7 +1453,7 @@ TEST(R61_TraderCTPOpt, position_query_covers_open_cover_combo_and_negative)
 	p.UseMargin = 100.0;
 	p.PositionProfit = 0.0;
 	p.PositionCost = 200.0;
-	probe.OnRspQryInvestorPosition(&p, nullptr, 2, false);
+	probe.OnRspQryInvestorPosition(&p, nullptr, 1, false);
 
 	/* 负仓 + 零保证金：命中套利兜底，可用量强制归零 */
 	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "neg2610");
@@ -1389,14 +1463,14 @@ TEST(R61_TraderCTPOpt, position_query_covers_open_cover_combo_and_negative)
 	p.UseMargin = 0.0;
 	p.PositionProfit = 0.0;
 	p.PositionCost = 0.0;
-	probe.OnRspQryInvestorPosition(&p, nullptr, 3, false);
+	probe.OnRspQryInvestorPosition(&p, nullptr, 1, false);
 
 	/* 末笔：用一条全零的已登记合约触发收尾（避免同一 key 二次累计），
 	 * 先返回聚合持仓再释放 map */
 	std::memset(&p, 0, sizeof(p));
 	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "zero2610");
 	std::snprintf(p.ExchangeID, sizeof(p.ExchangeID), "%s", "SHFE");
-	probe.OnRspQryInvestorPosition(&p, nullptr, 5, true);
+	probe.OnRspQryInvestorPosition(&p, nullptr, 1, true);
 
 	ASSERT_EQ(4u, sink.positions.size());
 	const R61OptSink::PosCap* rb = findPos(sink.positions, "rb2610");
@@ -1408,7 +1482,7 @@ TEST(R61_TraderCTPOpt, position_query_covers_open_cover_combo_and_negative)
 	EXPECT_DOUBLE_EQ(4.0, rb->availPre);		/* 4+6-2-1-3 */
 	EXPECT_DOUBLE_EQ(170.0, rb->avg);		/* 17000/10/10 */
 	EXPECT_DOUBLE_EQ(500.0, rb->margin);
-	EXPECT_EQ(WDT_LONG, rb->direction);
+	EXPECT_EQ(static_cast<int>(WDT_LONG), rb->direction);
 
 	const R61OptSink::PosCap* sp = findPos(sink.positions, "sp2610");
 	ASSERT_NE(nullptr, sp);
@@ -1423,7 +1497,7 @@ TEST(R61_TraderCTPOpt, position_query_covers_open_cover_combo_and_negative)
 	EXPECT_DOUBLE_EQ(0.0, neg->availPre);
 	EXPECT_DOUBLE_EQ(0.0, neg->avg);
 
-	/* map 已在末笔释放；错误回报不再入表 */
+	/* map 已在末笔释放；请求 1 已终结，同号或他号迟到错误回报不再入表 */
 	CThostFtdcRspInfoField err = r61_opt_ok();
 	err.ErrorID = 7;
 	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "rb2610");
@@ -1444,6 +1518,7 @@ TEST(R61_TraderCTPOpt, position_query_unknown_rows_mark_batch_incomplete_and_nex
 	R61OptProbe probe;
 	probe.harden();
 	probe.registerSpi(&sink);
+	probe.expectPositionRequest(1);
 
 	CThostFtdcInvestorPositionField p;
 	std::memset(&p, 0, sizeof(p));
@@ -1480,6 +1555,7 @@ TEST(R61_TraderCTPOpt, position_query_unknown_rows_mark_batch_incomplete_and_nex
 	p.PositionDate = THOST_FTDC_PSD_History;
 	p.Position = 10;
 	p.PosiDirection = THOST_FTDC_PD_Long;
+	probe.expectPositionRequest(2);
 	probe.OnRspQryInvestorPosition(&p, nullptr, 2, false);
 	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "ghost");
 	probe.OnRspQryInvestorPosition(&p, nullptr, 2, true);
@@ -1494,6 +1570,7 @@ TEST(R61_TraderCTPOpt, position_query_unknown_rows_mark_batch_incomplete_and_nex
 	p.PositionDate = THOST_FTDC_PSD_History;
 	p.Position = 2;
 	p.PosiDirection = THOST_FTDC_PD_Short;
+	probe.expectPositionRequest(3);
 	probe.OnRspQryInvestorPosition(&p, nullptr, 3, true);
 
 	ASSERT_EQ(1u, sink.positionCalls);
@@ -1518,6 +1595,7 @@ TEST(R61_TraderCTPOpt, position_query_error_response_discards_partial_batch_and_
 	R61OptProbe probe;
 	probe.harden();
 	probe.registerSpi(&sink);
+	probe.expectPositionRequest(1);
 
 	CThostFtdcInvestorPositionField p;
 	std::memset(&p, 0, sizeof(p));
@@ -1535,6 +1613,7 @@ TEST(R61_TraderCTPOpt, position_query_error_response_discards_partial_batch_and_
 	EXPECT_TRUE(probe.positionMapNull());
 	EXPECT_FALSE(probe.positionQueryIncomplete());
 
+	probe.expectPositionRequest(2);
 	probe.OnRspQryInvestorPosition(&p, nullptr, 2, false);
 	p.Position = 11;
 	std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", "ghost");
@@ -1545,4 +1624,262 @@ TEST(R61_TraderCTPOpt, position_query_error_response_discards_partial_batch_and_
 	probe.release();
 	EXPECT_FALSE(probe.positionQueryIncomplete());
 	EXPECT_EQ(0u, probe.positionMapSize());
+	EXPECT_EQ(0, probe.positionRequestInFlight());	/* release 清除在途登记 */
+}
+
+/*
+ * 迭代03 卡14（2026-11-03 裁定 14a=C/14c=C）+ BUG-R65-002：持仓查询请求号在途跟踪。
+ * 全部为本进程 fake SDK 回调，不连接真实 CTPOpt；真实 SDK 是否在非零返回后仍有迟到回调、
+ * 请求号是否可靠回显均未验证（X），故实现对任何非在途请求号一律忽略。
+ */
+namespace
+{
+	struct I03PosFixture
+	{
+		R61OptContract rb{"rb", "rb2610", "SHFE", CM_OpenCover, CC_Future, 10};
+		R61OptContract ag{"ag", "ag2610", "SHFE", CM_OpenCover, CC_Future, 10};
+		R61OptDataMgr mgr;
+		R61OptApi api;
+		R61OptSink sink;
+		R61OptProbe probe;
+
+		I03PosFixture()
+		{
+			mgr.add(rb.ct);
+			mgr.add(ag.ct);
+			sink.mgr = &mgr;
+			probe.harden();
+			probe.setApi(&api);
+			probe.setState(TraderCTPOpt::WS_ALLREADY);
+			probe.setBrokerUser("9999", "tester");
+			probe.registerSpi(&sink);
+		}
+		~I03PosFixture()
+		{
+			probe.registerSpi(nullptr);
+			probe.setApi(nullptr);
+		}
+
+		static CThostFtdcInvestorPositionField row(const char* code, double position)
+		{
+			CThostFtdcInvestorPositionField p;
+			std::memset(&p, 0, sizeof(p));
+			std::snprintf(p.InstrumentID, sizeof(p.InstrumentID), "%s", code);
+			std::snprintf(p.ExchangeID, sizeof(p.ExchangeID), "%s", "SHFE");
+			p.PositionDate = THOST_FTDC_PSD_History;
+			p.PosiDirection = THOST_FTDC_PD_Long;
+			p.Position = position;
+			return p;
+		}
+
+		/* 模拟 worker：取出任务前置 m_bInQuery=true，再执行请求 lambda。 */
+		void sendQuery()
+		{
+			ASSERT_EQ(0, probe.queryPositions());
+			probe.setInQuery(true);
+			probe.drainQueue();
+		}
+
+		std::set<std::string> codes() const
+		{
+			std::set<std::string> out;
+			for (const auto& position : sink.positions)
+				out.insert(position.code);
+			return out;
+		}
+	};
+}
+
+TEST(I03_CTPOptSdkEvents, position_sync_send_failure_releases_queue_and_ignores_late_callbacks)
+{
+	I03PosFixture fx;
+	fx.api.position_ret = -3;
+	fx.sendQuery();
+	ASSERT_EQ(1u, fx.api.position_request_ids.size());
+	const int failedId = fx.api.position_request_ids[0];
+	EXPECT_FALSE(fx.probe.inQuery());				/* 非零同步返回不能永久占住查询队列 */
+	EXPECT_EQ(0, fx.probe.positionRequestInFlight());
+	EXPECT_TRUE(fx.sink.hasLog("send failed: -3"));
+	EXPECT_EQ(0u, fx.sink.positionCalls);
+
+	/* 头文件未保证非零返回后无迟到回调：迟到回报不得被当作成功快照。 */
+	CThostFtdcInvestorPositionField late = I03PosFixture::row("rb2610", 5);
+	fx.probe.OnRspQryInvestorPosition(&late, nullptr, failedId, true);
+	EXPECT_EQ(0u, fx.sink.positionCalls);
+	EXPECT_TRUE(fx.probe.positionMapNull());
+}
+
+TEST(I03_CTPOptSdkEvents, position_sent_is_not_confirmed_until_matching_terminal_frame)
+{
+	I03PosFixture fx;
+	fx.sendQuery();
+	ASSERT_EQ(1u, fx.api.position_request_ids.size());
+	const int id = fx.api.position_request_ids[0];
+	/* 14a：SDK 返回 0 只是"已发送"，不能当作业务成功。 */
+	EXPECT_TRUE(fx.sink.hasLog("sent, awaiting confirmation"));
+	EXPECT_EQ(0u, fx.sink.positionCalls);
+	EXPECT_TRUE(fx.probe.inQuery());
+	EXPECT_EQ(id, fx.probe.positionRequestInFlight());
+
+	CThostFtdcInvestorPositionField p = I03PosFixture::row("ag2610", 2);
+	fx.probe.OnRspQryInvestorPosition(&p, nullptr, id, true);	/* "已确认" */
+	ASSERT_EQ(1u, fx.sink.positionCalls);
+	EXPECT_EQ((std::set<std::string>{ "ag2610" }), fx.codes());
+	EXPECT_FALSE(fx.probe.inQuery());
+	EXPECT_EQ(0, fx.probe.positionRequestInFlight());
+
+	/* 同号重复终帧不得再次发布。 */
+	fx.probe.OnRspQryInvestorPosition(&p, nullptr, id, true);
+	EXPECT_EQ(1u, fx.sink.positionCalls);
+}
+
+TEST(I03_CTPOptSdkEvents, position_terminal_callback_inside_sdk_call_is_accepted)
+{
+	I03PosFixture fx;
+	fx.api.position_sync_hook = [&fx](int requestId) {
+		CThostFtdcInvestorPositionField p = I03PosFixture::row("rb2610", 3);
+		fx.probe.OnRspQryInvestorPosition(&p, nullptr, requestId, true);
+	};
+	fx.sendQuery();
+	ASSERT_EQ(1u, fx.sink.positionCalls);
+	EXPECT_EQ((std::set<std::string>{ "rb2610" }), fx.codes());
+	EXPECT_FALSE(fx.probe.inQuery());
+	EXPECT_EQ(0, fx.probe.positionRequestInFlight());
+}
+
+TEST(I03_CTPOptSdkEvents, stale_request_rows_do_not_mix_into_in_flight_batch)
+{
+	I03PosFixture fx;
+	fx.probe.expectPositionRequest(10);
+	CThostFtdcInvestorPositionField rb = I03PosFixture::row("rb2610", 4);
+	CThostFtdcInvestorPositionField ag = I03PosFixture::row("ag2610", 7);
+	fx.probe.OnRspQryInvestorPosition(&rb, nullptr, 10, false);
+	fx.probe.OnRspQryInvestorPosition(&ag, nullptr, 9, false);	/* 旧请求迟到行 */
+	fx.probe.OnRspQryInvestorPosition(&ag, nullptr, 9, true);	/* 旧请求迟到末帧 */
+	EXPECT_EQ(0u, fx.sink.positionCalls);
+	fx.probe.OnRspQryInvestorPosition(nullptr, nullptr, 10, true);
+	ASSERT_EQ(1u, fx.sink.positionCalls);
+	EXPECT_EQ((std::set<std::string>{ "rb2610" }), fx.codes());
+}
+
+TEST(I03_CTPOptSdkEvents, error_response_for_in_flight_position_request_is_failed_terminal)
+{
+	I03PosFixture fx;
+	fx.probe.expectPositionRequest(7);
+	fx.probe.setInQuery(true);
+	CThostFtdcInvestorPositionField rb = I03PosFixture::row("rb2610", 4);
+	fx.probe.OnRspQryInvestorPosition(&rb, nullptr, 7, false);
+	ASSERT_EQ(1u, fx.probe.positionMapSize());
+
+	CThostFtdcRspInfoField err = r61_opt_error(31, "position rejected");
+	fx.probe.OnRspError(&err, 7, true);
+	EXPECT_TRUE(fx.probe.positionMapNull());
+	EXPECT_FALSE(fx.probe.inQuery());
+	EXPECT_EQ(0, fx.probe.positionRequestInFlight());
+	EXPECT_TRUE(fx.sink.hasLog("Position query request 7 failed by error response"));
+
+	/* 失败请求之后的同号迟到末帧不得发布部分快照。 */
+	fx.probe.OnRspQryInvestorPosition(&rb, nullptr, 7, true);
+	EXPECT_EQ(0u, fx.sink.positionCalls);
+
+	/* 下一批只含自身数据。 */
+	fx.probe.expectPositionRequest(8);
+	CThostFtdcInvestorPositionField ag = I03PosFixture::row("ag2610", 2);
+	fx.probe.OnRspQryInvestorPosition(&ag, nullptr, 8, true);
+	ASSERT_EQ(1u, fx.sink.positionCalls);
+	EXPECT_EQ((std::set<std::string>{ "ag2610" }), fx.codes());
+}
+
+TEST(I03_CTPOptSdkEvents, empty_error_response_info_fails_closed_and_terminates_in_flight_position)
+{
+	I03PosFixture fx;
+	fx.probe.expectPositionRequest(12);
+	CThostFtdcInvestorPositionField rb = I03PosFixture::row("rb2610", 4);
+	fx.probe.OnRspQryInvestorPosition(&rb, nullptr, 12, false);
+	fx.probe.OnRspError(nullptr, 12, true);	/* 14c：无 SDK 契约的空应答按失败处理 */
+	EXPECT_TRUE(fx.probe.positionMapNull());
+	EXPECT_EQ(0, fx.probe.positionRequestInFlight());
+	EXPECT_TRUE(fx.sink.hasLog("12 rsp error: empty response info without SDK contract, treated as failure"));
+	fx.probe.OnRspQryInvestorPosition(&rb, nullptr, 12, true);
+	EXPECT_EQ(0u, fx.sink.positionCalls);
+}
+
+// 迭代03 第五会话主线程：BUG-L01-014——CTPOpt 推送成交无法转换（合约未知）时，宿主声明能力则上送原始结构。
+TEST(R61_TraderCTPOpt, l01014_unconvertible_trade_is_forwarded_raw_when_host_supports_it)
+{
+	R61TempDir tmp;
+	ASSERT_FALSE(tmp.path.empty());
+	R61OptContract fx("rb", "rb2610", "CFFEX", CM_OpenCover, CC_Future, 10);
+	R61OptDataMgr mgr;
+	mgr.add(fx.ct);
+	R61OptApi api;
+	R61OptSink sink;
+	sink.mgr = &mgr;
+	R61OptProbe probe;
+	probe.harden();
+	probe.setApi(&api);
+	probe.setState(TraderCTPOpt::WS_ALLREADY);
+	probe.setBrokerUser("9999", "tester");
+	probe.registerSpi(&sink);
+	probe.setSpiFeatures(WT_TRADER_SPI_FEATURE_RAW_UNRESOLVED);
+
+	CThostFtdcTradeField t;
+	memset(&t, 0, sizeof(t));
+	strcpy(t.InstrumentID, "zz9999");
+	strcpy(t.ExchangeID, "CFFEX");
+	strcpy(t.TradeID, "T99");
+	t.Volume = 1;
+	t.Price = 3500.0;
+	probe.OnRtnTrade(&t);
+	ASSERT_EQ(1u, sink.unresolved_raw.size());
+	EXPECT_EQ(0u, sink.unresolved_raw[0].rfind("trade|struct=CThostFtdcTradeField;size=", 0)) << sink.unresolved_raw[0];
+}
+
+// 卡8（BUG-P02-005，slice1 final gaps）：CTPOpt 普通报单与行权报单都只支持整数量。小数、非有限、
+// 非正或超出 int 的数量在下单入口明确拒绝，不到 SDK；整数量照常提交。
+TEST(R61_TraderCTPOpt, card8_non_whole_lot_quantity_is_rejected_before_the_sdk)
+{
+	R61TempDir tmp;
+	ASSERT_FALSE(tmp.path.empty());
+
+	R61OptContract fx("rb", "rb2610", "CFFEX", CM_OpenCover, CC_Future, 10);
+	R61OptDataMgr mgr;
+	mgr.add(fx.ct);
+	R61OptApi api;
+	R61OptSink sink;
+	sink.mgr = &mgr;
+	R61OptProbe probe;
+	probe.harden();
+	probe.setApi(&api);
+	probe.setState(TraderCTPOpt::WS_ALLREADY);
+	probe.setBrokerUser("9999", "tester");
+	probe.setIds(5, 6, 0);
+	probe.loadIni((tmp.path + "/entrust.ini").c_str());
+	probe.registerSpi(&sink);
+
+	for (double bad : { 1.5, 0.5, 0.0, -1.0, std::nan(""), 1e12 })
+	{
+		WTSEntrust* ent = WTSEntrust::create("rb2610", 1, 3510.0, "CFFEX");
+		ent->setContractInfo(fx.ct);
+		ent->setDirection(WDT_LONG);
+		ent->setOffsetType(WOT_OPEN);
+		ent->setPriceType(WPT_LIMITPRICE);
+		ent->setVolume(bad);
+		EXPECT_EQ(-1, probe.orderInsert(ent)) << bad;
+		ent->setBusinessType(BT_EXECUTE);
+		EXPECT_EQ(-1, probe.orderInsertOpt(ent)) << bad;
+		ent->release();
+	}
+	EXPECT_EQ(0u, api.order_calls);
+	EXPECT_EQ(0u, api.exec_order_calls);
+
+	WTSEntrust* whole = WTSEntrust::create("rb2610", 2, 3510.0, "CFFEX");
+	whole->setContractInfo(fx.ct);
+	whole->setDirection(WDT_LONG);
+	whole->setOffsetType(WOT_OPEN);
+	whole->setPriceType(WPT_LIMITPRICE);
+	EXPECT_EQ(0, probe.orderInsert(whole));
+	ASSERT_EQ(1u, api.order_calls);
+	EXPECT_EQ(2, api.order.VolumeTotalOriginal);
+	whole->release();
 }

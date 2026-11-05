@@ -1,0 +1,24 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = P07TickLoaderTest.p04011*
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from P07TickLoaderTest
+[ RUN      ] P07TickLoaderTest.p04011TickQueryUsesTheInstrumentsOwnTradingDayInMixedSessions
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp:3327: Failure
+Expected equality of these values:
+  (std::vector<std::size_t>{1u, 1u, 1u})
+    Which is: { 1, 1, 1 }
+  l2Visible
+    Which is: { 0, 0, 0 }
+transaction, order detail and order queue queries also use BTC's own trading day
+
+[  FAILED  ] P07TickLoaderTest.p04011TickQueryUsesTheInstrumentsOwnTradingDayInMixedSessions (9 ms)
+[----------] 1 test from P07TickLoaderTest (9 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (9 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] P07TickLoaderTest.p04011TickQueryUsesTheInstrumentsOwnTradingDayInMixedSessions
+
+ 1 FAILED TEST

@@ -1,0 +1,53 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5RtRunnerEngineScope.*
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03S5RtRunnerEngineScope
+[ RUN      ] I03S5RtRunnerEngineScope.ContextsAreRejectedOnUnconfiguredSiblingEngines
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:491: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  unconfigured->createCtaContext("i03s5_scope_cta0", 0)
+    Which is: 1
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:492: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  unconfigured->createSelContext("i03s5_scope_sel0", 0, 1500, "d", 0)
+    Which is: 3000
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:494: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  unconfigured->createHftContext("i03s5_scope_hft0", "i03s5_scope_trader0", false, 0)
+    Which is: 6000
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:499: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  runner->createSelContext("i03s5_scope_sel", 0, 1500, "d", 0)
+    Which is: 3001
+the SEL engine of a CTA runner was never initialized
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:501: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  runner->createHftContext("i03s5_scope_hft", "i03s5_scope_trader", false, 0)
+    Which is: 6001
+the HFT engine of a CTA runner was never initialized
+
+[  FAILED  ] I03S5RtRunnerEngineScope.ContextsAreRejectedOnUnconfiguredSiblingEngines (20 ms)
+[----------] 1 test from I03S5RtRunnerEngineScope (20 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (20 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] I03S5RtRunnerEngineScope.ContextsAreRejectedOnUnconfiguredSiblingEngines
+
+ 1 FAILED TEST

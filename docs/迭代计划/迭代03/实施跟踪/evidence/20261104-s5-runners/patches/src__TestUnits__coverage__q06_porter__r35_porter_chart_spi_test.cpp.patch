@@ -1,0 +1,23 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/q06_porter/r35_porter_chart_spi_test.cpp	2026-10-28 01:29:48
++++ src/TestUnits/coverage/q06_porter/r35_porter_chart_spi_test.cpp	2026-11-04 21:25:56
+@@ -41,6 +41,11 @@
+ USING_NS_WTP;
+ 
+ extern WtRtRunner& getRunner();
++// I03-NEW-064（迭代03）：C API 只在 runner 已配置的引擎上建上下文（.before 见 s5-runners 证据）。
++uint32_t i03s5_inject_cta_context(WtRtRunner& runner, const char* name, int32_t slippage);
++uint32_t i03s5_inject_sel_context(WtRtRunner& runner, const char* name, uint32_t date, uint32_t time,
++	TaskPeriodType period, int32_t slippage);
++uint32_t i03s5_inject_hft_context(WtRtRunner& runner, const char* name, const char* trader, int32_t slippage);
+ 
+ namespace {
+ 
+@@ -111,7 +116,7 @@
+ 		reset_cb();
+ 		register_cta_callbacks(cb_cta_init, cb_cta_tick, cb_cta_calc, cb_cta_bar, cb_sess, cb_cond);
+ 
+-		_cta = create_cta_context("r35_cta_chart", 0);
++		_cta = i03s5_inject_cta_context(getRunner(), "r35_cta_chart", 0); // forwarding-only fixture
+ 		ASSERT_NE(_cta, 0U);
+ 		ASSERT_TRUE(getRunner().getCtaContext(_cta) != NULL);
+ 	}

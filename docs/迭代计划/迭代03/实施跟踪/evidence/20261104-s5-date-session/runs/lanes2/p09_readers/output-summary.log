@@ -1,0 +1,70 @@
+[ RUN      ] P09RdmCacheTest.init_with_null_cfg_injects_host_and_skips_check_thread
+[       OK ] P09RdmCacheTest.init_with_null_cfg_injects_host_and_skips_check_thread (0 ms)
+[ RUN      ] P09RdmCacheTest.index_bar_by_range_empty_cache_returns_null_and_touches_key
+[       OK ] P09RdmCacheTest.index_bar_by_range_empty_cache_returns_null_and_touches_key (0 ms)
+[ RUN      ] P09RdmCacheTest.index_bar_by_range_trims_window
+[       OK ] P09RdmCacheTest.index_bar_by_range_trims_window (0 ms)
+[ RUN      ] P09RdmCacheTest.index_bar_by_count_clamps_and_walks_back
+[       OK ] P09RdmCacheTest.index_bar_by_count_clamps_and_walks_back (0 ms)
+[ RUN      ] P09RdmCacheTest.read_bars_from_cache_by_range_copies_window
+[       OK ] P09RdmCacheTest.read_bars_from_cache_by_range_copies_window (0 ms)
+[ RUN      ] P09RdmCacheTest.clear_cache_drops_bars_but_keeps_adj_factors
+[       OK ] P09RdmCacheTest.clear_cache_drops_bars_but_keeps_adj_factors (0 ms)
+[ RUN      ] P09RdmCacheTest.load_adj_factors_from_missing_or_bad_file
+[       OK ] P09RdmCacheTest.load_adj_factors_from_missing_or_bad_file (0 ms)
+[ RUN      ] P09RdmCacheTest.load_adj_factors_from_json_key_format_and_sort
+[       OK ] P09RdmCacheTest.load_adj_factors_from_json_key_format_and_sort (0 ms)
+[ RUN      ] P09RdmCacheTest.get_adj_factor_by_date_stock_and_non_stock
+[       OK ] P09RdmCacheTest.get_adj_factor_by_date_stock_and_non_stock (0 ms)
+[ RUN      ] P09WindowTest.window_bounds_are_inclusive_on_both_sides
+[       OK ] P09WindowTest.window_bounds_are_inclusive_on_both_sides (0 ms)
+[ RUN      ] P09WindowTest.range_right_edge_beyond_last_bar_clamps_to_latest
+[       OK ] P09WindowTest.range_right_edge_beyond_last_bar_clamps_to_latest (0 ms)
+[ RUN      ] P09WindowTest.range_left_edge_beyond_all_returns_null_for_empty_result
+[       OK ] P09WindowTest.range_left_edge_beyond_all_returns_null_for_empty_result (0 ms)
+[ RUN      ] P09WindowTest.seam_between_two_sections_is_returned_whole_without_dedup
+[       OK ] P09WindowTest.seam_between_two_sections_is_returned_whole_without_dedup (0 ms)
+[ RUN      ] P09WindowTest.isday_comparator_collapses_same_day_minute_bars
+[       OK ] P09WindowTest.isday_comparator_collapses_same_day_minute_bars (0 ms)
+[ RUN      ] P09WindowTest.rt_bars_are_never_scanned_by_the_indexers
+[       OK ] P09WindowTest.rt_bars_are_never_scanned_by_the_indexers (0 ms)
+[ RUN      ] P09WindowTest.index_bar_by_count_walks_back_from_right_edge
+[       OK ] P09WindowTest.index_bar_by_count_walks_back_from_right_edge (0 ms)
+[ RUN      ] P09WindowTest.index_bar_by_count_zero_returns_null_for_empty_result
+[       OK ] P09WindowTest.index_bar_by_count_zero_returns_null_for_empty_result (0 ms)
+[ RUN      ] P09WindowTest.public_kline_slice_readers_keep_empty_and_nonempty_results
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p09_storage_readers/p09_rdm_window_range_test.cpp:426: Failure
+Expected: (range) != (nullptr), actual: NULL vs (nullptr)
+[  FAILED  ] P09WindowTest.public_kline_slice_readers_keep_empty_and_nonempty_results (0 ms)
+[ RUN      ] P09DataReaderTest.init_null_cfg_returns_before_any_dir_config
+[       OK ] P09DataReaderTest.init_null_cfg_returns_before_any_dir_config (0 ms)
+[ RUN      ] P09DataReaderTest.init_single_path_and_his_path_and_adjust_flag
+[       OK ] P09DataReaderTest.init_single_path_and_his_path_and_adjust_flag (0 ms)
+[ RUN      ] P09DataReaderTest.init_path_array_and_adjfactor_file_is_loaded
+[       OK ] P09DataReaderTest.init_path_array_and_adjfactor_file_is_loaded (0 ms)
+[ RUN      ] P09DataReaderTest.load_adj_factors_from_loader_without_loader
+[       OK ] P09DataReaderTest.load_adj_factors_from_loader_without_loader (0 ms)
+[ RUN      ] P09DataReaderTest.load_adj_factors_from_file_failures
+[       OK ] P09DataReaderTest.load_adj_factors_from_file_failures (0 ms)
+[ RUN      ] P09DataReaderTest.load_adj_factors_key_rules_and_ordering
+[       OK ] P09DataReaderTest.load_adj_factors_key_rules_and_ordering (0 ms)
+[ RUN      ] P09DataReaderTest.get_adj_factors_loader_receives_complete_dynamic_key_and_cache_hits
+[       OK ] P09DataReaderTest.get_adj_factors_loader_receives_complete_dynamic_key_and_cache_hits (0 ms)
+[ RUN      ] P09DataReaderTest.delayed_loader_key_pointer_survives_return_stack_use_and_other_keys
+[       OK ] P09DataReaderTest.delayed_loader_key_pointer_survives_return_stack_use_and_other_keys (0 ms)
+[ RUN      ] P09DataReaderTest.concurrent_readers_keep_different_loader_key_addresses
+[       OK ] P09DataReaderTest.concurrent_readers_keep_different_loader_key_addresses (0 ms)
+[ RUN      ] P09DataReaderTest.concurrent_distinct_loader_keys_have_independent_stable_addresses
+[       OK ] P09DataReaderTest.concurrent_distinct_loader_keys_have_independent_stable_addresses (0 ms)
+[ RUN      ] P09DataReaderTest.get_adj_factor_by_date_branches
+[       OK ] P09DataReaderTest.get_adj_factor_by_date_branches (0 ms)
+[ RUN      ] P09DataReaderTest.init_missing_path_returns_without_partial_directories
+[       OK ] P09DataReaderTest.init_missing_path_returns_without_partial_directories (0 ms)
+[ RUN      ] P09DataReaderTest.init_null_sinkLeavesReaderNotReady
+[       OK ] P09DataReaderTest.init_null_sinkLeavesReaderNotReady (0 ms)
+[ RUN      ] P09DataReaderTest.invalidReinitializationClearsPreviousReadyDirectories
+[       OK ] P09DataReaderTest.invalidReinitializationClearsPreviousReadyDirectories (0 ms)
+[ RUN      ] P09DataReaderTest.init_emptyOrInvalidPathReturnsWithoutPartialDirectories
+[       OK ] P09DataReaderTest.init_emptyOrInvalidPathReturnsWithoutPartialDirectories (1 ms)
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] P09WindowTest.public_kline_slice_readers_keep_empty_and_nonempty_results

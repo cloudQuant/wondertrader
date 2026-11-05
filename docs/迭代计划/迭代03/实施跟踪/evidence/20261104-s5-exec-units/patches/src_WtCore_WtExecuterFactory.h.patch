@@ -1,0 +1,27 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/WtCore/WtExecuterFactory.h	2026-11-04 09:03:40
++++ src/WtCore/WtExecuterFactory.h	2026-11-04 13:17:41
+@@ -181,11 +181,22 @@
+ 	ExecuteUnitPtr createExeUnit(const char* factname, const char* unitname);
+ 	ExecuteUnitPtr createDiffExeUnit(const char* factname, const char* unitname);
+ 	ExecuteUnitPtr createArbiExeUnit(const char* factname, const char* unitname);
++	/**
++	 * Same as the single-name overloads. pluginEntered is set to true only
++	 * when control was handed to the plugin's create_unit entry. A null
++	 * result with pluginEntered == false is a host-side rejection (malformed
++	 * name, closed unit admission or unknown factory) during which no plugin
++	 * code ran, so the caller may treat it as a retry-safe preflight failure.
++	 */
++	ExecuteUnitPtr createExeUnit(const char* name, bool& pluginEntered);
++	ExecuteUnitPtr createDiffExeUnit(const char* name, bool& pluginEntered);
++	ExecuteUnitPtr createArbiExeUnit(const char* name, bool& pluginEntered);
+ 
+ private:
+ 	ExecuteUnitPtr createUnit(const char* factname, const char* unitname,
+-		WtExecPluginV2UnitKind kind);
+-	ExecuteUnitPtr createUnit(const char* name, WtExecPluginV2UnitKind kind);
++		WtExecPluginV2UnitKind kind, bool* pluginEntered = NULL);
++	ExecuteUnitPtr createUnit(const char* name, WtExecPluginV2UnitKind kind,
++		bool* pluginEntered = NULL);
+ 
+ 	wt_hashmap<std::string, std::shared_ptr<ExePluginV2State> > _factories;
+ 	mutable std::mutex _factories_mutex;

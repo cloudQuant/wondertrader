@@ -16,6 +16,7 @@
 #include "../Share/TimeUtils.hpp"
 
 #include "../Includes/WTSContractInfo.hpp"
+#include "../Includes/DateMappingBinding.h"
 #include "../Includes/WTSDataDef.hpp"
 #include "../Includes/WTSVariant.hpp"
 #include "../Includes/IBaseDataMgr.h"
@@ -23,15 +24,24 @@
 
 #include "../WTSTools/WTSLogger.h"
 
+#include <atomic>
 #include <cctype>
 #include <cstddef>
 #include <cstring>
 #include <exception>
+#include <new>
 
 USING_NS_WTP;
 
 namespace
 {
+	struct LifecycleOperation
+	{
+		bool& active;
+		explicit LifecycleOperation(bool& value) : active(value) { active = true; }
+		~LifecycleOperation() { active = false; }
+	};
+
 	bool isDigits(const char* begin, const char* end)
 	{
 		if (begin == end)
@@ -120,14 +130,28 @@ namespace
 
 		return isHyphenatedFuturesOptionCode(code) || isCompactFuturesOptionCode(code);
 	}
+
+	// I03-NEW-087: bounded diagnostic for market data of a contract that has no
+	// commodity metadata (dropped instead of dereferencing a NULL commodity).
+	void warnContractWithoutCommodity(const char* kind, WTSContractInfo* cInfo)
+	{
+		static std::atomic<uint32_t> s_reported{ 0 };
+		if (s_reported.fetch_add(1, std::memory_order_relaxed) < 16)
+			WTSLogger::warn("{} of {} dropped: the contract has no commodity metadata", kind, cInfo->getFullCode());
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
 //ParserAdapter
 ParserAdapter::ParserAdapter()
 	: _parser_api(NULL)
+	, _contended_external_apis(NULL)
 	, _remover(NULL)
 	, _module_handle(NULL)
+	, _lifecycle(NULL)
+	, _operation_active(false)
+	, _stop_accepted(false)
+	, _external_stop_notified(false)
 	, _stopped(false)
 	, _initialized(false)
 	, _api_creation_uncertain(false)
@@ -143,6 +167,29 @@ ParserAdapter::ParserAdapter()
 
 ParserAdapter::~ParserAdapter()
 {
+}
+
+bool ParserAdapter::hasApiUnlocked() const noexcept
+{
+	return _parser_api != NULL || !_rejected_external_apis.empty() ||
+		_contended_external_apis.load() != NULL || _api_creation_uncertain || _release_uncertain;
+}
+
+bool ParserAdapter::hasApi() const noexcept
+{
+	try {
+		std::unique_lock<std::recursive_mutex> lock(_lifecycle_mutex, std::try_to_lock);
+		return !lock.owns_lock() || _operation_active || hasApiUnlocked();
+	} catch (...) { return true; }
+}
+
+void ParserAdapter::retainContendedExternalApi(IParserApi* api) noexcept
+{
+	RetainedExternalNode* node = new (std::nothrow) RetainedExternalNode{api, NULL};
+	if (!node) std::terminate(); // Ownership transferred at entry.
+	RetainedExternalNode* head = _contended_external_apis.load();
+	do { node->next = head; }
+	while (!_contended_external_apis.compare_exchange_weak(head, node));
 }
 
 void ParserAdapter::retainRejectedExternalApi(IParserApi* api)
@@ -172,8 +219,15 @@ bool ParserAdapter::initExt(const char* id, IParserApi* api, IParserStub* stub, 
 {
 	if (api == NULL)
 		return false;
+	std::unique_lock<std::recursive_mutex> lifecycleLock(_lifecycle_mutex, std::try_to_lock);
+	if (!lifecycleLock.owns_lock() || _operation_active)
+	{
+		retainContendedExternalApi(api);
+		return false;
+	}
+	LifecycleOperation operation(_operation_active);
 
-	if (hasApi() || _cfg != NULL || _module_handle != NULL)
+	if (hasApiUnlocked() || _cfg != NULL || _module_handle != NULL)
 	{
 		// A non-null initExt argument transfers ownership even on this busy
 		// path. Keep a distinct candidate without replacing or stopping the
@@ -183,6 +237,9 @@ bool ParserAdapter::initExt(const char* id, IParserApi* api, IParserStub* stub, 
 	}
 
 	_parser_api = api;
+	_lifecycle = NULL;
+	_stop_accepted = false;
+	_external_stop_notified = false;
 	_stub = stub;
 	_bd_mgr = bgMgr;
 	_hot_mgr = hotMgr;
@@ -195,6 +252,7 @@ bool ParserAdapter::initExt(const char* id, IParserApi* api, IParserStub* stub, 
 	try
 	{
 		_id = id == NULL ? "" : id;
+		WTSLogger::log_dyn("parser", _id.c_str(), LL_WARN, "[{}] External parser has no V2 drain proof; retaining its owner", _id.c_str());
 		if (_bd_mgr == NULL)
 		{
 			// Ownership transferred at the initExt call boundary, but without a
@@ -229,6 +287,7 @@ bool ParserAdapter::initExt(const char* id, IParserApi* api, IParserStub* stub, 
 				ayContract->release();
 			}
 		}
+		if (_stopped.load()) return false;
 		_parser_api->subscribe(contractSet);
 		_initialized = true;
 		contractSet.clear();
@@ -242,13 +301,15 @@ bool ParserAdapter::initExt(const char* id, IParserApi* api, IParserStub* stub, 
 		return false;
 	}
 
-	return _initialized;
+	return isInitialized();
 }
 
 bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBaseDataMgr* bgMgr, IHotMgr* hotMgr/* = NULL*/)
 {
-	if (cfg == NULL || bgMgr == NULL || hasApi() || _cfg != NULL || _module_handle != NULL)
+	std::unique_lock<std::recursive_mutex> lifecycleLock(_lifecycle_mutex, std::try_to_lock);
+	if (!lifecycleLock.owns_lock() || _operation_active || id == NULL || cfg == NULL || bgMgr == NULL || hasApiUnlocked() || _cfg != NULL || _module_handle != NULL)
 		return false;
+	LifecycleOperation operation(_operation_active);
 
 	_stub = stub;
 	_bd_mgr = bgMgr;
@@ -262,6 +323,7 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBa
 	_cfg->retain();
 	_stopped = false;
 	_initialized = false;
+	_stop_accepted = false;
 
 	auto failWithoutApi = [this]() {
 		if (_module_handle != NULL)
@@ -270,6 +332,7 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBa
 			_module_handle = NULL;
 		}
 		_remover = NULL;
+		_lifecycle = NULL;
 		if (_cfg != NULL)
 		{
 			_cfg->release();
@@ -305,12 +368,55 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBa
 			WTSLogger::log_dyn("parser", _id.c_str(), LL_INFO, "[{}] Parser module {} loaded", _id.c_str(), dllpath.c_str());
 		}
 
+		WtParserLifecycleV2GetterFn getter = reinterpret_cast<WtParserLifecycleV2GetterFn>(
+			DLLHelper::get_symbol(_module_handle, WT_PARSER_LIFECYCLE_V2_GETTER_SYMBOL));
+		if (!getter)
+		{
+			WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser lacks lifecycle V2", _id.c_str());
+			return failWithoutApi();
+		}
+		try
+		{
+			_lifecycle = getter(WT_PARSER_LIFECYCLE_V2_ABI_MAJOR);
+			if (!_lifecycle || _lifecycle->struct_size < WT_PARSER_LIFECYCLE_V2_REQUIRED_SIZE ||
+				(_lifecycle->abi_version >> 16) != WT_PARSER_LIFECYCLE_V2_ABI_MAJOR ||
+				(_lifecycle->capabilities & WT_PARSER_LIFECYCLE_V2_REQUIRED_CAPABILITIES) != WT_PARSER_LIFECYCLE_V2_REQUIRED_CAPABILITIES ||
+				_lifecycle->reserved[0] != 0 || _lifecycle->reserved[1] != 0 ||
+				!_lifecycle->preflight_factory || !_lifecycle->request_stop || !_lifecycle->can_wait ||
+				!_lifecycle->wait_drained || !_lifecycle->destroy_api)
+			{
+				WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Invalid parser lifecycle V2", _id.c_str());
+				return failWithoutApi();
+			}
+			const WtParserLifecycleV2Status preflight = _lifecycle->preflight_factory();
+			if (preflight != WT_PARSER_LIFECYCLE_V2_OK)
+			{
+				WTSLogger::log_dyn("parser", _id.c_str(), LL_ERROR, "[{}] Parser lifecycle preflight rejected", _id.c_str());
+				if (preflight != WT_PARSER_LIFECYCLE_V2_PENDING && preflight != WT_PARSER_LIFECYCLE_V2_WOULD_DEADLOCK &&
+					preflight != WT_PARSER_LIFECYCLE_V2_INVALID_ARGUMENT && preflight != WT_PARSER_LIFECYCLE_V2_UNSUPPORTED)
+				{
+					_api_creation_uncertain = true;
+					_stopped = true;
+					return false;
+				}
+				return failWithoutApi();
+			}
+		}
+		catch (...)
+		{
+			_api_creation_uncertain = true;
+			_stopped = true;
+			return false;
+		}
+
 		FuncCreateParser pFuncCreateParser = (FuncCreateParser)DLLHelper::get_symbol(_module_handle, "createParser");
 		if (NULL == pFuncCreateParser)
 		{
 			WTSLogger::log_dyn("parser", _id.c_str(), LL_FATAL, "[{}] Entrance function createParser not found", _id.c_str());
 			return failWithoutApi();
 		}
+		if (_stopped.load())
+			return failWithoutApi();
 
 		try
 		{
@@ -330,8 +436,9 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBa
 			_stopped = true;
 			return false;
 		}
+		if (_stopped.load())
+			return false;
 
-		_remover = (FuncDeleteParser)DLLHelper::get_symbol(_module_handle, "deleteParser");
 	}
 
 	try
@@ -342,6 +449,17 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBa
 			const StringVector& ayFilter = StrUtil::split(strFilter, ",");
 			for (const auto& filter : ayFilter)
 				_filters.insert(filter);
+		}
+
+		// K31=A: inject the host DateMappingV1 table before init when the parser module exports the binder.
+		if (_has_date_mapping)
+		{
+			const int bound = wtp::bindDateMappingV1(DLLHelper::get_symbol(_module_handle, WT_BIND_PARSER_DATE_MAPPING_V1),
+				_parser_api, _date_mapping);
+			if (bound == 1)
+				WTSLogger::log_dyn("parser", _id.c_str(), LL_INFO, "[{}] Parser bound to the host date mapping table", _id.c_str());
+			else if (bound == 0)
+				WTSLogger::log_dyn("parser", _id.c_str(), LL_WARN, "[{}] Parser rejected the host date mapping table; it keeps the legacy mapping path", _id.c_str());
 		}
 
 		_parser_api->registerSpi(this);
@@ -382,6 +500,7 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBa
 			}
 		}
 
+		if (_stopped.load()) return false;
 		_parser_api->subscribe(contractSet);
 		_initialized = true;
 	}
@@ -396,110 +515,100 @@ bool ParserAdapter::init(const char* id, WTSVariant* cfg, IParserStub* stub, IBa
 
 	WTSLogger::log_dyn("parser", _id.c_str(), LL_INFO, "[{}] Parser initialzied, check_time: {}", _id.c_str(), _check_time);
 
-	return _initialized;
+	return isInitialized();
+}
+
+bool ParserAdapter::requestStopLifecycle() noexcept
+{
+    _stopped.store(true);
+    _initialized.store(false);
+    try {
+        std::unique_lock<std::recursive_mutex> lock(_lifecycle_mutex, std::try_to_lock);
+        if (!lock.owns_lock() || _operation_active || _release_uncertain || _api_creation_uncertain) return false;
+        LifecycleOperation operation(_operation_active);
+        if (!_parser_api)
+            return _rejected_external_apis.empty() && _contended_external_apis.load() == NULL;
+        if (!_lifecycle)
+        {
+            // Decision K15=A (2026-11-04): an initExt API belongs to its caller and has no V2
+            // drain proof. An explicit release notifies it to stop exactly once, which is not
+            // treated as quiescence: the host keeps the API (never destroys it). A release
+            // re-entered from that callback, or issued by another thread meanwhile, returns
+            // immediately through the operation guard / try-lock above.
+            if (!_external_stop_notified)
+            {
+                _external_stop_notified = true;
+                try { _parser_api->release(); }
+                catch (...) { _release_uncertain = true; }
+            }
+            return false;
+        }
+        if (_stop_accepted) return true;
+        WtParserLifecycleV2Status status;
+        try { status = _lifecycle->request_stop(static_cast<void*>(_parser_api)); }
+        catch (...) { _release_uncertain = true; return false; }
+        if (status == WT_PARSER_LIFECYCLE_V2_OK) { _stop_accepted = true; return true; }
+        if (status != WT_PARSER_LIFECYCLE_V2_PENDING && status != WT_PARSER_LIFECYCLE_V2_WOULD_DEADLOCK)
+            _release_uncertain = true;
+        return false;
+    } catch (...) { return false; }
+}
+
+bool ParserAdapter::finishReleaseLifecycle() noexcept
+{
+    try {
+        std::unique_lock<std::recursive_mutex> lock(_lifecycle_mutex, std::try_to_lock);
+        if (!lock.owns_lock() || _operation_active || _release_uncertain || _api_creation_uncertain) return false;
+        LifecycleOperation operation(_operation_active);
+        if (_parser_api) {
+            if (!_lifecycle || !_stop_accepted) return false;
+            WtParserLifecycleV2Status status;
+            try { status = _lifecycle->can_wait(static_cast<void*>(_parser_api)); }
+            catch (...) { _release_uncertain = true; return false; }
+            if (status != WT_PARSER_LIFECYCLE_V2_OK) {
+                if (status != WT_PARSER_LIFECYCLE_V2_WOULD_DEADLOCK && status != WT_PARSER_LIFECYCLE_V2_PENDING)
+                    _release_uncertain = true;
+                return false;
+            }
+            try { status = _lifecycle->wait_drained(static_cast<void*>(_parser_api), 0); }
+            catch (...) { _release_uncertain = true; return false; }
+            if (status != WT_PARSER_LIFECYCLE_V2_DRAINED) {
+                if (status != WT_PARSER_LIFECYCLE_V2_PENDING && status != WT_PARSER_LIFECYCLE_V2_WOULD_DEADLOCK)
+                    _release_uncertain = true;
+                return false;
+            }
+            IParserApi* original = _parser_api;
+            void* opaque = static_cast<void*>(original);
+            try { status = _lifecycle->destroy_api(&opaque); }
+            catch (...) { _release_uncertain = true; return false; }
+            if (status != WT_PARSER_LIFECYCLE_V2_OK || opaque != NULL) {
+                _release_uncertain = true; // Preserve the original handle, even after an ambiguous callback.
+                return false;
+            }
+            _parser_api = NULL;
+        }
+        if (!_rejected_external_apis.empty() || _contended_external_apis.load() != NULL) return false;
+        _lifecycle = NULL;
+        _remover = NULL;
+        _remover_pending = false;
+        _stop_accepted = false;
+        if (_module_handle) { DLLHelper::free_library(_module_handle); _module_handle = NULL; }
+        if (_cfg) { _cfg->release(); _cfg = NULL; }
+        _filters.clear();
+        return true;
+    } catch (...) { return false; }
 }
 
 void ParserAdapter::release()
 {
-	_stopped = true;
-	_initialized = false;
-	if (_release_uncertain)
-		return;
-	if (_api_creation_uncertain)
-	{
-		// No handle exists to release, and the factory may have left hidden
-		// work or a callback registered before returning/throwing. Preserve the
-		// module, config and adapter's borrowed dependency graph for quarantine.
-		return;
-	}
-	if (_parser_api)
-	{
-		IParserApi* api_being_released = _parser_api;
-		if (_remover_pending && _remover == NULL)
-		{
-			// A pending provider remover cannot safely be replaced with delete.
-			_release_uncertain = true;
-			return;
-		}
-		try
-		{
-			// IParserApi::release() may not be idempotent. Once a remover leaves
-			// the API pointer non-null, retry only the remover on later calls.
-			if (!_remover_pending)
-				_parser_api->release();
-			if (_remover)
-				_remover(_parser_api);
-			else
-			{
-				delete _parser_api;
-				_parser_api = NULL;
-			}
-		}
-		catch (...)
-		{
-			// release() may have partially changed provider state; a remover may
-			// also have partially destroyed the object. Preserve all remaining
-			// ownership context and never retry this teardown implicitly. Keep
-			// the original pointer value even if a throwing remover nulled it;
-			// the sticky flag prevents any future dereference or deletion.
-			_parser_api = api_being_released;
-			_release_uncertain = true;
-			return;
-		}
-		if (_remover != NULL && _parser_api != NULL)
-		{
-			if (_parser_api == api_being_released)
-			{
-				// The remover's by-reference pointer is its completion signal. A
-				// non-null result means it deferred destruction; retain the API,
-				// remover, module, config and callback dependencies for a later
-				// retry after the caller establishes a safe provider barrier.
-				_remover_pending = true;
-				return;
-			}
-
-			// A remover is specified to null the pointer on success or preserve
-			// the same pointer when it defers. A replacement pointer is ambiguous.
-			_release_uncertain = true;
-			return;
-		}
-		_parser_api = NULL;
-		_remover_pending = false;
-	}
-	for (std::vector<IParserApi*>::iterator it = _rejected_external_apis.begin();
-		it != _rejected_external_apis.end();)
-	{
-		IParserApi* api = *it;
-		try
-		{
-			api->release();
-		}
-		catch (...)
-		{
-			// Preserve this owner and its remaining candidates if a provider
-			// cannot complete its teardown. Never retry a partial release.
-			_release_uncertain = true;
-			return;
-		}
-		delete api;
-		it = _rejected_external_apis.erase(it);
-	}
-	_remover = NULL;
-	if (_module_handle != NULL)
-	{
-		DLLHelper::free_library(_module_handle);
-		_module_handle = NULL;
-	}
-	if (_cfg != NULL)
-	{
-		_cfg->release();
-		_cfg = NULL;
-	}
-	_filters.clear();
+    if (requestStopLifecycle()) (void)finishReleaseLifecycle();
 }
 
 bool ParserAdapter::run()
 {
+	std::unique_lock<std::recursive_mutex> lock(_lifecycle_mutex, std::try_to_lock);
+	if (!lock.owns_lock() || _operation_active) return false;
+	LifecycleOperation operation(_operation_active);
 	if (_parser_api == NULL || !_initialized || _stopped)
 		return false;
 
@@ -519,6 +628,9 @@ void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t /*procFlag*/)
 	WTSContractInfo* cInfo = quote->getContractInfo();
 	if (cInfo == NULL)
 	{
+		// I03-NEW-087: an uninitialised adapter has no base data to resolve the code.
+		if (_bd_mgr == NULL)
+			return;
 		cInfo = _bd_mgr->getContract(quote->code(), quote->exchg());
 		quote->setContractInfo(cInfo);
 	}
@@ -527,6 +639,11 @@ void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t /*procFlag*/)
 		return;
 
 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
+	if (commInfo == NULL)
+	{
+		warnContractWithoutCommodity("Tick", cInfo);
+		return;
+	}
 	[[maybe_unused]] WTSSessionInfo* sInfo = commInfo->getSessionInfo();
 
 	if (_check_time)
@@ -572,6 +689,8 @@ void ParserAdapter::handleQuote(WTSTickData *quote, uint32_t /*procFlag*/)
 	else
 	{
 		stdCode = CodeHelper::rawFlatCodeToStdCode(cInfo->getCode(), cInfo->getExchg(), cInfo->getProduct());
+		if (stdCode.empty())	// I03-NEW-087: same guard as the monthly branch
+			return;
 	}
 	quote->setCode(stdCode.c_str());
 
@@ -589,12 +708,23 @@ void ParserAdapter::handleOrderQueue(WTSOrdQueData* ordQueData)
 	if (ordQueData->actiondate() == 0 || ordQueData->tradingdate() == 0)
 		return;
 
+	// I03-NEW-087: an uninitialised adapter or a contract without commodity
+	// metadata is dropped instead of dereferenced.
+	if (_bd_mgr == NULL)
+		return;
 	WTSContractInfo* cInfo = _bd_mgr->getContract(ordQueData->code(), ordQueData->exchg());
 	if (cInfo == NULL)
 		return;
 
 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
+	if (commInfo == NULL)
+	{
+		warnContractWithoutCommodity("Order queue", cInfo);
+		return;
+	}
 	std::string stdCode = CodeHelper::rawFlatCodeToStdCode(cInfo->getCode(), cInfo->getExchg(), commInfo->getProduct());
+	if (stdCode.empty())
+		return;
 	ordQueData->setCode(stdCode.c_str());
 
 	if (_stub)
@@ -612,12 +742,23 @@ void ParserAdapter::handleOrderDetail(WTSOrdDtlData* ordDtlData)
 	if (ordDtlData->actiondate() == 0 || ordDtlData->tradingdate() == 0)
 		return;
 
+	// I03-NEW-087: an uninitialised adapter or a contract without commodity
+	// metadata is dropped instead of dereferenced.
+	if (_bd_mgr == NULL)
+		return;
 	WTSContractInfo* cInfo = _bd_mgr->getContract(ordDtlData->code(), ordDtlData->exchg());
 	if (cInfo == NULL)
 		return;
 
 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
+	if (commInfo == NULL)
+	{
+		warnContractWithoutCommodity("Order detail", cInfo);
+		return;
+	}
 	std::string stdCode = CodeHelper::rawFlatCodeToStdCode(cInfo->getCode(), cInfo->getExchg(), commInfo->getProduct());
+	if (stdCode.empty())
+		return;
 	ordDtlData->setCode(stdCode.c_str());
 
 	if (_stub)
@@ -635,12 +776,23 @@ void ParserAdapter::handleTransaction(WTSTransData* transData)
 	if (transData->actiondate() == 0 || transData->tradingdate() == 0)
 		return;
 
+	// I03-NEW-087: an uninitialised adapter or a contract without commodity
+	// metadata is dropped instead of dereferenced.
+	if (_bd_mgr == NULL)
+		return;
 	WTSContractInfo* cInfo = _bd_mgr->getContract(transData->code(), transData->exchg());
 	if (cInfo == NULL)
 		return;
 
 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
+	if (commInfo == NULL)
+	{
+		warnContractWithoutCommodity("Transaction", cInfo);
+		return;
+	}
 	std::string stdCode = CodeHelper::rawFlatCodeToStdCode(cInfo->getCode(), cInfo->getExchg(), commInfo->getProduct());
+	if (stdCode.empty())
+		return;
 	transData->setCode(stdCode.c_str());
 
 	if (_stub)
@@ -661,17 +813,35 @@ void ParserAdapter::handleParserLog(WTSLogLevel ll, const char* message)
 //ParserAdapterMgr
 void ParserAdapterMgr::release()
 {
+	(void)requestStopLifecycleAll();
+	(void)finishReleaseLifecycleAll();
+}
+
+bool ParserAdapterMgr::requestStopLifecycleAll() noexcept
+{
+	bool allStopped = true;
+	for (auto& entry : _adapters)
+	{
+		if (entry.second && !entry.second->requestStopLifecycle()) allStopped = false;
+	}
+	return allStopped;
+}
+
+bool ParserAdapterMgr::finishReleaseLifecycleAll() noexcept
+{
+	bool allReleased = true;
 	for (ParserAdapterMap::iterator it = _adapters.begin(); it != _adapters.end();)
 	{
 		ParserAdapterPtr adapter = it->second;
-		if (adapter)
-			adapter->release();
-
-		if (adapter && adapter->hasApi())
+		if (adapter && (!adapter->finishReleaseLifecycle() || adapter->hasApi()))
+		{
+			allReleased = false;
 			++it;
+		}
 		else
 			it = _adapters.erase(it);
 	}
+	return allReleased;
 }
 
 bool ParserAdapterMgr::hasQuarantinedAdapters() const noexcept
@@ -716,10 +886,22 @@ ParserAdapterPtr ParserAdapterMgr::getAdapter(const char* id)
 
 void ParserAdapterMgr::run()
 {
+	(void)runWithResult();
+}
+
+bool ParserAdapterMgr::runWithResult()
+{
+	bool allSubmitted = true;
 	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
 	{
-		it->second->run();
+		if (!it->second || !it->second->run())
+		{
+			allSubmitted = false;
+			WTSLogger::error("Parser '{}' connect command was not submitted", it->first.c_str());
+		}
 	}
 
-	WTSLogger::info("{} parsers started", _adapters.size());
+	if (allSubmitted)
+		WTSLogger::info("Connect commands submitted for {} parsers", _adapters.size());
+	return allSubmitted;
 }

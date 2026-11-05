@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <memory>
 #include <system_error>
+#include <utility>
 #include <vector>
 namespace fs = std::filesystem;
 
@@ -53,10 +54,44 @@ IndexWorkerMgr::IndexWorkerMgr()
 
 IndexWorkerMgr::~IndexWorkerMgr()
 {
+	release();
+}
+
+void IndexWorkerMgr::release()
+{
+	if (_released.exchange(true))
+		return;
+
+	// Drain every scheduled quote task before any worker is deleted.
+	if (_pool)
+	{
+		_pool->wait();
+		_pool.reset();
+	}
+
+	// IdxWorkerWrapper deletes each worker through its creating factory.
+	_workers.clear();
+	_subbed.clear();
+
+	if (!_factories.empty() || _conflicting_factory != nullptr || _conflicting_module != nullptr)
+		WTSLogger::info("Index worker factories and modules stay loaded until process exit; no verified remover ABI");
 }
 
 bool IndexWorkerMgr::loadFactories(const char* path)
 {
+	// A candidate being loaded, or retained after a failure, blocks new scans.
+	// This also prevents an unbounded number of unquiesced candidates per manager.
+	if (_loading_factories || _conflicting_module != nullptr || _conflicting_factory != nullptr)
+	{
+		WTSLogger::error("Index worker factory load is in progress or quarantined");
+		return false;
+	}
+	_loading_factories = true;
+	struct LoadingGuard
+	{
+		bool& loading;
+		~LoadingGuard() { loading = false; }
+	} loadingGuard{_loading_factories};
 	if (path == nullptr || path[0] == '\0')
 	{
 		WTSLogger::error("Directory of index worker factory is empty");
@@ -152,22 +187,62 @@ bool IndexWorkerMgr::loadFactories(const char* path)
 			continue;
 		}
 
-		IIndexWorkerFact* fact = creator();
+		// Reserve the loader reference before calling plugin code. A synchronous
+		// re-entry must not start another scan while this candidate is unknown.
+		// If the creator or get_name throws, the plugin may already have started
+		// work, so keep the reference pinned rather than unloading active code.
+		_conflicting_module = hInst;
+		IIndexWorkerFact* fact = nullptr;
+		try
+		{
+			fact = creator();
+		}
+		catch (...)
+		{
+			WTSLogger::error("Index worker factory creator threw; module quarantined");
+			return false;
+		}
 		if(fact != NULL)
 		{
-			IdxFactInfo& fInfo = _factories[fact->get_name()];
+			_conflicting_factory = fact;
+			std::string factName;
+			try
+			{
+				const char* name = fact->get_name();
+				if (name == nullptr || name[0] == '\0')
+				{
+					WTSLogger::error("Index worker factory has no name; candidate quarantined");
+					return false;
+				}
+				factName = name;
+			}
+			catch (...)
+			{
+				WTSLogger::error("Reading index worker factory name failed; candidate quarantined");
+				return false;
+			}
+			if (_factories.find(factName) != _factories.end())
+			{
+				WTSLogger::error("Duplicate index worker factory [{}]; candidate quarantined", factName);
+				return false;
+			}
+			IdxFactInfo fInfo{};
 			fInfo._module_inst = hInst;
 			fInfo._module_path = modulePath.string();
 			fInfo._creator = creator;
 			fInfo._remover = (FuncDeleteIndexFact)DLLHelper::get_symbol(hInst, "delete_index_factory");
 			fInfo._fact = fact;
+			_factories.emplace(factName, std::move(fInfo));
+			_conflicting_module = nullptr;
+			_conflicting_factory = nullptr;
 
-			WTSLogger::info("Index worker factory [{}] loaded", fact->get_name());
+			WTSLogger::info("Index worker factory [{}] loaded", factName);
 
 			count++;
 		}
 		else
 		{
+			_conflicting_module = nullptr;
 			DLLHelper::free_library(hInst);
 			continue;
 		}
@@ -210,6 +285,8 @@ IndexWorkerPtr IndexWorkerMgr::createWorker(const char* name, const char* id)
 
 bool IndexWorkerMgr::init(WTSVariant* config, IHotMgr* hotMgr, IBaseDataMgr* bdMgr, DataManager* dataMgr)
 {
+	if (_released.load())
+		return false;
 	_hot_mgr = hotMgr;
 	_bd_mgr = bdMgr;
 	_data_mgr = dataMgr;
@@ -251,7 +328,7 @@ bool IndexWorkerMgr::init(WTSVariant* config, IHotMgr* hotMgr, IBaseDataMgr* bdM
 
 void IndexWorkerMgr::handle_quote(WTSTickData* newTick)
 {
-	if (newTick == NULL)
+	if (newTick == NULL || _released.load())
 		return;
 
 	const char* fullCode = newTick->getContractInfo()->getFullCode();

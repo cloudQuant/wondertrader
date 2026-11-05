@@ -1,0 +1,26 @@
+[
+ {
+  "id": "r3-asan-xtp-red",
+  "name": "XTP-minus-map",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan-r2/tests",
+  "filter": "*-xtp_map.*",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 900
+ },
+ {
+  "id": "r3-asan-xtp-green",
+  "name": "XTP-minus-map",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/tests",
+  "filter": "*-xtp_map.*",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 900
+ }
+]

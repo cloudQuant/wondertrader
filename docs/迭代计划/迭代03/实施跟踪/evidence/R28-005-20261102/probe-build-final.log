@@ -1,0 +1,75 @@
+[0/2] Re-checking globbed directories...
+[1/3] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_exec_mgr_test.cpp.o
+FAILED: TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_exec_mgr_test.cpp.o 
+/usr/bin/c++ -DFMT_HEADER_ONLY -DR59_CREDENTIALS_PLUGIN_PATH=\"/tmp/wt-i03-r28-005-20261102/build/TestUnits/coverage/r59_credentials_plugins/libR59CredentialsTrader.dylib\" -DSPDLOG_FMT_EXTERNAL -DWT_COV_CTA_PLUGIN_PATH=\"/tmp/wt-i03-r28-005-20261102/build/build_x64/Debug/bin/libWtCtaStraFact.dylib\" -DWT_COV_SEL_PLUGIN_PATH=\"/tmp/wt-i03-r28-005-20261102/build/TestUnits/coverage/sel_plugin/libCoverageWtSelStraFactPlugin.dylib\" -DWT_P11_TRADERMOCKER_PATH=\"/tmp/wt-i03-r28-005-20261102/build/build_x64/Debug/bin/libTraderMocker.dylib\" -DWT_R10_MISSING_CREATE_MQ_DIR=\"/tmp/wt-i03-r28-005-20261102/build/TestUnits/coverage/r10_missing_create_mq\" -DWT_R10_MISSING_REGISTER_MQ_DIR=\"/tmp/wt-i03-r28-005-20261102/build/TestUnits/coverage/r10_missing_register_mq\" -DWT_R130_PARSER_PLUGIN_PATH=\"/tmp/wt-i03-r28-005-20261102/build/TestUnits/coverage/r130_parser_plugins/libR130LifecycleParser.dylib\" -DWT_R160_FAKE_MQ_DIR=\"/tmp/wt-i03-r28-005-20261102/build/TestUnits/coverage/r160_fake_mq\" -DWT_R81_RISK_FAKE_TRADER_PATH=\"/tmp/wt-i03-r28-005-20261102/build/TestUnits/coverage/r81_risk_plugins/libR81RiskFakeTrader.dylib\" -DNOTFOUND -Dinst_hlp=cov_inst_hlp_4f1b01cc -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/include -I/tmp/wt-i03-r28-005-20261102/build/TestUnits/coverage/cov_boost_include -I/tmp/wt-i03-r28-005-20261102/snapshot/src/Includes -I/tmp/wt-i03-r28-005-20261102/snapshot/src/Share -I/tmp/wt-i03-r28-005-20261102/snapshot/src/WTSTools -I/tmp/wt-i03-r28-005-20261102/snapshot/src/WTSUtils -isystem /tmp/wt-i03-r28-005-20261102/snapshot/src -isystem /opt/homebrew/Cellar/googletest/1.17.0/include -include /tmp/wt-i03-r28-005-20261102/snapshot/src/Share/fmt_enum_compat.h -g -std=gnu++17 -Wall -Wextra -Wno-deprecated-copy-with-user-provided-copy "-Wno-#pragma-messages" -Werror -fprofile-instr-generate -fcoverage-mapping -MD -MT TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_exec_mgr_test.cpp.o -MF TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_exec_mgr_test.cpp.o.d -o TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/n02_wtcore_engines/n02_exec_mgr_test.cpp.o -c /tmp/wt-i03-r28-005-20261102/snapshot/src/TestUnits/coverage/n02_wtcore_engines/n02_exec_mgr_test.cpp
+/tmp/wt-i03-r28-005-20261102/snapshot/src/TestUnits/coverage/n02_wtcore_engines/n02_exec_mgr_test.cpp:652:31: error: call to member function 'get' is ambiguous
+  652 |     ASSERT_NE(nullptr, rules->get(0));
+      |                        ~~~~~~~^~~
+/opt/homebrew/include/gtest/gtest.h:1918:53: note: expanded from macro 'ASSERT_NE'
+ 1918 | #define ASSERT_NE(val1, val2) GTEST_ASSERT_NE(val1, val2)
+      |                                                     ^~~~
+/opt/homebrew/include/gtest/gtest.h:1900:63: note: expanded from macro 'GTEST_ASSERT_NE'
+ 1900 |   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperNE, val1, val2)
+      |                                                               ^~~~
+/opt/homebrew/include/gtest/gtest_pred_impl.h:148:40: note: expanded from macro 'ASSERT_PRED_FORMAT2'
+  148 |   GTEST_PRED_FORMAT2_(pred_format, v1, v2, GTEST_FATAL_FAILURE_)
+      |                                        ^~
+/opt/homebrew/include/gtest/gtest_pred_impl.h:134:43: note: expanded from macro 'GTEST_PRED_FORMAT2_'
+  134 |   GTEST_ASSERT_(pred_format(#v1, #v2, v1, v2), on_failure)
+      |                                           ^~
+/opt/homebrew/include/gtest/gtest_pred_impl.h:79:52: note: expanded from macro 'GTEST_ASSERT_'
+   79 |   if (const ::testing::AssertionResult gtest_ar = (expression)) \
+      |                                                    ^~~~~~~~~~
+/tmp/wt-i03-r28-005-20261102/snapshot/src/Includes/WTSVariant.hpp:570:21: note: candidate function
+  570 |         inline WTSVariant* get(const char* name) const
+      |                            ^
+/tmp/wt-i03-r28-005-20261102/snapshot/src/Includes/WTSVariant.hpp:594:21: note: candidate function
+  594 |         inline WTSVariant* get(uint32_t idx) const
+      |                            ^
+/tmp/wt-i03-r28-005-20261102/snapshot/src/TestUnits/coverage/n02_wtcore_engines/n02_exec_mgr_test.cpp:653:31: error: call to member function 'get' is ambiguous
+  653 |     ASSERT_NE(nullptr, rules->get(0)->get("executer"));
+      |                        ~~~~~~~^~~
+/opt/homebrew/include/gtest/gtest.h:1918:53: note: expanded from macro 'ASSERT_NE'
+ 1918 | #define ASSERT_NE(val1, val2) GTEST_ASSERT_NE(val1, val2)
+      |                                                     ^~~~
+/opt/homebrew/include/gtest/gtest.h:1900:63: note: expanded from macro 'GTEST_ASSERT_NE'
+ 1900 |   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperNE, val1, val2)
+      |                                                               ^~~~
+/opt/homebrew/include/gtest/gtest_pred_impl.h:148:40: note: expanded from macro 'ASSERT_PRED_FORMAT2'
+  148 |   GTEST_PRED_FORMAT2_(pred_format, v1, v2, GTEST_FATAL_FAILURE_)
+      |                                        ^~
+/opt/homebrew/include/gtest/gtest_pred_impl.h:134:43: note: expanded from macro 'GTEST_PRED_FORMAT2_'
+  134 |   GTEST_ASSERT_(pred_format(#v1, #v2, v1, v2), on_failure)
+      |                                           ^~
+/opt/homebrew/include/gtest/gtest_pred_impl.h:79:52: note: expanded from macro 'GTEST_ASSERT_'
+   79 |   if (const ::testing::AssertionResult gtest_ar = (expression)) \
+      |                                                    ^~~~~~~~~~
+/tmp/wt-i03-r28-005-20261102/snapshot/src/Includes/WTSVariant.hpp:570:21: note: candidate function
+  570 |         inline WTSVariant* get(const char* name) const
+      |                            ^
+/tmp/wt-i03-r28-005-20261102/snapshot/src/Includes/WTSVariant.hpp:594:21: note: candidate function
+  594 |         inline WTSVariant* get(uint32_t idx) const
+      |                            ^
+/tmp/wt-i03-r28-005-20261102/snapshot/src/TestUnits/coverage/n02_wtcore_engines/n02_exec_mgr_test.cpp:654:26: error: call to member function 'get' is ambiguous
+  654 |     EXPECT_EQ(2u, rules->get(0)->get("executer")->size());
+      |                   ~~~~~~~^~~
+/opt/homebrew/include/gtest/gtest.h:1885:69: note: expanded from macro 'EXPECT_EQ'
+ 1885 |   EXPECT_PRED_FORMAT2(::testing::internal::EqHelper::Compare, val1, val2)
+      |                                                                     ^~~~
+/opt/homebrew/include/gtest/gtest_pred_impl.h:144:40: note: expanded from macro 'EXPECT_PRED_FORMAT2'
+  144 |   GTEST_PRED_FORMAT2_(pred_format, v1, v2, GTEST_NONFATAL_FAILURE_)
+      |                                        ^~
+/opt/homebrew/include/gtest/gtest_pred_impl.h:134:43: note: expanded from macro 'GTEST_PRED_FORMAT2_'
+  134 |   GTEST_ASSERT_(pred_format(#v1, #v2, v1, v2), on_failure)
+      |                                           ^~
+/opt/homebrew/include/gtest/gtest_pred_impl.h:79:52: note: expanded from macro 'GTEST_ASSERT_'
+   79 |   if (const ::testing::AssertionResult gtest_ar = (expression)) \
+      |                                                    ^~~~~~~~~~
+/tmp/wt-i03-r28-005-20261102/snapshot/src/Includes/WTSVariant.hpp:570:21: note: candidate function
+  570 |         inline WTSVariant* get(const char* name) const
+      |                            ^
+/tmp/wt-i03-r28-005-20261102/snapshot/src/Includes/WTSVariant.hpp:594:21: note: candidate function
+  594 |         inline WTSVariant* get(uint32_t idx) const
+      |                            ^
+3 errors generated.
+ninja: build stopped: subcommand failed.

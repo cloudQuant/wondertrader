@@ -8,6 +8,9 @@
  * \brief 
  */
 #include "UftMocker.h"
+#include "ReplayTradeReceipt.hpp"
+#include <algorithm>
+#include <memory>
 #include "WtHelper.h"
 
 #include <stdarg.h>
@@ -150,23 +153,43 @@ bool UftMocker::init_uft_factory(WTSVariant* cfg)
 	if (hInst == NULL)
 		return false;
 
-	FuncCreateUftStraFact creator = (FuncCreateUftStraFact)DLLHelper::get_symbol(hInst, "createStrategyFact");
-	FuncDeleteUftStraFact remover = (FuncDeleteUftStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
-	if (creator == NULL || remover == NULL)
+	// Card 4b=A: only a validated versioned UFT table is used. CTA/HFT plugins
+	// export the same legacy symbol names, so v1 creators/deleters never run.
+	const WtStrategyPluginApiV2* api = NULL;
+	std::string rejectReason;
+	const auto probe = wt_stra_plugin::probeModule(
+		[hInst](const char* symbol) { return DLLHelper::get_symbol(hInst, symbol); },
+		WT_STRA_PLUGIN_V2_FAMILY_UFT, api, rejectReason);
+	if (probe != wt_stra_plugin::ProbeResult::Accepted)
 	{
-		log_error("UFT strategy module {} is missing {}", module,
-			creator == NULL ? "createStrategyFact" : "deleteStrategyFact");
+		log_error("UFT strategy module {} rejected: {}", module,
+			probe == wt_stra_plugin::ProbeResult::NotStrategyPlugin ?
+				std::string("no versioned UFT strategy plugin entry") : rejectReason);
 		DLLHelper::free_library(hInst);
 		return false;
 	}
 
-	return init_uft_factory_impl(cfg, hInst, module, creator, remover);
+	return init_uft_factory_core(cfg, hInst, module, NULL, NULL, api);
 }
 
 bool UftMocker::init_uft_factory_impl(WTSVariant* cfg, DllHandle module,
 	const std::string& modulePath, FuncCreateUftStraFact creator, FuncDeleteUftStraFact remover)
 {
-	if (cfg == NULL || modulePath.empty() || creator == NULL || remover == NULL ||
+	// In-process seam with explicit v1 functions (tests only).
+	if (creator == NULL || remover == NULL)
+	{
+		if (module != NULL)
+			DLLHelper::free_library(module);
+		return false;
+	}
+	return init_uft_factory_core(cfg, module, modulePath, creator, remover, NULL);
+}
+
+bool UftMocker::init_uft_factory_core(WTSVariant* cfg, DllHandle module,
+	const std::string& modulePath, FuncCreateUftStraFact creator, FuncDeleteUftStraFact remover,
+	const WtStrategyPluginApiV2* api)
+{
+	if (cfg == NULL || modulePath.empty() || (api == NULL && (creator == NULL || remover == NULL)) ||
 		_factory.is_preserved() || _factory._module_inst != NULL || _factory._fact != NULL || _strategy != NULL)
 	{
 		if (module != NULL)
@@ -198,7 +221,7 @@ bool UftMocker::init_uft_factory_impl(WTSVariant* cfg, DllHandle module,
 	IUftStrategyFact* fact = NULL;
 	try
 	{
-		fact = creator();
+		fact = api != NULL ? static_cast<IUftStrategyFact*>(api->create_factory()) : creator();
 	}
 	catch (...)
 	{
@@ -219,6 +242,7 @@ bool UftMocker::init_uft_factory_impl(WTSVariant* cfg, DllHandle module,
 	_factory._module_path = std::move(modulePathValue);
 	_factory._creator = creator;
 	_factory._remover = remover;
+	_factory._api = api;
 	_factory._fact = fact;
 
 	try
@@ -939,13 +963,145 @@ void UftMocker::on_order(uint32_t localid, const char* stdCode, bool isLong, uin
 		_strategy->on_order(this, localid, stdCode, isLong, offset, totalQty, leftQty, price, isCanceled);
 }
 
+bool UftMocker::plan_trade_fees(const char* stdCode, bool isLong, uint32_t offset, const std::vector<double>& volumes,
+ double price, const wt_fee::Context& context, std::vector<std::vector<double>>& fees)
+{
+ auto found = _pos_map.find(stdCode);
+ PosInfo simulated = found == _pos_map.end() ? PosInfo() : found->second;
+ PosItem& item = isLong ? simulated._long : simulated._short;
+ double total = _fund_info._total_fees;
+ double totalProfit = _fund_info._total_profit;
+ auto* commodity = _replayer->get_commodity_info(stdCode);
+ if (offset > 2 || !replay_trade::fundFinite(totalProfit, _fund_info._total_dynprofit, total) || !commodity ||
+     !std::isfinite(commodity->getVolScale())) return false;
+ const uint32_t today = _replayer->get_trading_date();
+ for (double vol : volumes) {
+  if (!std::isfinite(vol) || vol <= 0 || !std::isfinite(price) || price < 0) return false;
+  std::vector<double> segments;
+  if (offset == 0) {
+   if (!replay_trade::appendFee(context, price, vol, 0, total, segments) ||
+       !replay_trade::fundFinite(totalProfit, _fund_info._total_dynprofit, total)) return false;
+   item._newvol += vol;
+   if (!std::isfinite(item._newvol)) return false;
+   DetailInfo d; d._volume = vol; d._opentdate = today; d._price = price; item._details.emplace_back(d);
+  } else {
+   if (offset == 2 && decimal::gt(vol, item._newvol)) return false;
+   if (offset == 1 && decimal::gt(vol, item._prevol + item._newvol)) return false;
+   double left = vol;
+   size_t firstUsed = item._details.size(), lastExhausted = item._details.size();
+   for (size_t i = 0; i < item._details.size(); ++i) {
+    auto& d = item._details[i];
+    if (offset == 2 && d._opentdate != today) continue;
+    const double used = std::min(d._volume, left);
+    if (decimal::eq(used, 0)) continue;
+    if (firstUsed == item._details.size()) firstUsed = i;
+    double profit = (price - d._price) * used * commodity->getVolScale();
+    if (!isLong) profit *= -1;
+    if (!std::isfinite(profit) || !std::isfinite(totalProfit + profit) ||
+        !std::isfinite(item._closeprofit + profit)) return false;
+    totalProfit += profit; item._closeprofit += profit;
+    if (!replay_trade::appendFee(context, price, used, d._opentdate == today ? 2 : 1, total, segments) ||
+        !replay_trade::fundFinite(totalProfit, _fund_info._total_dynprofit, total)) return false;
+    d._volume -= used; left -= used;
+    if (decimal::eq(d._volume, 0)) lastExhausted = i;
+    if (left == 0) break;
+   }
+   if (!decimal::eq(left, 0)) return false;
+   if (lastExhausted != item._details.size()) {
+    const size_t begin = offset == 1 ? 0 : firstUsed;
+    // Match the commit path's contiguous erase, but reject if it would
+    // accidentally discard any still-open detail in an irregular ordering.
+    for (size_t i = begin; i <= lastExhausted; ++i)
+     if (!decimal::eq(item._details[i]._volume, 0)) return false;
+    item._details.erase(item._details.begin() + begin, item._details.begin() + lastExhausted + 1);
+   }
+   if (offset == 2) item._newvol -= vol;
+   else { double used = std::min(item._prevol, vol); item._prevol -= used; item._newvol -= vol - used; }
+  }
+  fees.push_back(std::move(segments));
+ }
+ return true;
+}
+
 void UftMocker::on_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price)
 {
-	//PosInfo& posInfo = _pos_map[stdCode];
-	//PosItem& posItem = isLong ? posInfo._long : posInfo._short;
-	update_position(stdCode, isLong, offset, vol, price);
-	if (_strategy)
-		_strategy->on_trade(this, localid, stdCode, isLong, offset, vol, price);
+ apply_trade(localid, stdCode, isLong, offset, vol, price);
+}
+
+std::function<bool()> UftMocker::trade_state_guard(const std::string& key)
+{
+ auto existing = _pos_map.find(key);
+ const bool existed = existing != _pos_map.end();
+ const PosInfo snapshot = existed ? existing->second : PosInfo();
+ const double feeSnapshot = _fund_info._total_fees, profitSnapshot = _fund_info._total_profit;
+ const double dynamicSnapshot = _fund_info._total_dynprofit;
+ const uint32_t dateSnapshot = _replayer->get_trading_date();
+ return [this, key, snapshot, existed, feeSnapshot, profitSnapshot, dynamicSnapshot, dateSnapshot]() {
+  auto it = _pos_map.find(key);
+  if ((it != _pos_map.end()) != existed || _fund_info._total_fees != feeSnapshot ||
+      _fund_info._total_profit != profitSnapshot || _fund_info._total_dynprofit != dynamicSnapshot ||
+      _replayer->get_trading_date() != dateSnapshot) return false;
+  if (!existed) return true;
+  auto sameItem = [](const PosItem& a, const PosItem& b) {
+   if (a._closeprofit != b._closeprofit || a._dynprofit != b._dynprofit ||
+       a._prevol != b._prevol || a._newvol != b._newvol || a._preavail != b._preavail ||
+       a._newavail != b._newavail || a._details.size() != b._details.size()) return false;
+   for (size_t i = 0; i < a._details.size(); ++i) {
+    const auto& x = a._details[i]; const auto& y = b._details[i];
+    if (x._price != y._price || x._volume != y._volume || x._opentime != y._opentime ||
+        x._opentdate != y._opentdate || x._max_profit != y._max_profit ||
+        x._max_loss != y._max_loss || x._profit != y._profit) return false;
+   }
+   return true;
+  };
+  return sameItem(it->second._long, snapshot._long) && sameItem(it->second._short, snapshot._short);
+ };
+}
+
+bool UftMocker::apply_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price)
+{
+ if (!stdCode || !_replayer->fee_error().empty()) return false;
+ // I03-NEW-095: a zero-volume trade report changes nothing (legacy behaviour) and is not
+ // a fee failure; latching a fee error here would terminate the whole replay.
+ if (vol == 0.0) return false;
+ // I03-NEW-095: legacy update_position priced a zero-price trade report at the latest
+ // local price; fee planning and the position update must use that same price.
+ double fillPrice = price;
+ if (decimal::eq(fillPrice, 0.0)) {
+  auto last = _price_map.find(stdCode);
+  if (last != _price_map.end()) fillPrice = last->second;
+ }
+ auto* frame = replay_trade::find(this);
+ replay_trade::Frame direct;
+ std::vector<std::vector<double>> planned;
+ std::unique_ptr<replay_trade::Scope> scope;
+ if (frame) {
+  if (!frame->expected || frame->committed || !frame->stateValid || !frame->stateValid() ||
+      (frame->remaining && *frame->remaining != frame->expectedRemaining) ||
+      frame->localid != localid || frame->code != stdCode ||
+      frame->direction != isLong || frame->offset != offset || frame->quantity != vol || frame->price != price || !frame->fees) {
+   frame->rejected = true; _replayer->report_fee_error("reentrant or mismatched UFT trade"); return false;
+  }
+ } else {
+  wt_fee::Context context; std::string error;
+  if (!_replayer->prepare_fee_context(stdCode, nullptr, context, error) ||
+      !plan_trade_fees(stdCode, isLong, offset, {vol}, fillPrice, context, planned)) {
+   _replayer->report_fee_error(error.empty() ? "UFT trade fee preflight failed" : error); return false;
+  }
+  direct.owner = this; direct.code = stdCode; direct.localid = localid; direct.direction = isLong; direct.offset = offset;
+  direct.quantity = vol; direct.price = price; direct.fees = &planned[0]; direct.expected = true;
+  direct.stateValid = trade_state_guard(stdCode);
+  scope.reset(new replay_trade::Scope(direct)); frame = &direct;
+ }
+ frame->expected = false;
+ if (!update_position(stdCode, isLong, offset, vol, fillPrice, *frame->fees)) {
+  _replayer->report_fee_error("UFT trade commit failed"); return false;
+ }
+ frame->committed = true;
+ frame->stateValid = trade_state_guard(stdCode);
+ if (_strategy) _strategy->on_trade(this, localid, stdCode, isLong, offset, vol, price);
+ if (!frame->stateValid()) _replayer->report_fee_error("UFT trade plan invalidated by callback");
+ return true;
 }
 
 void UftMocker::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* message)
@@ -1023,6 +1179,12 @@ void UftMocker::update_dyn_profit(const char* stdCode, WTSTickData* newTick)
 
 bool UftMocker::procOrder(uint32_t localid)
 {
+	if (auto* active = replay_trade::find(this)) {
+		active->rejected = true; _replayer->report_fee_error("reentrant UFT order matching"); return false;
+	}
+	if (!_replayer->fee_error().empty()) return false;
+	replay_trade::Frame frame; frame.owner = this;
+	replay_trade::Scope receipt(frame);
 	OrderInfoPtr ordInfo;
 	{
 		auto it = _orders.find(localid);
@@ -1045,7 +1207,9 @@ bool UftMocker::procOrder(uint32_t localid)
 		ordInfo->_proced_after_placed = true;
 	}
 
-	WTSTickData* curTick = stra_get_last_tick(ordInfo->_code);
+	auto tickReleaser = [](WTSTickData* tick) { if (tick) tick->release(); };
+	std::unique_ptr<WTSTickData, decltype(tickReleaser)> tick(stra_get_last_tick(ordInfo->_code), tickReleaser);
+	WTSTickData* curTick = tick.get();
 	if (curTick == NULL)
 		return false;
 
@@ -1060,11 +1224,9 @@ bool UftMocker::procOrder(uint32_t localid)
 		//if (curPx == 0.0)
 		if(decimal::eq(curPx, 0.0))
 		{
-			curTick->release();
 			return false;
 		}
 	}
-	curTick->release();
 
 	//如果没有成交条件,则退出逻辑
 	if(!decimal::eq(ordInfo->_price, 0.0))
@@ -1085,14 +1247,70 @@ bool UftMocker::procOrder(uint32_t localid)
 	/*
 	 *	下面就要模拟成交了
 	 */
+	if (!std::isfinite(orderQty) || !std::isfinite(ordInfo->_left)) {
+		_replayer->report_fee_error("invalid UFT order quantity"); return false;
+	}
 	double maxQty = min(orderQty, ordInfo->_left);
+	if (!std::isfinite(maxQty) || maxQty <= 0 || maxQty > static_cast<double>(UINT32_MAX)) {
+		_replayer->report_fee_error("invalid UFT fill quantity"); return false;
+	}
 	auto vols = splitVolume((uint32_t)maxQty);
-	for(uint32_t curQty : vols)
+	if (vols.empty()) return false;
+	if (frame.rejected || !_replayer->fee_error().empty()) return false;
+	wt_fee::Context context; std::string error;
+	// I03-NEW-080: the fee context is the authority for the fill contract. A continuous
+	// order without the tick's physical contract still fails closed there; a physical
+	// order code resolves its own contract (same as the CTA/SEL mockers).
+	if (!_replayer->prepare_fee_context(ordInfo->_code, curTick->getContractInfo(), context, error)) {
+		_replayer->report_fee_error(error); return false;
+	}
+	tick.reset();
+	std::vector<double> volumes(vols.begin(), vols.end());
+	std::vector<std::vector<double>> fees;
+	if (!plan_trade_fees(ordInfo->_code, ordInfo->_isLong, ordInfo->_offset, volumes, curPx, context, fees)) {
+		_replayer->report_fee_error("UFT split-fill fee preflight failed"); return false;
+	}
+	frame.code = ordInfo->_code;
+	frame.localid = localid; frame.direction = ordInfo->_isLong; frame.offset = ordInfo->_offset; frame.price = curPx;
+	for (size_t index = 0; index < vols.size(); ++index)
 	{
-		on_trade(ordInfo->_localid, ordInfo->_code, ordInfo->_isLong, ordInfo->_offset, curQty, curPx);
+		uint32_t curQty = vols[index];
+		if (!std::isfinite(ordInfo->_left) || ordInfo->_left < curQty) {
+			_replayer->report_fee_error("UFT order remaining is smaller than planned fill"); return false;
+		}
+		frame.quantity = curQty; frame.fees = &fees[index]; frame.expected = true; frame.committed = false;
+		frame.remaining = &ordInfo->_left; frame.expectedRemaining = ordInfo->_left;
+		frame.stateValid = trade_state_guard(frame.code);
+		try {
+			on_trade(ordInfo->_localid, ordInfo->_code, ordInfo->_isLong, ordInfo->_offset, curQty, curPx);
+		} catch (...) {
+			frame.expected = false;
+			if (frame.committed && ordInfo->_left == frame.expectedRemaining) ordInfo->_left -= curQty;
+			_replayer->report_fee_error("UFT trade callback threw");
+			return false;
+		}
+		frame.expected = false;
+		if (!frame.committed) {
+			_replayer->report_fee_error("UFT virtual trade callback did not commit"); return false;
+		}
+		if (ordInfo->_left != frame.expectedRemaining) {
+			_replayer->report_fee_error("UFT order changed during trade callback"); return false;
+		}
 
 		ordInfo->_left -= curQty;
-		on_order(localid, ordInfo->_code, ordInfo->_isLong, ordInfo->_offset, ordInfo->_total, ordInfo->_left, ordInfo->_price, false);
+		const double remainingAfterFill = ordInfo->_left;
+		if (frame.rejected || !_replayer->fee_error().empty() || !frame.stateValid || !frame.stateValid()) {
+			_replayer->report_fee_error("UFT trade plan invalidated by callback"); return false;
+		}
+		try {
+			on_order(localid, ordInfo->_code, ordInfo->_isLong, ordInfo->_offset, ordInfo->_total, ordInfo->_left, ordInfo->_price, false);
+		} catch (...) {
+			_replayer->report_fee_error("UFT order callback threw after fill"); return false;
+		}
+		if (frame.rejected || !_replayer->fee_error().empty() || !frame.stateValid() ||
+		    ordInfo->_left != remainingAfterFill) {
+			_replayer->report_fee_error("UFT trade plan invalidated by order callback"); return false;
+		}
 	}
 
 	//if(ordInfo->_left == 0)
@@ -1287,24 +1505,21 @@ void UftMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, d
 		totalprofit);
 }
 
-void UftMocker::update_position(const char* stdCode, bool isLong, uint32_t offset, double qty, double price /* = 0.0 */)
+bool UftMocker::update_position(const char* stdCode, bool isLong, uint32_t offset, double qty, double price, const std::vector<double>& fees)
 {
+	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
+	if (!commInfo || offset > 2) return false;
+	size_t feeIndex = 0;
 	PosItem& pItem = isLong ? _pos_map[stdCode]._long : _pos_map[stdCode]._short;
 
 	//先确定成交价格
 	double curPx = price;
-	if (decimal::eq(price, 0.0))
-		curPx = _price_map[stdCode];
 
 	const char* pos_dir = isLong ? "long" : "short";
 
 	//获取时间
 	uint64_t curTm = (uint64_t)_replayer->get_date() * 1000000000 + (uint64_t)_replayer->get_min_time()*100000 + _replayer->get_secs();
 	uint32_t curTDate = _replayer->get_trading_date();
-
-	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
-	if (commInfo == NULL)
-		return;
 
 	//成交价
 	double trdPx = curPx;
@@ -1331,7 +1546,7 @@ void UftMocker::update_position(const char* stdCode, bool isLong, uint32_t offse
 		dInfo._opentdate = curTDate;
 		pItem._details.emplace_back(dInfo);
 
-		double fee = _replayer->calc_fee(stdCode, trdPx, qty, 0);
+		double fee = fees[feeIndex++];
 		_fund_info._total_fees += fee;
 
 		log_trade(stdCode, isLong, 0, curTm, trdPx, qty, fee);
@@ -1371,7 +1586,7 @@ void UftMocker::update_position(const char* stdCode, bool isLong, uint32_t offse
 			dInfo._max_profit = dInfo._max_profit*dInfo._volume / (dInfo._volume + maxQty);
 			dInfo._max_loss = dInfo._max_loss*dInfo._volume / (dInfo._volume + maxQty);
 			_fund_info._total_profit += profit;
-			double fee = _replayer->calc_fee(stdCode, trdPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
+			double fee = fees[feeIndex++];
 			_fund_info._total_fees += fee;
 			//这里写成交记录
 			log_trade(stdCode, isLong, offset, curTm, trdPx, maxQty, fee);
@@ -1430,7 +1645,7 @@ void UftMocker::update_position(const char* stdCode, bool isLong, uint32_t offse
 			_fund_info._total_profit += profit;
 
 			uint32_t offset = dInfo._opentdate == curTDate ? 2 : 1;
-			double fee = _replayer->calc_fee(stdCode, trdPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
+			double fee = fees[feeIndex++];
 			_fund_info._total_fees += fee;
 			//这里写成交记录
 			log_trade(stdCode, isLong, offset, curTm, trdPx, maxQty, fee);
@@ -1454,4 +1669,5 @@ void UftMocker::update_position(const char* stdCode, bool isLong, uint32_t offse
 		dynprofit += dInfo._profit;
 	}
 	pItem._dynprofit = dynprofit;
+	return true;
 }

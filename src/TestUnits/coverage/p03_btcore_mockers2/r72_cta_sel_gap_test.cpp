@@ -233,7 +233,7 @@ TEST_F(R72CtaSelGap, SelMinuteBarsSeedPriceAndScheduleRollover)
 
 	WTSKlineSlice* bars = sel.stra_get_bars(kCode, "m1", 5);
 	ASSERT_NE(nullptr, bars);
-	ASSERT_GE(bars->size(), 1u);
+	ASSERT_GE(bars->size(), 1);
 	EXPECT_DOUBLE_EQ(10.0, bars->at(-1)->close);
 	bars->release();
 

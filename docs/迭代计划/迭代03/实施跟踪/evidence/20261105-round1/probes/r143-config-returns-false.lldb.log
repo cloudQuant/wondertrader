@@ -1,0 +1,41 @@
+(lldb) target create "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/round1/build/build_x64/Debug/bin/TestUnits/CoverageTests_porter"
+Current executable set to '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/round1/build/build_x64/Debug/bin/TestUnits/CoverageTests_porter' (arm64).
+(lldb) settings set -- target.run-args  "--gtest_filter=R143PorterBars.cta_get_bars_returns_loaded_blocks"
+(lldb) breakpoint set -n WtRtRunner::config
+Breakpoint 1: 2 locations.
+(lldb) run
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[0;33mNote: Google Test filter = R143PorterBars.cta_get_bars_returns_loaded_blocks
+[m[0;32m[==========] [mRunning 1 test from 1 test suite.
+[0;32m[----------] [mGlobal test environment set-up.
+[0;32m[----------] [m1 test from R143PorterBars
+[0;32m[ RUN      ] [mR143PorterBars.cta_get_bars_returns_loaded_blocks
+Process 67914 launched: '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/round1/build/build_x64/Debug/bin/TestUnits/CoverageTests_porter' (arm64)
+Process 67914 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x00000001001cfcb8 CoverageTests_porter`WtRtRunner::config(this=0x0000000100476990, cfgFile="{\"basefiles\":{\"session\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_67914/sessions.json\",\"commodity\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_67914/commodities.json\",\"contract\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_67914/contracts.json\"},\"env\":{\"name\":\"cta\"},\"data\":{\"store\":{\"module\":\"WtDataStorage\",\"path\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_67914\"}},\"bspolicy\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_67914/actions.json\"}", isFile=false) at WtRtRunner.cpp:1276:25
+   1273	
+   1274	bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
+   1275	{
+-> 1276		if (is_in_runner_scope(g_exec_status_call_scope, this))
+    		                       ^
+   1277		{
+   1278			WTSLogger::error("Runner configuration from execution-unit status provider rejected; call config after the query returns");
+   1279			return false;
+Target 0: (CoverageTests_porter) stopped.
+(lldb) finish
+Process 67914 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = step out
+Return value: (bool) $0 = false
+
+    frame #0: 0x00000001000c9964 CoverageTests_porter`(anonymous namespace)::LiveFixture::setup(this=0x000000016fdfe450, tag="cta", env="cta") at r143_porter_bars_test.cpp:194:20
+   191 			WtHelper::setInstDir(bin.c_str());
+   192 	
+   193 			register_ext_data_loader(fnl_loader, raw_loader, nullptr, nullptr);
+-> 194 			if (!getRunner().config(make_cfg(dir, env).c_str(), false))
+    			                 ^
+   195 				return false;
+   196 			return getRunner().getEngine() != nullptr;
+   197 		}
+Target 0: (CoverageTests_porter) stopped.
+(lldb) quit

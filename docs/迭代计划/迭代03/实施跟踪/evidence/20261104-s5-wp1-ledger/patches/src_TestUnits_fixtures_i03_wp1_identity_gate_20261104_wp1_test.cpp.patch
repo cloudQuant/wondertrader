@@ -1,0 +1,658 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp	2026-11-04 09:36:24
++++ src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp	2026-11-04 21:50:18
+@@ -9,10 +9,18 @@
+ #if !defined(WP1_BASELINE) && !defined(WP1_BASELINE2)
+ #include <WtCore/WtExecuterFactory.h>
+ #include <Includes/IExecPluginV2.h>
++#include <Includes/ExecuteDefs.h>
++#include <Includes/WTSDataDef.hpp>
++#include <Includes/WTSSessionInfo.hpp>
++#include <cstdio>
++#include <cstring>
+ #endif
+ #include <sys/stat.h>
+ 
+ #include <atomic>
++#include <chrono>
++#include <condition_variable>
++#include <mutex>
+ #include <algorithm>
+ #include <climits>
+ #include <csignal>
+@@ -23,6 +31,7 @@
+ #include <iterator>
+ #include <spawn.h>
+ #include <sstream>
++#include <stdexcept>
+ #include <sys/wait.h>
+ #include <thread>
+ 
+@@ -327,7 +336,11 @@
+     ASSERT_NE(UINT_MAX, localid);
+     pushOrder(adapter, id_, localid, WOS_NotTraded_Queuing, 2, 0);
+     adapter.onRspPosition(static_cast<const WTSArray*>(nullptr));
+-    rspOrders(adapter, {});
++    // A complete, non-empty snapshot (one external order) without localid.
++    // 2026-11-04 s5 (NEW-154): an empty snapshot cannot be told apart from a
++    // failed query and is no longer trusted for absence; see
++    // EmptyOrderSnapshotIsAmbiguousAndKeepsLiveOrders.
++    rspOrders(adapter, { makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 1, 0, "OEXT", "external") });
+     EXPECT_DOUBLE_EQ(0.0, adapter.getUndoneQty(kStdCode));
+     pushOrder(adapter, id_, localid, WOS_PartTraded_Queuing, 2, 1);
+     EXPECT_DOUBLE_EQ(1.0, adapter.getUndoneQty(kStdCode)) << "newer realtime report revives an absent tombstone";
+@@ -856,9 +869,615 @@
+             unit->requestQuiesce();
+             ASSERT_TRUE(unit->waitQuiesced());
+         }
++    }
++}
++#endif
++
++#if !defined(WP1_BASELINE) && !defined(WP1_BASELINE2)
++//////////////////////////////////////////////////////////////////////////
++// Slice 6 (2026-11-04 s5 review of slice 5). These use only slice-5 APIs so
++// the baseline3 variant (slice 5 as found at the start of the review) builds
++// them as red controls.
++namespace {
++// Fake provider that can report synchronously from inside orderInsert and can
++// throw from orderAction (outcome unknown).
++class SyncApi : public p11fix::FakeTraderApi
++{
++public:
++    std::function<void(WTSEntrust*)> onInsert;
++    bool throwOnAction = false;
++    int orderInsert(WTSEntrust* entrust) override
++    {
++        const int ret = p11fix::FakeTraderApi::orderInsert(entrust);
++        if (onInsert)
++            onInsert(entrust);
++        return ret;
++    }
++    int orderAction(WTSEntrustAction* action) override
++    {
++        if (throwOnAction)
++        {
++            throwOnAction = false;
++            throw std::runtime_error("provider failure, outcome unknown");
++        }
++        return p11fix::FakeTraderApi::orderAction(action);
++    }
++};
++
++class CallbackSink : public p11fix::RecordingSink
++{
++public:
++    std::function<void(uint32_t)> onOrder;
++    void on_order(uint32_t localid, const char* stdCode, bool isBuy, double totalQty,
++        double leftQty, double price, bool isCanceled = false) override
++    {
++        RecordingSink::on_order(localid, stdCode, isBuy, totalQty, leftQty, price, isCanceled);
++        if (onOrder)
++            onOrder(localid);
++    }
++};
++}
++
++TEST_F(Wp1Test, EmptyOrderSnapshotIsAmbiguousAndKeepsLiveOrders)
++{
++    TraderAdapter adapter;
++    build(adapter, &pm_);
++    const uint32_t localid = adapter.openLong(kStdCode, 7000, 2, 0, ct_);
++    ASSERT_NE(UINT_MAX, localid);
++    pushOrder(adapter, id_, localid, WOS_NotTraded_Queuing, 2, 0);
++    adapter.onRspPosition(static_cast<const WTSArray*>(nullptr));
++    rspOrders(adapter, {});	// CTP/XTP deliver this both for "no orders" and for a failed query
++    EXPECT_DOUBLE_EQ(2.0, adapter.getUndoneQty(kStdCode)) << "fail closed: reservation kept";
++    EXPECT_EQ(TraderAdapter::OrderLedgerState::Live, adapter.orderLedger(localid).state);
++    EXPECT_TRUE(adapter.cancel(localid)) << "the live order is still known and cancellable";
++}
++
++TEST_F(Wp1Test, OwnerScopeDoesNotLeakIntoSinkCallbacks)
++{
++    SyncApi api;
++    TraderAdapter adapter;
++    ASSERT_TRUE(adapter.initExt("wp1leak", &api, &bd_, &pm_));
++    ASSERT_TRUE(adapter.run());
++    adapter.onLoginResult(true, "wp1", 20240510);
++    ASSERT_TRUE(adapter.configureOwnerRoutingCapabilities(allCaps()));
++    // A non-owner observer (e.g. an HFT context) enters a bare order while the
++    // report of owner a's order is delivered synchronously from orderInsert.
++    CallbackSink observer;
++    OrderIDs inner;
++    observer.onOrder = [&](uint32_t) {
++        if (inner.empty())
++            inner = adapter.buy(kStdCode, 7000, 1, 0, false, ct_);
++    };
++    adapter.addSink(&observer);
++    api.onInsert = [&](WTSEntrust* e) {
++        if (api.n_insert_ != 1)
++            return;
++        WTSOrderInfo* o = makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 2, 0, "OSYNC", e->getUserTag());
++        adapter.onPushOrder(o);
++        o->release();
++    };
++    OrderIDs ia = adapter.buyAsOwner("exec:a", true, kStdCode, 7000, 2, 0, false);
++    ASSERT_EQ(1u, ia.size());
++    ASSERT_EQ(1u, inner.size());
++    EXPECT_EQ("exec:a", adapter.orderLedger(ia[0]).owner_id);
++    EXPECT_EQ("", adapter.orderLedger(inner[0]).owner_id) << "callback entry must not inherit owner exec:a";
++    EXPECT_DOUBLE_EQ(2.0, adapter.getUndoneQtyForOwner(kStdCode, "exec:a"));
++    adapter.removeSink(&observer);
++}
++
++TEST_F(Wp1Test, RemovedOwnerSinkDeclarationEndsWithTheSink)
++{
++    TraderAdapter adapter;
++    build(adapter, &pm_);
++    ASSERT_TRUE(adapter.configureOwnerRoutingCapabilities(allCaps()));
++    p11fix::RecordingSink a1, b;
++    ASSERT_TRUE(adapter.declareOwnerSink(&a1, "exec:a"));
++    ASSERT_TRUE(adapter.declareOwnerSink(&b, "exec:b"));
++    adapter.addSink(&a1);
++    adapter.addSink(&b);
++    ASSERT_TRUE(adapter.removeSink(&a1));	// executer a is destroyed
++    // The same sink object (address) is reused by an unrelated plain observer,
++    // e.g. a new HFT context; it must not silently inherit owner exec:a.
++    adapter.addSink(&a1);
++    // Re-created executer a (same owner id, new sink object).
++    p11fix::RecordingSink a2;
++    EXPECT_TRUE(adapter.declareOwnerSink(&a2, "exec:a"));
++    adapter.addSink(&a2);
++    OrderIDs ib = adapter.buyAsOwner("exec:b", true, kStdCode, 7000, 1, 0, false);
++    OrderIDs ia = adapter.buyAsOwner("exec:a", true, kStdCode, 7000, 1, 0, false);
++    ASSERT_EQ(1u, ib.size());
++    ASSERT_EQ(1u, ia.size());
++    pushOrder(adapter, id_, ib[0], WOS_NotTraded_Queuing, 1, 0);
++    pushOrder(adapter, id_, ia[0], WOS_NotTraded_Queuing, 1, 0);
++    EXPECT_EQ(0u, ordersFor(a2, ib[0])) << "re-created owner a must be routed, never see owner b's order";
++    EXPECT_EQ(1u, ordersFor(a2, ia[0]));
++    EXPECT_EQ(1u, ordersFor(b, ib[0]));
++    EXPECT_EQ(1u, ordersFor(a1, ib[0])) << "the reused sink is a plain observer, not a silent owner";
++    adapter.removeSink(&a1);
++    adapter.removeSink(&a2);
++    adapter.removeSink(&b);
++}
++
++TEST_F(Wp1Test, UnownedEventsNeverReachOwnerSinksUnderRouting)
++{
++    TraderAdapter adapter;
++    build(adapter, &pm_);	// sink_ is a non-owner observer
++    ASSERT_TRUE(adapter.configureOwnerRoutingCapabilities(allCaps()));
++    p11fix::RecordingSink a;
++    ASSERT_TRUE(adapter.declareOwnerSink(&a, "exec:a"));
++    adapter.addSink(&a);
++    OrderIDs direct = adapter.buy(kStdCode, 7000, 1, 0, false, ct_);	// e.g. an HFT context
++    ASSERT_EQ(1u, direct.size());
++    pushOrder(adapter, id_, direct[0], WOS_NotTraded_Queuing, 1, 0);
++    pushTrade(adapter, id_, direct[0], 1, "TD1");
++    EXPECT_EQ(0u, ordersFor(a, direct[0]));
++    EXPECT_EQ(0u, tradesFor(a, direct[0])) << "an unowned trade must not reach an owner's ledger";
++    EXPECT_EQ(1u, ordersFor(sink_, direct[0]));
++    EXPECT_EQ(1u, tradesFor(sink_, direct[0]));
++    EXPECT_FALSE(adapter.isUnresolvedReportPaused()) << "a verified direct order is not unresolvable";
++    adapter.removeSink(&a);
++}
++
++TEST_F(Wp1Test, UnresolvableOwnerTradeIsQuarantinedUnderRouting)
++{
++    TraderAdapter adapter;
++    build(adapter, &pm_);
++    ASSERT_TRUE(adapter.configureOwnerRoutingCapabilities(allCaps()));
++    p11fix::RecordingSink a;
++    ASSERT_TRUE(adapter.declareOwnerSink(&a, "exec:a"));
++    adapter.addSink(&a);
++    const uint32_t foreign = 777777;	// own tag, never entered or journaled by this adapter
++    pushTrade(adapter, id_, foreign, 1, "TF1");
++    EXPECT_EQ(0u, tradesFor(a, foreign));
++    EXPECT_TRUE(adapter.isUnresolvedReportPaused()) << "owner cannot be verified: retain and pause";
++    ASSERT_EQ(1u, adapter.unresolvedTradeReports().size());
++    EXPECT_NE(std::string::npos, adapter.unresolvedTradeReports()[0].payload.find("owner unresolvable"));
++    adapter.removeSink(&a);
++}
++
++TEST_F(Wp1Test, PositionSnapshotWithoutBaselineAndNewerTradePausesAccount)
++{
++    {
++        TraderAdapter adapter;
++        build(adapter, &pm_);	// position query epoch issued at login
++        WTSTradeInfo* t = makeTrade(ct_, WDT_LONG, WOT_OPEN, 2, 7000, "TPB1", "OPB1", "ext");
++        adapter.onPushTrade(t);
++        t->release();
++        // The adapter holds only the delta; the row may or may not include it.
++        seedPos(adapter, { makePos(ct_, WDT_LONG, 10, 10, 2, 2) });
++        EXPECT_TRUE(adapter.isUnresolvedReportPaused()) << "no baseline for the contract: ambiguous, fail closed";
++        EXPECT_DOUBLE_EQ(2.0, adapter.getPosition(kStdCode, false)) << "the row is still not applied";
+     }
++    {
++        TraderAdapter adapter;
++        build(adapter, &pm_);
++        seedPos(adapter, { makePos(ct_, WDT_LONG, 10, 10, 0, 0) });	// baseline established
++        adapter.onLoginResult(true, "wp1", 20240510);	// reconnect: new position epoch
++        WTSTradeInfo* t = makeTrade(ct_, WDT_LONG, WOT_OPEN, 2, 7000, "TPB2", "OPB2", "ext");
++        adapter.onPushTrade(t);
++        t->release();
++        seedPos(adapter, { makePos(ct_, WDT_LONG, 10, 10, 0, 0) });	// stale row
++        EXPECT_FALSE(adapter.isUnresolvedReportPaused());
++        EXPECT_DOUBLE_EQ(12.0, adapter.getPosition(kStdCode, false)) << "baseline + newer trade wins over the stale row";
++    }
+ }
++
++TEST_F(Wp1Test, DuplicateTradePushIsAppliedOnceButSelfMatchSidesAreNot)
++{
++    TraderAdapter adapter;
++    build(adapter, &pm_);
++    OrderIDs ids = adapter.buy(kStdCode, 7000, 5, 0, false, ct_);
++    ASSERT_EQ(1u, ids.size());
++    pushTrade(adapter, id_, ids[0], 2, "TDUP");
++    pushTrade(adapter, id_, ids[0], 2, "TDUP");	// redelivered realtime trade
++    EXPECT_DOUBLE_EQ(2.0, adapter.getPosition(kStdCode, false));
++    EXPECT_EQ(1u, tradesFor(sink_, ids[0])) << "sinks see a trade report once";
++    EXPECT_DOUBLE_EQ(3.0, adapter.getUndoneQty(kStdCode));
++    // The other side of a self match shares the trade id but not the order ref.
++    WTSTradeInfo* other = makeTrade(ct_, WDT_SHORT, WOT_OPEN, 2, 7000, "TDUP", "OTHER", "ext");
++    adapter.onPushTrade(other);
++    other->release();
++    EXPECT_TRUE(adapter.isSelfMatched(kStdCode)) << "self-match detection still sees both sides";
++    // A later trade query row of the pushed trade is not counted again.
++    WTSArray* rows = WTSArray::create();
++    rows->append(makeTrade(ct_, WDT_LONG, WOT_OPEN, 2, 7000, "TDUP", ("OID" + std::to_string(ids[0])).c_str(),
++        tagFor(id_, ids[0]).c_str()), false);
++    adapter.onRspTrades(rows);
++    rows->release();
++}
++
++TEST_F(Wp1Test, ThrowingCancelReleasesItsClaim)
++{
++    SyncApi api;
++    TraderAdapter adapter;
++    ASSERT_TRUE(adapter.initExt("wp1throw", &api, &bd_, &pm_));
++    ASSERT_TRUE(adapter.run());
++    adapter.onLoginResult(true, "wp1", 20240510);
++    OrderIDs ia = adapter.buyAsOwner("exec:a", false, kStdCode, 7000, 1, 0, false);
++    ASSERT_EQ(1u, ia.size());
++    pushOrder(adapter, "wp1throw", ia[0], WOS_NotTraded_Queuing, 1, 0);
++    api.throwOnAction = true;
++    EXPECT_THROW(adapter.cancelForOwner(kStdCode, true, 0, "exec:a"), std::runtime_error);
++    EXPECT_TRUE(adapter.cancelForOwner(ia[0], "exec:a")) << "a failed provider call must not leave the order claimed";
++}
+ #endif
++
++#if !defined(WP1_BASELINE) && !defined(WP1_BASELINE2)
++namespace {
++// ExecuteContext fake for the real TWAP unit: records cancels, sends nothing.
++class TwapCtx : public ExecuteContext
++{
++public:
++    explicit TwapCtx(WTSCommodityInfo* c) : comm(c)
++    {
++        sess = WTSSessionInfo::create("WP1TWAP", "WP1TWAP", 0);
++        sess->addTradingSection(930, 1500);
++    }
++    ~TwapCtx() override { sess->release(); }
++    WTSTickSlice* getTicks(const char*, uint32_t, uint64_t) override { return nullptr; }
++    WTSTickData* grabLastTick(const char*) override { return nullptr; }
++    double getPosition(const char*, bool = true, int32_t = 3) override { return 0; }
++    OrderMap* getOrders(const char*) override { return nullptr; }
++    double getUndoneQty(const char*) override { return 0; }
++    OrderIDs buy(const char*, double, double, bool) override { ++orders; return OrderIDs(); }
++    OrderIDs sell(const char*, double, double, bool) override { ++orders; return OrderIDs(); }
++    bool cancel(uint32_t id) override { cancels.push_back(id); return cancelResult; }
++    OrderIDs cancel(const char*, bool, double = 0) override { ++codeCancels; return OrderIDs(); }
++    void writeLog(const char* l) override { logs.push_back(l ? l : ""); }
++    WTSCommodityInfo* getCommodityInfo(const char*) override { return comm; }
++    WTSSessionInfo* getSessionInfo(const char*) override { return sess; }
++    uint64_t getCurTime() override { return now; }
++    size_t countLog(const std::string& sub) const
++    {
++        return (size_t)std::count_if(logs.begin(), logs.end(), [&](const std::string& l) { return l.find(sub) != std::string::npos; });
++    }
++    WTSCommodityInfo* comm;
++    WTSSessionInfo* sess = nullptr;
++    uint64_t now = 20240102100000000ull;
++    bool cancelResult = true;
++    uint32_t orders = 0;
++    uint32_t codeCancels = 0;
++    std::vector<uint32_t> cancels;
++    std::vector<std::string> logs;
++};
++
++WTSTickData* twapTick(uint32_t actTime)
++{
++    WTSTickStruct ts;
++    memset(&ts, 0, sizeof(ts));
++    snprintf(ts.code, sizeof(ts.code), "%s", "tw2403");
++    ts.action_date = ts.trading_date = 20240102;
++    ts.action_time = actTime;
++    ts.price = 10.5;
++    ts.pre_close = 10.0;
++    ts.bid_prices[0] = 10.49; ts.bid_qty[0] = 100;
++    ts.ask_prices[0] = 10.51; ts.ask_qty[0] = 80;
++    return WTSTickData::create(ts);
++}
++}
++
++// N05-003 / card 5b (old identity ABI => non-shared owner mode and no
++// automatic timeout cancel), end to end through the host factory: the same
++// real WtTWapExeUnit code inside a capable and an old-ABI plugin. The host
++// verifies identity in both cases; only the capable plugin's unit receives the
++// reserved key = 1 and auto-cancels a timed-out order. The old-ABI unit keeps
++// the order monitored without any cancel over many rounds, and its flag puts
++// the executer owner into exclusive (non-shared) claims on the account.
++TEST_F(Wp1Test, OldIdentityAbiPluginNeverAutoCancelsAndOwnsContractsExclusively)
++{
++    const char* paths[2] = { std::getenv("WP1_TWAP_CAP"), std::getenv("WP1_TWAP_OLD") };
++    TraderAdapter routed;
++    build(routed, &pm_);
++    ASSERT_TRUE(routed.configureOwnerRoutingCapabilities(allCaps()));
++    for (int which = 0; which < 2; ++which)
++    {
++        ASSERT_NE(nullptr, paths[which]);
++        const bool capable = which == 0;
++        const auto dir = tmp_ / (capable ? "twap_cap" : "twap_old");
++        std::filesystem::create_directories(dir);
++        const auto copy = dir / (capable ? "libWp1TwapCap.dylib" : "libWp1TwapOld.dylib");
++        ASSERT_TRUE(std::filesystem::copy_file(paths[which], copy));
++        WtExecuterFactory factory;
++        ASSERT_TRUE(factory.loadFactories((dir.string() + "/").c_str()));
++        void* handle = dlopen(copy.c_str(), RTLD_NOW);
++        ASSERT_NE(nullptr, handle);
++        typedef void (*MonitorFn)(void*, uint32_t, uint64_t);
++        MonitorFn monitor = (MonitorFn)dlsym(handle, "wp1TwapMonitorOrder");
++        ASSERT_NE(nullptr, monitor);
++
++        WTSCommodityInfo* comm = WTSCommodityInfo::create("tw", "WP1TWAP", "CFFEX", "WP1TWAP", "CHN");
++        comm->setPriceTick(0.01);
++        comm->setLotsTick(1.0);
++        comm->setMinLots(1.0);
++        comm->setCategory(CC_Future);
++        comm->setTradingMode(TM_Both);
++        {
++            TwapCtx ctx(comm);
++            ExecuteUnitPtr unit = factory.createExeUnit("Wp1Twap.TWap");
++            ASSERT_NE(nullptr, unit.get());
++            WTSVariant* cfg = WTSVariant::createObject();
++            cfg->append("begin_time", (uint32_t)930);
++            cfg->append("end_time", (uint32_t)1500);
++            cfg->append("ord_sticky", (uint32_t)1);
++            cfg->append("total_secs", (uint32_t)3600);
++            cfg->append("tail_secs", (uint32_t)19800);
++            cfg->append("total_times", (uint32_t)4);
++            cfg->append("price_mode", (uint32_t)0);
++            cfg->append("price_offset", (uint32_t)0);
++            cfg->append("lots", 10.0);
++            cfg->append("minopenlots", 1.0);
++            std::string error;
++            ASSERT_TRUE(unit->initialize(&ctx, "tw2403", cfg, error, true)) << error;	// verifying host
++            cfg->release();
++            EXPECT_EQ(capable, unit->hostOrderIdentitySupported());
++            unit->self()->set_position("tw2403", 0);
++            monitor(unit->self(), 8361, ctx.now);
++            uint32_t t = 100000000;
++            for (int round = 0; round < 6; ++round)
++            {
++                unit->self()->on_tick(twapTick(t));
++                t += 2000;
++                ctx.now += 2000;
++            }
++            if (capable)
++            {
++                ASSERT_EQ(1u, ctx.cancels.size()) << "capable unit cancels once through the host-verified context";
++                EXPECT_EQ(8361u, ctx.cancels[0]);
++            }
++            else
++            {
++                EXPECT_TRUE(ctx.cancels.empty()) << "old identity ABI: no automatic timeout cancel";
++                EXPECT_GE(ctx.countLog("cannot be auto-canceled"), 1u);
++            }
++            EXPECT_EQ(0u, ctx.codeCancels);
++            EXPECT_EQ(0u, ctx.orders) << "the timed-out order is never followed by a new order";
++            // Card 5b/5c: the unit's capability decides the owner mode of its
++            // executer; the old-ABI owner can only hold the contract exclusively.
++            const std::string owner = capable ? "exec:cap" : "exec:old";
++            const std::string code = capable ? kStdAu : kStdCode;
++            ASSERT_EQ(1u, routed.buyAsOwner(owner, unit->hostOrderIdentitySupported(), code.c_str(),
++                capable ? 400 : 7000, 1, 0, false).size());
++            EXPECT_EQ(capable ? 1u : 0u, routed.buyAsOwner("exec:peer", true, code.c_str(),
++                capable ? 400 : 7000, 1, 0, false).size()) << "shared only with a capable owner";
++            unit->requestQuiesce();
++            ASSERT_TRUE(unit->waitQuiesced());
++        }
++        comm->release();
++    }
++}
++#endif
++
++#if !defined(WP1_BASELINE) && !defined(WP1_BASELINE2)
++namespace {
++// Provider fake whose queryAccount (called at the end of onPushTrade) can block:
++// an SPI callback in flight inside the adapter but outside any sink callback.
++class BlockingQueryApi : public p11fix::FakeTraderApi
++{
++public:
++    std::mutex m;
++    std::condition_variable cv;
++    bool block = false;
++    bool entered = false;
++    bool open = false;
++    int queryAccount() override
++    {
++        std::unique_lock<std::mutex> lock(m);
++        if (block)
++        {
++            block = false;
++            entered = true;
++            cv.notify_all();
++            cv.wait(lock, [this]() { return open; });
++        }
++        return p11fix::FakeTraderApi::queryAccount();
++    }
++};
++}
++
++// NEW-052 host side (card 9a): release() closes the provider SPI ingress
++// without becoming a drain barrier (a callback may be blocked on the caller);
++// later callbacks are dropped without touching state; the destructor waits for
++// SPI callbacks still running inside the adapter and then releases the
++// adapter-owned order map (no leak). A callback after the adapter object is
++// gone remains the provider's contract.
++TEST_F(Wp1Test, ReleaseClosesSpiIngressAndDestructorDrainsBeforeFreeingOrderMap)
++{
++    BlockingQueryApi api;
++    TraderAdapter* adapter = new TraderAdapter();
++    ASSERT_TRUE(adapter->initExt("wp1spi", &api, &bd_, &pm_));
++    ASSERT_TRUE(adapter->run());
++    adapter->onLoginResult(true, "wp1", 20240510);
++    const uint32_t localid = adapter->openLong(kStdCode, 7000, 2, 0, ct_);
++    ASSERT_NE(UINT_MAX, localid);
++    WTSOrderInfo* live = makeOrder(ct_, WDT_LONG, WOT_OPEN, WOS_NotTraded_Queuing, 2, 0, "OSPI", tagFor("wp1spi", localid).c_str());
++    const uint32_t refsBefore = live->retainCount();
++    adapter->onPushOrder(live);
++    EXPECT_EQ(refsBefore + 1, live->retainCount()) << "the adapter order map holds the live order";
++
++    {
++        std::lock_guard<std::mutex> lock(api.m);
++        api.block = true;
++    }
++    std::thread provider([&]() {
++        WTSTradeInfo* t = makeTrade(ct_, WDT_LONG, WOT_OPEN, 1, 7000, "TSPI1", "OSPI", tagFor("wp1spi", localid).c_str());
++        adapter->onPushTrade(t);	// blocks in queryAccount at its end
++        t->release();
++    });
++    {
++        std::unique_lock<std::mutex> lock(api.m);
++        api.cv.wait(lock, [&]() { return api.entered; });
++    }
++    EXPECT_DOUBLE_EQ(1.0, adapter->getPosition(kStdCode, false));
++
++    std::thread releaser([&]() { adapter->release(); });
++    releaser.join();	// not a drain barrier: returns while the callback is still running
++
++    WTSTradeInfo* late = makeTrade(ct_, WDT_LONG, WOT_OPEN, 1, 7000, "TLATE", "OSPI", tagFor("wp1spi", localid).c_str());
++    adapter->onPushTrade(late);	// dropped by the closed ingress
++    late->release();
++    EXPECT_DOUBLE_EQ(1.0, adapter->getPosition(kStdCode, false)) << "late callback after release is dropped";
++    EXPECT_DOUBLE_EQ(1.0, adapter->getUndoneQty(kStdCode));
++
++    std::atomic<bool> destroyed{false};
++    std::thread destroyer([&]() { delete adapter; destroyed = true; });
++    std::this_thread::sleep_for(std::chrono::milliseconds(150));
++    EXPECT_FALSE(destroyed.load()) << "destructor waits for the SPI callback still inside the adapter";
++    {
++        std::lock_guard<std::mutex> lock(api.m);
++        api.open = true;
++        api.cv.notify_all();
++    }
++    provider.join();
++    destroyer.join();
++    EXPECT_TRUE(destroyed.load());
++    EXPECT_EQ(refsBefore, live->retainCount()) << "destructor released the adapter-owned order map";
++    live->release();
++}
++#endif
++
++#if !defined(WP1_BASELINE) && !defined(WP1_BASELINE2)
++//////////////////////////////////////////////////////////////////////////
++// I03-NEW-057 (static findings from the uftcore subtask, confirmed at runtime)
++
++// (1) The same fill arrives first as an order report (volLeft shrinks) and then
++// as a trade report: it must reduce the undone quantity once.
++TEST_F(Wp1Test, OrderReportThenTradeOfSameFillDeductsOnce)
++{
++    TraderAdapter adapter;
++    build(adapter, &pm_);
++    OrderIDs ids = adapter.buy(kStdCode, 7000, 5, 0, false, ct_);
++    ASSERT_EQ(1u, ids.size());
++    pushOrder(adapter, id_, ids[0], WOS_PartTraded_Queuing, 5, 2);	// order stream: 2 filled
++    EXPECT_DOUBLE_EQ(3.0, adapter.getUndoneQty(kStdCode));
++    pushTrade(adapter, id_, ids[0], 2, "TOT1");						// trade stream: the same 2
++    EXPECT_DOUBLE_EQ(3.0, adapter.getUndoneQty(kStdCode)) << "one fill seen by both streams counts once";
++    pushTrade(adapter, id_, ids[0], 1, "TOT2");						// a newer fill, trade stream first
++    EXPECT_DOUBLE_EQ(2.0, adapter.getUndoneQty(kStdCode));
++    pushOrder(adapter, id_, ids[0], WOS_PartTraded_Queuing, 5, 3);	// order stream catches up
++    EXPECT_DOUBLE_EQ(2.0, adapter.getUndoneQty(kStdCode));
++    pushOrder(adapter, id_, ids[0], WOS_PartTraded_Queuing, 5, 4);	// order stream leads again
++    EXPECT_DOUBLE_EQ(1.0, adapter.getUndoneQty(kStdCode));
++    pushTrade(adapter, id_, ids[0], 1, "TOT3");
++    EXPECT_DOUBLE_EQ(1.0, adapter.getUndoneQty(kStdCode));
++    pushOrder(adapter, id_, ids[0], WOS_AllTraded, 5, 5);
++    EXPECT_DOUBLE_EQ(0.0, adapter.getUndoneQty(kStdCode));
++    pushTrade(adapter, id_, ids[0], 1, "TOT4");						// late trade after terminal
++    EXPECT_DOUBLE_EQ(0.0, adapter.getUndoneQty(kStdCode));
++}
++
++// (2) Pruning terminal tombstones beyond the limit erases from the dense
++// ledger (swap-and-pop), which moves another entry: the rejection being
++// processed must not read its owner/code through a stale iterator.
++TEST_F(Wp1Test, TombstonePruneDuringRejectionKeepsTheRejectedOrdersIdentity)
++{
++    TraderAdapter adapter;
++    build(adapter, &pm_);
++    ASSERT_TRUE(adapter.configureOwnerRoutingCapabilities(allCaps()));
++    p11fix::RecordingSink a;
++    ASSERT_TRUE(adapter.declareOwnerSink(&a, "exec:a"));
++    adapter.addSink(&a);
++    adapter.removeSink(&sink_);	// keep 65536 reports out of the recording sink
++    const uint32_t first = 3000000;
++    for (uint32_t i = 0; i < 65536; ++i)
++        pushOrder(adapter, id_, first + i, WOS_Canceled, 1, 0);	// fill the tombstone window
++    OrderIDs ia = adapter.buyAsOwner("exec:a", true, kStdCode, 7000, 2, 0, false);
++    ASSERT_EQ(1u, ia.size());	// newest ledger entry (last in the dense storage)
++    WTSEntrust* e = WTSEntrust::create(kRawCode, 2, 7000, kExchg);
++    e->setContractInfo(ct_);
++    e->setDirection(WDT_LONG);
++    e->setOffsetType(WOT_OPEN);
++    e->setUserTag(tagFor(id_, ia[0]).c_str());
++    WTSError* err = WTSError::create(WEC_ORDERINSERT, "rejected");
++    adapter.onRspEntrust(e, err);	// its tombstone prunes the oldest one
++    err->release();
++    e->release();
++    size_t failures = 0;
++    for (const auto& rec : a.entrusts_)
++        failures += (!rec.ok && rec.localid == ia[0]) ? 1 : 0;
++    EXPECT_EQ(1u, failures) << "the rejection reaches the order's owner";
++    EXPECT_DOUBLE_EQ(0.0, adapter.getUndoneQtyForOwner(kStdCode, "exec:a"));
++    EXPECT_EQ(TraderAdapter::OrderLedgerState::Terminal, adapter.orderLedger(ia[0]).state);
++    EXPECT_FALSE(adapter.orderLedger(first).found) << "oldest tombstone pruned";
++    adapter.removeSink(&a);
++}
++#endif
++
++#if !defined(WP1_BASELINE) && !defined(WP1_BASELINE2)
++// I03-NEW-071 / L01-014 caller audit: an unknown or unparseable standard code
++// must fail closed in buy/sell/openLong instead of dereferencing a NULL
++// contract. The checks run in a spawned child so that a crash of an old
++// implementation is reported as a failure instead of aborting this suite.
++TEST_F(Wp1Test, UnknownCodeChild)
++{
++    if (std::getenv("WP1_UNKNOWN_CODE_CHILD") == nullptr)
++        GTEST_SKIP() << "only runs as a spawned child";
++    TraderAdapter adapter;
++    build(adapter, &pm_);
++    EXPECT_TRUE(adapter.buy("SHFE.xx.9999", 7000, 1, 0, false).empty());
++    EXPECT_TRUE(adapter.sell("SHFE.xx.9999", 7000, 1, 0, false).empty());
++    EXPECT_EQ(UINT_MAX, adapter.openLong("SHFE.xx.9999", 7000, 1, 0));
++    EXPECT_EQ(0u, api2_.n_insert_);
++    EXPECT_DOUBLE_EQ(0.0, adapter.getUndoneQty("SHFE.xx.9999"));
++}
++
++TEST_F(Wp1Test, BuySellOnUnknownCodeFailClosedWithoutDereferencingNull)
++{
++    std::string filter = "--gtest_filter=Wp1Test.UnknownCodeChild";
++    std::vector<std::string> envs;
++    for (char** e = environ; *e; ++e)
++        envs.push_back(*e);
++    envs.push_back("WP1_UNKNOWN_CODE_CHILD=1");
++    std::vector<char*> envp;
++    for (auto& e : envs) envp.push_back(&e[0]);
++    envp.push_back(nullptr);
++    std::vector<char*> argv = { &g_argv0[0], &filter[0], nullptr };
++    pid_t pid = 0;
++    ASSERT_EQ(0, posix_spawn(&pid, g_argv0.c_str(), nullptr, nullptr, argv.data(), envp.data()));
++    int status = 0;
++    ASSERT_EQ(pid, waitpid(pid, &status, 0));
++    EXPECT_FALSE(WIFSIGNALED(status)) << "child crashed with signal " << (WIFSIGNALED(status) ? WTERMSIG(status) : 0);
++    EXPECT_TRUE(WIFEXITED(status) && WEXITSTATUS(status) == 0) << "child assertions failed";
++}
++#endif
++
++#if !defined(WP1_BASELINE) && !defined(WP1_BASELINE2) && !defined(WP1_BASELINE3)
++// New API of slice 6 (green only).
++TEST_F(Wp1Test, EntrustObserverRunsBeforeProviderCallAndOnlyForItsAdapter)
++{
++    SyncApi api;
++    TraderAdapter adapter;
++    ASSERT_TRUE(adapter.initExt("wp1obs", &api, &bd_, &pm_));
++    ASSERT_TRUE(adapter.run());
++    adapter.onLoginResult(true, "wp1", 20240510);
++    std::vector<uint32_t> observed;
++    std::vector<size_t> insertsAtObserve;
++    api.onInsert = [&](WTSEntrust*) { EXPECT_EQ(observed.size(), (size_t)api.n_insert_); };
++    OrderIDs ids;
++    {
++        TraderAdapter::EntrustObserverScope scope(&adapter, [&](uint32_t id) {
++            observed.push_back(id);
++            insertsAtObserve.push_back(api.n_insert_);
++        });
++        ids = adapter.buy(kStdCode, 7000, 1, 0, false, ct_);
++        api.insert_ret_ = -1;	// synchronous failure: observed but not accepted
++        OrderIDs failed = adapter.buy(kStdCode, 7000, 1, 0, false, ct_);
++        EXPECT_TRUE(failed.empty());
++        api.insert_ret_ = 0;
++    }
++    api.onInsert = nullptr;
++    ASSERT_EQ(1u, ids.size());
++    ASSERT_EQ(2u, observed.size());
++    EXPECT_EQ(ids[0], observed[0]);
++    EXPECT_EQ(0u, insertsAtObserve[0]) << "observer runs before the provider call";
++    OrderIDs after = adapter.buy(kStdCode, 7000, 1, 0, false, ct_);
++    EXPECT_EQ(1u, after.size());
++    EXPECT_EQ(2u, observed.size()) << "scope ended";
++    TraderAdapter::EntrustObserverScope throwing(&adapter, [](uint32_t) { throw std::runtime_error("observer"); });
++    const uint32_t inserts = api.n_insert_;
++    EXPECT_TRUE(adapter.buy(kStdCode, 7000, 1, 0, false, ct_).empty()) << "observer failure aborts before send";
++    EXPECT_EQ(inserts, api.n_insert_);
++}
++#endif
+ } // namespace
+ 
+ int main(int argc, char** argv)

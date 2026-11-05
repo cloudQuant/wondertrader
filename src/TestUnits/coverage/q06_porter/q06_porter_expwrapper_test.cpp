@@ -225,12 +225,8 @@ TEST_F(Q06PorterWrapper, WrapperCallsAreSafeWithoutCallbacks)
 	EXPECT_EQ(g_probe.exec_cmd, 0U);
 }
 
-/*
- * 跳过目标（详见文件头与 manifest）：
- * - WtRtRunner::createExtParser()/createExtExecuter()：_engine 为空即崩溃，
- *   需要完整 config()+initEngine()，属起进程路径 → DISABLED。
- */
-TEST_F(Q06PorterWrapper, DISABLED_ExtParserCreationNeedsEngine)
+/* 迭代03 最终验收复核后启用（原禁用：BUG-R6-003 未 config 时 createExtParser 解引用 _engine）。 */
+TEST_F(Q06PorterWrapper, ExtParserCreationNeedsEngine)
 {
 	WtRtRunner& r = getRunner();
 	(void)r.createExtParser("q06_never");

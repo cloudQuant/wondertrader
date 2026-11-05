@@ -8,6 +8,13 @@
  * \brief 数据管理器实现
  * \details 该文件实现了WonderTrader数据管理器DataManager类，负责行情数据的接收、处理、存储和广播
  * 实现了IDataWriterSink接口，作为数据写入器的回调接口，处理各类行情数据并进行相应操作
+ *
+ * Writer lifecycle (iteration 03, decision card 9: 9a=A+C, 9b=A, 9c=A, 9d=A; BUG-I02-NEW-038,
+ * BUG-R18-002, BUG-R23-001): the writer, its remover/module and the sink handed to the
+ * writer live in a heap WriterHost. Writer calls and writer callbacks pin the host and
+ * are tracked per thread; release requested from inside such a frame is queued and
+ * delivered at a safe point. Only a lifecycle-V1 DRAINED result authorizes deleteWriter
+ * and unloading; anything that cannot be proven is quarantined until process exit.
  */
 #include "DataManager.h"
 #include "StateMonitor.h"
@@ -21,35 +28,622 @@
 #include "../WTSTools/WTSBaseDataMgr.h"
 #include "../WTSTools/WTSLogger.h"
 
+#include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <exception>
+#include <vector>
+
+namespace
+{
+	enum HostFrameKind
+	{
+		HFK_Outbound = 1,	// DataManager -> writer call
+		HFK_Inbound = 2		// writer -> sink callback
+	};
+
+	struct HostFrame
+	{
+		const void*	_host;
+		int			_kind;
+	};
+
+	// Frames of every WriterHost active on this thread (innermost last).
+	thread_local std::vector<HostFrame> t_host_frames;
+
+	bool threadInFrame(const void* host)
+	{
+		for (const HostFrame& frame : t_host_frames)
+		{
+			if (frame._host == host)
+				return true;
+		}
+		return false;
+	}
+
+	void popFrame(const void* host, int kind) noexcept
+	{
+		for (auto it = t_host_frames.rbegin(); it != t_host_frames.rend(); ++it)
+		{
+			if (it->_host == host && it->_kind == kind)
+			{
+				t_host_frames.erase(std::next(it).base());
+				return;
+			}
+		}
+	}
+
+	const uint32_t DRAIN_SLICE_MS = 1000;
+	const uint32_t DRAIN_PROGRESS_LOG_MS = 10000;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// WriterHost
+class DataManager::WriterHost final : public IDataWriterSink, public std::enable_shared_from_this<DataManager::WriterHost>
+{
+public:
+	typedef DataManager::WriterLifecycleState State;
+
+	// ---- IDataWriterSink (the object handed to the writer) ----
+	virtual IBaseDataMgr* getBDMgr() override
+	{
+		StdUniqueLock lock(_mtx);
+		if (_detached.load())
+			return NULL;
+		return _bd_mgr;
+	}
+
+	virtual bool canSessionReceive(const char* sid) override
+	{
+		Inbound in(*this);
+		if (!in)
+			return false;
+		//By Wesley @ 2021.12.27
+		//如果状态机为NULL，说明是全天候模式，直接返回true即可
+		if (in._state_mon == NULL)
+			return true;
+		return in._state_mon->isInState(sid, SS_RECEIVING);
+	}
+
+	virtual void broadcastTick(WTSTickData* curTick) override { fanout(curTick, "tick"); }
+	virtual void broadcastOrdQue(WTSOrdQueData* curOrdQue) override { fanout(curOrdQue, "order queue"); }
+	virtual void broadcastOrdDtl(WTSOrdDtlData* curOrdDtl) override { fanout(curOrdDtl, "order detail"); }
+	virtual void broadcastTrans(WTSTransData* curTrans) override { fanout(curTrans, "transaction"); }
+
+	virtual CodeSet* getSessionComms(const char* sid) override
+	{
+		Inbound in(*this);
+		if (!in || in._bd_mgr == NULL)
+			return NULL;
+		return in._bd_mgr->getSessionComms(sid);
+	}
+
+	virtual uint32_t getTradingDate(const char* pid) override
+	{
+		Inbound in(*this);
+		if (!in || in._bd_mgr == NULL)
+			return 0;
+		// BUG-R12-13 (DateMappingV1, card 1 A+C): a missing calendar/commodity or an
+		// unmappable clock is a failure (0), not the legacy "today" fallback.
+		const DateMappingResult32 mapped = in._bd_mgr->checkedGetTradingDate(pid);
+		if (mapped.status != DateMappingStatus::Ok)
+		{
+			WTSLogger::error("Trading date of {} cannot be mapped, status {}", pid != NULL ? pid : "",
+				static_cast<uint32_t>(mapped.status));
+			return 0;
+		}
+		return mapped.value;
+	}
+
+	virtual void outputLog(WTSLogLevel ll, const char* message) override
+	{
+		WTSLogger::log_raw(ll, message);
+	}
+
+public:
+	// Pins the host for one writer callback; snapshots borrowed objects.
+	class Inbound
+	{
+	public:
+		explicit Inbound(WriterHost& host) : _host(host)
+		{
+			t_host_frames.push_back(HostFrame{ &host, HFK_Inbound });
+			StdUniqueLock lock(host._mtx);
+			if (host._detached.load())
+			{
+				lock.unlock();
+				popFrame(&host, HFK_Inbound);
+				return;
+			}
+			++host._inbound;
+			_entered = true;
+			_casters = host._casters;
+			_bd_mgr = host._bd_mgr;
+			_state_mon = host._state_mon;
+		}
+		~Inbound()
+		{
+			if (!_entered)
+				return;
+			popFrame(&_host, HFK_Inbound);
+			{
+				StdUniqueLock lock(_host._mtx);
+				--_host._inbound;
+			}
+			_host._cond.notify_all();
+		}
+		Inbound(const Inbound&) = delete;
+		Inbound& operator=(const Inbound&) = delete;
+		explicit operator bool() const { return _entered; }
+
+		std::shared_ptr<const std::vector<IDataCaster*>> _casters;
+		WTSBaseDataMgr*	_bd_mgr = NULL;
+		StateMonitor*	_state_mon = NULL;
+
+	private:
+		WriterHost&	_host;
+		bool		_entered = false;
+	};
+
+	// Pins the host and its writer for one DataManager -> writer call.
+	class Outbound
+	{
+	public:
+		explicit Outbound(const std::shared_ptr<WriterHost>& host) : _host(host)
+		{
+			if (!_host)
+				return;
+			t_host_frames.push_back(HostFrame{ _host.get(), HFK_Outbound });
+			StdUniqueLock lock(_host->_mtx);
+			if (_host->_state != DataManager::WLS_Ready || _host->_writer == NULL)
+			{
+				lock.unlock();
+				popFrame(_host.get(), HFK_Outbound);
+				return;
+			}
+			++_host->_outbound;
+			_writer = _host->_writer;
+			_lifecycle = _host->_lifecycle;
+		}
+		~Outbound()
+		{
+			if (_writer == NULL)
+				return;
+			popFrame(_host.get(), HFK_Outbound);
+			_host->leaveOutbound();
+		}
+		Outbound(const Outbound&) = delete;
+		Outbound& operator=(const Outbound&) = delete;
+		explicit operator bool() const { return _writer != NULL; }
+		IDataWriter* writer() const { return _writer; }
+		// K20: the writer's lifecycle V1 table, or NULL for a legacy writer.
+		const WtDataWriterLifecycleApiV1* lifecycle() const { return _lifecycle; }
+
+	private:
+		std::shared_ptr<WriterHost>	_host;	// keeps the host alive through the epilogue
+		IDataWriter*				_writer = NULL;
+		const WtDataWriterLifecycleApiV1*	_lifecycle = NULL;
+	};
+
+	template<typename T>
+	void fanout(T* data, const char* what)
+	{
+		Inbound in(*this);
+		if (!in || !in._casters)
+			return;
+		for (IDataCaster* caster : *in._casters)
+		{
+			// A callback may have destroyed the owner of the casters (quarantine/destruction).
+			if (_detached.load())
+				break;
+			try
+			{
+				caster->broadcast(data);
+			}
+			catch (const std::exception& ex)
+			{
+				WTSLogger::error("Data caster failed to broadcast {}: {}", what, ex.what());
+			}
+			catch (...)
+			{
+				WTSLogger::error("Data caster failed to broadcast {} with an unknown exception", what);
+			}
+		}
+	}
+
+	void addCaster(IDataCaster* caster)
+	{
+		StdUniqueLock lock(_mtx);
+		std::shared_ptr<std::vector<IDataCaster*>> casters = std::make_shared<std::vector<IDataCaster*>>(*_casters);
+		casters->emplace_back(caster);
+		_casters = casters;
+	}
+
+	State state() const
+	{
+		StdUniqueLock lock(_mtx);
+		return _state;
+	}
+
+	// Last pinned writer call: deliver a queued release at this safe point.
+	void leaveOutbound() noexcept
+	{
+		bool deliver = false;
+		{
+			StdUniqueLock lock(_mtx);
+			if (_outbound > 0)
+				--_outbound;
+			deliver = (_state == DataManager::WLS_ReleasePending && _outbound == 0 && !threadInFrame(this));
+		}
+		_cond.notify_all();
+		if (deliver)
+			finalize();
+	}
+
+	/*
+	 * release()/destructor entry. ownerGone: the DataManager is being destroyed, so the
+	 * borrowed casters/state monitor/base data may disappear with it.
+	 */
+	void requestRelease(bool ownerGone) noexcept
+	{
+		try
+		{
+			if (threadInFrame(this))
+			{
+				// Card 9d: never release/delete/unload on a frame the writer may return into.
+				IDataWriter* writer = NULL;
+				const WtDataWriterLifecycleApiV1* lifecycle = NULL;
+				bool queued = false;
+				{
+					StdUniqueLock lock(_mtx);
+					if (_state == DataManager::WLS_Ready || _state == DataManager::WLS_Initializing)
+						_state = DataManager::WLS_ReleasePending;
+					queued = (_state == DataManager::WLS_ReleasePending);
+					if (queued && _lifecycle != NULL && !_stop_requested)
+					{
+						_stop_requested = true;
+						writer = _writer;
+						lifecycle = _lifecycle;
+					}
+				}
+				if (lifecycle != NULL)
+					lifecycle->request_stop(static_cast<void*>(writer));
+				if (ownerGone)
+				{
+					_detached.store(true);	// the owner's casters/monitor/base data are going away
+					if (queued)
+						hold();	// keep the host for the pending safe point (or until exit)
+				}
+				if (queued)
+					WTSLogger::warn("Data writer release requested from inside a writer call or callback; deferred to a safe point");
+				return;
+			}
+
+			{
+				StdUniqueLock lock(_mtx);
+				if (_state == DataManager::WLS_Ready || _state == DataManager::WLS_Initializing)
+					_state = DataManager::WLS_ReleasePending;
+			}
+			finalize();
+			if (ownerGone)
+				_detached.store(true);
+		}
+		catch (...)
+		{
+			quarantine("release threw an exception");
+		}
+	}
+
+	// Runs only on a thread with no frame of this host.
+	void finalize() noexcept
+	{
+		IDataWriter* writer = NULL;
+		const WtDataWriterLifecycleApiV1* lifecycle = NULL;
+		FuncDeleteWriter remover = NULL;
+		DllHandle module = NULL;
+		uint32_t timeoutMs = 0;
+		bool sendStop = false;
+		{
+			StdUniqueLock lock(_mtx);
+			// Another thread is finalizing: wait for its outcome (it never waits for us).
+			_cond.wait(lock, [this]() { return _state != DataManager::WLS_Finalizing; });
+			if (_state != DataManager::WLS_ReleasePending)
+				return;
+			_state = DataManager::WLS_Finalizing;
+			writer = _writer;
+			lifecycle = _lifecycle;
+			remover = _remover;
+			module = _module;
+			timeoutMs = _release_timeout_ms;
+			sendStop = (lifecycle != NULL && !_stop_requested);
+			_stop_requested = _stop_requested || sendStop;
+		}
+
+		try
+		{
+			if (sendStop)
+				lifecycle->request_stop(static_cast<void*>(writer));
+
+			// No writer call made through this manager may still be on any stack.
+			if (!waitFor([this]() { return _outbound == 0; }, timeoutMs))
+			{
+				quarantine("writer calls are still in flight after release_timeout_ms");
+				return;
+			}
+
+			if (lifecycle == NULL)
+			{
+				// Legacy writer: release from this safe context, then retain (card 9a).
+				try
+				{
+					writer->release();
+				}
+				catch (...)
+				{
+					WTSLogger::error("Legacy data writer release threw an exception");
+				}
+				quarantine("legacy writer exports no lifecycle V1 and cannot prove callback quiescence");
+				return;
+			}
+
+			const WtDataWriterLifecycleV1Status drained = drain(lifecycle, writer, timeoutMs);
+			if (drained != WT_DATA_WRITER_LIFECYCLE_V1_DRAINED)
+			{
+				quarantine(drained == WT_DATA_WRITER_LIFECYCLE_V1_PENDING
+					? "writer did not drain within release_timeout_ms"
+					: "writer could not prove drain");
+				return;
+			}
+
+			// DRAINED: release is a synchronous, callback-free cleanup.
+			try
+			{
+				writer->release();
+			}
+			catch (...)
+			{
+				quarantine("data writer release threw after drain");
+				return;
+			}
+
+			// A callback that started before DRAINED may still be unwinding through the host.
+			if (!waitFor([this]() { return _inbound == 0; }, timeoutMs))
+			{
+				quarantine("writer callbacks are still unwinding after drain");
+				return;
+			}
+
+			IDataWriter* doomed = writer;
+			bool destroyed = false;
+			if (remover != NULL)
+			{
+				try
+				{
+					remover(doomed);
+					destroyed = (doomed == NULL);
+				}
+				catch (...)
+				{
+					WTSLogger::error("Destroying data writer failed with an exception");
+				}
+			}
+			if (!destroyed)
+			{
+				quarantine("data writer was not destroyed by deleteWriter");
+				return;
+			}
+
+			{
+				StdUniqueLock lock(_mtx);
+				_writer = NULL;
+				_remover = NULL;
+				_lifecycle = NULL;
+				_module = NULL;
+				_bd_mgr = NULL;
+				_state_mon = NULL;
+				_stop_requested = false;
+				_state = DataManager::WLS_Released;
+			}
+			if (module != NULL)
+				DLLHelper::free_library(module);
+			unhold();
+			_cond.notify_all();
+			WTSLogger::info("Data writer drained, released and unloaded");
+		}
+		catch (...)
+		{
+			quarantine("writer finalization threw an exception");
+		}
+	}
+
+	WtDataWriterLifecycleV1Status drain(const WtDataWriterLifecycleApiV1* lifecycle, IDataWriter* writer, uint32_t timeoutMs)
+	{
+		const auto started = std::chrono::steady_clock::now();
+		uint32_t lastProgressLog = 0;
+		for (;;)
+		{
+			WtDataWriterLifecycleV1Status status = lifecycle->can_wait(static_cast<void*>(writer));
+			if (status != WT_DATA_WRITER_LIFECYCLE_V1_OK)
+				return status;
+
+			const uint32_t elapsed = (uint32_t)std::min<int64_t>(UINT32_MAX - 1,
+				std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - started).count());
+			uint32_t slice = DRAIN_SLICE_MS;
+			if (timeoutMs != 0)
+			{
+				if (elapsed >= timeoutMs)
+					slice = 0;
+				else
+					slice = std::min(slice, timeoutMs - elapsed);
+			}
+
+			status = lifecycle->wait_drained(static_cast<void*>(writer), slice);
+			if (status != WT_DATA_WRITER_LIFECYCLE_V1_PENDING)
+				return status;
+			if (timeoutMs != 0 && elapsed >= timeoutMs)
+				return status;
+			if (elapsed - lastProgressLog >= DRAIN_PROGRESS_LOG_MS)
+			{
+				lastProgressLog = elapsed;
+				WTSLogger::warn("Data writer still draining accepted work after {} ms", elapsed);
+			}
+		}
+	}
+
+	// Retain writer, module and this sink until process exit (card 9a).
+	void quarantine(const char* reason) noexcept
+	{
+		try
+		{
+			{
+				StdUniqueLock lock(_mtx);
+				_state = DataManager::WLS_Quarantined;
+			}
+			_detached.store(true);	// later callbacks no longer reach the owner's objects
+			_cond.notify_all();
+			hold();
+			if (!threadInFrame(this))
+				waitFor([this]() { return _inbound == 0; }, _release_timeout_ms);
+			WTSLogger::error("Data writer quarantined until process exit: {}", reason);
+		}
+		catch (...)
+		{
+		}
+	}
+
+	template<typename Pred>
+	bool waitFor(Pred pred, uint32_t timeoutMs)
+	{
+		StdUniqueLock lock(_mtx);
+		if (timeoutMs == 0)
+		{
+			_cond.wait(lock, pred);
+			return true;
+		}
+		return _cond.wait_for(lock, std::chrono::milliseconds(timeoutMs), pred);
+	}
+
+	void hold();
+	void unhold() noexcept;
+
+public:
+	mutable StdUniqueMutex	_mtx;
+	StdCondVariable			_cond;
+
+	// Borrowed from the owner of the DataManager.
+	WTSBaseDataMgr*		_bd_mgr = NULL;
+	StateMonitor*		_state_mon = NULL;
+	std::shared_ptr<const std::vector<IDataCaster*>> _casters = std::make_shared<std::vector<IDataCaster*>>();
+	std::atomic<bool>	_detached{ false };
+
+	// Writer slot.
+	IDataWriter*		_writer = NULL;
+	FuncDeleteWriter	_remover = NULL;
+	DllHandle			_module = NULL;
+	const WtDataWriterLifecycleApiV1* _lifecycle = NULL;
+	State				_state = DataManager::WLS_None;
+	uint32_t			_outbound = 0;
+	uint32_t			_inbound = 0;
+	uint32_t			_release_timeout_ms = 0;
+	bool				_stop_requested = false;
+};
+
+namespace
+{
+	// Process-wide owners of hosts that are pending or quarantined. Intentionally leaked:
+	// a retained writer may call its sink until the process exits.
+	StdUniqueMutex& holdMutex()
+	{
+		static StdUniqueMutex* mtx = new StdUniqueMutex();
+		return *mtx;
+	}
+
+	std::vector<std::shared_ptr<DataManager::WriterHost>>& holdList()
+	{
+		static auto* hosts = new std::vector<std::shared_ptr<DataManager::WriterHost>>();
+		return *hosts;
+	}
+}
+
+void DataManager::WriterHost::hold()
+{
+	std::shared_ptr<WriterHost> self = shared_from_this();
+	StdUniqueLock lock(holdMutex());
+	auto& hosts = holdList();
+	if (std::find(hosts.begin(), hosts.end(), self) == hosts.end())
+		hosts.emplace_back(self);
+}
+
+void DataManager::WriterHost::unhold() noexcept
+{
+	try
+	{
+		std::shared_ptr<WriterHost> self;
+		{
+			StdUniqueLock lock(holdMutex());
+			auto& hosts = holdList();
+			auto it = std::find_if(hosts.begin(), hosts.end(),
+				[this](const std::shared_ptr<WriterHost>& host) { return host.get() == this; });
+			if (it == hosts.end())
+				return;
+			self = *it;	// drop the registry reference outside the registry lock
+			hosts.erase(it);
+		}
+	}
+	catch (...)
+	{
+	}
+}
+
+size_t DataManager::quarantinedWriterCount()
+{
+	StdUniqueLock lock(holdMutex());
+	size_t count = 0;
+	for (const auto& host : holdList())
+	{
+		if (host->state() == WLS_Quarantined)
+			++count;
+	}
+	return count;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// DataManager
 
 /**
  * @brief 构造函数
- * @details 初始化数据管理器对象，将所有指针成员变量初始化为NULL
+ * @details 创建写入器宿主；宿主在 DataManager 析构后仍可能被隔离保留
  */
 DataManager::DataManager()
-	: _writer(NULL)
-	, _writer_module(NULL)
-	, _writer_release_failed(false)
-	, _writer_releasing(false)
-	, _remover(NULL)
-	, _bd_mgr(NULL)
-	, _state_mon(NULL)
+	: _host(std::make_shared<WriterHost>())
 {
 }
 
 
 /**
  * @brief 析构函数
- * @details 清理数据管理器对象的资源，实际的资源释放在release方法中完成
+ * @details 以“所有者即将销毁”语义释放写入器：安全上下文内排空并销毁，或隔离保留到进程退出
  */
 DataManager::~DataManager()
 {
-	release();
-	if (_writer_release_failed)
+	_host->requestRelease(true);
+	if (_host->state() == WLS_Quarantined)
 	{
-		WTSLogger::error("DataManager is being destroyed after writer shutdown failed; writer and module are retained, "
-			"but the writer may still hold the DataManager sink pointer");
+		WTSLogger::error("DataManager destroyed while its data writer is quarantined; the writer, its module "
+			"and sink are retained and no longer reach casters, state monitor or base data");
 	}
+}
+
+DataManager::WriterLifecycleState DataManager::writerLifecycleState() const
+{
+	return _host->state();
+}
+
+void DataManager::add_caster(IDataCaster* caster)
+{
+	if (caster == NULL)
+		return;
+	_host->addCaster(caster);
 }
 
 /**
@@ -60,15 +654,16 @@ DataManager::~DataManager()
  */
 bool DataManager::isSessionProceeded(const char* sid)
 {
-	if (_writer == NULL || _writer_release_failed)
+	WriterHost::Outbound call(_host);
+	if (!call)
 		return false;
-
-	return _writer->isSessionProceeded(sid);
+	return call.writer()->isSessionProceeded(sid);
 }
 
 /**
  * @brief 初始化数据管理器
- * @details 根据配置参数初始化数据管理器，加载数据存储模块，并设置基础数据管理器和状态监控器
+ * @details 加载数据存储模块；仅在模块与工厂可用后才登记基础数据管理器和状态监控器。
+ * 重复初始化（含隔离保留的旧实例）被拒绝且保留原实例（卡9c）。
  * @param params 配置参数，包含数据存储模块等配置
  * @param bdMgr 基础数据管理器指针
  * @param stMonitor 状态监控器指针
@@ -81,11 +676,23 @@ bool DataManager::init(WTSVariant* params, WTSBaseDataMgr* bdMgr, StateMonitor* 
 		WTSLogger::error("Initializing of data writer failed: configuration is null");
 		return false;
 	}
-	if (_writer != NULL || _writer_module != NULL)
+
+	std::shared_ptr<WriterHost> host = _host;
+	WriterLifecycleState previous = WLS_None;
 	{
-		WTSLogger::error("Initializing of data writer failed: data writer is already initialized");
-		return false;
+		StdUniqueLock lock(host->_mtx);
+		if (host->_state != WLS_None && host->_state != WLS_Released)
+		{
+			WTSLogger::error("Initializing of data writer failed: data writer is already initialized or retained");
+			return false;
+		}
+		previous = host->_state;
+		host->_state = WLS_Initializing;	// reserve against concurrent init
 	}
+	auto restore = [&host, previous]() {
+		StdUniqueLock lock(host->_mtx);
+		host->_state = previous;
+	};
 
 	const char* configuredModule = params->getCString("module");
 	std::string module = configuredModule ? configuredModule : "";
@@ -98,6 +705,7 @@ bool DataManager::init(WTSVariant* params, WTSBaseDataMgr* bdMgr, StateMonitor* 
 	if (libWriter == NULL)
 	{
 		WTSLogger::error("Initializing of data writer failed: loading module {} failed...", module.c_str());
+		restore();
 		return false;
 	}
 
@@ -108,7 +716,43 @@ bool DataManager::init(WTSVariant* params, WTSBaseDataMgr* bdMgr, StateMonitor* 
 		WTSLogger::error("Initializing of data writer failed: module {} is missing {}", module.c_str(),
 			pFuncCreateWriter == NULL ? "createWriter" : "deleteWriter");
 		DLLHelper::free_library(libWriter);
+		restore();
 		return false;
+	}
+
+	// Optional lifecycle V1. A getter that is present but invalid fails closed before
+	// createWriter; an absent getter marks a legacy writer (quarantined on release).
+	const WtDataWriterLifecycleApiV1* lifecycle = NULL;
+	WtDataWriterLifecycleV1GetterFn getter = (WtDataWriterLifecycleV1GetterFn)DLLHelper::get_symbol(libWriter,
+		WT_DATA_WRITER_LIFECYCLE_V1_GETTER_SYMBOL);
+	if (getter != NULL)
+	{
+		try
+		{
+			lifecycle = getter(WT_DATA_WRITER_LIFECYCLE_V1_ABI_MAJOR);
+		}
+		catch (...)
+		{
+			lifecycle = NULL;
+		}
+		const bool valid = lifecycle != NULL
+			&& lifecycle->struct_size >= WT_DATA_WRITER_LIFECYCLE_V1_MINOR0_SIZE	// K20: minor-0 tables stay valid
+			&& (lifecycle->abi_version >> 16) == WT_DATA_WRITER_LIFECYCLE_V1_ABI_MAJOR
+			&& (lifecycle->capabilities & WT_DATA_WRITER_LIFECYCLE_V1_CAP_DRAIN) != 0
+			&& lifecycle->request_stop != NULL && lifecycle->can_wait != NULL && lifecycle->wait_drained != NULL;
+		if (!valid)
+		{
+			WTSLogger::error("Initializing of data writer failed: module {} exports an invalid writer lifecycle V1 table",
+				module.c_str());
+			DLLHelper::free_library(libWriter);
+			restore();
+			return false;
+		}
+	}
+	else
+	{
+		WTSLogger::warn("Data writer module {} exports no lifecycle V1; it will be retained (not unloaded) on release",
+			module.c_str());
 	}
 
 	IDataWriter* writer = NULL;
@@ -120,38 +764,66 @@ bool DataManager::init(WTSVariant* params, WTSBaseDataMgr* bdMgr, StateMonitor* 
 	{
 		WTSLogger::error("Initializing of data writer failed: createWriter threw an exception in {}", module.c_str());
 		DLLHelper::free_library(libWriter);
+		restore();
 		return false;
 	}
 	if (writer == NULL)
 	{
 		WTSLogger::error("Initializing of data writer failed: createWriter returned null in {}", module.c_str());
 		DLLHelper::free_library(libWriter);
+		restore();
 		return false;
 	}
 
-	_writer = writer;
-	_remover = pFuncDeleteWriter;
-	_writer_module = libWriter;
-	_bd_mgr = bdMgr;
-	_state_mon = stMonitor;
+	{
+		StdUniqueLock lock(host->_mtx);
+		host->_writer = writer;
+		host->_remover = pFuncDeleteWriter;
+		host->_module = libWriter;
+		host->_lifecycle = lifecycle;
+		host->_bd_mgr = bdMgr;
+		host->_state_mon = stMonitor;
+		host->_release_timeout_ms = params->getUInt32("release_timeout_ms");
+		host->_stop_requested = false;
+		host->_outbound += 1;	// the init call itself is a writer frame
+	}
 
 	bool initialized = false;
+	t_host_frames.push_back(HostFrame{ host.get(), HFK_Outbound });
 	try
 	{
-		initialized = _writer->init(params, this);
+		initialized = writer->init(params, host.get());
 	}
 	catch (...)
 	{
 		WTSLogger::error("Initializing of data writer failed: writer initialization threw an exception in {}", module.c_str());
 	}
-	if (!initialized)
+	popFrame(host.get(), HFK_Outbound);
+
+	bool ready = false;
+	{
+		StdUniqueLock lock(host->_mtx);
+		host->_outbound -= 1;
+		if (initialized && host->_state == WLS_Initializing)
+		{
+			host->_state = WLS_Ready;
+			ready = true;
+		}
+		else if (host->_state == WLS_Initializing)
+		{
+			host->_state = WLS_ReleasePending;	// failed init is released like any writer
+		}
+	}
+	host->_cond.notify_all();
+
+	if (!ready)
 	{
 		WTSLogger::error("Initializing of data writer failed: writer initialization rejected {}", module.c_str());
-		release();
+		host->finalize();
 		return false;
 	}
 
-	WTSLogger::info("Data storage module {} loaded", module);
+	WTSLogger::info("Data storage module {} loaded{}", module, lifecycle != NULL ? " (lifecycle V1)" : " (legacy lifecycle)");
 	return true;
 }
 
@@ -161,79 +833,42 @@ bool DataManager::init(WTSVariant* params, WTSBaseDataMgr* bdMgr, StateMonitor* 
  * @param id 转储器标识符
  * @param dumper 历史数据转储器指针
  */
-void DataManager::add_ext_dumper(const char* id, IHisDataDumper* dumper)
+bool DataManager::add_ext_dumper(const char* id, IHisDataDumper* dumper)
 {
-	if (_writer == NULL || _writer_release_failed)
-		return;
+	WriterHost::Outbound call(_host);
+	if (!call || id == NULL || id[0] == '\0' || dumper == NULL)
+		return false;
 
-	_writer->add_ext_dumper(id, dumper);
+	// Decision K20=B: a writer whose lifecycle V1 table is minor 1 or later registers
+	// dumpers through it (synchronized, duplicate ids rejected with the original kept).
+	// The caller keeps the dumper alive until the writer is DRAINED.
+	const WtDataWriterLifecycleApiV1* lifecycle = call.lifecycle();
+	if (lifecycle != NULL && lifecycle->struct_size >= sizeof(WtDataWriterLifecycleApiV1)
+		&& (lifecycle->capabilities & WT_DATA_WRITER_LIFECYCLE_V1_CAP_DUMPERS) != 0
+		&& lifecycle->add_dumper != NULL)
+	{
+		const WtDataWriterLifecycleV1Status status = lifecycle->add_dumper(static_cast<void*>(call.writer()), id,
+			static_cast<void*>(dumper));
+		if (status == WT_DATA_WRITER_LIFECYCLE_V1_OK)
+			return true;
+		WTSLogger::error("Registering history dumper {} failed with writer status {}{}", id, status,
+			status == WT_DATA_WRITER_LIFECYCLE_V1_DUPLICATE ? " (id already registered; the original is kept)" : "");
+		return false;
+	}
+
+	// Legacy writer: unsynchronized inline registration (no duplicate protection).
+	call.writer()->add_ext_dumper(id, dumper);
+	return true;
 }
 
 /**
  * @brief 释放数据管理器资源
- * @details 清理并释放数据管理器使用的资源，包括数据写入器等
+ * @details 见头文件中的写入器生命周期说明（卡9）
  */
 void DataManager::release()
 {
-	if (_writer_release_failed || _writer_releasing)
-		return;
-
-	if (_writer != NULL)
-	{
-		_writer_releasing = true;
-		try
-		{
-			_writer->release();
-		}
-		catch (...)
-		{
-			_writer_release_failed = true;
-			_writer_releasing = false;
-			WTSLogger::error("Releasing data writer failed with an exception; retaining writer and module to avoid use-after-unload");
-			return;
-		}
-		_writer_releasing = false;
-	}
-
-	IDataWriter* writer = _writer;
-	FuncDeleteWriter remover = _remover;
-	DllHandle module = _writer_module;
-	_writer = NULL;
-	_remover = NULL;
-	_writer_module = NULL;
-	_bd_mgr = NULL;
-	_state_mon = NULL;
-
-	if (writer)
-	{
-		bool writerDestroyed = false;
-		if (remover)
-		{
-			try
-			{
-				remover(writer);
-				writerDestroyed = (writer == NULL);
-			}
-			catch (...)
-			{
-				WTSLogger::error("Destroying data writer failed with an exception");
-			}
-		}
-		else
-		{
-			WTSLogger::error("Destroying data writer failed: deleteWriter is unavailable");
-		}
-
-		if (!writerDestroyed)
-		{
-			// Keep the module mapped if its object may still be alive; unloading it
-			// would leave the writer's vtable pointing into unmapped code.
-			WTSLogger::error("Data writer was not destroyed; keeping its module loaded for safety");
-			module = NULL;
-		}
-	}
-	if (module)
-		DLLHelper::free_library(module);
+	std::shared_ptr<WriterHost> host = _host;
+	host->requestRelease(false);
 }
 
 /**
@@ -245,10 +880,11 @@ void DataManager::release()
  */
 bool DataManager::writeTick(WTSTickData* curTick, uint32_t procFlag)
 {
-	if (_writer == NULL || _writer_release_failed)
+	WriterHost::Outbound call(_host);
+	if (!call)
 		return false;
 
-	return _writer->writeTick(curTick, procFlag);
+	return call.writer()->writeTick(curTick, procFlag);
 }
 
 /**
@@ -259,10 +895,11 @@ bool DataManager::writeTick(WTSTickData* curTick, uint32_t procFlag)
  */
 bool DataManager::writeOrderQueue(WTSOrdQueData* curOrdQue)
 {
-	if (_writer == NULL || _writer_release_failed)
+	WriterHost::Outbound call(_host);
+	if (!call)
 		return false;
 
-	return _writer->writeOrderQueue(curOrdQue);
+	return call.writer()->writeOrderQueue(curOrdQue);
 }
 
 /**
@@ -273,10 +910,11 @@ bool DataManager::writeOrderQueue(WTSOrdQueData* curOrdQue)
  */
 bool DataManager::writeOrderDetail(WTSOrdDtlData* curOrdDtl)
 {
-	if (_writer == NULL || _writer_release_failed)
+	WriterHost::Outbound call(_host);
+	if (!call)
 		return false;
 
-	return _writer->writeOrderDetail(curOrdDtl);
+	return call.writer()->writeOrderDetail(curOrdDtl);
 }
 
 /**
@@ -287,10 +925,11 @@ bool DataManager::writeOrderDetail(WTSOrdDtlData* curOrdDtl)
  */
 bool DataManager::writeTransaction(WTSTransData* curTrans)
 {
-	if (_writer == NULL || _writer_release_failed)
+	WriterHost::Outbound call(_host);
+	if (!call)
 		return false;
 
-	return _writer->writeTransaction(curTrans);
+	return call.writer()->writeTransaction(curTrans);
 }
 
 /**
@@ -302,10 +941,11 @@ bool DataManager::writeTransaction(WTSTransData* curTrans)
  */
 WTSTickData* DataManager::getCurTick(const char* code, const char* exchg/* = ""*/)
 {
-	if (_writer == NULL || _writer_release_failed)
+	WriterHost::Outbound call(_host);
+	if (!call)
 		return NULL;
 
-	return _writer->getCurTick(code, exchg);
+	return call.writer()->getCurTick(code, exchg);
 }
 
 /**
@@ -315,8 +955,9 @@ WTSTickData* DataManager::getCurTick(const char* code, const char* exchg/* = ""*
  */
 void DataManager::transHisData(const char* sid)
 {
-	if (_writer && !_writer_release_failed)
-		_writer->transHisData(sid);
+	WriterHost::Outbound call(_host);
+	if (call)
+		call.writer()->transHisData(sid);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -328,7 +969,7 @@ void DataManager::transHisData(const char* sid)
  */
 IBaseDataMgr* DataManager::getBDMgr()
 {
-	return _bd_mgr;
+	return _host->getBDMgr();
 }
 
 /**
@@ -339,12 +980,7 @@ IBaseDataMgr* DataManager::getBDMgr()
  */
 bool DataManager::canSessionReceive(const char* sid)
 {
-	//By Wesley @ 2021.12.27
-	//如果状态机为NULL，说明是全天候模式，直接返回true即可
-	if (_state_mon == NULL)
-		return true;
-
-	return _state_mon->isInState(sid, SS_RECEIVING);
+	return _host->canSessionReceive(sid);
 }
 
 /**
@@ -354,8 +990,7 @@ bool DataManager::canSessionReceive(const char* sid)
  */
 void DataManager::broadcastTick(WTSTickData* curTick)
 {
-	for(IDataCaster* caster : _casters)
-		caster->broadcast(curTick);
+	_host->broadcastTick(curTick);
 }
 
 /**
@@ -365,8 +1000,7 @@ void DataManager::broadcastTick(WTSTickData* curTick)
  */
 void DataManager::broadcastOrdDtl(WTSOrdDtlData* curOrdDtl)
 {
-	for (IDataCaster* caster : _casters)
-		caster->broadcast(curOrdDtl);
+	_host->broadcastOrdDtl(curOrdDtl);
 }
 
 /**
@@ -376,8 +1010,7 @@ void DataManager::broadcastOrdDtl(WTSOrdDtlData* curOrdDtl)
  */
 void DataManager::broadcastOrdQue(WTSOrdQueData* curOrdQue)
 {
-	for (IDataCaster* caster : _casters)
-		caster->broadcast(curOrdQue);
+	_host->broadcastOrdQue(curOrdQue);
 }
 
 /**
@@ -387,8 +1020,7 @@ void DataManager::broadcastOrdQue(WTSOrdQueData* curOrdQue)
  */
 void DataManager::broadcastTrans(WTSTransData* curTrans)
 {
-	for (IDataCaster* caster : _casters)
-		caster->broadcast(curTrans);
+	_host->broadcastTrans(curTrans);
 }
 
 /**
@@ -399,7 +1031,7 @@ void DataManager::broadcastTrans(WTSTransData* curTrans)
  */
 CodeSet* DataManager::getSessionComms(const char* sid)
 {
-	return  _bd_mgr->getSessionComms(sid);
+	return _host->getSessionComms(sid);
 }
 
 /**
@@ -410,7 +1042,7 @@ CodeSet* DataManager::getSessionComms(const char* sid)
  */
 uint32_t DataManager::getTradingDate(const char* pid)
 {
-	return  _bd_mgr->getTradingDate(pid);
+	return _host->getTradingDate(pid);
 }
 
 /**

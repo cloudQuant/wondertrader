@@ -1,0 +1,13 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before/src/TestUnits/coverage/p05_datastorage2/p05_rdmdtreader_ad_slices_test.cpp.before	2026-11-01 01:20:36
++++ src/TestUnits/coverage/p05_datastorage2/p05_rdmdtreader_ad_slices_test.cpp	2026-11-04 19:06:51
+@@ -1690,6 +1690,10 @@
+ 	std::vector<WTSBarStruct> before_bars;
+ 	uint64_t before_last = 0;
+ 	ASSERT_TRUE(WtRdmDtReaderADTestAccess::bar_cache_state(*_reader, cache_key, before_bars, before_last));
++
++	// 迭代03 s5（R21-BUG-07）：LMDB 环境无新提交时同窗口复读复用快照、不再扫描，
++	// 因此先提交一次相同内容，使下一次读取必然走 checked range 失败注入路径；断言不变。
++	put_day_bars("SHFE", "rb2409", bars);
+ 
+ 	RdmRangeFailureState failure;
+ 	failure.fail_on_range = 1;

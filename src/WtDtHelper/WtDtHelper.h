@@ -15,6 +15,7 @@
 #pragma once
 
 #include "../Includes/WTSTypes.h"
+#include <stdint.h>
 
 NS_WTP_BEGIN
 struct WTSBarStruct;
@@ -89,6 +90,23 @@ typedef void(PORTER_FLAG *FuncCountDataCallback)(WtUInt32 dataCnt);
 //typedef bool(PORTER_FLAG *FuncGetBarItem)(WTSBarStruct* curBar,int idx);
 //typedef bool(PORTER_FLAG *FuncGetTickItem)(WTSTickStruct* curTick, int idx);
 
+// Fixed numeric values returned by the versioned CSV export functions.
+// PartialFailure means at least one file succeeded and another operation failed,
+// or failures of different kinds occurred. CSV publication is not transactional.
+enum WtCsvDumpStatus
+{
+    WT_CSV_DUMP_SUCCESS = 0,
+    WT_CSV_DUMP_INVALID_ARGUMENT = 1,
+    WT_CSV_DUMP_INPUT_ERROR = 2,
+    WT_CSV_DUMP_OUTPUT_ERROR = 3,
+    WT_CSV_DUMP_PARTIAL_FAILURE = 4,
+    WT_CSV_DUMP_INTERNAL_ERROR = 5,
+    // Appended 2026-11-04 (BUG-L05-002): the readable source folder contained no .dsb
+    // file accepted by strFilter (empty folder, no .dsb files, or filter matched none).
+    // Nothing was read or written; this is not reported as success.
+    WT_CSV_DUMP_NO_INPUT = 6
+};
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -97,23 +115,34 @@ extern "C"
 	 * @brief 将二进制K线数据导出为CSV格式
 	 * @param binFolder 二进制数据文件夹路径
 	 * @param csvFolder CSV输出文件夹路径
-	 * @param strFilter 合约过滤器，支持通配符，默认为空（处理所有合约）
+	 * @param strFilter 合约过滤器，支持通配符（'*' 任意串、'?' 单字符），整串匹配 .dsb 文件名主干（合约代码），区分大小写；空串处理所有合约
 	 * @param cbLogger 日志回调函数，默认为NULL
 	 * @details 将指定文件夹中的二进制K线数据文件（.dsb格式）导出为CSV格式，
-	 * 方便用户查看和分析。可以通过strFilter参数指定要处理的合约。
+	 * 方便用户查看和分析；仅处理文件名主干匹配strFilter的文件。
 	 */
+	// Legacy ABI: void return cannot communicate failure; use dump_bars_v2.
 	EXPORT_FLAG	void		dump_bars(WtString binFolder, WtString csvFolder, WtString strFilter = "", FuncLogCallback cbLogger = NULL);
 
 	/**
 	 * @brief 将二进制Tick数据导出为CSV格式
 	 * @param binFolder 二进制数据文件夹路径
 	 * @param csvFolder CSV输出文件夹路径
-	 * @param strFilter 合约过滤器，支持通配符，默认为空（处理所有合约）
+	 * @param strFilter 合约过滤器，支持通配符（'*' 任意串、'?' 单字符），整串匹配 .dsb 文件名主干（合约代码），区分大小写；空串处理所有合约
 	 * @param cbLogger 日志回调函数，默认为NULL
 	 * @details 将指定文件夹中的二进制Tick数据文件（.dsb格式）导出为CSV格式，
-	 * 方便用户查看和分析。可以通过strFilter参数指定要处理的合约。
+	 * 方便用户查看和分析；仅处理文件名主干匹配strFilter的文件。
 	 */
+	// Legacy ABI: void return cannot communicate failure; use dump_ticks_v2.
 	EXPORT_FLAG	void		dump_ticks(WtString binFolder, WtString csvFolder, WtString strFilter = "", FuncLogCallback cbLogger = NULL);
+
+	// Return WtCsvDumpStatus values as a fixed-width integer, independent of
+	// the optional logger. Empty or null input/output paths are invalid.
+	// strFilter selects files whose stem matches the wildcard pattern (see above).
+	// A readable directory in which no .dsb file matches returns NO_INPUT, not
+	// SUCCESS. A matched zero-record valid block produces no CSV file and counts
+	// as processed.
+	EXPORT_FLAG uint32_t dump_bars_v2(WtString binFolder, WtString csvFolder, WtString strFilter = "", FuncLogCallback cbLogger = NULL);
+	EXPORT_FLAG uint32_t dump_ticks_v2(WtString binFolder, WtString csvFolder, WtString strFilter = "", FuncLogCallback cbLogger = NULL);
 
 	/**
 	 * @brief 将CSV格式的K线数据转换为二进制格式

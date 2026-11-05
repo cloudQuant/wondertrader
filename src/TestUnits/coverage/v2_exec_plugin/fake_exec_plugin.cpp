@@ -551,6 +551,9 @@ WtExecPluginApiV2 makeApi()
 		api.capabilities = WT_EXEC_PLUGIN_V2_CAP_QUIESCE;
 	else if (COV_EXEC_PLUGIN_MODE == 23)
 		api.can_wait_factory_quiesce = nullptr;
+	else if (COV_EXEC_PLUGIN_MODE == 28)
+		// Decision K41 positive control: a plugin declaring host-verified order identity.
+		api.capabilities |= WT_EXEC_PLUGIN_V2_CAP_HOST_ORDER_IDENTITY;
 	return api;
 }
 

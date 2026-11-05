@@ -1,0 +1,167 @@
+{
+ "start": "2026-11-05T22:35:00+08:00",
+ "end": "2026-11-05T22:36:04+08:00",
+ "total": 104,
+ "by_status": {
+  "pass": 95,
+  "fail": 9
+ },
+ "per_binary": {
+  "CoverageTests_btcore": {
+   "pass": 13
+  },
+  "CoverageTests_btporter": {
+   "pass": 4
+  },
+  "CoverageTests_dtcore": {
+   "pass": 5
+  },
+  "CoverageTests_dtservo": {
+   "pass": 2
+  },
+  "CoverageTests_execv2": {
+   "pass": 50,
+   "fail": 2
+  },
+  "CoverageTests_m_WtUftRunner": {
+   "pass": 3
+  },
+  "CoverageTests_t_ParserCTPOpt": {
+   "pass": 2
+  },
+  "CoverageTests_t_CTPOptLoader": {
+   "fail": 2
+  },
+  "CoverageTests_t_ParserXTP": {
+   "pass": 2
+  },
+  "CoverageTests_t_TraderCTPMini": {
+   "pass": 2
+  },
+  "CoverageTests_t_TraderCTPOpt": {
+   "pass": 1
+  },
+  "CoverageTests_t_TraderFemas": {
+   "pass": 1
+  },
+  "CoverageTests_t_TraderYD": {
+   "pass": 1
+  },
+  "CoverageTests_uftcore": {
+   "pass": 3,
+   "fail": 1
+  },
+  "CoverageTests_wtcore": {
+   "fail": 3,
+   "pass": 6
+  },
+  "CoverageTests_m_QuoteFactory": {
+   "fail": 1
+  }
+ },
+ "non_pass": [
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.NullFactoryIsUnloadedWithoutBeingPublished",
+   "fail"
+  ],
+  [
+   "CoverageTests_execv2",
+   "V2ExecuterFactoryTest.RepeatedLoadSkipsNullAndDuplicateFactoriesSafely",
+   "fail"
+  ],
+  [
+   "CoverageTests_m_QuoteFactory",
+   "r14_quote_cli.valid_config_with_real_writer_returns_zero_after_signal",
+   "fail"
+  ],
+  [
+   "CoverageTests_t_CTPOptLoader",
+   "CTPOptLoaderRun.missing_creator_symbol_returns_nonzero_and_unloads_module",
+   "fail"
+  ],
+  [
+   "CoverageTests_t_CTPOptLoader",
+   "CTPOptLoaderRun.null_creator_returns_nonzero_and_unloads_module",
+   "fail"
+  ],
+  [
+   "CoverageTests_uftcore",
+   "R78UftParserAdapterInit.missing_parser_factory_releases_config_and_module_reference",
+   "fail"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R10EventNotifier.MissingCreateServerExportUnloadsWithoutStartingWorker",
+   "fail"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "R10EventNotifier.MissingRegisterExportUnloadsCandidateAndPreservesActiveNotifier",
+   "fail"
+  ],
+  [
+   "CoverageTests_wtcore",
+   "S5MainK43TraderResidency.ProviderWithoutCallbackChannelIsStillDeletedAndUnloaded",
+   "fail"
+  ]
+ ],
+ "disabled_total": 163,
+ "list_failures": [],
+ "external_platform_skipped": [
+  {
+   "id": "BUG-L00-010",
+   "requires": "Windows/MSVC",
+   "rerun": "MSVC 实际构建并运行双 DLL、多 TU、静态初始化与卸载重载测试",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-L01-018",
+   "requires": "Windows/MSVC",
+   "rerun": "MSVC 下运行有效/非法/1969 日期矩阵（weekday helper 合组及日期映射传播用例）",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R160-002",
+   "requires": "Windows/MSVC 签名构建",
+   "rerun": "MSVC 签名构建并验证产物",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R42-001",
+   "requires": "Linux + MSan（或 Valgrind）",
+   "rerun": "MSan 全插桩构建后运行 r41_ticker/r101_sel_ctx_gap/r120_sel_engine_run 等相关用例的未初始化读取检测",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R93-005",
+   "requires": "真实 XTP SDK",
+   "rerun": "真实 XTP SDK 回调排空/Release 合同验证",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R93-006",
+   "requires": "真实 YD 柜台/官方时序",
+   "rerun": "部分成交、首包终态、乱序与 TradeVolume 语义验证",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-P05-010",
+   "requires": "有来源的真实历史 LMDB 键样本及版本说明",
+   "rerun": "以真实样本运行 AD 键兼容读取验证",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-R8-003",
+   "requires": "完整 dtservo/生产数据服务环境",
+   "rerun": "完整 dtservo 生产数据服务验收",
+   "status": "skipped(platform)"
+  },
+  {
+   "id": "BUG-P04-011",
+   "requires": "真实 provider（部分：其余需合同裁定）",
+   "rerun": "真实 provider 同步回调合同与同刻并发回调顺序验证",
+   "status": "skipped(platform)"
+  }
+ ]
+}

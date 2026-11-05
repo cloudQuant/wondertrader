@@ -1,0 +1,64 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5ExecRunnerPreflight.*
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from I03S5ExecRunnerPreflight
+[ RUN      ] I03S5ExecRunnerPreflight.InvalidEntryInMiddleRegistersNothing
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/r24_exefact2/i03_s5_exec_runner_preflight_test.cpp:87: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner._exe_mgr.find_executer("i03s5_exec_first").get()
+    Which is: 0x106d30ff0
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/r24_exefact2/i03_s5_exec_runner_preflight_test.cpp:88: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner._exe_mgr.find_executer("i03s5_exec_bad").get()
+    Which is: 0x106d314f0
+
+[  FAILED  ] I03S5ExecRunnerPreflight.InvalidEntryInMiddleRegistersNothing (2 ms)
+[ RUN      ] I03S5ExecRunnerPreflight.UnknownKindIsRejectedInsteadOfBecomingDist
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/r24_exefact2/i03_s5_exec_runner_preflight_test.cpp:97: Failure
+Value of: runner.initExecuters(cfg)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/r24_exefact2/i03_s5_exec_runner_preflight_test.cpp:99: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner._exe_mgr.find_executer("i03s5_exec_ok").get()
+    Which is: 0x106d30fd0
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/r24_exefact2/i03_s5_exec_runner_preflight_test.cpp:100: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner._exe_mgr.find_executer("i03s5_exec_kind").get()
+    Which is: 0x106d314c0
+
+[  FAILED  ] I03S5ExecRunnerPreflight.UnknownKindIsRejectedInsteadOfBecomingDist (0 ms)
+[ RUN      ] I03S5ExecRunnerPreflight.DuplicateIdInTableRegistersNothing
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/r24_exefact2/i03_s5_exec_runner_preflight_test.cpp:110: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner._exe_mgr.find_executer("i03s5_exec_dup").get()
+    Which is: 0x106d32350
+
+[  FAILED  ] I03S5ExecRunnerPreflight.DuplicateIdInTableRegistersNothing (0 ms)
+[ RUN      ] I03S5ExecRunnerPreflight.ValidTableRegistersEveryExecuter
+[       OK ] I03S5ExecRunnerPreflight.ValidTableRegistersEveryExecuter (0 ms)
+[----------] 4 tests from I03S5ExecRunnerPreflight (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (3 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] I03S5ExecRunnerPreflight.InvalidEntryInMiddleRegistersNothing
+[  FAILED  ] I03S5ExecRunnerPreflight.UnknownKindIsRejectedInsteadOfBecomingDist
+[  FAILED  ] I03S5ExecRunnerPreflight.DuplicateIdInTableRegistersNothing
+
+ 3 FAILED TESTS

@@ -1,0 +1,65 @@
+--- src/TestUnits/coverage/q05_dtsrv/r18_parser_adapter_test.cpp	2026-11-01 22:55:05
++++ /tmp/wt-i03-r18-006-012/snapshot/src/TestUnits/coverage/q05_dtsrv/r18_parser_adapter_test.cpp	2026-11-02 11:45:05
+@@ -28,6 +28,7 @@
+ #include <stdexcept>
+ #include <string>
+ #include <unistd.h>
++#include <dlfcn.h>
+ #include <vector>
+ 
+ #include <filesystem>
+@@ -837,3 +838,54 @@
+ }
+ 
+ }  // namespace
++
++// Local R18 plugin ownership evidence: a pinned fake module with controlled quiescence.
++TEST_F(R18ParserAdapterTest, ModuleConfigReferenceOnFailedAndSuccessfulInit)
++{
++    const fs::path fixture = "/tmp/wt-i03-r18-006-012/plugin/libR130LifecycleParser.dylib";
++    ASSERT_TRUE(fs::exists(fixture));
++    const fs::path local = fs::current_path() / "libR130LifecycleParser.dylib";
++    fs::copy_file(fixture, local, fs::copy_options::overwrite_existing);
++    void* handle = dlopen(local.c_str(), RTLD_NOW);
++    ASSERT_NE(handle, nullptr) << dlerror();
++    using Counter = uint32_t (*)();
++    using Reset = void (*)();
++    auto reset = reinterpret_cast<Reset>(dlsym(handle, "r130_parser_reset_counts"));
++    auto quiet = reinterpret_cast<Reset>(dlsym(handle, "r130_parser_prove_quiescent"));
++    auto init = reinterpret_cast<Counter>(dlsym(handle, "r130_parser_init_count"));
++    auto reg = reinterpret_cast<Counter>(dlsym(handle, "r130_parser_register_count"));
++    auto sub = reinterpret_cast<Counter>(dlsym(handle, "r130_parser_subscribe_count"));
++    auto connect = reinterpret_cast<Counter>(dlsym(handle, "r130_parser_connect_count"));
++    auto rel = reinterpret_cast<Counter>(dlsym(handle, "r130_parser_release_count"));
++    auto del = reinterpret_cast<Counter>(dlsym(handle, "r130_parser_delete_count"));
++    ASSERT_TRUE(reset && quiet && init && reg && sub && connect && rel && del);
++    for (bool initOk : {false, true})
++    {
++        reset();
++        WTSVariant* cfg = WTSVariant::createObject();
++        cfg->append("module", "R130LifecycleParser");
++        cfg->append("r130_init_ok", initOk);
++        const uint32_t baseline = cfg->retainCount();
++        {
++            ParserAdapter pa(&_bdMgr, &_dm, nullptr);
++            EXPECT_EQ(pa.init("r18_cfg_lifecycle", cfg), initOk);
++            EXPECT_EQ(cfg->retainCount(), baseline + 1);
++            EXPECT_EQ(init(), 1u);
++            EXPECT_EQ(reg(), 1u); // SPI registered before init, including failure.
++            EXPECT_EQ(sub(), initOk ? 1u : 0u);
++            if (!initOk) { EXPECT_FALSE(pa.run()); EXPECT_EQ(connect(), 0u); }
++            quiet();
++            pa.release();
++            EXPECT_EQ(cfg->retainCount(), baseline);
++            EXPECT_EQ(rel(), 1u);
++            EXPECT_EQ(del(), 1u);
++            pa.release();
++            EXPECT_EQ(rel(), 1u);
++            EXPECT_EQ(del(), 1u);
++        }
++        EXPECT_EQ(cfg->retainCount(), baseline);
++        cfg->release();
++    }
++    dlclose(handle);
++    fs::remove(local);
++}

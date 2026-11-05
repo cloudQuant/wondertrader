@@ -1,0 +1,38 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/WTSTools/WTSBaseDataMgr.cpp	2026-11-03 22:46:02
++++ src/WTSTools/WTSBaseDataMgr.cpp	2026-11-04 21:17:11
+@@ -587,7 +587,9 @@
+ 			WTSCommodityInfo* commodity = WTSCommodityInfo::create(pid.c_str(), config->getCString("name"), exchg.c_str(), sid, config->getCString("holiday"));
+ 			if (!commodity)
+ 			{
+-				WTSLogger::error("Commodity {}.{} rejected, nothing loaded from {}: invalid identity", exchg.c_str(), pid.c_str(), filename);
++				// create() only fails when an identity field exceeds its capacity;
++				// keep the established diagnostic text (I03-NEW-053).
++				WTSLogger::error("Commodity identity exceeds field capacity: {}.{}; nothing loaded from {}", exchg.c_str(), pid.c_str(), filename);
+ 				root->release();
+ 				return false;
+ 			}
+@@ -721,10 +723,22 @@
+ 			const char* pid = product ? config->getCString("product") : (rules ? code.c_str() : "");
+ 			const char* alt = config->getCString("altcode");
+ 			if (!*alt) alt = code.c_str();
++			// Rejections stay observable with the established diagnostics (I03-NEW-053).
+ 			if (exchg.size() >= MAX_EXCHANGE_LENGTH || code.size() >= MAX_INSTRUMENT_LENGTH ||
+-				strlen(contractExchg) >= MAX_EXCHANGE_LENGTH || strlen(contractExchg) + strlen(pid) + 1 >= 64 ||
++				strlen(contractExchg) >= MAX_EXCHANGE_LENGTH)
++			{
++				WTSLogger::error("Contract identity exceeds storage field capacity: {}.{}; nothing loaded from {}", exchg.c_str(), code.c_str(), filename);
++				root->release();
++				return false;
++			}
++			if (strlen(contractExchg) + strlen(pid) + 1 >= 64 ||
+ 				!WTSContractInfo::isIdentityValid(code.c_str(), config->getCString("name"), contractExchg, pid) ||
+-				!WTSContractInfo::isAltCodeValid(alt)) { root->release(); return false; }
++				!WTSContractInfo::isAltCodeValid(alt))
++			{
++				WTSLogger::error("Contract identity exceeds field capacity: {}.{}; nothing loaded from {}", contractExchg, code.c_str(), filename);
++				root->release();
++				return false;
++			}
+ 			if (product)
+ 			{
+ 				WTSCommodityInfo* commodity = getCommodity(contractExchg, pid);

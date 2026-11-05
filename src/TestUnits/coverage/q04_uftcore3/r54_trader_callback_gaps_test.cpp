@@ -299,10 +299,11 @@ TEST(R54TraderCallback, entrust_errors_cover_action_text)
 	for (auto& rec : env.sink._entrusts)
 		EXPECT_FALSE(rec._succ);
 
-	// usertag 为空: 未完成量回滚但不通知 sink
+	// usertag 为空: 无法归属到任何订单。卡5(Q04-002)逐单账本下不改变未完成量
+	// (该笔 1 手仍按活单计入), 也不通知 sink; 旧断言期望按合约聚合量回滚为 0
 	env.place(5000, 1, true, true);
 	sendError(WDT_LONG, WOT_OPEN, "");
-	EXPECT_DOUBLE_EQ(0.0, env.adapter.getUndoneQty(kAg));
+	EXPECT_DOUBLE_EQ(1.0, env.adapter.getUndoneQty(kAg));
 	EXPECT_EQ(5u, env.sink._entrusts.size());
 
 	// 合约查不到: 不动未完成量、不通知

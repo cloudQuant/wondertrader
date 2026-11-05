@@ -1,0 +1,274 @@
+/*!
+ * \file VendorMdLifecycleV2.hpp
+ * \project	WonderTrader
+ *
+ * \brief Parser lifecycle V2 helpers for parsers whose callbacks come from a
+ *        vendor SDK (ParserCTP, ParserCTPMini, ParserCTPOpt, ParserFemas,
+ *        ParserXTP). Iteration 03, decision card 9 (9a=A+C, 9b=A, 9c=A, 9d=A).
+ *
+ * Capability statement (what a provider using this header can and cannot prove):
+ *  - Every vendor SDK callback and every provider-posted task enters a callback
+ *    admission gate; every host IParserApi call enters an API admission gate.
+ *    request_stop closes both gates with lock-free atomics only. Once both gates
+ *    are closed and empty, no IParserSpi call and no use of host-borrowed
+ *    objects attributable to the parser can start or still be running.
+ *  - The SDK's own threads are not provider-owned. None of the vendored SDK
+ *    headers documents that Release(), RegisterSpi(NULL) or Logout() joins SDK
+ *    threads or forbids a later callback (citations are in each parser). After
+ *    an SDK API object was created for an instance, wait_drained therefore
+ *    releases the SDK once on the verified-safe waiting thread and reports
+ *    WT_PARSER_LIFECYCLE_V2_ERROR ("drain state uncertain"): the host must keep
+ *    the module, handle and borrowed objects until process exit (quarantine).
+ *    destroy_api is refused for such an instance.
+ *  - DRAINED, and therefore destroy_api, is reported only for an instance that
+ *    never created an SDK API object (not initialized, or initialization failed
+ *    before creation).
+ *  - Legacy release()/disconnect() called on a thread that is inside one of the
+ *    parser's own callbacks or API calls closes admission and defers the vendor
+ *    release to the next lifecycle call made from a safe thread (9d). The
+ *    legacy deleteParser remover keeps (does not delete) a parser whose SDK API
+ *    was ever created, because no SDK thread-exit confirmation exists (9b).
+ */
+#pragma once
+
+#include "../Includes/IParserLifecycleV2.h"
+#include "../Includes/IParserApi.h"
+
+#include <atomic>
+#include <chrono>
+#include <cstdint>
+#include <thread>
+
+namespace wt_vendor_md_v2
+{
+	static_assert(std::atomic<uint64_t>::is_always_lock_free && std::atomic<bool>::is_always_lock_free,
+		"Vendor parser V2 stop requires lock-free atomic operations");
+
+	// Admission gate: bit 63 closes admission permanently, bit 62 holds it
+	// temporarily (legacy shutdown in progress); the low bits count admitted frames.
+	class Gate
+	{
+	public:
+		static constexpr uint64_t CLOSED = UINT64_C(1) << 63;
+		static constexpr uint64_t HOLD = UINT64_C(1) << 62;
+		static constexpr uint64_t COUNT_MASK = HOLD - 1;
+
+		bool enter() noexcept
+		{
+			uint64_t state = _state.load(std::memory_order_acquire);
+			for (;;)
+			{
+				if ((state & (CLOSED | HOLD)) != 0 || (state & COUNT_MASK) == COUNT_MASK)
+					return false;
+				if (_state.compare_exchange_weak(state, state + 1, std::memory_order_acq_rel, std::memory_order_acquire))
+					return true;
+			}
+		}
+		void leave() noexcept { _state.fetch_sub(1, std::memory_order_acq_rel); }
+		void close() noexcept { _state.fetch_or(CLOSED, std::memory_order_acq_rel); }
+		void hold() noexcept { _state.fetch_or(HOLD, std::memory_order_acq_rel); }
+		void unhold() noexcept { _state.fetch_and(~HOLD, std::memory_order_acq_rel); }
+		bool closed() const noexcept { return (_state.load(std::memory_order_acquire) & CLOSED) != 0; }
+		uint64_t active() const noexcept { return _state.load(std::memory_order_acquire) & COUNT_MASK; }
+
+	private:
+		std::atomic<uint64_t> _state{0};
+	};
+
+	// Per-thread stacks of active callback/API frames, keyed by parser object.
+	struct Frame
+	{
+		const void* owner;
+		Frame* previous;
+	};
+	inline Frame*& callbackFrames() noexcept { static thread_local Frame* top = nullptr; return top; }
+	inline Frame*& apiFrames() noexcept { static thread_local Frame* top = nullptr; return top; }
+	inline bool hasFrame(const Frame* top, const void* owner) noexcept
+	{
+		for (const Frame* frame = top; frame != nullptr; frame = frame->previous)
+		{
+			if (frame->owner == owner)
+				return true;
+		}
+		return false;
+	}
+
+	// RAII admission through one gate, recorded on the current thread's stack.
+	class Scope
+	{
+	public:
+		Scope(Gate& gate, Frame*& top, const void* owner) noexcept
+			: _gate(gate), _top(top), _frame{owner, top}, _entered(gate.enter())
+		{
+			if (_entered)
+				_top = &_frame;
+		}
+		~Scope()
+		{
+			if (_entered)
+			{
+				_top = _frame.previous;
+				_gate.leave();
+			}
+		}
+		explicit operator bool() const noexcept { return _entered; }
+		Scope(const Scope&) = delete;
+		Scope& operator=(const Scope&) = delete;
+
+	private:
+		Gate&	_gate;
+		Frame*&	_top;
+		Frame	_frame;
+		bool	_entered;
+	};
+
+	class Lifecycle
+	{
+	public:
+		Gate callbacks;	// vendor SDK callbacks and provider-posted tasks
+		Gate api;		// host IParserApi calls
+		std::atomic<bool> v2_stop{false};
+		std::atomic<bool> v2_drained{false};
+		std::atomic<bool> sdk_created{false};	// an SDK API object existed for this instance
+		std::atomic<bool> shutdown_deferred{false};
+
+		Scope callback(const void* owner) noexcept { return Scope(callbacks, callbackFrames(), owner); }
+		Scope call(const void* owner) noexcept { return Scope(api, apiFrames(), owner); }
+
+		// True when the current thread is inside one of owner's callbacks or API calls.
+		static bool reentered(const void* owner) noexcept
+		{
+			return hasFrame(callbackFrames(), owner) || hasFrame(apiFrames(), owner);
+		}
+		static bool insideCallback(const void* owner) noexcept { return hasFrame(callbackFrames(), owner); }
+
+		bool quiet() const noexcept { return api.active() == 0 && callbacks.active() == 0; }
+		// Callbacks are closed for good by a legacy shutdown or a V2 stop.
+		bool shutDown() const noexcept { return callbacks.closed(); }
+
+		WtParserLifecycleV2Status requestStop() noexcept
+		{
+			api.close();
+			callbacks.close();
+			v2_stop.store(true, std::memory_order_release);
+			return WT_PARSER_LIFECYCLE_V2_OK;
+		}
+
+		// Legacy terminal shutdown. Closes callback admission for good. On
+		// re-entry (own callback/API frame, or a provider worker) it records a
+		// deferred shutdown and returns false without waiting. Otherwise it holds
+		// API admission, waits (unbounded) for admitted callbacks/API calls to
+		// leave, runs releaseSdk on this thread, and reopens API admission so
+		// later legacy calls see the released (NULL) SDK pointer.
+		template <typename ReleaseSdk>
+		bool shutdownLegacy(const void* owner, bool unsafeThread, ReleaseSdk&& releaseSdk) noexcept
+		{
+			callbacks.close();
+			if (unsafeThread || reentered(owner))
+			{
+				shutdown_deferred.store(true, std::memory_order_release);
+				return false;
+			}
+			api.hold();
+			while (!quiet())
+				std::this_thread::sleep_for(std::chrono::microseconds(200));
+			releaseSdk();
+			shutdown_deferred.store(false, std::memory_order_release);
+			api.unhold();
+			return true;
+		}
+
+		// Shared V2 wait. canWait is the caller's wait-safety result for this
+		// thread; sdkSeen reports whether an SDK API object ever existed.
+		template <typename SdkSeen, typename ReleaseSdk, typename DropBorrows>
+		WtParserLifecycleV2Status waitDrained(WtParserLifecycleV2Status canWait, uint32_t timeoutMs,
+			SdkSeen&& sdkSeen, ReleaseSdk&& releaseSdk, DropBorrows&& dropBorrows) noexcept
+		{
+			try
+			{
+				if (!v2_stop.load(std::memory_order_acquire))
+					return WT_PARSER_LIFECYCLE_V2_INVALID_ARGUMENT;
+				if (canWait != WT_PARSER_LIFECYCLE_V2_OK)
+					return WT_PARSER_LIFECYCLE_V2_WOULD_DEADLOCK;
+				const auto start = std::chrono::steady_clock::now();
+				while (!quiet())
+				{
+					if (timeoutMs == 0 || (timeoutMs != UINT32_MAX &&
+						std::chrono::steady_clock::now() - start >= std::chrono::milliseconds(timeoutMs)))
+						return WT_PARSER_LIFECYCLE_V2_PENDING;
+					std::this_thread::sleep_for(std::chrono::milliseconds(1));
+				}
+				if (sdkSeen())
+				{
+					// Provider-owned work is drained, SDK-owned threads are not
+					// provably quiescent: release the vendor API once and report
+					// uncertainty so the host quarantines module and handle.
+					releaseSdk();
+					return WT_PARSER_LIFECYCLE_V2_ERROR;
+				}
+				dropBorrows();
+				v2_drained.store(true, std::memory_order_release);
+				return WT_PARSER_LIFECYCLE_V2_DRAINED;
+			}
+			catch (...)
+			{
+				return WT_PARSER_LIFECYCLE_V2_ERROR;
+			}
+		}
+
+		bool destroyable(WtParserLifecycleV2Status canWait) const noexcept
+		{
+			return v2_drained.load(std::memory_order_acquire) && canWait == WT_PARSER_LIFECYCLE_V2_OK && quiet();
+		}
+	};
+
+	// Static C ABI table for one parser type. Parser must provide
+	// requestStopV2/canWaitV2/waitDrainedV2/destroyableV2 (all noexcept).
+	template <typename Parser>
+	struct Table
+	{
+		static Parser* from(void* handle) noexcept
+		{
+			return static_cast<Parser*>(static_cast<wtp::IParserApi*>(handle));
+		}
+		static WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL preflight() { return WT_PARSER_LIFECYCLE_V2_OK; }
+		static WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL stop(void* handle)
+		{
+			return handle ? from(handle)->requestStopV2() : WT_PARSER_LIFECYCLE_V2_INVALID_ARGUMENT;
+		}
+		static WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL canWait(void* handle)
+		{
+			return handle ? from(handle)->canWaitV2() : WT_PARSER_LIFECYCLE_V2_INVALID_ARGUMENT;
+		}
+		static WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL wait(void* handle, uint32_t timeoutMs)
+		{
+			return handle ? from(handle)->waitDrainedV2(timeoutMs) : WT_PARSER_LIFECYCLE_V2_INVALID_ARGUMENT;
+		}
+		static WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL destroy(void** handle)
+		{
+			if (handle == nullptr || *handle == nullptr)
+				return WT_PARSER_LIFECYCLE_V2_INVALID_ARGUMENT;
+			Parser* parser = from(*handle);
+			try
+			{
+				if (!parser->destroyableV2())
+					return WT_PARSER_LIFECYCLE_V2_ERROR;
+				delete parser;
+				*handle = nullptr;
+				return WT_PARSER_LIFECYCLE_V2_OK;
+			}
+			catch (...)
+			{
+				return WT_PARSER_LIFECYCLE_V2_ERROR;
+			}
+		}
+		static const WtParserLifecycleApiV2* get(uint32_t major) noexcept
+		{
+			static const WtParserLifecycleApiV2 table = {
+				sizeof(WtParserLifecycleApiV2), WT_PARSER_LIFECYCLE_V2_ABI_VERSION,
+				WT_PARSER_LIFECYCLE_V2_REQUIRED_CAPABILITIES, {0, 0},
+				&preflight, &stop, &canWait, &wait, &destroy };
+			return major == WT_PARSER_LIFECYCLE_V2_ABI_MAJOR ? &table : nullptr;
+		}
+	};
+}

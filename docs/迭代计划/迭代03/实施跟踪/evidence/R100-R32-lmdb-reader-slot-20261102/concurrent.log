@@ -1,0 +1,35 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=6661)
+  Read of size 4 at 0x000102ef0088 by thread T2:
+    #0 mdb_find_oldest mdb.c:2127 (control:arm64+0x10000a540)
+    #1 mdb_page_alloc mdb.c:2270 (control:arm64+0x10000a540)
+    #2 mdb_page_touch mdb.c:2453 (control:arm64+0x1000112c0)
+    #3 mdb_cursor_touch mdb.c:6562 (control:arm64+0x100009c18)
+    #4 mdb_cursor_put mdb.c:6696 (control:arm64+0x100004864)
+    #5 mdb_put mdb.c:9071 (control:arm64+0x10000fbf8)
+    #6 main::$_1::operator()() const control.cpp:28 (control:arm64+0x100001c70)
+    #7 main::$_2::operator()() const control.cpp:30 (control:arm64+0x100001dc8)
+    #8 std::__1::__invoke_result_impl<void, main::$_2>::type std::__1::__invoke[abi:nqe220108]<main::$_2>(main::$_2&&) invoke.h:90 (control:arm64+0x100001dc8)
+    #9 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_2, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_2>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (control:arm64+0x100001dc8)
+    #10 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_2>>(void*) thread.h:169 (control:arm64+0x100001dc8)
+
+  Previous write of size 4 at 0x000102ef0088 by thread T1:
+    #0 mdb_env_reader_dest mdb.c:4517 (control:arm64+0x100011e94)
+    #1 _pthread_tsd_cleanup <null> (libsystem_pthread.dylib:arm64e+0x4678)
+
+  Thread T2 (tid=1466779, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (control:arm64+0x100000f34)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_2, 0>(main::$_2&&) thread.h:218 (control:arm64+0x100000f34)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_2, 0>(main::$_2&&) thread.h:209 (control:arm64+0x100000f34)
+    #4 main control.cpp:30 (control:arm64+0x100000f34)
+
+  Thread T1 (tid=1466776, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (control:arm64+0x100000d68)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_0, 0>(main::$_0&&) thread.h:218 (control:arm64+0x100000d68)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_0, 0>(main::$_0&&) thread.h:209 (control:arm64+0x100000d68)
+    #4 main control.cpp:23 (control:arm64+0x100000d68)
+
+SUMMARY: ThreadSanitizer: data race mdb.c:2127 in mdb_find_oldest
+==================

@@ -1,0 +1,27 @@
+diff --git a/src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp b/src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp
+index 17f16286..befda251 100644
+--- a/src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp
++++ b/src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp
+@@ -499,6 +499,22 @@ TEST(T3_006_TraderCTPMini, init_rejects_each_missing_required_config_key)
+ 	EXPECT_FALSE(nullParams.init(nullptr));
+ }
+ 
++TEST(T3_006_TraderCTPMini, init_rejects_flowdir_only_configuration)
++{
++	R61MiniProbe probe;
++	R61MiniSink sink;
++	probe.registerSpi(&sink);
++	WTSVariant* cfg = WTSVariant::createObject();
++	cfg->append("flowdir", "r61miniflow_only");
++	EXPECT_FALSE(probe.init(cfg));
++	EXPECT_FALSE(probe.creatorReady());
++	EXPECT_FALSE(probe.moduleLoaded());
++	EXPECT_TRUE(probe.workerNull());
++	EXPECT_EQ(nullptr, probe.api());
++	EXPECT_TRUE(sink.hasLog("front"));
++	cfg->release();
++}
++
+ TEST(T3_006_TraderCTPMini, init_rejects_missing_module_and_creator_symbol)
+ {
+ 	struct ModuleCase

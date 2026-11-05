@@ -1,0 +1,11 @@
+--- tree/src/TestUnits/fixtures/cta_factory_quarantine/run.sh
++++ mirror/src/TestUnits/fixtures/cta_factory_quarantine/run.sh
+@@ -32,7 +32,7 @@
+  -I"$boost" -I"$fmt" -I"$spdlog" -include "$src_root/Share/fmt_enum_compat.h" \
+  "$src_root/WtCore/CtaStrategyMgr.cpp" "$fixture/logger_stub.cpp" "$fixture/check.cpp" $dl_lib -o "$run_dir/current"
+ # HEAD is a historical control, not the previously dirty working-tree snapshot.
+-git rev-parse HEAD > "$run_dir/head-commit.txt"
++echo ccaad010e9169f610aded4d8dc0f5647f70a5cff > "$run_dir/head-commit.txt"
+ # 2026-11-05: the historical control is pinned to the commit that was HEAD when this
+ # fixture was written (9094fd8e; CtaStrategyMgr.cpp unchanged since 325a4d5f). The moving
+ # HEAD (ccaad010 onwards) already contains the fix, so it is no longer a red control.

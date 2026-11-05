@@ -1,0 +1,72 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 24 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from ParserCTPMiniFactory
+[ RUN      ] ParserCTPMiniFactory.create_and_delete_round_trip
+[       OK ] ParserCTPMiniFactory.create_and_delete_round_trip (0 ms)
+[ RUN      ] ParserCTPMiniFactory.lifecycle_calls_without_api_are_safe
+[       OK ] ParserCTPMiniFactory.lifecycle_calls_without_api_are_safe (0 ms)
+[----------] 2 tests from ParserCTPMiniFactory (0 ms total)
+
+[----------] 1 test from ParserCTPMiniStrToTime
+[ RUN      ] ParserCTPMiniStrToTime.strips_colons_and_keeps_digits
+[       OK ] ParserCTPMiniStrToTime.strips_colons_and_keeps_digits (0 ms)
+[----------] 1 test from ParserCTPMiniStrToTime (0 ms total)
+
+[----------] 11 tests from ParserCTPMiniTest
+[ RUN      ] ParserCTPMiniTest.depth_market_data_is_converted_into_a_tick
+[       OK ] ParserCTPMiniTest.depth_market_data_is_converted_into_a_tick (0 ms)
+[ RUN      ] ParserCTPMiniTest.invalid_prices_become_zero
+[       OK ] ParserCTPMiniTest.invalid_prices_become_zero (0 ms)
+[ RUN      ] ParserCTPMiniTest.czce_turnover_is_scaled_by_volume_multiple
+[       OK ] ParserCTPMiniTest.czce_turnover_is_scaled_by_volume_multiple (0 ms)
+[ RUN      ] ParserCTPMiniTest.missing_action_day_falls_back_to_trading_date
+[       OK ] ParserCTPMiniTest.missing_action_day_falls_back_to_trading_date (0 ms)
+[ RUN      ] ParserCTPMiniTest.unknown_contract_drops_the_tick
+[       OK ] ParserCTPMiniTest.unknown_contract_drops_the_tick (0 ms)
+[ RUN      ] ParserCTPMiniTest.quote_is_dropped_when_sink_unregistered
+[       OK ] ParserCTPMiniTest.quote_is_dropped_when_sink_unregistered (0 ms)
+[ RUN      ] ParserCTPMiniTest.front_connected_publishes_event_and_survives_missing_api
+[       OK ] ParserCTPMiniTest.front_connected_publishes_event_and_survives_missing_api (0 ms)
+[ RUN      ] ParserCTPMiniTest.login_response_is_ignored_until_last_packet
+[       OK ] ParserCTPMiniTest.login_response_is_ignored_until_last_packet (0 ms)
+[ RUN      ] ParserCTPMiniTest.logout_and_close_events
+[       OK ] ParserCTPMiniTest.logout_and_close_events (0 ms)
+[ RUN      ] ParserCTPMiniTest.heartbeat_and_sub_response_paths_log_only
+[       OK ] ParserCTPMiniTest.heartbeat_and_sub_response_paths_log_only (0 ms)
+[ RUN      ] ParserCTPMiniTest.subscribe_before_login_only_caches_the_filter
+[       OK ] ParserCTPMiniTest.subscribe_before_login_only_caches_the_filter (0 ms)
+[----------] 11 tests from ParserCTPMiniTest (0 ms total)
+
+[----------] 1 test from gate_placeholder_ParserCTPMini
+[ RUN      ] gate_placeholder_ParserCTPMini.compiles_with_module_flags
+[       OK ] gate_placeholder_ParserCTPMini.compiles_with_module_flags (0 ms)
+[----------] 1 test from gate_placeholder_ParserCTPMini (0 ms total)
+
+[----------] 9 tests from R105MiniTest
+[ RUN      ] R105MiniTest.injected_api_connect_login_and_do_subscribe
+[       OK ] R105MiniTest.injected_api_connect_login_and_do_subscribe (0 ms)
+[ RUN      ] R105MiniTest.login_failure_and_inline_subscribe_branches
+[       OK ] R105MiniTest.login_failure_and_inline_subscribe_branches (0 ms)
+[ RUN      ] R105MiniTest.logged_in_subscribe_handles_500_and_501_codes
+[       OK ] R105MiniTest.logged_in_subscribe_handles_500_and_501_codes (4 ms)
+[ RUN      ] R105MiniTest.pre_login_cache_handles_500_and_501_codes_after_login
+[       OK ] R105MiniTest.pre_login_cache_handles_500_and_501_codes_after_login (8 ms)
+[ RUN      ] R105MiniTest.subscription_count_guard_rejects_values_above_int_max
+[       OK ] R105MiniTest.subscription_count_guard_rejects_values_above_int_max (0 ms)
+[ RUN      ] R105MiniTest.init_flowdir_creation_failure_returns_false_before_vendor_module
+[       OK ] R105MiniTest.init_flowdir_creation_failure_returns_false_before_vendor_module (15 ms)
+[ RUN      ] R105MiniTest.depth_null_manager_actionday_fallback_and_settlement
+[       OK ] R105MiniTest.depth_null_manager_actionday_fallback_and_settlement (0 ms)
+[ RUN      ] R105MiniTest.night_session_recomputes_action_date
+[       OK ] R105MiniTest.night_session_recomputes_action_date (1 ms)
+[ RUN      ] R105MiniTest.null_sink_and_no_api_guards
+[       OK ] R105MiniTest.null_sink_and_no_api_guards (0 ms)
+[----------] 9 tests from R105MiniTest (31 ms total)
+
+[----------] Global test environment tear-down
+[==========] 24 tests from 5 test suites ran. (32 ms total)
+[  PASSED  ] 24 tests.
+
+  YOU HAVE 3 DISABLED TESTS
+

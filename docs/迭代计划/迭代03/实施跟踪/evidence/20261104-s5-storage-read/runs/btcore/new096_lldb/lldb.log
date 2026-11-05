@@ -1,0 +1,78 @@
+(lldb) target create "/tmp/wt-i03-s5-storage-read-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btcore"
+Current executable set to '/tmp/wt-i03-s5-storage-read-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btcore' (arm64).
+(lldb) settings set target.env-vars LLVM_PROFILE_FILE=/tmp/wt-i03-s5-storage-read-run/bt/new096_lldb/%p.profraw
+(lldb) breakpoint set -n check_cache_days -G true
+Breakpoint 1: 2 locations.
+(lldb) breakpoint set -n mark -G true
+Breakpoint 2: 37 locations.
+(lldb) run --gtest_filter=R180LoaderFixture.R180His_CacheClearJoinsMultipleCodes
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[0;33mNote: Google Test filter = R180LoaderFixture.R180His_CacheClearJoinsMultipleCodes
+[m[0;32m[==========] [mRunning 1 test from 1 test suite.
+[0;32m[----------] [mGlobal test environment set-up.
+[0;32m[----------] [m1 test from R180LoaderFixture
+[0;32m[ RUN      ] [mR180LoaderFixture.R180His_CacheClearJoinsMultipleCodes
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p03_btcore_mockers2/r180_btcore_mockers2_test.cpp:370: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  loader.calls[kExtraA]
+    Which is: 1
+
+[0;31m[  FAILED  ] [mR180LoaderFixture.R180His_CacheClearJoinsMultipleCodes (4195 ms)
+[0;32m[----------] [m1 test from R180LoaderFixture (4195 ms total)
+
+[0;32m[----------] [mGlobal test environment tear-down
+[0;32m[==========] [m1 test from 1 test suite ran. (4195 ms total)
+[0;32m[  PASSED  ] [m0 tests.
+[0;31m[  FAILED  ] [m1 test, listed below:
+[0;31m[  FAILED  ] [mR180LoaderFixture.R180His_CacheClearJoinsMultipleCodes
+
+ 1 FAILED TEST
+Process 65507 launched: '/tmp/wt-i03-s5-storage-read-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btcore' (arm64)
+Process 65507 exited with status = 1 (0x00000001)
+(lldb) breakpoint list
+Current breakpoints:
+1: name = 'check_cache_days', locations = 2, resolved = 2, hit count = 5 Options: enabled auto-continue 
+  1.1: where = CoverageTests_btcore`HisDataReplayer::check_cache_days() + 40 at HisDataReplayer.cpp:7151:6, address = 0x000000010060ab48, resolved, hit count = 5 
+  1.2: where = libWtBtPorter.dylib`HisDataReplayer::check_cache_days() + 40 at HisDataReplayer.cpp:7151:6, address = 0x00000001062ad374, resolved, hit count = 0 
+
+2: name = 'mark', locations = 37, resolved = 37, hit count = 15 Options: enabled auto-continue 
+  2.1: where = CoverageTests_btcore`HisDataReplayer::_BarsList::mark() + 28 at HisDataReplayer.h:350:18, address = 0x0000000100620ec0, resolved, hit count = 15 
+  2.2: where = CoverageTests_btcore`YAML::detail::node::mark() const + 20 at node.h:35:37, address = 0x0000000100671404, resolved, hit count = 0 
+  2.3: where = CoverageTests_btcore`YAML::detail::node_ref::mark() const + 20 at node_ref.h:24:37, address = 0x000000010067142c, resolved, hit count = 0 
+  2.4: where = CoverageTests_btcore`YAML::detail::node_data::mark() const + 12 at node_data.h:45:37, address = 0x000000010067144c, resolved, hit count = 0 
+  2.5: where = CoverageTests_btcore`YAML::Stream::mark() const + 36 at stream.h:43:36, address = 0x000000010077d588, resolved, hit count = 0 
+  2.6: where = CoverageTests_btcore`YAML::Scanner::mark() const + 36 at scanner.cpp:51:43, address = 0x0000000100790b28, resolved, hit count = 0 
+  2.7: where = libWtDtServo.dylib`YAML::Stream::mark() const + 36 at stream.h:43:36, address = 0x0000000104e38524, resolved, hit count = 0 
+  2.8: where = libWtDtServo.dylib`YAML::Scanner::mark() const + 36 at scanner.cpp:51:43, address = 0x0000000104e4d8e4, resolved, hit count = 0 
+  2.9: where = libWtDtServo.dylib`YAML::detail::node::mark() const + 36 at node.h:35:37, address = 0x0000000104e84b50, resolved, hit count = 0 
+  2.10: where = libWtDtServo.dylib`YAML::detail::node_ref::mark() const + 36 at node_ref.h:24:37, address = 0x0000000104e84b88, resolved, hit count = 0 
+  2.11: where = libWtDtServo.dylib`YAML::detail::node_data::mark() const + 28 at node_data.h:45:37, address = 0x0000000104e84bb8, resolved, hit count = 0 
+  2.12: where = libWtDataStorage.dylib`YAML::Stream::mark() const + 36 at stream.h:43:36, address = 0x0000000102d75628, resolved, hit count = 0 
+  2.13: where = libWtDataStorage.dylib`YAML::Scanner::mark() const + 36 at scanner.cpp:51:43, address = 0x0000000102d8aeec, resolved, hit count = 0 
+  2.14: where = libWtDataStorage.dylib`YAML::detail::node::mark() const + 36 at node.h:35:37, address = 0x0000000102e86e30, resolved, hit count = 0 
+  2.15: where = libWtDataStorage.dylib`YAML::detail::node_ref::mark() const + 36 at node_ref.h:24:37, address = 0x0000000102e86e68, resolved, hit count = 0 
+  2.16: where = libWtDataStorage.dylib`YAML::detail::node_data::mark() const + 28 at node_data.h:45:37, address = 0x0000000102e86e98, resolved, hit count = 0 
+  2.17: where = libWtDtPorter.dylib`YAML::Stream::mark() const + 36 at stream.h:43:36, address = 0x0000000104515930, resolved, hit count = 0 
+  2.18: where = libWtDtPorter.dylib`YAML::Scanner::mark() const + 36 at scanner.cpp:51:43, address = 0x000000010452ad44, resolved, hit count = 0 
+  2.19: where = libWtDtPorter.dylib`YAML::detail::node::mark() const + 36 at node.h:35:37, address = 0x00000001045629a8, resolved, hit count = 0 
+  2.20: where = libWtDtPorter.dylib`YAML::detail::node_ref::mark() const + 36 at node_ref.h:24:37, address = 0x00000001045629e0, resolved, hit count = 0 
+  2.21: where = libWtDtPorter.dylib`YAML::detail::node_data::mark() const + 28 at node_data.h:45:37, address = 0x0000000104562a10, resolved, hit count = 0 
+  2.22: where = libWtBtPorter.dylib`HisDataReplayer::_BarsList::mark() + 28 at HisDataReplayer.h:350:18, address = 0x00000001062c3cbc, resolved, hit count = 0 
+  2.23: where = libWtBtPorter.dylib`YAML::detail::node::mark() const + 36 at node.h:35:37, address = 0x000000010631de80, resolved, hit count = 0 
+  2.24: where = libWtBtPorter.dylib`YAML::detail::node_ref::mark() const + 36 at node_ref.h:24:37, address = 0x000000010631deb8, resolved, hit count = 0 
+  2.25: where = libWtBtPorter.dylib`YAML::detail::node_data::mark() const + 28 at node_data.h:45:37, address = 0x000000010631dee8, resolved, hit count = 0 
+  2.26: where = libWtBtPorter.dylib`YAML::Stream::mark() const + 36 at stream.h:43:36, address = 0x0000000106434200, resolved, hit count = 0 
+  2.27: where = libWtBtPorter.dylib`YAML::Scanner::mark() const + 36 at scanner.cpp:51:43, address = 0x0000000106447a48, resolved, hit count = 0 
+  2.28: where = libWtExecMon.dylib`YAML::Stream::mark() const + 36 at stream.h:43:36, address = 0x000000010859b9b4, resolved, hit count = 0 
+  2.29: where = libWtExecMon.dylib`YAML::Scanner::mark() const + 36 at scanner.cpp:51:43, address = 0x00000001085b0c68, resolved, hit count = 0 
+  2.30: where = libWtExecMon.dylib`YAML::detail::node::mark() const + 36 at node.h:35:37, address = 0x00000001085e22c0, resolved, hit count = 0 
+  2.31: where = libWtExecMon.dylib`YAML::detail::node_ref::mark() const + 36 at node_ref.h:24:37, address = 0x00000001085e22f8, resolved, hit count = 0 
+  2.32: where = libWtExecMon.dylib`YAML::detail::node_data::mark() const + 28 at node_data.h:45:37, address = 0x00000001085e2328, resolved, hit count = 0 
+  2.33: where = libWtPorter.dylib`YAML::detail::node::mark() const + 36 at node.h:35:37, address = 0x000000010b23fd00, resolved, hit count = 0 
+  2.34: where = libWtPorter.dylib`YAML::detail::node_ref::mark() const + 36 at node_ref.h:24:37, address = 0x000000010b23fd38, resolved, hit count = 0 
+  2.35: where = libWtPorter.dylib`YAML::detail::node_data::mark() const + 28 at node_data.h:45:37, address = 0x000000010b23fd68, resolved, hit count = 0 
+  2.36: where = libWtPorter.dylib`YAML::Stream::mark() const + 36 at stream.h:43:36, address = 0x000000010b34f240, resolved, hit count = 0 
+  2.37: where = libWtPorter.dylib`YAML::Scanner::mark() const + 36 at scanner.cpp:51:43, address = 0x000000010b361f70, resolved, hit count = 0 
+

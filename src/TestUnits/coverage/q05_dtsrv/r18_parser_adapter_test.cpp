@@ -565,9 +565,14 @@ TEST_F(R18ParserAdapterTest, InitReleasesRetainedConfigWhenNoApiWasCreated)
 	const uint32_t baseline = cfg->retainCount();
 
 	{
+		// Iteration 03 (R18-012/R18-006, card 9): a failed init that created no
+		// API returns its config reference before returning (exactly once); the
+		// destructor must not release it again. The former oracle expected the
+		// reference to stay until destruction.
 		ParserAdapter pa(&_bdMgr, &_dm, nullptr);
 		EXPECT_FALSE(pa.init("r18_cfg_empty", cfg));
-		EXPECT_EQ(cfg->retainCount(), baseline + 1);
+		EXPECT_EQ(cfg->retainCount(), baseline);
+		EXPECT_TRUE(pa.releaseComplete());
 	}
 
 	EXPECT_EQ(cfg->retainCount(), baseline);
@@ -583,7 +588,8 @@ TEST_F(R18ParserAdapterTest, ReleaseReturnsRetainedConfigWhenModuleLoadFails)
 
 	ParserAdapter pa(&_bdMgr, &_dm, nullptr);
 	EXPECT_FALSE(pa.init("r18_cfg_missing", cfg));
-	EXPECT_EQ(cfg->retainCount(), baseline + 1);
+	// Returned on failure (iteration 03, see above); release() must not repeat it.
+	EXPECT_EQ(cfg->retainCount(), baseline);
 	pa.release();
 	EXPECT_EQ(cfg->retainCount(), baseline);
 	cfg->release();

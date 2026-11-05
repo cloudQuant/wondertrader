@@ -1,0 +1,98 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 8 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 8 tests from I03CommodityReady
+[ RUN      ] I03CommodityReady.ReadyApiIsPresent
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/commodity_ready_test.cpp:86: Failure
+Value of: HasReady<WTSCommodityInfo>::value
+  Actual: false
+Expected: true
+
+[  FAILED  ] I03CommodityReady.ReadyApiIsPresent (0 ms)
+[ RUN      ] I03CommodityReady.CreateIsDeterministicAndFailsClosed
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/commodity_ready_test.cpp:103: Failure
+Expected equality of these values:
+  TM_None
+    Which is: 9
+  c->getTradingMode()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/commodity_ready_test.cpp:104: Failure
+Value of: c->canShort()
+  Actual: true
+Expected: false
+
+[  FAILED  ] I03CommodityReady.CreateIsDeterministicAndFailsClosed (0 ms)
+[ RUN      ] I03CommodityReady.ReadyRequiresExplicitTradingModeAndSession
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/commodity_ready_test.cpp:117: Failure
+Value of: c->hasValidConfiguration()
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/commodity_ready_test.cpp:118: Failure
+Value of: c->canShort()
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/commodity_ready_test.cpp:125: Failure
+Value of: markReady(c.get())
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/commodity_ready_test.cpp:126: Failure
+Value of: isReady(c.get())
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/commodity_ready_test.cpp:131: Failure
+Value of: isReady(c.get())
+  Actual: false
+Expected: true
+
+[  FAILED  ] I03CommodityReady.ReadyRequiresExplicitTradingModeAndSession (0 ms)
+[ RUN      ] I03CommodityReady.ExplicitTradingModesKeepTheirMeaning
+[       OK ] I03CommodityReady.ExplicitTradingModesKeepTheirMeaning (0 ms)
+[ RUN      ] I03CommodityReady.LoaderPublishesOnlyReadyCommodities
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/commodity_ready_test.cpp:155: Failure
+Value of: isReady(rb)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/commodity_ready_test.cpp:160: Failure
+Value of: isReady(ag)
+  Actual: false
+Expected: true
+
+[  FAILED  ] I03CommodityReady.LoaderPublishesOnlyReadyCommodities (1 ms)
+[ RUN      ] I03CommodityReady.MissingRequiredFieldsRejectWholeImport
+[       OK ] I03CommodityReady.MissingRequiredFieldsRejectWholeImport (4 ms)
+[ RUN      ] I03CommodityReady.RulesDerivedCommodityIsReadyOrRejected
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/commodity_ready_test.cpp:196: Failure
+Value of: isReady(ct->getCommInfo())
+  Actual: false
+Expected: true
+
+[  FAILED  ] I03CommodityReady.RulesDerivedCommodityIsReadyOrRejected (4 ms)
+[ RUN      ] I03CommodityReady.ShippedBaseDataIsFullyReady
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/commodity_ready_test.cpp:218: Failure
+Expected equality of these values:
+  total
+    Which is: 70
+  ready
+    Which is: 0
+
+[  FAILED  ] I03CommodityReady.ShippedBaseDataIsFullyReady (5 ms)
+[----------] 8 tests from I03CommodityReady (16 ms total)
+
+[----------] Global test environment tear-down
+[==========] 8 tests from 1 test suite ran. (16 ms total)
+[  PASSED  ] 2 tests.
+[  FAILED  ] 6 tests, listed below:
+[  FAILED  ] I03CommodityReady.ReadyApiIsPresent
+[  FAILED  ] I03CommodityReady.CreateIsDeterministicAndFailsClosed
+[  FAILED  ] I03CommodityReady.ReadyRequiresExplicitTradingModeAndSession
+[  FAILED  ] I03CommodityReady.LoaderPublishesOnlyReadyCommodities
+[  FAILED  ] I03CommodityReady.RulesDerivedCommodityIsReadyOrRejected
+[  FAILED  ] I03CommodityReady.ShippedBaseDataIsFullyReady
+
+ 6 FAILED TESTS

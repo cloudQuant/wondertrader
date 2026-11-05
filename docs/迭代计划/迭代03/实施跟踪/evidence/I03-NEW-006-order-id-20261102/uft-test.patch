@@ -1,0 +1,15 @@
+--- src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp	2026-11-02 13:28:47
++++ /tmp/wt-i03-time-orderid-20261102/snapshot/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp	2026-11-02 14:56:47
+@@ -710,3 +710,12 @@
+ 	//裸代码会让 doEntrust 的代码拆分路径收到缺少交易所的输入。
+ 	adapter.openLong("ag2406", 5000.0, 1.0, 0);
+ }
++
++TEST(q04_trader_entrust, I03TimeFailureMustNotSubmitOrChangeUndone)
++{
++    OrdEnv env;
++    const uint32_t result = env._adapter.openLong(kStdAg, 5000.0, 2.0, 0);
++    EXPECT_EQ(UINT_MAX, result);
++    EXPECT_TRUE(env._api._entrusts.empty());
++    EXPECT_DOUBLE_EQ(0.0, env._adapter.getUndoneQty(kStdAg));
++}

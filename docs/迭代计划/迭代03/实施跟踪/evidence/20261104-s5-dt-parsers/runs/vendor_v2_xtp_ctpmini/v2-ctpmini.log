@@ -1,0 +1,81 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 11 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from V2Adapter
+[ RUN      ] V2Adapter.A_FailedInitBeforeSdkDrainsAndReleasesOwner
+[       OK ] V2Adapter.A_FailedInitBeforeSdkDrainsAndReleasesOwner (33 ms)
+[ RUN      ] V2Adapter.B_RealParserAdapterQuarantinesSdkParser
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:276: Failure
+Value of: adapter->init(kName, cfg, nullptr, bd)
+  Actual: false
+Expected: true
+V2 table must be accepted by the real adapter
+
+[  FAILED  ] V2Adapter.B_RealParserAdapterQuarantinesSdkParser (9 ms)
+[----------] 2 tests from V2Adapter (42 ms total)
+
+[----------] 9 tests from V2
+[ RUN      ] V2.TableShape
+[       OK ] V2.TableShape (0 ms)
+[ RUN      ] V2.NeverInitializedDrainsAndDestroys
+[       OK ] V2.NeverInitializedDrainsAndDestroys (0 ms)
+[ RUN      ] V2.FailedInitBeforeSdkDrainsAndDestroys
+[       OK ] V2.FailedInitBeforeSdkDrainsAndDestroys (0 ms)
+[ RUN      ] V2.SdkCreatedIsReportedUncertainAndQuarantined
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:154: Failure
+Value of: initOnline()
+  Actual: false
+Expected: true
+
+[  FAILED  ] V2.SdkCreatedIsReportedUncertainAndQuarantined (0 ms)
+[ RUN      ] V2.StopInsideSdkCallbackIsNonBlockingAndWaitIsUnsafe
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:176: Failure
+Value of: initOnline()
+  Actual: false
+Expected: true
+
+[  FAILED  ] V2.StopInsideSdkCallbackIsNonBlockingAndWaitIsUnsafe (0 ms)
+[ RUN      ] V2.PendingWhileCallbackInFlight
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:198: Failure
+Value of: initOnline()
+  Actual: false
+Expected: true
+
+[  FAILED  ] V2.PendingWhileCallbackInFlight (6 ms)
+[ RUN      ] V2.PendingWhileHostApiCallInFlight
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:215: Failure
+Value of: initOnline()
+  Actual: false
+Expected: true
+
+[  FAILED  ] V2.PendingWhileHostApiCallInFlight (8 ms)
+[ RUN      ] V2.LegacyReleaseThenV2StaysQuarantined
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:236: Failure
+Value of: initOnline()
+  Actual: false
+Expected: true
+
+[  FAILED  ] V2.LegacyReleaseThenV2StaysQuarantined (79 ms)
+[ RUN      ] V2.IndependentInstances
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:256: Failure
+Value of: initOnline()
+  Actual: false
+Expected: true
+the first instance is unaffected
+
+[  FAILED  ] V2.IndependentInstances (22 ms)
+[----------] 9 tests from V2 (120 ms total)
+
+[----------] Global test environment tear-down
+[==========] 11 tests from 2 test suites ran. (163 ms total)
+[  PASSED  ] 4 tests.
+[  FAILED  ] 7 tests, listed below:
+[  FAILED  ] V2Adapter.B_RealParserAdapterQuarantinesSdkParser
+[  FAILED  ] V2.SdkCreatedIsReportedUncertainAndQuarantined
+[  FAILED  ] V2.StopInsideSdkCallbackIsNonBlockingAndWaitIsUnsafe
+[  FAILED  ] V2.PendingWhileCallbackInFlight
+[  FAILED  ] V2.PendingWhileHostApiCallInFlight
+[  FAILED  ] V2.LegacyReleaseThenV2StaysQuarantined
+[  FAILED  ] V2.IndependentInstances
+
+ 7 FAILED TESTS

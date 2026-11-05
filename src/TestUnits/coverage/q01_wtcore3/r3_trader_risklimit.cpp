@@ -658,12 +658,15 @@ TEST_F(R3TraderTest, cancel_localid_synchronous_api_failure_is_not_cached)
     EXPECT_EQ(1u, api_.n_action_);
     EXPECT_EQ(trader._cancel_time_cache.end(), trader._cancel_time_cache.find(kStdCode));
 
-    // A synchronous API acceptance remains recorded as dispatched.
+    // This adapter has no risk params, so the cancel boundary is 0 and rate
+    // limiting is disabled. User decision 2026-11-04 (card 7 supplement): a
+    // zero boundary keeps no window cache, so even an accepted cancel is not
+    // recorded. Recording/rollback under an enabled window is covered by
+    // src/TestUnits/fixtures/i03_trader_ratelimit_20261103.
     api_.action_ret_ = 0;
     EXPECT_TRUE(trader.cancel(3501));
-    const auto cacheIt = trader._cancel_time_cache.find(kStdCode);
-    ASSERT_NE(trader._cancel_time_cache.end(), cacheIt);
-    EXPECT_EQ(1u, cacheIt->second.size());
+    EXPECT_EQ(2u, api_.n_action_);
+    EXPECT_EQ(trader._cancel_time_cache.end(), trader._cancel_time_cache.find(kStdCode));
     trader.release();
 }
 

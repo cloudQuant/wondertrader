@@ -1,0 +1,47 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/WtRunner/WtRunner.cpp	2026-11-03 21:34:10
++++ src/WtRunner/WtRunner.cpp	2026-11-04 20:28:04
+@@ -459,12 +459,25 @@
+ WtRunner::~WtRunner()
+ {
+ 	if (!shutdown())
++	{
++		// Destroying members while a parser/trader/executor owner may still call back
++		// would be use-after-free. Owners that are merely retained for lack of drain
++		// proof are kept alive by the process entry (see main.cpp), which never
++		// destroys such a runner; reaching here is an unrecoverable teardown failure.
++		WTSLogger::fatal("Runner destroyed with live callback owners (parser owners retained: {}); aborting",
++			parserOwnersRetained());
+ 		std::terminate();
++	}
+ }
+ 
+ bool WtRunner::shutdown()
+ {
+ 	return shutdownRuntime(true);
++}
++
++bool WtRunner::parserOwnersRetained() const
++{
++	return _parser_owners_retained.load(std::memory_order_acquire);
+ }
+ 
+ bool WtRunner::shutdownRuntime(bool stopEngines, bool fromConfigFailure)
+@@ -490,6 +503,7 @@
+ 		return false;
+ 	}
+ 	ScopedBoolReset shutdownGuard(_shutdown_in_progress);
++	_parser_owners_retained.store(false, std::memory_order_release);
+ 	_shutdown_requested.store(true, std::memory_order_release);
+ 	_to_exit.store(true, std::memory_order_release);
+ 	_traders.requestStopSinkNotifications();
+@@ -544,6 +558,10 @@
+ 	if (!stopRequested || !parsersReleased || _parsers.hasQuarantinedAdapters() ||
+ 		!_parsers._adapters.empty() || !_failed_parser_owners.empty())
+ 	{
++		// I03-NEW-045 / card 9a: executors are already quiesced; only parser owners
++		// without callback-drain proof block teardown. They stay quarantined with the
++		// whole borrowed runner graph until process exit (a contract result).
++		_parser_owners_retained.store(true, std::memory_order_release);
+ 		WTSLogger::error("Parser shutdown is incomplete; runner owners are retained for a control-thread retry");
+ 		return false;
+ 	}

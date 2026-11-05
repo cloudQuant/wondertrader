@@ -309,9 +309,8 @@ TEST_F(R121UftMocker, R135ProbeDirectFactory)
 	ASSERT_NE(nullptr, remover);
 	IUftStrategyFact* fact = creator();
 	fprintf(stderr, "PROBE4 fact=%p\n", (void*)fact);
-	void** vt = *(void***)fact;
-	for (int i = 0; i < 8; i++)
-		fprintf(stderr, "PROBE4 vt[%d]=%p\n", i, vt[i]);
+	// I03-NEW-102: the former vt[0..7] dump read past the end of the factory vtable
+	// (ASan global-buffer-overflow); the vtable length is not known here, so it is not printed.
 	fprintf(stderr, "PROBE4 name=%s\n", fact->getName());
 	typedef void (*DelByValue)(IUftStrategyFact*);
 	DelByValue dv = reinterpret_cast<DelByValue>(reinterpret_cast<void*>(remover));

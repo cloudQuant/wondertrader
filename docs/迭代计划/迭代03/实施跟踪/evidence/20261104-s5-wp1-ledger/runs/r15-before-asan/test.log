@@ -1,0 +1,188 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R15CtxTest.*
+[==========] Running 42 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 42 tests from R15CtxTest
+[ RUN      ] R15CtxTest.strategy_pointer_roundtrip
+[       OK ] R15CtxTest.strategy_pointer_roundtrip (48 ms)
+[ RUN      ] R15CtxTest.null_strategy_events_only_touch_base
+[       OK ] R15CtxTest.null_strategy_events_only_touch_base (16 ms)
+[ RUN      ] R15CtxTest.on_init_and_session_callbacks_forward_to_strategy
+[       OK ] R15CtxTest.on_init_and_session_callbacks_forward_to_strategy (0 ms)
+[ RUN      ] R15CtxTest.session_end_forwards_date_then_base_writes_fund_line
+[       OK ] R15CtxTest.session_end_forwards_date_then_base_writes_fund_line (4 ms)
+[ RUN      ] R15CtxTest.on_tick_without_subscription_skips_strategy
+[       OK ] R15CtxTest.on_tick_without_subscription_skips_strategy (0 ms)
+[ RUN      ] R15CtxTest.on_tick_subscribed_forwards_same_pointer
+[       OK ] R15CtxTest.on_tick_subscribed_forwards_same_pointer (0 ms)
+[ RUN      ] R15CtxTest.on_bar_forwards_code_period_times_and_bar
+[       OK ] R15CtxTest.on_bar_forwards_code_period_times_and_bar (2 ms)
+[ RUN      ] R15CtxTest.ordque_orddtl_trans_forward_when_strategy_set
+[       OK ] R15CtxTest.ordque_orddtl_trans_forward_when_strategy_set (0 ms)
+[ RUN      ] R15CtxTest.on_trade_forwards_inner_code_and_order_tag
+[       OK ] R15CtxTest.on_trade_forwards_inner_code_and_order_tag (0 ms)
+[ RUN      ] R15CtxTest.on_order_and_entrust_forward_tag_and_cancel_flag
+[       OK ] R15CtxTest.on_order_and_entrust_forward_tag_and_cancel_flag (0 ms)
+[ RUN      ] R15CtxTest.on_position_forwards_only_to_strategy
+[       OK ] R15CtxTest.on_position_forwards_only_to_strategy (0 ms)
+[ RUN      ] R15CtxTest.channel_events_forward_and_flush_userdata_only_when_dirty
+[       OK ] R15CtxTest.channel_events_forward_and_flush_userdata_only_when_dirty (13 ms)
+[ RUN      ] R15CtxTest.order_tag_default_capacity_preserves_registered_tag
+[       OK ] R15CtxTest.order_tag_default_capacity_preserves_registered_tag (0 ms)
+[ RUN      ] R15CtxTest.order_tag_set_get_erase_with_default_context
+[       OK ] R15CtxTest.order_tag_set_get_erase_with_default_context (0 ms)
+[ RUN      ] R15CtxTest.order_tag_lookup_miss_does_not_match_or_erase_neighbor
+[       OK ] R15CtxTest.order_tag_lookup_miss_does_not_match_or_erase_neighbor (0 ms)
+[ RUN      ] R15CtxTest.order_tags_keep_unordered_ids_and_replace_exact_duplicate
+[       OK ] R15CtxTest.order_tags_keep_unordered_ids_and_replace_exact_duplicate (0 ms)
+[ RUN      ] R15CtxTest.order_tags_do_not_silently_evict_or_truncate
+[       OK ] R15CtxTest.order_tags_do_not_silently_evict_or_truncate (1 ms)
+[ RUN      ] R15CtxTest.registered_order_tag_reaches_callbacks_and_remains_after_terminal_order
+[       OK ] R15CtxTest.registered_order_tag_reaches_callbacks_and_remains_after_terminal_order (0 ms)
+[ RUN      ] R15CtxTest.order_tags_survive_open_close_and_reverse_without_truncation
+[       OK ] R15CtxTest.order_tags_survive_open_close_and_reverse_without_truncation (4 ms)
+[ RUN      ] R15CtxTest.unbound_trader_actions_fail_before_engine_or_mapping_side_effects
+[       OK ] R15CtxTest.unbound_trader_actions_fail_before_engine_or_mapping_side_effects (0 ms)
+[ RUN      ] R15CtxTest.fresh_context_starts_without_a_trader
+[       OK ] R15CtxTest.fresh_context_starts_without_a_trader (0 ms)
+[ RUN      ] R15CtxTest.unbound_trader_reentrant_diagnostic_cannot_submit_actions
+[       OK ] R15CtxTest.unbound_trader_reentrant_diagnostic_cannot_submit_actions (0 ms)
+[ RUN      ] R15CtxTest.bound_trader_still_handles_queries_and_unknown_cancel
+[       OK ] R15CtxTest.bound_trader_still_handles_queries_and_unknown_cancel (0 ms)
+[ RUN      ] R15CtxTest.bound_trader_sends_order_only_to_fake_api
+[       OK ] R15CtxTest.bound_trader_sends_order_only_to_fake_api (1 ms)
+[ RUN      ] R15CtxTest.unbinding_a_previously_bound_trader_rejects_actions
+[       OK ] R15CtxTest.unbinding_a_previously_bound_trader_rejects_actions (0 ms)
+[ RUN      ] R15CtxTest.reentrant_bind_during_unbound_diagnostic_does_not_submit_outer_order
+[       OK ] R15CtxTest.reentrant_bind_during_unbound_diagnostic_does_not_submit_outer_order (0 ms)
+[ RUN      ] R15CtxTest.trader_unbound_during_rule_callback_rejects_outer_order
+[       OK ] R15CtxTest.trader_unbound_during_rule_callback_rejects_outer_order (0 ms)
+[ RUN      ] R15CtxTest.trader_replaced_during_rule_callback_rejects_outer_order
+[       OK ] R15CtxTest.trader_replaced_during_rule_callback_rejects_outer_order (34 ms)
+[ RUN      ] R15CtxTest.trader_unbound_then_rebound_during_rule_callback_rejects_outer_order
+[       OK ] R15CtxTest.trader_unbound_then_rebound_during_rule_callback_rejects_outer_order (0 ms)
+[ RUN      ] R15CtxTest.each_entry_and_exit_rejects_reentrant_unbind_from_rule_lookup
+[       OK ] R15CtxTest.each_entry_and_exit_rejects_reentrant_unbind_from_rule_lookup (88 ms)
+[ RUN      ] R15CtxTest.trader_unbound_during_custom_code_lookup_rejects_outer_order
+[       OK ] R15CtxTest.trader_unbound_during_custom_code_lookup_rejects_outer_order (0 ms)
+[ RUN      ] R15CtxTest.trader_unbound_during_contract_lookup_rejects_outer_buy
+[       OK ] R15CtxTest.trader_unbound_during_contract_lookup_rejects_outer_buy (0 ms)
+[ RUN      ] R15CtxTest.trader_unbound_during_commodity_lookup_rejects_outer_sell
+[       OK ] R15CtxTest.trader_unbound_during_commodity_lookup_rejects_outer_sell (0 ms)
+[ RUN      ] R15CtxTest.trader_unbound_during_sell_position_lookup_rejects_outer_sell
+[       OK ] R15CtxTest.trader_unbound_during_sell_position_lookup_rejects_outer_sell (0 ms)
+[ RUN      ] R15CtxTest.bound_long_only_sell_uses_existing_position_semantics
+[       OK ] R15CtxTest.bound_long_only_sell_uses_existing_position_semantics (0 ms)
+[ RUN      ] R15CtxTest.bound_long_only_sell_keeps_custom_position_mapping
+[       OK ] R15CtxTest.bound_long_only_sell_keeps_custom_position_mapping (0 ms)
+[ RUN      ] R15CtxTest.synchronous_report_sees_tag_registered_before_provider_call
+/tmp/wt-i03-s5-wp1-ledger-run/r15-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1118: Failure
+Expected equality of these values:
+  "sync-tag"
+  stra.last_tag.c_str()
+    Which is: ""
+tag must be registered before the provider call
+
+[  FAILED  ] R15CtxTest.synchronous_report_sees_tag_registered_before_provider_call (46 ms)
+[ RUN      ] R15CtxTest.rejected_reservation_does_not_keep_a_tag
+[       OK ] R15CtxTest.rejected_reservation_does_not_keep_a_tag (49 ms)
+[ RUN      ] R15CtxTest.terminal_tags_retire_in_a_bounded_window_and_live_tags_never_evict
+/tmp/wt-i03-s5-wp1-ledger-run/r15-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1160: Failure
+Expected equality of these values:
+  ""
+  ctx.getOrderTag(first)
+    Which is: "done"
+oldest retired tag is evicted beyond the window
+
+/tmp/wt-i03-s5-wp1-ledger-run/r15-before-asan/overlay/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp:1161: Failure
+Expected equality of these values:
+  ""
+  ctx.getOrderTag(first + 9)
+    Which is: "done"
+
+[  FAILED  ] R15CtxTest.terminal_tags_retire_in_a_bounded_window_and_live_tags_never_evict (392 ms)
+[ RUN      ] R15CtxTest.tag_pointer_survives_reentrant_erase_and_replacement
+=================================================================
+==43047==ERROR: AddressSanitizer: heap-use-after-free on address 0x6070000059d0 at pc 0x00010396f004 bp 0x00016d3a9e30 sp 0x00016d3a9600
+READ of size 3 at 0x6070000059d0 thread T0
+    #0 0x00010396f000 in strlen+0x26c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x17000)
+    #1 0x0001882fdb5c in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__assign_external(char const*)+0x1c (libc++.1.dylib:arm64e+0x20b5c)
+    #2 0x000102b959f0 in (anonymous namespace)::R15MutatingStra::on_order(wtp::IHftStraCtx*, unsigned int, char const*, bool, double, double, double, bool, char const*)+0x150 (test:arm64+0x1001419f0)
+    #3 0x000102a8ad64 in HftStraContext::on_order(unsigned int, char const*, bool, double, double, double, bool)+0x1f4 (test:arm64+0x100036d64)
+    #4 0x000102b7bea4 in R15CtxTest_tag_pointer_survives_reentrant_erase_and_replacement_Test::TestBody()+0x3a8 (test:arm64+0x100127ea4)
+    #5 0x000102bc45d4 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (test:arm64+0x1001705d4)
+    #6 0x000102bc451c in testing::Test::Run()+0xcc (test:arm64+0x10017051c)
+    #7 0x000102bc50fc in testing::TestInfo::Run()+0xd0 (test:arm64+0x1001710fc)
+    #8 0x000102bc5b80 in testing::TestSuite::Run()+0x1c4 (test:arm64+0x100171b80)
+    #9 0x000102bd0fa4 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (test:arm64+0x10017cfa4)
+    #10 0x000102bd0950 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (test:arm64+0x10017c950)
+    #11 0x000102bd08b4 in testing::UnitTest::Run()+0x78 (test:arm64+0x10017c8b4)
+    #12 0x000102bb1cb4 in main+0x40 (test:arm64+0x10015dcb4)
+    #13 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x6070000059d0 is located 0 bytes inside of 72-byte region [0x6070000059d0,0x607000005a18)
+freed by thread T0 here:
+    #0 0x0001039bd4d0 in _ZdlPv+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x654d0)
+    #1 0x000102b8c6f0 in std::__1::__tree<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::__map_value_compare<unsigned int, std::__1::pair<unsigned int const, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::less<unsigned int>>, std::__1::allocator<std::__1::pair<unsigned int const, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>>::erase(std::__1::__tree_const_iterator<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::__tree_node<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, void*>*, long>)+0xac (test:arm64+0x1001386f0)
+    #2 0x000102ba9d28 in std::__1::__function::__func<R15CtxTest_tag_pointer_survives_reentrant_erase_and_replacement_Test::TestBody()::$_0, void (unsigned int)>::operator()(unsigned int&&)+0x148 (test:arm64+0x100155d28)
+    #3 0x000102b959d0 in (anonymous namespace)::R15MutatingStra::on_order(wtp::IHftStraCtx*, unsigned int, char const*, bool, double, double, double, bool, char const*)+0x130 (test:arm64+0x1001419d0)
+    #4 0x000102a8ad64 in HftStraContext::on_order(unsigned int, char const*, bool, double, double, double, bool)+0x1f4 (test:arm64+0x100036d64)
+    #5 0x000102b7bea4 in R15CtxTest_tag_pointer_survives_reentrant_erase_and_replacement_Test::TestBody()+0x3a8 (test:arm64+0x100127ea4)
+    #6 0x000102bc45d4 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (test:arm64+0x1001705d4)
+    #7 0x000102bc451c in testing::Test::Run()+0xcc (test:arm64+0x10017051c)
+    #8 0x000102bc50fc in testing::TestInfo::Run()+0xd0 (test:arm64+0x1001710fc)
+    #9 0x000102bc5b80 in testing::TestSuite::Run()+0x1c4 (test:arm64+0x100171b80)
+    #10 0x000102bd0fa4 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (test:arm64+0x10017cfa4)
+    #11 0x000102bd0950 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (test:arm64+0x10017c950)
+    #12 0x000102bd08b4 in testing::UnitTest::Run()+0x78 (test:arm64+0x10017c8b4)
+    #13 0x000102bb1cb4 in main+0x40 (test:arm64+0x10015dcb4)
+    #14 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+previously allocated by thread T0 here:
+    #0 0x0001039bd0e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x0001882e1060 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*)+0xb0 (libc++.1.dylib:arm64e+0x4060)
+    #2 0x0001882f64bc in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__assign_external(char const*, unsigned long)+0x68 (libc++.1.dylib:arm64e+0x194bc)
+    #3 0x000102b7bdbc in R15CtxTest_tag_pointer_survives_reentrant_erase_and_replacement_Test::TestBody()+0x2c0 (test:arm64+0x100127dbc)
+    #4 0x000102bc45d4 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (test:arm64+0x1001705d4)
+    #5 0x000102bc451c in testing::Test::Run()+0xcc (test:arm64+0x10017051c)
+    #6 0x000102bc50fc in testing::TestInfo::Run()+0xd0 (test:arm64+0x1001710fc)
+    #7 0x000102bc5b80 in testing::TestSuite::Run()+0x1c4 (test:arm64+0x100171b80)
+    #8 0x000102bd0fa4 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (test:arm64+0x10017cfa4)
+    #9 0x000102bd0950 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (test:arm64+0x10017c950)
+    #10 0x000102bd08b4 in testing::UnitTest::Run()+0x78 (test:arm64+0x10017c8b4)
+    #11 0x000102bb1cb4 in main+0x40 (test:arm64+0x10015dcb4)
+    #12 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: heap-use-after-free (libc++.1.dylib:arm64e+0x20b5c) in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__assign_external(char const*)+0x1c
+Shadow bytes around the buggy address:
+  0x607000005700: fd fd fa fa fa fa fd fd fd fd fd fd fd fd fd fa
+  0x607000005780: fa fa fa fa fd fd fd fd fd fd fd fd fd fa fa fa
+  0x607000005800: fa fa fd fd fd fd fd fd fd fd fd fd fa fa fa fa
+  0x607000005880: 00 00 00 00 00 00 00 00 00 00 fa fa fa fa fd fd
+  0x607000005900: fd fd fd fd fd fd fd fa fa fa fa fa 00 00 00 00
+=>0x607000005980: 00 00 00 00 00 fa fa fa fa fa[fd]fd fd fd fd fd
+  0x607000005a00: fd fd fd fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x607000005a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x607000005b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x607000005b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x607000005c00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==43047==ABORTING

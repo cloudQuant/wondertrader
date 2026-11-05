@@ -12,6 +12,7 @@
  */
 #pragma once
 #include <atomic>
+#include <mutex>
 #include <vector>
 #include "../Share/StdUtils.hpp"
 #include "../Includes/FasterDefs.h"
@@ -153,15 +154,35 @@ public:
 	
 	/**
 	 * @brief 启动交易状态监控器
-	 * @details 创建并运行一个后台线程，定期检查各交易时间段的状态并处理状态转换
+	 * @details 重复调用不会创建第二个工作线程；stop 后不能重启本实例。
 	 */
 	void run();
 	
 	/**
 	 * @brief 停止交易状态监控器
-	 * @details 设置停止标志并等待监控线程结束
+	 * @details 外部线程等待监控线程结束；监控线程内仅请求停止，宿主仍须从外部等待并保留依赖。
 	 */
 	void stop();
+
+	// A worker exception stops further monitoring; it is not automatically
+	// retried because writer side effects may already have occurred.
+	bool hasFailed() const
+	{
+		std::lock_guard<std::mutex> lock(_state_mutex);
+		return _worker_failed;
+	}
+
+	// Returns the last recorded value even after a failure, for diagnosis only.
+	// It does not establish that a writer operation completed successfully.
+	bool tryGetRecordedState(const char* sid, SimpleState& result) const
+	{
+		std::lock_guard<std::mutex> lock(_state_mutex);
+		auto it = _map.find(sid);
+		if (it == _map.end())
+			return false;
+		result = it->second->_state;
+		return true;
+	}
 
 	/**
 	 * @brief 检查是否有任意交易时间段处于指定状态
@@ -170,6 +191,9 @@ public:
 	 */
 	inline bool	isAnyInState(SimpleState ss) const
 	{
+		std::lock_guard<std::mutex> lock(_state_mutex);
+		if (_worker_failed)
+			return false;
 		// 遍历所有交易时间段
 		auto it = _map.begin();
 		for (; it != _map.end(); it++)
@@ -190,6 +214,9 @@ public:
 	 */
 	inline bool	isAllInState(SimpleState ss) const
 	{
+		std::lock_guard<std::mutex> lock(_state_mutex);
+		if (_worker_failed)
+			return false;
 		// 遍历所有交易时间段
 		auto it = _map.begin();
 		for (; it != _map.end(); it++)
@@ -212,6 +239,9 @@ public:
 	 */
 	inline bool	isInState(const char* sid, SimpleState ss) const
 	{
+		std::lock_guard<std::mutex> lock(_state_mutex);
+		if (_worker_failed)
+			return false;
 		// 在映射表中查找指定交易时间段
 		auto it = _map.find(sid);
 		// 如果找不到该交易时间段，返回false
@@ -226,20 +256,30 @@ public:
 private:
 	friend struct R154StateMonitorTestAccess;
 	friend struct Q05StateMonitorConfigTestAccess;
+	friend struct I03MonitorDateTestAccess;
 
 	// Takes ownership of one config reference returned by WTSCfgLoader.
 	bool initializeConfig(WTSVariant* config);
+	bool initializeConfig(WTSVariant* config, WTSBaseDataMgr* bdMgr, DataManager* dtMgr);
 
-	// curMin is HHMM; run() supplies wall-clock values and tests supply fixed values.
+	// curMin is HHMM; run() supplies one checked wall-clock snapshot and tests
+	// supply fixed values. An invalid date/time (including date 0) performs no
+	// transition; a session whose offset date cannot be computed is skipped.
 	void advanceOnce(uint32_t curDate, uint32_t curMin);
+	void setState(StateInfo& state, SimpleState value);
 
+	// Protects the map and state values, not concurrent initialization or the
+	// lifetimes of the base-data manager, data manager, and their callbacks.
+	mutable std::mutex _state_mutex;
+	bool _worker_failed = false;
 	StateMap		_map;        ///< 交易状态信息映射表，以交易时间段ID为键存储所有交易时间段的状态信息
 	WTSBaseDataMgr*	_bd_mgr;    ///< 基础数据管理器指针，提供交易时间段信息和交易日历
 	DataManager*	_dt_mgr;    ///< 数据管理器指针，用于处理盘后数据转换
 
 	StdThreadPtr	_thrd;      ///< 监控线程智能指针，用于定期检查状态
 
-	// This flag only signals the worker loop. It does not serialize run/stop
-	// or protect the lifetime of the thread and the monitor's dependencies.
+	// A callback on the worker may request stop; an external owner must still
+	// join it before destroying this monitor or any borrowed dependency.
+	std::mutex _thread_mutex;
 	std::atomic<bool> _stopped;   ///< 停止标志，用于控制监控线程的结束
 };

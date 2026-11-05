@@ -103,6 +103,16 @@ private:
 	std::function<bool()> _shutdown;
 };
 
+// 卡8b=A（迭代03 s5-runners）：local/diff 须带含 default 的 policy（原夹具缺失，.before 见证据）。
+void appendDefaultPolicy(WTSVariant* executer)
+{
+	WTSVariant* policy = WTSVariant::createObject();
+	WTSVariant* def = WTSVariant::createObject();
+	def->append("name", "WtExeFact.WtMinImpactExeUnit");
+	policy->append("default", def, false);
+	executer->append("policy", policy, false);
+}
+
 WTSVariant* makeExecuters()
 {
 	WTSVariant* executers = WTSVariant::createArray();
@@ -112,6 +122,7 @@ WTSVariant* makeExecuters()
 	local->append("name", "local");
 	local->append("trader", "r220_trader");
 	local->append("scale", 1.0);
+	appendDefaultPolicy(local);
 	executers->append(local, false);
 
 	WTSVariant* diff = WTSVariant::createObject();
@@ -120,6 +131,7 @@ WTSVariant* makeExecuters()
 	diff->append("name", "diff");
 	diff->append("trader", "r220_trader");
 	diff->append("scale", 1.0);
+	appendDefaultPolicy(diff);
 	executers->append(diff, false);
 	return executers;
 }

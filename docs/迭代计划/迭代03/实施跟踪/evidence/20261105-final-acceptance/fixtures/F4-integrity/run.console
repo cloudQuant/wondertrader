@@ -1,0 +1,114 @@
+suites to run: 109 (priority first), parallel=2, -j 2
+[20:43:52] hft_factory_quarantine                        pass                8s  green[pass]: run.sh exit 0；current 用例 25 个；历史红控 0 行；基线红控 NOT RUN（套件未自带基线源码，WT_HFT_BASELINE_DIR 未提供）
+[20:44:31] i03_btcore_s5_20261104s5                      pass               48s  green[pass]: green 13 例，非零 0
+[20:45:25] i03_container_ownership_20261103              pass               54s  green[pass]: green 构建/运行：5/5 exit 0；red-baseline[expected-red/red]: check-red(baseline/Includes) 与旧 oracle 对新头：2/2 非零
+[20:45:30] i03_csv_block_type_20261103                   pass                5s  green[pass]: csv_block_check exit 0 (tests=10 failures=0 errors=0)；导出符号 _dump_bars,_dump_bars_v2,_dump_ticks,_dump_ticks_v2
+[20:48:28] i03_ctp_order_identity_20261103               pass              178s  green[pass]: run.sh（TraderCTP/WtCore 生产构建 + i03_ctp_identity + P11 host tag） exit 0
+[20:50:08] i03_dt_parser_host_20261104s5                 pass              100s  plain[pass]: run.sh exit 0；6/6 exit 0；thread[pass]: run.sh thread exit 0；6/6 exit 0
+[20:52:36] i03_card3_dayboundary_20261104                pass              523s  green-plain[pass]: c3_actday_ParserCTP total=9 pass=9 fail=0；c3_actday_ParserCTPMini total=9 pass=9 fail=0；c3_actday_ParserFemas total=9 pass=9 fail=0
+[20:52:46] i03_dualthrust_config_20261103                pass               10s  green[pass]: ctest + 2 组既有用例过滤：ctest=0, existing-0=0, existing-1=0
+[20:57:22] i03_dt_writer_lifecycle_20261104s5            pass              434s  normal[pass]: normal：18 例，异常 0；asan[pass]: asan：18 例，异常 0；tsan[pass]: tsan：18 例，异常 0
+[20:59:09] i03_engine_followup_20261104s5                pass              383s  asan[pass]: asan：5 例，异常 0；tsan[pass]: tsan：5 例，异常 0
+[21:01:22] i03_initext_login_20261104                    pass              133s  fix-plain[pass]: fix-plain exit 0；8/8 exit 0；fix-asan[pass]: fix-asan exit 0；8/8 exit 0；base-plain[expected-red/red]: base(baseline/)-plain：5/8 非零；bas
+[21:06:59] i03_leaks_main_20261104                       pass              336s  femas-normal[pass]: femas-normal 7 例，非零/缺 XML 0；ALL(filter *) exit 0，最后运行 FemasContractFixture.l01014_unconvertible_query_rows_are_forwarded_raw_when_
+[21:08:40] i03_parser_event_contract_20261103            pass              102s  （自带红控无法与当前树组合构建，未形成红绿对照）green[pass]: i03_parser_events exit 0 (tests=13 failures=0 errors=0)；red-events-before[expected-red/red]: red-events-before ex
+[21:09:55] i03_parser_shm_lifecycle_v2                   pass               75s  green[pass]: i03_parser_shm_v2 exit 0 (tests=10 failures=0 errors=0)；i03_parser_shm_legacy exit 0 (tests=19 failures=0 errors=0)；asan[pass]: asan-i03_
+[21:11:41] i03_parser_udp_lifecycle_v2                   pass              105s  green[pass]: i03_parser_udp_v2 exit 0 (tests=8 failures=0 errors=0)；i03_parser_udp_legacy exit 0 (tests=20 failures=0 errors=0)；asan[pass]: asan-i03_p
+[21:13:09] i03_parser_vendor_v2_20261104                 pass               88s  green[pass]: green：10/10 exit 0；red-baseline[expected-red/red]: 基线（baseline/ 自带）v2 与场景红控：42/50 非零
+[21:14:45] i03_parser_xele_lifecycle_v2                  pass               97s  green[pass]: i03_parser_xele_v2 exit 0 (tests=11 failures=0 errors=0)；i03_parser_xele_scenarios exit 0 (tests=5 failures=0 errors=0)；i03_parser_xele_p
+[21:18:49] i03_r42_fundinfo_leak_20261103                pass              243s  （自带红控无法与当前树组合构建，未形成红绿对照）red[red-unbuildable/red]: red run.sh exit 12（基线与当前树组合构建/链接失败，红控未运行）；green[pass]: green 5 用例（ASan/UBSan/LSan）：5/5 exit 0
+[21:19:10] i03_replay_status_20261103                    pass               21s  green[pass]: i03_replay_status exit 0 (tests=16 failures=0 errors=0)
+[21:22:39] i03_riskmon_quiesce_20261104s5                pass              209s  green[pass]: green 3 用例：3/3 exit 0
+[21:24:55] i03_sdk_events_20261103                       pass              135s  normal+asan+tsan[pass]: run.sh exit 0；non-baseline failures: 0；red-baseline[expected-red/red]: baseline（反向应用本目录补丁）11 场景：RED 11、PASS 0；t26-regression[p
+[21:25:02] i03_exec_eager_validation_20261103            pass             1654s  （自带红控无法与当前树组合构建，未形成红绿对照）green[pass]: green：3/3 exit 0；red[red-unbuildable/red]: run.sh exit 1，未生成 exit_codes.txt（构建失败？见 /private/tmp/claude-501/-Users
+[21:26:09] i03_slice_shared_owner_20261103               pass               73s  green-asan[pass]: asan-i03_slice_rdm exit 0 (tests=9 failures=0 errors=0)；asan-i03_slice_servo exit 0 (tests=5 failures=0 errors=0)；asan-i03_slice_rep
+[21:26:30] i03_storage_read_20261104s5                   pass               21s  green[pass]: green exit=0 tests="33" failures="0"
+[21:26:33] i03_storage_multiwriter_20261104              pass               91s  green-asan[pass]: asan-mw_storage exit 0 (tests=6 failures=0 errors=0)；asan-mw_reader exit 0 (tests=2 failures=0 errors=0)；asan-mw_ad exit 0 (tests=9 
+[21:27:31] i03_strategy_plugin_abi_20261104s5            pass               62s  green[pass]: live-green-results.txt 11/11 exit 0；mocker-green-results.txt 5/5 exit 0
+[21:28:06] i03_trader_ratelimit_20261103                 pass               94s  fix-plain[pass]: fix-plain exit 0（tests=24 failures=0）；fix-asan[pass]: fix-asan exit 0（tests=24 failures=0）；fix-tsan[pass]: fix-tsan exit 0（tests=24 f
+[21:29:24] i03_uft_ledger_ctx_concurrency_20261104s5     pass               77s  thread[pass]: run.sh thread exit 0；2/2 exit 0；address,undefined[pass]: run.sh address,undefined exit 0；2/2 exit 0
+[21:30:18] i03_uft_parser_lifecycle_20261104s5           pass               55s  plain[pass]: run.sh exit 0；7/7 exit 0；thread[pass]: run.sh thread exit 0；7/7 exit 0
+[21:30:48] i03_uft_strategy_mgr_v2_20261104s5            pass               29s  green[pass]: run.sh exit 0；4/4 exit 0
+[21:35:09] i03_wp1_identity_gate_20261104                pass              261s  current-asan[pass]: current-asan exit 0（tests=41 failures=0）；current-tsan[pass]: current-tsan exit 0（tests=41 failures=0）；baseline-asan[expected-red/r
+[21:35:33] i03_traders_other_20261104s5                  pass              481s  fix[pass]: run.sh fix exit 0；t4002 7/7，t6009 10/10，r60003 11/11，r60001 4/4，t4003 9/9，r93006 4/4，lane 4/4
+[21:36:10] l04_contract_import                           pass               61s  normal[pass]: run.sh exit 0；sanitize[pass]: run.sh L04_SANITIZE=1 exit 0
+[21:36:16] l04_lmdb_key_bounds                           pass               43s  green[pass]: run.sh（key_bounds ASan + 产品编译 + reader_rejection） exit 0
+[21:36:33] l05_csv_failure_signal                        pass               23s  green+known-red[pass]: run.sh exit 0（green 全部 + KnownRed 子集 exit=1，脚本要求 1）
+[21:36:36] r13_sel_period_contract                       fail                3s  green+baseline-extract[fail]: run.sh exit 1（脚本逐项断言 baseline/current 期望；0 行）
+[21:37:24] p10_first_insert                              pass               68s  normal+tsan[pass]: run_tests.py exit 0：tsan Minute1 0 tsan Minute5 0
+[21:40:22] r23_old_mapping                               pass              178s  green+known-red[pass]: build.sh exit 0；OldViewMustNotExposeRecordsBeyondItsMappedLength=1/期望1，RollbackMustNotTruncateAnotherProcessesAppend=1/期望1，Fail
+[21:40:50] r14_runner_startup_overlap                    pass              254s  normal+asan+tsan[pass]: run.sh exit 0；36/36 exit 0
+[21:49:50] r23_retry_wait                                pass              568s  green+baseline[pass]: run_tests.py exit 0（baseline shutdown 期望 5，其余 0）：tsan shutdown 0 expected 0 tsan normal 0 expected 0
+[21:50:44] t26_fees_atomic                               pass              594s  normal+asan+baselines[pass]: run.sh exit 0；baseline response_error old-failure-observed 0 | baseline empty_terminal old-failure-observed -6 | baseline
+[21:51:46] cta_factory_quarantine                        pass               62s  green+head-red[pass]: run.sh exit 0；current 17 例；HEAD 红控 6 例（非零 6）
+[21:53:26] ctpm_empty_module_path                        pass              100s  green[pass]: run.py（ParserCTPMini/TraderCTPMini empty/valid/absolute + 控制用例） exit 0
+[21:54:05] ctpmini_api_init                              pass               39s  init[pass]: run.py 6 模式 exit 0；unload[pass]: run_unload.py 2 模式 exit 0
+[21:54:35] ctpopt_empty_module_path                      pass               30s  green[pass]: run.py（ParserCTPOpt/TraderCTPOpt empty/absolute/valid） exit 0
+[21:55:12] ctpopt_time_snapshot                          pass               37s  green[pass]: green 27 模式，非零 0 
+[21:55:12] femas_insert_return                           not-applicable      0s  目录只有 insert_return_test.cpp，无 README/脚本/CMake，CoverageTests 也未编入；仓库内无运行命令（docs 中仅出现在快照哈希清单）
+[21:55:52] huax_module_path                              pass               39s  green[pass]: build_and_run.py（ParserHuaX/TraderHuaX 当前 + 去掉路径守卫的对照） exit 0
+[21:56:20] t26_request_completion                        fail              390s  green+known-red[fail]: run.sh exit 1；fee PASS 行 150，query PASS 行 51，baseline known-red 行 0
+[21:58:08] i03_bar_fee_provenance_20261103               pass              108s  green[pass]: i03_bar_fee_provenance exit 0 (tests=13 failures=0 errors=0)
+[21:58:19] i03_backtest_fee_consumer_20261103            pass              147s  green[pass]: run.sh（WtBtCore 构建 + fee_consumer_test + p03 选定用例） exit 0
+[21:58:33] i03_config_embedded_nul_20261103              pass               14s  green[pass]: i03_config_nul exit 0 (tests=17 failures=0 errors=0)
+[22:00:08] i03_csv_status_20261103                       pass               95s  green[pass]: csv_status exit 0 (tests=14 failures=0 errors=0)；导出符号 _dump_bars,_dump_bars_v2,_dump_ticks,_dump_ticks_v2
+[22:00:15] i03_date_mapping_20261103                     pass                7s  green[pass]: i03_date_mapping exit 0 (tests=5 failures=0 errors=0)
+[22:03:08] i03_date_mapping_20261104s5                   pass              173s  green[pass]: 当前目标：6/6 exit 0
+[22:03:15] i03_fee_consumer_pipeline                     pass                7s  green[pass]: run.py exit 0（卡13d 四例逐进程）：[('UnmigratedExportedContractKeysAreAnObservableMissingFee', 0), ('VersionedContractVolumeFeeIsUsedForThePhysic
+[22:03:24] i03_fee_context_20261103                      pass                9s  green[pass]: run.sh normal+ubsan（FeeContext.* + FeeScheduleCandidate.*） exit 0
+[22:04:02] i03_fee_engine_gate                           pass               39s  green[pass]: run.sh（I03FeeEngineGate.* + R130EngineFee.*） exit 0
+[22:04:32] i03_commodity_ready_20261103                  pass              384s  red[expected-red/red]: red（baseline/ 四文件）ready/mocker：2/2 非零；green[pass]: green ready/mocker：2/2 exit 0；regression(info)[pass/info]: 相关回归（README 记 l03
+[22:04:33] i03_frequency_20261103                        fail                1s  green[fail]: run.py（抽取的生产请求方法 + 本地 fake） exit 1
+[22:04:56] i03_hft_fee_pipeline                          expected-red       24s  control[pass]: 控制用例 R71HftTest.TradeAccountingAndDynProfitExtremes 通过；fee-probes(known-red)[expected-red/demo]: README：四项按目标行为编写的红控当前应失败（现存缺陷）；FAILED 
+[22:05:09] i03_hft_uft_fee_commit_20261103               pass               12s  green[pass]: check exit 0 (tests=23 failures=0 errors=0)
+[22:05:22] i03_monitor_date_20261103                     pass               13s  green[pass]: monitor_date exit 0 (tests=8 failures=0 errors=0)；q05_monitor_control exit 0 (tests=8 failures=0 errors=0)
+[22:05:36] i03_parser_lifecycle_v2                       pass               14s  green[pass]: i03_parser_v2 exit 0 (tests=9 failures=0 errors=0)
+[22:07:00] i03_porter_replay_status_20261103             pass               83s  green[pass]: run.sh（WtBtPorter 构建 + 7 模式 + launch-failure 注入） exit 0
+[22:11:17] i03_r15_hft_tags_20261104s5                   pass              257s  current-asan[pass]: current-asan exit 0（tests=44 failures=0）；current-tsan[pass]: current-tsan exit 0（tests=44 failures=0）
+[22:12:21] i03_replay_fee_identity_20261103              pass               64s  green[pass]: i03_replay_fee_identity exit 0 (tests=13 failures=0 errors=0)
+[22:14:38] i03_replayer_date_range_20261103              pass              137s  green[pass]: i03_replayer_date_range exit 0 (tests=24 failures=0 errors=0)
+[22:17:18] i03_report_quarantine_20261103                pass              160s  green[pass]: run.sh（I03Quarantine.*，UBSan） exit 0
+[22:20:19] i03_fractional_targets_20261103               pass              974s  green[pass]: run.sh exit 0（tests=44 failures=0 errors=0，fractional+groups 合并过滤）
+[22:23:20] i03_resampled_fee_provenance_20261103         pass              362s  green[pass]: i03_resampled_fee_provenance exit 0 (tests=21 failures=0 errors=0)
+[22:23:40] i03_runner_quarantine_exit_20261104s5         pass               20s  cta[pass]: cta：进程退出码 0，retained 诊断 1 行 （期望非 134/SIGABRT、未超时、诊断≥1）；uft[pass]: uft：进程退出码 0，retained 诊断 1 行 （期望非 134/SIGABRT、未超时、诊断≥1）
+[22:25:44] i03_servo_date_20261103                       pass              124s  green[pass]: servo_date exit 0 (tests=8 failures=0 errors=0)
+[22:25:58] i03_session_contract_20261103                 pass               14s  green[pass]: i03_session_contract exit 0 (tests=49 failures=0 errors=0)
+[22:26:23] i03_strategy_id_20261103                      pass               25s  green[pass]: run.sh（Hft/Sel 策略 ID 检查） exit 0
+[22:26:38] i03_trader_oes_query_s4                       pass               14s  green[pass]: run.sh exit 0；4/4 exit 0
+[22:28:15] i03_runner_parser_drain_20261103              pass              473s  green[pass]: run.sh exit 0（tests=5 failures=0）
+[22:28:24] i03_wp1_ledger_20261104s5                     pass              106s  green[pass]: run_r202_003.sh 当前 TraderAdapter exit 0（tests=2 failures=0）
+[22:28:31] lmdb_bar_key_v2                               pass                7s  green[pass]: run.sh（normal + sanitized key test） exit 0
+[22:28:58] l03_commodity_state                           pass               43s  probe[pass]: run.sh（probe normal+sanitizer） exit 0；config[pass]: run-config.sh（L03CommodityReady.*） exit 0；config-sanitize[pass]: run-config.sh L03_SA
+[22:29:22] lmdb_bar_migration_perf                       pass               23s  green[pass]: run.sh（cache guard normal+asan 5 模式） exit 0
+[22:29:22] module_helper_odr                             not-applicable      0s  源码由 coverage CMake 编入 CoverageTests_modulehelper_odr（WT_COV_MODULE_HELPER_ODR_DIR / add_subdirectory windows），随 CoverageTests 回归运行
+[22:29:27] module_helper_posix                           pass                5s  green[pass]: run.sh（fake dladdr 6 模式 + real dladdr） exit 0
+[22:29:30] n05_timeout_guard_race                        expected-red        3s  sequential-control[pass]: sequential 控制 exit 0；race-counterexample[expected-red/demo]: 并发反例 exit 1（README：当前实现已知反例）
+[22:29:30] new034_monitor                                not-applicable      0s  目录只有 monitor_lifecycle.cpp，无 README/脚本/CMake，CoverageTests 未编入；无可执行入口
+[22:29:30] owner_delivery_result                         not-applicable      0s  空目录（0 个文件），无入口
+[22:29:43] p04_cross_session_clock                       fail               13s  green+known-red[fail]: run.py exit 1；verify.py exit 1（green + known-red 期望）：green exit 1 expected 0
+[22:29:56] parser_module_dir                             pass               13s  green[pass]: build.py（ParserXTP/ParserFemas after empty/valid/absolute） exit 0
+[22:30:31] r103_dispatched_snapshot                      pass               35s  asan[pass]: run.sh asan exit 0；tsan[pass]: run.sh tsan exit 0
+[22:30:45] lmdb_bar_migration                            pass              133s  capability[pass]: run_capability.sh exit 0；14/14 exit 0；controlled-legacy[pass]: run_controlled_regression.sh exit 0；normal 30/30，asan 30/30；legacy-ru
+[22:30:58] r13_real_schedule                             fail               26s  controlled-probe[fail/demo]: run.py exit 1，观测与脚本期望不符：AssertionError
+[22:31:40] r15_tag_snapshot                              pass               55s  asan[pass]: run.sh asan exit 0；tsan[pass]: run.sh tsan exit 0
+[22:31:43] r202_nextday                                  pass               44s  green[pass]: R202NextDay/R202Reentry 及收盘正控在卡3/9d 合同下全部通过：R202NextDay.Cta 0，R202NextDay.Sel 0，R202NextDay.Hft 0，R202Reentry.Cta 0，R202Reentry.Sel 0，R20
+[22:31:43] r22_monitor_lifecycle                         not-applicable      0s  目录只有 probe.cpp，无 README/脚本，无运行入口
+[22:31:43] r22_monitor_owner                             not-applicable      0s  目录只有两个 probe 源码，无 README/脚本，无运行入口
+[22:32:09] r22_timezone                                  pass               26s  green+red-baseline[pass]: run.sh exit 0；30 项，MISMATCH 0（含 baseline-tsan-race 红控）
+[22:32:11] r3_cancel_batch_cache                         fail                2s  normal[fail]: run.py（single/failure 期望 0，batch 期望 1 已内置） exit 1；sanitize[fail]: run.py R3_SANITIZE=1（single/failure 期望 0，batch 期望 1 已内置） exit 1
+[22:32:12] r3_split_reject                               fail                1s  green[fail]: run.py exit 1
+[22:32:12] r60_yd                                        not-applicable      0s  YD fixture 动态库源码由 coverage CMake 编入 CoverageTests_t_TraderYD（WT_COV_R60_YD_FIXTURE_DIR），无独立入口
+[22:32:12] r68_index_factory                             not-applicable      0s  由 coverage CMake add_subdirectory 编入 CoverageTests_dtcore；README 命令只是运行该 CoverageTests 目标的过滤集
+[22:32:12] r78_no_parser                                 not-applicable      0s  no_parser.cpp 由 coverage CMake 编为 R78NoParserFixture 供 CoverageTests 加载，无独立入口
+[22:32:12] r7_twap_sell_sign                             blocked-env         0s  README 复现步骤依赖 `git archive ccaad010 src` 快照、docs/…/R7-002-total-times-ccaad010/CMakeLists.ubsan.patch 与前一节工作目录，且各节红控属于当时版本；套件无脚本入口，冻结树不含 docs
+[22:32:27] sel_factory_quarantine                        pass               15s  green[pass]: run.sh exit 0；current 用例 18 个；历史红控 1 行
+[22:32:27] t1_ctpopt_init                                not-applicable      0s  missing_symbol.cpp 由 coverage CMake 编入（WT_COV_T1_CTPOPT_FIXTURE_DIR），无独立入口
+[22:32:27] t1_xtp                                        not-applicable      0s  两个 fixture 源码由 coverage CMake 编入 CoverageTests_t_ParserXTP（WT_COV_T1_XTP_FIXTURE_DIR），无独立入口
+[22:32:27] t4_ctpopt_loader                              not-applicable      0s  两个 fixture 源码由 coverage CMake 编入（WT_COV_T4_CTP_OPT_FIXTURE_DIR），无独立入口
+[22:32:27] t4_femas                                      not-applicable      0s  两个 fixture 源码由 coverage CMake 编入（WT_COV_T4_FEMAS_FIXTURE_DIR），无独立入口
+[22:32:52] r20_zstd_ubsan                                pass               72s  green[pass]: run.sh exit 0（ASan+UBSan 与普通 direct/wrapper/sweep）：direct normal=0 sanitized=0 sanitizer_reports=0 roundtrip_pass=1，wrapper normal=0 sani
+[22:32:57] trader_module_path                            pass               30s  green[pass]: build_and_run.py exit 0
+[22:32:57] i03_diff_batch_atomic_20261103                pass           (derived from i03_fractional_targets_20261103) 无独立入口：README 规定经 i03_fractional_targets_20261103/run.sh 合并编译运行；本目录 filter.txt 匹配 17 例，失败 0；来源套件结论 pass
+[22:32:57] i03_exec_units_20261104s5                     pass           (derived from i03_wp1_ledger_20261104s5) 本目录只有测试源码，无独立入口；由 i03_wp1_ledger_20261104s5/run_r202_003.sh 编译运行：green[pass]: run_r202_003.sh 当前 TraderAdapter exit 0（te
+[22:32:57] i03_execution_groups_20261103                 pass           (derived from i03_fractional_targets_20261103) 无独立入口：README 规定经 i03_fractional_targets_20261103/run.sh 合并编译运行；本目录 filter.txt 匹配 18 例，失败 0；来源套件结论 pass
+[22:32:57] i03_fee_schedule_candidate                    pass           (derived from i03_fee_context_20261103) 本目录 fee_schedule_test.cpp 无独立入口，由 i03_fee_context_20261103/run.sh 与 FeeContext 一起编译运行（FeeScheduleCandidate.*）：green[pass

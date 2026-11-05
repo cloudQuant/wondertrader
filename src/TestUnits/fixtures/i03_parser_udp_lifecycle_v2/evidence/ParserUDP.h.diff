@@ -1,0 +1,89 @@
+diff --git a/src/TestUnits/fixtures/i03_parser_udp_lifecycle_v2/baseline/ParserUDP.h b/src/ParserUDP/ParserUDP.h
+index 55d65084..7e9d1ae2 100644
+--- a/src/TestUnits/fixtures/i03_parser_udp_lifecycle_v2/baseline/ParserUDP.h
++++ b/src/ParserUDP/ParserUDP.h
+@@ -9,10 +9,12 @@
+  */
+ #pragma once
+ #include "../Includes/IParserApi.h"
++#include "../Includes/IParserLifecycleV2.h"
+ #include "../Share/StdUtils.hpp"
+ 
+ #include <queue>
+ #include <atomic>
++#include <future>
+ #include <functional>
+ #include <memory>
+ #include <mutex>
+@@ -45,6 +47,10 @@ public:
+ 	// called from an io/SPI callback thread; the owner must retain this parser
+ 	// and retry from another thread before destroying it.
+ 	bool shutdown();
++	WtParserLifecycleV2Status requestStopV2() noexcept;
++	WtParserLifecycleV2Status canWaitV2() const noexcept;
++	WtParserLifecycleV2Status waitDrainedV2(uint32_t timeoutMs) noexcept;
++	bool prepareDestroyV2() noexcept;
+ 
+ 	virtual bool connect() override;
+ 
+@@ -66,6 +72,27 @@ private:
+ 		ParserUDP* parser;
+ 		CallbackFrame* previous;
+ 	};
++	struct ApiFrame { ParserUDP* parser; ApiFrame* previous; };
++	class ApiGuard
++	{
++	public:
++		explicit ApiGuard(ParserUDP* parser, bool allowClosed = false) noexcept;
++		~ApiGuard();
++		explicit operator bool() const noexcept { return _entered; }
++	private:
++		ParserUDP* _parser;
++		ApiFrame _frame;
++		bool _entered;
++	};
++	struct WorkerExitProof
++	{
++		std::promise<bool> promise;
++		std::shared_future<bool> exited;
++		WorkerExitProof() : exited(promise.get_future().share()) {}
++	};
++	bool is_api_thread() const noexcept;
++	void armStopTimer();
++	void stopOnWorkerV2();
+ 
+ 	template<typename Fn>
+ 	void with_spi(Fn&& fn)
+@@ -133,6 +160,7 @@ private:
+ 	ip::udp::endpoint	_broad_ep;
+ 	ip::udp::endpoint	_server_ep;
+ 	io_context			_io_service;
++	boost::asio::steady_timer _stop_timer;
+ 
+ 	boost::asio::strand<boost::asio::io_context::executor_type>	_strand;
+ 
+@@ -156,9 +184,24 @@ private:
+ 	std::atomic<bool>	_stop_requested;
+ 	// True only while the io_context worker is expected to process completions.
+ 	std::atomic<bool>	_worker_running{ false };
++	static constexpr uint64_t API_CLOSED = UINT64_C(1) << 63;
++	static constexpr uint64_t API_V2_STOP = UINT64_C(1) << 62;
++	static constexpr uint64_t API_COUNT_MASK = API_V2_STOP - 1;
++	std::atomic<uint64_t> _api_state{0};
++	std::atomic<bool> _v2_stop{false};
++	std::atomic<bool> _v2_drained{false};
++	std::atomic<bool> _v2_joined{false};
++	std::atomic<bool> _worker_created{false};
++	std::atomic<bool> _stop_post_failed{false};
++	std::atomic<bool> _stop_completed{false};
++	bool _initialized_once = false;
++	WorkerExitProof _worker_exit;
++	using WorkGuard = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
++	std::unique_ptr<WorkGuard> _work_guard;
+ 	std::recursive_mutex _mtx_io;
+ 	std::mutex			_mtx_lifecycle;
+ 	inline static thread_local CallbackFrame* _callback_stack_top = nullptr;
++	inline static thread_local ApiFrame* _api_stack_top = nullptr;
+ 
+ 	CodeSet					_set_subs;
+ 

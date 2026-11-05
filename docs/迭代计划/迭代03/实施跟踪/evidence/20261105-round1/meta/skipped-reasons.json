@@ -1,0 +1,87 @@
+[
+ {
+  "binary": "CoverageTests",
+  "test": "R22PorterCapiTest.ConfiguredStartChildChecksStateMonitor",
+  "reason": "internal child process test"
+ },
+ {
+  "binary": "CoverageTests_btcore",
+  "test": "P04ReplayCsvTest.failedBinaryRawBarsLoadCanBeRetriedSafely",
+  "reason": "requires libWtDataStorage.dylib in build-cov/build_x64/{Debug,Release}/bin or build_x64/{Debug,Release}/bin"
+ },
+ {
+  "binary": "CoverageTests_btporter",
+  "test": "R66BtPorterNotifier.FailedConfigRetryAndDuplicateConfigOwnOneServer",
+  "reason": "set WT_R66_FAKE_MQ_DIR to the isolated R160 fake WtMsgQue module directory"
+ },
+ {
+  "binary": "CoverageTests_btporter",
+  "test": "S5R20RunnerNotifierRelease.AsyncReplayReleaseJoinsThenDestroysOnce",
+  "reason": "set WT_R66_FAKE_MQ_DIR to the isolated R160 fake WtMsgQue module directory"
+ },
+ {
+  "binary": "CoverageTests_btporter",
+  "test": "S5R20RunnerNotifierRelease.IdleReleaseDestroysServerOnceBeforeRunnerDestruction",
+  "reason": "set WT_R66_FAKE_MQ_DIR to the isolated R160 fake WtMsgQue module directory"
+ },
+ {
+  "binary": "CoverageTests_btporter",
+  "test": "S5R20RunnerNotifierRelease.SyncReplayThenReleaseDestroysOnceAndStopsPublishing",
+  "reason": "set WT_R66_FAKE_MQ_DIR to the isolated R160 fake WtMsgQue module directory"
+ },
+ {
+  "binary": "CoverageTests_dtcore",
+  "test": "R44ParserAdapterEdgesTest.RepeatedInitExtNeedsContract",
+  "reason": "Repeated initExt semantics are unspecified; define the ownership and replacement contract before enabling this scenario."
+ },
+ {
+  "binary": "CoverageTests_m_WtRunner",
+  "test": "R42HftTraderBinding.KnownTraderStillPublishesBoundContext",
+  "reason": "R42_HFT_PLUGIN must name the independently built HFT factory"
+ },
+ {
+  "binary": "CoverageTests_m_WtRunner",
+  "test": "R42HftTraderBinding.LaterUnknownTraderDoesNotPublishEarlierContext",
+  "reason": "R42_HFT_PLUGIN must name the independently built HFT factory"
+ },
+ {
+  "binary": "CoverageTests_mqshare",
+  "test": "R19ExecChild.protocol",
+  "reason": "internal exec-child protocol test; launched only by its parent test"
+ },
+ {
+  "binary": "CoverageTests_porter",
+  "test": "R143PorterBars.cta_get_bars_returns_loaded_blocks",
+  "reason": "libWtDataStorage.dylib not found in this build"
+ },
+ {
+  "binary": "CoverageTests_porter",
+  "test": "R143PorterBars.hft_get_bars_returns_loaded_blocks",
+  "reason": "libWtDataStorage.dylib not found in this build"
+ },
+ {
+  "binary": "CoverageTests_porter",
+  "test": "R143PorterBars.sel_get_bars_returns_loaded_blocks",
+  "reason": "libWtDataStorage.dylib not found in this build"
+ },
+ {
+  "binary": "CoverageTests_wtcore",
+  "test": "R15MgrTest.cta_strategy_mgr_scan_free_library_path",
+  "reason": "libWtIndexFactory.dylib not present on this machine"
+ },
+ {
+  "binary": "CoverageTests_wtcore",
+  "test": "R15MgrTest.executer_factory_free_library_when_creator_symbol_absent",
+  "reason": "libWtIndexFactory.dylib not present on this machine"
+ },
+ {
+  "binary": "CoverageTests_wtcore",
+  "test": "R15MgrTest.hft_strategy_mgr_scan_free_library_path",
+  "reason": "libWtIndexFactory.dylib not present on this machine"
+ },
+ {
+  "binary": "CoverageTests_wtcore",
+  "test": "UnresolvedReportJournal.SymlinkAndVisiblePathReplacementFailClosed",
+  "reason": "policy (iteration 03, BUG-I02-NEW-137): creating a symbolic link is not allowed"
+ }
+]

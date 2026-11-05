@@ -1,0 +1,73 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.L03MissingOrInvalidActionDateAndMissingSessionAreRejected
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.L03MissingOrInvalidActionDateAndMissingSessionAreRejected
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:78: Failure
+Value of: _writer->writeTick(tick, 0)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:78: Failure
+Value of: _writer->writeTick(tick, 0)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:82: Failure
+Expected equality of these values:
+  _sink->bcast_tick()
+    Which is: 2
+  0u
+    Which is: 0
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:83: Failure
+Expected equality of these values:
+  read_head(path_of("cache_tick.dmb"))._size
+    Which is: 1
+  0u
+    Which is: 0
+
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==71756==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000010 (pc 0x0001045954bc bp 0x00016b8f2950 sp 0x00016b8f2920 T0)
+==71756==The signal is caused by a READ memory access.
+==71756==Hint: address points to the zero page.
+    #0 0x0001045954bc in std::__1::vector<wtp::WTSSessionInfo::_TradingSection, std::__1::allocator<wtp::WTSSessionInfo::_TradingSection>>::empty[abi:nqe220108]() const vector.h:400
+    #1 0x00010451d918 in wtp::WTSSessionInfo::timeToMinutes(unsigned int, bool) WTSSessionInfo.hpp:223
+    #2 0x00010451b21c in WtDataWriterAD::updateBarCache(wtp::WTSContractInfo*, wtp::WTSTickData*) WtDataWriterAD.cpp:882
+    #3 0x0001045b027c in WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0::operator()() const WtDataWriterAD.cpp:706
+    #4 0x0001045afed0 in std::__1::__invoke_result_impl<void, WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&>::type std::__1::__invoke[abi:nqe220108]<WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&>(WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&) invoke.h:90
+    #5 0x0001045afeac in void std::__1::__invoke_void_return_wrapper<void, true>::__call[abi:nqe220108]<WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&>(WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&) invoke.h:350
+    #6 0x0001045afe88 in void std::__1::__invoke_r[abi:nqe220108]<void, WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&>(WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0&) invoke.h:356
+    #7 0x0001045af798 in std::__1::__function::__func<WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)::$_0, void ()>::operator()() function.h:172
+    #8 0x0001045a6e38 in std::__1::__function::__value_func<void ()>::operator()[abi:nqe220108]() const function.h:273
+    #9 0x0001045148c4 in std::__1::function<void ()>::operator()() const function.h:754
+    #10 0x000104514584 in WtDataWriterAD::pushTask(std::__1::function<void ()>) WtDataWriterAD.cpp:729
+    #11 0x0001045141e0 in WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int) WtDataWriterAD.cpp:682
+    #12 0x00010460ab8c in (anonymous namespace)::R4WriterADTest_L03MissingOrInvalidActionDateAndMissingSessionAreRejected_Test::TestBody() l03_ad_writer_date_test.cpp:95
+    #13 0x000104b922a0 in void testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2664
+    #14 0x000104b0ad84 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2700
+    #15 0x000104b0ab34 in testing::Test::Run() gtest.cc:2739
+    #16 0x000104b0cea4 in testing::TestInfo::Run() gtest.cc:2885
+    #17 0x000104b0f894 in testing::TestSuite::Run() gtest.cc:3063
+    #18 0x000104b32e38 in testing::internal::UnitTestImpl::RunAllTests() gtest.cc:6054
+    #19 0x000104bad90c in bool testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2664
+    #20 0x000104b31a84 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2700
+    #21 0x000104b316b0 in testing::UnitTest::Run() gtest.cc:5594
+    #22 0x000104bc45bc in RUN_ALL_TESTS() gtest.h:2334
+    #23 0x000104bc4524 in main gtest_main.cc:64
+    #24 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+==71756==Register values:
+ x[0] = 0x0000000000000010   x[1] = 0x00000000000003a2   x[2] = 0x0000000000000000   x[3] = 0x000000802d73e540  
+ x[4] = 0x000000802d73e540   x[5] = 0x000000000000000c   x[6] = 0x0000000000000001   x[7] = 0x0000000000000001  
+ x[8] = 0x0000008000020000   x[9] = 0x0000000000000010  x[10] = 0x000000802d73e52c  x[11] = 0x0000000104c19a55  
+x[12] = 0x0000000041b58ab3  x[13] = 0x0000000104c198c5  x[14] = 0x0000000041b58ab3  x[15] = 0x000010800001ffff  
+x[16] = 0x000000010451d7e4  x[17] = 0x00000001f5b8d540  x[18] = 0x0000000000000000  x[19] = 0x000000016b8f29c0  
+x[20] = 0x00000001f4298100  x[21] = 0x000000016b8f6de8  x[22] = 0xfffffffffffffff0  x[23] = 0x00000001f454f760  
+x[24] = 0x0000000000000001  x[25] = 0x000000016b8f6f50  x[26] = 0x00000001f454f770  x[27] = 0x0000000000000000  
+x[28] = 0x0000000000000000     fp = 0x000000016b8f2950     lr = 0x000000010451d91c     sp = 0x000000016b8f2920  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV vector.h:400 in std::__1::vector<wtp::WTSSessionInfo::_TradingSection, std::__1::allocator<wtp::WTSSessionInfo::_TradingSection>>::empty[abi:nqe220108]() const
+==71756==ABORTING

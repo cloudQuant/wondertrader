@@ -1,0 +1,51 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R59Exec.set_trader_forwards_orders_only_while_channel_ready
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R59Exec
+[ RUN      ] R59Exec.set_trader_forwards_orders_only_while_channel_ready
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/r59_exec_autoclear_test.cpp:596: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  arbi.buy(kStdCode, 7000.0, 1.0).size()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/r59_exec_autoclear_test.cpp:597: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  arbi.sell(kStdCode, 7000.0, 1.0).size()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/r59_exec_autoclear_test.cpp:598: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  diff.buy(kStdCode, 7000.0, 1.0).size()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/r59_exec_autoclear_test.cpp:599: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  diff.sell(kStdCode, 7000.0, 1.0).size()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/r59_exec_autoclear_test.cpp:600: Failure
+Expected equality of these values:
+  6u
+    Which is: 6
+  api2_.n_insert_
+    Which is: 2
+
+[  FAILED  ] R59Exec.set_trader_forwards_orders_only_while_channel_ready (7 ms)
+[----------] 1 test from R59Exec (7 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (8 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R59Exec.set_trader_forwards_orders_only_while_channel_ready
+
+ 1 FAILED TEST

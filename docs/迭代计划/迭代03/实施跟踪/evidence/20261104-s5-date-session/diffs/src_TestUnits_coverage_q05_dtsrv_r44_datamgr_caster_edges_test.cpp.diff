@@ -1,0 +1,56 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp	2026-11-01 15:00:16
++++ src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp	2026-11-04 20:56:12
+@@ -127,9 +127,14 @@
+ 			})JSON");
+ 		r44_write_file(_dir / "state.json",
+ 			R"JSON({"DAY0": {"inittime": 900, "closetime": 1510, "proctime": 1530}})JSON");
++		// I03-NEW-043（卡 1=A+C）：StateMonitor 初始化对有关联品种的会话使用 checked
++		// 日期映射，品种引用的节假日模板（CHINA）必须已加载，否则 MissingCalendar、
++		// 初始化失败。原夹具未加载节假日，SetUp 因此失败；此处补空节假日模板。
++		r44_write_file(_dir / "holidays.json", R"JSON({"CHINA": []})JSON");
+ 
+ 		ASSERT_TRUE(_bdMgr.loadSessions((_dir / "sessions.json").string().c_str()));
+ 		ASSERT_TRUE(_bdMgr.loadCommodities((_dir / "commodities.json").string().c_str()));
++		ASSERT_TRUE(_bdMgr.loadHolidays((_dir / "holidays.json").string().c_str()));
+ 		ASSERT_TRUE(_mon.initialize((_dir / "state.json").string().c_str(), &_bdMgr, nullptr));
+ 
+ 		r44_write_file(_dir / "dm.json", R"JSON({})JSON");
+@@ -156,8 +161,11 @@
+ 	R44ModuleDirGuard _moduleDirGuard;
+ };
+ 
+-// DataManager.cpp:73-104 —— 默认模块名对应的文件存在但不是 Mach-O，dlopen 失败后 return false；
+-// _bd_mgr/_state_mon 已在函数头部写入，可继续委托
++// 迭代03 卡9（dt-writer 包，2026-11-04）：init 失败（模块/工厂未就绪）回滚为未初始化态，
++// 借用的基础数据/状态机不在失败态对外发布（9c 拒绝/保留原实例的对偶：失败不留部分状态，可重试；
++// 同 WP2“失败对象不得进入运行态”、13a 先准备后发布）。旧断言“函数头部已赋值”来自迭代01覆盖计划
++// 的旧实现，与该合同冲突，按 BUG-I02-NEW-056 归因更新；原文件见证据 before/*.before。
++// 默认模块名对应的文件存在但不是 Mach-O，dlopen 失败后 return false，且不登记借用依赖。
+ TEST_F(R44DataManagerEdgesTest, InitFailsOnExistingButCorruptDefaultModuleFile)
+ {
+ 	r44_write_file(_bin / "libWtDataStorage.dylib", "this is not a Mach-O library");
+@@ -167,9 +175,10 @@
+ 	DataManager dm;
+ 	EXPECT_FALSE(dm.init(params, &_bdMgr, &_mon));
+ 
+-	EXPECT_EQ(dm.getBDMgr(), static_cast<IBaseDataMgr*>(&_bdMgr));
+-	// 状态机里 DAY0 仍是 SS_ORIGINAL，不是 SS_RECEIVING
+-	EXPECT_FALSE(dm.canSessionReceive("DAY0"));
++	EXPECT_EQ(dm.writerLifecycleState(), DataManager::WLS_None);	// 回滚，可重试
++	EXPECT_EQ(dm.getBDMgr(), nullptr);
++	// 未登记状态机 -> 按未初始化（全天候）语义；DAY0 的 SS_ORIGINAL 不再被失败实例引用
++	EXPECT_TRUE(dm.canSessionReceive("DAY0"));
+ 	EXPECT_FALSE(dm.writeTick(nullptr, 0));
+ 	params->release();
+ }
+@@ -183,7 +192,9 @@
+ 	ASSERT_NE(params, nullptr);
+ 	DataManager dm;
+ 	EXPECT_FALSE(dm.init(params, &_bdMgr, &_mon));
+-	EXPECT_EQ(dm.getBDMgr(), static_cast<IBaseDataMgr*>(&_bdMgr));
++	// 卡9：失败态不发布借用依赖（见上方说明）
++	EXPECT_EQ(dm.writerLifecycleState(), DataManager::WLS_None);
++	EXPECT_EQ(dm.getBDMgr(), nullptr);
+ 	params->release();
+ }
+ 

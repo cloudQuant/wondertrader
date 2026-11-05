@@ -1,0 +1,39 @@
+build femas asan exit=0
+build mocker asan exit=0
+build mocker tsan exit=0
+-rwxr-xr-x@ 1 yunjinqi  wheel  2175616  4 Nov 08:24 /tmp/wt-i03-main-leaks-20261104/manual/femas-fix-asan/tests
+-rwxr-xr-x@ 1 yunjinqi  wheel  3912544  4 Nov 08:27 /tmp/wt-i03-main-leaks-20261104/manual/mocker-fix-asan/tests
+-rwxr-xr-x@ 1 yunjinqi  wheel  2080064  4 Nov 08:28 /tmp/wt-i03-main-leaks-20261104/manual/mocker-fix-tsan/tests
+run femas-fix-asan exit=0
+run mocker-fix-asan exit=0
+run mocker-fix-tsan exit=0
+femas-fix-asan position_query_response_appends_the_reported_item exit 0 xml True ('1', '0')
+femas-fix-asan position_query_unknown_contract_returns_empty_fina exit 0 xml True ('1', '0')
+femas-fix-asan make_order_info_maps_vendor_order_fields exit 0 xml True ('1', '0')
+femas-fix-asan make_order_info_falls_back_to_local_id_and_maps_fo exit 0 xml True ('1', '0')
+femas-fix-asan order_query_and_push_callbacks exit 0 xml True ('1', '0')
+femas-fix-asan trade_query_response_reports_appended_records exit 0 xml True ('1', '0')
+femas-fix-asan i03_new016_destructor_returns_query_container_owne exit 0 xml True ('1', '0')
+femas-fix-asan ALL exit 0 xml True ('42', '0')
+mocker-fix-asan PendingAndCanceledOrderRefsReturnedExactlyOnce exit 0 xml True ('1', '0')
+mocker-fix-asan DestructorAloneReturnsPendingOrderRefs exit 0 xml True ('1', '0')
+mocker-fix-asan ReleaseFromWorkerCallbackDefersJoin exit 0 xml True ('1', '0')
+mocker-fix-asan DeleteTraderFromWorkerCallbackQuarantines exit 0 xml True ('1', '0')
+mocker-fix-asan RepeatedInitRejected exit 0 xml True ('1', '0')
+mocker-fix-asan ConcurrentExternalReleaseAndRequests exit 0 xml True ('1', '0')
+mocker-fix-asan R113Mocker_CancelCopiesOrderIdBeforeFinalActionRel exit 0 xml True ('1', '0')
+mocker-fix-asan R113Mocker_PartialFillThenCancelPushesCanceled exit 0 xml True ('1', '0')
+mocker-fix-asan CompleteTickAcceptedAndTruncatedOrWrongTypeIgnored exit 0 xml True ('1', '0')
+mocker-fix-asan ALL exit -6 xml False None
+mocker-fix-tsan PendingAndCanceledOrderRefsReturnedExactlyOnce exit 0 xml True ('1', '0')
+mocker-fix-tsan DestructorAloneReturnsPendingOrderRefs exit 0 xml True ('1', '0')
+mocker-fix-tsan ReleaseFromWorkerCallbackDefersJoin exit 0 xml True ('1', '0')
+mocker-fix-tsan DeleteTraderFromWorkerCallbackQuarantines exit 0 xml True ('1', '0')
+mocker-fix-tsan RepeatedInitRejected exit 0 xml True ('1', '0')
+mocker-fix-tsan ConcurrentExternalReleaseAndRequests exit 0 xml True ('1', '0')
+mocker-fix-tsan R113Mocker_CancelCopiesOrderIdBeforeFinalActionRel exit 0 xml True ('1', '0')
+mocker-fix-tsan R113Mocker_PartialFillThenCancelPushesCanceled exit 0 xml True ('1', '0')
+mocker-fix-tsan CompleteTickAcceptedAndTruncatedOrWrongTypeIgnored exit 0 xml True ('1', '0')
+mocker-fix-tsan ALL exit -6 xml False None
+
+[exited with code 0]

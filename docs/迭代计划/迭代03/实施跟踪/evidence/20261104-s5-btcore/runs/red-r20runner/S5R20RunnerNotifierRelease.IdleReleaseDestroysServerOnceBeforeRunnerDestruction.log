@@ -1,0 +1,39 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5R20RunnerNotifierRelease.IdleReleaseDestroysServerOnceBeforeRunnerDestruction
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5R20RunnerNotifierRelease
+[ RUN      ] S5R20RunnerNotifierRelease.IdleReleaseDestroysServerOnceBeforeRunnerDestruction
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q06_btporter/s5_r20_runner_notifier_release_test.cpp:166: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  _fake.destroy_count()
+    Which is: 0
+release_backtest must destroy the notifier server
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q06_btporter/s5_r20_runner_notifier_release_test.cpp:167: Failure
+Expected equality of these values:
+  0xF1234567u
+    Which is: 4045620583
+  _fake.destroyed_id()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q06_btporter/s5_r20_runner_notifier_release_test.cpp:169: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  _fake.destroy_count()
+    Which is: 0
+repeated release must not destroy again
+
+[  FAILED  ] S5R20RunnerNotifierRelease.IdleReleaseDestroysServerOnceBeforeRunnerDestruction (41 ms)
+[----------] 1 test from S5R20RunnerNotifierRelease (41 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (41 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S5R20RunnerNotifierRelease.IdleReleaseDestroysServerOnceBeforeRunnerDestruction
+
+ 1 FAILED TEST

@@ -1,0 +1,100 @@
+--- a/CTPLoader/TraderSpi.cpp
++++ b/CTPLoader/TraderSpi.cpp
+@@ -10,6 +10,7 @@
+ #include <string_view>
+ #include <atomic>
+ #include <cmath>
++#include <cfloat>
+ #include <cerrno>
+ #include <fcntl.h>
+ #include <sys/stat.h>
+@@ -64,6 +65,12 @@
+ 
+ namespace
+ {
++bool isValidFeeValue(double value)
++{
++	// CTP uses these finite maxima as missing-value markers (see checkValid).
++	return std::isfinite(value) && value != DBL_MAX && value != FLT_MAX;
++}
++
+ bool publishFeeFile(const std::string& path, const char* data, size_t size)
+ {
+ 	static std::atomic<unsigned long long> sequence{0};
+@@ -877,19 +884,28 @@
+ 	if (responseError) _fee_response_failed.store(true, std::memory_order_release);
+ 	if(!responseError && pInstrumentCommissionRate != NULL)
+ 	{
+-		FeeInfo& fInfo = _fees[pInstrumentCommissionRate->InstrumentID];
+-		fInfo._byvol = decimal::eq(pInstrumentCommissionRate->OpenRatioByMoney, 0);
+-		if(fInfo._byvol)
++		const auto& rate = *pInstrumentCommissionRate;
++		const bool finite = isValidFeeValue(rate.OpenRatioByMoney) && isValidFeeValue(rate.CloseRatioByMoney) &&
++			isValidFeeValue(rate.CloseTodayRatioByMoney) && isValidFeeValue(rate.OpenRatioByVolume) &&
++			isValidFeeValue(rate.CloseRatioByVolume) && isValidFeeValue(rate.CloseTodayRatioByVolume);
++		const bool money = rate.OpenRatioByMoney != 0.0 || rate.CloseRatioByMoney != 0.0 ||
++			rate.CloseTodayRatioByMoney != 0.0;
++		const bool volume = rate.OpenRatioByVolume != 0.0 || rate.CloseRatioByVolume != 0.0 ||
++			rate.CloseTodayRatioByVolume != 0.0;
++		// The fee schema has one mode shared by open/close/close-today. Do not
++		// silently discard a component merely because it uses the other mode.
++		if (!finite || (money && volume))
+ 		{
+-			fInfo._open = pInstrumentCommissionRate->OpenRatioByVolume;
+-			fInfo._close = pInstrumentCommissionRate->CloseRatioByVolume;
+-			fInfo._closet = pInstrumentCommissionRate->CloseTodayRatioByVolume;
++			_fee_response_failed.store(true, std::memory_order_release);
++			std::cerr << "--->>> Cannot export fees: invalid or mixed commission units" << std::endl;
+ 		}
+ 		else
+ 		{
+-			fInfo._open = pInstrumentCommissionRate->OpenRatioByMoney;
+-			fInfo._close = pInstrumentCommissionRate->CloseRatioByMoney;
+-			fInfo._closet = pInstrumentCommissionRate->CloseTodayRatioByMoney;
++			FeeInfo& fInfo = _fees[rate.InstrumentID];
++			fInfo._byvol = !money; // Includes the all-zero, mode-independent case.
++			fInfo._open = money ? rate.OpenRatioByMoney : rate.OpenRatioByVolume;
++			fInfo._close = money ? rate.CloseRatioByMoney : rate.CloseRatioByVolume;
++			fInfo._closet = money ? rate.CloseTodayRatioByMoney : rate.CloseTodayRatioByVolume;
+ 		}
+ 	}
+ 
+@@ -907,9 +923,23 @@
+ 	if (responseError) _fee_response_failed.store(true, std::memory_order_release);
+ 	if (!responseError && pInstrumentMarginRate != NULL)
+ 	{
+-		MarginInfo& mInfo = _margins[pInstrumentMarginRate->InstrumentID];
+-		mInfo._long = pInstrumentMarginRate->LongMarginRatioByMoney;
+-		mInfo._short = pInstrumentMarginRate->ShortMarginRatioByMoney;
++		const auto& rate = *pInstrumentMarginRate;
++		// The exported margin field has no per-volume mode. Validate even the
++		// fields not selected for output so unsupported data cannot become zero.
++		if (!isValidFeeValue(rate.LongMarginRatioByMoney) || !isValidFeeValue(rate.ShortMarginRatioByMoney) ||
++			!isValidFeeValue(rate.LongMarginRatioByVolume) || !isValidFeeValue(rate.ShortMarginRatioByVolume) ||
++			rate.LongMarginRatioByVolume != 0.0 || rate.ShortMarginRatioByVolume != 0.0 ||
++			rate.LongMarginRatioByMoney != rate.ShortMarginRatioByMoney)
++		{
++			_fee_response_failed.store(true, std::memory_order_release);
++			std::cerr << "--->>> Cannot export fees: invalid or unrepresentable margin" << std::endl;
++		}
++		else
++		{
++			MarginInfo& mInfo = _margins[rate.InstrumentID];
++			mInfo._long = rate.LongMarginRatioByMoney;
++			mInfo._short = rate.ShortMarginRatioByMoney;
++		}
+ 	}
+ 
+ 	if (IsQueryQueueEmpty() && QRYFEES)
+@@ -1131,8 +1161,9 @@
+ 			return false;
+ 		}
+ 		const FeeInfo& fInfo = *foundFee;
+-		if (!std::isfinite(fInfo._open) || !std::isfinite(fInfo._close) ||
+-			!std::isfinite(fInfo._closet) || !std::isfinite(mInfo._long))
++		if (!isValidFeeValue(fInfo._open) || !isValidFeeValue(fInfo._close) ||
++			!isValidFeeValue(fInfo._closet) || !isValidFeeValue(mInfo._long) || !isValidFeeValue(mInfo._short) ||
++			mInfo._long != mInfo._short)
+ 		{
+ 			std::cerr << "--->>> Cannot export fees: non-finite value for " << rawCode << std::endl;
+ 			return false;

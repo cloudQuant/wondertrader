@@ -296,7 +296,7 @@ TEST_F(R19TempDir, r19_cmd_concurrent_cold_initialization_is_serialized)
 	ASSERT_TRUE(inspect.map(path.c_str()));
 	const CmdBlock* block = static_cast<const CmdBlock*>(inspect.addr());
 	ASSERT_NE(nullptr, block);
-	EXPECT_EQ(MAX_KEY_CNT, block->_capacity);
+	EXPECT_EQ(static_cast<uint32_t>(MAX_KEY_CNT), block->_capacity);
 	EXPECT_EQ(0u, block->_writable);
 	EXPECT_EQ(UINT32_MAX, block->_readable);
 }

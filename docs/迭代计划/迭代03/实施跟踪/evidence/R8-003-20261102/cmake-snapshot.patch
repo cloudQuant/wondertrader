@@ -1,0 +1,21 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,6 +1,7 @@
+ CMAKE_MINIMUM_REQUIRED(VERSION 3.16.0)
+ 
+ PROJECT(WonderTrader)
++include_directories(BEFORE /opt/homebrew/Cellar/boost/1.88.0/include)
+ IF(APPLE)
+ 	FIND_PROGRAM(HOMEBREW_BIN brew)
+ 	IF(HOMEBREW_BIN)
+--- a/src/TestUnits/coverage/CMakeLists.txt
++++ b/src/TestUnits/coverage/CMakeLists.txt
+@@ -286,7 +286,7 @@
+ 	# （WtDtCore/ParserAdapter.h:30 构造是 3 参，WtDtServo/ParserAdapter.h:28 是 2 参），
+ 	# 同名不同形 → 不能塞进同一个二进制（不是去重能解决的），所以拆成两个目标。
+ 	"dtcore|WtDtCore,WtDtHelper|dir:q05_dtsrv"
+-	"dtservo|WtDtServo|dir:q05b_dtservo"
++	"dtservo|WtDtServo|q05b_dtservo/r8_wtdtrunner_test.cpp+q05b_dtservo/r45_servo_api_test.cpp+q05b_dtservo/r8_export_no_reader_probe.cpp"
+ 	# 实盘/回测的 C 导出层（WtPorter / WtBtPorter）此前没有任何目标编过它们的 TU，
+ 	# 两块合计 3390 行未覆盖。它们各自定义 extern "C" 入口，所以必须一人一个二进制。
+ 	"porter|WtPorter|dir:q06_porter"

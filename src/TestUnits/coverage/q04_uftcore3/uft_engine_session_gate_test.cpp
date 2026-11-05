@@ -380,7 +380,8 @@ TEST(UftEngineSessionGate, knownSessionPreservesStrategyInitialization)
 	StrictSessionBaseDataMgr bd;
 	WTSSessionInfo* session = WTSSessionInfo::create("UFT_SESSION_VALID", "session gate test", 0);
 	ASSERT_NE(nullptr, session);
-	session->addTradingSection(0, 2400);
+	// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；R12-13 后 ticker 对无法映射的交易日 fail-closed（迭代03 第五会话）。
+	session->addTradingSection(0, 0);
 	bd._session = session;
 
 	InitCountingStrategy strategy("known_session_strategy");
@@ -403,7 +404,8 @@ TEST(UftTickerLifecycle, repeatedStopCallsJoinWorkerOnce)
 	StrictSessionBaseDataMgr bd;
 	WTSSessionInfo* session = WTSSessionInfo::create("UFT_TICKER_STOP", "ticker stop test", 0);
 	ASSERT_NE(nullptr, session);
-	session->addTradingSection(0, 2400);
+	// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；R12-13 后 ticker 对无法映射的交易日 fail-closed（迭代03 第五会话）。
+	session->addTradingSection(0, 0);
 	bd._session = session;
 
 	{
@@ -471,7 +473,8 @@ TEST(UftEngineLifecycle, stopDrainsGatedInitializationAndCallbackWaitDoesNotSelf
 	StrictSessionBaseDataMgr bd;
 	WTSSessionInfo* session = WTSSessionInfo::create("UFT_ENGINE_STOP_DURING_INIT", "engine init stop", 0);
 	ASSERT_NE(nullptr, session);
-	session->addTradingSection(0, 2400);
+	// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；R12-13 后 ticker 对无法映射的交易日 fail-closed（迭代03 第五会话）。
+	session->addTradingSection(0, 0);
 	bd._session = session;
 
 	EngineRunGate gate;
@@ -544,7 +547,8 @@ TEST(UftEngineLifecycle, concurrentRunCallsInitializeStrategiesOnce)
 	StrictSessionBaseDataMgr bd;
 	WTSSessionInfo* session = WTSSessionInfo::create("UFT_ENGINE_CONCURRENT_RUN", "engine concurrent run", 0);
 	ASSERT_NE(nullptr, session);
-	session->addTradingSection(0, 2400);
+	// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；R12-13 后 ticker 对无法映射的交易日 fail-closed（迭代03 第五会话）。
+	session->addTradingSection(0, 0);
 	bd._session = session;
 
 	EngineRunGate gate;
@@ -645,7 +649,8 @@ TEST(UftEngineLifecycle, stopBeforeRunSkipsStrategyInitialization)
 	StrictSessionBaseDataMgr bd;
 	WTSSessionInfo* session = WTSSessionInfo::create("UFT_ENGINE_STOP_BEFORE_RUN", "engine stop before run", 0);
 	ASSERT_NE(nullptr, session);
-	session->addTradingSection(0, 2400);
+	// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；R12-13 后 ticker 对无法映射的交易日 fail-closed（迭代03 第五会话）。
+	session->addTradingSection(0, 0);
 	bd._session = session;
 
 	InitCountingStrategy strategy("stop_before_run_strategy");

@@ -22,6 +22,7 @@
  * ExpHftContext::on_trade 都要解引用未绑定 _trader（创建上下文时 trader 必不存在），
  * 属已知崩溃路径（r13 BUG），本 lane 不重复制造。
  */
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <cstring>
@@ -40,6 +41,14 @@
 USING_NS_WTP;
 
 extern WtRtRunner& getRunner();
+// I03-NEW-064（迭代03）：C API 只在 runner 已配置的引擎上建上下文（.before 见 s5-runners 证据）。
+uint32_t i03s5_inject_cta_context(WtRtRunner& runner, const char* name, int32_t slippage);
+uint32_t i03s5_inject_sel_context(WtRtRunner& runner, const char* name, uint32_t date, uint32_t time,
+	TaskPeriodType period, int32_t slippage);
+uint32_t i03s5_inject_hft_context(WtRtRunner& runner, const char* name, const char* trader, int32_t slippage);
+// BUG-R42-002 gate (迭代03): HFT contexts bind only a registered trader; the
+// fixtures below register a module-less local adapter (see i03_s5_test_trader_support.cpp).
+TraderAdapterPtr i03s5_register_test_trader(WtRtRunner& runner, const char* id);
 
 namespace {
 
@@ -111,7 +120,7 @@ protected:
 
 	void SetUp() override
 	{
-		std::filesystem::path p = std::filesystem::temp_directory_path() / kGenLeaf;
+		std::filesystem::path p = std::filesystem::temp_directory_path() / (std::string(kGenLeaf) + "_" + std::to_string(static_cast<long>(::getpid())));
 		std::error_code ec;
 		std::filesystem::create_directories(p, ec);
 		_genDir = p.string();
@@ -132,7 +141,7 @@ protected:
  * 目录由 WtHelper::setGenerateDir 指到临时目录。 */
 TEST_F(R46PorterCtx, CtaInitAndSessionEventsReachRunnerCallbacks)
 {
-	CtxHandler id = getRunner().createCtaContext("r46_ctx_cta", 0);
+	CtxHandler id = i03s5_inject_cta_context(getRunner(), "r46_ctx_cta", 0); // forwarding-only
 	ASSERT_NE(id, 0u) << "createCtaContext 返回 0 句柄";
 	CtaContextPtr ctx = getRunner().getCtaContext(id);
 	ASSERT_TRUE(ctx != nullptr);
@@ -156,7 +165,7 @@ TEST_F(R46PorterCtx, CtaInitAndSessionEventsReachRunnerCallbacks)
 /* ExpSelContext.cpp:48-55 / 62-69 / 76-83：与 CTA 同形，但 sel 槽位独立。 */
 TEST_F(R46PorterCtx, SelInitAndSessionEventsReachRunnerCallbacks)
 {
-	CtxHandler id = getRunner().createSelContext("r46_ctx_sel", 20240102, 93000, "d", 0);
+	CtxHandler id = i03s5_inject_sel_context(getRunner(), "r46_ctx_sel", 20240102, 93000, TPT_Daily, 0);
 	ASSERT_NE(id, 0u);
 	SelContextPtr ctx = getRunner().getSelContext(id);
 	ASSERT_TRUE(ctx != nullptr);
@@ -179,7 +188,8 @@ TEST_F(R46PorterCtx, SelInitAndSessionEventsReachRunnerCallbacks)
  * 同时确认空 bar 不会消费掉周期串、也不会触发 runner 的 bar 回调。 */
 TEST_F(R46PorterCtx, HftNullBarIsDroppedBeforeForwarding)
 {
-	CtxHandler id = getRunner().createHftContext("r46_ctx_hft_null", "R46_TRADER_ABSENT", false, 0);
+	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "r46_test_trader") != nullptr);
+	CtxHandler id = i03s5_inject_hft_context(getRunner(), "r46_ctx_hft_null", "r46_test_trader", 0);
 	ASSERT_NE(id, 0u);
 	HftContextPtr ctxBase = getRunner().getHftContext(id);
 	ASSERT_TRUE(ctxBase != nullptr);
@@ -203,7 +213,8 @@ TEST_F(R46PorterCtx, HftNullBarIsDroppedBeforeForwarding)
  * 因此只调用不解引用 _trader 的入口。 */
 TEST_F(R46PorterCtx, HftInitSessionAndMicroStructureForwardWithoutTrader)
 {
-	CtxHandler id = getRunner().createHftContext("r46_ctx_hft", "R46_TRADER_ABSENT", false, 0);
+	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "r46_test_trader") != nullptr);
+	CtxHandler id = i03s5_inject_hft_context(getRunner(), "r46_ctx_hft", "r46_test_trader", 0);
 	ASSERT_NE(id, 0u);
 	HftContextPtr ctxBase = getRunner().getHftContext(id);
 	ASSERT_TRUE(ctxBase != nullptr);

@@ -1,0 +1,137 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 25 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from S5LmdbKeyBounds
+[ RUN      ] S5LmdbKeyBounds.LegalMaximumIdentityKeepsLayout
+[       OK ] S5LmdbKeyBounds.LegalMaximumIdentityKeepsLayout (0 ms)
+[ RUN      ] S5LmdbKeyBounds.OverlongNullAndUnterminatedIdentityAreRejected
+[       OK ] S5LmdbKeyBounds.OverlongNullAndUnterminatedIdentityAreRejected (0 ms)
+[ RUN      ] S5LmdbKeyBounds.EmptyFieldsFitTheKeyButAreNotAStorageIdentity
+/tmp/wt-i03-s5-storage-read-redsrc/src/TestUnits/coverage/p05_datastorage2/s5_reader_ad_bounds_test.cpp:277: Failure
+Expected: LMDBBarKey("", "", 1u) doesn't throw an exception.
+  Actual: it throws std::invalid_argument with description "invalid LMDB key identity".
+
+/tmp/wt-i03-s5-storage-read-redsrc/src/TestUnits/coverage/p05_datastorage2/s5_reader_ad_bounds_test.cpp:278: Failure
+Expected: LMDBHftKey("", "", 1u, 1u) doesn't throw an exception.
+  Actual: it throws std::invalid_argument with description "invalid LMDB key identity".
+
+[  FAILED  ] S5LmdbKeyBounds.EmptyFieldsFitTheKeyButAreNotAStorageIdentity (0 ms)
+[----------] 3 tests from S5LmdbKeyBounds (0 ms total)
+
+[----------] 8 tests from S5ReaderADTest
+[ RUN      ] S5ReaderADTest.OverlongExchangeIsRejectedBeforeAnyStorageSideEffect
+[       OK ] S5ReaderADTest.OverlongExchangeIsRejectedBeforeAnyStorageSideEffect (1 ms)
+[ RUN      ] S5ReaderADTest.BtReaderRejectsOverlongCodeBeforeOpeningDatabases
+[       OK ] S5ReaderADTest.BtReaderRejectsOverlongCodeBeforeOpeningDatabases (0 ms)
+[ RUN      ] S5ReaderADTest.LongConfiguredPathLogIsBoundedToTheMessageBuffer
+/tmp/wt-i03-s5-storage-read-redsrc/src/TestUnits/coverage/p05_datastorage2/s5_reader_ad_bounds_test.cpp:335: Failure
+Expected: (message.size()) < (512u), actual: 512 vs 512
+formatter wrote past the fixed log buffer
+
+[  FAILED  ] S5ReaderADTest.LongConfiguredPathLogIsBoundedToTheMessageBuffer (0 ms)
+[ RUN      ] S5ReaderADTest.MinuteCutoffBeyondUint32KeyIsRefusedNotWrapped
+/tmp/wt-i03-s5-storage-read-redsrc/src/TestUnits/coverage/p05_datastorage2/s5_reader_ad_bounds_test.cpp:355: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  wrapped
+    Which is: 0x60d0000005f0
+2033 cutoff must not select bars through a wrapped 32-bit key
+
+/tmp/wt-i03-s5-storage-read-redsrc/src/TestUnits/coverage/p05_datastorage2/s5_reader_ad_bounds_test.cpp:358: Failure
+Expected: (wrapped->at(-1)->time) != ((uint64_t)1000u), actual: 1000 vs 1000
+wrapped cutoff selected an unrelated early bar
+
+[  FAILED  ] S5ReaderADTest.MinuteCutoffBeyondUint32KeyIsRefusedNotWrapped (3 ms)
+[ RUN      ] S5ReaderADTest.MinuteEndBeyondUint32KeyDoesNotWrapOrSignalAllUpdated
+/tmp/wt-i03-s5-storage-read-redsrc/src/TestUnits/coverage/p05_datastorage2/s5_reader_ad_bounds_test.cpp:385: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  _sink->_all_updated
+    Which is: 1
+a minute end the LMDB key cannot represent was reported as complete
+
+/tmp/wt-i03-s5-storage-read-redsrc/src/TestUnits/coverage/p05_datastorage2/s5_reader_ad_bounds_test.cpp:395: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  _sink->_all_updated
+    Which is: 3
+
+[  FAILED  ] S5ReaderADTest.MinuteEndBeyondUint32KeyDoesNotWrapOrSignalAllUpdated (1 ms)
+[ RUN      ] S5ReaderADTest.DayBarsIn2033UseDateKeysAndRemainReadable
+[       OK ] S5ReaderADTest.DayBarsIn2033UseDateKeysAndRemainReadable (1 ms)
+[ RUN      ] S5ReaderADTest.ReadOnlyRootWithMissingDatabaseFailsClosedAndRecovers
+[       OK ] S5ReaderADTest.ReadOnlyRootWithMissingDatabaseFailsClosedAndRecovers (2 ms)
+[ RUN      ] S5ReaderADTest.ReadOnlyExchangeDirectoryWithoutDataFileFailsClosed
+[       OK ] S5ReaderADTest.ReadOnlyExchangeDirectoryWithoutDataFileFailsClosed (2 ms)
+[----------] 8 tests from S5ReaderADTest (13 ms total)
+
+[----------] 14 tests from R21ReaderADTest
+[ RUN      ] R21ReaderADTest.DayKlineFirstReadLoadsAllBarsAndClipsToRequestedWindow
+[       OK ] R21ReaderADTest.DayKlineFirstReadLoadsAllBarsAndClipsToRequestedWindow (2 ms)
+[ RUN      ] R21ReaderADTest.DayKlineWindowBeforeFirstBarReturnsWholeLoadedRange
+[       OK ] R21ReaderADTest.DayKlineWindowBeforeFirstBarReturnsWholeLoadedRange (2 ms)
+[ RUN      ] R21ReaderADTest.RepeatedKlineLookupOfSameExchangeReturnsCachedBars
+[       OK ] R21ReaderADTest.RepeatedKlineLookupOfSameExchangeReturnsCachedBars (2 ms)
+[ RUN      ] R21ReaderADTest.ThirdCodeOfSameExchangeReturnsItsBars
+[       OK ] R21ReaderADTest.ThirdCodeOfSameExchangeReturnsItsBars (9 ms)
+[ RUN      ] R21ReaderADTest.Min1KlineKeysByBarTimeAndSlicesTwoBars
+[       OK ] R21ReaderADTest.Min1KlineKeysByBarTimeAndSlicesTwoBars (6 ms)
+[ RUN      ] R21ReaderADTest.ThreePeriodMapsAreIndependentSoEachFirstLookupOpensOnce
+[       OK ] R21ReaderADTest.ThreePeriodMapsAreIndependentSoEachFirstLookupOpensOnce (6 ms)
+[ RUN      ] R21ReaderADTest.HourPeriodHasNoRoutedDbAndKlineReadReturnsNull
+[       OK ] R21ReaderADTest.HourPeriodHasNoRoutedDbAndKlineReadReturnsNull (0 ms)
+[ RUN      ] R21ReaderADTest.RepeatKlineReadReloadsWholeRangeBecauseLastBarTimeIsNeverUpdated
+/tmp/wt-i03-s5-storage-read-redsrc/src/TestUnits/coverage/p05_datastorage2/r21_rdmbars_kline_test.cpp:306: Failure
+Expected equality of these values:
+  sink()->count_containing("Reading back")
+    Which is: 2
+  1u
+    Which is: 1
+
+[  FAILED  ] R21ReaderADTest.RepeatKlineReadReloadsWholeRangeBecauseLastBarTimeIsNeverUpdated (1 ms)
+[ RUN      ] R21ReaderADTest.BarCacheIsKeyedByStdCodeAndPeriodSoCodesDoNotMix
+[       OK ] R21ReaderADTest.BarCacheIsKeyedByStdCodeAndPeriodSoCodesDoNotMix (2 ms)
+[ DISABLED ] R21ReaderADTest.DISABLED_KlineReadWithoutAnyBarCrashesOnEmptyVectorSubscript
+[ RUN      ] R21ReaderADTest.KlineDbPathOccupiedByRegularFileReturnsNullAndAllowsRetry
+[       OK ] R21ReaderADTest.KlineDbPathOccupiedByRegularFileReturnsNullAndAllowsRetry (17 ms)
+[ RUN      ] R21ReaderADTest.S5SameWindowWithoutCommitReusesSnapshot
+/tmp/wt-i03-s5-storage-read-redsrc/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp:42: Failure
+Expected equality of these values:
+  sink()->count_containing("Reading back")
+    Which is: 3
+  1u
+    Which is: 1
+
+[  FAILED  ] R21ReaderADTest.S5SameWindowWithoutCommitReusesSnapshot (7 ms)
+[ RUN      ] R21ReaderADTest.S5CommitAfterSnapshotKeepsFullRescanAndRevisionVisibility
+[       OK ] R21ReaderADTest.S5CommitAfterSnapshotKeepsFullRescanAndRevisionVisibility (73 ms)
+[ RUN      ] R21ReaderADTest.S5MinuteRangeEndingIn2033DoesNotWrap
+/tmp/wt-i03-s5-storage-read-redsrc/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp:84: Failure
+Value of: slice != __null
+  Actual: false
+Expected: true
+a 2033 right endpoint wrapped below the 2032 bars
+
+[  FAILED  ] R21ReaderADTest.S5MinuteRangeEndingIn2033DoesNotWrap (2 ms)
+[ RUN      ] R21ReaderADTest.S5OverlongIdentityRejectedBeforeOpeningDatabases
+[       OK ] R21ReaderADTest.S5OverlongIdentityRejectedBeforeOpeningDatabases (0 ms)
+[----------] 14 tests from R21ReaderADTest (133 ms total)
+
+[----------] Global test environment tear-down
+[==========] 25 tests from 3 test suites ran. (148 ms total)
+[  PASSED  ] 18 tests.
+[  FAILED  ] 7 tests, listed below:
+[  FAILED  ] S5LmdbKeyBounds.EmptyFieldsFitTheKeyButAreNotAStorageIdentity
+[  FAILED  ] S5ReaderADTest.LongConfiguredPathLogIsBoundedToTheMessageBuffer
+[  FAILED  ] S5ReaderADTest.MinuteCutoffBeyondUint32KeyIsRefusedNotWrapped
+[  FAILED  ] S5ReaderADTest.MinuteEndBeyondUint32KeyDoesNotWrapOrSignalAllUpdated
+[  FAILED  ] R21ReaderADTest.RepeatKlineReadReloadsWholeRangeBecauseLastBarTimeIsNeverUpdated
+[  FAILED  ] R21ReaderADTest.S5SameWindowWithoutCommitReusesSnapshot
+[  FAILED  ] R21ReaderADTest.S5MinuteRangeEndingIn2033DoesNotWrap
+
+ 7 FAILED TESTS
+  YOU HAVE 1 DISABLED TEST
+

@@ -1,0 +1,39 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R2TickTest.signalWithDespriceFillsAtTargetNotLastPrice
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R2TickTest
+[ RUN      ] R2TickTest.signalWithDespriceFillsAtTargetNotLastPrice
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:272: Failure
+Expected equality of these values:
+  10.8
+    Which is: 10.800000000000001
+  mocker.stra_get_position_avgpx(kCode)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:275: Failure
+Expected: (mocker.stra_get_position_profit(kCode)) > (0.0), actual: 0 vs 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:280: Failure
+Expected: (std::string::npos) != (trades.find("tagL")), actual: 18446744073709551615 vs 18446744073709551615
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:281: Failure
+Expected: (std::string::npos) != (trades.find("10.8")), actual: 18446744073709551615 vs 18446744073709551615
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp:282: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  count_lines(folder / "trades.csv")
+    Which is: 1
+
+[  FAILED  ] R2TickTest.signalWithDespriceFillsAtTargetNotLastPrice (32 ms)
+[----------] 1 test from R2TickTest (32 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (32 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R2TickTest.signalWithDespriceFillsAtTargetNotLastPrice
+
+ 1 FAILED TEST

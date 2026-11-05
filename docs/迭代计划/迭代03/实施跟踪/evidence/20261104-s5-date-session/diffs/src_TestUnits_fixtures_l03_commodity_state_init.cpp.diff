@@ -1,0 +1,42 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/TestUnits/fixtures/l03_commodity_state/init.cpp	2026-11-03 15:00:11
++++ src/TestUnits/fixtures/l03_commodity_state/init.cpp	2026-11-04 13:25:31
+@@ -17,7 +17,16 @@
+     // Observe object representation first; never read an uninitialized field
+     // on the current unfixed implementation. A zero-setting setter should not
+     // change any bytes if the constructor wrote the same value already.
+-    bool ok = true;
++    //
++    // 2026-11-04 (BUG-L03-002, decision card 4a=A): an unconfigured commodity
++    // has the effective trading mode TM_None and is not ready. setTradingMode()
++    // now also records "trading mode configured" in the state byte, so it is
++    // expected to change the object representation and is checked separately
++    // below instead of in the byte-identity list; the old probe treated that
++    // byte change, and the raw TM_Both zero, as a failure.
++    bool ok = !p->isTradingModeConfigured() && p->getTradingMode() == TM_None &&
++        !p->canShort() && !p->isT1() && !p->isReady();
++    if (!ok) std::puts("FAIL: unconfigured commodity is not TM_None/not ready");
+     auto check = [&](auto set) {
+         unsigned char before[sizeof(storage)];
+         std::memcpy(before, storage, sizeof(storage));
+@@ -31,16 +40,19 @@
+     check([&]{ p->setCategory(static_cast<ContractCategory>(0)); });
+     check([&]{ p->setCoverMode(static_cast<CoverMode>(0)); });
+     check([&]{ p->setPriceMode(static_cast<PriceMode>(0)); });
+-    check([&]{ p->setTradingMode(static_cast<TradingMode>(0)); });
+     ok = ok && p->getVolScale() == 0 && p->getPriceTick() == 0.0 &&
+         p->getLotsTick() == 0.0 && p->getMinLots() == 0.0 &&
+         static_cast<unsigned>(p->getCategoty()) == 0 &&
+         static_cast<unsigned>(p->getCoverMode()) == 0 &&
+         static_cast<unsigned>(p->getPriceMode()) == 0 &&
+-        static_cast<unsigned>(p->getTradingMode()) == 0 &&
++        p->getTradingMode() == TM_None &&
+         !*p->getName() && !*p->getExchg() && !*p->getProduct() &&
+         !*p->getCurrency() && !*p->getSession() && !*p->getTradingTpl() &&
+         !*p->getFullPid() && p->getSessionInfo() == nullptr && !p->hasValidConfiguration();
++    // An explicit TM_Both is a configured value (not the unconfigured default).
++    p->setTradingMode(TM_Both);
++    ok = ok && p->isTradingModeConfigured() && p->getTradingMode() == TM_Both &&
++        p->canShort() && !p->isReady();
+     p->~Probe();
+     if (!ok) { std::puts("FAIL: default initialization"); return 1; }
+ 

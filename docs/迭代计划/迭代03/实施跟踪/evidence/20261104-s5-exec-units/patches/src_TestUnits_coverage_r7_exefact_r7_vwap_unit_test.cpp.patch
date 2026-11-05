@@ -1,0 +1,57 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp	2026-11-04 09:13:26
++++ src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp	2026-11-04 20:10:33
+@@ -617,12 +617,53 @@
+ 	EXPECT_EQ(ctx.buys.size(), 1u);
+ 	EXPECT_TRUE(ctx.sells.empty());
+ 	sendTick(unit, mkTick(kCode, 100100000, 10.60, 10.59, 10.61));
+-	// L348 的 curPos==newVol 分支在 L319 之后不可达（见 BUG-R7-004），所以这里仍然没有清仓卖单
++	// 平仓后无持仓：清仓分支可达但可用多头为 0，仍不发单（BUG-R7-004 修复后的平仓对照）
+ 	EXPECT_TRUE(ctx.sells.empty());
+ 	ctx.comm->release();
+ }
+ 
++//////////////////////////////////////////////////////////////////////////
++// BUG-R7-004（卡15最终复核的明确缺陷，迭代03 2026-11-04）：净持仓为零但有锁仓
++// （多 2、空 2）时清仓指令原被“差额为零即返回”挡住；修复后先卖出可用多头。
+ //////////////////////////////////////////////////////////////////////////
++namespace
++{
++class LockedVwapCtx : public FakeCtx
++{
++public:
++	double getPosition(const char*, bool validOnly = true, int32_t flag = 3) override
++	{
++		const double lng = validOnly ? lockedLongAvail : lockedLong;
++		const double sht = validOnly ? lockedShortAvail : lockedShort;
++		if (flag == 1)
++			return lng;
++		if (flag == 2)
++			return sht;
++		return lng + sht;
++	}
++	double lockedLong = 2.0;
++	double lockedLongAvail = 2.0;
++	double lockedShort = -2.0;
++	double lockedShortAvail = -2.0;
++};
++}
++
++TEST(r7_vwap, clear_target_flattens_net_zero_locked_position)
++{
++	VwapFile vf(25.0);
++	LockedVwapCtx ctx;
++	ctx.comm = mkComm();
++	WtVWapExeUnit unit;
++	boot(unit, ctx, DBL_MAX, mkCfg());
++	sendTick(unit, mkTick(kCode, 100000000, 10.50, 10.49, 10.51));
++	ASSERT_EQ(ctx.sells.size(), 1u) << "net zero must not hide the gross long under a clear command";
++	EXPECT_GT(ctx.sells[0].qty, 0.0);
++	EXPECT_LE(ctx.sells[0].qty, 2.0) << "never more than the available long";
++	EXPECT_TRUE(ctx.buys.empty());
++	ctx.comm->release();
++}
++
++//////////////////////////////////////////////////////////////////////////
+ // on_channel_ready：未完成单为 0 但 OMS 有单 -> 判错单清空（L206-216）
+ //////////////////////////////////////////////////////////////////////////
+ TEST(r7_vwap, channel_ready_clears_unconfirmed_local_orders)

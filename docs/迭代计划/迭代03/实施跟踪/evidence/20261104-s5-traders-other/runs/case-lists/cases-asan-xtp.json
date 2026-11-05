@@ -1,0 +1,98 @@
+[
+ {
+  "id": "asan-xtp",
+  "name": "XtpS5Lifecycle.error_callbacks_after_register_spi_null_do_not_crash",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/tests",
+  "filter": "XtpS5Lifecycle.error_callbacks_after_register_spi_null_do_not_crash",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-xtp",
+  "name": "XtpS5Lifecycle.delete_trader_from_sdk_callback_quarantines",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/tests",
+  "filter": "XtpS5Lifecycle.delete_trader_from_sdk_callback_quarantines",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-xtp",
+  "name": "XtpS5Lifecycle.release_waits_for_inflight_callback_before_api_release",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/tests",
+  "filter": "XtpS5Lifecycle.release_waits_for_inflight_callback_before_api_release",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-xtp",
+  "name": "XtpS5Lifecycle.callback_drain_timeout_retains_api_and_remover_quarantines",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/tests",
+  "filter": "XtpS5Lifecycle.callback_drain_timeout_retains_api_and_remover_quarantines",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-xtp",
+  "name": "XtpS5Lifecycle.late_disconnect_of_replaced_api_session_does_not_relogin",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/tests",
+  "filter": "XtpS5Lifecycle.late_disconnect_of_replaced_api_session_does_not_relogin",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-xtp",
+  "name": "XtpS5Lifecycle.disconnect_of_current_session_still_relogins",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/tests",
+  "filter": "XtpS5Lifecycle.disconnect_of_current_session_still_relogins",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-xtp",
+  "name": "XtpS5Lifecycle.init_fails_without_module_and_rejects_repeated_init",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/tests",
+  "filter": "XtpS5Lifecycle.init_fails_without_module_and_rejects_repeated_init",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "asan-xtp",
+  "name": "ALL",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/tests",
+  "filter": "*",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 900
+ }
+]

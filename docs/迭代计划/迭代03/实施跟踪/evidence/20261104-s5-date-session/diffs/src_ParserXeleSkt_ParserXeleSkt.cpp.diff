@@ -1,0 +1,155 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/ParserXeleSkt/ParserXeleSkt.cpp	2026-11-03 21:53:34
++++ src/ParserXeleSkt/ParserXeleSkt.cpp	2026-11-04 17:47:14
+@@ -14,6 +14,7 @@
+ #include "../Includes/WTSDataDef.hpp"
+ #include "../Includes/IBaseDataMgr.h"
+ #include "../Includes/WTSContractInfo.hpp"
++#include "../Includes/DateMappingClient.hpp"
+ #include "../Share/decimal.h"
+ #include "../Share/Converter.hpp"
+ 
+@@ -41,23 +42,48 @@
+ 	sink->handleParserLog(ll, buffer);
+ }
+ 
+-inline uint32_t strToTime(const char* strTime)
++// I03-NEW-011: parse a fixed-width SDK clock field such as ActionDay
++// ("YYYYMMDD") or UpdateTime ("HH:MM:SS") without shared state and without
++// reading past the field. The field must be NUL-terminated within capacity and
++// contain only digits and ':' separators, with at most 8 digits; an empty
++// field is 0 as before. Otherwise the field is rejected and value is unchanged.
++inline bool tryParseXeleClockField(const char* field, std::size_t capacity, uint32_t& value)
+ {
+-	static char str[10] = { 0 };
+-	[[maybe_unused]] const char *pos = strTime;
+-	int idx = 0;
+-	auto len = strlen(strTime);
+-	for (std::size_t i = 0; i < len; i++)
++	if (field == nullptr)
++		return false;
++	uint32_t result = 0;
++	std::size_t digits = 0;
++	std::size_t i = 0;
++	for (; i < capacity && field[i] != '\0'; ++i)
+ 	{
+-		if (strTime[i] != ':')
+-		{
+-			str[idx] = strTime[i];
+-			idx++;
+-		}
+-	}
+-	str[idx] = '\0';
++		const char ch = field[i];
++		if (ch == ':')
++			continue;
++		if (ch < '0' || ch > '9' || digits == 8)
++			return false;
++		result = result * 10 + static_cast<uint32_t>(ch - '0');
++		++digits;
++	}
++	if (i == capacity)
++		return false;
++	value = result;
++	return true;
++}
+ 
+-	return convert::to_uint32(str);
++// Decision card 1 (A+C): map the action date/time of a cached tick through the
++// typed client over the guarded legacy virtuals. On failure the caller must not
++// modify the cached quote or deliver it.
++inline bool tryXeleTradingDate(IBaseDataMgr* bdMgr, WTSContractInfo* contract, uint32_t actDate,
++	uint32_t actTimeMs, uint32_t& tradingDate, wtp::DateMappingStatus& status)
++{
++	wtp::DateMappingClient mapping(bdMgr);
++	const char* pid = contract == NULL ? NULL : contract->getFullPid();
++	const wtp::DateMappingResult32 result = mapping.calcTradingDate(pid, actDate, actTimeMs / 100000, false);
++	status = result.status;
++	if (result.status != wtp::DateMappingStatus::Ok)
++		return false;
++	tradingDate = result.value;
++	return true;
+ }
+ 
+ inline double checkValid(double val)
+@@ -677,8 +703,16 @@
+ 					WTSTickStruct& quote = tick->getTickStruct();
+ 					wt_strcpy(quote.exchg, ct->getExchg());
+ 
+-					quote.action_date = strToTime(p->ActionDay);
+-					quote.action_time = strToTime(p->UpdateTime) * 1000 + p->UpdateMilliSec;
++					// A malformed snapshot clock field is not published; the cached
++					// tick keeps 0 (the empty-field value) until the first feed frame
++					// sets action date/time from SnapDateTime.
++					uint32_t actionDate = 0, updateTime = 0;
++					const bool clockValid = tryParseXeleClockField(p->ActionDay, sizeof(p->ActionDay), actionDate) &&
++						tryParseXeleClockField(p->UpdateTime, sizeof(p->UpdateTime), updateTime);
++					if (!clockValid)
++						with_spi([&](IParserSpi* sink) { write_log(sink, LL_ERROR, "[ParserXeleSkt] Snapshot of {} has a malformed ActionDay/UpdateTime, cleared", instrumentCode); });
++					quote.action_date = clockValid ? actionDate : 0;
++					quote.action_time = clockValid ? updateTime * 1000 + p->UpdateMilliSec : 0;
+ 					quote.price = checkValid(p->LastPrice);
+ 					quote.open = checkValid(p->OpenPrice);
+ 					quote.high = checkValid(p->HighestPrice);
+@@ -1090,15 +1124,26 @@
+ 				uint32_t actTime = tNow->tm_hour * 10000 + tNow->tm_min * 100 + tNow->tm_sec;
+ 				actTime = actTime * 1000 + SnapMillisec;
+ 
+-				double scale = _price_scales[p->InstrumentNo];
+ 				WTSTickStruct& quote = tick->getTickStruct();
+-				quote.action_date = actDate;
+-				quote.action_time = actTime;
+-				if(quote.trading_date == 0)
++				// Map before touching the cached quote: a failed mapping must not
++				// write a quote or deliver it (decision card 1).
++				uint32_t tradingDate = quote.trading_date;
++				if (tradingDate == 0)
+ 				{
+-					quote.trading_date = _bd_mgr->calcTradingDate(tick->getContractInfo()->getFullPid(), actDate, actTime / 100000);
++					wtp::DateMappingStatus mappingStatus = wtp::DateMappingStatus::Ok;
++					if (!tryXeleTradingDate(_bd_mgr, tick->getContractInfo(), actDate, actTime, tradingDate, mappingStatus))
++					{
++						with_spi([&](IParserSpi* sink) { write_log(sink, LL_ERROR, "[ParserXeleSkt] Trading date of {} at {}.{} unavailable ({}), tick dropped",
++							tick->code(), actDate, actTime, wtp::dateMappingStatusName(mappingStatus)); });
++						continue;
++					}
+ 				}
+ 
++				double scale = _price_scales[p->InstrumentNo];
++				quote.action_date = actDate;
++				quote.action_time = actTime;
++				quote.trading_date = tradingDate;
++
+ 				quote.price = p->LastPrice*scale;
+ 				quote.high = std::max(quote.high, p->LastPrice*scale);
+ 				quote.low = std::min(quote.low, p->LastPrice*scale);
+@@ -1161,14 +1206,25 @@
+ 				uint32_t actTime = tNow->tm_hour * 10000 + tNow->tm_min * 100 + tNow->tm_sec;
+ 				actTime = actTime * 1000 + SnapMillisec;
+ 
+-				double scale = _price_scales[p->InstrumentNo];
+ 				WTSTickStruct& quote = tick->getTickStruct();
+-				quote.action_date = actDate;
+-				quote.action_time = actTime;
+-				if (quote.trading_date == 0)
++				// Map before touching the cached quote: a failed mapping must not
++				// write a quote or deliver it (decision card 1).
++				uint32_t tradingDate = quote.trading_date;
++				if (tradingDate == 0)
+ 				{
+-					quote.trading_date = _bd_mgr->calcTradingDate(tick->getContractInfo()->getFullPid(), actDate, actTime / 100000);
++					wtp::DateMappingStatus mappingStatus = wtp::DateMappingStatus::Ok;
++					if (!tryXeleTradingDate(_bd_mgr, tick->getContractInfo(), actDate, actTime, tradingDate, mappingStatus))
++					{
++						with_spi([&](IParserSpi* sink) { write_log(sink, LL_ERROR, "[ParserXeleSkt] Trading date of {} at {}.{} unavailable ({}), tick dropped",
++							tick->code(), actDate, actTime, wtp::dateMappingStatusName(mappingStatus)); });
++						continue;
++					}
+ 				}
++
++				double scale = _price_scales[p->InstrumentNo];
++				quote.action_date = actDate;
++				quote.action_time = actTime;
++				quote.trading_date = tradingDate;
+ 				quote.price = p->LastPrice*scale;
+ 				quote.high = std::max(quote.high, p->LastPrice*scale);
+ 				quote.low = std::min(quote.low, p->LastPrice*scale);

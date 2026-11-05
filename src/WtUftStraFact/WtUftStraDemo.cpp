@@ -17,9 +17,116 @@
 #include "../Share/decimal.h"
 #include "../Share/fmtlib.h"
 
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <string>
+
 /// @brief 外部声明的工厂名称
 /// @note 在WtUftStraFact.cpp中定义
 extern const char* FACT_NAME;
+
+namespace
+{
+	// BUG-WSN06-002 strict parameter schema. Loaders keep every scalar as text
+	// (YAML scalars are strings), so values are validated from their text form.
+	enum class ParamKind { Text, UInt, Real, PositiveReal, Bool };
+	struct ParamRule { const char* key; ParamKind kind; bool required; };
+
+	// code and lots are required: a missing lots used to become 0 and produce
+	// zero-quantity orders. second/freq/offset keep the historical zero
+	// defaults. count/level2/maxloss are legacy keys still present in the
+	// shipped dist/WtRunnerUft config; they are accepted and ignored.
+	const ParamRule kUftDemoRules[] = {
+		{ "code", ParamKind::Text, true },
+		{ "lots", ParamKind::PositiveReal, true },
+		{ "second", ParamKind::UInt, false },
+		{ "freq", ParamKind::UInt, false },
+		{ "offset", ParamKind::UInt, false },
+		{ "count", ParamKind::UInt, false },
+		{ "level2", ParamKind::Bool, false },
+		{ "maxloss", ParamKind::Real, false },
+	};
+
+	bool scalarText(WTSVariant* value, std::string& text)
+	{
+		if (value == NULL || value->type() == WTSVariant::VT_Null ||
+			value->type() == WTSVariant::VT_Object || value->type() == WTSVariant::VT_Array)
+			return false;
+		text = value->asString();
+		return true;
+	}
+
+	bool checkParam(WTSVariant* value, ParamKind kind)
+	{
+		std::string text;
+		if (!scalarText(value, text) || text.empty())
+			return false;
+		switch (kind)
+		{
+		case ParamKind::Text:
+			return value->type() == WTSVariant::VT_String;
+		case ParamKind::UInt:
+		{
+			if (text.size() > 10 || text.find_first_not_of("0123456789") != std::string::npos)
+				return false;
+			return std::strtoull(text.c_str(), NULL, 10) <= 0xFFFFFFFFull;
+		}
+		case ParamKind::Real:
+		case ParamKind::PositiveReal:
+		{
+			char* end = NULL;
+			const double number = std::strtod(text.c_str(), &end);
+			if (end == NULL || *end != '\0' || !std::isfinite(number))
+				return false;
+			return kind == ParamKind::Real || number > 0.0;
+		}
+		case ParamKind::Bool:
+			return wt_stricmp(text.c_str(), "true") == 0 || wt_stricmp(text.c_str(), "false") == 0;
+		}
+		return false;
+	}
+
+	bool validateParams(WTSVariant* cfg, const ParamRule* rules, size_t count, std::string& error)
+	{
+		if (cfg == NULL || cfg->type() != WTSVariant::VT_Object)
+		{
+			error = "params must be an object";
+			return false;
+		}
+		for (const std::string& key : cfg->memberNames())
+		{
+			bool known = false;
+			for (size_t i = 0; i < count && !known; i++)
+				known = key == rules[i].key;
+			if (!known)
+			{
+				error = "unknown parameter " + key;
+				return false;
+			}
+		}
+		for (size_t i = 0; i < count; i++)
+		{
+			WTSVariant* value = cfg->get(rules[i].key);
+			if (value == NULL)
+			{
+				if (rules[i].required)
+				{
+					error = std::string("missing required parameter ") + rules[i].key;
+					return false;
+				}
+				continue;
+			}
+			if (!checkParam(value, rules[i].kind))
+			{
+				error = std::string("invalid parameter ") + rules[i].key;
+				return false;
+			}
+		}
+		return true;
+	}
+}
 
 /**
  * @brief 构造函数
@@ -78,9 +185,14 @@ const char* WtUftStraDemo::getFactName()
 bool WtUftStraDemo::init(WTSVariant* cfg)
 {
 	// This strategy requires the parameter object for its instrument and order settings.
-	// Reject a missing object before reading any fields instead of dereferencing null.
-	if (cfg == nullptr)
+	// BUG-WSN06-002: validate the whole object (unknown keys, missing required
+	// code/lots, malformed values) before any field is applied.
+	std::string schemaError;
+	if (!validateParams(cfg, kUftDemoRules, sizeof(kUftDemoRules) / sizeof(kUftDemoRules[0]), schemaError))
+	{
+		std::fprintf(stderr, "[%s] SimpleUft rejected params: %s\n", id(), schemaError.c_str());
 		return false;
+	}
 
 	//这里演示一下外部传入参数的获取
 	_code = cfg->getCString("code");      // 获取交易品种代码

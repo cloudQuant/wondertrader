@@ -1,0 +1,62 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = L05HelperBarTest.DumpBarsReportsInputCloseFailureWithoutSuccess:L05HelperTickTest.DumpTicksReportsInputCloseFailureWithoutSuccess
+[==========] Running 2 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from L05HelperBarTest
+[ RUN      ] L05HelperBarTest.DumpBarsReportsInputCloseFailureWithoutSuccess
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:931: Failure
+Value of: any_log_has("Failed to close input file")
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:932: Failure
+Value of: any_log_has("写入完成")
+  Actual: true
+Expected: false
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:933: Failure
+Value of: any_log_has("全部导出完成")
+  Actual: true
+Expected: false
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp:934: Failure
+Value of: std::filesystem::exists(_root / "csv" / "bar.csv")
+  Actual: true
+Expected: false
+
+[  FAILED  ] L05HelperBarTest.DumpBarsReportsInputCloseFailureWithoutSuccess (1 ms)
+[----------] 1 test from L05HelperBarTest (1 ms total)
+
+[----------] 1 test from L05HelperTickTest
+[ RUN      ] L05HelperTickTest.DumpTicksReportsInputCloseFailureWithoutSuccess
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:679: Failure
+Value of: t_any_log_has("Failed to close input file")
+  Actual: false
+Expected: true
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:680: Failure
+Value of: t_any_log_has("写入完成")
+  Actual: true
+Expected: false
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:681: Failure
+Value of: t_any_log_has("全部导出完成")
+  Actual: true
+Expected: false
+
+src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp:682: Failure
+Value of: std::filesystem::exists(_root / "csv" / "tick.csv")
+  Actual: true
+Expected: false
+
+[  FAILED  ] L05HelperTickTest.DumpTicksReportsInputCloseFailureWithoutSuccess (0 ms)
+[----------] 1 test from L05HelperTickTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 2 test suites ran. (2 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] L05HelperBarTest.DumpBarsReportsInputCloseFailureWithoutSuccess
+[  FAILED  ] L05HelperTickTest.DumpTicksReportsInputCloseFailureWithoutSuccess
+
+ 2 FAILED TESTS

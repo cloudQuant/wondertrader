@@ -1,0 +1,587 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before/src/WtDataStorageAD/WtDataReaderAD.cpp	2026-11-04 08:03:07
++++ src/WtDataStorageAD/WtDataReaderAD.cpp	2026-11-04 18:12:40
+@@ -11,16 +11,124 @@
+ #include "../Includes/IBaseDataMgr.h"
+ #include "../Includes/IHotMgr.h"
+ #include "../Includes/WTSDataDef.hpp"
++#include "../Includes/DateMappingClient.hpp"
+ 
+ #include <boost/filesystem.hpp>
++#include <cstring>
+ #include <limits>
++#include <string>
+ namespace fs = boost::filesystem;
+ 
+ namespace {
+ thread_local LMDBRangeCursorGetOverride tick_query_cursor_get_override = NULL;
+ thread_local void* tick_query_cursor_get_context = NULL;
++
++// R122-002 test hooks (null/zero in production): bar-update chunk size and an
++// observer of every staging buffer size, used to prove the staging bound.
++thread_local std::size_t bar_update_chunk_override = 0;
++thread_local void (*staging_size_observer)(void*, std::size_t) = NULL;
++thread_local void* staging_size_observer_context = NULL;
++
++// Largest number of bars a forward K-line update stages at once.
++constexpr std::size_t kBarUpdateChunk = 4096;
++
++void observe_staging(std::size_t staged)
++{
++	if (staging_size_observer != NULL)
++		staging_size_observer(staging_size_observer_context, staged);
+ }
+ 
++struct ReadTxnGuard
++{
++	MDB_txn* txn = NULL;
++	~ReadTxnGuard() { if (txn != NULL) mdb_txn_abort(txn); }
++};
++
++struct CursorGuard
++{
++	MDB_cursor* cursor = NULL;
++	~CursorGuard() { if (cursor != NULL) mdb_cursor_close(cursor); }
++};
++
++enum : int { kStreamLmdbFailure = -1, kStreamRejected = -2 };
++
++// R122-002: walk [lower, upper] (lower optionally exclusive) in key order inside
++// one read-only transaction, handing each record to visit() without staging the
++// range. visit returns false to reject the scan. At most `limit` records are
++// visited when limit != 0 (more is then set if another in-range record exists).
++// Returns the visited count, kStreamLmdbFailure (error kept in db) or
++// kStreamRejected. The transaction is closed before returning, so callers may
++// run callbacks that re-enter the reader afterwards.
++template<typename Visitor>
++int stream_checked_range(WtLMDB& db, const std::string& lower, bool lowerExclusive,
++	const std::string& upper, std::size_t limit, bool honorTestOverride, Visitor&& visit, bool& more)
++{
++	more = false;
++	ReadTxnGuard txn;
++	int status = mdb_txn_begin(db.env(), NULL, MDB_RDONLY, &txn.txn);
++	if (status != MDB_SUCCESS)
++	{
++		txn.txn = NULL;
++		db.update_errno(status);
++		return kStreamLmdbFailure;
++	}
++	const MDB_dbi dbi = db.update_dbi(txn.txn);
++	if (dbi == 0)
++		return kStreamLmdbFailure;
++
++	CursorGuard cursor;
++	status = mdb_cursor_open(txn.txn, dbi, &cursor.cursor);
++	if (status != MDB_SUCCESS)
++	{
++		cursor.cursor = NULL;
++		db.update_errno(status);
++		return kStreamLmdbFailure;
++	}
++	const LMDBRangeCursorGetOverride override_get = honorTestOverride ? tick_query_cursor_get_override : NULL;
++	auto cursor_get = [&](MDB_val* key, MDB_val* value, MDB_cursor_op op) {
++		return override_get == NULL
++			? mdb_cursor_get(cursor.cursor, key, value, op)
++			: override_get(tick_query_cursor_get_context, cursor.cursor, key, value, op);
++	};
++
++	MDB_val key = { lower.size(), (void*)lower.data() };
++	MDB_val value = { 0, NULL };
++	MDB_cursor_op op = MDB_SET_RANGE;
++	int visited = 0;
++	for (;;)
++	{
++		status = cursor_get(&key, &value, op);
++		op = MDB_NEXT;
++		if (status == MDB_NOTFOUND)
++		{
++			status = MDB_SUCCESS;
++			break;
++		}
++		if (status != MDB_SUCCESS)
++			break;
++		if (compare_lmdb_keys(key.mv_data, key.mv_size, upper.data(), upper.size()) > 0)
++			break;
++		if (lowerExclusive && compare_lmdb_keys(key.mv_data, key.mv_size, lower.data(), lower.size()) == 0)
++			continue;
++		if (limit != 0 && (std::size_t)visited >= limit)
++		{
++			more = true;
++			break;
++		}
++		if (visited == (std::numeric_limits<int>::max)() || !visit(key, value))
++			return kStreamRejected;
++		++visited;
++	}
++	if (status != MDB_SUCCESS)
++	{
++		db.update_errno(status);
++		return kStreamLmdbFailure;
++	}
++	db.update_errno(MDB_SUCCESS);
++	return visited;
++}
++}
++
+ namespace wtp {
+ 
+ struct WtLMDBReaderTestAccess
+@@ -43,13 +151,83 @@
+ 	if (sink == NULL)
+ 		return;
+ 
++	// Messages can carry caller-supplied codes and configured paths; bound the
++	// formatter writes to the per-thread buffer instead of trusting their size.
+ 	static thread_local char buffer[512] = { 0 };
+-	memset(buffer, 0, 512);
+-	fmt::format_to(buffer, format, args...);
++	try
++	{
++		const std::size_t max_output_size = sizeof(buffer) - 1;
++		const auto formatted = fmt::format_to_n(buffer, max_output_size, format, args...);
++		if (formatted.size > max_output_size)
++		{
++			constexpr char truncation_marker[] = "...[truncated]";
++			constexpr std::size_t marker_size = sizeof(truncation_marker) - 1;
++			std::memcpy(buffer + max_output_size - marker_size, truncation_marker, marker_size);
++			buffer[max_output_size] = '\0';
++		}
++		else
++		{
++			buffer[formatted.size] = '\0';
++		}
++	}
++	catch (...)
++	{
++		constexpr char fallback[] = "WtDataReaderAD log formatting failed";
++		std::memcpy(buffer, fallback, sizeof(fallback));
++	}
+ 
+ 	sink->reader_log(ll, buffer);
+ }
+ 
++// Decision card 1 (A+C): trading dates come from the typed client over the
++// guarded legacy IBaseDataMgr virtuals; a failure stops the read.
++static bool ad_reader_trading_date(IDataReaderSink* sink, IBaseDataMgr* mgr, const char* stdPID,
++	uint32_t uDate, uint32_t uTime, uint32_t& tradingDate)
++{
++	wtp::DateMappingClient mapping(mgr);
++	const wtp::DateMappingResult32 result = mapping.calcTradingDate(stdPID, uDate, uTime, false);
++	if (result.status != wtp::DateMappingStatus::Ok)
++	{
++		pipe_reader_log(sink, LL_ERROR, "Mapping trading date of {} at {}.{} failed: {}",
++			stdPID == NULL ? "" : stdPID, uDate, uTime, wtp::dateMappingStatusName(result.status));
++		return false;
++	}
++	tradingDate = result.value;
++	return true;
++}
++
++namespace {
++
++// Display at most the bytes the key check inspects; the field may be unterminated.
++std::string key_field_for_log(const char* field, std::size_t capacity)
++{
++	if (field == NULL)
++		return "(null)";
++	std::size_t length = 0;
++	while (length < capacity && field[length] != '\0')
++		++length;
++	std::string text(field, length);
++	if (length == capacity)
++		text += "...";
++	return text;
++}
++
++// BUG-L04-004: an identity that cannot be represented by the fixed LMDB key is
++// rejected before cache, directory, database or callback side effects, and the
++// rejection is observable instead of a silent NULL.
++bool accept_key_identity(IDataReaderSink* sink, const char* exchg, const char* code, const char* entry)
++{
++	if (lmdbKeyIdentityValid(exchg, code))
++		return true;
++	pipe_reader_log(sink, LL_ERROR,
++		"{} rejected storage identity {}.{}: exchange and code must be non-empty and shorter than {} and {} bytes",
++		entry, key_field_for_log(exchg, MAX_EXCHANGE_LENGTH),
++		key_field_for_log(code, MAX_INSTRUMENT_LENGTH), MAX_EXCHANGE_LENGTH, MAX_INSTRUMENT_LENGTH);
++	return false;
++}
++
++} // namespace
++
+ extern "C"
+ {
+ 	EXPORT_FLAG IDataReader* createDataReader()
+@@ -84,6 +262,13 @@
+ 	tick_query_cursor_get_context = context;
+ }
+ 
++void WtDataReaderAD::set_test_staging_hooks(std::size_t barChunk, void (*observer)(void*, std::size_t), void* context)
++{
++	bar_update_chunk_override = barChunk;
++	staging_size_observer = observer;
++	staging_size_observer_context = context;
++}
++
+ void WtDataReaderAD::init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader* loader /* = NULL */)
+ {
+ 	IDataReader::init(cfg, sink, loader);
+@@ -107,7 +292,7 @@
+ WTSTickSlice* WtDataReaderAD::readTickSlice(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
+ {
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+-	if (!lmdbKeyIdentityValid(cInfo._exchg, cInfo._code))
++	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "readTickSlice"))
+ 		return NULL;
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+ 	std::string stdPID = fmtutil::format<64>("{}.{}", cInfo._exchg, cInfo._product);
+@@ -129,7 +314,9 @@
+ 		curSecs = (uint32_t)(etime % 100000);
+ 	}
+ 
+-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), curDate, curTime, false);
++	uint32_t endTDate = 0;
++	if (!ad_reader_trading_date(_sink, _base_data_mgr, stdPID.c_str(), curDate, curTime, endTDate))
++		return NULL;
+ 
+ 	std::string curCode = cInfo._code;
+ 	if (commInfo->isFuture())
+@@ -138,7 +325,7 @@
+ 		if (strlen(ruleTag) > 0)
+ 		{
+ 			const char* rawCode = _hot_mgr->getCustomRawCode(ruleTag, cInfo.stdCommID(), endTDate);
+-			if (!lmdbKeyIdentityValid(cInfo._exchg, rawCode))
++			if (!accept_key_identity(_sink, cInfo._exchg, rawCode, "readTickSlice(custom raw code)"))
+ 				return NULL;
+ 			curCode = rawCode;
+ 		}
+@@ -200,21 +387,46 @@
+ 		};
+ 
+ 		int cnt = -1;
+-		WtLMDBQuery query(*db);
+-		WtLMDBReaderTestAccess::set_cursor_get_override(query,
+-			tick_query_cursor_get_override, tick_query_cursor_get_context);
+ 		if (reload_flag == 1)
+ 		{
+ 			//增量更新，只在完整扫描成功后追加到缓存。
+ 			last_access_time += 1;
+ 			LMDBHftKey lKey(cInfo._exchg, cInfo._code, (uint32_t)(last_access_time / 1000000000), (uint32_t)(last_access_time % 1000000000));
+ 			LMDBHftKey rKey(cInfo._exchg, cInfo._code, (uint32_t)(etime / 1000000000), (uint32_t)(etime % 1000000000));
+-			cnt = query.get_range_checked(std::string((const char*)&lKey, sizeof(lKey)),
+-				std::string((const char*)&rKey, sizeof(rKey)), collect_ticks);
++			// R122-002: the cache ring keeps only its capacity, so stage at most
++			// that many of the newest rows while still validating the whole range
++			// inside one snapshot; a long gap no longer grows memory linearly.
++			boost::circular_buffer<WTSTickStruct> newest(tickList._ticks.capacity());
++			bool more = false;
++			cnt = stream_checked_range(*db, std::string((const char*)&lKey, sizeof(lKey)), false,
++				std::string((const char*)&rKey, sizeof(rKey)), 0, true,
++				[&newest, &values_valid](const MDB_val&, const MDB_val& item) {
++					if (item.mv_size != sizeof(WTSTickStruct))
++					{
++						values_valid = false;
++						return false;
++					}
++					WTSTickStruct curTick;
++					memcpy(&curTick, item.mv_data, sizeof(curTick));
++					newest.push_back(curTick);
++					return true;
++				}, more);
++			if (cnt == kStreamRejected)
++			{
++				values_valid = false;
++				cnt = 0;
++			}
++			observe_staging(newest.size());
++			loaded_ticks.assign(newest.begin(), newest.end());
+ 		}
+ 		else
+ 		{
+ 			//首次/扩容全量重载，从结束时间向前限量读取。
++			// The query owns a read transaction; keep it scoped to this branch so the
++			// streaming scan above never nests a second read transaction in this thread.
++			WtLMDBQuery query(*db);
++			WtLMDBReaderTestAccess::set_cursor_get_override(query,
++				tick_query_cursor_get_override, tick_query_cursor_get_context);
+ 			LMDBHftKey rKey(cInfo._exchg, cInfo._code, (uint32_t)(etime / 1000000000), (uint32_t)(etime % 1000000000));
+ 			LMDBHftKey lKey(cInfo._exchg, cInfo._code, 0, 0);
+ 			cnt = query.get_lowers_checked(std::string((const char*)&lKey, sizeof(lKey)),
+@@ -294,7 +506,7 @@
+ bool WtDataReaderAD::read_bars_to_buffer(const char* exchg, const char* code,
+ 	WTSKlinePeriod period, std::string& buffer)
+ {
+-	if (!lmdbKeyIdentityValid(exchg, code))
++	if (!accept_key_identity(_sink, exchg, code, "read_bars_to_buffer"))
+ 		return false;
+ 
+ 	WtLMDBPtr db = get_k_db(exchg, period);
+@@ -336,7 +548,7 @@
+ 	WTSKlinePeriod period, uint32_t count, uint32_t cutoff)
+ {
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+-	if (!lmdbKeyIdentityValid(cInfo._exchg, cInfo._code))
++	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "cacheBarsFromStorage"))
+ 		return false;
+ 	[[maybe_unused]] WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+ 	if (count > static_cast<uint32_t>((std::numeric_limits<int>::max)()))
+@@ -418,7 +630,7 @@
+ bool WtDataReaderAD::update_cache_from_lmdb(BarsList& barsList, const char* exchg, const char* code,
+ 	WTSKlinePeriod period, uint32_t& lastBarTime, uint32_t cutoff)
+ {
+-	if (!lmdbKeyIdentityValid(exchg, code))
++	if (!accept_key_identity(_sink, exchg, code, "update_cache_from_lmdb"))
+ 		return false;
+ 	bool isDay = (period == KP_DAY);
+ 	if (lastBarTime > cutoff)
+@@ -428,54 +640,62 @@
+ 	if (db == NULL)
+ 		return false;
+ 
+-	WtLMDBQuery query(*db);
+ 	LMDBBarKey lKey(exchg, code, lastBarTime);
+ 	LMDBBarKey rKey(exchg, code, cutoff);
+-	std::vector<WTSBarStruct> newBars;
+-	bool valuesValid = true;
+-	int cnt = query.get_range_checked(std::string((const char*)&lKey, sizeof(lKey)),
+-		std::string((const char*)&rKey, sizeof(rKey)),
+-		[&newBars, &valuesValid, isDay, cutoff](const ValueArray& ayKeys, const ValueArray& ayVals) {
+-			if (ayKeys.size() != ayVals.size())
+-			{
+-				valuesValid = false;
+-				return;
+-			}
++	const std::string lower((const char*)&lKey, sizeof(lKey));
++	const std::string upper((const char*)&rKey, sizeof(rKey));
++	const std::size_t chunkLimit = bar_update_chunk_override != 0 ? bar_update_chunk_override : kBarUpdateChunk;
+ 
+-			for (std::size_t idx = 0; idx < ayVals.size(); idx++)
++	// Decodes one record of the inclusive range; false means malformed.
++	auto decode = [isDay, cutoff](const MDB_val& key, const MDB_val& item, bool& keep, WTSBarStruct& bar) {
++		if (key.mv_size != sizeof(LMDBBarKey) || item.mv_size != sizeof(WTSBarStruct))
++			return false;
++		memcpy(&bar, item.mv_data, sizeof(bar));
++		const uint64_t barTime = isDay ? bar.date : bar.time;
++		if (isDay)
++			wt_ad_daybar::normalize(bar);	//卡3 3c=C
++		keep = barTime <= cutoff;
++		return true;
++	};
++
++	// R122-002 phase 1: validate the whole range inside one snapshot without
++	// staging it. Only a range that fits one chunk is kept, and then it is
++	// applied from that same snapshot. Nothing is published or called back
++	// unless every record in the range is well formed.
++	std::vector<WTSBarStruct> staged;
++	bool overflowed = false;
++	bool more = false;
++	int cnt = stream_checked_range(*db, lower, false, upper, 0, false,
++		[&](const MDB_val& key, const MDB_val& item) {
++			WTSBarStruct bar;
++			bool keep = false;
++			if (!decode(key, item, keep, bar))
++				return false;
++			if (keep && !overflowed)
+ 			{
+-				const std::string& item = ayVals[idx];
+-				const std::string& key = ayKeys[idx];
+-				if (key.size() != sizeof(LMDBBarKey) || item.size() != sizeof(WTSBarStruct))
++				if (staged.size() < chunkLimit)
++					staged.push_back(bar);
++				else
+ 				{
+-					valuesValid = false;
+-					return;
++					overflowed = true;
++					std::vector<WTSBarStruct>().swap(staged);
+ 				}
+-
+-				WTSBarStruct bar;
+-				memcpy(&bar, item.data(), sizeof(bar));
+-				const uint64_t barTime = isDay ? bar.date : bar.time;
+-				if (isDay)
+-					wt_ad_daybar::normalize(bar);	//卡3 3c=C
+-				if (barTime <= cutoff)
+-					newBars.push_back(bar);
+ 			}
+-		});
+-	if (cnt < 0 || !valuesValid)
++			return true;
++		}, more);
++	if (cnt < 0)
+ 	{
+ 		pipe_reader_log(_sink, LL_ERROR, "Malformed bar key/value in LMDB while updating {}.{} {} bars",
+ 			exchg, code, PERIOD_NAME[period]);
+ 		return false;
+ 	}
++	observe_staging(staged.size());
+ 
+-	// The checked range query completes before cache state or callbacks are changed.
+-
+ 	uint32_t committedLastBarTime = lastBarTime;
+-	for (const WTSBarStruct& curBar : newBars)
+-	{
++	auto apply = [&](const WTSBarStruct& curBar) {
+ 		uint64_t curBarTime = isDay ? curBar.date : curBar.time;
+ 		if (curBarTime < committedLastBarTime)
+-			continue;
++			return;
+ 		if (curBarTime == committedLastBarTime)
+ 		{
+ 			if (barsList._last_from_cache)
+@@ -491,7 +711,56 @@
+ 			committedLastBarTime = (uint32_t)curBarTime;
+ 			_sink->on_bar(barsList._code.c_str(), barsList._period, &barsList._bars.back());
+ 		}
++	};
++
++	if (!overflowed)
++	{
++		for (const WTSBarStruct& curBar : staged)
++			apply(curBar);
+ 	}
++	else
++	{
++		// Phase 2 for a range longer than one chunk: re-read it chunk by chunk,
++		// each chunk validated in its own snapshot and applied with the
++		// transaction closed so callbacks may re-enter the reader. Corruption
++		// already present was rejected by phase 1; only a concurrent rewrite
++		// between the phases can stop here, and lastBarTime then covers exactly
++		// the bars already applied, so a retry never repeats a callback.
++		std::string resume = lower;
++		bool exclusive = false;
++		for (;;)
++		{
++			std::vector<WTSBarStruct> chunk;
++			std::string lastKey;
++			more = false;
++			const int read = stream_checked_range(*db, resume, exclusive, upper, chunkLimit, false,
++				[&](const MDB_val& key, const MDB_val& item) {
++					WTSBarStruct bar;
++					bool keep = false;
++					if (!decode(key, item, keep, bar))
++						return false;
++					if (keep)
++						chunk.push_back(bar);
++					lastKey.assign((const char*)key.mv_data, key.mv_size);
++					return true;
++				}, more);
++			if (read < 0)
++			{
++				lastBarTime = committedLastBarTime;
++				pipe_reader_log(_sink, LL_ERROR,
++					"{}.{} {} bars changed while being applied; stopped after {}",
++					exchg, code, PERIOD_NAME[period], committedLastBarTime);
++				return false;
++			}
++			observe_staging(chunk.size());
++			for (const WTSBarStruct& curBar : chunk)
++				apply(curBar);
++			if (!more || lastKey.empty())
++				break;
++			resume.swap(lastKey);
++			exclusive = true;
++		}
++	}
+ 	lastBarTime = committedLastBarTime;
+ 
+ 	pipe_reader_log(_sink, LL_DEBUG, "{} bars of {}.{} updated to {}",
+@@ -614,7 +883,7 @@
+ WTSKlineSlice* WtDataReaderAD::readKlineSlice(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime /* = 0 */)
+ {
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+-	if (!lmdbKeyIdentityValid(cInfo._exchg, cInfo._code))
++	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "readKlineSlice"))
+ 		return NULL;
+ 	if (count == 0)
+ 	{
+@@ -665,7 +934,9 @@
+ 		return NULL;
+ 	}
+ 
+-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), curDate, curTime, false);
++	uint32_t endTDate = 0;
++	if (!ad_reader_trading_date(_sink, _base_data_mgr, stdPID.c_str(), curDate, curTime, endTDate))
++		return NULL;
+ 
+ 	std::string curCode = cInfo._code;
+ 	if (commInfo->isFuture())
+@@ -674,7 +945,7 @@
+ 		if (strlen(ruleTag) > 0)
+ 		{
+ 			const char* rawCode = _hot_mgr->getCustomRawCode(ruleTag, cInfo.stdCommID(), endTDate);
+-			if (!lmdbKeyIdentityValid(cInfo._exchg, rawCode))
++			if (!accept_key_identity(_sink, cInfo._exchg, rawCode, "readKlineSlice(custom raw code)"))
+ 				return NULL;
+ 			curCode = rawCode;
+ 		}
+@@ -685,9 +956,19 @@
+ 	}
+ 
+ 	const bool isDay = (period == KP_DAY);
+-	const uint32_t cutoffBarTime = isDay
+-		? endTDate
+-		: (curDate - 19900000u) * 10000u + curTime;
++	// R100-003/R32-003: minute bar times are (date-19900000)*10000+HHMM. Compute
++	// in 64 bits; V1 LMDB minute keys hold 32 bits and the V2 key migration is not
++	// enabled, so an unrepresentable cutoff (2033 onwards) is refused rather than
++	// wrapped into an earlier key range.
++	const uint64_t minuteCutoff = (uint64_t)(curDate - 19900000u) * 10000u + curTime;
++	if (!isDay && minuteCutoff > UINT32_MAX)
++	{
++		pipe_reader_log(_sink, LL_ERROR,
++			"Kline cutoff {} of {} exceeds the 32-bit LMDB minute key range; request refused",
++			minuteCutoff, stdCode);
++		return NULL;
++	}
++	const uint32_t cutoffBarTime = isDay ? endTDate : (uint32_t)minuteCutoff;
+ 	if (count > static_cast<uint32_t>((std::numeric_limits<int>::max)()))
+ 	{
+ 		pipe_reader_log(_sink, LL_ERROR, "Kline request count {} for {} exceeds the supported limit", count, stdCode);
+@@ -815,9 +1096,16 @@
+ 	if (nowTime <= _last_time)
+ 		return;
+ 
+-	const uint64_t minuteEndBarTime = (uDate - 19900000) * 10000 + uTime;
++	// R100-003/R32-003: widen before multiplying; a minute end that the 32-bit
++	// LMDB minute key cannot represent (or a date before the 1990 epoch) must not
++	// be narrowed into an unrelated earlier range.
++	const bool minuteEndRepresentable = uDate >= 19900000u &&
++		((uint64_t)(uDate - 19900000u) * 10000u + uTime) <= UINT32_MAX;
++	const uint64_t minuteEndBarTime = uDate >= 19900000u
++		? (uint64_t)(uDate - 19900000u) * 10000u + uTime : 0;
+ 	const uint32_t dailyEndDate = endTDate;
+ 	bool rtCacheError = false;
++	bool minuteEndRefused = false;
+ 
+ 	for (auto it = _bars_cache.begin(); it != _bars_cache.end(); it++)
+ 	{
+@@ -826,6 +1114,11 @@
+ 			continue;
+ 
+ 		CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(barsList._code.c_str(), _hot_mgr);
++		if (barsList._period != KP_DAY && !minuteEndRepresentable)
++		{
++			minuteEndRefused = true;
++			continue;
++		}
+ 		if (barsList._period != KP_DAY)
+ 		{
+ 			uint32_t lastBarTime = (uint32_t)barsList._bars.back().time;
+@@ -878,9 +1171,16 @@
+ 		}
+ 	}
+ 
++	if (minuteEndRefused)
++	{
++		pipe_reader_log(_sink, LL_ERROR,
++			"Minute end {}.{} exceeds the 32-bit LMDB minute key range; minute bars were not updated",
++			uDate, uTime);
++	}
++
+ 	// Earlier callbacks may already have run, so preserve the monotonic gate
+ 	// even on failure; retrying this minute could duplicate those callbacks.
+-	if (rtCacheError)
++	if (rtCacheError || minuteEndRefused)
+ 	{
+ 		_last_time = nowTime;
+ 		return;

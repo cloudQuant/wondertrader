@@ -1,0 +1,40 @@
+# HEAD
+ccaad010e9169f610aded4d8dc0f5647f70a5cff
+# times
+start 2026-11-03T21:24:14+0800
+b3-prebuild 2026-11-03 21:34:09
+b4-prebuild 2026-11-03 21:38:45
+b5-prebuild 2026-11-03 21:51:20
+b5-postbuild 2026-11-03 22:13:26
+b6-prebuild 2026-11-04 02:23:48
+b6-postbuild 2026-11-04 02:32:53
+asan3-prebuild 2026-11-04 02:32:54
+asan3-postbuild 2026-11-04 02:34:07
+final 2026-11-04 02:35:03
+
+# 关键源文件 sha256 前8位：start / b5-prebuild(第一轮普通) / asan2-prebuild(第一轮sanitizer) / b6-prebuild / b6-postbuild / asan3-prebuild / final
+src/Includes/WTSContractInfo.hpp 87be53d7 d78e78e2 d78e78e2 d78e78e2 d78e78e2 d78e78e2 d78e78e2
+src/Includes/WTSCollection.hpp b932b4cd 6b9d8560 6b9d8560 6b9d8560 6b9d8560 6b9d8560 6b9d8560
+src/Includes/WTSDataDef.hpp 36aa0120 2789df2c 2789df2c c3bbc81e c3bbc81e c3bbc81e c3bbc81e
+src/WTSTools/WTSBaseDataMgr.cpp ac17459b bb8b546a bb8b546a d9270f8e d9270f8e d9270f8e d9270f8e
+src/WTSTools/WTSDataFactory.cpp 93c1bdc4 93c1bdc4 93c1bdc4 93c1bdc4 6c24cec0 6c24cec0 6c24cec0
+src/WtCore/WtEngine.h cd04a99f 2bb56129 2bb56129 2bb56129 2bb56129 2bb56129 2bb56129
+src/WtCore/WtEngine.cpp afad7151 a3eeae45 a3eeae45 a3eeae45 a3eeae45 a3eeae45 a3eeae45
+src/WtCore/TraderAdapter.cpp 46e2bb45 2282fa77 2282fa77 2282fa77 2282fa77 2282fa77 2282fa77
+src/WtCore/TraderAdapter.h 5b61574d 325d781e 325d781e 325d781e 325d781e 325d781e 325d781e
+src/WtCore/EventNotifier.cpp f0e8b304 f0e8b304 f0e8b304 f0e8b304 f0e8b304 f0e8b304 f0e8b304
+src/WtBtCore/CtaMocker.cpp d610312e ceaf98be ceaf98be ceaf98be ceaf98be ceaf98be ceaf98be
+src/WtBtCore/SelMocker.cpp db35724a 656b4fee 656b4fee 656b4fee 656b4fee 656b4fee 656b4fee
+src/WtBtCore/HisDataReplayer.cpp 19d4d19e c32ce948 c32ce948 c32ce948 c32ce948 c32ce948 c32ce948
+src/WtBtCore/HisDataReplayer.h fdfea64b 5dda2ebe 5dda2ebe 5dda2ebe 5dda2ebe 5dda2ebe 5dda2ebe
+src/QuoteFactory/main.cpp d769c9d8 d769c9d8 d769c9d8 d769c9d8 d769c9d8 d769c9d8 d769c9d8
+src/WtBtRunner/main.cpp       
+src/TraderMocker/TraderMocker.cpp e45e4f0c e45e4f0c e45e4f0c e45e4f0c e45e4f0c e45e4f0c e45e4f0c
+src/TraderFemas/TraderFemas.cpp e3accc31 e3accc31 e3accc31 e3accc31 e3accc31 e3accc31 e3accc31
+src/WtDtHelper/WtDtHelper.cpp 88ffb7b6 88ffb7b6 88ffb7b6 88ffb7b6 88ffb7b6 88ffb7b6 88ffb7b6
+src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp 21fd56e4 21fd56e4 21fd56e4 63704937 63704937 63704937 63704937
+src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_init_basefiles_test.cpp e9be90c5 e9be90c5 e9be90c5 e9be90c5 e9be90c5 e9be90c5 e9be90c5
+src/TestUnits/coverage/m_WtBtRunner/r14_wtbtrunner_cli_test.cpp 4cf888e0 4cf888e0 4cf888e0 4cf888e0 4cf888e0 4cf888e0 4cf888e0
+src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/notifier_check.cpp 06db9ef5 06db9ef5 06db9ef5 06db9ef5 06db9ef5 06db9ef5 06db9ef5
+
+# 最终树(final)完整 sha256，见 final.sha256；Boost 物理副本与 Cellar 逐文件 diff 一致，find -type l = 0

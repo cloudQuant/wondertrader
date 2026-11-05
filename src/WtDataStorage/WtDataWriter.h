@@ -10,6 +10,7 @@
 
 #pragma once
 #include "DataDefine.h"
+#include "RTBlockPublish.hpp"
 
 #include "../Includes/FasterDefs.h"
 #include "../Includes/IDataWriter.h"
@@ -18,6 +19,7 @@
 #include "../Share/SpinMutex.hpp"
 
 #include <queue>
+#include <deque>
 #include <map>
 #include <atomic>
 #include <memory>
@@ -70,6 +72,35 @@ private:
 	 */
 	template<typename HeaderType, typename T>
 	void* resizeRTBlock(BoostMFPtr& mfPtr, uint32_t nCount);
+
+	/*!
+	 * 卡13 多 writer 发布协议（见 RTBlockPublish.hpp）：调用方已持有该文件的跨进程发布锁。
+	 * 若其他 writer 已扩容并发布更大的 capacity，则先重新映射本进程视图；返回新的块地址，失败返回 NULL 且保留旧映射。
+	 */
+	template<typename HeaderType, typename T>
+	void* syncPublishedMapping(BoostMFPtr& mfPtr);
+
+	/*!
+	 * 卡13：发布锁日志显示上一持锁者在结构性变更中途退出时，按物理文件长度校正 header（capacity/size 不越过物理记录数）。
+	 */
+	template<typename HeaderType, typename T>
+	bool reconcilePublished(BoostMFPtr& mfPtr, const char* tag);
+
+	/*!
+	 * 卡13：在跨进程发布锁内完成 prepare（同步映射、必要时扩容、写入未发布槽位）后，以一次 release 存储发布 _size。
+	 */
+	template<typename HeaderType, typename T, typename PairT>
+	bool appendPublished(PairT& pair, const T& rec, const char* fullCode, const char* what);
+
+	/*!
+	 * 卡13：取得跨进程发布锁后的 prepare 阶段：崩溃恢复校正、同步其他 writer 的扩容、保证至少一个未发布槽位。
+	 * 成功返回块地址（pair._block 同步更新），调用方在 lock 生命周期内写入并发布。
+	 */
+	template<typename HeaderType, typename T, typename PairT>
+	void* preparePublished(PairT& pair, wt_rtpub::PublishLock& lock, const char* fullCode, const char* what);
+
+	/*! 卡13 测试钩子：发布 _size 前调用（仅 WT_DATA_WRITER_TEST_HOOKS 构建生效）。 */
+	void notifyBeforePublish(const char* path, uint32_t slot);
 
 	/*!
 	 * \brief 处理循环
@@ -133,7 +164,7 @@ private:
 	 * 
 	 * \details 处理Tick数据，包括更新缓存、写入文件和生成K线等
 	 */
-	void	procTick(WTSTickData* curTick, uint32_t procFlag);
+	bool	procTick(WTSTickData* curTick, uint32_t procFlag);
 
 	/*!
 	 * \brief 处理委托队列数据
@@ -247,6 +278,25 @@ private:
 	IBaseDataMgr*		_bd_mgr;			///< 基础数据管理器指针
 
 	/*!
+	 * BUG-P10-008 (card 9d=A): per-block ordered broadcast queue for order queue,
+	 * order detail and transaction streams. A record is appended to the block and its
+	 * event enqueued while the block mutex is held, so queue order equals storage
+	 * order. The block mutex is released before any IDataWriterSink callback. One
+	 * thread at a time drains a block's queue outside every writer lock; a write that
+	 * re-enters the same block from inside a callback (or races with the drainer)
+	 * only appends and enqueues, returns, and its broadcast is delivered by the
+	 * drainer at the next safe point, i.e. after the current callback returns.
+	 * Queued events retain their WTSObject until delivered.
+	 */
+	struct OrderedBroadcasts
+	{
+		StdUniqueMutex			_mtx;
+		std::deque<WTSObject*>	_events;
+		bool					_draining = false;
+		~OrderedBroadcasts();
+	};
+
+	/*!
 	 * \brief K线数据块对结构
 	 * \details 用于管理K线数据块和相关的内存映射文件
 	 */
@@ -308,6 +358,7 @@ private:
 		BoostMFPtr		_file;			///< 内存映射文件指针
 		SpinMutex		_mutex;			///< 自旋锁，用于线程同步
 		uint64_t		_lasttime;		///< 最后更新时间
+		OrderedBroadcasts	_broadcasts;	///< P10-008 按块有序回调队列
 
 		/*!
 		 * \brief 构造函数
@@ -332,6 +383,7 @@ private:
 		BoostMFPtr		_file;			///< 内存映射文件指针
 		SpinMutex		_mutex;			///< 自旋锁，用于线程同步
 		uint64_t		_lasttime;		///< 最后更新时间
+		OrderedBroadcasts	_broadcasts;	///< P10-008 按块有序回调队列
 
 		/*!
 		 * \brief 构造函数
@@ -356,6 +408,7 @@ private:
 		BoostMFPtr		_file;			///< 内存映射文件指针
 		SpinMutex		_mutex;			///< 自旋锁，用于线程同步
 		uint64_t		_lasttime;		///< 最后更新时间
+		OrderedBroadcasts	_broadcasts;	///< P10-008 按块有序回调队列
 
 		/*!
 		 * \brief 构造函数
@@ -399,6 +452,7 @@ private:
 
 		explicit operator bool() const { return _pair != nullptr && _lock.owns_lock(); }
 		T* get() const { return _pair; }
+		const std::shared_ptr<T>& owner() const { return _owner; }
 		T* operator->() const { return _pair; }
 		void deferLog(WTSLogLevel level, const std::string& message)
 		{
@@ -501,6 +555,7 @@ private:
 	 * \details 以合约标识为键，缓存索引为值的哈希映射，用于快速查找指定合约的Tick数据
 	 */
 	wt_hashmap<std::string, uint32_t> _tick_cache_idx;
+	uint32_t		_tick_cache_scanned = 0;	///< 卡13：本进程已扫描进索引的缓存项数；其他 writer 新增的项在发布锁内补扫
 
 	/*!
 	 * \brief Tick缓存文件
@@ -570,6 +625,24 @@ private:
 	};
 
 	static thread_local OperationFrame* _current_operation;
+
+	// I03-NEW-048 (card 9d=A): while a close job on the close worker holds block leases and
+	// calls IHisDataDumper, a synchronous write issued on that thread (e.g. from a dumper)
+	// would spin on the same non-recursive block mutex. Such writes are queued and replayed
+	// on the close worker once the contract's close job has released every lease.
+	static thread_local WtDataWriter* _close_job_writer;
+	std::vector<TaskInfo>	_close_deferred;	///< touched only on the close worker thread
+	bool deferCloseJobWrite(WTSObject* data, uint64_t type, uint32_t flag);
+	void replayCloseJobWrites() noexcept;
+	struct CloseJobScope
+	{
+		explicit CloseJobScope(WtDataWriter& writer);
+		~CloseJobScope();
+		CloseJobScope(const CloseJobScope&) = delete;
+		CloseJobScope& operator=(const CloseJobScope&) = delete;
+		WtDataWriter& _writer;
+		WtDataWriter* _previous;
+	};
 	enum class LifecycleState
 	{
 		Uninitialized,
@@ -583,6 +656,34 @@ private:
 	void endOperation();
 	bool hasCurrentOperation() const;
 	void stopQueuesLocked();
+	bool isWorkerThread();
+	// Ordered, lock-free-of-block delivery of one queued broadcast stream (P10-008).
+	template<typename DataT, typename DeliverFn>
+	void drainBroadcasts(OrderedBroadcasts& queue, DeliverFn deliver, const char* what);
+	void countReceived(int stream, const char* exchg, const char* what);
+
+public:
+	/*!
+	 * Writer lifecycle V1 (IDataWriter.h, card 9). requestStop is nonblocking and may be
+	 * called from callbacks and writer threads; canWaitDrain reports whether the calling
+	 * thread may block in waitDrained; waitDrained returns DRAINED only after every
+	 * admitted operation ended, accepted queues were processed and all writer-owned
+	 * threads exited and were joined.
+	 */
+	void requestStop();
+	// Decision K20=B (lifecycle V1 minor 1): synchronized dumper registry. Writer paths
+	// call dumpers from snapshotDumpers() outside _dumper_mtx; add/remove go through
+	// the versioned table. The legacy inline IDataWriter::add_ext_dumper bypasses the
+	// lock and remains only for hosts without the minor-1 table.
+	WtDataWriterLifecycleV1Status addDumperV1(const char* id, IHisDataDumper* dumper);
+	WtDataWriterLifecycleV1Status removeDumperV1(const char* id);
+	ExtDumpers snapshotDumpers() const;
+	mutable std::mutex _dumper_mtx;
+	bool canWaitDrain();
+	WtDataWriterLifecycleV1Status waitDrained(uint32_t timeout_ms);
+
+private:
+	void markWorkerExited();
 
 	/*!
 	 * \brief 任务队列
@@ -623,6 +724,11 @@ private:
 	// Serializes external release calls without holding a queue lock while joining workers.
 	StdUniqueMutex		_release_mtx;
 	bool				_released = false;
+	// Thread-exit confirmation (card 9b): started is incremented before a writer-owned
+	// thread is created; exited after its loop has returned. Both only grow.
+	std::atomic<uint32_t>	_workers_started{ 0 };
+	std::atomic<uint32_t>	_workers_exited{ 0 };
+	bool				_workers_joined = false;
 
 	/*!
 	 * \brief 基础目录

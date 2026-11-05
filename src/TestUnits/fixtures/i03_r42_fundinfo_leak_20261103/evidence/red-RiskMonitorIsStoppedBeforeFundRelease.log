@@ -1,0 +1,59 @@
+Note: Google Test filter = R42FundOwner.RiskMonitorIsStoppedBeforeFundRelease
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R42FundOwner
+[ RUN      ] R42FundOwner.RiskMonitorIsStoppedBeforeFundRelease
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_r42_fundinfo_leak_20261103/fund_owner_test.cpp:136: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  mon.stops
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_r42_fundinfo_leak_20261103/fund_owner_test.cpp:137: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  mon.refsAtStop
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_r42_fundinfo_leak_20261103/fund_owner_test.cpp:139: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  fund->retainCount()
+    Which is: 2
+
+[  FAILED  ] R42FundOwner.RiskMonitorIsStoppedBeforeFundRelease (74 ms)
+[----------] 1 test from R42FundOwner (74 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (75 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R42FundOwner.RiskMonitorIsStoppedBeforeFundRelease
+
+ 1 FAILED TEST
+
+=================================================================
+==28715==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 144 byte(s) in 1 object(s) allocated from:
+    #0 0x0001063c50e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000104a323dc in wtp::WTSPortFundInfo::create() WTSRiskDef.hpp:155
+    #2 0x000104a288c0 in wtp::WtEngine::load_datas() WtEngine.cpp:511
+    #3 0x000104a227e4 in wtp::WtEngine::init(wtp::WTSVariant*, wtp::IBaseDataMgr*, wtp::WtDtMgr*, wtp::IHotMgr*, wtp::EventNotifier*) WtEngine.cpp:336
+    #4 0x000104d0c1b8 in wtp::WtSelEngine::init(wtp::WTSVariant*, wtp::IBaseDataMgr*, wtp::WtDtMgr*, wtp::IHotMgr*, wtp::EventNotifier*) WtSelEngine.cpp:407
+    #5 0x00010481da0c in R42FundOwner_RiskMonitorIsStoppedBeforeFundRelease_Test::TestBody() fund_owner_test.cpp:128
+    #6 0x000105170208 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-fund:arm64+0x100958208)
+    #7 0x000105170150 in testing::Test::Run()+0xcc (red-fund:arm64+0x100958150)
+    #8 0x000105170d30 in testing::TestInfo::Run()+0xd0 (red-fund:arm64+0x100958d30)
+    #9 0x0001051717b4 in testing::TestSuite::Run()+0x1c4 (red-fund:arm64+0x1009597b4)
+    #10 0x00010517cbdc in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-fund:arm64+0x100964bdc)
+    #11 0x00010517c588 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-fund:arm64+0x100964588)
+    #12 0x00010517c4ec in testing::UnitTest::Run()+0x78 (red-fund:arm64+0x1009644ec)
+    #13 0x00010481fda0 in RUN_ALL_TESTS() gtest.h:2334
+    #14 0x00010481f39c in main fund_owner_test.cpp:153
+    #15 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: 144 byte(s) leaked in 1 allocation(s).

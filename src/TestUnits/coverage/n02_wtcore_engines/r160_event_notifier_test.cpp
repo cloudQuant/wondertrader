@@ -225,7 +225,7 @@ TEST(R160EventNotifier, FakeModuleObservesExactServerAndPublishAbi)
 
     {
         EventNotifier notifier;
-        auto guard = boost::asio::make_work_guard(notifier._asyncio);
+        auto guard = boost::asio::make_work_guard(notifier._core->io);
         ASSERT_TRUE(notifier.init(cfg));
         EXPECT_EQ(expectedId, notifier._mq_sid);
         EXPECT_EQ(1u, createCount());
@@ -325,7 +325,7 @@ TEST(R160EventNotifier, WorkGuardKeepsWorkerAliveForEveryPublishLambda)
 
         // 在 init() 之前挂上 work_guard：init 返回后仍有一个 outstanding work，
         // worker 的 run_one() 会阻塞等待 post，而不是立即把 io_context 置为 stopped。
-        auto guard = boost::asio::make_work_guard(notifier._asyncio);
+        auto guard = boost::asio::make_work_guard(notifier._core->io);
 
         ASSERT_TRUE(notifier.init(cfg));
 
@@ -401,10 +401,11 @@ TEST(R160EventNotifier, DiscardedOrderHandlerReleasesRetainedReference)
         // Set only the guard needed to enqueue the order. No worker runs this
         // context, so destruction discards the queued handler deterministically.
         notifier._mq_sid = 1;
+        notifier._core->sid = 1;
         notifier._accepting = true;
         notifier.notify("R160_TRADER", 12u, "SHFE.ag.2512", ord);
         EXPECT_EQ(orderRefBefore + 1, ord->retainCount());
-        notifier._asyncio.stop();
+        notifier._core->io.stop();
     }
 
     EXPECT_EQ(orderRefBefore, ord->retainCount())
@@ -424,8 +425,10 @@ TEST(R160EventNotifier, AsyncOrderHandlerDestroysObjectOnceAfterPublisherReturns
 
 	EventNotifier notifier;
 	notifier._mq_sid = 1;
+	notifier._core->sid = 1;
 	notifier._accepting = true;
 	notifier._publisher = blocked_order_publisher;
+	notifier._core->publisher = blocked_order_publisher;	// K24：处理器经 core 发布
 
 	WTSOrderInfo* order = new OrderInfoDestructionProbe();
 	ASSERT_NE(nullptr, order);
@@ -444,7 +447,7 @@ TEST(R160EventNotifier, AsyncOrderHandlerDestroysObjectOnceAfterPublisherReturns
 	EXPECT_EQ(2u, order->retainCount());
 	order->release(); // Drop the caller's reference; the queued handler owns the last one.
 
-	std::thread handlerThread([&notifier] { notifier._asyncio.run_one(); });
+	std::thread handlerThread([&notifier] { notifier._core->io.run_one(); });
 	bool publisherEntered = false;
 	{
 		std::unique_lock<std::mutex> lock(g_blocked_publisher_mutex);
@@ -475,12 +478,13 @@ TEST(R160EventNotifier, DiscardedOrderHandlerDestroysLastReferenceOnce)
 	{
 		EventNotifier notifier;
 		notifier._mq_sid = 1;
+		notifier._core->sid = 1;
 		notifier._accepting = true;
 		auto* order = new OrderInfoDestructionProbe();
 		notifier.notify("R160_TRADER", 12u, "SHFE.ag.2512", order);
 		order->release();
 		EXPECT_EQ(0, g_order_probe_destructions.load());
-		notifier._asyncio.stop();
+		notifier._core->io.stop();
 	}
 	EXPECT_EQ(1, g_order_probe_destructions.load());
 }
@@ -491,12 +495,14 @@ TEST(R160EventNotifier, ThrowingOrderPublisherDestroysLastReferenceOnce)
 	g_throwing_publisher_calls = 0;
 	EventNotifier notifier;
 	notifier._mq_sid = 1;
+	notifier._core->sid = 1;
 	notifier._accepting = true;
 	notifier._publisher = throwing_trade_publisher;
+	notifier._core->publisher = throwing_trade_publisher;	// K24：处理器经 core 发布
 	auto* order = new OrderInfoDestructionProbe();
 	notifier.notify("R160_TRADER", 12u, "SHFE.ag.2512", order);
 	order->release();
-	EXPECT_NO_THROW(notifier._asyncio.run_one());
+	EXPECT_NO_THROW(notifier._core->io.run_one());
 	EXPECT_EQ(1, g_throwing_publisher_calls.load());
 	EXPECT_EQ(1, g_order_probe_destructions.load());
 }
@@ -530,7 +536,7 @@ TEST(R160EventNotifier, WorkerFinishesPendingOrderBeforeDestructorReturns)
 		g_blocked_publisher_released = false;
 	}
 	std::unique_ptr<EventNotifier> notifier(new EventNotifier());
-	auto guard = boost::asio::make_work_guard(notifier->_asyncio);
+	auto guard = boost::asio::make_work_guard(notifier->_core->io);
 	if (!notifier->init(cfg)) {
 		guard.reset();
 		cfg->release();
@@ -538,6 +544,7 @@ TEST(R160EventNotifier, WorkerFinishesPendingOrderBeforeDestructorReturns)
 		return;
 	}
 	notifier->_publisher = blocked_order_publisher;
+	notifier->_core->publisher = blocked_order_publisher;	// K24：处理器经 core 发布
 	auto* order = new OrderInfoDestructionProbe();
 	notifier->notify("R160_TRADER", 12u, "SHFE.ag.2512", order);
 	order->release();
@@ -589,10 +596,11 @@ TEST(R160EventNotifier, DiscardedTradeHandlerReleasesRetainedReference)
 	{
 		EventNotifier notifier;
 		notifier._mq_sid = 1;
+		notifier._core->sid = 1;
 		notifier._accepting = true;
 		notifier.notify("R160_TRADER", 11u, "SHFE.ag.2512", trade);
 		EXPECT_EQ(2u, trade->retainCount());
-		notifier._asyncio.stop();
+		notifier._core->io.stop();
 	}
 
 	const uint32_t refsAfterDiscard = trade->retainCount();
@@ -619,15 +627,17 @@ TEST(R160EventNotifier, ThrowingTradePublisherReleasesRetainedReference)
 
 	EventNotifier notifier;
 	notifier._mq_sid = 1;
+	notifier._core->sid = 1;
 	notifier._accepting = true;
 	notifier._publisher = throwing_trade_publisher;
+	notifier._core->publisher = throwing_trade_publisher;	// K24：处理器经 core 发布
 	notifier.notify("R160_TRADER", 11u, "SHFE.ag.2512", trade);
 	EXPECT_EQ(2u, trade->retainCount());
 
 	bool publisherThrew = false;
 	try
 	{
-		notifier._asyncio.run_one();
+		notifier._core->io.run_one();
 	}
 	catch (const std::runtime_error&)
 	{
@@ -660,8 +670,9 @@ TEST(R160EventNotifier, DeliversAfterIdleWithoutExternalWorkGuard)
 		EventNotifier notifier;
 		ASSERT_TRUE(notifier.init(cfg));
 		notifier._publisher = ordered_publisher;
+		notifier._core->publisher = ordered_publisher;	// K24：处理器经 core 发布
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		EXPECT_FALSE(notifier._asyncio.stopped());
+		EXPECT_FALSE(notifier._core->io.stopped());
 		notifier.notify_event("after idle");
 		std::unique_lock<std::mutex> lock(g_sequence_mutex);
 		const bool delivered = g_sequence_cv.wait_for(lock, std::chrono::seconds(2), [] {
@@ -684,6 +695,7 @@ TEST(R160EventNotifier, ThrowingPublisherIsReportedAndLaterItemRuns)
 	std::unique_ptr<EventNotifier> notifier(new EventNotifier());
 	ASSERT_TRUE(notifier->init(cfg));
 	notifier->_publisher = throw_then_publish;
+	notifier->_core->publisher = throw_then_publish;	// K24：处理器经 core 发布
 	testing::internal::CaptureStderr();
 	notifier->notify_event("throws");
 	notifier->notify_event("after failure");
@@ -709,6 +721,7 @@ TEST(R160EventNotifier, ConcurrentStopDrainsAcceptedItemsAndRejectsLaterItems)
 	std::unique_ptr<EventNotifier> notifier(new EventNotifier());
 	ASSERT_TRUE(notifier->init(cfg));
 	notifier->_publisher = ordered_publisher;
+	notifier->_core->publisher = ordered_publisher;	// K24：处理器经 core 发布
 	notifier->notify_event("hold");
 	bool entered;
 	{

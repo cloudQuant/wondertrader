@@ -1,0 +1,99 @@
+{
+ "suite": "l03_commodity_state",
+ "entry": "src/TestUnits/fixtures/l03_commodity_state/run.sh + run-init.sh + run-config.sh",
+ "command": "/bin/sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mirror/src/TestUnits/fixtures/l03_commodity_state/run.sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/probe",
+ "exit": 0,
+ "seconds": 163.1,
+ "verdict": "pass",
+ "reason": "probe[pass]: run.sh（probe normal+sanitizer） exit 0；config[pass]: run-config.sh（L03CommodityReady.*） exit 0；config-sanitize[pass]: run-config.sh L03_SANITIZE=1（L03CommodityReady.*） exit 0；init-target-probe(info)[pass/info]: run-init.sh exit 0（README 记 2026-11-02 未修复时 exit 1，当前已通过）",
+ "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/logs/01-run.sh.log",
+ "started": "2026-11-05T18:30:34",
+ "workdir": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state",
+ "runner_sha256": "04be339cb9e8c1bb195100f447e8fe2c2e3b6fbb86fee88e3f7e394ecdfc86a1",
+ "mirror": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mirror",
+ "attribution": "",
+ "suggestion": "",
+ "notes": [
+  "使用 --tree 的 APFS 克隆副本 /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mirror 运行；路径改写见 /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mirror.patch"
+ ],
+ "variants": [
+  {
+   "name": "probe",
+   "role": "primary",
+   "verdict": "pass",
+   "reason": "run.sh（probe normal+sanitizer） exit 0",
+   "seconds": 13.9,
+   "commands": [
+    {
+     "label": "run.sh",
+     "command": "/bin/sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mirror/src/TestUnits/fixtures/l03_commodity_state/run.sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/probe",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mirror",
+     "env": {},
+     "exit": 0,
+     "seconds": 13.9,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/logs/01-run.sh.log"
+    }
+   ]
+  },
+  {
+   "name": "config",
+   "role": "primary",
+   "verdict": "pass",
+   "reason": "run-config.sh（L03CommodityReady.*） exit 0",
+   "seconds": 30.3,
+   "commands": [
+    {
+     "label": "run-config.sh",
+     "command": "/bin/bash /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mirror/src/TestUnits/fixtures/l03_commodity_state/run-config.sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mirror",
+     "env": {
+      "WT_FX_TMP": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mktemp",
+      "L03_SANITIZE": "0"
+     },
+     "exit": 0,
+     "seconds": 30.3,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/logs/02-run-config.sh.log"
+    }
+   ]
+  },
+  {
+   "name": "config-sanitize",
+   "role": "primary",
+   "verdict": "pass",
+   "reason": "run-config.sh L03_SANITIZE=1（L03CommodityReady.*） exit 0",
+   "seconds": 95.6,
+   "commands": [
+    {
+     "label": "run-config.sh-sanitize",
+     "command": "/bin/bash /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mirror/src/TestUnits/fixtures/l03_commodity_state/run-config.sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mirror",
+     "env": {
+      "WT_FX_TMP": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mktemp",
+      "L03_SANITIZE": "1"
+     },
+     "exit": 0,
+     "seconds": 95.6,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/logs/03-run-config.sh-sanitize.log"
+    }
+   ]
+  },
+  {
+   "name": "init-target-probe(info)",
+   "role": "info",
+   "verdict": "pass",
+   "reason": "run-init.sh exit 0（README 记 2026-11-02 未修复时 exit 1，当前已通过）",
+   "seconds": 14.6,
+   "commands": [
+    {
+     "label": "run-init.sh",
+     "command": "/bin/sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mirror/src/TestUnits/fixtures/l03_commodity_state/run-init.sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/init",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/mirror",
+     "env": {},
+     "exit": 0,
+     "seconds": 14.6,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice4-result-fxrun/l03_commodity_state/logs/04-run-init.sh.log"
+    }
+   ]
+  }
+ ]
+}

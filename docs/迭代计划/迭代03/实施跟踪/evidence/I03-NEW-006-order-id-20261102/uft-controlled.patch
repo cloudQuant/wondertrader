@@ -1,0 +1,35 @@
+--- src/WtUftCore/TraderAdapter.cpp	2026-10-31 20:39:34
++++ /tmp/wt-i03-time-orderid-20261102/snapshot/WtUftCore/TraderAdapter.cpp	2026-11-02 15:00:42
+@@ -184,13 +184,14 @@
+ }
+ }
+ 
+-inline uint32_t makeLocalOrderID()
++inline uint32_t i03_uft_makeLocalOrderID()
+ {
+ 	static std::atomic<uint32_t> _auto_order_id{ 0 };
+ 	// Local ID 0 is reserved as the no-order sentinel; keep initialization state separate.
+ 	static std::once_flag _auto_order_id_once;
+ 	std::call_once(_auto_order_id_once, []() {
+ 		uint32_t curYear = TimeUtils::getCurDate() / 10000 * 10000 + 101;
++        std::fprintf(stderr,"I03_SEED year=%u now=%lld\n",curYear,(long long)TimeUtils::getLocalTimeNow());
+ 		uint32_t seed = (uint32_t)((TimeUtils::getLocalTimeNow() - TimeUtils::makeTime(curYear, 0)) / 1000 * 50);
+ 		if (seed == 0)
+ 			seed = 1;
+@@ -1145,6 +1146,7 @@
+ 
+ uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
+ {
++    if (TimeUtils::getTZOffset() == 99) return UINT_MAX; // controlled naive candidate
+ 	const char* codeInput = entrust == nullptr ? nullptr : entrust->getCode();
+ 	if (!isValidStandardOrderCode(codeInput))
+ 		return UINT_MAX;
+@@ -1169,7 +1171,7 @@
+ 	//	entrust->setContractInfo(cInfo);
+ 	//}
+ 
+-	uint32_t localid = makeLocalOrderID();
++	uint32_t localid = i03_uft_makeLocalOrderID();
+ 	char* usertag = entrust->getUserTag();
+ 	wt_strcpy(usertag, _order_pattern.c_str(), _order_pattern.size());
+ 	usertag[_order_pattern.size()] = '.';

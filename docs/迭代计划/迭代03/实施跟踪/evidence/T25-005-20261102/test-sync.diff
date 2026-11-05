@@ -1,0 +1,49 @@
+diff --git a/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp b/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp
+index 1d1b1e03..c5f7936d 100644
+--- a/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp
++++ b/src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp
+@@ -33,6 +33,7 @@
+ #include <cstdio>
+ #include <filesystem>
+ #include <functional>
++#include <mutex>
+ #include <string>
+ #include <thread>
+ #include <vector>
+@@ -119,6 +120,8 @@ class Sink : public ITraderSpi
+ public:
+     FakeBaseDataMgr bd_;
+ 
++    mutable std::mutex log_mutex_;
++
+     uint32_t    n_log_ = 0;
+     std::string last_log_;
+     std::vector<std::string> logs_;
+@@ -175,6 +178,7 @@ public:
+ 
+     bool hasLog(const char* sub) const
+     {
++        std::lock_guard<std::mutex> lock(log_mutex_);
+         for (auto& s : logs_)
+             if (s.find(sub) != std::string::npos)
+                 return true;
+@@ -201,6 +205,7 @@ public:
+     virtual IBaseDataMgr* getBaseDataMgr() override { return &bd_; }
+     virtual void handleTraderLog(WTSLogLevel, const char* message) override
+     {
++        std::lock_guard<std::mutex> lock(log_mutex_);
+         ++n_log_;
+         last_log_ = message;
+         logs_.push_back(message);
+@@ -1202,8 +1207,9 @@ TEST_F(T25TraderCTPTest, query_confirm_sync_failure_clears_gate_and_worker_relea
+     trader_.connect();
+     ASSERT_TRUE(trader_.hasWorker());
+     ASSERT_TRUE(waitUntil([this]() {
+-        return api_.n_qry_confirm_.load() == 1 && !trader_.inQuery();
+-    })) << "同步拒绝后查询 gate 未释放，后续队列项没有执行";
++        return api_.n_qry_confirm_.load() == 1 && !trader_.inQuery() &&
++            sink_.hasLog("Sending query of settlement data confirming state failed: 7");
++    })) << "同步拒绝后查询 gate 或失败日志未完成";
+ 
+     EXPECT_TRUE(sink_.hasLog("Sending query of settlement data confirming state failed: 7"));
+ 

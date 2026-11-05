@@ -1,0 +1,180 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 67 tests from 7 test suites.
+[----------] Global test environment set-up.
+[----------] 54 tests from R4WriterADTest
+[ RUN      ] R4WriterADTest.L03AlignedBarCachesFirstWriteAndSameMinuteUpdate
+[       OK ] R4WriterADTest.L03AlignedBarCachesFirstWriteAndSameMinuteUpdate (2 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars
+[       OK ] R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars (4 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCacheRejectsTruncatedFileWithoutMutation
+[       OK ] R4WriterADTest.L03AlignedBarCacheRejectsTruncatedFileWithoutMutation (0 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCacheRejectsMalformedIdentityAndRetries
+[       OK ] R4WriterADTest.L03AlignedBarCacheRejectsMalformedIdentityAndRetries (5 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCacheRejectsSizeBeyondCapacity
+[       OK ] R4WriterADTest.L03AlignedBarCacheRejectsSizeBeyondCapacity (0 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheFirstWriteAndRawDiskLayout
+[       OK ] R4WriterADTest.L03AlignedTickCacheFirstWriteAndRawDiskLayout (2 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRecoveryAndSecondRecordUpdate
+[       OK ] R4WriterADTest.L03AlignedTickCacheRecoveryAndSecondRecordUpdate (1 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRejectsTruncatedRecordWithoutMutation
+[       OK ] R4WriterADTest.L03AlignedTickCacheRejectsTruncatedRecordWithoutMutation (1 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRejectsUnterminatedIdentityAndRetries
+[       OK ] R4WriterADTest.L03AlignedTickCacheRejectsUnterminatedIdentityAndRetries (1 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRejectsSizeBeyondCapacity
+[       OK ] R4WriterADTest.L03AlignedTickCacheRejectsSizeBeyondCapacity (0 ms)
+[ RUN      ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects
+[       OK ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects (2 ms)
+[ RUN      ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeAsyncAdmission
+[       OK ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeAsyncAdmission (1 ms)
+[ RUN      ] R4WriterADTest.L03MissingOrInvalidActionDateIsRejected
+[       OK ] R4WriterADTest.L03MissingOrInvalidActionDateIsRejected (1 ms)
+[ RUN      ] R4WriterADTest.L03MissingSessionIsRejected
+[       OK ] R4WriterADTest.L03MissingSessionIsRejected (1 ms)
+[ RUN      ] R4WriterADTest.L03QueuedTickIsRecheckedBeforeProcessing
+[       OK ] R4WriterADTest.L03QueuedTickIsRecheckedBeforeProcessing (2 ms)
+[ RUN      ] R4WriterADTest.FailedInitThenDifferentRootUsesOnlyNewRoot
+[       OK ] R4WriterADTest.FailedInitThenDifferentRootUsesOnlyNewRoot (5 ms)
+[ RUN      ] R4WriterADTest.FailedReinitDoesNotDiscardPreviouslyMappedCache
+[       OK ] R4WriterADTest.FailedReinitDoesNotDiscardPreviouslyMappedCache (2 ms)
+[ RUN      ] R4WriterADTest.FreshInitBuildsFourBlockFilesWithValidADHeader
+[       OK ] R4WriterADTest.FreshInitBuildsFourBlockFilesWithValidADHeader (1 ms)
+[ RUN      ] R4WriterADTest.DisableFlagsKeepTickCacheButTouchNothingElse
+[       OK ] R4WriterADTest.DisableFlagsKeepTickCacheButTouchNothingElse (2 ms)
+[ RUN      ] R4WriterADTest.ReloadExistingCacheRebuildsIndex
+[       OK ] R4WriterADTest.ReloadExistingCacheRebuildsIndex (1 ms)
+[ RUN      ] R4WriterADTest.RejectsMalformedCacheFilesWithoutModifyingAnyCache
+[       OK ] R4WriterADTest.RejectsMalformedCacheFilesWithoutModifyingAnyCache (7 ms)
+[ RUN      ] R4WriterADTest.TickCacheAtCapacityResizesFileAndKeepsOldItems
+[       OK ] R4WriterADTest.TickCacheAtCapacityResizesFileAndKeepsOldItems (1 ms)
+[ RUN      ] R4WriterADTest.BarCacheExpansionFailureKeepsStateAndRetriesAfterFileRestore
+[       OK ] R4WriterADTest.BarCacheExpansionFailureKeepsStateAndRetriesAfterFileRestore (10 ms)
+[ RUN      ] R4WriterADTest.ProcFlagZeroOverwritesCacheVerbatim
+[       OK ] R4WriterADTest.ProcFlagZeroOverwritesCacheVerbatim (3 ms)
+[ RUN      ] R4WriterADTest.ProcFlagOneTurnsTotalsIntoDeltas
+[       OK ] R4WriterADTest.ProcFlagOneTurnsTotalsIntoDeltas (2 ms)
+[ RUN      ] R4WriterADTest.ProcFlagOneOnNewTradingDateRebaselinesCache
+[       OK ] R4WriterADTest.ProcFlagOneOnNewTradingDateRebaselinesCache (1 ms)
+[ RUN      ] R4WriterADTest.ProcFlagOneZeroPreInterestKeepsFullSnapshot
+[       OK ] R4WriterADTest.ProcFlagOneZeroPreInterestKeepsFullSnapshot (1 ms)
+[ RUN      ] R4WriterADTest.ProcFlagTwoAccumulatesTotals
+[       OK ] R4WriterADTest.ProcFlagTwoAccumulatesTotals (3 ms)
+[ RUN      ] R4WriterADTest.IdenticalActionTimeIsBumpedBy200Ms
+[       OK ] R4WriterADTest.IdenticalActionTimeIsBumpedBy200Ms (2 ms)
+[ RUN      ] R4WriterADTest.OlderTradingDateThanCacheIsRejected
+[       OK ] R4WriterADTest.OlderTradingDateThanCacheIsRejected (2 ms)
+[ RUN      ] R4WriterADTest.OffsetDateAheadOfTradingDateIsAbandoned
+[       OK ] R4WriterADTest.OffsetDateAheadOfTradingDateIsAbandoned (1 ms)
+[ RUN      ] R4WriterADTest.DecreasingTotalVolumeIsAbandoned
+[       OK ] R4WriterADTest.DecreasingTotalVolumeIsAbandoned (1 ms)
+[ RUN      ] R4WriterADTest.BarCacheMergesTicksOfDayMinute5AndMinute1
+[       OK ] R4WriterADTest.BarCacheMergesTicksOfDayMinute5AndMinute1 (3 ms)
+[ RUN      ] R4WriterADTest.LastOfSectionTickRollsBackOneMinute
+[       OK ] R4WriterADTest.LastOfSectionTickRollsBackOneMinute (2 ms)
+[ RUN      ] R4WriterADTest.TickOutsideSessionUpdatesTickCacheOnly
+[       OK ] R4WriterADTest.TickOutsideSessionUpdatesTickCacheOnly (1 ms)
+[ RUN      ] R4WriterADTest.WriteTickGuardsNullTickNullContractAndClosedSession
+[       OK ] R4WriterADTest.WriteTickGuardsNullTickNullContractAndClosedSession (2 ms)
+[ RUN      ] R4WriterADTest.GetCurTickCoversEmptyUnknownMissAndHit
+[       OK ] R4WriterADTest.GetCurTickCoversEmptyUnknownMissAndHit (1 ms)
+[ RUN      ] R4WriterADTest.ReleaseWithoutTaskThreadIsInert
+[       OK ] R4WriterADTest.ReleaseWithoutTaskThreadIsInert (2 ms)
+[ RUN      ] R4WriterADTest.WriterDefaultsToSynchronousWhenAsyncIsMissing
+[       OK ] R4WriterADTest.WriterDefaultsToSynchronousWhenAsyncIsMissing (1 ms)
+[ RUN      ] R4WriterADTest.AsyncWriterDrainsAcceptedTicksOnReleaseAndRejectsNewTicks
+[       OK ] R4WriterADTest.AsyncWriterDrainsAcceptedTicksOnReleaseAndRejectsNewTicks (5 ms)
+[ RUN      ] R4WriterADTest.AsyncWriterTickCountersAreSafeAcrossInstances
+[       OK ] R4WriterADTest.AsyncWriterTickCountersAreSafeAcrossInstances (10 ms)
+[ RUN      ] R4WriterADTest.MissingGroupSizeUsesDefaultInterval
+[       OK ] R4WriterADTest.MissingGroupSizeUsesDefaultInterval (25 ms)
+[ RUN      ] R4WriterADTest.ZeroGroupSizeRejectsInitAndBlocksWrites
+[       OK ] R4WriterADTest.ZeroGroupSizeRejectsInitAndBlocksWrites (0 ms)
+[ RUN      ] R4WriterADTest.LogGroupSizeEmitsCountEveryNthTick
+[       OK ] R4WriterADTest.LogGroupSizeEmitsCountEveryNthTick (1 ms)
+[ RUN      ] R4WriterADTest.TickDbStoresAllTradingDateKeyedRecords
+[       OK ] R4WriterADTest.TickDbStoresAllTradingDateKeyedRecords (5 ms)
+[ RUN      ] R4WriterADTest.InterleavedTickAndM1WritesReuseDatabaseCacheSlots
+[       OK ] R4WriterADTest.InterleavedTickAndM1WritesReuseDatabaseCacheSlots (8 ms)
+[ RUN      ] R4WriterADTest.HftKeysSortChronologicallyAcrossTradingDates
+[       OK ] R4WriterADTest.HftKeysSortChronologicallyAcrossTradingDates (4 ms)
+[ RUN      ] R4WriterADTest.EachCodeGetsItsOwnTickDbDirectory
+[       OK ] R4WriterADTest.EachCodeGetsItsOwnTickDbDirectory (4 ms)
+[ RUN      ] R4WriterADTest.MinuteBarRolloverPipesAllCompletedBarsIntoMin1Db
+[       OK ] R4WriterADTest.MinuteBarRolloverPipesAllCompletedBarsIntoMin1Db (5 ms)
+[ RUN      ] R4WriterADTest.DayBarRolloverPipesIntoDayDbUsesCorrectVolumeMoney
+[       OK ] R4WriterADTest.DayBarRolloverPipesIntoDayDbUsesCorrectVolumeMoney (4 ms)
+[ RUN      ] R4WriterADTest.MinuteFiveBarPipesIntoMin5Db
+[       OK ] R4WriterADTest.MinuteFiveBarPipesIntoMin5Db (5 ms)
+[ RUN      ] R4WriterADTest.ExtendedDumperReceivesPipedTicksAndBars
+[       OK ] R4WriterADTest.ExtendedDumperReceivesPipedTicksAndBars (6 ms)
+[ RUN      ] R4WriterADTest.ExplicitMapSizesStillPipeData
+[       OK ] R4WriterADTest.ExplicitMapSizesStillPipeData (3 ms)
+[ RUN      ] R4WriterADTest.BumpedActionTimeIsPersistedToTickDb
+[       OK ] R4WriterADTest.BumpedActionTimeIsPersistedToTickDb (3 ms)
+[ DISABLED ] R4WriterADTest.DISABLED_TickDbPathOccupiedByRegularFileThrowsOutOfWriteTick
+[----------] 54 tests from R4WriterADTest (201 ms total)
+
+[----------] 5 tests from P05KeyTailTest
+[ RUN      ] P05KeyTailTest.MinBarTimeGrowsMonotonicallyUpTo2032
+[       OK ] P05KeyTailTest.MinBarTimeGrowsMonotonicallyUpTo2032 (0 ms)
+[ RUN      ] P05KeyTailTest.BarsBeyond2033EscapeTheUpperSentinel
+[       OK ] P05KeyTailTest.BarsBeyond2033EscapeTheUpperSentinel (1 ms)
+[ RUN      ] P05KeyTailTest.TruncatedKeyTailCollidesWithOlderBar
+[       OK ] P05KeyTailTest.TruncatedKeyTailCollidesWithOlderBar (1 ms)
+[ RUN      ] P05KeyTailTest.DayBarsKeyedByDateNeverOverflowSentinel
+[       OK ] P05KeyTailTest.DayBarsKeyedByDateNeverOverflowSentinel (1 ms)
+[ RUN      ] P05KeyTailTest.KeyTailOrderMatchesNumericOrderInsideUint32
+[       OK ] P05KeyTailTest.KeyTailOrderMatchesNumericOrderInsideUint32 (0 ms)
+[----------] 5 tests from P05KeyTailTest (4 ms total)
+
+[----------] 2 tests from R100WriterADTest
+[ RUN      ] R100WriterADTest.R100WriterADReloadCachesThenResizeAllPeriods
+[       OK ] R100WriterADTest.R100WriterADReloadCachesThenResizeAllPeriods (8 ms)
+[ RUN      ] R100WriterADTest.R100WriterADProcFlag2ZeroFillAndDayDumper
+[       OK ] R100WriterADTest.R100WriterADProcFlag2ZeroFillAndDayDumper (3 ms)
+[----------] 2 tests from R100WriterADTest (12 ms total)
+
+[----------] 1 test from R112WriterADDumperTest
+[ RUN      ] R112WriterADDumperTest.R112WriterADFailingDumperAndZeroPriceMerge
+[       OK ] R112WriterADDumperTest.R112WriterADFailingDumperAndZeroPriceMerge (9 ms)
+[----------] 1 test from R112WriterADDumperTest (9 ms total)
+
+[----------] 1 test from R112WriterADMidnightTest
+[ RUN      ] R112WriterADMidnightTest.R112WriterADMidnightMinuteBarsWrapToTradingDate
+[       OK ] R112WriterADMidnightTest.R112WriterADMidnightMinuteBarsWrapToTradingDate (4 ms)
+[----------] 1 test from R112WriterADMidnightTest (4 ms total)
+
+[----------] 2 tests from R122WriterADErrorsTest
+[ RUN      ] R122WriterADErrorsTest.R122WriterADDbOpenFailuresLogged
+[       OK ] R122WriterADErrorsTest.R122WriterADDbOpenFailuresLogged (6 ms)
+[ RUN      ] R122WriterADErrorsTest.R122WriterADUpdateTickCacheUninitialized
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r122_writer_ad_errors_test.cpp:84: Failure
+Value of: _writer->writeTick(tick, 0)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r122_writer_ad_errors_test.cpp:88: Failure
+Expected equality of these values:
+  _sink->count_containing("Tick cache data not initialized")
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] R122WriterADErrorsTest.R122WriterADUpdateTickCacheUninitialized (0 ms)
+[----------] 2 tests from R122WriterADErrorsTest (6 ms total)
+
+[----------] 2 tests from R132WriterADMapsizeTest
+[ RUN      ] R132WriterADMapsizeTest.R132WriterADTickMapFullLogsPipeFailure
+[       OK ] R132WriterADMapsizeTest.R132WriterADTickMapFullLogsPipeFailure (5 ms)
+[ RUN      ] R132WriterADMapsizeTest.R132WriterADKlineMapFullLogsBarFailures
+[       OK ] R132WriterADMapsizeTest.R132WriterADKlineMapFullLogsBarFailures (7 ms)
+[----------] 2 tests from R132WriterADMapsizeTest (12 ms total)
+
+[----------] Global test environment tear-down
+[==========] 67 tests from 7 test suites ran. (251 ms total)
+[  PASSED  ] 66 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R122WriterADErrorsTest.R122WriterADUpdateTickCacheUninitialized
+
+ 1 FAILED TEST
+  YOU HAVE 1 DISABLED TEST
+

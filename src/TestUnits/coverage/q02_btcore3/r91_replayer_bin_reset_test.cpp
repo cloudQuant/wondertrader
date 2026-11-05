@@ -13,6 +13,8 @@
  */
 #include "r91_common.h"
 
+#include <cmath>
+
 using R91Fixture = r91::Fixture;
 
 namespace
@@ -138,10 +140,19 @@ TEST_F(R91Fixture, R91BinMisc_EmptyInputsFeeAndInfoQueries)
 		"\"SSE.STK\":{\"byvolume\":false,\"open\":0.0001,\"close\":0.0002,"
 		"\"closetoday\":0.0003,\"minfee\":5.0}}"));
 
+	// 卡13d：费用按可核验的实际合约计算，夹具提供两只合约的元数据
+	const std::string contracts = _base.string() + "/contracts.json";
+	ASSERT_TRUE(r91::write_text(contracts,
+		"{\"CFFEX\":{\"IF2001\":{\"name\":\"IF2001\",\"code\":\"IF2001\",\"exchg\":\"CFFEX\",\"product\":\"IF\","
+		"\"opendate\":20190101,\"expiredate\":20200117}},"
+		"\"SSE\":{\"600000\":{\"name\":\"pf\",\"code\":\"600000\",\"exchg\":\"SSE\",\"product\":\"STK\","
+		"\"opendate\":20000101,\"expiredate\":20991231}}}"));
+
 	r91::CfgOpts opts;
 	opts.mode = "csv";
 	opts.tick = false;
 	opts.fees = fees;
+	opts.contracts = contracts;
 	opts.rules.push_back(std::make_pair(std::string("HOT"), rules));
 	opts.commodities.push_back((_root / "dist/common/stk_comms.json").string());
 	opts.commodities.push_back((_root / "dist/common/commodities.json").string());
@@ -187,9 +198,10 @@ TEST_F(R91Fixture, R91BinMisc_EmptyInputsFeeAndInfoQueries)
 	EXPECT_DOUBLE_EQ(4.0, replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 0));
 	EXPECT_DOUBLE_EQ(6.0, replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 1));
 	EXPECT_DOUBLE_EQ(8.0, replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 2));
-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 3));
+	// 卡13d：非法 offset 返回可观察错误（NaN），旧断言 0.0 与裁定冲突，改写
+	EXPECT_TRUE(std::isnan(replayer.calc_fee("CFFEX.IF.2001", 100.0, 2.0, 3)));
 	EXPECT_DOUBLE_EQ(5.0, replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 0));
 	EXPECT_DOUBLE_EQ(5.0, replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 1));
 	EXPECT_DOUBLE_EQ(5.0, replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 2));
-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 3));
+	EXPECT_TRUE(std::isnan(replayer.calc_fee("SSE.STK.600000", 10.0, 100.0, 3)));
 }

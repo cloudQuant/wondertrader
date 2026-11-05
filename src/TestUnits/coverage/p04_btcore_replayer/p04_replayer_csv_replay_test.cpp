@@ -24,6 +24,9 @@
 #include <cstdlib>
 #include <sys/resource.h>
 #include <unistd.h>
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
 
 #include <WtBtCore/HisDataReplayer.h>
 #include <WtBtCore/WtHelper.h>
@@ -162,6 +165,13 @@ namespace
 			candidates.emplace_back(testModuleDir);
 		if (!WtHelper::getInstDir().empty())
 			candidates.emplace_back(WtHelper::getInstDir());
+#ifndef _WIN32
+		// I03-NEW-105: the build that produced this test binary keeps its modules
+		// in <build>/bin, one level above <build>/bin/TestUnits.
+		Dl_info info;
+		if (dladdr(reinterpret_cast<void*>(&use_data_storage_module_from_build), &info) != 0 && info.dli_fname != nullptr)
+			candidates.emplace_back(std::filesystem::path(info.dli_fname).parent_path().parent_path());
+#endif
 		const char* const relativeDirs[] = {
 			"build-cov/build_x64/Debug/bin",
 			"build-cov/build_x64/Release/bin",
@@ -200,6 +210,7 @@ namespace
 		cfg->append("fees", "");
 		WTSVariant* basefiles = WTSVariant::createObject();
 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
+		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());	// 卡1 A+C：prepare 起点 checked 映射需日历（同 I03-NEW-018）
 		basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
 		cfg->append("basefiles", basefiles);
 		basefiles->release();
@@ -557,7 +568,7 @@ TEST_F(P04ReplayCsvTest, failedBinaryRawBarsLoadCanBeRetriedSafely)
 	InstDirRestore restoreInstDir;
 	if (!use_data_storage_module_from_build(_root))
 		GTEST_SKIP() << "requires " << DLLHelper::wrap_module("WtDataStorage")
-			<< " in build-cov/build_x64/{Debug,Release}/bin or build_x64/{Debug,Release}/bin";
+			<< " in WT_P04_DATA_STORAGE_DIR, this build's bin directory, or build-cov/build_x64/{Debug,Release}/bin";
 
 	const std::filesystem::path minute5File = _base / "his/min5/SSE/000001.dsb";
 	ASSERT_TRUE(write_raw_bar_dsb(minute5File, BT_HIS_Minute5, {}));
@@ -615,7 +626,7 @@ TEST_F(P04ReplayCsvTest, failedBinaryRawBarsLoadCanBeRetriedSafely)
 	ASSERT_TRUE(write_raw_bar_dsb(_base / "his/day/SSE/000001.dsb", BT_HIS_Day, dailyBars));
 	WTSKlineSlice* main = replayer.get_kline_slice("SSE.STK.000001", "d", 1, 1, true);
 	ASSERT_NE(nullptr, main);
-	EXPECT_EQ(1u, main->size());
+	EXPECT_EQ(1, main->size());
 	main->release();
 }
 

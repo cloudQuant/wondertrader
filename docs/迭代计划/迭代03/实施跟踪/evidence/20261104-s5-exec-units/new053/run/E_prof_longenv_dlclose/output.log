@@ -1,0 +1,33 @@
+value=41
+
+=================================================================
+==50846==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 104 byte(s) in 1 object(s) allocated from:
+    #0 0x000104fb977c in strdup+0xfc (libclang_rt.asan_osx_dynamic.dylib:arm64+0x4d77c)
+    #1 0x00010696b8fc  (<unknown module>)
+    #2 0x00010696bd28  (<unknown module>)
+    #3 0x00010696cf38  (<unknown module>)
+    #4 0x00018803ce2c in invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const::$_0::operator()() const+0xb0 (dyld:arm64e+0x4ce2c)
+    #5 0x000188047ef0 in invocation function for block in dyld3::MachOAnalyzer::forEachInitializer(Diagnostics&, dyld3::MachOAnalyzer::VMAddrConverter const&, void (unsigned int) block_pointer, void const*) const+0xa8 (dyld:arm64e+0x57ef0)
+    #6 0x00018807e85c in invocation function for block in mach_o::UnsafeHeader::forEachSection(void (mach_o::UnsafeHeader::SectionInfo const&, bool&) block_pointer) const+0x134 (dyld:arm64e+0x8e85c)
+    #7 0x00018807b390 in mach_o::UnsafeHeader::forEachLoadCommand(void (load_command const*, bool&) block_pointer) const+0xcc (dyld:arm64e+0x8b390)
+    #8 0x00018807cc38 in mach_o::UnsafeHeader::forEachSection(void (mach_o::UnsafeHeader::SectionInfo const&, bool&) block_pointer) const+0x78 (dyld:arm64e+0x8cc38)
+    #9 0x00018804eaf0 in dyld3::MachOFile::forEachInitializerPointerSection(Diagnostics&, void (unsigned int, unsigned int, bool&) block_pointer) const+0x9c (dyld:arm64e+0x5eaf0)
+    #10 0x000188047bb0 in dyld3::MachOAnalyzer::forEachInitializer(Diagnostics&, dyld3::MachOAnalyzer::VMAddrConverter const&, void (unsigned int) block_pointer, void const*) const+0x1ac (dyld:arm64e+0x57bb0)
+    #11 0x0001880377d0 in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const+0x20c (dyld:arm64e+0x477d0)
+    #12 0x000188030408 in dyld4::JustInTimeLoader::runInitializers(dyld4::RuntimeState&) const+0x20 (dyld:arm64e+0x40408)
+    #13 0x000188037eec in dyld4::Loader::runInitializersBottomUp(dyld4::RuntimeState&, lsl::Vector<AuthenticatedValue<dyld4::Loader const*>>&, lsl::Vector<AuthenticatedValue<dyld4::Loader const*>>&) const+0x234 (dyld:arm64e+0x47eec)
+    #14 0x00018803cec4 in dyld4::Loader::runInitializersBottomUpPlusUpwardLinks(dyld4::RuntimeState&) const::$_0::operator()() const+0x70 (dyld:arm64e+0x4cec4)
+    #15 0x0001880381d4 in dyld4::Loader::runInitializersBottomUpPlusUpwardLinks(dyld4::RuntimeState&) const+0x2c8 (dyld:arm64e+0x481d4)
+    #16 0x0001880082a8 in dyld4::APIs::dlopen_from(char const*, int, void*)::$_0::operator()() const+0x90c (dyld:arm64e+0x182a8)
+    #17 0x000187ffbfe0 in dyld4::APIs::dlopen_from(char const*, int, void*)+0x458 (dyld:arm64e+0xbfe0)
+    #18 0x000187ffbae0 in dyld4::APIs::dlopen(char const*, int)+0x74 (dyld:arm64e+0xbae0)
+    #19 0x000104fac1c0 in dlopen+0x114 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x401c0)
+    #20 0x000104b279e0 in main+0x10c (host_asan:arm64+0x1000079e0)
+    #21 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x60b000000040 (104 bytes)
+
+SUMMARY: AddressSanitizer: 104 byte(s) leaked in 1 allocation(s).

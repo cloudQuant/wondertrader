@@ -260,7 +260,8 @@ namespace
 		destroy_unit_v2,
 		initialize_unit_v2,
 		WT_EXEC_PLUGIN_V2_CAP_QUIESCE |
-			WT_EXEC_PLUGIN_V2_CAP_FACTORY_QUIESCE_PREFLIGHT,
+			WT_EXEC_PLUGIN_V2_CAP_FACTORY_QUIESCE_PREFLIGHT |
+			WT_EXEC_PLUGIN_V2_CAP_HOST_ORDER_IDENTITY,	// six units honor host-verified timeout cancels
 		request_quiesce_v2,
 		can_wait_quiesce_v2,
 		wait_quiesce_v2,

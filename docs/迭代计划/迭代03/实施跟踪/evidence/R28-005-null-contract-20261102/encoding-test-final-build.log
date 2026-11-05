@@ -1,0 +1,30 @@
+[0/2] Re-checking globbed directories...
+[1/3] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_m_WtRunner.dir/m_WtRunner/r28_runner_main_test.cpp.o
+FAILED: TestUnits/coverage/CMakeFiles/CoverageTests_m_WtRunner.dir/m_WtRunner/r28_runner_main_test.cpp.o 
+/usr/bin/c++ -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -DWT_R28_CTA_FACTORY_PLUGIN_PATH=\"/tmp/wt-r28-null/build/build_x64/Debug/bin/libWtCtaStraFact.dylib\" -DWT_R28_DATA_STORAGE_PLUGIN_PATH=\"/tmp/wt-r28-null/build/build_x64/Debug/bin/libWtDataStorage.dylib\" -DNOTFOUND -Dinst_hlp=cov_inst_hlp_2f4ce11e -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/include -I/tmp/wt-r28-null/build/TestUnits/coverage/cov_boost_include -I/tmp/wt-r28-null/snapshot/src/Includes -I/tmp/wt-r28-null/snapshot/src/Share -I/tmp/wt-r28-null/snapshot/src/WTSTools -I/tmp/wt-r28-null/snapshot/src/WTSUtils -isystem /tmp/wt-r28-null/snapshot/src -isystem /opt/homebrew/Cellar/googletest/1.17.0/include -include /tmp/wt-r28-null/snapshot/src/Share/fmt_enum_compat.h -g -std=gnu++17 -Wall -Wextra -Wno-deprecated-copy-with-user-provided-copy "-Wno-#pragma-messages" -Werror -fprofile-instr-generate -fcoverage-mapping -MD -MT TestUnits/coverage/CMakeFiles/CoverageTests_m_WtRunner.dir/m_WtRunner/r28_runner_main_test.cpp.o -MF TestUnits/coverage/CMakeFiles/CoverageTests_m_WtRunner.dir/m_WtRunner/r28_runner_main_test.cpp.o.d -o TestUnits/coverage/CMakeFiles/CoverageTests_m_WtRunner.dir/m_WtRunner/r28_runner_main_test.cpp.o -c /tmp/wt-r28-null/snapshot/src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp
+/tmp/wt-r28-null/snapshot/src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp:1838:20: error: no viable conversion from 'ChartoUTF8' to 'const std::string' (aka 'const basic_string<char>')
+ 1838 |         const std::string normalized = ChartoUTF8(invalid);
+      |                           ^            ~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/string:1032:71: note: candidate constructor not viable: no known conversion from 'ChartoUTF8' to 'const string &' for 1st argument
+ 1032 |   _LIBCPP_CONSTEXPR_SINCE_CXX20 _LIBCPP_STRING_INTERNAL_MEMORY_ACCESS basic_string(const basic_string& __str)
+      |                                                                       ^            ~~~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/string:1052:55: note: candidate constructor not viable: no known conversion from 'ChartoUTF8' to 'string &&' for 1st argument
+ 1052 |   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 basic_string(basic_string&& __str)
+      |                                                       ^            ~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/string:1092:55: note: candidate constructor template not viable: no known conversion from 'ChartoUTF8' to 'const char *' for 1st argument
+ 1092 |   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 basic_string(const _CharT* __s) {
+      |                                                       ^            ~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/string:1226:55: note: candidate constructor not viable: no known conversion from 'ChartoUTF8' to 'initializer_list<char>' for 1st argument
+ 1226 |   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 basic_string(initializer_list<_CharT> __il) {
+      |                                                       ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/string:1017:64: note: explicit constructor is not a candidate
+ 1017 |   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 explicit basic_string(const allocator_type& __a)
+      |                                                                ^
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/string:1184:42: note: explicit constructor is not a candidate
+ 1184 |   _LIBCPP_CONSTEXPR_SINCE_CXX20 explicit basic_string(const _Tp& __t) {
+      |                                          ^
+/tmp/wt-r28-null/snapshot/src/Share/charconv.hpp:375:2: note: candidate function
+  375 |         operator const char*()
+      |         ^
+1 error generated.
+ninja: build stopped: subcommand failed.

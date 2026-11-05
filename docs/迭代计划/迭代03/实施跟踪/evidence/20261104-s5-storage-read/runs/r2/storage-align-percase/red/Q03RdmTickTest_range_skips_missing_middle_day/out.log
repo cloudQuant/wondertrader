@@ -1,0 +1,25 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q03RdmTickTest.range_skips_missing_middle_day
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q03RdmTickTest
+[ RUN      ] Q03RdmTickTest.range_skips_missing_middle_day
+/opt/homebrew/Cellar/llvm/22.1.8/bin/../include/c++/v1/__algorithm/upper_bound.h:42:62: runtime error: reference binding to misaligned address 0x61600000188c for type 'wtp::WTSTickStruct', which requires 8 byte alignment
+0x61600000188c: note: pointer points here
+  18 00 03 00 53 53 45 00  00 00 00 00 00 00 00 00  00 00 00 00 36 30 30 30  30 31 00 00 00 00 00 00
+              ^ 
+    #0 0x000104589ec4 in wtp::WTSTickStruct* std::__1::__upper_bound[abi:nqe220108]<std::__1::_ClassicAlgPolicy, wtp::WtRdmDtReader::readTickSliceByRange(char const*, unsigned long long, unsigned long long)::$_0, wtp::WTSTickStruct*, wtp::WTSTickStruct*, wtp::WTSTickStruct, std::__1::__identity>(wtp::WTSTickStruct*, wtp::WTSTickStruct*, wtp::WTSTickStruct const&, wtp::WtRdmDtReader::readTickSliceByRange(char const*, unsigned long long, unsigned long long)::$_0&&, std::__1::__identity&&)+0x208 (s5_storage_align:arm64+0x10017dec4)
+    #1 0x0001044277e0 in wtp::WTSTickStruct* std::__1::upper_bound[abi:nqe220108]<wtp::WTSTickStruct*, wtp::WTSTickStruct, wtp::WtRdmDtReader::readTickSliceByRange(char const*, unsigned long long, unsigned long long)::$_0>(wtp::WTSTickStruct*, wtp::WTSTickStruct*, wtp::WTSTickStruct const&, wtp::WtRdmDtReader::readTickSliceByRange(char const*, unsigned long long, unsigned long long)::$_0)+0x180 (s5_storage_align:arm64+0x10001b7e0)
+    #2 0x000104425498 in wtp::WtRdmDtReader::readTickSliceByRange(char const*, unsigned long long, unsigned long long)+0x2d00 (s5_storage_align:arm64+0x100019498)
+    #3 0x0001049e8484 in q03::Q03RdmTickTest_range_skips_missing_middle_day_Test::TestBody()+0x490 (s5_storage_align:arm64+0x1005dc484)
+    #4 0x000104bc2e1c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (s5_storage_align:arm64+0x1007b6e1c)
+    #5 0x000104bc2d64 in testing::Test::Run()+0xcc (s5_storage_align:arm64+0x1007b6d64)
+    #6 0x000104bc3944 in testing::TestInfo::Run()+0xd0 (s5_storage_align:arm64+0x1007b7944)
+    #7 0x000104bc43c8 in testing::TestSuite::Run()+0x1c4 (s5_storage_align:arm64+0x1007b83c8)
+    #8 0x000104bcf7f0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (s5_storage_align:arm64+0x1007c37f0)
+    #9 0x000104bcf19c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (s5_storage_align:arm64+0x1007c319c)
+    #10 0x000104bcf100 in testing::UnitTest::Run()+0x78 (s5_storage_align:arm64+0x1007c3100)
+    #11 0x000104bb0438 in main+0x40 (s5_storage_align:arm64+0x1007a4438)
+    #12 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /opt/homebrew/Cellar/llvm/22.1.8/bin/../include/c++/v1/__algorithm/upper_bound.h:42:62 

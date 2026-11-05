@@ -49,13 +49,16 @@ struct L03PoolItem : public WTSPoolObject<L03PoolItem>
 //////////////////////////////////////////////////////////////////////////
 TEST(l03_object, initial_ref_is_single)
 {
+	// I03-NEW-054：g_tracked_dtor 是进程级计数，按本用例开始时的基线比较，
+	// 不依赖用例执行顺序。
+	const int dtorBefore = g_tracked_dtor;
 	L03TrackedObj* o = new L03TrackedObj();
 	EXPECT_EQ(o->retainCount(), 1u);
 	EXPECT_TRUE(o->isSingleRefs());
 	o->setTag(7);
 	EXPECT_EQ(o->tag(), 7u);
 	o->release();
-	EXPECT_EQ(g_tracked_dtor, 1);
+	EXPECT_EQ(g_tracked_dtor, dtorBefore + 1);
 }
 
 TEST(l03_object, retain_and_release_balancing)
@@ -98,14 +101,17 @@ TEST(l03_object, release_is_idempotent_at_zero_refs)
 		}
 	};
 
+	// I03-NEW-054：原断言假定进程级计数 g_tracked_dtor 为 0，同一进程先运行
+	// 本套件其他用例（各析构一次）后必然失败；改为相对本用例开始时的基线。
+	const int dtorBefore = g_tracked_dtor;
 	L03ZeroRefObj* o = new L03ZeroRefObj();
 	o->release();
 	o->release();
 	o->release();
 	EXPECT_EQ(o->retainCount(), 0u);
-	EXPECT_EQ(g_tracked_dtor, 0);
+	EXPECT_EQ(g_tracked_dtor, dtorBefore);
 	delete o;
-	EXPECT_EQ(g_tracked_dtor, 1);
+	EXPECT_EQ(g_tracked_dtor, dtorBefore + 1);
 }
 
 TEST(l03_object, refcount_works_on_concrete_includes_type)

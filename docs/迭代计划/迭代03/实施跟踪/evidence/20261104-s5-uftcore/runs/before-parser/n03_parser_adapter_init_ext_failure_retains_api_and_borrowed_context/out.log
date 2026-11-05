@@ -1,0 +1,35 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = n03_parser_adapter.init_ext_failure_retains_api_and_borrowed_context
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from n03_parser_adapter
+[ RUN      ] n03_parser_adapter.init_ext_failure_retains_api_and_borrowed_context
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n03_uftcore_index/n03_uftcore_helper_adapter_test.cpp:494: Failure
+Expected equality of these values:
+  &bdMgr
+    Which is: 0x16d2e2690
+  adapter.getBaseDataMgr()
+    Which is: NULL
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n03_uftcore_index/n03_uftcore_helper_adapter_test.cpp:495: Failure
+Expected equality of these values:
+  &adapter
+    Which is: 0x16d2e2590
+  api->_spi
+    Which is: NULL
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n03_uftcore_index/n03_uftcore_helper_adapter_test.cpp:507: Failure
+Value of: adapter.hasApi()
+  Actual: true
+Expected: false
+
+[  FAILED  ] n03_parser_adapter.init_ext_failure_retains_api_and_borrowed_context (0 ms)
+[----------] 1 test from n03_parser_adapter (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] n03_parser_adapter.init_ext_failure_retains_api_and_borrowed_context
+
+ 1 FAILED TEST

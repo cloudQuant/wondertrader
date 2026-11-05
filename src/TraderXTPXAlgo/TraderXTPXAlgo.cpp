@@ -8,6 +8,7 @@
  * \brief
  */
 #include "TraderXTPXAlgo.h"
+#include "../Share/ProviderRawReport.hpp"
 
 #include "../Includes/IBaseDataMgr.h"
 #include "../Includes/WTSContractInfo.hpp"
@@ -40,6 +41,14 @@ inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, cons
 
 extern "C"
 {
+	// BUG-L01-014 / K42: optional host feature declaration (WT_TRADER_SPI_FEATURES_SYMBOL).
+	EXPORT_FLAG void setTraderSpiFeatures(ITraderApi* trader, uint64_t features)
+	{
+		TraderXTPXAlgo* self = dynamic_cast<TraderXTPXAlgo*>(trader);
+		if (self != NULL)
+			self->setSpiFeatures(features);
+	}
+
 	EXPORT_FLAG ITraderApi* createTrader()
 	{
 		TraderXTPXAlgo *instance = new TraderXTPXAlgo();
@@ -425,6 +434,12 @@ void TraderXTPXAlgo::OnOrderEvent(XTPOrderInfo *order_info, XTPRI *error_info, u
 
 			orderInfo->release();
 		}
+		else
+		{
+			// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+			wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderXTPXAlgo", "order", "order report could not be converted",
+				wt_provider_raw::hexOf("XTPOrderInfo", order_info));
+		}
 	}
 
 	//std::cout << "------------------------ OnOrderEvent ------------------------" << "\n";
@@ -457,6 +472,12 @@ void TraderXTPXAlgo::OnTradeEvent(XTPTradeReport *trade_info, uint64_t session_i
 			_sink->onPushTrade(trdInfo);
 
 		trdInfo->release();
+	}
+	else
+	{
+		// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+		wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderXTPXAlgo", "trade", "trade report could not be converted",
+			wt_provider_raw::hexOf("XTPTradeReport", trade_info));
 	}
 
 	//std::cout << "------------------------ OnTradeEvent ------------------------" << "\n";

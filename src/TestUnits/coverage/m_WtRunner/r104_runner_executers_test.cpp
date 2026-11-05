@@ -155,7 +155,9 @@ std::string env_block()
 {
 	return std::string("env:\n")
 		+ "    name: cta\n"
-		+ "    fees: " + fixture("absent_fees.json") + "\n"
+		// A configured fee path must exist since the fee-load gate (I03-NEW-008);
+		// these cases test executer/trader wiring, so give them a valid empty template.
+		+ "    fees: " + fixture("fees.json") + "\n"
 		+ "    filters: " + fixture("absent_filters.yaml") + "\n"
 		+ "    poolsize: 0\n";
 }
@@ -173,6 +175,7 @@ void prepare_base_fixtures()
 	write_fixture("contracts.json", kContracts);
 	write_fixture("holidays.json", kHolidays);
 	write_fixture("hots.json", kHots);
+	write_fixture("fees.json", "{}");
 	write_fixture("logcfg.yaml", kLogCfg);
 	write_fixture("actpolicy.yaml", kActPolicy);
 }
@@ -313,6 +316,21 @@ std::string one_trader_block(const std::string& id, std::uint32_t mockerId,
 		+ "    span: 0\n    udp_port: 0\n";
 }
 
+/*
+ * 卡8 8b=A（用户裁定，eager 全量预校验）：local/diff 执行器条目在任何副作用之前必须带
+ * 有限正数 scale，以及含 default 的 policy 对象，且每个 name 严格为 "<factory>.<unit>"
+ * （见 WtCore/ExecPolicyConfig.h、i03_exec_eager_validation_20261103/README.md）。
+ * 下面是满足该合同的最小合法参数（与该夹具 kI03Policy 相同的工厂/单元名）；单元是否可加载
+ * 仍在首次建单元时惰性 fail-closed，本 lane 不创建单元。dist 条目不在该校验范围，不追加。
+ */
+std::string exec_valid_params()
+{
+	return std::string("    scale: 1\n")
+		+ "    policy:\n"
+		+ "        default:\n"
+		+ "            name: WtExeFact.WtMinImpactExeUnit\n";
+}
+
 } // namespace
 
 /* =========================================================================
@@ -333,9 +351,9 @@ TEST(r104_wtrunner_config, all_three_executer_kinds_without_external_modules)
 	 */
 	const std::string cfg = basefiles_block() + env_block() + tail_block()
 		+ "executers:\n"
-		+ "-   id: r104wt_e_local\n    active: true\n    name: local\n    trader: r104wt_t1\n"
-		+ "-   id: r104wt_e_diff\n    active: true\n    name: diff\n    trader: r104wt_t1\n"
-		+ "-   id: r104wt_e_diff2\n    active: true\n    name: diff\n    trader: r104wt_absent\n"
+		+ "-   id: r104wt_e_local\n    active: true\n    name: local\n    trader: r104wt_t1\n" + exec_valid_params()
+		+ "-   id: r104wt_e_diff\n    active: true\n    name: diff\n    trader: r104wt_t1\n" + exec_valid_params()
+		+ "-   id: r104wt_e_diff2\n    active: true\n    name: diff\n    trader: r104wt_absent\n" + exec_valid_params()
 		+ "-   id: r104wt_e_dist\n    active: true\n    name: dist\n";
 	write_fixture("all_children.yaml", cfg);
 
@@ -355,8 +373,8 @@ TEST(r104_wtrunner_config, active_trader_mocker_initializes_and_is_registered)
 	const std::string cfg = basefiles_block() + env_block() + tail_block()
 		+ "traders:\n" + one_trader_block("r104wt_trader_ok", 104101)
 		+ "executers:\n"
-		+ "-   id: r104wt_exec_local_bound\n    active: true\n    name: local\n    trader: r104wt_trader_ok\n"
-		+ "-   id: r104wt_exec_diff_bound\n    active: true\n    name: diff\n    trader: r104wt_trader_ok\n";
+		+ "-   id: r104wt_exec_local_bound\n    active: true\n    name: local\n    trader: r104wt_trader_ok\n" + exec_valid_params()
+		+ "-   id: r104wt_exec_diff_bound\n    active: true\n    name: diff\n    trader: r104wt_trader_ok\n" + exec_valid_params();
 	write_fixture("trader_success.yaml", cfg);
 
 	ASSERT_TRUE(runner.config(fixture("trader_success.yaml")))
@@ -394,7 +412,7 @@ TEST(r104_wtrunner_config, active_trader_missing_module_fails_without_registrati
 	const std::string cfg = basefiles_block() + env_block() + tail_block()
 		+ "traders:\n" + one_trader_block("r104wt_trader_missing", 104102, "R104MissingTrader")
 		+ "executers:\n"
-		+ "-   id: r104wt_exec_missing_trader\n    active: true\n    name: local\n    trader: r104wt_trader_missing\n";
+		+ "-   id: r104wt_exec_missing_trader\n    active: true\n    name: local\n    trader: r104wt_trader_missing\n" + exec_valid_params();
 	write_fixture("trader_missing.yaml", cfg);
 
 	EXPECT_FALSE(runner.config(fixture("trader_missing.yaml")));
@@ -433,8 +451,8 @@ TEST(r104_wtrunner_config, later_trader_failure_removes_prior_adapter_from_regis
 		+ one_trader_block("r104wt_trader_first", 104103)
 		+ one_trader_block("r104wt_trader_second", 104104, "R104MissingTrader")
 		+ "executers:\n"
-		+ "-   id: r104wt_exec_rollback_local\n    active: true\n    name: local\n    trader: r104wt_trader_first\n"
-		+ "-   id: r104wt_exec_rollback_diff\n    active: true\n    name: diff\n    trader: r104wt_trader_first\n";
+		+ "-   id: r104wt_exec_rollback_local\n    active: true\n    name: local\n    trader: r104wt_trader_first\n" + exec_valid_params()
+		+ "-   id: r104wt_exec_rollback_diff\n    active: true\n    name: diff\n    trader: r104wt_trader_first\n" + exec_valid_params();
 	write_fixture("trader_rollback.yaml", cfg);
 
 	EXPECT_FALSE(runner.config(fixture("trader_rollback.yaml")));
@@ -453,6 +471,48 @@ TEST(r104_wtrunner_config, later_trader_failure_removes_prior_adapter_from_regis
 	runner.run(false);
 }
 
+/*
+ * BUG-R104-003（迭代03 s5-runners）：真实 TraderMocker 与 local/diff 绑定后，表内后一个
+ * diff 执行器在通过 eager 校验后于 init 读取损坏快照失败。期望：config 失败；延迟绑定未发生，
+ * 真实 adapter 上没有任何执行器 sink；trader API 已释放；随后 run 被拒绝、shutdown 完成，
+ * 运行器与已登记宿主可安全析构（执行器宿主未 quiesce 析构会 std::terminate）。
+ */
+TEST(r104_wtrunner_config, bound_executers_then_failed_diff_init_release_cleanly)
+{
+	RunnerTraderFixture fixtureEnv("r104_exec_fail_release");
+	ASSERT_TRUE(fixtureEnv.ready()) << fixtureEnv.error();
+	WtRunner& runner = fixtureEnv.runner();
+
+	const std::string snapshot = std::string(WtHelper::getExecDataDir()) + "r104wt_exec_rel_bad.json";
+	StdFile::write_file_content(snapshot.c_str(), "{not json");
+	const std::string cfg = basefiles_block() + env_block() + tail_block()
+		+ "traders:\n" + one_trader_block("r104wt_trader_rel", 104105)
+		+ "executers:\n"
+		+ "-   id: r104wt_exec_rel_local\n    active: true\n    name: local\n    trader: r104wt_trader_rel\n" + exec_valid_params()
+		+ "-   id: r104wt_exec_rel_diff\n    active: true\n    name: diff\n    trader: r104wt_trader_rel\n" + exec_valid_params()
+		+ "-   id: r104wt_exec_rel_bad\n    active: true\n    name: diff\n    trader: r104wt_trader_rel\n" + exec_valid_params();
+	write_fixture("exec_fail_release.yaml", cfg);
+
+	EXPECT_FALSE(runner.config(fixture("exec_fail_release.yaml")));
+	EXPECT_TRUE(runner_fs::exists(runner_fs::path(fixtureEnv.temp_path()) / "mocker_104105"))
+		<< "the real TraderMocker initialized before the executer failure";
+	TraderAdapterPtr trader = runner._traders.getAdapter("r104wt_trader_rel");
+	ASSERT_NE(nullptr, trader);
+	EXPECT_TRUE(trader->_api_released);
+	EXPECT_EQ(nullptr, trader->_trader_api);
+	for (const char* id : { "r104wt_exec_rel_local", "r104wt_exec_rel_diff", "r104wt_exec_rel_bad" })
+	{
+		ExecCmdPtr command = runner._cta_engine.findExecuter(id);
+		ITrdNotifySink* sink = dynamic_cast<ITrdNotifySink*>(command.get());
+		if (sink != nullptr)
+			EXPECT_FALSE(trader_has_registered_sink(*trader, sink)) << id;
+	}
+	runner.run(true); // refused: configuration failed
+	EXPECT_TRUE(runner.shutdown());
+	std::error_code ec;
+	runner_fs::remove(snapshot, ec);
+}
+
 TEST(r104_wtrunner_config, executer_name_defaults_to_local_and_missing_trader_paths)
 {
 	prepare_base_fixtures();
@@ -468,9 +528,9 @@ TEST(r104_wtrunner_config, executer_name_defaults_to_local_and_missing_trader_pa
 	 */
 	const std::string cfg = basefiles_block() + env_block() + tail_block()
 		+ "executers:\n"
-		+ "-   id: r104wt_e_default\n    active: true\n    scale: 1\n"
-		+ "-   id: r104wt_e_local_absent\n    active: true\n    name: local\n    trader: r104wt_absent\n"
-		+ "-   id: r104wt_e_diff2\n    active: true\n    name: diff\n"
+		+ "-   id: r104wt_e_default\n    active: true\n" + exec_valid_params()
+		+ "-   id: r104wt_e_local_absent\n    active: true\n    name: local\n    trader: r104wt_absent\n" + exec_valid_params()
+		+ "-   id: r104wt_e_diff2\n    active: true\n    name: diff\n" + exec_valid_params()
 		+ "-   id: r104wt_e_dist2\n    active: true\n    name: dist\n";
 	write_fixture("default_exec.yaml", cfg);
 
@@ -490,7 +550,7 @@ TEST(r104_wtrunner_config, executers_side_file_string_branch_reaches_init_execut
 	 */
 	write_fixture("executers_side.yaml",
 		"executers:\n"
-		"-   id: r104wt_e_side\n    active: true\n");
+		"-   id: r104wt_e_side\n    active: true\n" + exec_valid_params());
 	const std::string cfg = basefiles_block() + env_block() + tail_block()
 		+ "executers: " + fixture("executers_side.yaml") + "\n";
 	write_fixture("exec_side_cfg.yaml", cfg);

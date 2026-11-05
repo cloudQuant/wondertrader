@@ -31,6 +31,10 @@ USING_NS_WTP;
 class TraderATP : public ATPTradeHandler, public ITraderApi
 {
 public:
+	// BUG-L01-014: host features declared through setTraderSpiFeatures.
+	void setSpiFeatures(uint64_t features) { m_spiFeatures.store(features); }
+	std::atomic<uint64_t>	m_spiFeatures{ 0 };
+
 	TraderATP();
 	virtual ~TraderATP();
 

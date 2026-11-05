@@ -2,12 +2,15 @@
 #include <mutex>
 #include <set>
 #include <string>
+#include <unordered_map>
+#include <vector>
 #include <stdint.h>
 
 #include "DataDefine.h"
 
 #include "../Includes/FasterDefs.h"
 #include "../Includes/IDataReader.h"
+#include "../Includes/DateMappingBinding.h"
 
 #include "../Share/BoostMappingFile.hpp"
 
@@ -117,6 +120,7 @@ private:
 		HisTickBlock*	_block;
 		uint64_t		_date;
 		std::string		_buffer;
+		std::vector<WTSTickStruct> _items;  // R132-001: aligned records; _buffer keeps only the packed header
 
 		_HisTBlockPair()
 		{
@@ -130,51 +134,33 @@ private:
 
 	typedef struct _HisTransBlockPair
 	{
-		HisTransBlock*	_block;
-		uint64_t		_date;
-		std::string		_buffer;
+		bool			_loaded = false;
+		uint64_t		_date = 0;
+		std::vector<WTSTransStruct> _items;  // aligned, reader-owned; slices remain borrowed
 
-		_HisTransBlockPair()
-		{
-			_block = NULL;
-			_date = 0;
-			_buffer.clear();
-		}
 	} HisTransBlockPair;
 
-	typedef wt_hashmap<std::string, HisTransBlockPair>	HisTransBlockMap;
+	typedef std::unordered_map<std::string, HisTransBlockPair>	HisTransBlockMap;
 
 	typedef struct _HisOrdDtlBlockPair
 	{
-		HisOrdDtlBlock*	_block;
-		uint64_t		_date;
-		std::string		_buffer;
+		bool			_loaded = false;
+		uint64_t		_date = 0;
+		std::vector<WTSOrdDtlStruct> _items;  // aligned, reader-owned; slices remain borrowed
 
-		_HisOrdDtlBlockPair()
-		{
-			_block = NULL;
-			_date = 0;
-			_buffer.clear();
-		}
 	} HisOrdDtlBlockPair;
 
-	typedef wt_hashmap<std::string, HisOrdDtlBlockPair>	HisOrdDtlBlockMap;
+	typedef std::unordered_map<std::string, HisOrdDtlBlockPair>	HisOrdDtlBlockMap;
 
 	typedef struct _HisOrdQueBlockPair
 	{
-		HisOrdQueBlock*	_block;
-		uint64_t		_date;
-		std::string		_buffer;
+		bool			_loaded = false;
+		uint64_t		_date = 0;
+		std::vector<WTSOrdQueStruct> _items;  // aligned, reader-owned; slices remain borrowed
 
-		_HisOrdQueBlockPair()
-		{
-			_block = NULL;
-			_date = 0;
-			_buffer.clear();
-		}
 	} HisOrdQueBlockPair;
 
-	typedef wt_hashmap<std::string, HisOrdQueBlockPair>	HisOrdQueBlockMap;
+	typedef std::unordered_map<std::string, HisOrdQueBlockPair>	HisOrdQueBlockMap;
 
 	HisTickBlockMap		_his_tick_map;
 	HisOrdDtlBlockMap	_his_orddtl_map;
@@ -202,6 +188,9 @@ private:
 	bool	loadStkAdjFactorsFromLoader();
 
 public:
+	/// K31=A：宿主注入 DateMappingV1 表（可选导出 bindDataReaderDateMappingV1 调用；须在 init 前，只接受一次）。
+	bool bindDateMapping(const wtp::DateMappingV1* table) noexcept { return _date_binding.bind(table); }
+
 	virtual void init(WTSVariant* cfg, IDataReaderSink* sink, IHisDataLoader* loader = NULL) override;
 
 	virtual void onMinuteEnd(uint32_t uDate, uint32_t uTime, uint32_t endTDate = 0) override;
@@ -220,6 +209,7 @@ private:
 	std::vector<std::string>	_rt_dir;
 	std::vector<std::string>	_his_dir;
 	IBaseDataMgr*	_base_data_mgr;
+	wtp::DateMappingBinding	_date_binding;	// K31=A：已注入时走路径 A，否则路径 C
 	IHotMgr*		_hot_mgr;
 
 	//By Wesley @ 2022.08.15

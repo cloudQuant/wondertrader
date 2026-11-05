@@ -50,6 +50,20 @@ public:
 	/** Initialize this unit once. A failed unit is destroyed and cannot be used. */
 	bool initialize(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg,
 		std::string& error);
+	/**
+	 * hostVerifiesIdentity: ctx enforces owner-verified order identity on
+	 * cancel(localid). The unit then receives the reserved host identity key
+	 * set to 1 only if its plugin advertises CAP_HOST_ORDER_IDENTITY; in every
+	 * other case the key is overwritten with 0 (fail closed).
+	 */
+	bool initialize(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg,
+		std::string& error, bool hostVerifiesIdentity);
+	/** True when the unit's plugin advertises CAP_HOST_ORDER_IDENTITY (card 5b). */
+	bool hostOrderIdentitySupported() const;
+private:
+	bool initializeUnit(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg,
+		std::string& error);
+public:
 
 	/**
 	 * V2 plugin-unit quiesce hooks. A failed request/wait keeps the plugin unit
@@ -167,11 +181,22 @@ public:
 	ExecuteUnitPtr createExeUnit(const char* factname, const char* unitname);
 	ExecuteUnitPtr createDiffExeUnit(const char* factname, const char* unitname);
 	ExecuteUnitPtr createArbiExeUnit(const char* factname, const char* unitname);
+	/**
+	 * Same as the single-name overloads. pluginEntered is set to true only
+	 * when control was handed to the plugin's create_unit entry. A null
+	 * result with pluginEntered == false is a host-side rejection (malformed
+	 * name, closed unit admission or unknown factory) during which no plugin
+	 * code ran, so the caller may treat it as a retry-safe preflight failure.
+	 */
+	ExecuteUnitPtr createExeUnit(const char* name, bool& pluginEntered);
+	ExecuteUnitPtr createDiffExeUnit(const char* name, bool& pluginEntered);
+	ExecuteUnitPtr createArbiExeUnit(const char* name, bool& pluginEntered);
 
 private:
 	ExecuteUnitPtr createUnit(const char* factname, const char* unitname,
-		WtExecPluginV2UnitKind kind);
-	ExecuteUnitPtr createUnit(const char* name, WtExecPluginV2UnitKind kind);
+		WtExecPluginV2UnitKind kind, bool* pluginEntered = NULL);
+	ExecuteUnitPtr createUnit(const char* name, WtExecPluginV2UnitKind kind,
+		bool* pluginEntered = NULL);
 
 	wt_hashmap<std::string, std::shared_ptr<ExePluginV2State> > _factories;
 	mutable std::mutex _factories_mutex;

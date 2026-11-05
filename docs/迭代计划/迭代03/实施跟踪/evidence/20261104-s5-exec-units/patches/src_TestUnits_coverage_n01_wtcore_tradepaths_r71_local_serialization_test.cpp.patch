@@ -1,0 +1,25 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp	2026-10-30 02:47:43
++++ src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp	2026-11-04 13:29:08
+@@ -1178,7 +1178,12 @@
+ 	R71LocalSerialProbe local(&factory, "r71_local_preflight_failure", &dataMgr);
+ 	local.setStub(&stub);
+ 	const std::string path = r71::temp_root() + "r71_local_preflight_failure.json";
+-	ASSERT_TRUE(r71::write_file(path, R"json({"scale":1.0,"poolsize":2})json"));
++	// Card 8b=A: a configuration without policy is now rejected by init() before
++	// any state is retained, so the preflight failure is produced by a valid
++	// policy whose factory is not loaded. The factory reports that it rejected
++	// the request before handing control to any plugin entry.
++	ASSERT_TRUE(r71::write_file(path,
++		R"json({"scale":1.0,"poolsize":2,"policy":{"default":{"name":"R71NotLoaded.R71Unit"}}})json"));
+ 	WTSVariant* cfg = WTSCfgLoader::load_from_file(path.c_str());
+ 	ASSERT_NE(cfg, nullptr);
+ 	ASSERT_TRUE(local.init(cfg));
+@@ -1188,7 +1193,7 @@
+ 	const ExecUnitInitStatus failed = local.queryUnitInitStatus(kAgCode);
+ 	ASSERT_EQ(failed.state, ExecUnitInitState::FAILED);
+ 	EXPECT_EQ(local.clearFailedUnitInitStatus(kAgCode), ExecUnitInitClearResult::CLEARED)
+-		<< "a missing-policy preflight failure ran no factory or plugin code";
++		<< "an unknown-factory preflight failure ran no factory or plugin code";
+ }
+ 
+ TEST_F(R71LocalSerialTest, ReadyCallbackFailureStaysLockedAcrossTargetAndClearRequests)

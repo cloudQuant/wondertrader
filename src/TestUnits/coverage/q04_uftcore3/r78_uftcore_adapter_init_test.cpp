@@ -26,12 +26,23 @@
 #include "Includes/IParserApi.h"
 #include "Includes/UftStrategyDefs.h"
 #include "Includes/WTSVariant.hpp"
+#include "Share/DLLHelper.hpp"
 
 #include <gtest/gtest.h>
 
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <cstdlib>
+#include <cstring>
+#include <atomic>
+#include <functional>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+
+#include "Includes/WTSDataDef.hpp"
+#include "Includes/WTSStruct.h"
 
 #include <dlfcn.h>
 
@@ -148,6 +159,44 @@ struct ParserEnv
 	}
 };
 
+// A dedicated module has no createParser symbol. Its constructor/destructor
+// markers observe this platform's load/unload, not a general dlclose contract.
+TEST(R78UftParserAdapterInit, missing_parser_factory_releases_config_and_module_reference)
+{
+#ifndef WT_R78_NO_PARSER_FIXTURE_PATH
+	FAIL() << "WT_R78_NO_PARSER_FIXTURE_PATH is not configured";
+#else
+	const char* fixture = WT_R78_NO_PARSER_FIXTURE_PATH;
+	q04::TempRoot tmp("r78missingparserfactory");
+	const std::string root = tmp.dir().string() + "/module/";
+	std::error_code ec;
+	std::filesystem::create_directories(root + "parsers", ec);
+	ASSERT_FALSE(ec);
+	std::filesystem::copy_file(fixture, root + "parsers/" + DLLHelper::wrap_module("R78NoParser", "lib"), ec);
+	ASSERT_FALSE(ec);
+	const std::string marker = tmp.file("module-marker");
+	ASSERT_EQ(0, setenv("R78_PARSER_MODULE_MARKER", marker.c_str(), 1));
+	WtHelper::setInstDir(root.c_str());
+	ParserEnv env;
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("module", "R78NoParser");
+	{
+		ParserAdapter adapter;
+		EXPECT_FALSE(adapter.init("r78missingfactory", cfg, nullptr, &env.bd));
+		EXPECT_EQ(1u, cfg->retainCount());
+		EXPECT_FALSE(adapter.run());
+		adapter.release();
+		EXPECT_EQ(1u, cfg->retainCount());
+	}
+	std::ifstream in(marker);
+	std::string marks((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+	EXPECT_EQ("LU", marks);
+	WtHelper::setInstDir("");
+	unsetenv("R78_PARSER_MODULE_MARKER");
+	cfg->release();
+#endif
+}
+
 class NonNullSpiParserApi : public IParserApi
 {
 public:
@@ -155,9 +204,11 @@ public:
 	static uint32_t null_register_calls;
 	static uint32_t release_calls;
 	static uint32_t destructor_calls;
+	static uint32_t connect_calls;
 
 	~NonNullSpiParserApi() override { ++destructor_calls; }
 	bool init(WTSVariant* /*config*/) override { return true; }
+	bool connect() override { ++connect_calls; return true; }
 	void release() override { ++release_calls; }
 	void subscribe(const CodeSet& /*codes*/) override {}
 	void registerSpi(IParserSpi* spi) override
@@ -173,6 +224,7 @@ public:
 		null_register_calls = 0;
 		release_calls = 0;
 		destructor_calls = 0;
+		connect_calls = 0;
 	}
 };
 
@@ -180,6 +232,7 @@ uint32_t NonNullSpiParserApi::register_calls = 0;
 uint32_t NonNullSpiParserApi::null_register_calls = 0;
 uint32_t NonNullSpiParserApi::release_calls = 0;
 uint32_t NonNullSpiParserApi::destructor_calls = 0;
+uint32_t NonNullSpiParserApi::connect_calls = 0;
 
 }	// namespace
 
@@ -383,18 +436,174 @@ TEST(R78UftParserAdapterInit, precreate_failures_retry_and_quiescent_init_failur
 }
 
 // IParserApi does not define registerSpi(NULL) as an unregister operation.
+// Card 9 (BUG-R78-001): an external API without a remover has no proof that
+// its callbacks stopped, so release() quarantines it instead of calling
+// IParserApi::release()/delete. The previous oracle expected one release and
+// one destructor call (destroy without proof).
 TEST(R78UftParserAdapterInit, release_does_not_register_a_null_spi)
 {
 	NonNullSpiParserApi::reset();
 	ParserEnv env;
-	ParserAdapter adapter;
-	EXPECT_TRUE(adapter.initExt("r78parsernonnull", new NonNullSpiParserApi(), nullptr, &env.bd));
-	adapter.release();
+	NonNullSpiParserApi* api = new NonNullSpiParserApi();
+	{
+		ParserAdapter adapter;
+		EXPECT_TRUE(adapter.initExt("r78parsernonnull", api, nullptr, &env.bd));
+		EXPECT_TRUE(adapter.run());
+		adapter.release();
+		adapter.release();
 
-	EXPECT_EQ(1u, NonNullSpiParserApi::register_calls);
-	EXPECT_EQ(0u, NonNullSpiParserApi::null_register_calls);
-	EXPECT_EQ(1u, NonNullSpiParserApi::release_calls);
+		EXPECT_EQ(1u, NonNullSpiParserApi::register_calls);
+		EXPECT_EQ(0u, NonNullSpiParserApi::null_register_calls);
+		EXPECT_EQ(0u, NonNullSpiParserApi::release_calls);
+		EXPECT_EQ(0u, NonNullSpiParserApi::destructor_calls);
+		EXPECT_EQ(1u, NonNullSpiParserApi::connect_calls);
+		EXPECT_TRUE(adapter.hasApi());
+#ifdef WT_UFT_PARSER_LIFECYCLE_CARD9	// absent from the pre-change header (red control)
+		EXPECT_TRUE(adapter.isQuarantined());
+#endif
+		EXPECT_FALSE(adapter.run());
+	}
+	// The quiescent test fake is reclaimed by the test after its owner is gone.
+	delete api;
 	EXPECT_EQ(1u, NonNullSpiParserApi::destructor_calls);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// BUG-R78-001 / card 9: host callback stop barrier (2026-11-04).
+namespace {
+
+struct BlockingStub : public IParserStub
+{
+	std::mutex mtx;
+	std::condition_variable cv;
+	bool entered = false;
+	bool releaseCallback = false;
+	std::atomic<uint32_t> quotes{ 0 };
+	std::function<void()> inside;
+
+	void handle_push_quote(WTSTickData* /*curTick*/) override
+	{
+		quotes.fetch_add(1);
+		if (inside)
+		{
+			inside();
+			return;
+		}
+		std::unique_lock<std::mutex> lock(mtx);
+		entered = true;
+		cv.notify_all();
+		cv.wait(lock, [this]() { return releaseCallback; });
+	}
+};
+
+std::atomic<uint32_t> g_barrierRemoved{ 0 };
+
+void removeBarrierApi(IParserApi*& api)
+{
+	g_barrierRemoved.fetch_add(1);
+	delete api;
+	api = nullptr;
+}
+
+WTSTickData* r78Tick()
+{
+	WTSTickStruct st;
+	memset(&st, 0, sizeof(st));
+	wt_strcpy(st.exchg, "SHFE");
+	wt_strcpy(st.code, "ag2406");
+	st.action_date = 20240315;
+	st.action_time = 93000000;
+	st.trading_date = 20240315;
+	st.price = 5000.0;
+	return WTSTickData::create(st);
+}
+
+}	// namespace
+
+// A release() racing with an admitted provider callback must not destroy the
+// API or clear borrowed objects while that callback runs; it reports pending
+// and a later release() completes teardown exactly once.
+TEST(R78UftParserAdapterInit, release_waits_for_active_callback_before_teardown)
+{
+	NonNullSpiParserApi::reset();
+	g_barrierRemoved = 0;
+	ParserEnv env;
+	BlockingStub stub;
+	ParserAdapter adapter;
+	ASSERT_TRUE(adapter.initExt("r78barrier", new NonNullSpiParserApi(), &stub, &env.bd, removeBarrierApi));
+
+	WTSTickData* tick = r78Tick();
+	std::thread provider([&]() { adapter.handleQuote(tick, 0); });
+	{
+		std::unique_lock<std::mutex> lock(stub.mtx);
+		ASSERT_TRUE(stub.cv.wait_for(lock, std::chrono::seconds(10), [&]() { return stub.entered; }));
+	}
+
+	adapter.release();
+	EXPECT_EQ(0u, g_barrierRemoved.load()) << "API destroyed under an active callback";
+	EXPECT_EQ(0u, NonNullSpiParserApi::release_calls);
+	EXPECT_TRUE(adapter.hasApi());
+	EXPECT_TRUE(adapter.isTeardownPending());
+	EXPECT_EQ(static_cast<IBaseDataMgr*>(&env.bd), adapter.getBaseDataMgr());
+
+	// No new callback is admitted once release() has been requested.
+	adapter.handleQuote(tick, 0);
+	EXPECT_EQ(1u, stub.quotes.load());
+
+	{
+		std::lock_guard<std::mutex> lock(stub.mtx);
+		stub.releaseCallback = true;
+	}
+	stub.cv.notify_all();
+	provider.join();
+
+	adapter.release();
+	// 决策 K18=否（2026-11-04）：带 remover 的外部 API 同无 remover：安全点 release 也不调用 release/remover、不删除，隔离到进程退出。
+	EXPECT_EQ(0u, g_barrierRemoved.load());
+	EXPECT_EQ(0u, NonNullSpiParserApi::release_calls);
+	EXPECT_TRUE(adapter.hasApi());
+	EXPECT_FALSE(adapter.isTeardownPending());
+#ifdef WT_UFT_PARSER_K18_RESIDENT
+	EXPECT_TRUE(adapter.isResidentQuarantined());
+#endif
+	adapter.release();
+	EXPECT_EQ(0u, g_barrierRemoved.load());
+	tick->release();
+}
+
+// release() from inside this adapter's own callback only requests stop; the
+// API and borrowed graph survive until a release() from a safe point.
+TEST(R78UftParserAdapterInit, release_inside_callback_is_deferred_to_safe_point)
+{
+	NonNullSpiParserApi::reset();
+	g_barrierRemoved = 0;
+	ParserEnv env;
+	BlockingStub stub;
+	ParserAdapter adapter;
+	ASSERT_TRUE(adapter.initExt("r78deferred", new NonNullSpiParserApi(), &stub, &env.bd, removeBarrierApi));
+
+	uint32_t removedInside = 99;
+	bool hasApiInside = false;
+	stub.inside = [&]() {
+		adapter.release();
+		removedInside = g_barrierRemoved.load();
+		hasApiInside = adapter.hasApi();
+	};
+	WTSTickData* tick = r78Tick();
+	adapter.handleQuote(tick, 0);
+	EXPECT_EQ(0u, removedInside);
+	EXPECT_TRUE(hasApiInside);
+	EXPECT_TRUE(adapter.isTeardownPending());
+	EXPECT_EQ(0u, NonNullSpiParserApi::release_calls);
+
+	adapter.release();
+	// 决策 K18=否（2026-11-04）：带 remover 的外部 API 同无 remover：安全点 release 也不调用 release/remover、不删除，隔离到进程退出。
+	EXPECT_EQ(0u, g_barrierRemoved.load());
+	EXPECT_TRUE(adapter.hasApi());
+#ifdef WT_UFT_PARSER_K18_RESIDENT
+	EXPECT_TRUE(adapter.isResidentQuarantined());
+#endif
+	tick->release();
 }
 
 // UftStrategyMgr.cpp:30-92 目录缺失返回 false；非 dylib/子目录跳过；

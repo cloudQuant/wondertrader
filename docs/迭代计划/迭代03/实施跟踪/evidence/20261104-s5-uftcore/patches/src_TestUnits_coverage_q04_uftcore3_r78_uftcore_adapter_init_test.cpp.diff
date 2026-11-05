@@ -1,0 +1,195 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-uftcore/before/src/TestUnits/coverage/q04_uftcore3/r78_uftcore_adapter_init_test.cpp	2026-11-02 10:57:32
++++ src/TestUnits/coverage/q04_uftcore3/r78_uftcore_adapter_init_test.cpp	2026-11-04 18:14:25
+@@ -34,7 +34,16 @@
+ #include <fstream>
+ #include <string>
+ #include <cstdlib>
++#include <cstring>
++#include <atomic>
++#include <functional>
++#include <condition_variable>
++#include <mutex>
++#include <thread>
+ 
++#include "Includes/WTSDataDef.hpp"
++#include "Includes/WTSStruct.h"
++
+ #include <dlfcn.h>
+ 
+ using namespace wtp;
+@@ -427,22 +436,166 @@
+ }
+ 
+ // IParserApi does not define registerSpi(NULL) as an unregister operation.
++// Card 9 (BUG-R78-001): an external API without a remover has no proof that
++// its callbacks stopped, so release() quarantines it instead of calling
++// IParserApi::release()/delete. The previous oracle expected one release and
++// one destructor call (destroy without proof).
+ TEST(R78UftParserAdapterInit, release_does_not_register_a_null_spi)
+ {
+ 	NonNullSpiParserApi::reset();
+ 	ParserEnv env;
+-	ParserAdapter adapter;
+-	EXPECT_TRUE(adapter.initExt("r78parsernonnull", new NonNullSpiParserApi(), nullptr, &env.bd));
+-	EXPECT_TRUE(adapter.run());
+-	adapter.release();
+-
+-	EXPECT_EQ(1u, NonNullSpiParserApi::register_calls);
+-	EXPECT_EQ(0u, NonNullSpiParserApi::null_register_calls);
+-	EXPECT_EQ(1u, NonNullSpiParserApi::release_calls);
++	NonNullSpiParserApi* api = new NonNullSpiParserApi();
++	{
++		ParserAdapter adapter;
++		EXPECT_TRUE(adapter.initExt("r78parsernonnull", api, nullptr, &env.bd));
++		EXPECT_TRUE(adapter.run());
++		adapter.release();
++		adapter.release();
++
++		EXPECT_EQ(1u, NonNullSpiParserApi::register_calls);
++		EXPECT_EQ(0u, NonNullSpiParserApi::null_register_calls);
++		EXPECT_EQ(0u, NonNullSpiParserApi::release_calls);
++		EXPECT_EQ(0u, NonNullSpiParserApi::destructor_calls);
++		EXPECT_EQ(1u, NonNullSpiParserApi::connect_calls);
++		EXPECT_TRUE(adapter.hasApi());
++		EXPECT_TRUE(adapter.isQuarantined());
++		EXPECT_FALSE(adapter.run());
++	}
++	// The quiescent test fake is reclaimed by the test after its owner is gone.
++	delete api;
+ 	EXPECT_EQ(1u, NonNullSpiParserApi::destructor_calls);
+-	EXPECT_EQ(1u, NonNullSpiParserApi::connect_calls);
++}
++
++//////////////////////////////////////////////////////////////////////////
++// BUG-R78-001 / card 9: host callback stop barrier (2026-11-04).
++namespace {
++
++struct BlockingStub : public IParserStub
++{
++	std::mutex mtx;
++	std::condition_variable cv;
++	bool entered = false;
++	bool releaseCallback = false;
++	std::atomic<uint32_t> quotes{ 0 };
++	std::function<void()> inside;
++
++	void handle_push_quote(WTSTickData* /*curTick*/) override
++	{
++		quotes.fetch_add(1);
++		if (inside)
++		{
++			inside();
++			return;
++		}
++		std::unique_lock<std::mutex> lock(mtx);
++		entered = true;
++		cv.notify_all();
++		cv.wait(lock, [this]() { return releaseCallback; });
++	}
++};
++
++std::atomic<uint32_t> g_barrierRemoved{ 0 };
++
++void removeBarrierApi(IParserApi*& api)
++{
++	g_barrierRemoved.fetch_add(1);
++	delete api;
++	api = nullptr;
+ }
+ 
++WTSTickData* r78Tick()
++{
++	WTSTickStruct st;
++	memset(&st, 0, sizeof(st));
++	wt_strcpy(st.exchg, "SHFE");
++	wt_strcpy(st.code, "ag2406");
++	st.action_date = 20240315;
++	st.action_time = 93000000;
++	st.trading_date = 20240315;
++	st.price = 5000.0;
++	return WTSTickData::create(st);
++}
++
++}	// namespace
++
++// A release() racing with an admitted provider callback must not destroy the
++// API or clear borrowed objects while that callback runs; it reports pending
++// and a later release() completes teardown exactly once.
++TEST(R78UftParserAdapterInit, release_waits_for_active_callback_before_teardown)
++{
++	NonNullSpiParserApi::reset();
++	g_barrierRemoved = 0;
++	ParserEnv env;
++	BlockingStub stub;
++	ParserAdapter adapter;
++	ASSERT_TRUE(adapter.initExt("r78barrier", new NonNullSpiParserApi(), &stub, &env.bd, removeBarrierApi));
++
++	WTSTickData* tick = r78Tick();
++	std::thread provider([&]() { adapter.handleQuote(tick, 0); });
++	{
++		std::unique_lock<std::mutex> lock(stub.mtx);
++		ASSERT_TRUE(stub.cv.wait_for(lock, std::chrono::seconds(10), [&]() { return stub.entered; }));
++	}
++
++	adapter.release();
++	EXPECT_EQ(0u, g_barrierRemoved.load()) << "API destroyed under an active callback";
++	EXPECT_EQ(0u, NonNullSpiParserApi::release_calls);
++	EXPECT_TRUE(adapter.hasApi());
++	EXPECT_TRUE(adapter.isTeardownPending());
++	EXPECT_EQ(static_cast<IBaseDataMgr*>(&env.bd), adapter.getBaseDataMgr());
++
++	// No new callback is admitted once release() has been requested.
++	adapter.handleQuote(tick, 0);
++	EXPECT_EQ(1u, stub.quotes.load());
++
++	{
++		std::lock_guard<std::mutex> lock(stub.mtx);
++		stub.releaseCallback = true;
++	}
++	stub.cv.notify_all();
++	provider.join();
++
++	adapter.release();
++	EXPECT_EQ(1u, g_barrierRemoved.load());
++	EXPECT_EQ(1u, NonNullSpiParserApi::release_calls);
++	EXPECT_FALSE(adapter.hasApi());
++	EXPECT_FALSE(adapter.isTeardownPending());
++	adapter.release();
++	EXPECT_EQ(1u, g_barrierRemoved.load());
++	tick->release();
++}
++
++// release() from inside this adapter's own callback only requests stop; the
++// API and borrowed graph survive until a release() from a safe point.
++TEST(R78UftParserAdapterInit, release_inside_callback_is_deferred_to_safe_point)
++{
++	NonNullSpiParserApi::reset();
++	g_barrierRemoved = 0;
++	ParserEnv env;
++	BlockingStub stub;
++	ParserAdapter adapter;
++	ASSERT_TRUE(adapter.initExt("r78deferred", new NonNullSpiParserApi(), &stub, &env.bd, removeBarrierApi));
++
++	uint32_t removedInside = 99;
++	bool hasApiInside = false;
++	stub.inside = [&]() {
++		adapter.release();
++		removedInside = g_barrierRemoved.load();
++		hasApiInside = adapter.hasApi();
++	};
++	WTSTickData* tick = r78Tick();
++	adapter.handleQuote(tick, 0);
++	EXPECT_EQ(0u, removedInside);
++	EXPECT_TRUE(hasApiInside);
++	EXPECT_TRUE(adapter.isTeardownPending());
++	EXPECT_EQ(0u, NonNullSpiParserApi::release_calls);
++
++	adapter.release();
++	EXPECT_EQ(1u, g_barrierRemoved.load());
++	EXPECT_FALSE(adapter.hasApi());
++	tick->release();
++}
++
+ // UftStrategyMgr.cpp:30-92 目录缺失返回 false；非 dylib/子目录跳过；
+ // dylib 可装载但缺 createStrategyFact 时 free_library + continue
+ TEST(R78UftStraMgr, load_factories_skips_unusable_entries)

@@ -54,7 +54,7 @@ TEST_F(R112ReaderADDayTest, R112ReaderADDayOnMinuteEndAppendsRtBar)
 	// 首次读取只回源一次；末条 0102 不早于 etime，不会触发 update
 	WTSKlineSlice* dk = _reader->readKlineSlice("EXDD.rb2301", KP_DAY, 2, 20230102100000000ull);
 	ASSERT_TRUE(dk != NULL);
-	ASSERT_EQ(dk->size(), 1u);
+	ASSERT_EQ(dk->size(), 1);
 	EXPECT_EQ(dk->get_block_addr(0)[0].date, 20230102u);
 	dk->release();
 	EXPECT_EQ(_sink->bar_calls(), 0u);

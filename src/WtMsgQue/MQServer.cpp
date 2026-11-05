@@ -124,6 +124,9 @@ void MQServer::publish(const char* topic, const void* data, uint32_t dataLen)
 		m_uTotalPacks.fetch_add(1);
 	}
 
+	// I03-NEW-116: concurrent publishers must not both create the cast thread; the
+	// check-and-create runs under m_mtxCast (the thread itself only takes it later).
+	SpinLock threadLock(m_mtxCast);
 	if(m_thrdCast == NULL)
 	{
 		m_thrdCast.reset(new StdThread([this](){
@@ -135,21 +138,27 @@ void MQServer::publish(const char* topic, const void* data, uint32_t dataLen)
 			while (!m_bTerminated)
 			{
 				int cnt = (int)nn_get_statistic(_sock, NN_STAT_CURRENT_CONNECTIONS);
-				if(m_dataQue.empty() || (cnt == 0 && _confirm))
+				bool queueEmpty = false;
+				{
+					// I03-NEW-116: publish() appends under m_mtxCast; read the queue under it too.
+					SpinLock lock(m_mtxCast);
+					queueEmpty = m_dataQue.empty();
+				}
+				if(queueEmpty || (cnt == 0 && _confirm))
 				{
 					std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
 					m_bTimeout = true;
 					uint64_t now = TimeUtils::getLocalTimeNow();
 					//如果有连接，并且超过60s没有新的数据推送，就推送一条心跳包
-					if (now - m_uLastHBTime > 60*1000 && cnt>0)
+					if (now - m_uLastHBTime.load() > 60*1000 && cnt>0)
 					{
 						//等待超时以后，广播心跳包
 						SpinLock lock(m_mtxCast);
 						m_dataQue.emplace_back(PubData("HEARTBEAT", "", 0));
 						m_uTotalPacks.fetch_add(1);
 						m_uLastHBTime = now;
-						_mgr->log_server(_id, fmtutil::format("HeartBeat timestamp updated to {}", m_uLastHBTime));
+						_mgr->log_server(_id, fmtutil::format("HeartBeat timestamp updated to {}", m_uLastHBTime.load()));
 					}
 					else
 					{
@@ -225,7 +234,14 @@ void MQServer::publish(const char* topic, const void* data, uint32_t dataLen)
 
 				m_uTotalSents.fetch_add(tmpQue.size());			
 
-				if(m_dataQue.empty())
+				bool drained = false;
+				{
+					// I03-NEW-116 (follow-up, final TSan): this second queue check also raced
+					// with publish(); read it under m_mtxCast like the first one.
+					SpinLock lock(m_mtxCast);
+					drained = m_dataQue.empty();
+				}
+				if(drained)
 				{
 					if(m_uTotalSents != m_uTotalPacks)
 					{

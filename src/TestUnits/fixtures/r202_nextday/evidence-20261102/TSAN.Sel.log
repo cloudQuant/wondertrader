@@ -1,0 +1,35 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R202NextDay.Sel
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R202NextDay
+[ RUN      ] R202NextDay.Sel
+==================
+WARNING: ThreadSanitizer: data race (pid=22946)
+  Write of size 4 at 0x00016f9bdf24 by main thread:
+    #0 wtp::WtSelRtTicker::on_tick(wtp::WTSTickData*, unsigned int) <null> (test:arm64+0x1003a3488)
+    #1 void expectNextDayAfterFullDayClose<R202NextDayEngine<(anonymous namespace)::R202SelEngine>, wtp::WtSelRtTicker>()::'lambda'(unsigned int, unsigned int, unsigned int)::operator()(unsigned int, unsigned int, unsigned int) const <null> (test:arm64+0x10006174c)
+    #2 void expectNextDayAfterFullDayClose<R202NextDayEngine<(anonymous namespace)::R202SelEngine>, wtp::WtSelRtTicker>() <null> (test:arm64+0x10000b8f0)
+    #3 R202NextDay_Sel_Test::TestBody() <null> (test:arm64+0x10000b558)
+    #4 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (test:arm64+0x1004483d0)
+
+  Previous read of size 4 at 0x00016f9bdf24 by thread T1:
+    #0 wtp::WtSelRtTicker::run()::$_0::operator()() const <null> (test:arm64+0x1003a512c)
+    #1 std::__1::__invoke_result_impl<void, wtp::WtSelRtTicker::run()::$_0>::type std::__1::__invoke[abi:nqe220108]<wtp::WtSelRtTicker::run()::$_0>(wtp::WtSelRtTicker::run()::$_0&&) <null> (test:arm64+0x1003a500c)
+    #2 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::WtSelRtTicker::run()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::WtSelRtTicker::run()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) <null> (test:arm64+0x1003a4fb4)
+    #3 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, wtp::WtSelRtTicker::run()::$_0>>(void*) <null> (test:arm64+0x1003a4bb0)
+
+  Location is stack of main thread.
+
+  Thread T1 (tid=1562264, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) <null> (test:arm64+0x1002bf794)
+    #2 std::__1::thread::thread[abi:nqe220108]<wtp::WtSelRtTicker::run()::$_0, 0>(wtp::WtSelRtTicker::run()::$_0&&) <null> (test:arm64+0x1003a498c)
+    #3 std::__1::thread::thread[abi:nqe220108]<wtp::WtSelRtTicker::run()::$_0, 0>(wtp::WtSelRtTicker::run()::$_0&&) <null> (test:arm64+0x1003a3f48)
+    #4 wtp::WtSelRtTicker::run() <null> (test:arm64+0x1003a3e84)
+    #5 void expectNextDayAfterFullDayClose<R202NextDayEngine<(anonymous namespace)::R202SelEngine>, wtp::WtSelRtTicker>() <null> (test:arm64+0x10000b8ac)
+    #6 R202NextDay_Sel_Test::TestBody() <null> (test:arm64+0x10000b558)
+    #7 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (test:arm64+0x1004483d0)
+
+SUMMARY: ThreadSanitizer: data race (test:arm64+0x1003a3488) in wtp::WtSelRtTicker::on_tick(wtp::WTSTickData*, unsigned int)+0x20c
+==================

@@ -1,0 +1,50 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S4OwnerRelease.*
+[==========] Running 5 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 5 tests from S4OwnerRelease
+[ RUN      ] S4OwnerRelease.HftContextReturnsItsClaimsWhenDestroyed
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s4_owner_release_test.cpp:118: Failure
+Value of: otherOwnerCanTrade(trader, kAg)
+  Actual: false
+Expected: true
+a destroyed context no longer blocks the contract
+
+[  FAILED  ] S4OwnerRelease.HftContextReturnsItsClaimsWhenDestroyed (11 ms)
+[ RUN      ] S4OwnerRelease.HftContextReturnsClaimsOfThePreviousTraderWhenRebound
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s4_owner_release_test.cpp:135: Failure
+Value of: otherOwnerCanTrade(traderA, kAg)
+  Actual: false
+Expected: true
+the binding to trader A has ended
+
+[  FAILED  ] S4OwnerRelease.HftContextReturnsClaimsOfThePreviousTraderWhenRebound (2 ms)
+[ RUN      ] S4OwnerRelease.LocalExecuterReturnsItsClaimsWhenDestroyed
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s4_owner_release_test.cpp:157: Failure
+Value of: otherOwnerCanTrade(trader, kAg)
+  Actual: false
+Expected: true
+a destroyed executer no longer blocks the contract
+
+[  FAILED  ] S4OwnerRelease.LocalExecuterReturnsItsClaimsWhenDestroyed (3 ms)
+[ RUN      ] S4OwnerRelease.ArbiExecuterReturnsItsClaimsWhenDestroyed
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s4_owner_release_test.cpp:175: Failure
+Value of: otherOwnerCanTrade(trader, kAg)
+  Actual: false
+Expected: true
+
+[  FAILED  ] S4OwnerRelease.ArbiExecuterReturnsItsClaimsWhenDestroyed (0 ms)
+[ RUN      ] S4OwnerRelease.ManualClaimIsNotReleasedByAnExecuterTeardown
+[       OK ] S4OwnerRelease.ManualClaimIsNotReleasedByAnExecuterTeardown (0 ms)
+[----------] 5 tests from S4OwnerRelease (18 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 1 test suite ran. (20 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 4 tests, listed below:
+[  FAILED  ] S4OwnerRelease.HftContextReturnsItsClaimsWhenDestroyed
+[  FAILED  ] S4OwnerRelease.HftContextReturnsClaimsOfThePreviousTraderWhenRebound
+[  FAILED  ] S4OwnerRelease.LocalExecuterReturnsItsClaimsWhenDestroyed
+[  FAILED  ] S4OwnerRelease.ArbiExecuterReturnsItsClaimsWhenDestroyed
+
+ 4 FAILED TESTS

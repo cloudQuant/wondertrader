@@ -27,6 +27,9 @@ namespace wtp {
 /** Narrow read-only access to the private unit registry for this integration test. */
 struct WtLocalExecuterTestAccess
 {
+	static size_t groupCount(const WtLocalExecuter& executer) { return executer._group_rules.size(); }
+	static bool hasConfig(const WtLocalExecuter& executer) { return executer._config != nullptr; }
+	static bool hasPool(const WtLocalExecuter& executer) { return executer._pool != nullptr; }
 	static bool hasUnit(const WtLocalExecuter& executer, const char* code)
 	{
 		if (code == nullptr || code[0] == '\0')
@@ -48,6 +51,29 @@ struct WtLocalExecuterTestAccess
 		SpinLock lock(executer._mtx_units);
 		executer._unit_map[code] = unit;
 		executer._unit_states[code] = state;
+	}
+
+	static void makeInitializing(WtLocalExecuter& executer, const std::string& code)
+	{
+		SpinLock lock(executer._mtx_units);
+		auto state = executer._unit_states.at(code);
+		std::lock_guard<std::mutex> stateLock(state->mutex);
+		state->creation_complete = false;
+		state->creation_started = true;
+		state->init_status = ExecUnitInitState::INITIALIZING;
+	}
+
+	static void finishInitializing(WtLocalExecuter& executer, const std::string& code)
+	{
+		std::shared_ptr<WtLocalExecuter::UnitLifecycleState> state;
+		{
+			SpinLock lock(executer._mtx_units);
+			state = executer._unit_states.at(code);
+			std::lock_guard<std::mutex> stateLock(state->mutex);
+			state->creation_complete = true;
+			state->init_status = ExecUnitInitState::READY;
+		}
+		executer.drainUnitCallbacks(code, state);
 	}
 
 	static double target(const WtLocalExecuter& executer, const std::string& code)
@@ -561,6 +587,10 @@ TEST_F(R7VwapV2LocalIntegration, MatchingTwapCommodityAndSessionRegisterUnit)
 
 TEST_F(R7VwapV2LocalIntegration, LocalGroupTargetsDispatchStablyAndClearOnEmptyInput)
 {
+	WTSSessionInfo* groupSession = makeSession("I03_LEGACY", {{900, 1500}});
+	ASSERT_NE(groupSession, nullptr);
+	addInstrument("SHFE", "rb", "rb2510", "SHFE.rb.2510", "I03_LEGACY", TM_Both, CC_Future, groupSession);
+	addInstrument("SHFE", "au", "au2212", "SHFE.au.2212", "I03_LEGACY", TM_Both, CC_Future, groupSession);
 	LocalGroupPositionFact fact;
 	std::shared_ptr<CapturingLocalExecuter> local(new CapturingLocalExecuter(
 		&_factory, "r7_local_group_targets", &_data_manager));
@@ -601,41 +631,40 @@ TEST_F(R7VwapV2LocalIntegration, LocalGroupTargetsDispatchStablyAndClearOnEmptyI
 	negativeTargets[rbCode] = -6.0;
 	negativeTargets[auCode] = -8.0;
 	local->set_position(negativeTargets);
-	EXPECT_TRUE(groupProbe->snapshot().empty());
-	expectLastTarget(rbProbe, rbCode, -6.0, 1);
-	expectLastTarget(auProbe, auCode, -8.0, 1);
-	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), -6.0);
-	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), -8.0);
+	expectLastTarget(groupProbe, groupCode, -3.0, 1);
+	expectLastTarget(rbProbe, rbCode, 0.0, 1);
+	expectLastTarget(auProbe, auCode, -2.0, 1);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), -2.0);
 
-	// Fractional member targets stay on the original path; the existing Local
-	// dispatch rounds unit callbacks while the target ledger retains precision.
+	// Fractional member targets produce an exact fractional group and residual.
 	wt_hashmap<std::string, double> fractionalGroupTargets;
 	fractionalGroupTargets[rbCode] = 7.5;
 	fractionalGroupTargets[auCode] = 8.0;
 	local->set_position(fractionalGroupTargets);
-	EXPECT_TRUE(groupProbe->snapshot().empty());
-	expectLastTarget(rbProbe, rbCode, 8.0, 2);
-	expectLastTarget(auProbe, auCode, 8.0, 2);
-	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 7.5);
-	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 8.0);
+	expectLastTarget(groupProbe, groupCode, 3.75, 2);
+	expectLastTarget(rbProbe, rbCode, 0.0, 2);
+	expectLastTarget(auProbe, auCode, 0.5, 2);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 0.5);
 
 	// Integer member targets may also imply a fractional group count.
 	wt_hashmap<std::string, double> fractionalCountTargets;
 	fractionalCountTargets[rbCode] = 7.0;
 	fractionalCountTargets[auCode] = 8.0;
 	local->set_position(fractionalCountTargets);
-	EXPECT_TRUE(groupProbe->snapshot().empty());
-	expectLastTarget(rbProbe, rbCode, 7.0, 3);
-	expectLastTarget(auProbe, auCode, 8.0, 3);
-	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 7.0);
-	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 8.0);
+	expectLastTarget(groupProbe, groupCode, 3.5, 3);
+	expectLastTarget(rbProbe, rbCode, 0.0, 3);
+	expectLastTarget(auProbe, auCode, 1.0, 3);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 1.0);
 
 	wt_hashmap<std::string, double> targets;
 	targets[rbCode] = 6.0;
 	targets[auCode] = 8.0;
 	local->set_position(targets);
 
-	expectLastTarget(groupProbe, groupCode, 3.0, 1);
+	expectLastTarget(groupProbe, groupCode, 3.0, 4);
 	expectLastTarget(rbProbe, rbCode, 0.0, 4);
 	expectLastTarget(auProbe, auCode, 2.0, 4);
 	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, groupCode), 3.0);
@@ -643,7 +672,7 @@ TEST_F(R7VwapV2LocalIntegration, LocalGroupTargetsDispatchStablyAndClearOnEmptyI
 	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 2.0);
 
 	local->set_position(targets);
-	expectLastTarget(groupProbe, groupCode, 3.0, 2);
+	expectLastTarget(groupProbe, groupCode, 3.0, 5);
 	expectLastTarget(rbProbe, rbCode, 0.0, 5);
 	expectLastTarget(auProbe, auCode, 2.0, 5);
 	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, groupCode), 3.0);
@@ -652,7 +681,7 @@ TEST_F(R7VwapV2LocalIntegration, LocalGroupTargetsDispatchStablyAndClearOnEmptyI
 
 	wt_hashmap<std::string, double> empty;
 	local->set_position(empty);
-	expectLastTarget(groupProbe, groupCode, 0.0, 3);
+	expectLastTarget(groupProbe, groupCode, 0.0, 6);
 	expectLastTarget(rbProbe, rbCode, 0.0, 6);
 	expectLastTarget(auProbe, auCode, 0.0, 6);
 	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, groupCode), 0.0);
@@ -661,7 +690,7 @@ TEST_F(R7VwapV2LocalIntegration, LocalGroupTargetsDispatchStablyAndClearOnEmptyI
 	WtLocalExecuterTestAccess::unregisterUnits(*local, { groupCode, rbCode, auCode });
 }
 
-TEST_F(R7VwapV2LocalIntegration, OverlappingGroupsPreserveOriginalTargets)
+TEST_F(R7VwapV2LocalIntegration, OverlappingGroupsUseConfiguredOrder)
 {
 	LocalGroupPositionFact fact;
 	std::shared_ptr<CapturingLocalExecuter> local(new CapturingLocalExecuter(
@@ -674,6 +703,7 @@ TEST_F(R7VwapV2LocalIntegration, OverlappingGroupsPreserveOriginalTargets)
 		R"json({"scale":1.0,"poolsize":0,"strict_sync":false,
 		"groups":{"SHFE.ags":{"SHFE.rb.2510":2.0,"SHFE.au.2212":2.0},
 		"SHFE.agc":{"SHFE.rb.2510":1.0,"SHFE.cu.2212":1.0}},
+		"group_order":["SHFE.ags","SHFE.agc"],
 		"policy":{"default":{"name":"LocalGroupPositionFact.LocalGroupPositionUnit"}}})json"),
 		[](WTSVariant* value) { if (value) value->release(); });
 	ASSERT_NE(config.get(), nullptr);
@@ -706,7 +736,8 @@ TEST_F(R7VwapV2LocalIntegration, OverlappingGroupsPreserveOriginalTargets)
 	targets[cuCode] = 5.0;
 	local->set_position(targets);
 
-	EXPECT_TRUE(firstGroupProbe->snapshot().empty());
+	ASSERT_EQ(firstGroupProbe->snapshot().size(), 1u);
+	EXPECT_DOUBLE_EQ(firstGroupProbe->snapshot().back().second, 3.0);
 	EXPECT_TRUE(secondGroupProbe->snapshot().empty());
 	const auto rbPositions = rbProbe->snapshot();
 	const auto auPositions = auProbe->snapshot();
@@ -714,11 +745,11 @@ TEST_F(R7VwapV2LocalIntegration, OverlappingGroupsPreserveOriginalTargets)
 	ASSERT_EQ(rbPositions.size(), 1u);
 	ASSERT_EQ(auPositions.size(), 1u);
 	ASSERT_EQ(cuPositions.size(), 1u);
-	EXPECT_DOUBLE_EQ(rbPositions.back().second, 6.0);
-	EXPECT_DOUBLE_EQ(auPositions.back().second, 8.0);
+	EXPECT_DOUBLE_EQ(rbPositions.back().second, 0.0);
+	EXPECT_DOUBLE_EQ(auPositions.back().second, 2.0);
 	EXPECT_DOUBLE_EQ(cuPositions.back().second, 5.0);
-	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 6.0);
-	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 8.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, auCode), 2.0);
 	EXPECT_DOUBLE_EQ(WtLocalExecuterTestAccess::target(*local, cuCode), 5.0);
 	WtLocalExecuterTestAccess::unregisterUnits(*local,
 		{ firstGroupCode, secondGroupCode, rbCode, auCode, cuCode });

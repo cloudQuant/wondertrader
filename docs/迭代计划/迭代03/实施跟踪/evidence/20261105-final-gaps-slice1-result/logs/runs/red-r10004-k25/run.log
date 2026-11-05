@@ -1,0 +1,45 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S1K25SelIsolation.*
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from S1K25SelIsolation
+[ RUN      ] S1K25SelIsolation.ThrowingScheduleIsIsolatedAndOtherStrategiesStillRun
+[       OK ] S1K25SelIsolation.ThrowingScheduleIsIsolatedAndOtherStrategiesStillRun (3 ms)
+[ RUN      ] S1K25SelIsolation.ThrowingTickHandlerIsIsolatedAndOtherStrategiesStillReceiveTicks
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:190: Failure
+Expected: engine->on_tick(kS1Code, t1) doesn't throw an exception.
+  Actual: it throws std::runtime_error with description "s1 tick failure".
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:193: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  b->tick_calls
+    Which is: 0
+the healthy strategy still receives the tick
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:196: Failure
+Expected: engine->on_tick(kS1Code, t2) doesn't throw an exception.
+  Actual: it throws std::runtime_error with description "s1 tick failure".
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:199: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  b->tick_calls
+    Which is: 0
+
+[  FAILED  ] S1K25SelIsolation.ThrowingTickHandlerIsIsolatedAndOtherStrategiesStillReceiveTicks (0 ms)
+[ RUN      ] S1K25SelIsolation.ReentrantTicksBetweenTwoStrategiesAreQueuedAndDeliveredOnce
+[       OK ] S1K25SelIsolation.ReentrantTicksBetweenTwoStrategiesAreQueuedAndDeliveredOnce (3 ms)
+[ RUN      ] S1K25SelIsolation.StopFromInsideAStrategyCallbackDoesNotSelfJoin
+[       OK ] S1K25SelIsolation.StopFromInsideAStrategyCallbackDoesNotSelfJoin (9 ms)
+[----------] 4 tests from S1K25SelIsolation (16 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (18 ms total)
+[  PASSED  ] 3 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S1K25SelIsolation.ThrowingTickHandlerIsIsolatedAndOtherStrategiesStillReceiveTicks
+
+ 1 FAILED TEST

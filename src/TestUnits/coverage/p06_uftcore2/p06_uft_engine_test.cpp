@@ -394,7 +394,8 @@ TEST(p06_uft_ticker, init_and_forward_before_thread_start)
 
 	WTSSessionInfo* session = WTSSessionInfo::create("ALLDAY", "p06 allday", 0);
 	ASSERT_NE(nullptr, session);
-	session->addTradingSection(0, 2400);
+	// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；R12-13 后 ticker 对无法映射的交易日 fail-closed（迭代03 第五会话）。
+	session->addTradingSection(0, 0);
 	fx.bdMgr.setSession(session);
 
 	WtUftRtTicker ticker(&fx.engine);

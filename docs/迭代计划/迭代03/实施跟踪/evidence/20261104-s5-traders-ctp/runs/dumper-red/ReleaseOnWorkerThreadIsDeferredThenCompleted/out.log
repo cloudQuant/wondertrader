@@ -1,0 +1,12 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5DumperLifecycle.ReleaseOnWorkerThreadIsDeferredThenCompleted
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03S5DumperLifecycle
+[ RUN      ] I03S5DumperLifecycle.ReleaseOnWorkerThreadIsDeferredThenCompleted
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderDumper/i03s5_dumper_lifecycle_test.cpp:175: Failure
+Value of: waitFor([]() { return g_release_returned_on_worker.load(); }, 5000)
+  Actual: false
+Expected: true
+
+libc++abi: terminating

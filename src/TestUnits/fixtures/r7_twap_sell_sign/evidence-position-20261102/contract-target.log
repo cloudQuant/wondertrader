@@ -1,0 +1,75 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r7_twap_sell_sign.*:r7_twap_bounded.*:r7_twap_position.*:TwapOpenFirstPolicyTest.*
+[==========] Running 28 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 5 tests from r7_twap_sell_sign
+[ RUN      ] r7_twap_sell_sign.canceled_sell_does_not_submit_a_buy
+[       OK ] r7_twap_sell_sign.canceled_sell_does_not_submit_a_buy (0 ms)
+[ RUN      ] r7_twap_sell_sign.last_slice_never_reverses_a_sell_into_a_buy
+[       OK ] r7_twap_sell_sign.last_slice_never_reverses_a_sell_into_a_buy (0 ms)
+[ RUN      ] r7_twap_sell_sign.late_buy_fill_must_not_be_retried_twice
+[       OK ] r7_twap_sell_sign.late_buy_fill_must_not_be_retried_twice (0 ms)
+[ RUN      ] r7_twap_sell_sign.accounted_buy_fill_retries_only_the_remainder
+[       OK ] r7_twap_sell_sign.accounted_buy_fill_retries_only_the_remainder (0 ms)
+[ RUN      ] r7_twap_sell_sign.sell_slice_does_not_exceed_target_difference
+[       OK ] r7_twap_sell_sign.sell_slice_does_not_exceed_target_difference (0 ms)
+[----------] 5 tests from r7_twap_sell_sign (1 ms total)
+
+[----------] 7 tests from r7_twap_bounded
+[ RUN      ] r7_twap_bounded.opening_minimum_above_remaining_does_not_cross_target
+[       OK ] r7_twap_bounded.opening_minimum_above_remaining_does_not_cross_target (0 ms)
+[ RUN      ] r7_twap_bounded.fractional_target_is_not_exceeded
+[       OK ] r7_twap_bounded.fractional_target_is_not_exceeded (0 ms)
+[ RUN      ] r7_twap_bounded.crossing_zero_closes_before_opening_opposite_position
+[       OK ] r7_twap_bounded.crossing_zero_closes_before_opening_opposite_position (0 ms)
+[ RUN      ] r7_twap_bounded.cancel_retry_never_reverses_when_position_moves_past_slice_target
+[       OK ] r7_twap_bounded.cancel_retry_never_reverses_when_position_moves_past_slice_target (0 ms)
+[ RUN      ] r7_twap_bounded.subminimum_opening_cancel_remainder_is_not_enlarged
+[       OK ] r7_twap_bounded.subminimum_opening_cancel_remainder_is_not_enlarged (0 ms)
+[ RUN      ] r7_twap_bounded.canceled_long_close_below_open_minimum_keeps_sell_direction
+[       OK ] r7_twap_bounded.canceled_long_close_below_open_minimum_keeps_sell_direction (0 ms)
+[ RUN      ] r7_twap_bounded.canceled_short_close_below_open_minimum_keeps_buy_direction
+[       OK ] r7_twap_bounded.canceled_short_close_below_open_minimum_keeps_buy_direction (0 ms)
+[----------] 7 tests from r7_twap_bounded (0 ms total)
+
+[----------] 13 tests from r7_twap_position
+[ RUN      ] r7_twap_position.frozen_stock_reduces_by_available_long_and_forces_close
+[       OK ] r7_twap_position.frozen_stock_reduces_by_available_long_and_forces_close (0 ms)
+[ RUN      ] r7_twap_position.no_sellable_stock_stays_pending_then_retries_after_availability
+[       OK ] r7_twap_position.no_sellable_stock_stays_pending_then_retries_after_availability (0 ms)
+[ RUN      ] r7_twap_position.partially_available_short_buys_only_available_and_forces_close
+[       OK ] r7_twap_position.partially_available_short_buys_only_available_and_forces_close (0 ms)
+[ RUN      ] r7_twap_position.crossing_zero_closes_then_opens_on_later_slice
+[       OK ] r7_twap_position.crossing_zero_closes_then_opens_on_later_slice (0 ms)
+[ RUN      ] r7_twap_position.hedged_position_closes_opposite_gross_side_first
+[       OK ] r7_twap_position.hedged_position_closes_opposite_gross_side_first (0 ms)
+[ RUN      ] r7_twap_position.retry_uses_total_and_force_close
+[       OK ] r7_twap_position.retry_uses_total_and_force_close (0 ms)
+[ RUN      ] r7_twap_position.short_retry_uses_total_and_force_close
+[       OK ] r7_twap_position.short_retry_uses_total_and_force_close (0 ms)
+[ RUN      ] r7_twap_position.inconsistent_snapshot_prevents_cancel_retry
+[       OK ] r7_twap_position.inconsistent_snapshot_prevents_cancel_retry (0 ms)
+[ RUN      ] r7_twap_position.rejects_nonfinite_out_of_range_inconsistent_or_changing_snapshot
+[       OK ] r7_twap_position.rejects_nonfinite_out_of_range_inconsistent_or_changing_snapshot (0 ms)
+[ RUN      ] r7_twap_position.missing_or_invalid_order_ids_hold_automatic_actions_without_fake_completion
+[       OK ] r7_twap_position.missing_or_invalid_order_ids_hold_automatic_actions_without_fake_completion (0 ms)
+[ RUN      ] r7_twap_position.retry_without_ids_holds_future_submissions
+[       OK ] r7_twap_position.retry_without_ids_holds_future_submissions (0 ms)
+[ RUN      ] r7_twap_position.synchronous_report_before_id_registration_is_held
+[       OK ] r7_twap_position.synchronous_report_before_id_registration_is_held (0 ms)
+[ RUN      ] r7_twap_position.multiple_valid_order_ids_remain_monitored
+[       OK ] r7_twap_position.multiple_valid_order_ids_remain_monitored (0 ms)
+[----------] 13 tests from r7_twap_position (1 ms total)
+
+[----------] 3 tests from TwapOpenFirstPolicyTest
+[ RUN      ] TwapOpenFirstPolicyTest.sell_close_skips_open_first_rule
+[       OK ] TwapOpenFirstPolicyTest.sell_close_skips_open_first_rule (12 ms)
+[ RUN      ] TwapOpenFirstPolicyTest.buy_close_skips_open_first_rule
+[       OK ] TwapOpenFirstPolicyTest.buy_close_skips_open_first_rule (1 ms)
+[ RUN      ] TwapOpenFirstPolicyTest.force_close_insert_failure_returns_invalid_id_and_holds
+[       OK ] TwapOpenFirstPolicyTest.force_close_insert_failure_returns_invalid_id_and_holds (1 ms)
+[----------] 3 tests from TwapOpenFirstPolicyTest (14 ms total)
+
+[----------] Global test environment tear-down
+[==========] 28 tests from 4 test suites ran. (17 ms total)
+[  PASSED  ] 28 tests.

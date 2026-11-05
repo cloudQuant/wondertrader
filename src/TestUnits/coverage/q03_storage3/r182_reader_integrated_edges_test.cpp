@@ -72,7 +72,7 @@ TEST_F(R182ReaderIntegratedTest, R182NoHotFileSplitRejected)
 
 	WTSKlineSlice* slice = _reader.readKlineSlice("SHFE.rb.HOT", KP_Minute1, 100, 202401101500ull);
 	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 0u);
+	EXPECT_EQ(slice->size(), 0);
 	EXPECT_EQ(_hot.split_calls(), 1u);
 	slice->release();
 }
@@ -85,7 +85,7 @@ TEST_F(R182ReaderIntegratedTest, R182HotSplitReturnsEmptySections)
 
 	WTSKlineSlice* slice = _reader.readKlineSlice("SHFE.rb.HOT", KP_Minute1, 100, 202401101500ull);
 	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 0u);
+	EXPECT_EQ(slice->size(), 0);
 	EXPECT_EQ(_hot.split_calls(), 1u);
 	slice->release();
 }
@@ -98,7 +98,7 @@ TEST_F(R182ReaderIntegratedTest, R182SectionFileMissingIsSkipped)
 
 	WTSKlineSlice* slice = _reader.readKlineSlice("SHFE.rb.HOT", KP_Minute1, 100, 202401101500ull);
 	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 0u);
+	EXPECT_EQ(slice->size(), 0);
 	EXPECT_EQ(_hot.split_calls(), 1u);
 	slice->release();
 }
@@ -127,7 +127,7 @@ TEST_F(R182ReaderIntegratedTest, R182SectionWindowAfterAllBarsIsSkipped)
 
 	WTSKlineSlice* slice = _reader.readKlineSlice("SHFE.rb.HOT", KP_Minute1, 100, 202401101500ull);
 	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 0u);
+	EXPECT_EQ(slice->size(), 0);
 	slice->release();
 }
 
@@ -143,7 +143,7 @@ TEST_F(R182ReaderIntegratedTest, R182SectionWindowBeforeFirstBarBreaks)
 
 	WTSKlineSlice* slice = _reader.readKlineSlice("SHFE.rb.HOT", KP_Minute1, 100, 202401101500ull);
 	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 0u);
+	EXPECT_EQ(slice->size(), 0);
 	slice->release();
 }
 
@@ -160,7 +160,7 @@ TEST_F(R182ReaderIntegratedTest, R182SectionWindowSelectsBothBars)
 	WTSKlineSlice* slice = _reader.readKlineSlice("SHFE.rb.HOT", KP_Minute1, 100,
 		(uint64_t)20240110 * 10000ull + 1500ull);
 	ASSERT_TRUE(slice != NULL);
-	ASSERT_EQ(slice->size(), 2u);
+	ASSERT_EQ(slice->size(), 2);
 	EXPECT_EQ(slice->at(0)->time, r52::min_bar_time(20240102, 930));
 	EXPECT_EQ(slice->at(1)->time, r52::min_bar_time(20240102, 931));
 	slice->release();

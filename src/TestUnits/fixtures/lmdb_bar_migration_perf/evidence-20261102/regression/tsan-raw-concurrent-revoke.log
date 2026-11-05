@@ -1,0 +1,51 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=10720)
+  Read of size 4 at 0x000104a200c8 by thread T2 (mutexes: write M0, write M1):
+    #0 mdb_find_oldest mdb.c:2127 (tsan-raw-test:arm64+0x10001d758)
+    #1 mdb_page_alloc mdb.c:2270 (tsan-raw-test:arm64+0x10001d758)
+    #2 mdb_page_touch mdb.c:2453 (tsan-raw-test:arm64+0x1000244d8)
+    #3 mdb_page_search mdb.c:5702 (tsan-raw-test:arm64+0x100023f84)
+    #4 mdb_cursor_touch mdb.c:6554 (tsan-raw-test:arm64+0x10001d0d8)
+    #5 mdb_cursor_del mdb.c:7120 (tsan-raw-test:arm64+0x100020f28)
+    #6 mdb_del0 mdb.c:8620 (tsan-raw-test:arm64+0x100022b10)
+    #7 mdb_del mdb.c:8580 (tsan-raw-test:arm64+0x100022850)
+    #8 wt_ad_bar_migration::Bindings::revokeEvidence(MDB_val const&) LMDBBarMigration.hpp:184 (tsan-raw-test:arm64+0x100011bc8)
+    #9 (anonymous namespace)::revokeFirst(wt_ad_bar_migration::Bindings&) capability_test.cpp:23 (tsan-raw-test:arm64+0x10000c990)
+    #10 main::$_2::operator()() const capability_test.cpp:101 (tsan-raw-test:arm64+0x100014fcc)
+    #11 std::__1::__invoke_result_impl<void, main::$_2>::type std::__1::__invoke[abi:nqe220108]<main::$_2>(main::$_2&&) invoke.h:90 (tsan-raw-test:arm64+0x100014fcc)
+    #12 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_2, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_2>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (tsan-raw-test:arm64+0x100014fcc)
+    #13 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_2>>(void*) thread.h:169 (tsan-raw-test:arm64+0x100014fcc)
+
+  Previous write of size 4 at 0x000104a200c8 by thread T1:
+    #0 mdb_env_reader_dest mdb.c:4517 (tsan-raw-test:arm64+0x1000250ac)
+    #1 _pthread_tsd_cleanup <null> (libsystem_pthread.dylib:arm64e+0x4678)
+
+  Mutex M0 (0x00016b652ca0) created at:
+    #0 pthread_mutex_lock <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x33b9c)
+    #1 std::__1::mutex::lock() <null> (libc++.1.dylib:arm64e+0x300c)
+    #2 wt_ad_bar_migration::Bindings::putEvidence(MDB_val const&, MDB_val const&, wt_ad_bar_migration::Evidence const&) LMDBBarMigration.hpp:145 (tsan-raw-test:arm64+0x1000118c8)
+    #3 (anonymous namespace)::loadEvidence(wt_ad_bar_migration::Bindings&) capability_test.cpp:12 (tsan-raw-test:arm64+0x10000c714)
+    #4 main capability_test.cpp:70 (tsan-raw-test:arm64+0x100009ac0)
+
+  Mutex M1 (0x00016b652c60) created at:
+    #0 pthread_mutex_lock <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x33b9c)
+    #1 std::__1::mutex::lock() <null> (libc++.1.dylib:arm64e+0x300c)
+    #2 (anonymous namespace)::bind(MDB_env*, MDB_env*, wt_ad_bar_migration::Bindings&) migration_test.cpp:142 (tsan-raw-test:arm64+0x100009aa8)
+    #3 main capability_test.cpp:70 (tsan-raw-test:arm64+0x100009aa8)
+
+  Thread T2 (tid=1490799, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (tsan-raw-test:arm64+0x10000d094)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_2, 0>(main::$_2&&) thread.h:218 (tsan-raw-test:arm64+0x10000d094)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_2, 0>(main::$_2&&) thread.h:209 (tsan-raw-test:arm64+0x10000d094)
+    #4 main capability_test.cpp:101 (tsan-raw-test:arm64+0x10000a34c)
+
+  Thread T1 (tid=1490798, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (tsan-raw-test:arm64+0x10000ce9c)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_1, 0>(main::$_1&&) thread.h:218 (tsan-raw-test:arm64+0x10000ce9c)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_1, 0>(main::$_1&&) thread.h:209 (tsan-raw-test:arm64+0x10000ce9c)
+    #4 main capability_test.cpp:100 (tsan-raw-test:arm64+0x10000a320)
+
+SUMMARY: ThreadSanitizer: data race mdb.c:2127 in mdb_find_oldest
+==================

@@ -51,7 +51,8 @@ namespace {
 
 	std::string prepare_out_dir()
 	{
-		std::filesystem::path p = std::filesystem::temp_directory_path() / kOutLeaf;
+		// I03-NEW-098：按进程区分目录，并行逐例运行时互不覆盖夹具。
+		std::filesystem::path p = std::filesystem::temp_directory_path() / (std::string(kOutLeaf) + "_" + std::to_string(static_cast<long>(::getpid())));
 		std::error_code ec;
 		std::filesystem::create_directories(p, ec);
 		return p.string();
@@ -68,13 +69,15 @@ namespace {
 		std::ofstream(dir + "/sessions.json")
 			<< "{\"TRADING\":{\"name\":\"Trading\",\"offset\":0,"
 			<< "\"sections\":[{\"from\":0,\"to\":2359}]}}";
+		// 卡1：日期映射须有交易日历（CHINA）
+		std::ofstream(dir + "/holidays.json") << "{\"CHINA\":[]}";
 	}
 
 	std::string replayer_with_session(const std::string& dir)
 	{
 		return "\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir +
 			"\",\"stime\":20240102000000,\"etime\":20240103000000,"
-			"\"basefiles\":{\"session\":\"" + dir + "/sessions.json\"}}";
+			"\"basefiles\":{\"session\":\"" + dir + "/sessions.json\",\"holiday\":\"" + dir + "/holidays.json\"}}";
 	}
 
 	std::string none_mode_config(const std::string& dir)
@@ -253,6 +256,7 @@ TEST(R46BtRunner, PrepareFailureDoesNotStartAsyncRunAndValidPrepareRemainsUsable
 		std::ofstream(dir + "/sessions.json")
 			<< "{\"TRADING\":{\"name\":\"Trading\",\"offset\":0,"
 			<< "\"sections\":[{\"from\":0,\"to\":2359}]}}";
+		std::ofstream(dir + "/holidays.json") << "{\"CHINA\":[]}";	// 卡1：交易日历
 		std::ofstream(dir + "/commodities.json")
 			<< "{\"SHFE\":{\"rb\":{\"name\":\"Rebar\",\"session\":\"TRADING\","
 			<< "\"pricetick\":1,\"volscale\":10,\"covermode\":0,\"pricemode\":0,"
@@ -269,7 +273,7 @@ TEST(R46BtRunner, PrepareFailureDoesNotStartAsyncRunAndValidPrepareRemainsUsable
 
 	const std::string cfg = "{\"replayer\":{\"mode\":\"none\",\"path\":\"" + dir
 		+ "\",\"stime\":20240102000000,\"etime\":20240103000000,\"tick\":false,"
-		+ "\"basefiles\":{\"session\":\"" + dir + "/sessions.json\",\"commodity\":\""
+		+ "\"basefiles\":{\"session\":\"" + dir + "/sessions.json\",\"holiday\":\"" + dir + "/holidays.json\",\"commodity\":\""
 		+ dir + "/commodities.json\",\"contract\":\"" + dir + "/contracts.json\"}},"
 		+ "\"env\":{\"mocker\":\"cta\"},\"cta\":{\"name\":\"r46_prepare_guard\","
 		+ "\"module\":\"" + module + "\",\"slippage\":0,\"strategy\":{"

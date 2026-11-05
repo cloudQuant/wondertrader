@@ -9,6 +9,7 @@
  * \details 定义了WtHelper帮助工具类，提供路径管理、时间管理等工具函数
  */
 #pragma once
+#include <atomic>
 #include <string>
 #include <stdint.h>
 
@@ -78,40 +79,43 @@ public:
 	 */
 	static inline void setTime(uint32_t date, uint32_t time, uint32_t secs = 0)
 	{
-		_cur_date = date;
-		_cur_time = time;
-		_cur_secs = secs;
+		// I03-NEW-124: written by the engine ticker thread and read by strategy
+		// and trader threads; each field is published on its own (relaxed), so
+		// a reader may still combine fields of two adjacent publishes.
+		_cur_date.store(date, std::memory_order_relaxed);
+		_cur_time.store(time, std::memory_order_relaxed);
+		_cur_secs.store(secs, std::memory_order_relaxed);
 	}
 
 	/**
 	 * @brief 设置当前交易日
 	 * @param tDate 交易日，格式YYYYMMDD
 	 */
-	static inline void setTDate(uint32_t tDate){ _cur_tdate = tDate; }
+	static inline void setTDate(uint32_t tDate){ _cur_tdate.store(tDate, std::memory_order_relaxed); }
 
 	/**
 	 * @brief 获取当前日期
 	 * @return 当前日期，格式YYYYMMDD
 	 */
-	static inline uint32_t getDate(){ return _cur_date; }
+	static inline uint32_t getDate(){ return _cur_date.load(std::memory_order_relaxed); }
 
 	/**
 	 * @brief 获取当前时间
 	 * @return 当前时间，格式HHMM
 	 */
-	static inline uint32_t getTime(){ return _cur_time; }
+	static inline uint32_t getTime(){ return _cur_time.load(std::memory_order_relaxed); }
 
 	/**
 	 * @brief 获取当前秒数
 	 * @return 当前秒数，包含毫秒
 	 */
-	static inline uint32_t getSecs(){ return _cur_secs; }
+	static inline uint32_t getSecs(){ return _cur_secs.load(std::memory_order_relaxed); }
 
 	/**
 	 * @brief 获取当前交易日
 	 * @return 当前交易日，格式YYYYMMDD
 	 */
-	static inline uint32_t getTradingDate(){ return _cur_tdate; }
+	static inline uint32_t getTradingDate(){ return _cur_tdate.load(std::memory_order_relaxed); }
 
 	/**
 	 * @brief 获取实例目录
@@ -135,22 +139,22 @@ private:
 	/**
 	 * @brief 当前日期，格式YYYYMMDD
 	 */
-	static uint32_t		_cur_date;
+	static std::atomic<uint32_t>	_cur_date;
 
 	/**
 	 * @brief 当前时间，以分钟为准，格式HHMM
 	 */
-	static uint32_t		_cur_time;
+	static std::atomic<uint32_t>	_cur_time;
 
 	/**
 	 * @brief 当前秒数，包含毫秒
 	 */
-	static uint32_t		_cur_secs;
+	static std::atomic<uint32_t>	_cur_secs;
 
 	/**
 	 * @brief 当前交易日，格式YYYYMMDD
 	 */
-	static uint32_t		_cur_tdate;
+	static std::atomic<uint32_t>	_cur_tdate;
 
 	/**
 	 * @brief 实例所在目录

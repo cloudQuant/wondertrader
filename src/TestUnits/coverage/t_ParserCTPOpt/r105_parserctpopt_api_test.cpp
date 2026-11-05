@@ -280,7 +280,10 @@ TEST_F(R105OptTest, injected_api_connect_login_and_do_subscribe)
 	EXPECT_EQ(2, api_.sub_count);
 	EXPECT_TRUE(api_.sub_codes.count("m2401") == 1);
 	EXPECT_TRUE(api_.sub_codes.count("CF405") == 1);
-	EXPECT_TRUE(sink_.hasLog("2 contracts subscribed in total"));
+	/* 卡14 14a（2026-11-03）：SDK 返回 0 只报告"已发送"，不能写成订阅成功。 */
+	EXPECT_TRUE(sink_.hasLog("sent for 2 contracts in 1 batches"));
+	EXPECT_TRUE(sink_.hasLog("awaiting confirmation"));
+	EXPECT_FALSE(sink_.hasLog("subscribed in total"));
 
 	parser_.release();
 	EXPECT_EQ(1, api_.release_calls);
@@ -351,6 +354,8 @@ TEST_F(R105OptTest, sdk_error_callbacks_are_logged_and_success_responses_are_qui
 	EXPECT_EQ(0u, sink_.n_quote);
 }
 
+/* T2-OPT-04 / 卡14 14b（2026-11-03 裁定 A/C）：CTPOpt3.5.8 ThostFtdcMdApi.h 未声明单次订阅上限，
+ * 默认按 500 分批（本模块历史缓冲容量，非厂商声明）；501 必须拆为 500+1，每个符号恰好提交一次。 */
 TEST_F(R105OptTest, logged_in_subscription_handles_500_and_501_contracts)
 {
 	parser_.m_uTradingDate = 20260301;
@@ -365,23 +370,103 @@ TEST_F(R105OptTest, logged_in_subscription_handles_500_and_501_contracts)
 	EXPECT_EQ(500, api_.sub_counts.back());
 
 	api_.sub_codes.clear();
+	api_.sub_counts.clear();
 	CodeSet fiveHundredOne = fiveHundred;
 	fiveHundredOne.insert("DCE.r105_extra");
 	ASSERT_EQ(501u, fiveHundredOne.size());
 	parser_.subscribe(fiveHundredOne);
-	ASSERT_EQ(2, api_.sub_calls);
-	EXPECT_EQ(501, api_.sub_count);
+	ASSERT_EQ(3, api_.sub_calls);
+	EXPECT_EQ((std::vector<int>{ 500, 1 }), api_.sub_counts);
 	EXPECT_EQ(501u, api_.sub_codes.size());
-	EXPECT_EQ(501, api_.sub_counts.back());
+	EXPECT_TRUE(sink_.hasLog("sent for 501 contracts in 2 batches (limit 500)"));
 
 	api_.sub_codes.clear();
+	api_.sub_counts.clear();
 	parser_.m_uTradingDate = 0;
 	parser_.subscribe(fiveHundredOne);
-	EXPECT_EQ(2, api_.sub_calls);
+	EXPECT_EQ(3, api_.sub_calls);
 	parser_.OnRspUserLogin(NULL, NULL, 9, true);
-	ASSERT_EQ(3, api_.sub_calls);
-	EXPECT_EQ(501, api_.sub_count);
+	ASSERT_EQ(5, api_.sub_calls);
+	EXPECT_EQ((std::vector<int>{ 500, 1 }), api_.sub_counts);
 	EXPECT_EQ(501u, api_.sub_codes.size());
+}
+
+/* 14b=C：subbatch 可配置；每批不超过配置值，每个符号恰好提交一次。 */
+TEST_F(R105OptTest, configured_subbatch_splits_subscriptions_by_limit)
+{
+	R105OptTempDir tmp;
+	ASSERT_FALSE(tmp.path.empty());
+	const std::string content = "front: tcp://127.0.0.1:1\nbroker: 9999\nuser: r105\npass: secret\n"
+		"flowdir: " + tmp.path + "/flow\nctpmodule: " WT_R105_CTP_OPT_SUCCESSFUL_CREATOR_MODULE "\nsubbatch: 2\n";
+	WTSVariant* cfg = WTSCfgLoader::load_from_content(content, true);
+	ASSERT_NE(nullptr, cfg);
+
+	ParserCTPOpt parser;
+	parser.registerSpi(&sink_);
+	ASSERT_TRUE(parser.init(cfg));
+	CThostFtdcMdApi* created = parser.m_pUserAPI;
+	parser.m_pUserAPI = &api_;
+	parser.m_uTradingDate = 20260301;
+
+	CodeSet codes;
+	for (int i = 0; i < 5; ++i)
+		codes.insert("DCE.cfg_" + std::to_string(i));
+	parser.subscribe(codes);
+	EXPECT_EQ(3, api_.sub_calls);
+	EXPECT_EQ((std::vector<int>{ 2, 2, 1 }), api_.sub_counts);
+	EXPECT_EQ(5u, api_.sub_codes.size());
+	EXPECT_TRUE(sink_.hasLog("sent for 5 contracts in 3 batches (limit 2)"));
+
+	/* 一批失败：失败数量可见，其余批次仍只提交一次。 */
+	api_.sub_codes.clear();
+	api_.sub_counts.clear();
+	api_.sub_ret = -1;
+	parser.subscribe(codes);
+	EXPECT_EQ(6, api_.sub_calls);
+	EXPECT_EQ((std::vector<int>{ 2, 2, 1 }), api_.sub_counts);
+	EXPECT_TRUE(sink_.hasLog("5 contracts were not sent for md subscription"));
+	api_.sub_ret = 0;
+
+	parser.m_pUserAPI = created;
+	parser.release();
+	cfg->release();
+}
+
+/* 14b：非法 subbatch（0、负数、非数字）在 init 阶段 fail-closed，不退回为不分批。 */
+TEST_F(R105OptTest, invalid_subbatch_fails_init_closed)
+{
+	for (const char* bad : { "0", "-5", "abc" })
+	{
+		R105OptTempDir tmp;
+		ASSERT_FALSE(tmp.path.empty());
+		const std::string content = "front: tcp://127.0.0.1:1\nbroker: 9999\nuser: r105\npass: secret\n"
+			"flowdir: " + tmp.path + "/flow\nctpmodule: " WT_R105_CTP_OPT_SUCCESSFUL_CREATOR_MODULE "\nsubbatch: " + bad + "\n";
+		WTSVariant* cfg = WTSCfgLoader::load_from_content(content, true);
+		ASSERT_NE(nullptr, cfg);
+		ParserCTPOpt parser;
+		parser.registerSpi(&sink_);
+		EXPECT_FALSE(parser.init(cfg)) << bad;
+		EXPECT_FALSE(parser.isConnected()) << bad;
+		parser.release();
+		cfg->release();
+	}
+	EXPECT_TRUE(sink_.hasLog("subbatch must be a positive int"));
+}
+
+/* 14a：订阅确认与发送分开记录；空确认不计为确认。 */
+TEST_F(R105OptTest, subscription_confirmation_is_a_separate_event)
+{
+	CThostFtdcSpecificInstrumentField spec;
+	std::memset(&spec, 0, sizeof(spec));
+	std::strncpy(spec.InstrumentID, "m2401", sizeof(spec.InstrumentID) - 1);
+	parser_.OnRspSubMarketData(&spec, NULL, 3, true);
+	EXPECT_TRUE(sink_.hasLog("Md subscription confirmed: m2401"));
+
+	const std::size_t before = sink_.logs.size();
+	std::memset(&spec, 0, sizeof(spec));
+	parser_.OnRspSubMarketData(&spec, NULL, 4, true);
+	parser_.OnRspSubMarketData(NULL, NULL, 5, true);
+	EXPECT_EQ(before, sink_.logs.size());
 }
 
 TEST_F(R105OptTest, init_fails_closed_for_missing_module_and_creator)
@@ -466,8 +551,10 @@ TEST_F(R105OptTest, init_accepts_loaded_module_with_injected_api)
 
 	parser.release();
 	EXPECT_FALSE(parser.isConnected());
-	EXPECT_EQ((DllHandle)NULL, parser.m_hInstCTP);
-	EXPECT_EQ(nullptr, parser.m_funcCreator);
+	// 迭代03 卡9 9a：本实例曾创建 SDK 对象，厂商头文件无回调线程退出/排空声明，
+	// 因此 release 后厂商库保留到进程退出，不再卸载（原断言为 release 后句柄置空）。
+	EXPECT_NE((DllHandle)NULL, parser.m_hInstCTP);
+	EXPECT_NE(nullptr, parser.m_funcCreator);
 	cfg->release();
 }
 
@@ -508,12 +595,15 @@ TEST_F(R105OptTest, login_failure_and_inline_subscribe_branches)
 	parser_.subscribe(codes);
 	EXPECT_EQ(1, api_.sub_calls);
 	EXPECT_EQ(2, api_.sub_count);
-	EXPECT_TRUE(sink_.hasLog("Sending md subscribe request failed: -3"));
+	EXPECT_TRUE(sink_.hasLog("Sending md subscribe batch 1 (2 contracts) failed: -3"));
+	EXPECT_TRUE(sink_.hasLog("2 contracts were not sent for md subscription"));
+	EXPECT_FALSE(sink_.hasLog("awaiting confirmation"));
 
 	api_.sub_ret = 0;
 	parser_.subscribe(codes);
 	EXPECT_EQ(2, api_.sub_calls);
-	EXPECT_TRUE(sink_.hasLog("2 contracts subscribed in total"));
+	EXPECT_TRUE(sink_.hasLog("sent for 2 contracts in 1 batches"));
+	EXPECT_FALSE(sink_.hasLog("subscribed in total"));
 
 	CodeSet empty;
 	parser_.subscribe(empty);

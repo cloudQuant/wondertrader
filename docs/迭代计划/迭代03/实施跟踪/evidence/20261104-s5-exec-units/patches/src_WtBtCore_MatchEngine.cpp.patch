@@ -1,0 +1,38 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/WtBtCore/MatchEngine.cpp	2026-11-04 09:29:11
++++ src/WtBtCore/MatchEngine.cpp	2026-11-04 17:46:12
+@@ -285,6 +285,12 @@
+ 	curBook._ask_px = PRICE_DOUBLE_TO_INT(curTick->askprice(0));
+ 	curBook._bid_px = PRICE_DOUBLE_TO_INT(curTick->bidprice(0));
+ 
++	// BUG-R43-002: a tick carries a complete snapshot of the displayed depth.
++	// A price level that is no longer displayed (including every level after an
++	// empty quote) has unknown resting volume and must not be kept as if it were
++	// current liquidity. Rebuild the book from this snapshot only; this also
++	// subsumes clearing stale levels between the best bid and best ask.
++	curBook._items.clear();
+ 	for (uint32_t i = 0; i < 10; i++)
+ 	{
+ 		if (PRICE_DOUBLE_TO_INT(curTick->askprice(i)) == 0 && PRICE_DOUBLE_TO_INT(curTick->bidprice(i)) == 0)
+@@ -303,22 +309,6 @@
+ 			double& volume = curBook._items[px];
+ 			volume = curTick->bidqty(i);
+ 		}
+-	}
+-
+-	//卖一和买一之间的报价必须全部清除掉
+-	if (!curBook._items.empty())
+-	{
+-		auto end = curBook._items.end();
+-		auto sit = curBook._items.lower_bound(curBook._bid_px);
+-		if (sit != end && sit->first == curBook._bid_px)
+-			sit++;
+-
+-		auto eit = curBook._items.lower_bound(curBook._ask_px);
+-
+-		// 单边盘口及锁定/交叉盘口都可能令其中一个搜索迭代器到达 end。
+-		// 只有两个有效边界且范围正向时，才清理买一和卖一之间的旧档位。
+-		if (sit != end && eit != end && sit->first < eit->first)
+-			curBook._items.erase(sit, eit);
+ 	}
+ }
+ 

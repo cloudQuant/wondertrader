@@ -250,18 +250,14 @@ details:
     direct: 0
     volume: 0
     openprice: 0
-  - exchg: DCE
-    code: m2509
-    direct: 0
-    volume: 1
-    openprice: 3000
 )YAML");
+	// K08 b=B：原文件另含未知合约 DCE.m2509（被跳过）；现在含未知合约的文件整份拒绝，见 q04 专门用例。
 
 	env.ready(20240315);
 
 	EXPECT_DOUBLE_EQ(3.0, env.ctx.stra_get_local_position(kAg));
 	EXPECT_DOUBLE_EQ(-2.0, env.ctx.stra_get_local_position(kAu));
-	// 两条有效明细各通知一次, 未知合约被 continue
+	// 两条有效明细各通知一次（零量明细不通知）
 	EXPECT_EQ(2u, env.stra.posCnt);
 	EXPECT_EQ(1u, env.stra.readyCnt);
 	// 原文件被改名, 不会二次导入
@@ -288,8 +284,12 @@ details:
 	env.ready(0);
 }
 
-TEST(R54UftCtx, manual_file_without_details_is_ignored_and_renamed)
+// 原用例 manual_file_without_details_is_ignored_and_renamed（改名、就绪照常）按 K08 a=B/e=A 改写。
+TEST(R54UftCtx, manual_file_without_details_is_rejected_and_kept)
 {
+	// 决策 K08（2026-11-04 用户裁定）：a=B/b=B 解析失败、缺 details、含未知合约或非法条目的手工文件整份拒绝，
+	// 不导入、不归档、本次切日失败；c=C 先改名归档再应用。改前期望见证据 k08-manual-file/before。
+
 	CtxEnv env("manual_no_details");
 	std::error_code ec;
 	std::filesystem::create_directories(env.folder, ec);
@@ -298,7 +298,7 @@ TEST(R54UftCtx, manual_file_without_details_is_ignored_and_renamed)
 	env.tmp.write(env.mannualFile(), "unrelated: value\n");
 	env.ready(20240315);
 
-	EXPECT_FALSE(std::filesystem::exists(env.mannualFile(), ec));
+	EXPECT_TRUE(std::filesystem::exists(env.mannualFile(), ec));
 	bool archived = false;
 	for (const auto& entry : std::filesystem::directory_iterator(env.folder, ec))
 	{
@@ -306,10 +306,10 @@ TEST(R54UftCtx, manual_file_without_details_is_ignored_and_renamed)
 		if (filename.find("mannual.yaml.") == 0)
 			archived = true;
 	}
-	EXPECT_TRUE(archived);
+	EXPECT_FALSE(archived);
 	EXPECT_DOUBLE_EQ(0.0, env.ctx.stra_get_local_position(kAg));
 	EXPECT_EQ(0u, env.stra.posCnt);
-	EXPECT_EQ(1u, env.stra.readyCnt);
+	EXPECT_EQ(0u, env.stra.readyCnt) << "e=A: a failed load does not notify the strategy";
 }
 
 // UftStraContext.cpp:592-594  on_trade 转发策略
@@ -424,12 +424,8 @@ TEST(R54UftCtx, slice_queries_are_null_before_cache)
 	EXPECT_EQ(nullptr, env.ctx.stra_get_last_tick(kAg));
 }
 
-// UftStraContext.cpp:71-84 只要本地有持仓就无条件
-// newTick->getContractInfo()->getCommInfo(); 而 ParserAdapter::handleQuote
-// (ParserAdapter.cpp:256-263) 解析出 cInfo 后只 setCode, 不回写 setContractInfo,
-// 实盘 tick 的 ContractInfo 为 NULL -> 策略有持仓时首笔行情必崩。
-// BUG-R54-002, 整条 DISABLED。
-TEST(DISABLED_R54UftCtx, tick_without_contract_info_crashes_with_local_position)
+// 迭代03 最终验收复核后启用（原禁用：BUG-R54-002）。
+TEST(R54UftCtx, tick_without_contract_info_crashes_with_local_position)
 {
 	CtxEnv env("ticknull");
 	env.ready(20240315);

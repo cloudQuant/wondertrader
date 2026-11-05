@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -23,6 +24,24 @@
 
 namespace wtp
 {
+#if defined(WT_JOURNAL_BOOTSTRAP_TEST_HOOKS) && !defined(_WIN32)
+static int bootstrap_exit_stage = -1;
+static std::string bootstrap_inject_path;
+void wtJournalBootstrapTestHook(int stage)
+{
+	if (stage == 0 && !bootstrap_inject_path.empty())
+	{
+		std::ofstream marker(bootstrap_inject_path, std::ios::binary);
+		marker << "concurrent-marker";
+		marker.close();
+		std::filesystem::permissions(bootstrap_inject_path,
+			std::filesystem::perms::owner_read | std::filesystem::perms::owner_write,
+			std::filesystem::perm_options::replace);
+	}
+	if (stage == bootstrap_exit_stage) _exit(70 + stage);
+}
+#endif
+
 struct UnresolvedReportJournalTestAccess
 {
 	using FaultPoint = UnresolvedReportJournal::TestFaultPoint;
@@ -125,6 +144,105 @@ TEST(UnresolvedReportJournal, WindowsFailsClosedUntilNativeDurabilityIsValidated
 }
 #else
 
+#ifdef WT_JOURNAL_BOOTSTRAP_TEST_HOOKS
+TEST(UnresolvedReportJournal, MarkerAppearingAfterBootstrapPreflightHasImmediateEvidence)
+{
+	for (const std::string& suffix : {std::string(".inflight"), std::string(".cleanup")})
+	{
+		TemporaryJournal file;
+		wtp::bootstrap_inject_path = file.string() + suffix;
+		Journal journal;
+		EXPECT_EQ(Journal::Status::RecoveryRequired, createJournal(journal, file));
+		wtp::bootstrap_inject_path.clear();
+		Journal::RecoveryInspection inspection;
+		ASSERT_EQ(Journal::Status::RecoveryRequired, journal.recoveryInspection(inspection));
+		EXPECT_TRUE(inspection.requires_manual_recovery);
+		EXPECT_EQ(suffix == ".inflight", inspection.has_in_flight_marker);
+		EXPECT_EQ(suffix == ".cleanup", inspection.has_cleanup_marker);
+		EXPECT_EQ("concurrent-marker", suffix == ".inflight"
+			? inspection.in_flight_marker_bytes : inspection.cleanup_marker_bytes);
+		EXPECT_FALSE(fs::exists(file.path()));
+	}
+}
+
+TEST(UnresolvedReportJournal, BootstrapProcessExitLeavesRecoveryEvidenceAndNeverRecreates)
+{
+	for (int stage = 1; stage <= 8; ++stage)
+	{
+		TemporaryJournal file;
+		const pid_t child = fork();
+		ASSERT_GE(child, 0);
+		if (child == 0)
+		{
+			wtp::bootstrap_exit_stage = stage;
+			Journal journal;
+			createJournal(journal, file);
+			_exit(100);
+		}
+		int status = 0;
+		ASSERT_EQ(child, waitpid(child, &status, 0));
+		ASSERT_TRUE(WIFEXITED(status));
+		ASSERT_EQ(70 + stage, WEXITSTATUS(status));
+		EXPECT_TRUE(fs::exists(file.string() + ".lock"));
+		EXPECT_EQ(stage >= 2, fs::exists(file.path()));
+		EXPECT_EQ(stage >= 3, fs::exists(file.string() + ".guard"));
+		EXPECT_EQ(stage >= 5, fs::exists(file.string() + ".inflight"));
+		Journal retry;
+		EXPECT_EQ(Journal::Status::AlreadyExists, createJournal(retry, file));
+		Journal reopened;
+		EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.open(file.string()));
+		Journal::RecoveryInspection inspection;
+		EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.recoveryInspection(inspection));
+		EXPECT_TRUE(inspection.requires_manual_recovery);
+		EXPECT_EQ(stage >= 5, inspection.has_in_flight_marker);
+	}
+}
+
+TEST(UnresolvedReportJournal, BootstrapProcessExitBeforeCreationAndAfterSuccessfulCreate)
+{
+	for (bool complete : {false, true})
+	{
+		TemporaryJournal file;
+		const pid_t child = fork();
+		ASSERT_GE(child, 0);
+		if (child == 0)
+		{
+			wtp::bootstrap_exit_stage = complete ? -1 : 0;
+			Journal journal;
+			_exit(createJournal(journal, file) == Journal::Status::Ok ? 0 : 100);
+		}
+		int status = 0;
+		ASSERT_EQ(child, waitpid(child, &status, 0));
+		ASSERT_TRUE(WIFEXITED(status));
+		ASSERT_EQ(complete ? 0 : 70, WEXITSTATUS(status));
+		Journal reopened;
+		EXPECT_EQ(complete ? Journal::Status::Ok : Journal::Status::NotFound,
+			reopened.open(file.string()));
+		if (!complete)
+			EXPECT_EQ(Journal::Status::Ok, createJournal(reopened, file));
+	}
+}
+
+TEST(UnresolvedReportJournal, GuardAppearingAfterPreflightIsNeverOverwritten)
+{
+	TemporaryJournal file;
+	const std::string guard = file.string() + ".guard";
+	wtp::bootstrap_inject_path = guard;
+	Journal journal;
+	EXPECT_EQ(Journal::Status::AlreadyExists, createJournal(journal, file));
+	wtp::bootstrap_inject_path.clear();
+	std::ifstream input(guard, std::ios::binary);
+	EXPECT_EQ("concurrent-marker", std::string(std::istreambuf_iterator<char>(input), {}));
+	EXPECT_TRUE(fs::exists(file.string() + ".lock"));
+	EXPECT_TRUE(fs::exists(file.path()));
+	Journal reopened;
+	EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.open(file.string()));
+	Journal::RecoveryInspection inspection;
+	EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.recoveryInspection(inspection));
+	EXPECT_TRUE(inspection.requires_manual_recovery);
+}
+#endif
+
 TEST(UnresolvedReportJournal, MissingOpenDoesNotBootstrapAndFreshRecordSurvivesRestart)
 {
 	TemporaryJournal file;
@@ -165,6 +283,53 @@ TEST(UnresolvedReportJournal, BootstrapCannotBeImplicitlyRepeated)
 	Journal second;
 	EXPECT_EQ(Journal::Status::AlreadyExists, createJournal(second, file));
 	EXPECT_EQ(Journal::Status::Ok, second.open(file.string()));
+}
+
+TEST(UnresolvedReportJournal, BootstrapRejectsOrphanArtifactsWithoutCreatingOthers)
+{
+	for (const std::string& suffix : {std::string(), std::string(".guard"),
+		std::string(".inflight"), std::string(".cleanup"), std::string(".lock")})
+	{
+		TemporaryJournal file;
+		const fs::path orphan = file.string() + suffix;
+		{
+			std::ofstream out(orphan, std::ios::binary);
+			ASSERT_TRUE(out.good());
+			out << "existing-artifact";
+		}
+		fs::permissions(orphan, fs::perms::owner_read | fs::perms::owner_write,
+			fs::perm_options::replace);
+		Journal journal;
+		const auto expected = suffix == ".inflight" || suffix == ".cleanup"
+			? Journal::Status::RecoveryRequired : Journal::Status::AlreadyExists;
+		EXPECT_EQ(expected, createJournal(journal, file)) << suffix;
+		EXPECT_FALSE(journal.isOpen()) << suffix;
+		if (expected == Journal::Status::RecoveryRequired)
+		{
+			Journal::RecoveryInspection inspection;
+			EXPECT_EQ(Journal::Status::RecoveryRequired, journal.recoveryInspection(inspection));
+			EXPECT_TRUE(inspection.requires_manual_recovery);
+			EXPECT_EQ(suffix == ".inflight", inspection.has_in_flight_marker);
+			EXPECT_EQ(suffix == ".cleanup", inspection.has_cleanup_marker);
+		}
+		for (const std::string& candidate : {std::string(), std::string(".guard"),
+			std::string(".inflight"), std::string(".cleanup"), std::string(".lock")})
+			EXPECT_EQ(candidate == suffix, fs::exists(file.string() + candidate)) << suffix << ":" << candidate;
+		std::ifstream input(orphan, std::ios::binary);
+		EXPECT_EQ("existing-artifact", std::string(std::istreambuf_iterator<char>(input), {}));
+	}
+}
+
+TEST(UnresolvedReportJournal, BootstrapProbeErrorDoesNotCreateArtifacts)
+{
+	TemporaryJournal file;
+	Journal journal;
+	wtp::UnresolvedReportJournalTestAccess::failComponentProbe(journal);
+	EXPECT_EQ(Journal::Status::StorageFailed, createJournal(journal, file));
+	EXPECT_FALSE(journal.isOpen());
+	for (const std::string& suffix : {std::string(), std::string(".guard"),
+		std::string(".inflight"), std::string(".cleanup"), std::string(".lock")})
+		EXPECT_FALSE(fs::exists(file.string() + suffix)) << suffix;
 }
 
 TEST(UnresolvedReportJournal, MissingWalWithOtherJournalArtifactsRequiresRecovery)
@@ -378,13 +543,25 @@ TEST(UnresolvedReportJournal, InterruptedPrimaryAppendAfterProcessExitExportsFor
 	const std::string validWal = readWal();
 	ASSERT_FALSE(validWal.empty());
 
+	// The child's open diagnostic is kept outside the journal directory so a
+	// failure (exit 10) can be attributed (2026-11-04 s5: one unreproduced
+	// exit 10 in a 6-process isolated run).
+	const fs::path childDiagnostic = file.directory().parent_path() /
+		(file.directory().filename().string() + ".child-open.txt");
 	const pid_t child = fork();
 	ASSERT_GE(child, 0);
 	if (child == 0)
 	{
 		Journal writer;
-		if (writer.open(file.string()) != Journal::Status::Ok)
+		std::string openError;
+		const Journal::Status openStatus = writer.open(file.string(), &openError);
+		if (openStatus != Journal::Status::Ok)
+		{
+			std::ofstream out(childDiagnostic);
+			out << "status=" << static_cast<int>(openStatus) << " error=" << openError << "\n";
+			out.close();
 			_exit(10);
+		}
 		wtp::UnresolvedReportJournalTestAccess::failAt(
 			writer, FaultPoint::FailPrimaryPartialWrite, 7);
 		uint64_t sequence = 0;
@@ -394,7 +571,14 @@ TEST(UnresolvedReportJournal, InterruptedPrimaryAppendAfterProcessExitExportsFor
 	int childStatus = 0;
 	ASSERT_EQ(child, waitpid(child, &childStatus, 0));
 	ASSERT_TRUE(WIFEXITED(childStatus));
-	ASSERT_EQ(0, WEXITSTATUS(childStatus));
+	std::string childOpenText;
+	{
+		std::ifstream in(childDiagnostic);
+		childOpenText.assign(std::istreambuf_iterator<char>(in), {});
+	}
+	std::error_code ignoredDiagnostic;
+	fs::remove(childDiagnostic, ignoredDiagnostic);
+	ASSERT_EQ(0, WEXITSTATUS(childStatus)) << "child open diagnostic: " << childOpenText;
 	const std::string tornWal = readWal();
 	ASSERT_GT(tornWal.size(), validWal.size());
 	EXPECT_EQ(validWal, tornWal.substr(0, validWal.size()));
@@ -493,6 +677,69 @@ TEST(UnresolvedReportJournal, ComponentProbeErrorFailsClosedWithoutTreatingPathA
 	EXPECT_EQ(0u, highWater);
 	EXPECT_EQ(walSize, fs::file_size(file.path()));
 	EXPECT_FALSE(fs::exists(file.path().string() + ".inflight"));
+}
+
+TEST(UnresolvedReportJournal, MarkerPermissionFailureRetainsImmediateAndRestartEvidence)
+{
+	TemporaryJournal file;
+	Journal journal;
+	ASSERT_EQ(Journal::Status::Ok, createJournal(journal, file));
+	uint64_t prior = 0;
+	ASSERT_EQ(Journal::Status::Ok, journal.append("prior-report", prior));
+	wtp::UnresolvedReportJournalTestAccess::failAt(journal, FaultPoint::FailMarkerPermissions);
+	uint64_t sequence = 99;
+	EXPECT_EQ(Journal::Status::StorageFailed, journal.append("not-written", sequence));
+	EXPECT_EQ(0u, sequence);
+	EXPECT_FALSE(journal.isHealthy());
+	Journal::RecoveryInspection immediate;
+	ASSERT_EQ(Journal::Status::RecoveryRequired, journal.recoveryInspection(immediate));
+	EXPECT_TRUE(immediate.has_in_flight_marker);
+	EXPECT_TRUE(immediate.requires_manual_recovery);
+	ASSERT_EQ(1u, immediate.primary_reports.size());
+	EXPECT_EQ("prior-report", immediate.primary_reports.front().raw_payload);
+	EXPECT_FALSE(immediate.primary_reports.front().committed);
+	journal.close();
+
+	Journal reopened;
+	EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.open(file.string()));
+	Journal::RecoveryInspection afterRestart;
+	ASSERT_EQ(Journal::Status::RecoveryRequired, reopened.recoveryInspection(afterRestart));
+	EXPECT_TRUE(afterRestart.has_in_flight_marker);
+	ASSERT_EQ(1u, afterRestart.primary_reports.size());
+	EXPECT_EQ("prior-report", afterRestart.primary_reports.front().raw_payload);
+	std::vector<Journal::Report> pending;
+	EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.pending(pending));
+}
+
+TEST(UnresolvedReportJournal, AckMarkerPermissionFailurePreservesPendingEvidence)
+{
+	TemporaryJournal file;
+	Journal journal;
+	ASSERT_EQ(Journal::Status::Ok, createJournal(journal, file));
+	uint64_t prior = 0;
+	ASSERT_EQ(Journal::Status::Ok, journal.append("pending-before-ack", prior));
+	wtp::UnresolvedReportJournalTestAccess::failAt(journal, FaultPoint::FailMarkerPermissions);
+	EXPECT_EQ(Journal::Status::StorageFailed,
+		journal.acknowledge(prior, "operator", "external reconciliation"));
+	Journal::RecoveryInspection immediate;
+	ASSERT_EQ(Journal::Status::RecoveryRequired, journal.recoveryInspection(immediate));
+	EXPECT_TRUE(immediate.has_in_flight_marker);
+	ASSERT_EQ(1u, immediate.primary_reports.size());
+	EXPECT_EQ("pending-before-ack", immediate.primary_reports.front().raw_payload);
+	EXPECT_TRUE(immediate.primary_acknowledgements.empty());
+	journal.close();
+
+	Journal reopened;
+	EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.open(file.string()));
+	Journal::RecoveryInspection afterRestart;
+	ASSERT_EQ(Journal::Status::RecoveryRequired, reopened.recoveryInspection(afterRestart));
+	EXPECT_TRUE(afterRestart.has_in_flight_marker);
+	ASSERT_EQ(1u, afterRestart.primary_reports.size());
+	EXPECT_EQ("pending-before-ack", afterRestart.primary_reports.front().raw_payload);
+	EXPECT_TRUE(afterRestart.primary_acknowledgements.empty());
+	uint64_t highWater = 99;
+	EXPECT_EQ(Journal::Status::RecoveryRequired, reopened.queryPendingHighWater(highWater));
+	EXPECT_EQ(0u, highWater);
 }
 
 TEST(UnresolvedReportJournal, CleanupComponentProbeErrorFailsClosedWithoutTreatingPathAsMissing)
@@ -724,8 +971,17 @@ TEST(UnresolvedReportJournal, AckCleanupFailuresExposeReportAndMatchedCommitBefo
 	expectAckCleanupRecovery(FaultPoint::FailCleanupMarkerRemove);
 }
 
+// BUG-I02-NEW-137: iteration 03 forbids creating symbolic links. The final
+// component symlink control below is therefore opt-in (WT_ALLOW_SYMLINK_TESTS=1)
+// and reported as SKIPPED otherwise; it never counts as passed. The
+// symlink-free parts run in VisiblePathAndLockReplacementFailClosed, and
+// SystemLinkInDirectoryPathIsCanonicalizedToOneJournal covers directory links
+// through the pre-existing operating-system link /tmp.
 TEST(UnresolvedReportJournal, SymlinkAndVisiblePathReplacementFailClosed)
 {
+	const char* allow = std::getenv("WT_ALLOW_SYMLINK_TESTS");
+	if (allow == nullptr || std::string(allow) != "1")
+		GTEST_SKIP() << "policy (iteration 03, BUG-I02-NEW-137): creating a symbolic link is not allowed";
 	TemporaryJournal symlinkFile;
 	Journal symlinkSeed;
 	ASSERT_EQ(Journal::Status::Ok, createJournal(symlinkSeed, symlinkFile));
@@ -775,6 +1031,103 @@ TEST(UnresolvedReportJournal, SymlinkAndVisiblePathReplacementFailClosed)
 	EXPECT_EQ(Journal::Status::StorageFailed,
 		lockOwner.append("must-not-write-with-drifted-lock", sequence));
 }
+
+TEST(UnresolvedReportJournal, VisiblePathAndLockReplacementFailClosed)
+{
+	uint64_t sequence = 0;
+	TemporaryJournal replacementFile;
+	Journal journal;
+	ASSERT_EQ(Journal::Status::Ok, createJournal(journal, replacementFile));
+	fs::rename(replacementFile.path(), replacementFile.path().string() + ".backup");
+	{
+		std::ofstream replacement(replacementFile.path(), std::ios::binary);
+		ASSERT_TRUE(replacement.good());
+		replacement << "replacement";
+	}
+	EXPECT_EQ(Journal::Status::StorageFailed,
+		journal.append("must-not-write-replaced-file", sequence));
+	EXPECT_FALSE(journal.isHealthy());
+
+	TemporaryJournal lockReplacementFile;
+	Journal lockOwner;
+	ASSERT_EQ(Journal::Status::Ok, createJournal(lockOwner, lockReplacementFile));
+	fs::rename(lockReplacementFile.path().string() + ".lock",
+		lockReplacementFile.path().string() + ".lock.backup");
+	{
+		std::ofstream newLock(lockReplacementFile.path().string() + ".lock", std::ios::binary);
+		ASSERT_TRUE(newLock.good());
+	}
+	Journal contender;
+	const Journal::Status contenderStatus = contender.open(lockReplacementFile.string());
+	EXPECT_TRUE(contenderStatus == Journal::Status::Busy ||
+		contenderStatus == Journal::Status::UnsafePath ||
+		contenderStatus == Journal::Status::RecoveryRequired);
+	EXPECT_EQ(Journal::Status::StorageFailed,
+		lockOwner.append("must-not-write-with-drifted-lock", sequence));
+}
+
+// BUG-I02-NEW-137 (iteration 03, no symlink may be created). Contract: the
+// journal canonicalizes its *directory* once at open (std::filesystem::canonical,
+// so links among directory components resolve to one real directory, which is
+// then pinned by descriptor), while every journal *file* is opened relative to
+// that descriptor with O_NOFOLLOW. This test uses the pre-existing operating
+// system link /tmp -> private/tmp: both spellings name one journal, files
+// exist only in the real directory, and the link spelling cannot obtain a
+// second writer. A link as the final file component is not exercised (it
+// would require creating a link). Skipped where /tmp is not a symbolic link.
+TEST(UnresolvedReportJournal, SystemLinkInDirectoryPathIsCanonicalizedToOneJournal)
+{
+	std::error_code ec;
+	if (!fs::is_symlink(fs::path("/tmp"), ec) || !fs::is_directory(fs::path("/private/tmp"), ec))
+		GTEST_SKIP() << "/tmp is not a system symbolic link to /private/tmp on this host";
+	const std::string name = "wondertrader_urj_syslink_" + std::to_string(processId());
+	const fs::path realDir = fs::path("/private/tmp") / name;
+	const fs::path linkedWal = fs::path("/tmp") / name / "reports.wal";
+	fs::remove_all(realDir, ec);
+	ASSERT_TRUE(fs::create_directory(realDir));
+	fs::permissions(realDir, fs::perms::owner_all, fs::perm_options::replace);
+	struct Cleanup { fs::path dir; ~Cleanup() { std::error_code ignored; fs::remove_all(dir, ignored); } } cleanup{ realDir };
+
+	Journal viaLink;
+	ASSERT_EQ(Journal::Status::Ok, viaLink.createNew(linkedWal.string(), "test:system-link"));
+	uint64_t sequence = 0;
+	ASSERT_EQ(Journal::Status::Ok, viaLink.append("via-system-link", sequence));
+	EXPECT_TRUE(fs::is_regular_file(realDir / "reports.wal")) << "files live in the canonical directory";
+	EXPECT_FALSE(fs::is_symlink(realDir / "reports.wal"));
+
+	Journal viaRealPath;
+	EXPECT_EQ(Journal::Status::Busy, viaRealPath.open((realDir / "reports.wal").string()))
+		<< "the other spelling of the same journal cannot become a second writer";
+	viaLink.close();
+
+	Journal reopenReal;
+	ASSERT_EQ(Journal::Status::Ok, reopenReal.open((realDir / "reports.wal").string()));
+	std::vector<Journal::Report> pending;
+	ASSERT_EQ(Journal::Status::Ok, reopenReal.pending(pending));
+	ASSERT_EQ(1u, pending.size());
+	EXPECT_EQ("via-system-link", pending[0].raw_payload);
+	Journal secondViaLink;
+	EXPECT_EQ(Journal::Status::Busy, secondViaLink.open(linkedWal.string()));
+}
+
+#ifdef __APPLE__
+// Negative control for the bounded EINVAL retry in noExtendedAcl (2026-11-04
+// s5): a genuine extended ACL on a journal file is still rejected.
+TEST(UnresolvedReportJournal, GenuineExtendedAclOnJournalFileIsRejected)
+{
+	TemporaryJournal file;
+	{
+		Journal seed;
+		ASSERT_EQ(Journal::Status::Ok, createJournal(seed, file));
+	}
+	const std::string command = "/bin/chmod +a \"everyone deny delete\" '" + file.string() + ".guard'";
+	ASSERT_EQ(0, std::system(command.c_str()));
+	Journal reopened;
+	std::string error;
+	EXPECT_EQ(Journal::Status::UnsafePath, reopened.open(file.string(), &error));
+	EXPECT_NE(std::string::npos, error.find("ACL-free")) << error;
+}
+#endif
 
 TEST(UnresolvedReportJournal, UnsafeDirectoryPermissionsAreRejected)
 {

@@ -556,11 +556,11 @@ TEST(l01_codehelper, extract_std_code_std_comm_id_capacity_boundaries)
 	// Both input shapes may fill all but the terminating NUL in _fullpid.
 	CodeHelper::CodeInfo info = CodeHelper::extractStdCode((exchange + "." + fitsProduct).c_str(), nullptr);
 	ASSERT_STREQ(info.stdCommID(), expectedFullPid.c_str());
-	EXPECT_EQ(std::strlen(info._fullpid), MAX_INSTRUMENT_LENGTH - 1);
+	EXPECT_EQ(std::strlen(info._fullpid), static_cast<std::size_t>(MAX_INSTRUMENT_LENGTH - 1));
 
 	info = CodeHelper::extractStdCode((exchange + "." + fitsProduct + ".contract").c_str(), nullptr);
 	ASSERT_STREQ(info.stdCommID(), expectedFullPid.c_str());
-	EXPECT_EQ(std::strlen(info._fullpid), MAX_INSTRUMENT_LENGTH - 1);
+	EXPECT_EQ(std::strlen(info._fullpid), static_cast<std::size_t>(MAX_INSTRUMENT_LENGTH - 1));
 
 	// A full PID whose characters would occupy the array's NUL byte is rejected.
 	info = CodeHelper::extractStdCode((exchange + "." + tooLongProduct).c_str(), nullptr);
@@ -569,7 +569,7 @@ TEST(l01_codehelper, extract_std_code_std_comm_id_capacity_boundaries)
 	EXPECT_STREQ(info._code, "");
 	EXPECT_STREQ(info._fullpid, "");
 	EXPECT_STREQ(info.stdCommID(), ".");
-	EXPECT_LT(std::strlen(info._fullpid), MAX_INSTRUMENT_LENGTH);
+	EXPECT_LT(std::strlen(info._fullpid), static_cast<std::size_t>(MAX_INSTRUMENT_LENGTH));
 
 	info = CodeHelper::extractStdCode((exchange + "." + tooLongProduct + ".contract").c_str(), nullptr);
 	EXPECT_STREQ(info._exchg, "");
@@ -577,7 +577,7 @@ TEST(l01_codehelper, extract_std_code_std_comm_id_capacity_boundaries)
 	EXPECT_STREQ(info._code, "");
 	EXPECT_STREQ(info._fullpid, "");
 	EXPECT_STREQ(info.stdCommID(), ".");
-	EXPECT_LT(std::strlen(info._fullpid), MAX_INSTRUMENT_LENGTH);
+	EXPECT_LT(std::strlen(info._fullpid), static_cast<std::size_t>(MAX_INSTRUMENT_LENGTH));
 }
 
 TEST(l01_codehelper, extract_std_code_fut_opt_goes_to_opt_branch)

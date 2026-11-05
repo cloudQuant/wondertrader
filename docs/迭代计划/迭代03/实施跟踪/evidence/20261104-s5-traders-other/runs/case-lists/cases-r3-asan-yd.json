@@ -1,0 +1,26 @@
+[
+ {
+  "id": "r3-asan-yd-red",
+  "name": "YD-suites",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan-r2/tests",
+  "filter": "R93YdTest.*:YdDestroyLifecycle.*:R60YdTest.*",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 900
+ },
+ {
+  "id": "r3-asan-yd-green",
+  "name": "YD-suites",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/tests",
+  "filter": "R93YdTest.*:YdDestroyLifecycle.*:R60YdTest.*",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 900
+ }
+]

@@ -371,6 +371,9 @@ namespace wtp {
 class WtArbiExecuterTestAccess
 {
 public:
+	static size_t groupCount(const WtArbiExecuter& executer) { return executer._group_rules.size(); }
+	static bool hasConfig(const WtArbiExecuter& executer) { return executer._config != nullptr; }
+	static bool hasPool(const WtArbiExecuter& executer) { return executer._pool != nullptr; }
 	static std::unique_ptr<WtArbiExecuter::QuiesceIngress> holdIngress(
 		WtArbiExecuter& executer)
 	{
@@ -634,7 +637,10 @@ TEST(WtArbiExecuterSerialization, PublicSetPositionAppliesGroupTargetsAndClearsO
 	auto groupProbe = std::make_shared<ArbiProbe>();
 	auto rbProbe = std::make_shared<ArbiProbe>();
 	auto auProbe = std::make_shared<ArbiProbe>();
+	std::shared_ptr<WTSCommodityInfo> commodity(r71::makeComm("SHFE", "ag", "I03", TM_Both), [](WTSCommodityInfo* p) { if (p) p->release(); });
+	r71::R71ExecStub groupStub; groupStub.comm_ = commodity.get();
 	WtArbiExecuter executer(NULL, "arbi_group_targets", NULL);
+	executer.setStub(&groupStub);
 	std::shared_ptr<WTSVariant> config(WTSCfgLoader::load_from_content(
 		R"json({"scale":1.0,"poolsize":0,"strict_sync":false,
 		"groups":{"SHFE.ags":{"SHFE.rb.2510":2.0,"SHFE.au.2212":2.0}},
@@ -661,41 +667,40 @@ TEST(WtArbiExecuterSerialization, PublicSetPositionAppliesGroupTargetsAndClearsO
 	negativeTargets[rbCode] = -6.0;
 	negativeTargets[auCode] = -8.0;
 	executer.set_position(negativeTargets);
-	EXPECT_TRUE(groupProbe->positionSnapshot().empty());
-	expectLastTarget(rbProbe, -6.0, 1);
-	expectLastTarget(auProbe, -8.0, 1);
-	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), -6.0);
-	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), -8.0);
+	expectLastTarget(groupProbe, -3.0, 1);
+	expectLastTarget(rbProbe, 0.0, 1);
+	expectLastTarget(auProbe, -2.0, 1);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), -2.0);
 
-	// Fractional member targets stay on the original path; the existing Arbi
-	// dispatch rounds unit callbacks while the target ledger retains precision.
+	// Fractional member targets produce an exact fractional group and residual.
 	wt_hashmap<std::string, double> fractionalGroupTargets;
 	fractionalGroupTargets[rbCode] = 7.5;
 	fractionalGroupTargets[auCode] = 8.0;
 	executer.set_position(fractionalGroupTargets);
-	EXPECT_TRUE(groupProbe->positionSnapshot().empty());
-	expectLastTarget(rbProbe, 8.0, 2);
-	expectLastTarget(auProbe, 8.0, 2);
-	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 7.5);
-	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 8.0);
+	expectLastTarget(groupProbe, 3.75, 2);
+	expectLastTarget(rbProbe, 0.0, 2);
+	expectLastTarget(auProbe, 0.5, 2);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 0.5);
 
 	// Integer member targets may also imply a fractional group count.
 	wt_hashmap<std::string, double> fractionalCountTargets;
 	fractionalCountTargets[rbCode] = 7.0;
 	fractionalCountTargets[auCode] = 8.0;
 	executer.set_position(fractionalCountTargets);
-	EXPECT_TRUE(groupProbe->positionSnapshot().empty());
-	expectLastTarget(rbProbe, 7.0, 3);
-	expectLastTarget(auProbe, 8.0, 3);
-	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 7.0);
-	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 8.0);
+	expectLastTarget(groupProbe, 3.5, 3);
+	expectLastTarget(rbProbe, 0.0, 3);
+	expectLastTarget(auProbe, 1.0, 3);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 1.0);
 
 	wt_hashmap<std::string, double> targets;
 	targets[rbCode] = 6.0;
 	targets[auCode] = 8.0;
 	executer.set_position(targets);
 
-	expectLastTarget(groupProbe, 3.0, 1);
+	expectLastTarget(groupProbe, 3.0, 4);
 	expectLastTarget(rbProbe, 0.0, 4);
 	expectLastTarget(auProbe, 2.0, 4);
 	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, groupCode), 3.0);
@@ -703,7 +708,7 @@ TEST(WtArbiExecuterSerialization, PublicSetPositionAppliesGroupTargetsAndClearsO
 	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 2.0);
 
 	executer.set_position(targets);
-	expectLastTarget(groupProbe, 3.0, 2);
+	expectLastTarget(groupProbe, 3.0, 5);
 	expectLastTarget(rbProbe, 0.0, 5);
 	expectLastTarget(auProbe, 2.0, 5);
 	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, groupCode), 3.0);
@@ -712,7 +717,7 @@ TEST(WtArbiExecuterSerialization, PublicSetPositionAppliesGroupTargetsAndClearsO
 
 	wt_hashmap<std::string, double> empty;
 	executer.set_position(empty);
-	expectLastTarget(groupProbe, 0.0, 3);
+	expectLastTarget(groupProbe, 0.0, 6);
 	expectLastTarget(rbProbe, 0.0, 6);
 	expectLastTarget(auProbe, 0.0, 6);
 	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, groupCode), 0.0);
@@ -720,7 +725,7 @@ TEST(WtArbiExecuterSerialization, PublicSetPositionAppliesGroupTargetsAndClearsO
 	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 0.0);
 }
 
-TEST(WtArbiExecuterSerialization, OverlappingGroupsPreserveOriginalTargets)
+TEST(WtArbiExecuterSerialization, OverlappingGroupsUseConfiguredOrder)
 {
 	ArbiProbeFact fact;
 	auto firstGroupProbe = std::make_shared<ArbiProbe>();
@@ -733,6 +738,7 @@ TEST(WtArbiExecuterSerialization, OverlappingGroupsPreserveOriginalTargets)
 		R"json({"scale":1.0,"poolsize":0,"strict_sync":false,
 		"groups":{"SHFE.ags":{"SHFE.rb.2510":2.0,"SHFE.au.2212":2.0},
 		"SHFE.agc":{"SHFE.rb.2510":1.0,"SHFE.cu.2212":1.0}},
+		"group_order":["SHFE.ags","SHFE.agc"],
 		"policy":{"default":{"name":"WtExeFact.WtMinImpactExeUnit"}}})json"),
 		[](WTSVariant* value) { if (value) value->release(); });
 	ASSERT_NE(config.get(), nullptr);
@@ -755,16 +761,17 @@ TEST(WtArbiExecuterSerialization, OverlappingGroupsPreserveOriginalTargets)
 	targets[cuCode] = 5.0;
 	executer.set_position(targets);
 
-	EXPECT_TRUE(firstGroupProbe->positionSnapshot().empty());
+	ASSERT_EQ(firstGroupProbe->positionSnapshot().size(), 1u);
+	EXPECT_DOUBLE_EQ(firstGroupProbe->positionSnapshot().back(), 3.0);
 	EXPECT_TRUE(secondGroupProbe->positionSnapshot().empty());
 	ASSERT_EQ(rbProbe->positionSnapshot().size(), 1u);
 	ASSERT_EQ(auProbe->positionSnapshot().size(), 1u);
 	ASSERT_EQ(cuProbe->positionSnapshot().size(), 1u);
-	EXPECT_DOUBLE_EQ(rbProbe->positionSnapshot().back(), 6.0);
-	EXPECT_DOUBLE_EQ(auProbe->positionSnapshot().back(), 8.0);
+	EXPECT_DOUBLE_EQ(rbProbe->positionSnapshot().back(), 0.0);
+	EXPECT_DOUBLE_EQ(auProbe->positionSnapshot().back(), 2.0);
 	EXPECT_DOUBLE_EQ(cuProbe->positionSnapshot().back(), 5.0);
-	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 6.0);
-	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 8.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, rbCode), 0.0);
+	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, auCode), 2.0);
 	EXPECT_DOUBLE_EQ(wtp::WtArbiExecuterTestAccess::target(executer, cuCode), 5.0);
 }
 

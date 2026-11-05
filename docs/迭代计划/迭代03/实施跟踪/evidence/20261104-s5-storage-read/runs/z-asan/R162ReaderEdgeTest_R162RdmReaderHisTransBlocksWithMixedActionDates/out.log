@@ -1,0 +1,11 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R162ReaderEdgeTest.R162RdmReaderHisTransBlocksWithMixedActionDates
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R162ReaderEdgeTest
+[ RUN      ] R162ReaderEdgeTest.R162RdmReaderHisTransBlocksWithMixedActionDates
+/opt/homebrew/Cellar/llvm/22.1.8/bin/../include/c++/v1/__algorithm/lower_bound.h:40:53: runtime error: reference binding to misaligned address 0x6160000010a4 for type 'wtp::WTSOrdQueStruct', which requires 8 byte alignment
+0x6160000010a4: note: pointer points here
+  3c 00 00 00 53 53 45 00  00 00 00 00 00 00 00 00  00 00 00 00 36 30 30 30  30 32 00 00 00 00 00 00
+              ^ 
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /opt/homebrew/Cellar/llvm/22.1.8/bin/../include/c++/v1/__algorithm/lower_bound.h:40:53 

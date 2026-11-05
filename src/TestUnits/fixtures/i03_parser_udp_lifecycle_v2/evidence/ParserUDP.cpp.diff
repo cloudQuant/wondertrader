@@ -1,0 +1,486 @@
+diff --git a/src/TestUnits/fixtures/i03_parser_udp_lifecycle_v2/baseline/ParserUDP.cpp b/src/ParserUDP/ParserUDP.cpp
+index dc3ee8a7..3744e0a3 100644
+--- a/src/TestUnits/fixtures/i03_parser_udp_lifecycle_v2/baseline/ParserUDP.cpp
++++ b/src/ParserUDP/ParserUDP.cpp
+@@ -15,6 +15,7 @@
+ #include <boost/bind.hpp>
+ #include <atomic>
+ #include <cstring>
++#include <stdexcept>
+ 
+  //By Wesley @ 2022.01.05
+ #include "../Share/fmtlib.h"
+@@ -33,6 +34,11 @@ inline void write_log(IParserSpi* sink, WTSLogLevel ll, const char* format, cons
+ namespace
+ {
+ 	thread_local ParserUDP* g_current_udp_worker = nullptr;
++#ifdef WT_PARSERUDP_TEST_HOOKS
++	std::atomic<bool> g_fail_next_worker_start{false};
++	std::atomic<bool> g_fail_after_receive_arm{false};
++	std::atomic<bool> g_fail_next_stop_timer{false};
++#endif
+ }
+ 
+ #define UDP_MSG_SUBSCRIBE	0x100
+@@ -68,10 +74,16 @@ typedef UDPDataPacket<WTSTransStruct>	UDPTransPacket;
+ 
+ extern "C"
+ {
++#ifdef WT_PARSERUDP_TEST_HOOKS
++	EXPORT_FLAG void parserUdpTestFailNextWorkerStart() { g_fail_next_worker_start.store(true); }
++	EXPORT_FLAG void parserUdpTestFailAfterReceiveArm() { g_fail_after_receive_arm.store(true); }
++	EXPORT_FLAG void parserUdpTestFailNextStopTimer() { g_fail_next_stop_timer.store(true); }
++	EXPORT_FLAG bool parserUdpTestLegacyShutdown(IParserApi* api) { return static_cast<ParserUDP*>(api)->shutdown(); }
++#endif
+ 	EXPORT_FLAG IParserApi* createParser()
+ 	{
+-		ParserUDP* parser = new ParserUDP();
+-		return parser;
++		try { return new ParserUDP(); }
++		catch (...) { return NULL; }
+ 	}
+ 
+ 	EXPORT_FLAG void deleteParser(IParserApi* &parser)
+@@ -86,12 +98,36 @@ extern "C"
+ 			parser = NULL;
+ 		}
+ 	}
++
++	static WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL udp_preflight() { return WT_PARSER_LIFECYCLE_V2_OK; }
++	static ParserUDP* udp_from_handle(void* handle) { return static_cast<ParserUDP*>(static_cast<IParserApi*>(handle)); }
++	static WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL udp_request(void* handle)
++	{ return handle ? udp_from_handle(handle)->requestStopV2() : WT_PARSER_LIFECYCLE_V2_INVALID_ARGUMENT; }
++	static WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL udp_can_wait(void* handle)
++	{ return handle ? udp_from_handle(handle)->canWaitV2() : WT_PARSER_LIFECYCLE_V2_INVALID_ARGUMENT; }
++	static WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL udp_wait(void* handle, uint32_t timeout)
++	{ return handle ? udp_from_handle(handle)->waitDrainedV2(timeout) : WT_PARSER_LIFECYCLE_V2_INVALID_ARGUMENT; }
++	static WtParserLifecycleV2Status WT_PARSER_LIFECYCLE_V2_CALL udp_destroy(void** handle)
++	{
++		if (!handle || !*handle) return WT_PARSER_LIFECYCLE_V2_INVALID_ARGUMENT;
++		ParserUDP* parser = udp_from_handle(*handle);
++		if (!parser->prepareDestroyV2()) return WT_PARSER_LIFECYCLE_V2_ERROR;
++		try { delete parser; *handle = NULL; return WT_PARSER_LIFECYCLE_V2_OK; }
++		catch (...) { return WT_PARSER_LIFECYCLE_V2_ERROR; }
++	}
++	WT_PARSER_LIFECYCLE_V2_EXPORT const WtParserLifecycleApiV2* WT_PARSER_LIFECYCLE_V2_CALL getParserLifecycleApiV2(uint32_t major)
++	{
++		static const WtParserLifecycleApiV2 table = { sizeof(WtParserLifecycleApiV2), WT_PARSER_LIFECYCLE_V2_ABI_VERSION,
++			WT_PARSER_LIFECYCLE_V2_REQUIRED_CAPABILITIES, {0, 0}, udp_preflight, udp_request, udp_can_wait, udp_wait, udp_destroy };
++		return major == WT_PARSER_LIFECYCLE_V2_ABI_MAJOR ? &table : NULL;
++	}
+ };
+ 
+ 
+ 
+ ParserUDP::ParserUDP()
+-	: _strand(boost::asio::make_strand(_io_service))
++	: _stop_timer(_io_service)
++	, _strand(boost::asio::make_strand(_io_service))
+ 	, _b_socket(NULL)
+ 	, _s_socket(NULL)
+ 	, _s_inited(false)
+@@ -107,14 +143,147 @@ ParserUDP::ParserUDP()
+ 
+ ParserUDP::~ParserUDP()
+ {
++	if (_v2_joined.load(std::memory_order_acquire)) return;
+ 	// The exported deleteParser entry point retains the owner when this is
+ 	// called from an SPI callback. Direct deletion from that callback cannot be
+ 	// made safe by the legacy void IParserApi::release() contract.
+ 	shutdown();
+ }
+ 
++ParserUDP::ApiGuard::ApiGuard(ParserUDP* parser, bool allowClosed) noexcept
++	: _parser(parser), _frame{parser, NULL}, _entered(false)
++{
++	uint64_t state = parser->_api_state.load(std::memory_order_acquire);
++	for (;;)
++	{
++		if (((state & API_CLOSED) && (!allowClosed || (state & API_V2_STOP))) ||
++			(state & API_COUNT_MASK) == API_COUNT_MASK) return;
++		if (parser->_api_state.compare_exchange_weak(state, state + 1, std::memory_order_acq_rel)) break;
++	}
++	_frame.previous = _api_stack_top;
++	_api_stack_top = &_frame;
++	_entered = true;
++}
++
++ParserUDP::ApiGuard::~ApiGuard()
++{
++	if (!_entered) return;
++	_api_stack_top = _frame.previous;
++	_parser->_api_state.fetch_sub(1, std::memory_order_release);
++}
++
++bool ParserUDP::is_api_thread() const noexcept
++{
++	for (ApiFrame* frame = _api_stack_top; frame; frame = frame->previous)
++		if (frame->parser == this) return true;
++	return false;
++}
++
++void ParserUDP::armStopTimer()
++{
++#ifdef WT_PARSERUDP_TEST_HOOKS
++	if (g_fail_next_stop_timer.exchange(false)) throw std::runtime_error("injected stop timer failure");
++#endif
++	_stop_timer.expires_after(std::chrono::milliseconds(10));
++	_stop_timer.async_wait([this](const boost::system::error_code& error) {
++		std::lock_guard<std::recursive_mutex> lock(_mtx_io);
++		if (error == boost::asio::error::operation_aborted) return;
++		if (error)
++		{
++			_stop_post_failed.store(true, std::memory_order_release);
++			return;
++		}
++		if (_v2_stop.load(std::memory_order_acquire)) { stopOnWorkerV2(); return; }
++		if (_stop_requested.load(std::memory_order_acquire)) return;
++		try { armStopTimer(); }
++		catch (...) { _stop_post_failed.store(true, std::memory_order_release); }
++	});
++}
++
++void ParserUDP::stopOnWorkerV2()
++{
++	std::lock_guard<std::recursive_mutex> lock(_mtx_io);
++	_stopped = true;
++	close_sockets();
++	_work_guard.reset();
++	_stop_completed.store(true, std::memory_order_release);
++}
++
++WtParserLifecycleV2Status ParserUDP::requestStopV2() noexcept
++{
++	static_assert(std::atomic<uint64_t>::is_always_lock_free && std::atomic<bool>::is_always_lock_free,
++		"ParserUDP V2 stop requires lock-free atomic operations");
++	_api_state.fetch_or(API_CLOSED | API_V2_STOP, std::memory_order_acq_rel);
++	_v2_stop.store(true, std::memory_order_release);
++	_stop_requested.store(true, std::memory_order_release);
++	return _stop_post_failed.load(std::memory_order_acquire) ? WT_PARSER_LIFECYCLE_V2_ERROR : WT_PARSER_LIFECYCLE_V2_OK;
++}
++
++WtParserLifecycleV2Status ParserUDP::canWaitV2() const noexcept
++{
++	return (is_worker_thread() || is_callback_thread() || is_api_thread()) ?
++		WT_PARSER_LIFECYCLE_V2_WOULD_DEADLOCK : WT_PARSER_LIFECYCLE_V2_OK;
++}
++
++WtParserLifecycleV2Status ParserUDP::waitDrainedV2(uint32_t timeoutMs) noexcept
++{
++	try {
++	if (canWaitV2() != WT_PARSER_LIFECYCLE_V2_OK) return WT_PARSER_LIFECYCLE_V2_WOULD_DEADLOCK;
++	if (!_v2_stop.load(std::memory_order_acquire)) return WT_PARSER_LIFECYCLE_V2_INVALID_ARGUMENT;
++	const auto start = std::chrono::steady_clock::now();
++	do
++	{
++		if (_stop_post_failed.load(std::memory_order_acquire)) return WT_PARSER_LIFECYCLE_V2_ERROR;
++		if ((_api_state.load(std::memory_order_acquire) & API_COUNT_MASK) == 0)
++		{
++			bool exited = !_worker_created.load(std::memory_order_acquire);
++			if (!exited)
++			{
++				if (_worker_exit.exited.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
++				{
++					if (!_worker_exit.exited.get()) return WT_PARSER_LIFECYCLE_V2_ERROR;
++					exited = true;
++				}
++			}
++			if (exited)
++			{
++				std::unique_lock<std::recursive_mutex> io(_mtx_io, std::try_to_lock);
++				if (io.owns_lock())
++				{
++					_sink = NULL;
++					_v2_drained.store(true, std::memory_order_release);
++					return WT_PARSER_LIFECYCLE_V2_DRAINED;
++				}
++			}
++		}
++		if (timeoutMs == 0) break;
++		std::this_thread::sleep_for(std::chrono::milliseconds(1));
++	} while (timeoutMs == UINT32_MAX || std::chrono::steady_clock::now() - start < std::chrono::milliseconds(timeoutMs));
++	return WT_PARSER_LIFECYCLE_V2_PENDING;
++	} catch (...) { return WT_PARSER_LIFECYCLE_V2_ERROR; }
++}
++
++bool ParserUDP::prepareDestroyV2() noexcept
++{
++	if (!_v2_drained.load(std::memory_order_acquire) || canWaitV2() != WT_PARSER_LIFECYCLE_V2_OK) return false;
++	try
++	{
++		std::unique_lock<std::mutex> lock(_mtx_lifecycle, std::try_to_lock);
++		if (!lock.owns_lock()) return false;
++		if (_thrd_parser && _thrd_parser->joinable()) _thrd_parser->join();
++		_thrd_parser.reset();
++		close_sockets();
++		_v2_joined.store(true, std::memory_order_release);
++		return true;
++	} catch (...) { return false; }
++}
++
+ bool ParserUDP::init( WTSVariant* config )
+ {
++	ApiGuard api(this);
++	if (!api) return false;
++	std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++	if (_initialized_once || _stop_requested.load(std::memory_order_acquire)) return false;
+ 	if (config == NULL)
+ 		return false;
+ 
+@@ -141,6 +310,7 @@ bool ParserUDP::init( WTSVariant* config )
+ 
+ 	_broad_ep = ip::udp::endpoint(ip::address_v4::any(), _bport);
+ 
++	_initialized_once = true;
+ 	return true;
+ }
+ 
+@@ -256,6 +426,9 @@ void ParserUDP::recover_from_transport_failure(uint32_t& attempts, const char* c
+ 
+ bool ParserUDP::shutdown()
+ {
++	ApiGuard api(this, true);
++	if (!api) return false;
++	_api_state.fetch_or(API_CLOSED, std::memory_order_acq_rel);
+ 	_stop_requested.store(true, std::memory_order_release);
+ 
+ 	if (is_worker_thread())
+@@ -266,6 +439,8 @@ bool ParserUDP::shutdown()
+ 		std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
+ 		_stopped = true;
+ 		close_sockets();
++		try { _stop_timer.cancel(); } catch (...) { return false; }
++		_work_guard.reset();
+ 		return false;
+ 	}
+ 	if (is_callback_thread())
+@@ -283,6 +458,8 @@ bool ParserUDP::shutdown()
+ 		std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
+ 		_stopped = true;
+ 		close_sockets();
++		try { _stop_timer.cancel(); } catch (...) { return false; }
++		_work_guard.reset();
+ 	}
+ 
+ 	if (_thrd_parser && _thrd_parser->joinable())
+@@ -360,6 +537,9 @@ bool ParserUDP::reconnect(uint32_t flag /* = 3 */, std::shared_ptr<ReceiveOperat
+ 		_b_socket->bind(_broad_ep);
+ 
+ 		std::shared_ptr<ReceiveOperation> operation = arm_receive(true, connection_epoch);
++#ifdef WT_PARSERUDP_TEST_HOOKS
++		if (g_fail_after_receive_arm.exchange(false)) throw std::runtime_error("injected partial connection failure");
++#endif
+ 		if (broadcast_operation != nullptr)
+ 			*broadcast_operation = operation;
+ 	}
+@@ -582,6 +762,8 @@ void ParserUDP::handle_write(const boost::system::error_code& e, uint64_t connec
+ 
+ bool ParserUDP::connect()
+ {
++	ApiGuard api(this);
++	if (!api) return false;
+ 	if (is_worker_thread() || is_callback_thread())
+ 		return false;
+ 
+@@ -591,6 +773,7 @@ bool ParserUDP::connect()
+ 
+ 	{
+ 		std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++		if (!_initialized_once) return false;
+ 		const bool running_pair = _b_socket != NULL && _b_socket->is_open() &&
+ 			_s_socket != NULL && _s_socket->is_open() && !_stopped && !_recovery_exhausted &&
+ 			!_stop_requested.load(std::memory_order_acquire) && _connection_epoch != 0 &&
+@@ -604,20 +787,55 @@ bool ParserUDP::connect()
+ 		}
+ 	}
+ 
+-	if (_thrd_parser && _thrd_parser->joinable())
++	if (!_thrd_parser)
+ 	{
+ 		try
+ 		{
+-			_thrd_parser->join();
++			_io_service.restart();
++			_work_guard.reset(new WorkGuard(boost::asio::make_work_guard(_io_service)));
++			_worker_running.store(true, std::memory_order_release);
++#ifdef WT_PARSERUDP_TEST_HOOKS
++			if (g_fail_next_worker_start.exchange(false)) throw std::system_error(std::make_error_code(std::errc::resource_unavailable_try_again));
++#endif
++			_thrd_parser = std::make_shared<StdThread>([this]()
++			{
++				g_current_udp_worker = this;
++				bool clean = true;
++				try { _io_service.run(); }
++				catch (...)
++				{
++					clean = false;
++					_stop_post_failed.store(true, std::memory_order_release);
++					_stop_requested.store(true, std::memory_order_release);
++					std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++					_stopped = true;
++					close_sockets();
++					_work_guard.reset();
++				}
++				g_current_udp_worker = nullptr;
++				_worker_running.store(false, std::memory_order_release);
++				try { _worker_exit.promise.set_value_at_thread_exit(clean && _stop_completed.load(std::memory_order_acquire)); }
++				catch (...) { _stop_post_failed.store(true, std::memory_order_release); }
++			});
++			_worker_created.store(true, std::memory_order_release);
++			std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++			armStopTimer();
+ 		}
+ 		catch (...)
+ 		{
++			const bool workerCreated = _worker_created.load(std::memory_order_acquire);
++			if (workerCreated) _stop_post_failed.store(true, std::memory_order_release);
++			_stop_requested.store(true, std::memory_order_release);
++			{
++				std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++				_work_guard.reset();
++			}
++			if (!workerCreated) _worker_running.store(false, std::memory_order_release);
+ 			return false;
+ 		}
+-		_thrd_parser.reset();
+ 	}
+-
+-	_io_service.restart();
++	else if (!_worker_running.load(std::memory_order_acquire)) return false;
++	if (_stop_requested.load(std::memory_order_acquire)) return false;
+ 	try
+ 	{
+ 		std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
+@@ -641,29 +859,9 @@ bool ParserUDP::connect()
+ 			return false;
+ 		}
+ 		_close_event_emitted = false;
+-		_worker_running.store(true, std::memory_order_release);
+-
+-		_thrd_parser.reset(new StdThread([this]()
+-		{
+-			g_current_udp_worker = this;
+-			try
+-			{
+-				_io_service.run();
+-			}
+-			catch (...)
+-			{
+-				_stop_requested.store(true, std::memory_order_release);
+-				std::lock_guard<std::recursive_mutex> worker_io_lock(_mtx_io);
+-				_stopped = true;
+-				close_sockets();
+-			}
+-			g_current_udp_worker = nullptr;
+-			_worker_running.store(false, std::memory_order_release);
+-		}));
+ 	}
+ 	catch (...)
+ 	{
+-		_worker_running.store(false, std::memory_order_release);
+ 		std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
+ 		_stopped = true;
+ 		_close_event_emitted = true;
+@@ -676,6 +874,8 @@ bool ParserUDP::connect()
+ 
+ bool ParserUDP::disconnect()
+ {
++	ApiGuard api(this);
++	if (!api) return (_api_state.load(std::memory_order_acquire) & API_V2_STOP) == 0;
+ 	const bool on_worker = is_worker_thread();
+ 	if (is_callback_thread() && !on_worker)
+ 		return false;
+@@ -704,6 +904,8 @@ bool ParserUDP::disconnect()
+ 
+ bool ParserUDP::isConnected()
+ {
++	ApiGuard api(this);
++	if (!api) return false;
+ 	std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
+ 	return _b_socket != NULL && _b_socket->is_open() && _s_socket != NULL && _s_socket->is_open() &&
+ 		!_stopped && !_recovery_exhausted && !_stop_requested.load(std::memory_order_acquire) &&
+@@ -713,6 +915,8 @@ bool ParserUDP::isConnected()
+ 
+ void ParserUDP::subscribe( const CodeSet &vecSymbols )
+ {
++	ApiGuard api(this);
++	if (!api) return;
+ 	std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
+ 	if (_stop_requested.load(std::memory_order_acquire))
+ 		return;
+@@ -730,11 +934,15 @@ void ParserUDP::subscribe( const CodeSet &vecSymbols )
+ 
+ void ParserUDP::unsubscribe(const CodeSet &/*setSymbols*/)
+ {
++	ApiGuard api(this);
++	if (!api) return;
+ 
+ }
+ 
+ void ParserUDP::registerSpi( IParserSpi* listener )
+ {
++	ApiGuard api(this);
++	if (!api) return;
+ 	std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
+ 	if (_stop_requested.load(std::memory_order_acquire))
+ 		return;
+@@ -836,10 +1044,10 @@ void ParserUDP::extract_buffer(uint32_t length, bool isBroad, const char* buffer
+ 
+ 			curTick->release();
+ 
+-			static uint32_t recv_cnt = 0;
+-			recv_cnt++;
+-			if (recv_cnt % _gpsize == 0)
+-				with_spi([&](IParserSpi* sink) { write_log(sink, LL_DEBUG, "[ParserUDP] {} ticks received in total", recv_cnt); });
++			static std::atomic<uint32_t> recv_cnt{0};
++			const uint32_t received = recv_cnt.fetch_add(1, std::memory_order_relaxed) + 1;
++			if (received % _gpsize == 0)
++				with_spi([&](IParserSpi* sink) { write_log(sink, LL_DEBUG, "[ParserUDP] {} ticks received in total", received); });
+ 		}
+ 	}
+ 	else if (message_type == UDP_MSG_PUSHORDDTL)
+@@ -855,10 +1063,10 @@ void ParserUDP::extract_buffer(uint32_t length, bool isBroad, const char* buffer
+ 
+ 			curData->release();
+ 
+-			static uint32_t recv_cnt = 0;
+-			recv_cnt++;
+-			if (recv_cnt % _gpsize == 0)
+-				with_spi([&](IParserSpi* sink) { write_log(sink, LL_DEBUG, "[ParserUDP] {} order details received in total", recv_cnt); });
++			static std::atomic<uint32_t> recv_cnt{0};
++			const uint32_t received = recv_cnt.fetch_add(1, std::memory_order_relaxed) + 1;
++			if (received % _gpsize == 0)
++				with_spi([&](IParserSpi* sink) { write_log(sink, LL_DEBUG, "[ParserUDP] {} order details received in total", received); });
+ 		}
+ 	}
+ 	else if (message_type == UDP_MSG_PUSHORDQUE)
+@@ -874,10 +1082,10 @@ void ParserUDP::extract_buffer(uint32_t length, bool isBroad, const char* buffer
+ 
+ 			curData->release();
+ 
+-			static uint32_t recv_cnt = 0;
+-			recv_cnt++;
+-			if (recv_cnt % _gpsize == 0)
+-				with_spi([&](IParserSpi* sink) { write_log(sink, LL_DEBUG, "[ParserUDP] {} order queues received in total", recv_cnt); });
++			static std::atomic<uint32_t> recv_cnt{0};
++			const uint32_t received = recv_cnt.fetch_add(1, std::memory_order_relaxed) + 1;
++			if (received % _gpsize == 0)
++				with_spi([&](IParserSpi* sink) { write_log(sink, LL_DEBUG, "[ParserUDP] {} order queues received in total", received); });
+ 		}
+ 	}
+ 	else if (message_type == UDP_MSG_PUSHTRANS)
+@@ -893,10 +1101,10 @@ void ParserUDP::extract_buffer(uint32_t length, bool isBroad, const char* buffer
+ 
+ 			curData->release();
+ 
+-			static uint32_t recv_cnt = 0;
+-			recv_cnt++;
+-			if (recv_cnt % _gpsize == 0)
+-				with_spi([&](IParserSpi* sink) { write_log(sink, LL_DEBUG, "[ParserUDP] {} transactions received in total", recv_cnt); });
++			static std::atomic<uint32_t> recv_cnt{0};
++			const uint32_t received = recv_cnt.fetch_add(1, std::memory_order_relaxed) + 1;
++			if (received % _gpsize == 0)
++				with_spi([&](IParserSpi* sink) { write_log(sink, LL_DEBUG, "[ParserUDP] {} transactions received in total", received); });
+ 		}
+ 	}
+ 	// Unknown message types are ignored; in particular, they never cause a

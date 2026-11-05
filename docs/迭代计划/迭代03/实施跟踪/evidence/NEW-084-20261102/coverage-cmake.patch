@@ -1,0 +1,12 @@
+--- src/TestUnits/coverage/CMakeLists.txt
++++ isolated/src/TestUnits/coverage/CMakeLists.txt
+@@ -387,6 +387,9 @@
+ 		CONTINUE()
+ 	ENDIF()
+ 
++	IF(suffix STREQUAL "btporter")
++		LIST(FILTER srcs INCLUDE REGEX "/(r69_btporter_runner_config_test|r46_btporter_runner_test|r222_bt_runner_shutdown_test)\\.cpp$")
++	ENDIF()
+ 	WT_COV_ISOLATE_INST_HLP(${tus})
+ 	ADD_EXECUTABLE(CoverageTests_${suffix} ${srcs} ${tus})
+ 	TARGET_INCLUDE_DIRECTORIES(CoverageTests_${suffix} PRIVATE ${WT_COV_INCS})

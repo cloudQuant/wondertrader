@@ -1,0 +1,1174 @@
+ M dist/common/fees.json
+ M "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/\346\211\247\350\241\214\350\256\260\345\275\225.md"
+ M "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/\346\226\260\345\242\236\351\227\256\351\242\230.md"
+ M "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\346\211\247\350\241\214\350\267\237\350\270\252.json"
+ M src/CTPLoader/CTPLoader.cpp
+ M src/CTPLoader/TraderSpi.cpp
+ M src/CTPLoader/TraderSpi.h
+ M src/CTPOptLoader/CTPOptLoader.cpp
+ M src/CTPOptLoader/TraderSpi.cpp
+ M src/CTPOptLoader/TraderSpi.h
+ M src/Includes/IDataWriter.h
+ M src/Includes/IExecPluginV2.h
+ M src/Includes/WTSCollection.hpp
+ M src/Includes/WTSContractInfo.hpp
+ M src/Includes/WTSDataDef.hpp
+ M src/Includes/WTSSessionInfo.hpp
+ M src/Includes/WTSTradeDef.hpp
+ M src/ParserCTP/ParserCTP.cpp
+ M src/ParserCTP/ParserCTP.h
+ M src/ParserCTPMini/ParserCTPMini.cpp
+ M src/ParserCTPMini/ParserCTPMini.h
+ M src/ParserCTPOpt/ParserCTPOpt.cpp
+ M src/ParserCTPOpt/ParserCTPOpt.h
+ M src/ParserFemas/ParserFemas.cpp
+ M src/ParserFemas/ParserFemas.h
+ M src/ParserShm/ParserShm.cpp
+ M src/ParserShm/ParserShm.h
+ M src/ParserUDP/ParserUDP.cpp
+ M src/ParserUDP/ParserUDP.h
+ M src/ParserXTP/ParserXTP.cpp
+ M src/ParserXTP/ParserXTP.h
+ M src/ParserXeleSkt/ParserXeleSkt.cpp
+ M src/ParserXeleSkt/ParserXeleSkt.h
+ M src/QuoteFactory/main.cpp
+ M src/Share/CodeHelper.hpp
+ M src/Share/TimeUtils.hpp
+ M src/TestUnits/coverage/CMakeLists.txt
+ M src/TestUnits/coverage/l03_includes/l03_contract_info_test.cpp
+ M src/TestUnits/coverage/l03_includes/l03_object_pool_test.cpp
+ M src/TestUnits/coverage/l03_includes/l03_session_info_test.cpp
+ M src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp
+ M src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp
+ M src/TestUnits/coverage/l06_wtbtcore/l06_replayer_runtime_test.cpp
+ M src/TestUnits/coverage/m_QuoteFactory/r104_quotefactory_init_test.cpp
+ M src/TestUnits/coverage/m_WtBtRunner/r14_wtbtrunner_cli_test.cpp
+ M src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp
+ M src/TestUnits/coverage/m_WtRunner/r220_ready_trader_registration_test.cpp
+ M src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp
+ M src/TestUnits/coverage/m_WtRunner/r6_wtrunner_main_test.cpp
+ M src/TestUnits/coverage/m_WtUftRunner/r220_uft_runner_sink_shutdown_test.cpp
+ M src/TestUnits/coverage/m_WtUftRunner/r78_parser_registration_test.cpp
+ M src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp
+ M src/TestUnits/coverage/n01_wtcore_tradepaths/n01_parser_adapter_test.cpp
+ M src/TestUnits/coverage/n01_wtcore_tradepaths/r220_arbi_serialization_test.cpp
+ M src/TestUnits/coverage/n01_wtcore_tradepaths/r71_cta_ctx_test.cpp
+ M src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp
+ M src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp
+ M src/TestUnits/coverage/n02_wtcore_engines/diff_owner_sink_registry_test.cpp
+ M src/TestUnits/coverage/n02_wtcore_engines/n02_diff_concurrency_test.cpp
+ M src/TestUnits/coverage/n02_wtcore_engines/r73_executers_test.cpp
+ M src/TestUnits/coverage/n02_wtcore_engines/unresolved_report_journal_test.cpp
+ M src/TestUnits/coverage/n03_uftcore_index/n03_uftcore_helper_adapter_test.cpp
+ M src/TestUnits/coverage/n03b_idxfactory/n03_idxfactory_worker_test.cpp
+ M src/TestUnits/coverage/n04_btcore_mockers/r43_match_engine_flow_test.cpp
+ M src/TestUnits/coverage/n04_btcore_mockers/r43_sel_mocker_dump_test.cpp
+ M src/TestUnits/coverage/n06_strategies_mq_share/n06_cta_ctx_mock_test.cpp
+ M src/TestUnits/coverage/p02_wtcore_engines2/p02_diff_executer_test.cpp
+ M src/TestUnits/coverage/p02_wtcore_engines2/p02_local_arbi_executer_test.cpp
+ M src/TestUnits/coverage/p02_wtcore_engines2/r42_parser_adapter_test.cpp
+ M src/TestUnits/coverage/p03_btcore_mockers2/p03_cta_trade_path_test.cpp
+ M src/TestUnits/coverage/p03_btcore_mockers2/p03_sel_trade_path_test.cpp
+ M src/TestUnits/coverage/p03_btcore_mockers2/r131_replayer_task_notifier_test.cpp
+ M src/TestUnits/coverage/p03_btcore_mockers2/r141_replayer_block_dsb_test.cpp
+ M src/TestUnits/coverage/p03_btcore_mockers2/r180_btcore_mockers2_test.cpp
+ M src/TestUnits/coverage/p04_btcore_replayer/p04_replay_termination_test.cpp
+ M src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp
+ M src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_csv_replay_test.cpp
+ M src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_init_basefiles_test.cpp
+ M src/TestUnits/coverage/p04_btcore_replayer/r43_replayer_tick_csv_test.cpp
+ M src/TestUnits/coverage/p05_datastorage2/p05_btdtreader_ad_lmdb_test.cpp
+ M src/TestUnits/coverage/p05_datastorage2/p05_rdmdtreader_ad_slices_test.cpp
+ M src/TestUnits/coverage/p05_datastorage2/r122_writer_ad_errors_test.cpp
+ M src/TestUnits/coverage/p05_datastorage2/r132_writer_ad_mapsize_test.cpp
+ M src/TestUnits/coverage/p05_datastorage2/r21_rdmbars_kline_test.cpp
+ M src/TestUnits/coverage/p05_datastorage2/r4_ad_fixture.h
+ M src/TestUnits/coverage/p05_datastorage2/r4_reader_ad_slices_test.cpp
+ M src/TestUnits/coverage/p05_datastorage2/r4_writer_ad_cache_test.cpp
+ M src/TestUnits/coverage/p07_btcore_replayer2/p07_minute_replay_test.cpp
+ M src/TestUnits/coverage/p07_btcore_replayer2/p07_tick_loader_test.cpp
+ M src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/CMakeLists.txt
+ M src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/README.md
+ M src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/fake_mq.cpp
+ M src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/notifier_check.cpp
+ M src/TestUnits/coverage/p09_storage_readers/p09_rdm_bars_cache_test.cpp
+ M src/TestUnits/coverage/p09_storage_readers/p09_rdm_window_range_test.cpp
+ M src/TestUnits/coverage/p10_storage_writer/p10_writer_test_hooks.h
+ M src/TestUnits/coverage/p11_wtcore_traderadapter/p11_push_notify_test.cpp
+ M src/TestUnits/coverage/p11_wtcore_traderadapter/r59_exec_autoclear_test.cpp
+ M src/TestUnits/coverage/p11_wtcore_traderadapter/r59_trader_misc_test.cpp
+ M src/TestUnits/coverage/p11_wtcore_traderadapter/r59_trader_sell_test.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r10_wtcore_executers.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r130_engine_fee_test.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r15_mgr_executers.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r170_trader_risk_test.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r211_wtcore_rest_test.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r31_stra_mgr_pluginload.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r3_trader_risklimit.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r66_tickers_test.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r7_vwap_v2_local_integration_test.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r90_executer_pool_test.cpp
+ M src/TestUnits/coverage/q01_wtcore3/r90_trader_risk_init_test.cpp
+ M src/TestUnits/coverage/q02_btcore3/q02_cta_replayer_integration_test.cpp
+ M src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp
+ M src/TestUnits/coverage/q02_btcore3/r2_mocker_tick_fill_test.cpp
+ M src/TestUnits/coverage/q02_btcore3/r2_replayer_public_api_test.cpp
+ M src/TestUnits/coverage/q02_btcore3/r80_replayer_config_tick_test.cpp
+ M src/TestUnits/coverage/q02_btcore3/r80_replayer_slice_unsub_test.cpp
+ M src/TestUnits/coverage/q02_btcore3/r91_common.h
+ M src/TestUnits/coverage/q02_btcore3/r91_replayer_bin_reset_test.cpp
+ M src/TestUnits/coverage/q03_storage3/q03_rdm_kline_file_test.cpp
+ M src/TestUnits/coverage/q03_storage3/r132_reader_his_test.cpp
+ M src/TestUnits/coverage/q03_storage3/r162_reader_edge_test.cpp
+ M src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp
+ M src/TestUnits/coverage/q04_uftcore3/q04_trader_push_report_test.cpp
+ M src/TestUnits/coverage/q04_uftcore3/q04_uftctx_local_report_test.cpp
+ M src/TestUnits/coverage/q04_uftcore3/r11_parser_adapter_test.cpp
+ M src/TestUnits/coverage/q04_uftcore3/r11_trader_reply_deep_test.cpp
+ M src/TestUnits/coverage/q04_uftcore3/r54_trader_callback_gaps_test.cpp
+ M src/TestUnits/coverage/q04_uftcore3/r54_uftcore_guards_test.cpp
+ M src/TestUnits/coverage/q04_uftcore3/r78_uftcore_adapter_init_test.cpp
+ M src/TestUnits/coverage/q05_dtsrv/q05_dtcore_datamgr_test.cpp
+ M src/TestUnits/coverage/q05_dtsrv/q05_state_monitor_test.cpp
+ M src/TestUnits/coverage/q05_dtsrv/r145_state_monitor_run_test.cpp
+ M src/TestUnits/coverage/q05_dtsrv/r145_test_util.h
+ M src/TestUnits/coverage/q05_dtsrv/r154_test_util.h
+ M src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp
+ M src/TestUnits/coverage/q05_dtsrv/r18_parser_adapter_test.cpp
+ M src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp
+ M src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp
+ M src/TestUnits/coverage/q05_dtsrv/r68_datamgr_failure_test.cpp
+ M src/TestUnits/coverage/q05_dtsrv/r68_idxworker_factory_test.cpp
+ M src/TestUnits/coverage/q05_dtsrv/r68_state_monitor_inputs_test.cpp
+ M src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp
+ M src/TestUnits/coverage/q05b_dtservo/r45_parseradapter_test.cpp
+ M src/TestUnits/coverage/q06_btporter/r222_bt_runner_shutdown_test.cpp
+ M src/TestUnits/coverage/q06_porter/q06_porter_runner_test.cpp
+ M src/TestUnits/coverage/q06_porter/r124_porter_expctx_test.cpp
+ M src/TestUnits/coverage/q06_porter/r124_porter_hft_orders_test.cpp
+ M src/TestUnits/coverage/q06_porter/r134_porter_bars_test.cpp
+ M src/TestUnits/coverage/q06_porter/r13_porter_cta_export_test.cpp
+ M src/TestUnits/coverage/q06_porter/r13_porter_expctx_forward_test.cpp
+ M src/TestUnits/coverage/q06_porter/r13_porter_sel_hft_export_test.cpp
+ M src/TestUnits/coverage/q06_porter/r143_porter_bars_test.cpp
+ M src/TestUnits/coverage/q06_porter/r163_porter_slices_test.cpp
+ M src/TestUnits/coverage/q06_porter/r214_porter_hft_test.cpp
+ M src/TestUnits/coverage/q06_porter/r220_trader_ready_owner_registration_test.cpp
+ M src/TestUnits/coverage/q06_porter/r35_porter_chart_spi_test.cpp
+ M src/TestUnits/coverage/q06_porter/r35_porter_trail_getters_test.cpp
+ M src/TestUnits/coverage/q06_porter/r46_porter_config_test.cpp
+ M src/TestUnits/coverage/q06_porter/r46_porter_expctx_test.cpp
+ M src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp
+ M src/TestUnits/coverage/q06_porter/r82_porter_runner_edges_test.cpp
+ M src/TestUnits/coverage/q06_porter/v2_exec_status_api_test.cpp
+ M src/TestUnits/coverage/q06_porter/zz_r220_runner_sink_shutdown_test.cpp
+ M src/TestUnits/coverage/r12_headers/r12_base_datamgr_test.cpp
+ M src/TestUnits/coverage/r12_headers/r12_collection_test.cpp
+ M src/TestUnits/coverage/r12_headers/r53_collection_variant_test.cpp
+ M src/TestUnits/coverage/r1_storage/r1_basedatamgr_test.cpp
+ M src/TestUnits/coverage/r24_exefact2/r220_exec_runner_ready_trader_registration_test.cpp
+ M src/TestUnits/coverage/r7_exefact/r17_diff_minimpact_unit_test.cpp
+ M src/TestUnits/coverage/r7_exefact/r17_minimpact_gap_unit_test.cpp
+ M src/TestUnits/coverage/r7_exefact/r7_stock_minimpact_unit_test.cpp
+ M src/TestUnits/coverage/r7_exefact/r7_stock_vwap_unit_test.cpp
+ M src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp
+ M src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp
+ M src/TestUnits/coverage/t_CTPLoader/t26_ctploader_dump_test.cpp
+ M src/TestUnits/coverage/t_CTPOptLoader/ctpopt_loader_test.cpp
+ M src/TestUnits/coverage/t_CTPOptLoader/r114_optloader_test.cpp
+ M src/TestUnits/coverage/t_ParserCTPOpt/r105_parserctpopt_api_test.cpp
+ M src/TestUnits/coverage/t_ParserShm/r76_shm_boundary_test.cpp
+ M src/TestUnits/coverage/t_ParserShm/t5_shm_parser_test.cpp
+ M src/TestUnits/coverage/t_ParserUDP/r76_udp_boundary_test.cpp
+ M src/TestUnits/coverage/t_ParserUDP/t6_parserudp_reachable_test.cpp
+ M src/TestUnits/coverage/t_ParserUDP/udp_handle_write_lock_test.cpp
+ M src/TestUnits/coverage/t_ParserXTP/t27_parserxtp_api_seam_test.cpp
+ M src/TestUnits/coverage/t_ParserXTP/t27_seam.hpp
+ M src/TestUnits/coverage/t_ParserXeleSkt/r76_xele_boundary_test.cpp
+ M src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp
+ M src/TestUnits/coverage/t_TraderCTP/t2_traderctp_conversion_test.cpp
+ M src/TestUnits/coverage/t_TraderCTPMini/ctpmini_trader_callbacks_test.cpp
+ M src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp
+ M src/TestUnits/coverage/t_TraderCTPOpt/cov_traderctpopt_spi_test.cpp
+ M src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp
+ M src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp
+ M src/TestUnits/coverage/t_TraderMocker/r113_mocker_common.h
+ M src/TestUnits/coverage/t_TraderMocker/r214_mocker_branch_test.cpp
+ M src/TestUnits/coverage/t_TraderMocker/r60_tradermocker_async_test.cpp
+ M src/TestUnits/coverage/t_TraderMocker/t6_tradermocker_reachable_test.cpp
+ M src/TestUnits/coverage/t_TraderXTP/r93_traderXTP_api_test.cpp
+ M src/TestUnits/coverage/t_TraderXTP/t5_xtp_api_test.cpp
+ M src/TestUnits/coverage/t_TraderYD/r93_traderYD_api_test.cpp
+ M src/TestUnits/coverage/t_TraderYD/r93_yd_api_stub.h
+ M src/TestUnits/fixtures/cta_factory_quarantine/factory.cpp
+ M src/TestUnits/fixtures/cta_factory_quarantine/logger_stub.cpp
+ M src/TestUnits/fixtures/hft_factory_quarantine/README.md
+ M src/TestUnits/fixtures/hft_factory_quarantine/check.cpp
+ M src/TestUnits/fixtures/hft_factory_quarantine/factory.cpp
+ M src/TestUnits/fixtures/hft_factory_quarantine/logger_stub.cpp
+ M src/TestUnits/fixtures/hft_factory_quarantine/run.sh
+ M src/TestUnits/fixtures/r130_parser_lifecycle.cpp
+ M src/TestUnits/fixtures/r18_writer_fixture.cpp
+ M src/TestUnits/fixtures/r45_dtservo_parser_fixture.cpp
+ M src/TestUnits/fixtures/r68_index_factory/CMakeLists.txt
+ M src/TestUnits/fixtures/r68_index_factory/counting_factory.cpp
+ M src/TestUnits/fixtures/r95_uft_strategy.cpp
+ M src/TestUnits/fixtures/sel_factory_quarantine/README.md
+ M src/TestUnits/fixtures/sel_factory_quarantine/check.cpp
+ M src/TestUnits/fixtures/sel_factory_quarantine/factory.cpp
+ M src/TestUnits/fixtures/sel_factory_quarantine/run.sh
+ M src/TestUnits/fixtures/t4_ctpopt_loader/creator_fixture.cpp
+ M src/TraderCTP/TraderCTP.cpp
+ M src/TraderCTP/TraderCTP.h
+ M src/TraderCTPMini/TraderCTPMini.cpp
+ M src/TraderCTPMini/TraderCTPMini.h
+ M src/TraderCTPOpt/TraderCTPOpt.cpp
+ M src/TraderCTPOpt/TraderCTPOpt.h
+ M src/TraderDumper/Dumper.cpp
+ M src/TraderDumper/Dumper.h
+ M src/TraderDumper/TraderAdapter.cpp
+ M src/TraderDumper/TraderAdapter.h
+ M src/TraderDumper/TraderDumper.cpp
+ M src/TraderFemas/TraderFemas.cpp
+ M src/TraderFemas/TraderFemas.h
+ M src/TraderMocker/TraderMocker.cpp
+ M src/TraderMocker/TraderMocker.h
+ M src/TraderXTP/TraderXTP.cpp
+ M src/TraderXTP/TraderXTP.h
+ M src/TraderYD/TraderYD.cpp
+ M src/TraderYD/TraderYD.h
+ M src/WTSTools/WTSBaseDataMgr.cpp
+ M src/WTSTools/WTSBaseDataMgr.h
+ M src/WTSTools/WTSDataFactory.cpp
+ M src/WTSTools/WTSDataFactory.h
+ M src/WTSUtils/WTSCfgLoader.cpp
+ M src/WTSUtils/WTSCfgLoader.h
+ M src/WtBtCore/CtaMocker.cpp
+ M src/WtBtCore/CtaMocker.h
+ M src/WtBtCore/EventNotifier.cpp
+ M src/WtBtCore/EventNotifier.h
+ M src/WtBtCore/HftMocker.cpp
+ M src/WtBtCore/HftMocker.h
+ M src/WtBtCore/HisDataReplayer.cpp
+ M src/WtBtCore/HisDataReplayer.h
+ M src/WtBtCore/MatchEngine.cpp
+ M src/WtBtCore/SelMocker.cpp
+ M src/WtBtCore/SelMocker.h
+ M src/WtBtCore/UftMocker.cpp
+ M src/WtBtCore/UftMocker.h
+ M src/WtBtPorter/ExpHftMocker.cpp
+ M src/WtBtPorter/WtBtPorter.cpp
+ M src/WtBtPorter/WtBtPorter.h
+ M src/WtBtPorter/WtBtRunner.cpp
+ M src/WtBtPorter/WtBtRunner.h
+ M src/WtBtRunner/WtBtRunner.cpp
+ M src/WtCore/CtaStraBaseCtx.cpp
+ M src/WtCore/CtaStrategyMgr.cpp
+ M src/WtCore/CtaStrategyMgr.h
+ M src/WtCore/EventNotifier.cpp
+ M src/WtCore/HftStraBaseCtx.cpp
+ M src/WtCore/HftStraBaseCtx.h
+ M src/WtCore/HftStrategyMgr.cpp
+ M src/WtCore/HftStrategyMgr.h
+ M src/WtCore/ParserAdapter.cpp
+ M src/WtCore/ParserAdapter.h
+ M src/WtCore/SelStraBaseCtx.cpp
+ M src/WtCore/SelStrategyMgr.cpp
+ M src/WtCore/SelStrategyMgr.h
+ M src/WtCore/TraderAdapter.cpp
+ M src/WtCore/TraderAdapter.h
+ M src/WtCore/UnresolvedReportJournal.cpp
+ M src/WtCore/UnresolvedReportJournal.h
+ M src/WtCore/WtArbiExecuter.cpp
+ M src/WtCore/WtArbiExecuter.h
+ M src/WtCore/WtCtaEngine.cpp
+ M src/WtCore/WtCtaTicker.cpp
+ M src/WtCore/WtCtaTicker.h
+ M src/WtCore/WtDiffExecuter.cpp
+ M src/WtCore/WtDiffExecuter.h
+ M src/WtCore/WtDtMgr.cpp
+ M src/WtCore/WtEngine.cpp
+ M src/WtCore/WtEngine.h
+ M src/WtCore/WtExecuterFactory.cpp
+ M src/WtCore/WtExecuterFactory.h
+ M src/WtCore/WtHftEngine.cpp
+ M src/WtCore/WtHftTicker.cpp
+ M src/WtCore/WtHftTicker.h
+ M src/WtCore/WtLocalExecuter.cpp
+ M src/WtCore/WtLocalExecuter.h
+ M src/WtCore/WtSelEngine.cpp
+ M src/WtCore/WtSelEngine.h
+ M src/WtCore/WtSelTicker.cpp
+ M src/WtCore/WtSelTicker.h
+ M src/WtCtaStraFact/WtCtaStraFact.cpp
+ M src/WtCtaStraFact/WtStraDualThrust.cpp
+ M src/WtCtaTwoMaFact/WtCtaTwoMaFact.cpp
+ M src/WtDataStorage/WtBtDtReader.cpp
+ M src/WtDataStorage/WtDataReader.cpp
+ M src/WtDataStorage/WtDataReader.h
+ M src/WtDataStorage/WtDataWriter.cpp
+ M src/WtDataStorage/WtDataWriter.h
+ M src/WtDataStorage/WtRdmDtReader.cpp
+ M src/WtDataStorage/WtRdmDtReader.h
+ M src/WtDataStorageAD/LMDBKeys.h
+ M src/WtDataStorageAD/WtBtDtReaderAD.cpp
+ M src/WtDataStorageAD/WtDataReaderAD.cpp
+ M src/WtDataStorageAD/WtDataReaderAD.h
+ M src/WtDataStorageAD/WtDataWriterAD.cpp
+ M src/WtDataStorageAD/WtDataWriterAD.h
+ M src/WtDataStorageAD/WtRdmDtReaderAD.cpp
+ M src/WtDataStorageAD/WtRdmDtReaderAD.h
+ M src/WtDtCore/DataManager.cpp
+ M src/WtDtCore/DataManager.h
+ M src/WtDtCore/IndexWorkerMgr.cpp
+ M src/WtDtCore/IndexWorkerMgr.h
+ M src/WtDtCore/ParserAdapter.cpp
+ M src/WtDtCore/ParserAdapter.h
+ M src/WtDtCore/StateMonitor.cpp
+ M src/WtDtCore/StateMonitor.h
+ M src/WtDtHelper/WtDtHelper.cpp
+ M src/WtDtHelper/WtDtHelper.h
+ M src/WtDtPorter/WtDtPorter.cpp
+ M src/WtDtPorter/WtDtPorter.h
+ M src/WtDtPorter/WtDtRunner.cpp
+ M src/WtDtPorter/WtDtRunner.h
+ M src/WtDtServo/ParserAdapter.cpp
+ M src/WtDtServo/ParserAdapter.h
+ M src/WtDtServo/WtDataManager.cpp
+ M src/WtDtServo/WtDataManager.h
+ M src/WtDtServo/WtDtRunner.cpp
+ M src/WtDtServo/WtDtRunner.h
+ M src/WtDtServo/WtDtServo.cpp
+ M src/WtDtServo/WtDtServo.h
+ M src/WtExeFact/WtDiffMinImpactExeUnit.cpp
+ M src/WtExeFact/WtDiffMinImpactExeUnit.h
+ M src/WtExeFact/WtExeFact.cpp
+ M src/WtExeFact/WtMinImpactExeUnit.cpp
+ M src/WtExeFact/WtMinImpactExeUnit.h
+ M src/WtExeFact/WtOrdMon.cpp
+ M src/WtExeFact/WtOrdMon.h
+ M src/WtExeFact/WtStockMinImpactExeUnit.cpp
+ M src/WtExeFact/WtStockMinImpactExeUnit.h
+ M src/WtExeFact/WtStockVWapExeUnit.cpp
+ M src/WtExeFact/WtStockVWapExeUnit.h
+ M src/WtExeFact/WtTWapExeUnit.cpp
+ M src/WtExeFact/WtTWapExeUnit.h
+ M src/WtExeFact/WtVWapExeUnit.cpp
+ M src/WtExeFact/WtVWapExeUnit.h
+ M src/WtExecMon/WtExecRunner.cpp
+ M src/WtHftStraFact/WtHftStraDemo.cpp
+ M src/WtHftStraFact/WtHftStraFact.cpp
+ M src/WtIndexFactory/WtBlkIdxWorker.cpp
+ M src/WtIndexFactory/WtBlkIdxWorker.h
+ M src/WtPorter/ExpHftContext.h
+ M src/WtPorter/WtPorter.cpp
+ M src/WtPorter/WtPorter.h
+ M src/WtPorter/WtRtRunner.cpp
+ M src/WtPorter/WtRtRunner.h
+ M src/WtRiskMonFact/WtRiskMonFact.cpp
+ M src/WtRiskMonFact/WtSimpRiskMon.cpp
+ M src/WtRiskMonFact/WtSimpRiskMon.h
+ M src/WtRunner/WtRunner.cpp
+ M src/WtRunner/WtRunner.h
+ M src/WtRunner/main.cpp
+ M src/WtSelStraFact/WtSelStraFact.cpp
+ M src/WtUftCore/ParserAdapter.cpp
+ M src/WtUftCore/ParserAdapter.h
+ M src/WtUftCore/TraderAdapter.cpp
+ M src/WtUftCore/TraderAdapter.h
+ M src/WtUftCore/UftStraContext.cpp
+ M src/WtUftCore/UftStraContext.h
+ M src/WtUftCore/UftStrategyMgr.cpp
+ M src/WtUftCore/UftStrategyMgr.h
+ M src/WtUftRunner/WtUftRunner.cpp
+ M src/WtUftRunner/WtUftRunner.h
+ M src/WtUftRunner/main.cpp
+ M src/WtUftStraFact/WtUftStraDemo.cpp
+ M src/WtUftStraFact/WtUftStraFact.cpp
+?? CLAUDE.md
+?? Logs/
+?? Vwap_R7SVWAP79971.txt
+?? Vwap_R7SVWAP80012.txt
+?? Vwap_R7SVWAP80130.txt
+?? Vwap_R7VWAP22279.txt
+?? abi20.log
+?? abi21.log
+?? active-plugin-callback.gate
+?? active-plugin-callback.log
+?? bad_callback.log
+?? bad_size.log
+?? can-stop-preflight-false.log
+?? ctpopt_creator_unloaded
+?? ctpopt_successful_creator_unloaded
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/evidence/btporter-r194-r205-r214-20261101/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/evidence/r122-writer-null-cache-20261101/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/evidence/r92-r72-mocker-tests-20261101/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-l05-006/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-new020/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-p05-007/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-p11-004/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-p12-006/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-q04-009/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r10-005/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r111-001/null-params/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r130-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r19-011/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r20-wtbtcore-8/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r202-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r21-bug10/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r4-02/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r41-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r42-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r56-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r6-008/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r60-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r60-004/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-r91-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-t1-ctpopt-01-07/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-t2-opt-01/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-t2-opt-03/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-t25-006/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-t26-006/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-t26-007-blocked/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-t3-013/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-t4-005/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-t6-005/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261030-wsn06-005/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-ad-kline-cutoff/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-after-arbi-integrated/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-arbi-v2-cleanup-retry/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-arbi-v2-integrated/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-basedata-map-release/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-continuation-integrated/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-exefact-fixture-acceptance/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-femas-id-bounds/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-final-focus/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-final-integration/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-final-latest/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-i02-new-027-cli-window/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-i02-new-027/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-l01-weekday-exhaustive/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-l03-006/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-l05-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-l06-007/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-n01-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-n01-006/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-n03-004/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-n03-006/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-n04-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-new008-owner-red/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-new020-poison/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-new031-unknown-contract/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-ordmon-ready-latch/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-ordmon-six-ready/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-owner-strict/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-p01-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-p01-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-p05-007-sanitizer/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-p07-005/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-p07-007/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-p10-007/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-p12-006-lifetime/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-parser-empty-code/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-q02-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-q02-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-q03-published-ticks/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-q03-zero-latest/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-q04-008/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-q05-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-q05-005/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-q05-006/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r10-009/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r10-010-asan/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r10-010/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r102-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r104-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r111-fixed-map/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r112-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r12-05/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r12-12-latency/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r12-12-order/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r132-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r134-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r14-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r14-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r14-004/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r14-005/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r14-009-config-refcount/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r142-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r143-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r143-serialization/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r16-15-sparse/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r160-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r160-integrated/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r161-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r162-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r175-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r18-007/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r18-writer-dso/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r19-001-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r19-007/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r190-real-host/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r2-wtbtcore-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r20-cancel/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r20-notifier-asan/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r202-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r22-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r22-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r23-short-write/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r28-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r28-005/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r28-007/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r3-010/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r32-005/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r35-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r4-bug10/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r41-004-stop/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r41-004-tsan/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r41-current-tsan/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r42-002-retract/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r42-llvm22/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r46-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r46-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r46-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r5-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r5-005-006/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r5-009/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r52-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r52-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r58-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r59-credentials-recheck/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r6-004/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r6-config/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r60-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r66-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r69-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r7-006/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r7-011/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r7-012/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r7-013/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r7-014/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r7-016/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r7-config-init/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r71-account-fanout/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r71-arbi-target/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r71-callback-contract/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r71-concurrent-controls/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r71-fixture-recheck/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r71-retry-contract-recheck/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r71-split-retry/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r71-status-controls/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r71-waiter-controls/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r76-07/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r78-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r8-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r8-init-contract/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r81-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r83-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r85-001/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r85-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r91-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r91-003/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r93-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r93-007/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r93-callback-drain-probe/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r95-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r95-003-hft/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-r95-004/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-runner-subscription-input/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-runner-suffix-only/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-sel-empty-codes/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t1-xtp-01/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t25-007/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t26-002/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t26-009/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t3-006/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t3-012/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t4-007/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t4-014/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t4-016/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t6-004-positive/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t6-004/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t6-005-asan/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-t6-008/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-udp-log-reentry/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-uft-trade-contract/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-uft-usertag-boundary/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-writer-reentry/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-wsn06-strategy/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-wtcore-usertag-boundary/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261031-xtp-close-yesterday/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-action-policy-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-ad-db-directory/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-ad-hot-cold/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-bar-notify-drain/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-bar-notify/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-basedata-ownership/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-blocked-recheck/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-boost-bridge-r220/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-btcore-other-oracles/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-btporter-adj-export/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-btporter-fixtures-a/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-btporter-remaining-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-ctafact-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-dtcore-oracles/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-exec-status-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-exec-uft-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-femas-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-fresh-v2-build/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-helper-longpath/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-hft-missing-params/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-hot-first-date/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-hot-sections/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-isolated-suite-diagnostic/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-l04-identity-asan/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-late-target-reaudit/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-loader-quote-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-logger-config/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-logger-scoped-boundaries/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-misc-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-n01-p11-no-symlink/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-n02-plugin-no-symlink/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-new092-no-link-reverify/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-p02-static-init/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-p07-outofsource/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-p11-oracles/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-p11-risk-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-parser-precondition-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-parser-shm-code-contract/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-plugin-fixtures-no-symlink/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-porter-lifecycle-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-q01-plugin-no-symlink/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-q02-r2-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-q02-r2-paths/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-q02-r2-postboost/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-q03-path-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r1-oracle/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r102-7x-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r103-oracle-corrections/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r103-sanitizer/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r111-llvm22-clean/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r111-ownership-retest/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r12-oracle-corrections/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r121-fill-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r123-watcher-precondition/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r124-porter-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r131-r161-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r134-porter-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r151-r62-oracles/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r171-oracles/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r180-r210-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r182-open-oracle/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r190-r200-empty-ticks/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r190-r200-warmup/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r194-empty-dtmgr/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r212-no-symlink/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r220-parser-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r44-session-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r52-r100-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r6-valid-config/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r62-selmocker/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r69-exec-oracle/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r74-adjusted-size-guard/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r74-cmp-truncated-header-recheck/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r74-dumper-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r74-json-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r74-rdm-oracles/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r74-short-adjusted-retry-cache/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r80-dump-period/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r80slice-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-r82-porter-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-rdm-checked-range/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-rdm-clearcache-contract/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-rdm-sanitizer/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-reader-failure-oracles/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-reader-init-log/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-reader-logger-boundary/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-reader-path-buffers/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-reopened-case-map/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-resample-times-one/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-risk-disabled/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-rt-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-runtime-symlink-audit/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-safe-case-runner/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-sel-routing-reaudit/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-session-oracles/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-session-ownership/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-storage-writer-cases/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-time-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-trade-notifier/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-trader-ctp-fixtures/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-trader-dumper-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-trader-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-uft-risk-valid-plugin/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-uft-strategy-init/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-uft-ticker-fixture/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-uftcore-factory-no-symlink/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-uftcore-plugin-copies/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v2-partial-audit/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v2-profile-archive/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v3-wtrunner-runtime/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v4-integrated-build/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v5-integrated-build/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v5-integrity-interruption/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v6-four-target-results/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v6-integrated-build/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v7-full-regression/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v7-integrated-build/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-40-target-regression/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-n01-action/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-n02-factory/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-q01-hft-time-verification/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r10-executer-persistence-singletons-sha463dc400/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r10-hft-retest/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r10-hft-verification/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r10-selengine-add-context/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r10-selengine-onbar-single/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r10-selengine-time-retest/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r101-cta-hot-executor-retest/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r101-cta-hot-verification/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r101-trader-report-verification/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r110-cta-run-qfq-tick-sha8d4c86f/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r143-btporter-ticks-empty-three-cases-sha2127740/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r15-hft-price-fallback/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r15-manager-empty-state/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r192-cta-run-ends-session-last-minute/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r192-cta-ticker-verification/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r28-cta-self-staging-single-sha-b2a43b4/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r28-real-cta-factory-single-sha-bd49d69/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r3-condition-oscs-sp-retest-sha7b4d8c/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r3-cta-all19-sha-b93e6965/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r3-cta-all19-sha-ecb8a6fc/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r3-cta-json-retest/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r3-cta-position-persist-verification/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r3-flat-signal-retest-sha601fc7/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r3-saveload-retest-sha647679/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r3-slippage-single-shaecb8a6f/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r3-trader-17-sha05191057/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r3-userdata-retest/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r59-diff-persistence-oracle-single-shaafd5e84/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r59-plugin-autoclear-two-singletons-sha7d77f724/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r7-twap-zero-total-probe-controls-sha384ae7/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r71-conditions/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r71-cta-final/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r71-hft/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r71-schedule/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r73-hft-verification/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r73-trader-report-verification/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-v8-r81-risk-plugin-init-singleton/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-ws01-split/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-wtcore-shared-fixtures-no-symlink/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261101-wtrunner-no-symlink/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/BUG-I02-NEW-009/parserudp-r45-command.txt"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/BUG-I02-NEW-009/parserudp-r45-exit-code.txt"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/BUG-I02-NEW-009/parserudp-r45-run.log"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24302/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/bug-r58-004/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-bar-fee-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-container-ownership/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-csv-block-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-date-diff-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-fees-groups-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-goal-start/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-parser-shm-v2-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-parser-udp-v2-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-primary-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-quarantine-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-resampled-fee-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-reverify-pending/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-servo-date-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261103-verification-audit/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-card3-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-commodity-ready-r42-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-exec-eager-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-leaks-main-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-oracle-integration/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-parser-events-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-r202-ticker-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-ratelimit-initext-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-replayer-prepare-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-btcore/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-date-session/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-dt-parsers/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-dt-writer/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-engine-lifecycle/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-exec-units/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-main/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-runners/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-start/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-storage-read/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-traders-ctp/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-traders-other/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-uftcore/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-s5-wp1-ledger/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-sdk-events-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-slice-shared-owner-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-storage-multiwriter-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-werror-cov-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-wp1-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/20261104-z15-final-review/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-AD-bar-alignment-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-AD-reader-alignment-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-AD-tick-alignment-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-NEW-003/core-manager-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-NEW-003/dtservo-manager/README.md"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-NEW-003/dtservo-manager/atomic/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-NEW-003/dtservo-manager/compat/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-NEW-003/dtservo-manager/current/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-NEW-003/dtservo-manager/group-isolation/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-NEW-003/dtservo-manager/red/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-NEW-003/parser-corrections-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-NEW-006-ctpopt-host-status-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-NEW-006-ctpopt/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-NEW-006-localtime-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-NEW-006-order-id-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-journal-bootstrap-recovery-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/I03-journal-marker-failure-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/L00-004-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/L01-018-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/L03-002-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/L03-009-ad-writer-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/L03-009-multiday-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/L03-009-regular-writer-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/L03-009-stock-vwap-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/L03-010-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/L03-session-config-atomic-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/L05-002-dump-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/L05-002-read-close-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/L06-007-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/NEW-008-owner-delivery-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/NEW-020-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/NEW-033/hft-owner-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/NEW-033/sel-owner-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/NEW-034-fund-owner-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/NEW-034-monitor/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/NEW-084-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/NEW-091-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/NEW-095-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/NEW-FEMAS-INSERT/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/P02-005-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/P05-009-uniform-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/P05-R52-uniform-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/Q02-003-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/Q03-005-slice-clear-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R10-005-20261102/README.md"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R10-005-20261102/compiler.log"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R10-005-20261102/input-check.log"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R10-005-20261102/results.log"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R10-005-20261102/run.sh"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R10-005-20261102/runs/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R10-005-20261102/symlinks.log"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R100-R32-evidence-consistency-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R100-R32-lmdb-reader-slot-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R100-R32-v2-binding-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R100-R32-v2-staging-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R103-002-between-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R132-001-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R14-003-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R14-010-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R160-002-uft-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R17-001-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R18-006-012-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R2-adjustment-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R20-1-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R202-001-midnight-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R202-003-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R22-002/lifecycle-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R22-002/owner-order-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R22-timezone-race-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R23-006-old-view-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R28-005-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R28-005-null-contract-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R3-008-Q04-002-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R4-AD-init-retry-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R4-AD-writer-partial-replay-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R41-004-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R42-001-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R42-002-hft-binding-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R42-003-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R58-003-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R6-004-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R6-006-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R60-003/accepted-queue-owner-audit-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R60-003/handler-raii/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R60-003/login-connect-admission-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R65-002-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R7-002-total-times-ccaad010/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R78-001-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R8-003-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/R93-006-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/T25-005-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/T25-007-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/T27-004-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/T3-006-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/T4-002-NEW-019-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/WSN06-002-20261102/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/evidence/regression-tools/"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/\345\206\263\347\255\226\347\247\257\345\216\213\346\270\205\345\215\225.md"
+?? "docs/\350\277\255\344\273\243\350\256\241\345\210\222/\350\277\255\344\273\24303/\345\256\236\346\226\275\350\267\237\350\270\252/\350\264\246\346\210\267\345\207\200\351\242\235\351\227\250\347\246\201\346\216\245\345\205\245\345\256\241\350\256\241-20261103.md"
+?? factory-preflight-retry.log
+?? generated/
+?? mocker_3297401/
+?? mocker_3322601/
+?? no_can_wait_quiesce.log
+?? no_factory_preflight.log
+?? no_factory_preflight_capability.log
+?? no_quiesce_capability.log
+?? no_request_quiesce.log
+?? no_wait_quiesce.log
+?? quiesce-order.log
+?? quiesce-retry.log
+?? r104qf_active_shm_failure.yaml
+?? r104qf_array.yaml
+?? r104qf_commodities.json
+?? r104qf_contracts.json
+?? r104qf_direct_parsers.yaml
+?? r104qf_full.yaml
+?? r104qf_holidays.json
+?? r104qf_hot.json
+?? r104qf_inactive_shm.yaml
+?? r104qf_minimal.yaml
+?? r104qf_parsers_unloadable.txt
+?? r104qf_rules.json
+?? r104qf_second.json
+?? r104qf_sessions.json
+?? r104qf_shm_inactive.bin
+?? r104qf_side_parsers.yaml
+?? r104qf_unloadable.yaml
+?? r14_uft_min_config.yaml
+?? r14_uft_missing_basefiles.yaml
+?? r14_uft_non_object_basefiles.yaml
+?? r28wt_actpolicy.yaml
+?? r28wt_array_cfg.yaml
+?? r28wt_badname_cfg.yaml
+?? r28wt_badrouter_cfg.yaml
+?? r28wt_broken_cfg.json
+?? r28wt_broken_cfg.yaml
+?? r28wt_broken_hot_cfg.yaml
+?? r28wt_broken_hots.json
+?? r28wt_cfg_without_suffix
+?? r28wt_commodities.json
+?? r28wt_contracts.json
+?? r28wt_cta_cfg.yaml
+?? r28wt_cta_missing_strategy_name_cfg.yaml
+?? r28wt_cta_unknown_strategy_factory_cfg.yaml
+?? r28wt_ctainactive_cfg.yaml
+?? r28wt_empty_cfg.yaml
+?? r28wt_emptyname_cfg.yaml
+?? r28wt_emptypolicy.yaml
+?? r28wt_emptypolicy_cfg.yaml
+?? r28wt_exec_cfg.yaml
+?? r28wt_executers_empty.yaml
+?? r28wt_executers_router_bad.yaml
+?? r28wt_executers_router_bad_cfg.yaml
+?? r28wt_executers_scalar.yaml
+?? r28wt_executers_scalar_cfg.yaml
+?? r28wt_executers_side.yaml
+?? r28wt_executers_side_cfg.yaml
+?? r28wt_executers_unload_cfg.yaml
+?? r28wt_executers_unloadable.txt
+?? r28wt_first_cfg.yaml
+?? r28wt_hft_cfg.yaml
+?? r28wt_hft_missing_strategy_name_cfg.yaml
+?? r28wt_hft_unknown_strategy_factory_cfg.yaml
+?? r28wt_holidays.json
+?? r28wt_hots.json
+?? r28wt_logcfg.yaml
+?? r28wt_missing_hot_cfg.yaml
+?? r28wt_missing_parser_cfg.yaml
+?? r28wt_missing_rule_cfg.yaml
+?? r28wt_missing_second_hot_cfg.yaml
+?? r28wt_missing_trader_cfg.yaml
+?? r28wt_nobs_cfg.yaml
+?? r28wt_nocta_cfg.yaml
+?? r28wt_nodata_cfg.yaml
+?? r28wt_noenv_cfg.yaml
+?? r28wt_nonotifier_cfg.yaml
+?? r28wt_nosession_cfg.yaml
+?? r28wt_notifier_off_cfg.yaml
+?? r28wt_notifier_on_cfg.yaml
+?? r28wt_parsers_cfg.yaml
+?? r28wt_parsers_empty.yaml
+?? r28wt_parsers_side.yaml
+?? r28wt_parsers_side_cfg.yaml
+?? r28wt_parsers_unload_cfg.yaml
+?? r28wt_parsers_unloadable.txt
+?? r28wt_routers_cfg.yaml
+?? r28wt_rule.json
+?? r28wt_rules_cfg.yaml
+?? r28wt_sel_cfg.yaml
+?? r28wt_sessions.json
+?? r28wt_traders_cfg.yaml
+?? r28wt_traders_empty.yaml
+?? r28wt_traders_scalar.yaml
+?? r28wt_traders_scalar_cfg.yaml
+?? r28wt_traders_side.yaml
+?? r28wt_traders_side_cfg.yaml
+?? r28wt_traders_unload_cfg.yaml
+?? r28wt_traders_unloadable.txt
+?? short_factory_preflight.log
+?? short_quiesce.log
+?? src/Includes/DateMappingClient.hpp
+?? src/Includes/DateMappingV1.h
+?? src/Includes/IRiskMonPluginV2.h
+?? src/Includes/IStrategyPluginV2.h
+?? src/Includes/ReplayStatusV1.h
+?? src/Includes/SelScheduleRules.hpp
+?? src/ParserCTP/VendorMdLifecycleV2.hpp
+?? src/Share/ActionDayNormalizer.hpp
+?? src/Share/ExecutionGroups.hpp
+?? src/Share/FeeSchedule.hpp
+?? src/Share/FrequencyWindow.hpp
+?? src/TestUnits/coverage/l03_includes/s5_main_k28_k30_session_test.cpp
+?? src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_v2_filter_test.cpp
+?? src/TestUnits/coverage/l06_wtbtcore/z15_match_engine_unsinked_test.cpp
+?? src/TestUnits/coverage/m_WtBtRunner/s5_prepare_failure_diagnostic_test.cpp
+?? src/TestUnits/coverage/m_WtUftRunner/i03_s5_uft_demo_params_test.cpp
+?? src/TestUnits/coverage/n02_wtcore_engines/s5_engine_uninit_metadata_test.cpp
+?? src/TestUnits/coverage/n02_wtcore_engines/s5_live_fee_schedule_test.cpp
+?? src/TestUnits/coverage/n02_wtcore_engines/s5_ticker_null_session_test.cpp
+?? src/TestUnits/coverage/p05_datastorage2/i03_writer_ad_lifecycle_v1_test.cpp
+?? src/TestUnits/coverage/p05_datastorage2/i03_writer_ad_log_identity_test.cpp
+?? src/TestUnits/coverage/p05_datastorage2/l03_ad_bar_alignment_test.cpp
+?? src/TestUnits/coverage/p05_datastorage2/l03_ad_tick_alignment_test.cpp
+?? src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp
+?? src/TestUnits/coverage/p05_datastorage2/r4_ad_init_retry_isolation_test.cpp
+?? src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp
+?? src/TestUnits/coverage/p05_datastorage2/s5_reader_ad_bounds_test.cpp
+?? src/TestUnits/coverage/q01_wtcore3/i03_new014_diff_config_init_test.cpp
+?? src/TestUnits/coverage/q01_wtcore3/p02_005_account_net_limit_test.cpp
+?? src/TestUnits/coverage/q01_wtcore3/s5_sel_schedule_thread_test.cpp
+?? src/TestUnits/coverage/q02_btcore3/s5_new029_out_of_session_streams_test.cpp
+?? src/TestUnits/coverage/q02_btcore3/s5_r103_last_tick_interval_test.cpp
+?? src/TestUnits/coverage/q02_btcore3/s5_sel_hft_frozen_tdate_test.cpp
+?? src/TestUnits/coverage/q03_storage3/q03_rdm_clear_lifetime_test.cpp
+?? src/TestUnits/coverage/q03_storage3/s5_storage_reader_guards_test.cpp
+?? src/TestUnits/coverage/q05_dtsrv/q05_resample_leak_paths_test.cpp
+?? src/TestUnits/coverage/q06_btporter/s5_r20_runner_notifier_release_test.cpp
+?? src/TestUnits/coverage/q06_btporter/z15_btrunner_config_lock_test.cpp
+?? src/TestUnits/coverage/q06_porter/i03_s5_hft_demo_params_test.cpp
+?? src/TestUnits/coverage/q06_porter/i03_s5_r42_capi_v2_test.cpp
+?? src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp
+?? src/TestUnits/coverage/q06_porter/i03_s5_test_trader_support.cpp
+?? src/TestUnits/coverage/r22_dtporter/i03_parser_start_status_test.cpp
+?? src/TestUnits/coverage/r23_storage4/l03_writer_session_date_test.cpp
+?? src/TestUnits/coverage/r24_exefact2/i03_s5_exec_runner_preflight_test.cpp
+?? src/TestUnits/coverage/r7_exefact/r17_order_identity_lifecycle_test.cpp
+?? src/TestUnits/coverage/r7_exefact/r7_twap_legal_lot_test.cpp
+?? src/TestUnits/coverage/t_TraderCTP/i03s5_traderctp_lifecycle_test.cpp
+?? src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp
+?? src/TestUnits/coverage/t_TraderCTPOpt/i03s5_traderctpopt_lifecycle_test.cpp
+?? src/TestUnits/coverage/t_TraderDumper/i03s5_dumper_lifecycle_test.cpp
+?? src/TestUnits/coverage/t_TraderFemas/t4_003_femas_lifecycle_test.cpp
+?? src/TestUnits/coverage/t_TraderMocker/new020_udp_alignment_test.cpp
+?? src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp
+?? src/TestUnits/coverage/t_TraderMocker/t6_009_mocker_lifecycle_test.cpp
+?? src/TestUnits/coverage/t_TraderXTP/xtp_lifecycle_s5_test.cpp
+?? src/TestUnits/coverage/t_TraderYD/yd_destroy_lifecycle_test.cpp
+?? src/TestUnits/fixtures/ctpopt_time_snapshot/
+?? src/TestUnits/fixtures/femas_insert_return/
+?? src/TestUnits/fixtures/i03_backtest_fee_consumer_20261103/
+?? src/TestUnits/fixtures/i03_bar_fee_provenance_20261103/
+?? src/TestUnits/fixtures/i03_btcore_s5_20261104s5/
+?? src/TestUnits/fixtures/i03_card3_dayboundary_20261104/
+?? src/TestUnits/fixtures/i03_commodity_ready_20261103/
+?? src/TestUnits/fixtures/i03_config_embedded_nul_20261103/
+?? src/TestUnits/fixtures/i03_container_ownership_20261103/
+?? src/TestUnits/fixtures/i03_csv_block_type_20261103/
+?? src/TestUnits/fixtures/i03_csv_status_20261103/
+?? src/TestUnits/fixtures/i03_ctp_order_identity_20261103/
+?? src/TestUnits/fixtures/i03_date_mapping_20261103/
+?? src/TestUnits/fixtures/i03_date_mapping_20261104s5/
+?? src/TestUnits/fixtures/i03_diff_batch_atomic_20261103/
+?? src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/
+?? src/TestUnits/fixtures/i03_dt_writer_lifecycle_20261104s5/
+?? src/TestUnits/fixtures/i03_dualthrust_config_20261103/
+?? src/TestUnits/fixtures/i03_engine_followup_20261104s5/
+?? src/TestUnits/fixtures/i03_exec_eager_validation_20261103/
+?? src/TestUnits/fixtures/i03_exec_units_20261104s5/
+?? src/TestUnits/fixtures/i03_execution_groups_20261103/
+?? src/TestUnits/fixtures/i03_fee_consumer_pipeline/
+?? src/TestUnits/fixtures/i03_fee_context_20261103/
+?? src/TestUnits/fixtures/i03_fee_engine_gate/
+?? src/TestUnits/fixtures/i03_fee_schedule_candidate/
+?? src/TestUnits/fixtures/i03_fractional_targets_20261103/
+?? src/TestUnits/fixtures/i03_frequency_20261103/
+?? src/TestUnits/fixtures/i03_hft_fee_pipeline/
+?? src/TestUnits/fixtures/i03_hft_uft_fee_commit_20261103/
+?? src/TestUnits/fixtures/i03_initext_login_20261104/
+?? src/TestUnits/fixtures/i03_leaks_main_20261104/
+?? src/TestUnits/fixtures/i03_monitor_date_20261103/
+?? src/TestUnits/fixtures/i03_parser_event_contract_20261103/
+?? src/TestUnits/fixtures/i03_parser_lifecycle_v2/
+?? src/TestUnits/fixtures/i03_parser_shm_lifecycle_v2/
+?? src/TestUnits/fixtures/i03_parser_udp_lifecycle_v2/
+?? src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/
+?? src/TestUnits/fixtures/i03_parser_xele_lifecycle_v2/
+?? src/TestUnits/fixtures/i03_porter_replay_status_20261103/
+?? src/TestUnits/fixtures/i03_r15_hft_tags_20261104s5/
+?? src/TestUnits/fixtures/i03_r42_fundinfo_leak_20261103/
+?? src/TestUnits/fixtures/i03_replay_fee_identity_20261103/
+?? src/TestUnits/fixtures/i03_replay_status_20261103/
+?? src/TestUnits/fixtures/i03_replayer_date_range_20261103/
+?? src/TestUnits/fixtures/i03_report_quarantine_20261103/
+?? src/TestUnits/fixtures/i03_resampled_fee_provenance_20261103/
+?? src/TestUnits/fixtures/i03_riskmon_quiesce_20261104s5/
+?? src/TestUnits/fixtures/i03_runner_parser_drain_20261103/
+?? src/TestUnits/fixtures/i03_runner_quarantine_exit_20261104s5/
+?? src/TestUnits/fixtures/i03_sdk_events_20261103/
+?? src/TestUnits/fixtures/i03_servo_date_20261103/
+?? src/TestUnits/fixtures/i03_session_contract_20261103/
+?? src/TestUnits/fixtures/i03_slice_shared_owner_20261103/
+?? src/TestUnits/fixtures/i03_storage_multiwriter_20261104/
+?? src/TestUnits/fixtures/i03_storage_read_20261104s5/
+?? src/TestUnits/fixtures/i03_strategy_id_20261103/
+?? src/TestUnits/fixtures/i03_strategy_plugin_abi_20261104s5/
+?? src/TestUnits/fixtures/i03_trader_ratelimit_20261103/
+?? src/TestUnits/fixtures/i03_traders_other_20261104s5/
+?? src/TestUnits/fixtures/i03_uft_ledger_ctx_concurrency_20261104s5/
+?? src/TestUnits/fixtures/i03_uft_parser_lifecycle_20261104s5/
+?? src/TestUnits/fixtures/i03_uft_strategy_mgr_v2_20261104s5/
+?? src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/
+?? src/TestUnits/fixtures/i03_wp1_ledger_20261104s5/
+?? src/TestUnits/fixtures/l03_commodity_state/
+?? src/TestUnits/fixtures/l04_contract_import/
+?? src/TestUnits/fixtures/l04_lmdb_key_bounds/
+?? src/TestUnits/fixtures/l05_csv_failure_signal/
+?? src/TestUnits/fixtures/lmdb_bar_migration/
+?? src/TestUnits/fixtures/lmdb_bar_migration_perf/
+?? src/TestUnits/fixtures/n05_timeout_guard_race/
+?? src/TestUnits/fixtures/new034_monitor/
+?? src/TestUnits/fixtures/p04_cross_session_clock/
+?? src/TestUnits/fixtures/p10_first_insert/
+?? src/TestUnits/fixtures/r103_dispatched_snapshot/
+?? src/TestUnits/fixtures/r13_real_schedule/
+?? src/TestUnits/fixtures/r13_sel_period_contract/
+?? src/TestUnits/fixtures/r14_runner_startup_overlap/
+?? src/TestUnits/fixtures/r15_tag_snapshot/
+?? src/TestUnits/fixtures/r202_nextday/
+?? src/TestUnits/fixtures/r20_zstd_ubsan/
+?? src/TestUnits/fixtures/r22_monitor_lifecycle/
+?? src/TestUnits/fixtures/r22_monitor_owner/
+?? src/TestUnits/fixtures/r22_timezone/
+?? src/TestUnits/fixtures/r23_old_mapping/
+?? src/TestUnits/fixtures/r23_retry_wait/
+?? src/TestUnits/fixtures/r3_cancel_batch_cache/
+?? src/TestUnits/fixtures/r3_split_reject/
+?? src/TestUnits/fixtures/r68_index_factory/README.md
+?? src/TestUnits/fixtures/r78_no_parser/
+?? src/TestUnits/fixtures/r7_twap_sell_sign/
+?? src/TestUnits/fixtures/t26_fees_atomic/
+?? src/TestUnits/fixtures/t26_request_completion/
+?? src/TraderCTP/VendorTdLifecycle.hpp
+?? src/WtBtCore/ReplayTradeReceipt.hpp
+?? src/WtCore/AccountNetPositionLimits.h
+?? src/WtCore/AccountTradingGate.h
+?? src/WtCore/ExecOwnerModes.h
+?? src/WtCore/ExecPolicyConfig.h
+?? src/WtCore/TickerDayBoundary.h
+?? src/WtDataStorage/RTBlockPublish.hpp
+?? src/WtDataStorageAD/DayBarContractAD.h
+?? src/WtDataStorageAD/LMDBBarMigration.hpp
+?? src/WtDtCore/ParserLifecycleHostV2.hpp
+?? wait-retry.log

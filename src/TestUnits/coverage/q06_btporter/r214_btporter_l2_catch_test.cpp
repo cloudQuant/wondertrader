@@ -260,6 +260,7 @@ TEST(R214BtPorterAsync, HftStepWithoutMockerReturnsInAsyncMode)
 	const std::string dir = prepare_dir("async");
 	ASSERT_FALSE(dir.empty());
 	write_text(dir + "/sessions.json", kSessions);
+	write_text(dir + "/holidays.json", "{\"CHINA\":[]}");
 	write_text(dir + "/commodities.json", kCommodities);
 	write_text(dir + "/contracts.json", kContracts);
 
@@ -287,6 +288,7 @@ TEST(R214BtPorterAsync, HftStepWithoutMockerReturnsInAsyncMode)
 		"\"tick\":false,"
 		"\"basefiles\":{"
 		"\"session\":\"" + dir + "/sessions.json\","
+		"\"holiday\":\"" + dir + "/holidays.json\","	// 卡1：日期映射须有交易日历（CHINA）
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
 		"\"env\":{\"mocker\":\"none\"}}";

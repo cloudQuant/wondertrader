@@ -14,6 +14,7 @@
  * 用例作用域内 join；active 用例用 LeakyCaster 规避 ~UDPCaster 的成员析构顺序
  * 缺陷（BUG-R164-001），只 stop 不 delete，进程退出即回收。
  */
+// 迭代03 第五会话（I03-NEW-053/卡2）：品种须带 pricetick/volscale 才能整批发布；起止相同的非 0–0 时段（旧夹具 1–1）被拒，改为 1–2。仅改测试输入。
 #include <gtest/gtest.h>
 
 #include <arpa/inet.h>
@@ -391,7 +392,7 @@ TEST_F(R154UdpCasterTest, ReceiveMalformedAndSubscribeDatagramsOnLoopback)
 		"DAY": {"name": "日盘", "offset": 0, "sections": [{"from": 930, "to": 1500}]}
 	})JSON");
 	r154::write_file(_dir / "commodities.json", R"JSON({
-		"SHFE": {"ag": {"name": "白银", "session": "DAY", "holiday": "R154_NONE"}}
+		"SHFE": {"ag": {"name": "白银", "session": "DAY", "holiday": "R154_NONE", "pricetick": 1, "volscale": 1}}
 	})JSON");
 	r154::write_file(_dir / "contracts.json", R"JSON({
 		"SHFE": {"ag2512": {"name": "ag2512", "exchg": "SHFE", "product": "ag"}}

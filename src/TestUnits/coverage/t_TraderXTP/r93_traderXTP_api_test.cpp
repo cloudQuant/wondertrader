@@ -330,7 +330,10 @@ namespace
 			cfg->append("quick", true);
 			cfg->append("hbinterval", (uint32_t)12);
 			cfg->append("flowdir", temp_.path("flow").c_str());
-			ASSERT_TRUE(api_.init(cfg));
+			// BUG-R93-005 (s5): init now fails closed when the XTP vendor module is
+			// absent (it is not available on macOS). The configuration is parsed
+			// before the module load, and the cases inject a fake creator below.
+			ASSERT_FALSE(api_.init(cfg));
 			cfg->release();
 
 			comm_ = WTSCommodityInfo::create("stock600", "股票", "SSE", "TRADE", "CHINA");

@@ -1,0 +1,64 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R41EventNotifierTest.*:R160EventNotifier.*:R120Notifier.*:R101EventNotifierLoader.*
+[==========] Running 21 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from R101EventNotifierLoader
+[ RUN      ] R101EventNotifierLoader.IncompatibleModuleRejected
+[       OK ] R101EventNotifierLoader.IncompatibleModuleRejected (392 ms)
+[----------] 1 test from R101EventNotifierLoader (392 ms total)
+
+[----------] 2 tests from R120Notifier
+[ RUN      ] R120Notifier.BurstPublishesEveryPayload
+[       OK ] R120Notifier.BurstPublishesEveryPayload (129 ms)
+[ RUN      ] R120Notifier.NullTradeAndOrderGuardsPlusLatePost
+[       OK ] R120Notifier.NullTradeAndOrderGuardsPlusLatePost (48 ms)
+[----------] 2 tests from R120Notifier (178 ms total)
+
+[----------] 12 tests from R160EventNotifier
+[ RUN      ] R160EventNotifier.FakeModuleObservesExactServerAndPublishAbi
+[       OK ] R160EventNotifier.FakeModuleObservesExactServerAndPublishAbi (404 ms)
+[ RUN      ] R160EventNotifier.WorkGuardKeepsWorkerAliveForEveryPublishLambda
+[       OK ] R160EventNotifier.WorkGuardKeepsWorkerAliveForEveryPublishLambda (117 ms)
+[ RUN      ] R160EventNotifier.DiscardedOrderHandlerReleasesRetainedReference
+[       OK ] R160EventNotifier.DiscardedOrderHandlerReleasesRetainedReference (0 ms)
+[ RUN      ] R160EventNotifier.AsyncOrderHandlerDestroysObjectOnceAfterPublisherReturns
+[       OK ] R160EventNotifier.AsyncOrderHandlerDestroysObjectOnceAfterPublisherReturns (0 ms)
+[ RUN      ] R160EventNotifier.DiscardedOrderHandlerDestroysLastReferenceOnce
+[       OK ] R160EventNotifier.DiscardedOrderHandlerDestroysLastReferenceOnce (0 ms)
+[ RUN      ] R160EventNotifier.ThrowingOrderPublisherDestroysLastReferenceOnce
+EventNotifier TRD_ORDER handler failed: R160 trade publisher failure
+[       OK ] R160EventNotifier.ThrowingOrderPublisherDestroysLastReferenceOnce (0 ms)
+[ RUN      ] R160EventNotifier.WorkerFinishesPendingOrderBeforeDestructorReturns
+[       OK ] R160EventNotifier.WorkerFinishesPendingOrderBeforeDestructorReturns (0 ms)
+[ RUN      ] R160EventNotifier.DiscardedTradeHandlerReleasesRetainedReference
+[       OK ] R160EventNotifier.DiscardedTradeHandlerReleasesRetainedReference (0 ms)
+[ RUN      ] R160EventNotifier.ThrowingTradePublisherReleasesRetainedReference
+EventNotifier TRD_TRADE handler failed: R160 trade publisher failure
+[       OK ] R160EventNotifier.ThrowingTradePublisherReleasesRetainedReference (0 ms)
+[ RUN      ] R160EventNotifier.DeliversAfterIdleWithoutExternalWorkGuard
+[       OK ] R160EventNotifier.DeliversAfterIdleWithoutExternalWorkGuard (104 ms)
+[ RUN      ] R160EventNotifier.ThrowingPublisherIsReportedAndLaterItemRuns
+[       OK ] R160EventNotifier.ThrowingPublisherIsReportedAndLaterItemRuns (2 ms)
+[ RUN      ] R160EventNotifier.ConcurrentStopDrainsAcceptedItemsAndRejectsLaterItems
+[       OK ] R160EventNotifier.ConcurrentStopDrainsAcceptedItemsAndRejectsLaterItems (3 ms)
+[----------] 12 tests from R160EventNotifier (635 ms total)
+
+[----------] 6 tests from R41EventNotifierTest
+[ RUN      ] R41EventNotifierTest.DefaultConstructorInitializesMqHooksToNull
+[       OK ] R41EventNotifierTest.DefaultConstructorInitializesMqHooksToNull (0 ms)
+[ RUN      ] R41EventNotifierTest.InactiveNotifierShortCircuitsEveryNotify
+[       OK ] R41EventNotifierTest.InactiveNotifierShortCircuitsEveryNotify (1 ms)
+[ RUN      ] R41EventNotifierTest.MissingMqModuleFailsInit
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r41_ntf_missing_5702_2/no_module_here/libWtMsgQue.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r41_ntf_missing_5702_2/no_module_here/libWtMsgQue.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r41_ntf_missing_5702_2/no_module_here/libWtMsgQue.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r41_ntf_missing_5702_2/no_module_here/libWtMsgQue.dylib' (no such file)
+[       OK ] R41EventNotifierTest.MissingMqModuleFailsInit (1 ms)
+[ RUN      ] R41EventNotifierTest.ActiveNotifierPublishesAllJsonPayloads
+[       OK ] R41EventNotifierTest.ActiveNotifierPublishesAllJsonPayloads (109 ms)
+[ RUN      ] R41EventNotifierTest.InactiveNotifierRejectsNonNullTradeAndOrder
+[       OK ] R41EventNotifierTest.InactiveNotifierRejectsNonNullTradeAndOrder (2 ms)
+[ RUN      ] R41EventNotifierTest.ActiveNotifierSkipsNullTradeAndOrder
+[       OK ] R41EventNotifierTest.ActiveNotifierSkipsNullTradeAndOrder (27 ms)
+[----------] 6 tests from R41EventNotifierTest (142 ms total)
+
+[----------] Global test environment tear-down
+[==========] 21 tests from 4 test suites ran. (1351 ms total)
+[  PASSED  ] 21 tests.

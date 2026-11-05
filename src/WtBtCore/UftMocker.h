@@ -16,6 +16,7 @@
 #include "../Includes/FasterDefs.h"
 #include "../Includes/IUftStraCtx.h"
 #include "../Includes/UftStrategyDefs.h"
+#include "../Includes/IStrategyPluginV2.h"
 
 #include "../Share/StdUtils.hpp"
 #include "../Share/DLLHelper.hpp"
@@ -193,6 +194,11 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	virtual void on_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price);
 
+protected:
+	bool apply_trade(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price);
+
+public:
+
 	virtual void on_order(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled);
 
 	virtual void on_channel_ready();
@@ -208,11 +214,16 @@ private:
 	void	procTask();
 	bool	init_uft_factory_impl(WTSVariant* cfg, DllHandle module,
 		const std::string& modulePath, FuncCreateUftStraFact creator, FuncDeleteUftStraFact remover);
+	bool	init_uft_factory_core(WTSVariant* cfg, DllHandle module,
+		const std::string& modulePath, FuncCreateUftStraFact creator, FuncDeleteUftStraFact remover,
+		const WtStrategyPluginApiV2* api);
 	void	release_uft_factory() noexcept;
 
 	bool	procOrder(uint32_t localid);
 
-	void	update_position(const char* stdCode, bool isLong, uint32_t offset, double qty, double price = 0.0);
+	bool	update_position(const char* stdCode, bool isLong, uint32_t offset, double qty, double price, const std::vector<double>& fees);
+	std::function<bool()> trade_state_guard(const std::string& key);
+	bool plan_trade_fees(const char* stdCode, bool isLong, uint32_t offset, const std::vector<double>& volumes, double price, const wt_fee::Context& context, std::vector<std::vector<double>>& fees);
 	void	update_dyn_profit(const char* stdCode, WTSTickData* newTick);
 
 	void	dump_outputs();
@@ -238,6 +249,7 @@ private:
 		IUftStrategyFact*	_fact;
 		FuncCreateUftStraFact	_creator;
 		FuncDeleteUftStraFact	_remover;
+		const WtStrategyPluginApiV2* _api;	// validated versioned table (card 4b=A); NULL for the v1 test seam
 
 		_StraFactInfo()
 		{
@@ -245,6 +257,7 @@ private:
 			_fact = NULL;
 			_creator = NULL;
 			_remover = NULL;
+			_api = NULL;
 		}
 
 		~_StraFactInfo()
@@ -259,14 +272,26 @@ private:
 
 			if (_fact != NULL)
 			{
-				if (_remover == NULL)
+				if (_api != NULL)
+				{
+					// Card 9a: keep a plugin without the teardown promise loaded.
+					if (!wt_stra_plugin::hasSyncTeardown(_api))
+					{
+						pin();
+						return;
+					}
+				}
+				else if (_remover == NULL)
 				{
 					pin();
 					return;
 				}
 				try
 				{
-					_remover(_fact);
+					if (_api != NULL)
+						_api->destroy_factory(static_cast<void*>(_fact));
+					else
+						_remover(_fact);
 				}
 				catch (...)
 				{
@@ -283,13 +308,14 @@ private:
 			}
 			_creator = NULL;
 			_remover = NULL;
+			_api = NULL;
 			_module_path.clear();
 		}
 
 		bool is_preserved() const noexcept
 		{
 			return _module_inst == NULL && _fact == NULL && _creator == NULL &&
-				_remover == NULL && !_module_path.empty();
+				_remover == NULL && _api == NULL && !_module_path.empty();
 		}
 
 		void pin() noexcept
@@ -299,6 +325,7 @@ private:
 			_fact = NULL;
 			_creator = NULL;
 			_remover = NULL;
+			_api = NULL;
 		}
 	} StraFactInfo;
 	StraFactInfo	_factory;
@@ -371,7 +398,7 @@ private:
 
 		std::vector<DetailInfo> _details;
 
-		_PosItem()
+		_PosItem() : _long(false)
 		{
 			_prevol = 0;
 			_newvol = 0;

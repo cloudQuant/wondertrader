@@ -1,0 +1,38 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R41EngineFixture.S5SelTickerRunWithoutSessionStartsNothing
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R41EngineFixture
+[ RUN      ] R41EngineFixture.S5SelTickerRunWithoutSessionStartsNothing
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_ticker_null_session_test.cpp:60: Failure
+Death test: std::exit((runWithoutSession<WtSelEngine, WtSelRtTicker>(cfg, _bd.get(), _dt.get(), _hot.get())))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtSelTicker.cpp:234:76: runtime error: member call on null pointer of type 'wtp::WTSSessionInfo'
+[  DEATH   ]     #0 0x0001016a5d6c in wtp::WtSelRtTicker::run()+0x2cc (red-asan:arm64+0x100851d6c)
+[  DEATH   ]     #1 0x000100e5ec0c in int (anonymous namespace)::runWithoutSession<wtp::WtSelEngine, wtp::WtSelRtTicker>(wtp::WTSVariant*, wtp::IBaseDataMgr*, wtp::WtDtMgr*, wtp::IHotMgr*)+0x274 (red-asan:arm64+0x10000ac0c)
+[  DEATH   ]     #2 0x000100e5e144 in R41EngineFixture_S5SelTickerRunWithoutSessionStartsNothing_Test::TestBody()+0xb58 (red-asan:arm64+0x10000a144)
+[  DEATH   ]     #3 0x000101985244 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-asan:arm64+0x100b31244)
+[  DEATH   ]     #4 0x00010198518c in testing::Test::Run()+0xcc (red-asan:arm64+0x100b3118c)
+[  DEATH   ]     #5 0x000101985d6c in testing::TestInfo::Run()+0xd0 (red-asan:arm64+0x100b31d6c)
+[  DEATH   ]     #6 0x0001019867f0 in testing::TestSuite::Run()+0x1c4 (red-asan:arm64+0x100b327f0)
+[  DEATH   ]     #7 0x000101991c18 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-asan:arm64+0x100b3dc18)
+[  DEATH   ]     #8 0x0001019915c4 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-asan:arm64+0x100b3d5c4)
+[  DEATH   ]     #9 0x000101991528 in testing::UnitTest::Run()+0x78 (red-asan:arm64+0x100b3d528)
+[  DEATH   ]     #10 0x00010197295c in main+0x40 (red-asan:arm64+0x100b1e95c)
+[  DEATH   ]     #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+[  DEATH   ] 
+[  DEATH   ] SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtSelTicker.cpp:234:76 
+[  DEATH   ] 
+
+[  FAILED  ] R41EngineFixture.S5SelTickerRunWithoutSessionStartsNothing (1051 ms)
+[----------] 1 test from R41EngineFixture (1051 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1051 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R41EngineFixture.S5SelTickerRunWithoutSessionStartsNothing
+
+ 1 FAILED TEST

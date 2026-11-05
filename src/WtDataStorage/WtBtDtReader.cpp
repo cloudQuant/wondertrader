@@ -14,6 +14,7 @@
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/StrUtil.hpp"
 #include "../WTSUtils/WTSCmpHelper.hpp"
+#include "../WTSUtils/WTSCmpBudgetConfig.hpp"
 
 //By Wesley @ 2022.01.05
 #include "../Share/fmtlib.h"
@@ -34,9 +35,30 @@ inline void pipe_btreader_log(IBtDtReaderSink* sink, WTSLogLevel ll, const char*
 	if (sink == NULL)
 		return;
 
+	// I03-NEW-038: messages can carry caller-supplied codes and configured
+	// paths; bound the formatter writes to the per-thread buffer.
 	static thread_local char buffer[512] = { 0 };
-	memset(buffer, 0, 512);
-	fmt::format_to(buffer, format, args...);
+	try
+	{
+		const std::size_t max_output_size = sizeof(buffer) - 1;
+		const auto formatted = fmt::format_to_n(buffer, max_output_size, format, args...);
+		if (formatted.size > max_output_size)
+		{
+			constexpr char truncation_marker[] = "...[truncated]";
+			constexpr std::size_t marker_size = sizeof(truncation_marker) - 1;
+			std::memcpy(buffer + max_output_size - marker_size, truncation_marker, marker_size);
+			buffer[max_output_size] = '\0';
+		}
+		else
+		{
+			buffer[formatted.size] = '\0';
+		}
+	}
+	catch (...)
+	{
+		constexpr char fallback[] = "WtBtDtReader log formatting failed";
+		std::memcpy(buffer, fallback, sizeof(fallback));
+	}
 
 	sink->reader_log(ll, buffer);
 }
@@ -121,6 +143,13 @@ void WtBtDtReader::init(WTSVariant* cfg, IBtDtReaderSink* sink)
 
 	_base_dir = cfg->getCString("path");
 	_base_dir = StrUtil::standardisePath(_base_dir);
+
+	// BUG-R132-001 / K37=B: host-configurable uncompress budget for this storage module
+	// (uncompress_max_bytes / uncompress_max_ratio next to "path"). An invalid value
+	// fails closed: every decompression in this module is refused.
+	std::string budgetError;
+	if (wt_cmp_budget::apply(cfg, budgetError) == wt_cmp_budget::ApplyResult::Invalid)
+		pipe_btreader_log(_sink, LL_ERROR, "{}; decompression in this storage module is refused", budgetError);
 
 	pipe_btreader_log(_sink, LL_INFO, "WtBtDtReader initialized, root data dir is {}", _base_dir);
 }

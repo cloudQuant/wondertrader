@@ -221,6 +221,151 @@ WtDtRunner::WtDtRunner()
 
 WtDtRunner::~WtDtRunner()
 {
+	// StateMonitor borrows _data_mgr and _bd_mgr; parsers borrow them too. Stop
+	// both while those members are still alive, before member destruction.
+	// The owner must not be destroyed from a monitor/parser callback or
+	// concurrently with other runner operations.
+	if (shutdown())
+		return;
+
+	// Not every owner is proven drained. shutdown() has closed every parser's
+	// callback gate, so the adapters no longer dispatch into this runner; keep the
+	// adapter objects (the SPI providers still hold) for the rest of the process.
+	try
+	{
+		static std::vector<ParserAdapterPtr>* s_leaked_owners = new std::vector<ParserAdapterPtr>();
+		std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+		for (auto& entry : _parsers._adapters)
+			s_leaked_owners->push_back(entry.second);
+		s_leaked_owners->insert(s_leaked_owners->end(), _quarantined_ext_parsers.begin(), _quarantined_ext_parsers.end());
+	}
+	catch (...)
+	{
+		std::terminate();
+	}
+
+	// I03-NEW-047: _dumpers is declared after _data_mgr, so member destruction
+	// would free the dumpers before the writer is released. Release the data
+	// manager (it waits for in-flight writer calls) while the dumpers are alive,
+	// and keep the dumpers for the rest of the process unless the writer was
+	// released and deleted.
+	_idx_factory.release();
+	_data_mgr.release();
+	retainDumpersUnlessWriterReleased();
+	WTSLogger::error("Data runner destroyed with owners that are not proven drained; owners leaked to process exit");
+}
+
+void WtDtRunner::retainDumpersUnlessWriterReleased()
+{
+	const DataManager::WriterLifecycleState state = _data_mgr.writerLifecycleState();
+	if (state == DataManager::WLS_None || state == DataManager::WLS_Released || _dumpers.empty())
+		return;
+	try
+	{
+		static std::vector<ExpDumperPtr>* s_retained_dumpers = new std::vector<ExpDumperPtr>();
+		for (auto& entry : _dumpers)
+			s_retained_dumpers->push_back(entry.second);
+	}
+	catch (...)
+	{
+		std::terminate();
+	}
+	WTSLogger::error("Data writer is not released (state {}); external dumpers are retained to process exit",
+		static_cast<int>(state));
+}
+
+bool WtDtRunner::shutdown()
+{
+	_to_exit.store(true);
+	_state_mon.stop();
+
+	std::vector<ParserAdapterPtr> owners;
+	bool creationInProgress = false;
+	{
+		std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+		_parser_registry_stopped = true;
+		auto creating = g_parser_creating.find(this);
+		creationInProgress = creating != g_parser_creating.end() && !creating->second.empty();
+		for (const auto& entry : _parsers._adapters)
+			owners.push_back(entry.second);
+		owners.insert(owners.end(), _quarantined_ext_parsers.begin(), _quarantined_ext_parsers.end());
+	}
+
+	// Provider calls run outside the registry lock. Close every callback gate
+	// first, even when shutdown cannot complete now.
+	bool stopped = true;
+	for (const ParserAdapterPtr& adapter : owners)
+	{
+		if (adapter && !adapter->requestStopLifecycle())
+			stopped = false;
+	}
+	if (creationInProgress)
+	{
+		WTSLogger::error("Data runner shutdown deferred: parser creation is still in progress");
+		return false;
+	}
+	std::vector<ParserAdapterPtr> released;
+	for (const ParserAdapterPtr& adapter : owners)
+	{
+		if (!adapter)
+		{
+			released.push_back(adapter);
+			continue;
+		}
+		// External (ExpParser) APIs have no V2 proof and their release() calls
+		// back into the embedding application, which may already be finalizing
+		// at process exit. Do not release them here: once their callback gate is
+		// closed and drained they no longer reach the data path, so they are
+		// moved to a process-lifetime holder and the managers can be released.
+		if (adapter->ownsOnlyExternalApis())
+		{
+			if (adapter->callbacksQuiesced(2000))
+			{
+				static std::vector<ParserAdapterPtr>* s_retained_external = new std::vector<ParserAdapterPtr>();
+				s_retained_external->push_back(adapter);
+				released.push_back(adapter);
+			}
+			continue;
+		}
+		if (adapter->finishReleaseLifecycle(2000) && !adapter->hasApi())
+			released.push_back(adapter);
+	}
+
+	bool complete = false;
+	{
+		std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+		for (const ParserAdapterPtr& adapter : released)
+		{
+			for (auto it = _parsers._adapters.begin(); it != _parsers._adapters.end();)
+			{
+				if (it->second == adapter) it = _parsers._adapters.erase(it);
+				else ++it;
+			}
+			_quarantined_ext_parsers.erase(std::remove(_quarantined_ext_parsers.begin(),
+				_quarantined_ext_parsers.end(), adapter), _quarantined_ext_parsers.end());
+		}
+		complete = stopped && _parsers._adapters.empty() && _quarantined_ext_parsers.empty();
+	}
+	if (!complete)
+	{
+		WTSLogger::error("Data runner parser shutdown is incomplete; parser owners and their managers are retained");
+		return false;
+	}
+
+	_idx_factory.release();
+	// DataManager::release() waits for in-flight writer calls and then releases or
+	// quarantines the writer; the dumpers it may call stay alive meanwhile.
+	_data_mgr.release();
+	const DataManager::WriterLifecycleState writerState = _data_mgr.writerLifecycleState();
+	if (writerState != DataManager::WLS_None && writerState != DataManager::WLS_Released)
+	{
+		// A retained writer may still reach the dumpers (and through them this
+		// runner); the owner must keep the runner, so report incomplete.
+		WTSLogger::error("Data writer was not released (state {}); runner and dumpers are retained",
+			static_cast<int>(writerState));
+		return false;
+	}
+	return true;
 }
 
 void WtDtRunner::start(bool bAsync /* = false */, bool bAlldayMode /* = false */)
@@ -228,10 +373,11 @@ void WtDtRunner::start(bool bAsync /* = false */, bool bAlldayMode /* = false */
 	std::vector<ParserAdapterPtr> parserSnapshot;
 	bool startupBlocked = false;
 	bool parserRegistryStopped = false;
+	bool initialSnapshot = false;
 	try
 	{
 		std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
-		startupBlocked = _startup_blocked;
+		startupBlocked = _startup_blocked || _config_load_failed;
 		parserRegistryStopped = _parser_registry_stopped || _to_exit.load();
 		if (!startupBlocked && !parserRegistryStopped && !_parser_registry_started)
 		{
@@ -239,6 +385,7 @@ void WtDtRunner::start(bool bAsync /* = false */, bool bAlldayMode /* = false */
 			for (const auto& entry : _parsers._adapters)
 				parserSnapshot.emplace_back(entry.second);
 			_parser_registry_started = true;
+			initialSnapshot = true;
 		}
 	}
 	catch (...)
@@ -257,6 +404,7 @@ void WtDtRunner::start(bool bAsync /* = false */, bool bAlldayMode /* = false */
 		return;
 	}
 	// run() invokes provider connect callbacks and may re-enter the runner.
+	bool allSubmitted = true;
 	for (const ParserAdapterPtr& adapter : parserSnapshot)
 	{
 		if (adapter != NULL)
@@ -264,14 +412,22 @@ void WtDtRunner::start(bool bAsync /* = false */, bool bAlldayMode /* = false */
 			try
 			{
 				if (!adapter->run())
-					WTSLogger::error("Parser {} did not start", adapter->id());
+				{
+					allSubmitted = false;
+					WTSLogger::error("Parser {} connect command was not submitted", adapter->id());
+				}
 			}
 			catch (...)
 			{
+				allSubmitted = false;
 				WTSLogger::error("Parser {} connect threw during startup", adapter->id());
 			}
 		}
+		else
+			allSubmitted = false;
 	}
+	if (initialSnapshot)
+		_initial_parser_commands_submitted.store(allSubmitted);
 
     if(!bAsync)
     {
@@ -334,6 +490,10 @@ void WtDtRunner::initialize(const char* cfgFile, const char* logCfg, const char*
 
 	if(config == NULL)
 	{
+		{
+			std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+			_config_load_failed = true;
+		}
 		WTSLogger::error("Loading config file {} failed", cfgFile);
 		return;
 	}
@@ -351,6 +511,10 @@ void WtDtRunner::initialize(const char* cfgFile, const char* logCfg, const char*
 			parserFileConfig->release();
 		config->release();
 		return;
+	}
+	{
+		std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+		_config_load_failed = false;
 	}
 
 	//基础数据文件
@@ -423,6 +587,28 @@ void WtDtRunner::initialize(const char* cfgFile, const char* logCfg, const char*
 		}
 	}
 
+	// Initialize date-dependent state before starting any caster, writer or parser.
+	_allday_mode = config->getBoolean("allday");
+	if (!_allday_mode)
+	{
+		if (!_state_mon.initialize(config->getCString("statemonitor"), &_bd_mgr, &_data_mgr))
+		{
+			{
+				std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+				_startup_blocked = true;
+			}
+			if (parserFileConfig != NULL)
+				parserFileConfig->release();
+			config->release();
+			WTSLogger::error("State monitor initialization failed; runner startup is blocked");
+			return;
+		}
+	}
+	else
+	{
+		WTSLogger::info("datakit will run in allday mode");
+	}
+
 	if (config->has("shmcaster"))
 	{
 		WTSVariant* shmCfg = config->get("shmcaster");
@@ -451,18 +637,6 @@ void WtDtRunner::initialize(const char* cfgFile, const char* logCfg, const char*
 	{
 		_udp_caster.init(config->get("broadcaster"), &_bd_mgr, &_data_mgr);
 		_data_mgr.add_caster(&_udp_caster);
-	}
-
-	//By Wesley @ 2021.12.27
-	//全天候模式，不需要再使用状态机
-	_allday_mode = config->getBoolean("allday");
-	if (!_allday_mode)
-	{
-		_state_mon.initialize(config->getCString("statemonitor"), &_bd_mgr, &_data_mgr);
-	}
-	else
-	{
-		WTSLogger::info("datakit will run in allday mode");
 	}
 
 	initDataMgr(config->get("writer"), _allday_mode);
@@ -519,6 +693,15 @@ void WtDtRunner::initialize(const char* cfgFile, const char* logCfg, const char*
 void WtDtRunner::initDataMgr(WTSVariant* config, bool bAlldayMode /* = false */)
 {
 	_data_mgr.init(config, &_bd_mgr, bAlldayMode ? NULL : &_state_mon);
+	// K20: dumpers created before the writer existed are registered now.
+	if (_data_mgr.writerLifecycleState() == DataManager::WLS_Ready)
+	{
+		for (auto& entry : _dumpers)
+		{
+			if (!_data_mgr.add_ext_dumper(entry.first.c_str(), entry.second.get()))
+				WTSLogger::error("Extended dumper {} could not be registered with the data writer", entry.first.c_str());
+		}
+	}
 }
 
 void WtDtRunner::initParsers(WTSVariant* cfg)
@@ -547,6 +730,11 @@ void WtDtRunner::initParsers(WTSVariant* cfg)
 			static uint32_t auto_parserid = 1000;
 			realid = fmtutil::format<64>("auto_parser_{}", auto_parserid++);
 		}
+
+		// Decision K13=B (BUG-R104-002 / I03-NEW-003): `required` defaults to true and an
+		// initialization/registration failure blocks startup; an optional parser that fails
+		// is reported and skipped (its candidate stays quarantined, startup continues).
+		const bool required = !cfgItem->has("required") || cfgItem->getBoolean("required");
 
 		ParserCreateReservation reservation(this, realid, &_parser_registry_stopped, &_to_exit);
 		if (!reservation.acquired())
@@ -620,8 +808,19 @@ void WtDtRunner::initParsers(WTSVariant* cfg)
 		}
 
 		bool initialized = false;
+		bool threw = false;
 		try { initialized = adapter->init(realid.c_str(), cfgItem); }
 		catch (...)
+		{
+			threw = true;
+		}
+		if (!initialized && !required)
+		{
+			WTSLogger::warn("Optional parser {} initialization {}; candidate quarantined, the data kit continues without it",
+				realid, threw ? "threw" : "failed");
+			continue;
+		}
+		if (threw)
 		{
 			blockStartup("Parser {} initialization threw; candidate quarantined and startup blocked", realid);
 			return;
@@ -667,8 +866,14 @@ void WtDtRunner::initParsers(WTSVariant* cfg)
 		}
 		if (!added)
 		{
-			if (!blockedAtPublication)
-				blockStartup("Parser {} registration failed; candidate quarantined and startup blocked", realid);
+			if (blockedAtPublication)
+				return;
+			if (!required)
+			{
+				WTSLogger::warn("Optional parser {} registration failed; candidate quarantined, the data kit continues without it", realid);
+				continue;
+			}
+			blockStartup("Parser {} registration failed; candidate quarantined and startup blocked", realid);
 			return;
 		}
 		if (runNow)
@@ -1056,10 +1261,29 @@ bool WtDtRunner::createExtParser(const char* id)
 
 bool WtDtRunner::createExtDumper(const char* id)
 {
+	// Decision K20=B: a duplicate id is rejected and the original dumper is kept (the
+	// old code replaced and destroyed it while the writer could still call it).
+	if (id == NULL || id[0] == '\0' || _dumpers.find(id) != _dumpers.end())
+	{
+		WTSLogger::error("Extended dumper {} rejected: the id is empty or already registered", id == NULL ? "" : id);
+		return false;
+	}
 	ExpDumperPtr dumper(new ExpDumper(id));
+	if (_data_mgr.writerLifecycleState() != DataManager::WLS_Ready)
+	{
+		// No writer yet: keep the dumper; initDataMgr() registers every kept dumper once
+		// the writer is ready (the old code dropped this registration silently).
+		_dumpers[id] = dumper;
+		WTSLogger::info("Extended dumper {} created; it is registered when the data writer starts", id);
+		return true;
+	}
+	if (!_data_mgr.add_ext_dumper(id, dumper.get()))
+	{
+		WTSLogger::error("Extended dumper {} could not be registered with the data writer", id);
+		return false;
+	}
+	// Shared ownership until the writer is DRAINED (see the destructor, I03-NEW-047).
 	_dumpers[id] = dumper;
-
-	_data_mgr.add_ext_dumper(id, dumper.get());
 
 	WTSLogger::info("Extended dumper {} created", id);
 	return true;

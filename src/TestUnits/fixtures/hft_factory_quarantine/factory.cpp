@@ -9,6 +9,8 @@
 
 namespace {
 std::atomic<int> creations{0}, names{0}, deletes{0}, factory_deletes{0}, entered{0}, proceed{0};
+// BUG-I02-NEW-033 (2026-11-05): counts entries into the strategy creator itself.
+std::atomic<int> strategy_calls{0};
 void (*callback)() = nullptr;
 void (*created_callback)() = nullptr;
 const char* mode() { const char* p = std::getenv("WT_HFT_FACTORY_MODE"); return p ? p : "good"; }
@@ -29,6 +31,7 @@ public:
  }
  void enumStrategy(FuncEnumHftStrategyCallback) override {}
  HftStrategy* createStrategy(const char* name, const char* id) override {
+  ++strategy_calls;
   HftStrategy* result = std::strcmp(name, "unit") == 0 ? new Strategy(id) : nullptr;
   if (created_callback) created_callback();
   return result;
@@ -56,8 +59,29 @@ extern "C" void deleteStrategyFact(IHftStrategyFact* f) { delete f; }
 extern "C" int fixture_creations() { return creations.load(); }
 extern "C" int fixture_names() { return names.load(); }
 extern "C" int fixture_deletes() { return deletes.load(); }
+extern "C" int fixture_strategy_calls() { return strategy_calls.load(); }
 extern "C" int fixture_factory_deletes() { return factory_deletes.load(); }
 extern "C" int fixture_entered() { return entered.load(std::memory_order_acquire); }
 extern "C" void fixture_proceed() { proceed.store(1, std::memory_order_release); }
 extern "C" void fixture_set_callback(void (*fn)()) { callback = fn; }
 extern "C" void fixture_set_created_callback(void (*fn)()) { created_callback = fn; }
+
+// Card 4b=A (iteration 03 s5): current hosts only use the versioned table.
+// create_factory forwards to the legacy creator so every failure mode above
+// (throw/null/reentrant/concurrent) still reaches the host unchanged.
+#include "../../../Includes/IStrategyPluginV2.h"
+namespace {
+void* WT_STRA_PLUGIN_V2_CALL fx_create_v2() { return static_cast<void*>(createStrategyFact()); }
+void WT_STRA_PLUGIN_V2_CALL fx_destroy_v2(void* f) { delete static_cast<IHftStrategyFact*>(f); }
+const WtStrategyPluginApiV2 fx_api = {
+ sizeof(WtStrategyPluginApiV2), WT_STRA_PLUGIN_V2_ABI_VERSION, WT_STRA_PLUGIN_V2_FAMILY_HFT,
+ WT_STRA_PLUGIN_V2_OBJECT_REVISION,
+#ifdef OMIT_REMOVER
+ 0u, // former missing-remover case: no teardown capability, factory stays quarantined
+#else
+ WT_STRA_PLUGIN_V2_CAP_SYNC_TEARDOWN,
+#endif
+ {0, 0, 0}, fx_create_v2, fx_destroy_v2};
+}
+extern "C" __attribute__((visibility("default"))) const WtStrategyPluginApiV2* getHftStrategyPluginApiV2(uint32_t major)
+{ return major == WT_STRA_PLUGIN_V2_ABI_MAJOR ? &fx_api : nullptr; }

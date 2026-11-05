@@ -1,0 +1,254 @@
+[==========] Running 36 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 36 tests from Wp1Test
+[ RUN      ] Wp1Test.SharedAccountPauseClosesEverySiblingAdapter
+[       OK ] Wp1Test.SharedAccountPauseClosesEverySiblingAdapter (740 ms)
+[ RUN      ] Wp1Test.PausedAccountCancelsOnlyVerifiedIdentities
+[       OK ] Wp1Test.PausedAccountCancelsOnlyVerifiedIdentities (373 ms)
+[ RUN      ] Wp1Test.MonthCodeContractKeepsThreeToSixDigitsAndRejectsOthers
+[       OK ] Wp1Test.MonthCodeContractKeepsThreeToSixDigitsAndRejectsOthers (366 ms)
+[ RUN      ] Wp1Test.NonDigitMonthTradeIsQuarantinedAndLongMonthKeptIntact
+[       OK ] Wp1Test.NonDigitMonthTradeIsQuarantinedAndLongMonthKeptIntact (350 ms)
+[ RUN      ] Wp1Test.DirectOrderReservesAndDuplicateCancelReleasesOnce
+[       OK ] Wp1Test.DirectOrderReservesAndDuplicateCancelReleasesOnce (401 ms)
+[ RUN      ] Wp1Test.BuySplitDuplicateTradeLateTradeAndDuplicateCancelAreIdempotent
+[       OK ] Wp1Test.BuySplitDuplicateTradeLateTradeAndDuplicateCancelAreIdempotent (351 ms)
+[ RUN      ] Wp1Test.RejectionOfUnknownLocalIdDoesNotConsumeOtherOrders
+[       OK ] Wp1Test.RejectionOfUnknownLocalIdDoesNotConsumeOtherOrders (397 ms)
+[ RUN      ] Wp1Test.StaleSnapshotRowDoesNotResurrectNewerCancel
+[       OK ] Wp1Test.StaleSnapshotRowDoesNotResurrectNewerCancel (427 ms)
+[ RUN      ] Wp1Test.AbsentOrderBecomesRevivableTombstone
+[       OK ] Wp1Test.AbsentOrderBecomesRevivableTombstone (381 ms)
+[ RUN      ] Wp1Test.StalePositionSnapshotRowDoesNotOverwriteNewerTrade
+[       OK ] Wp1Test.StalePositionSnapshotRowDoesNotOverwriteNewerTrade (438 ms)
+[ RUN      ] Wp1Test.FailedSnapshotKeepsLedger
+[       OK ] Wp1Test.FailedSnapshotKeepsLedger (354 ms)
+[ RUN      ] Wp1Test.SnapshotLedgerStatesAndEpoch
+[       OK ] Wp1Test.SnapshotLedgerStatesAndEpoch (393 ms)
+[ RUN      ] Wp1Test.AuditedManualResumeContract
+[       OK ] Wp1Test.AuditedManualResumeContract (383 ms)
+[ RUN      ] Wp1Test.ResumeAcknowledgesUnresolvedJournal
+[       OK ] Wp1Test.ResumeAcknowledgesUnresolvedJournal (395 ms)
+[ RUN      ] Wp1Test.IdentityJournalReservesMonotonicIdsAndVerifiedCancel
+[       OK ] Wp1Test.IdentityJournalReservesMonotonicIdsAndVerifiedCancel (476 ms)
+[ RUN      ] Wp1Test.IdentityJournalWithoutFloorFailsClosed
+[       OK ] Wp1Test.IdentityJournalWithoutFloorFailsClosed (370 ms)
+[ RUN      ] Wp1Test.ChildScenario
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:535: Skipped
+only runs as a spawned child
+
+[  SKIPPED ] Wp1Test.ChildScenario (360 ms)
+[ RUN      ] Wp1Test.CrashDuringSendIsNeverResentAndPausesAccount
+Note: Google Test filter = Wp1Test.ChildScenario
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Wp1Test
+[ RUN      ] Wp1Test.ChildScenario
+[       OK ] Wp1Test.CrashDuringSendIsNeverResentAndPausesAccount (1383 ms)
+[ RUN      ] Wp1Test.CrashAfterSendIsRecoveredFromSnapshot
+Note: Google Test filter = Wp1Test.ChildScenario
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Wp1Test
+[ RUN      ] Wp1Test.ChildScenario
+[       OK ] Wp1Test.CrashAfterSendIsRecoveredFromSnapshot (1325 ms)
+[ RUN      ] Wp1Test.ConcurrentEntryReportsSnapshotsAndGate
+[       OK ] Wp1Test.ConcurrentEntryReportsSnapshotsAndGate (445 ms)
+[ RUN      ] Wp1Test.OwnerRoutingIsolatesReportsCancelsAndUndone
+[       OK ] Wp1Test.OwnerRoutingIsolatesReportsCancelsAndUndone (352 ms)
+[ RUN      ] Wp1Test.NonSharedOwnerModeForOldAbiOrMissingRouting
+[       OK ] Wp1Test.NonSharedOwnerModeForOldAbiOrMissingRouting (374 ms)
+[ RUN      ] Wp1Test.ContractClaimsSpanAdaptersOfOneAccount
+[       OK ] Wp1Test.ContractClaimsSpanAdaptersOfOneAccount (377 ms)
+[ RUN      ] Wp1Test.DeclaredOwnerIsRegisteredBeforeReadyIsDelivered
+[       OK ] Wp1Test.DeclaredOwnerIsRegisteredBeforeReadyIsDelivered (357 ms)
+[ RUN      ] Wp1Test.ManagerResumeCommandIsAuditedAndGenerationChecked
+[       OK ] Wp1Test.ManagerResumeCommandIsAuditedAndGenerationChecked (368 ms)
+[ RUN      ] Wp1Test.ExecFactoryInjectsHostIdentityKeyOnlyForCapablePluginAndVerifyingHost
+[       OK ] Wp1Test.ExecFactoryInjectsHostIdentityKeyOnlyForCapablePluginAndVerifyingHost (1707 ms)
+[ RUN      ] Wp1Test.EmptyOrderSnapshotIsAmbiguousAndKeepsLiveOrders
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:930: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  adapter.getUndoneQty(kStdCode)
+    Which is: 0
+fail closed: reservation kept
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:931: Failure
+Expected equality of these values:
+  TraderAdapter::OrderLedgerState::Live
+    Which is: 4-byte object <01-00 00-00>
+  adapter.orderLedger(localid).state
+    Which is: 4-byte object <03-00 00-00>
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:932: Failure
+Value of: adapter.cancel(localid)
+  Actual: false
+Expected: true
+the live order is still known and cancellable
+
+[  FAILED  ] Wp1Test.EmptyOrderSnapshotIsAmbiguousAndKeepsLiveOrders (371 ms)
+[ RUN      ] Wp1Test.OwnerScopeDoesNotLeakIntoSinkCallbacks
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:963: Failure
+Expected equality of these values:
+  ""
+  adapter.orderLedger(inner[0]).owner_id
+    Which is: "exec:a"
+callback entry must not inherit owner exec:a
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:964: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  adapter.getUndoneQtyForOwner(kStdCode, "exec:a")
+    Which is: 3
+
+[  FAILED  ] Wp1Test.OwnerScopeDoesNotLeakIntoSinkCallbacks (368 ms)
+[ RUN      ] Wp1Test.RemovedOwnerSinkDeclarationEndsWithTheSink
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:992: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  ordersFor(a2, ib[0])
+    Which is: 1
+re-created owner a must be routed, never see owner b's order
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:995: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  ordersFor(a1, ib[0])
+    Which is: 0
+the reused sink is a plain observer, not a silent owner
+
+[  FAILED  ] Wp1Test.RemovedOwnerSinkDeclarationEndsWithTheSink (323 ms)
+[ RUN      ] Wp1Test.UnownedEventsNeverReachOwnerSinksUnderRouting
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1013: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  ordersFor(a, direct[0])
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1014: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  tradesFor(a, direct[0])
+    Which is: 1
+an unowned trade must not reach an owner's ledger
+
+[  FAILED  ] Wp1Test.UnownedEventsNeverReachOwnerSinksUnderRouting (396 ms)
+[ RUN      ] Wp1Test.UnresolvableOwnerTradeIsQuarantinedUnderRouting
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1031: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  tradesFor(a, foreign)
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1032: Failure
+Value of: adapter.isUnresolvedReportPaused()
+  Actual: false
+Expected: true
+owner cannot be verified: retain and pause
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1033: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  adapter.unresolvedTradeReports().size()
+    Which is: 0
+
+[  FAILED  ] Wp1Test.UnresolvableOwnerTradeIsQuarantinedUnderRouting (350 ms)
+[ RUN      ] Wp1Test.PositionSnapshotWithoutBaselineAndNewerTradePausesAccount
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1048: Failure
+Value of: adapter.isUnresolvedReportPaused()
+  Actual: false
+Expected: true
+no baseline for the contract: ambiguous, fail closed
+
+[  FAILED  ] Wp1Test.PositionSnapshotWithoutBaselineAndNewerTradePausesAccount (357 ms)
+[ RUN      ] Wp1Test.DuplicateTradePushIsAppliedOnceButSelfMatchSidesAreNot
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1073: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  adapter.getPosition(kStdCode, false)
+    Which is: 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1074: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  tradesFor(sink_, ids[0])
+    Which is: 2
+sinks see a trade report once
+
+[  FAILED  ] Wp1Test.DuplicateTradePushIsAppliedOnceButSelfMatchSidesAreNot (369 ms)
+[ RUN      ] Wp1Test.ThrowingCancelReleasesItsClaim
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1101: Failure
+Value of: adapter.cancelForOwner(ia[0], "exec:a")
+  Actual: false
+Expected: true
+a failed provider call must not leave the order claimed
+
+[  FAILED  ] Wp1Test.ThrowingCancelReleasesItsClaim (356 ms)
+[ RUN      ] Wp1Test.OldIdentityAbiPluginNeverAutoCancelsAndOwnsContractsExclusively
+[       OK ] Wp1Test.OldIdentityAbiPluginNeverAutoCancelsAndOwnsContractsExclusively (1780 ms)
+[ RUN      ] Wp1Test.ReleaseDrainsSpiCallbacksDropsLateOnesAndFreesOrderMap
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1300: Failure
+Value of: released.load()
+  Actual: true
+Expected: false
+release waits for the SPI callback running inside the adapter
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1315: Failure
+Value of: gate.trades_.empty()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1316: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  adapter.getPosition(kStdCode, false)
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1317: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  adapter.getUndoneQty(kStdCode)
+    Which is: 0
+ledger untouched by the dropped callback
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1320: Failure
+Expected equality of these values:
+  refsBefore
+    Which is: 1
+  live->retainCount()
+    Which is: 2
+destructor released the adapter-owned order map
+
+[  FAILED  ] Wp1Test.ReleaseDrainsSpiCallbacksDropsLateOnesAndFreesOrderMap (617 ms)
+[----------] 36 tests from Wp1Test (18980 ms total)
+
+[----------] Global test environment tear-down
+[==========] 36 tests from 1 test suite ran. (18980 ms total)
+[  PASSED  ] 26 tests.
+[  SKIPPED ] 1 test, listed below:
+[  SKIPPED ] Wp1Test.ChildScenario
+[  FAILED  ] 9 tests, listed below:
+[  FAILED  ] Wp1Test.EmptyOrderSnapshotIsAmbiguousAndKeepsLiveOrders
+[  FAILED  ] Wp1Test.OwnerScopeDoesNotLeakIntoSinkCallbacks
+[  FAILED  ] Wp1Test.RemovedOwnerSinkDeclarationEndsWithTheSink
+[  FAILED  ] Wp1Test.UnownedEventsNeverReachOwnerSinksUnderRouting
+[  FAILED  ] Wp1Test.UnresolvableOwnerTradeIsQuarantinedUnderRouting
+[  FAILED  ] Wp1Test.PositionSnapshotWithoutBaselineAndNewerTradePausesAccount
+[  FAILED  ] Wp1Test.DuplicateTradePushIsAppliedOnceButSelfMatchSidesAreNot
+[  FAILED  ] Wp1Test.ThrowingCancelReleasesItsClaim
+[  FAILED  ] Wp1Test.ReleaseDrainsSpiCallbacksDropsLateOnesAndFreesOrderMap
+
+ 9 FAILED TESTS

@@ -1,0 +1,28 @@
+--- src/TestUnits/fixtures/i03_ctp_order_identity_20261103/baseline/p11_push_notify_test.cpp	2026-11-03 17:57:12
++++ src/TestUnits/coverage/p11_wtcore_traderadapter/p11_push_notify_test.cpp	2026-11-03 17:57:29
+@@ -419,16 +419,21 @@
+     ASSERT_EQ(2u, sink_.entrusts_.size());
+     EXPECT_EQ(1002u, sink_.entrusts_[1].localid);
+ 
+-    // 外部委托(usertag 为空)只回落未完成量, 不通知订阅者
++    // 外部或无效标签不能改变本适配器的未完成量，也不能触发本地委托回调。
+     trader.onRspOrders(makeArray({
+         makePushOrder(ct_, WDT_LONG, WOT_OPEN, WOS_Submitting, 2, 0, "PE3", kTag1003) }));
+     EXPECT_DOUBLE_EQ(2.0, trader.getUndoneQty(kStdCode));
+     WTSEntrust* ent3 = WTSEntrust::create(kStdCode, 2, 7100.0);
+     ent3->setContractInfo(ct_);
+     ent3->setUserTag("");
+-    trader.onRspEntrust(ent3, err);
+-    EXPECT_DOUBLE_EQ(0.0, trader.getUndoneQty(kStdCode));
+-    EXPECT_EQ(2u, sink_.entrusts_.size());
++    for (const char* external : {"", "ctp-auto:012345#0000000067#001001", "otp.other.1003",
++                                 "otp.p11a.", "otp.p11a.0", "otp.p11a.1003x", "otp.p11a.4294967296"})
++    {
++        ent3->setUserTag(external);
++        trader.onRspEntrust(ent3, err);
++        EXPECT_DOUBLE_EQ(2.0, trader.getUndoneQty(kStdCode)) << external;
++        EXPECT_EQ(2u, sink_.entrusts_.size()) << external;
++    }
+ }
+ 
+ } // namespace

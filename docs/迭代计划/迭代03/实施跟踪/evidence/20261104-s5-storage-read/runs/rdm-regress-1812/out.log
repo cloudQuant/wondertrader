@@ -1,0 +1,872 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 177 tests from 31 test suites.
+[----------] Global test environment set-up.
+[----------] 9 tests from P09RdmCacheTest
+[ RUN      ] P09RdmCacheTest.init_with_null_cfg_injects_host_and_skips_check_thread
+[       OK ] P09RdmCacheTest.init_with_null_cfg_injects_host_and_skips_check_thread (2 ms)
+[ RUN      ] P09RdmCacheTest.index_bar_by_range_empty_cache_returns_null_and_touches_key
+[       OK ] P09RdmCacheTest.index_bar_by_range_empty_cache_returns_null_and_touches_key (4 ms)
+[ RUN      ] P09RdmCacheTest.index_bar_by_range_trims_window
+[       OK ] P09RdmCacheTest.index_bar_by_range_trims_window (0 ms)
+[ RUN      ] P09RdmCacheTest.index_bar_by_count_clamps_and_walks_back
+[       OK ] P09RdmCacheTest.index_bar_by_count_clamps_and_walks_back (0 ms)
+[ RUN      ] P09RdmCacheTest.read_bars_from_cache_by_range_copies_window
+[       OK ] P09RdmCacheTest.read_bars_from_cache_by_range_copies_window (0 ms)
+[ RUN      ] P09RdmCacheTest.clear_cache_drops_bars_but_keeps_adj_factors
+[       OK ] P09RdmCacheTest.clear_cache_drops_bars_but_keeps_adj_factors (0 ms)
+[ RUN      ] P09RdmCacheTest.load_adj_factors_from_missing_or_bad_file
+[       OK ] P09RdmCacheTest.load_adj_factors_from_missing_or_bad_file (11 ms)
+[ RUN      ] P09RdmCacheTest.load_adj_factors_from_json_key_format_and_sort
+[       OK ] P09RdmCacheTest.load_adj_factors_from_json_key_format_and_sort (3 ms)
+[ RUN      ] P09RdmCacheTest.get_adj_factor_by_date_stock_and_non_stock
+[       OK ] P09RdmCacheTest.get_adj_factor_by_date_stock_and_non_stock (0 ms)
+[ DISABLED ] P09RdmCacheTest.DISABLED_p09_underflow_inputs_from_range_indexers
+[----------] 9 tests from P09RdmCacheTest (27 ms total)
+
+[----------] 9 tests from P09WindowTest
+[ RUN      ] P09WindowTest.window_bounds_are_inclusive_on_both_sides
+[       OK ] P09WindowTest.window_bounds_are_inclusive_on_both_sides (0 ms)
+[ RUN      ] P09WindowTest.range_right_edge_beyond_last_bar_clamps_to_latest
+[       OK ] P09WindowTest.range_right_edge_beyond_last_bar_clamps_to_latest (0 ms)
+[ RUN      ] P09WindowTest.range_left_edge_beyond_all_returns_null_for_empty_result
+[       OK ] P09WindowTest.range_left_edge_beyond_all_returns_null_for_empty_result (0 ms)
+[ RUN      ] P09WindowTest.seam_between_two_sections_is_returned_whole_without_dedup
+[       OK ] P09WindowTest.seam_between_two_sections_is_returned_whole_without_dedup (0 ms)
+[ RUN      ] P09WindowTest.isday_comparator_collapses_same_day_minute_bars
+[       OK ] P09WindowTest.isday_comparator_collapses_same_day_minute_bars (0 ms)
+[ RUN      ] P09WindowTest.rt_bars_are_never_scanned_by_the_indexers
+[       OK ] P09WindowTest.rt_bars_are_never_scanned_by_the_indexers (0 ms)
+[ RUN      ] P09WindowTest.index_bar_by_count_walks_back_from_right_edge
+[       OK ] P09WindowTest.index_bar_by_count_walks_back_from_right_edge (0 ms)
+[ RUN      ] P09WindowTest.index_bar_by_count_zero_returns_null_for_empty_result
+[       OK ] P09WindowTest.index_bar_by_count_zero_returns_null_for_empty_result (0 ms)
+[ RUN      ] P09WindowTest.public_kline_slice_readers_keep_empty_and_nonempty_results
+[       OK ] P09WindowTest.public_kline_slice_readers_keep_empty_and_nonempty_results (9 ms)
+[----------] 9 tests from P09WindowTest (10 ms total)
+
+[----------] 15 tests from Q03RdmKlineTest
+[ RUN      ] Q03RdmKlineTest.day_dsb_raw_v2_full_range_roundtrip
+[       OK ] Q03RdmKlineTest.day_dsb_raw_v2_full_range_roundtrip (2 ms)
+[ RUN      ] Q03RdmKlineTest.day_etime_zero_is_normalized_to_203012312359
+[       OK ] Q03RdmKlineTest.day_etime_zero_is_normalized_to_203012312359 (4 ms)
+[ RUN      ] Q03RdmKlineTest.day_compressed_v2_roundtrip
+[       OK ] Q03RdmKlineTest.day_compressed_v2_roundtrip (5 ms)
+[ RUN      ] Q03RdmKlineTest.day_old_struct_versions_are_upgraded
+[       OK ] Q03RdmKlineTest.day_old_struct_versions_are_upgraded (10 ms)
+[ RUN      ] Q03RdmKlineTest.day_tail_fragment_is_dropped
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_kline_file_test.cpp:196: Failure
+Value of: slice != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] Q03RdmKlineTest.day_tail_fragment_is_dropped (23 ms)
+[ RUN      ] Q03RdmKlineTest.day_size_check_failure_returns_null_and_logs_error
+[       OK ] Q03RdmKlineTest.day_size_check_failure_returns_null_and_logs_error (2 ms)
+[ RUN      ] Q03RdmKlineTest.day_missing_file_caches_empty_entry
+[       OK ] Q03RdmKlineTest.day_missing_file_caches_empty_entry (0 ms)
+[ RUN      ] Q03RdmKlineTest.day_window_out_of_range_returns_null
+[       OK ] Q03RdmKlineTest.day_window_out_of_range_returns_null (8 ms)
+[ RUN      ] Q03RdmKlineTest.day_range_and_count_handle_first_cached_bar_boundaries
+[       OK ] Q03RdmKlineTest.day_range_and_count_handle_first_cached_bar_boundaries (6 ms)
+[ RUN      ] Q03RdmKlineTest.min1_splices_his_block_with_rt_block
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_kline_file_test.cpp:306: Failure
+Expected equality of these values:
+  got.size()
+    Which is: 2
+  (std::size_t)4
+    Which is: 4
+
+[  FAILED  ] Q03RdmKlineTest.min1_splices_his_block_with_rt_block (14 ms)
+[ RUN      ] Q03RdmKlineTest.min1_rt_only_when_start_inside_rt_block
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_kline_file_test.cpp:329: Failure
+Value of: slice != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] Q03RdmKlineTest.min1_rt_only_when_start_inside_rt_block (9 ms)
+[ RUN      ] Q03RdmKlineTest.min1_right_window_drops_late_bars
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_kline_file_test.cpp:353: Failure
+Value of: slice != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] Q03RdmKlineTest.min1_right_window_drops_late_bars (18 ms)
+[ RUN      ] Q03RdmKlineTest.empty_rt_blocks_fall_back_to_history_for_range_and_count
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_kline_file_test.cpp:435: Failure
+Expected: (single_range) != (nullptr), actual: NULL vs (nullptr)
+
+[  FAILED  ] Q03RdmKlineTest.empty_rt_blocks_fall_back_to_history_for_range_and_count (5 ms)
+[ RUN      ] Q03RdmKlineTest.min1_before_first_rt_bar_falls_back_to_history_for_range_and_count
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_kline_file_test.cpp:482: Failure
+Expected: (nullptr) != (equal_range), actual: (nullptr) vs NULL
+
+[  FAILED  ] Q03RdmKlineTest.min1_before_first_rt_bar_falls_back_to_history_for_range_and_count (3 ms)
+[ RUN      ] Q03RdmKlineTest.clear_cache_forces_rebuild_from_file
+[       OK ] Q03RdmKlineTest.clear_cache_forces_rebuild_from_file (2 ms)
+[----------] 15 tests from Q03RdmKlineTest (124 ms total)
+
+[----------] 17 tests from Q03RdmTickTest
+[ RUN      ] Q03RdmTickTest.his_tick_raw_v2_roundtrip_field_by_field
+[       OK ] Q03RdmTickTest.his_tick_raw_v2_roundtrip_field_by_field (4 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_compressed_v2_roundtrip
+[       OK ] Q03RdmTickTest.his_tick_compressed_v2_roundtrip (10 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_old_struct_versions_are_upgraded
+[       OK ] Q03RdmTickTest.his_tick_old_struct_versions_are_upgraded (7 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_size_check_rejects_short_file
+[       OK ] Q03RdmTickTest.his_tick_size_check_rejects_short_file (9 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_tail_fragment_is_dropped
+[       OK ] Q03RdmTickTest.his_tick_tail_fragment_is_dropped (2 ms)
+[ RUN      ] Q03RdmTickTest.his_tick_header_only_file_yields_zero_count
+[       OK ] Q03RdmTickTest.his_tick_header_only_file_yields_zero_count (1 ms)
+[ RUN      ] Q03RdmTickTest.rt_tick_block_read_back_when_no_his_file
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_file_test.cpp:240: Failure
+Value of: slice != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] Q03RdmTickTest.rt_tick_block_read_back_when_no_his_file (5 ms)
+[ RUN      ] Q03RdmTickTest.rt_tick_block_missing_and_empty
+[       OK ] Q03RdmTickTest.rt_tick_block_missing_and_empty (1 ms)
+[ RUN      ] Q03RdmTickTest.rt_tick_capacity_larger_than_size_is_fully_mapped
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_file_test.cpp:274: Failure
+Value of: slice != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] Q03RdmTickTest.rt_tick_capacity_larger_than_size_is_fully_mapped (81 ms)
+[ RUN      ] Q03RdmTickTest.range_splices_two_his_days_plus_rt_block
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_file_test.cpp:310: Failure
+Expected equality of these values:
+  got.size()
+    Which is: 5
+  all.size()
+    Which is: 7
+
+[  FAILED  ] Q03RdmTickTest.range_splices_two_his_days_plus_rt_block (24 ms)
+[ RUN      ] Q03RdmTickTest.range_clips_left_window_on_begin_trading_date
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_file_test.cpp:346: Failure
+Expected equality of these values:
+  got.size()
+    Which is: 4
+  want.size()
+    Which is: 6
+
+[  FAILED  ] Q03RdmTickTest.range_clips_left_window_on_begin_trading_date (188 ms)
+[ RUN      ] Q03RdmTickTest.range_clips_right_window_on_end_trading_date
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_file_test.cpp:365: Failure
+Expected equality of these values:
+  got.size()
+    Which is: 0
+  (std::size_t)2
+    Which is: 2
+
+[  FAILED  ] Q03RdmTickTest.range_clips_right_window_on_end_trading_date (155 ms)
+[ RUN      ] Q03RdmTickTest.range_returns_empty_object_when_no_data_at_all
+[       OK ] Q03RdmTickTest.range_returns_empty_object_when_no_data_at_all (218 ms)
+[ RUN      ] Q03RdmTickTest.range_skips_missing_middle_day
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_file_test.cpp:396: Failure
+Expected equality of these values:
+  got.size()
+    Which is: 1
+  (std::size_t)2
+    Which is: 2
+
+[  FAILED  ] Q03RdmTickTest.range_skips_missing_middle_day (76 ms)
+[ RUN      ] Q03RdmTickTest.trading_date_override_routes_to_his_branch
+[       OK ] Q03RdmTickTest.trading_date_override_routes_to_his_branch (2 ms)
+[ RUN      ] Q03RdmTickTest.his_kline_hot_rejects_fragmented_raw_and_cmp_blocks
+[       OK ] Q03RdmTickTest.his_kline_hot_rejects_fragmented_raw_and_cmp_blocks (67 ms)
+[ RUN      ] Q03RdmTickTest.adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp
+[       OK ] Q03RdmTickTest.adjusted_stock_kline_rejects_fragments_and_reads_complete_raw_cmp (2 ms)
+[----------] 17 tests from Q03RdmTickTest (859 ms total)
+
+[----------] 2 tests from Q03RdmTickRangeInclusiveTest
+[ RUN      ] Q03RdmTickRangeInclusiveTest.HistoricalAndRealtimeKeepInclusiveExactEndpoints
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_range_inclusive_test.cpp:104: Failure
+Expected equality of these values:
+  actual.size()
+    Which is: 0
+  expectedSequences.size()
+    Which is: 1
+SSE.STK.600902 [20240109/210000000, 20240109/210000000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_range_inclusive_test.cpp:104: Failure
+Expected equality of these values:
+  actual.size()
+    Which is: 0
+  expectedSequences.size()
+    Which is: 3
+SSE.STK.600902 [20240109/210000000, 20240110/93000000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_range_inclusive_test.cpp:104: Failure
+Expected equality of these values:
+  actual.size()
+    Which is: 0
+  expectedSequences.size()
+    Which is: 4
+SSE.STK.600902 [20240109/210000000, 20240110/93100000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_range_inclusive_test.cpp:104: Failure
+Expected equality of these values:
+  actual.size()
+    Which is: 0
+  expectedSequences.size()
+    Which is: 4
+SSE.STK.600902 [20240109/210000000, 20240110/93200000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_range_inclusive_test.cpp:155: Failure
+Expected equality of these values:
+  actual.size()
+    Which is: 0
+  expectedPresent ? 1u : 0u
+    Which is: 1
+SSE.STK.600904
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_range_inclusive_test.cpp:155: Failure
+Expected equality of these values:
+  actual.size()
+    Which is: 0
+  expectedPresent ? 1u : 0u
+    Which is: 1
+SSE.STK.600904
+
+[  FAILED  ] Q03RdmTickRangeInclusiveTest.HistoricalAndRealtimeKeepInclusiveExactEndpoints (2758 ms)
+[ RUN      ] Q03RdmTickRangeInclusiveTest.ZeroEndTimeReadsLatestCommittedHistoryAndRealtimeTicks
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_range_inclusive_test.cpp:277: Failure
+Value of: actual.empty()
+  Actual: false
+Expected: true
+20240111090000000
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_range_inclusive_test.cpp:277: Failure
+Value of: actual.empty()
+  Actual: false
+Expected: true
+20240110093200000
+
+[  FAILED  ] Q03RdmTickRangeInclusiveTest.ZeroEndTimeReadsLatestCommittedHistoryAndRealtimeTicks (945 ms)
+[----------] 2 tests from Q03RdmTickRangeInclusiveTest (3708 ms total)
+
+[----------] 1 test from WriterTickRangeE2ETest
+[ RUN      ] WriterTickRangeE2ETest.PublishedWriterTicksAreVisibleThroughPublicRange
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_range_inclusive_test.cpp:383: Failure
+Expected equality of these values:
+  actual.size()
+    Which is: 0
+  expectedTimes.size()
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_range_inclusive_test.cpp:383: Failure
+Expected equality of these values:
+  actual.size()
+    Which is: 0
+  expectedTimes.size()
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_tick_range_inclusive_test.cpp:383: Failure
+Expected equality of these values:
+  actual.size()
+    Which is: 0
+  expectedTimes.size()
+    Which is: 2
+
+[  FAILED  ] WriterTickRangeE2ETest.PublishedWriterTicksAreVisibleThroughPublicRange (828 ms)
+[----------] 1 test from WriterTickRangeE2ETest (828 ms total)
+
+[----------] 4 tests from R100RdmCrossDayTest
+[ RUN      ] R100RdmCrossDayTest.R100RdmRtHftCrossDateBackoff
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r100_rdm_crossday_test.cpp:115: Failure
+Expected equality of these values:
+  r52::flatten_ticks(ts).size()
+    Which is: 0
+  (std::size_t)1
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r100_rdm_crossday_test.cpp:120: Failure
+Value of: q != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R100RdmCrossDayTest.R100RdmRtHftCrossDateBackoff (88 ms)
+[ RUN      ] R100RdmCrossDayTest.R100RdmHisHftMissingAndShortFileGuards
+[       OK ] R100RdmCrossDayTest.R100RdmHisHftMissingAndShortFileGuards (53 ms)
+[ DISABLED ] R100RdmCrossDayTest.DISABLED_R100RdmHisHftValidCrossDateFiles
+[ DISABLED ] R100RdmCrossDayTest.DISABLED_R100RdmHisHftEmptyCmpV2Payloads
+[ DISABLED ] R100RdmCrossDayTest.DISABLED_R100RdmQueueDetailTransCachesAreIndependent
+[ RUN      ] R100RdmCrossDayTest.R100RdmHisTickAndKlineBoundaries
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r100_rdm_crossday_test.cpp:333: Failure
+Expected equality of these values:
+  r52::flatten_ticks(rc).size()
+    Which is: 0
+  (std::size_t)2
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r100_rdm_crossday_test.cpp:345: Failure
+Expected equality of these values:
+  r52::flatten_ticks(hc).size()
+    Which is: 3
+  (std::size_t)4
+    Which is: 4
+
+[  FAILED  ] R100RdmCrossDayTest.R100RdmHisTickAndKlineBoundaries (422 ms)
+[ RUN      ] R100RdmCrossDayTest.R100RdmHisHftExclusiveEndBoundaries
+[       OK ] R100RdmCrossDayTest.R100RdmHisHftExclusiveEndBoundaries (41 ms)
+[----------] 4 tests from R100RdmCrossDayTest (605 ms total)
+
+[----------] 3 tests from R112RdmResidualTest
+[ RUN      ] R112RdmResidualTest.R112RdmHftRangeCrossDateComparators
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r112_rdm_crossday_guards_test.cpp:108: Failure
+Expected equality of these values:
+  r52::flatten_ticks(ts).size()
+    Which is: 0
+  (std::size_t)1
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r112_rdm_crossday_guards_test.cpp:113: Failure
+Value of: q != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R112RdmResidualTest.R112RdmHftRangeCrossDateComparators (380 ms)
+[ RUN      ] R112RdmResidualTest.R112RdmMissingAndShortFileGuards
+[       OK ] R112RdmResidualTest.R112RdmMissingAndShortFileGuards (9 ms)
+[ DISABLED ] R112RdmResidualTest.DISABLED_R112RdmQueueDetailTransCachesAreIndependent
+[ RUN      ] R112RdmResidualTest.R112RdmTickCountsCrossDate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r112_rdm_crossday_guards_test.cpp:302: Failure
+Expected equality of these values:
+  r52::flatten_ticks(ts).size()
+    Which is: 0
+  (std::size_t)1
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r112_rdm_crossday_guards_test.cpp:308: Failure
+Expected: (ts->size()) > (0u), actual: 0 vs 0
+
+[  FAILED  ] R112RdmResidualTest.R112RdmTickCountsCrossDate (174 ms)
+[----------] 3 tests from R112RdmResidualTest (564 ms total)
+
+[----------] 3 tests from R122RdmByRangeTest
+[ RUN      ] R122RdmByRangeTest.R122RdmOrdQueByRangeCrossDateAndMissing
+Q1 rt written
+Q2 rt read ptr=0x0
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r122_rdm_byrange_test.cpp:61: Failure
+Value of: s1 != __null
+  Actual: false
+Expected: true
+
+Z1 clearCache
+Z2 sandbox reset
+Z3 teardown done
+[  FAILED  ] R122RdmByRangeTest.R122RdmOrdQueByRangeCrossDateAndMissing (1 ms)
+[ RUN      ] R122RdmByRangeTest.R122RdmDtlTransByRangeCrossDateAndMissing
+T1 dtl rt written
+T2 dtl rt read 0x0
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r122_rdm_byrange_test.cpp:113: Failure
+Value of: d1 != __null
+  Actual: false
+Expected: true
+
+Z1 clearCache
+Z2 sandbox reset
+Z3 teardown done
+[  FAILED  ] R122RdmByRangeTest.R122RdmDtlTransByRangeCrossDateAndMissing (1 ms)
+[ RUN      ] R122RdmByRangeTest.R122RdmKlineByCountEmptyResult
+Z1 clearCache
+Z2 sandbox reset
+Z3 teardown done
+[       OK ] R122RdmByRangeTest.R122RdmKlineByCountEmptyResult (0 ms)
+[----------] 3 tests from R122RdmByRangeTest (3 ms total)
+
+[----------] 4 tests from R132RdmResidualTest
+[ RUN      ] R132RdmResidualTest.R132RdmKlineRtBackoffByRangeAndCount
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r132_rdm_residual_test.cpp:79: Failure
+Expected equality of these values:
+  got.size()
+    Which is: 2
+  (std::size_t)3
+    Which is: 3
+
+[  FAILED  ] R132RdmResidualTest.R132RdmKlineRtBackoffByRangeAndCount (12 ms)
+[ RUN      ] R132RdmResidualTest.R132RdmKlineRangeEndBetweenHisBars
+[       OK ] R132RdmResidualTest.R132RdmKlineRangeEndBetweenHisBars (15 ms)
+[ RUN      ] R132RdmResidualTest.R132RdmRtHftComparatorsSeeOlderActionDate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r132_rdm_residual_test.cpp:144: Failure
+Value of: sq != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R132RdmResidualTest.R132RdmRtHftComparatorsSeeOlderActionDate (34 ms)
+[ RUN      ] R132RdmResidualTest.R132RdmTickDateEmptyRtBlockReturnsNull
+[       OK ] R132RdmResidualTest.R132RdmTickDateEmptyRtBlockReturnsNull (1 ms)
+[----------] 4 tests from R132RdmResidualTest (64 ms total)
+
+[----------] 12 tests from R132ReaderHisTest
+[ RUN      ] R132ReaderHisTest.R132ReaderHisTickCrossActionDate
+[       OK ] R132ReaderHisTest.R132ReaderHisTickCrossActionDate (3 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisHftCompressedRoundTrip
+[       OK ] R132ReaderHisTest.R132ReaderHisHftCompressedRoundTrip (28 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisCompressibleQueueExpansion
+[       OK ] R132ReaderHisTest.R132ReaderHisCompressibleQueueExpansion (10 ms)
+[ RUN      ] R132ReaderHisTest.R132AlignedHistoricalSlicesPreserveExclusiveEnd
+[       OK ] R132ReaderHisTest.R132AlignedHistoricalSlicesPreserveExclusiveEnd (28 ms)
+[ RUN      ] R132ReaderHisTest.R132AlignedSliceSurvivesOtherCacheInsertions
+[       OK ] R132ReaderHisTest.R132AlignedSliceSurvivesOtherCacheInsertions (390 ms)
+[ RUN      ] R132ReaderHisTest.R132HistoricalBadFilesCanBeReplacedAndRetried
+[       OK ] R132ReaderHisTest.R132HistoricalBadFilesCanBeReplacedAndRetried (49 ms)
+[ RUN      ] R132ReaderHisTest.R132AllocationFailureDoesNotPublishOrInvalidateHeldSlices
+[       OK ] R132ReaderHisTest.R132AllocationFailureDoesNotPublishOrInvalidateHeldSlices (55 ms)
+[ RUN      ] R132ReaderHisTest.R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape
+[       OK ] R132ReaderHisTest.R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape (20 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisOrderQueueDetailAndTransCachesAreIndependent
+[       OK ] R132ReaderHisTest.R132ReaderHisOrderQueueDetailAndTransCachesAreIndependent (85 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisEmptyBlockAndEmptyRecordSet
+[       OK ] R132ReaderHisTest.R132ReaderHisEmptyBlockAndEmptyRecordSet (17 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderHisMalformedCompressedRecordsAreRejected
+[       OK ] R132ReaderHisTest.R132ReaderHisMalformedCompressedRecordsAreRejected (3 ms)
+[ RUN      ] R132ReaderHisTest.R132ReaderIntegratedSectionsOverlapHotTail
+[       OK ] R132ReaderHisTest.R132ReaderIntegratedSectionsOverlapHotTail (72 ms)
+[----------] 12 tests from R132ReaderHisTest (767 ms total)
+
+[----------] 8 tests from R142RdmHftHisTest
+[ RUN      ] R142RdmHftHisTest.R142RdmHisQueueCrossActionDateByRange
+[       OK ] R142RdmHftHisTest.R142RdmHisQueueCrossActionDateByRange (2 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmHisDetailTransCrossActionDateByRange
+[       OK ] R142RdmHftHisTest.R142RdmHisDetailTransCrossActionDateByRange (2 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmCompressedExpansionPreservesAllFieldsAndCacheReads
+[       OK ] R142RdmHftHisTest.R142RdmCompressedExpansionPreservesAllFieldsAndCacheReads (40 ms)
+[ RUN      ] R142RdmHftHisTest.R175RdmCmpV2NoGrowthPreservesAllFields
+[       OK ] R142RdmHftHisTest.R175RdmCmpV2NoGrowthPreservesAllFields (37 ms)
+[ RUN      ] R142RdmHftHisTest.R175RdmCmpV2RejectsMalformedPayloadsAndAllowsRetry
+[       OK ] R142RdmHftHisTest.R175RdmCmpV2RejectsMalformedPayloadsAndAllowsRetry (95 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmMissingRtAndHisHftFiles
+[       OK ] R142RdmHftHisTest.R142RdmMissingRtAndHisHftFiles (0 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmEmptyQueueBlockSecondCallReturnsNull
+[       OK ] R142RdmHftHisTest.R142RdmEmptyQueueBlockSecondCallReturnsNull (1 ms)
+[ RUN      ] R142RdmHftHisTest.R142RdmKlineHisEndBetweenBarsBacksOff
+[       OK ] R142RdmHftHisTest.R142RdmKlineHisEndBetweenBarsBacksOff (1 ms)
+[----------] 8 tests from R142RdmHftHisTest (181 ms total)
+
+[----------] 4 tests from R162ReaderEdgeTest
+[ RUN      ] R162ReaderEdgeTest.R162ReaderContinuousCacheNonStdExceptionIsCaught
+[       OK ] R162ReaderEdgeTest.R162ReaderContinuousCacheNonStdExceptionIsCaught (4 ms)
+[ RUN      ] R162ReaderEdgeTest.R162ReaderAdjustedStockNonStdExceptionIsCaught
+[       OK ] R162ReaderEdgeTest.R162ReaderAdjustedStockNonStdExceptionIsCaught (0 ms)
+[ RUN      ] R162ReaderEdgeTest.R162RdmReaderAllSourcesMissingReturnsEmpty
+[       OK ] R162ReaderEdgeTest.R162RdmReaderAllSourcesMissingReturnsEmpty (243 ms)
+[ RUN      ] R162ReaderEdgeTest.R162RdmReaderHisTransBlocksWithMixedActionDates
+[       OK ] R162ReaderEdgeTest.R162RdmReaderHisTransBlocksWithMixedActionDates (0 ms)
+[ DISABLED ] R162ReaderEdgeTest.DISABLED_R162RdmReaderHisTransBlocksWithMixedActionDatesFromFile
+[----------] 4 tests from R162ReaderEdgeTest (250 ms total)
+
+[----------] 1 test from R172RdmMixedDatesTest
+[ RUN      ] R172RdmMixedDatesTest.R172RdmMixedActionDatesHisHftBlocks
+[       OK ] R172RdmMixedDatesTest.R172RdmMixedActionDatesHisHftBlocks (28 ms)
+[----------] 1 test from R172RdmMixedDatesTest (28 ms total)
+
+[----------] 1 test from R172ReaderMixedDatesTest
+[ RUN      ] R172ReaderMixedDatesTest.R172ReaderMixedActionDatesHisHftSlices
+[       OK ] R172ReaderMixedDatesTest.R172ReaderMixedActionDatesHisHftSlices (24 ms)
+[----------] 1 test from R172ReaderMixedDatesTest (24 ms total)
+
+[----------] 2 tests from R182RdmRtSlicesTest
+[ RUN      ] R182RdmRtSlicesTest.R182Min1RangeStartsInsideRtBlock
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r182_rdm_rt_slices_test.cpp:59: Failure
+Value of: slice != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R182RdmRtSlicesTest.R182Min1RangeStartsInsideRtBlock (1 ms)
+[ RUN      ] R182RdmRtSlicesTest.R182Min1CountTakesTailOfRtBlock
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r182_rdm_rt_slices_test.cpp:72: Failure
+Value of: slice != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R182RdmRtSlicesTest.R182Min1CountTakesTailOfRtBlock (1 ms)
+[----------] 2 tests from R182RdmRtSlicesTest (2 ms total)
+
+[----------] 9 tests from R70RdmResidualTest
+[ RUN      ] R70RdmResidualTest.R70RdmTodayOrderQueueRangeClips
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r70_rdm_residual_test.cpp:172: Failure
+Value of: s != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R70RdmResidualTest.R70RdmTodayOrderQueueRangeClips (1 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayOrderDetailRangeClips
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r70_rdm_residual_test.cpp:200: Failure
+Value of: s != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R70RdmResidualTest.R70RdmTodayOrderDetailRangeClips (14 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayTransRangeClips
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r70_rdm_residual_test.cpp:224: Failure
+Value of: s != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R70RdmResidualTest.R70RdmTodayTransRangeClips (5 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmHisHftFilesBuildAndReject
+[       OK ] R70RdmResidualTest.R70RdmHisHftFilesBuildAndReject (14 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmAdjustedStockMin1Continuation
+[       OK ] R70RdmResidualTest.R70RdmAdjustedStockMin1Continuation (3 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmHotTickCountAndRangeTail
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r70_rdm_residual_test.cpp:393: Failure
+Expected equality of these values:
+  got.size()
+    Which is: 2
+  (std::size_t)4
+    Which is: 4
+
+[  FAILED  ] R70RdmResidualTest.R70RdmHotTickCountAndRangeTail (14 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayOrderQueueRangeBoundaries
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r70_rdm_residual_test.cpp:452: Failure
+Value of: first != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R70RdmResidualTest.R70RdmTodayOrderQueueRangeBoundaries (12 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayOrderDetailRangeBoundaries
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r70_rdm_residual_test.cpp:506: Failure
+Value of: first != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R70RdmResidualTest.R70RdmTodayOrderDetailRangeBoundaries (16 ms)
+[ RUN      ] R70RdmResidualTest.R70RdmTodayTransactionRangeBoundaries
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r70_rdm_residual_test.cpp:556: Failure
+Value of: first != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R70RdmResidualTest.R70RdmTodayTransactionRangeBoundaries (13 ms)
+[----------] 9 tests from R70RdmResidualTest (96 ms total)
+
+[----------] 4 tests from R74RdmHftHotTest
+[ RUN      ] R74RdmHftHotTest.R74RdmHisQueueLoadsClipsAndRejects
+[       OK ] R74RdmHftHotTest.R74RdmHisQueueLoadsClipsAndRejects (82 ms)
+[ RUN      ] R74RdmHftHotTest.R74RdmHisDetailCrossDayAndRejects
+[       OK ] R74RdmHftHotTest.R74RdmHisDetailCrossDayAndRejects (8 ms)
+[ RUN      ] R74RdmHftHotTest.R74RdmHisTransCrossDayAndRejects
+[       OK ] R74RdmHftHotTest.R74RdmHisTransCrossDayAndRejects (19 ms)
+[ RUN      ] R74RdmHftHotTest.R74RdmHotDaySectionsEdgeCases
+[       OK ] R74RdmHftHotTest.R74RdmHotDaySectionsEdgeCases (11 ms)
+[----------] 4 tests from R74RdmHftHotTest (121 ms total)
+
+[----------] 7 tests from R74RdmInitAdjTest
+[ RUN      ] R74RdmInitAdjTest.R74RdmInitCfgLoadsAdjFactorsAndReplaysQfq
+[       OK ] R74RdmInitAdjTest.R74RdmInitCfgLoadsAdjFactorsAndReplaysQfq (20 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmAdjustedFileSizeGuards
+[       OK ] R74RdmInitAdjTest.R74RdmAdjustedFileSizeGuards (15 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmShortAdjustedFileFallsBackToRawAndLogsError
+[       OK ] R74RdmInitAdjTest.R74RdmShortAdjustedFileFallsBackToRawAndLogsError (17 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmShortAdjustedWithoutRawCanRetryWhenRawAppears
+[       OK ] R74RdmInitAdjTest.R74RdmShortAdjustedWithoutRawCanRetryWhenRawAppears (4 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmTickRangeRtBoundaries
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r74_rdm_init_adj_test.cpp:287: Failure
+Expected equality of these values:
+  got.size()
+    Which is: 0
+  (std::size_t)1
+    Which is: 1
+
+[  FAILED  ] R74RdmInitAdjTest.R74RdmTickRangeRtBoundaries (345 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmHotMalformedTickFileFailsClosedThenReloads
+[       OK ] R74RdmInitAdjTest.R74RdmHotMalformedTickFileFailsClosedThenReloads (370 ms)
+[ RUN      ] R74RdmInitAdjTest.R74RdmHotTickCandidatesAndCountWindows
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r74_rdm_init_adj_test.cpp:413: Failure
+Expected equality of these values:
+  mgot[1].action_time
+    Which is: 93100000
+  93000000u
+    Which is: 93000000
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r74_rdm_init_adj_test.cpp:421: Failure
+Expected equality of these values:
+  fgot.size()
+    Which is: 2
+  (std::size_t)4
+    Which is: 4
+
+[  FAILED  ] R74RdmInitAdjTest.R74RdmHotTickCandidatesAndCountWindows (67 ms)
+[----------] 7 tests from R74RdmInitAdjTest (842 ms total)
+
+[----------] 15 tests from R94RdmBadBlockRetryTest
+[ RUN      ] R94RdmBadBlockRetryTest.tick_by_date_rejects_corrupt_block_and_same_reader_retries
+[       OK ] R94RdmBadBlockRetryTest.tick_by_date_rejects_corrupt_block_and_same_reader_retries (87 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.tick_range_discards_prior_day_slice_and_retries
+[       OK ] R94RdmBadBlockRetryTest.tick_range_discards_prior_day_slice_and_retries (303 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.tick_count_rejects_corrupt_history_and_retries
+[       OK ] R94RdmBadBlockRetryTest.tick_count_rejects_corrupt_history_and_retries (28 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.absent_tick_history_remains_an_empty_read
+[       OK ] R94RdmBadBlockRetryTest.absent_tick_history_remains_an_empty_read (0 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.plain_bar_range_rejects_corruption_and_same_reader_retries
+[       OK ] R94RdmBadBlockRetryTest.plain_bar_range_rejects_corruption_and_same_reader_retries (2 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.plain_bar_count_rejects_corruption_and_same_reader_retries
+[       OK ] R94RdmBadBlockRetryTest.plain_bar_count_rejects_corruption_and_same_reader_retries (2 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.absent_plain_bar_history_is_not_logged_as_corrupt
+[       OK ] R94RdmBadBlockRetryTest.absent_plain_bar_history_is_not_logged_as_corrupt (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.header_only_plain_bar_block_remains_an_empty_read
+[       OK ] R94RdmBadBlockRetryTest.header_only_plain_bar_block_remains_an_empty_read (8 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.empty_adjusted_layer_falls_back_to_base_bars_for_range
+[       OK ] R94RdmBadBlockRetryTest.empty_adjusted_layer_falls_back_to_base_bars_for_range (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.empty_adjusted_layer_falls_back_to_base_bars_for_count
+[       OK ] R94RdmBadBlockRetryTest.empty_adjusted_layer_falls_back_to_base_bars_for_count (3 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.legacy_empty_cmp_adjusted_layer_falls_back_for_range
+[       OK ] R94RdmBadBlockRetryTest.legacy_empty_cmp_adjusted_layer_falls_back_for_range (1 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.legacy_empty_cmp_adjusted_layer_falls_back_for_count
+[       OK ] R94RdmBadBlockRetryTest.legacy_empty_cmp_adjusted_layer_falls_back_for_count (10 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.malformed_legacy_empty_cmp_adjusted_layer_is_rejected
+[       OK ] R94RdmBadBlockRetryTest.malformed_legacy_empty_cmp_adjusted_layer_is_rejected (12 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.continuous_bar_failure_frees_prior_sections_and_retries
+[       OK ] R94RdmBadBlockRetryTest.continuous_bar_failure_frees_prior_sections_and_retries (47 ms)
+[ RUN      ] R94RdmBadBlockRetryTest.adjusted_continuation_failure_releases_hot_buffer_and_retries
+[       OK ] R94RdmBadBlockRetryTest.adjusted_continuation_failure_releases_hot_buffer_and_retries (10 ms)
+[----------] 15 tests from R94RdmBadBlockRetryTest (523 ms total)
+
+[----------] 1 test from R94RdmDayBackoffTest
+[ RUN      ] R94RdmDayBackoffTest.R94RdmDayRangeAndCountBackOffBeforeRightBoundary
+[       OK ] R94RdmDayBackoffTest.R94RdmDayRangeAndCountBackOffBeforeRightBoundary (1 ms)
+[ DISABLED ] R94RdmDayBackoffTest.DISABLED_R94RdmRangeBeforeFirstBarUnderflowsCacheCursor
+[----------] 1 test from R94RdmDayBackoffTest (1 ms total)
+
+[----------] 4 tests from R94RdmEmptyKlineTest
+[ RUN      ] R94RdmEmptyKlineTest.R94RdmCmpAdjustedFileWithZeroSizeIsEmpty
+[       OK ] R94RdmEmptyKlineTest.R94RdmCmpAdjustedFileWithZeroSizeIsEmpty (15 ms)
+[ RUN      ] R94RdmEmptyKlineTest.R94RdmRawAdjustedFileWithHeaderOnlyIsEmpty
+[       OK ] R94RdmEmptyKlineTest.R94RdmRawAdjustedFileWithHeaderOnlyIsEmpty (34 ms)
+[ RUN      ] R94RdmEmptyKlineTest.R94RdmRawContinuationFileHeaderOnlyKeepsAdjustedBars
+[       OK ] R94RdmEmptyKlineTest.R94RdmRawContinuationFileHeaderOnlyKeepsAdjustedBars (3 ms)
+[ RUN      ] R94RdmEmptyKlineTest.R94RdmPlainFileHeaderOnlyReturnsFalse
+[       OK ] R94RdmEmptyKlineTest.R94RdmPlainFileHeaderOnlyReturnsFalse (1 ms)
+[----------] 4 tests from R94RdmEmptyKlineTest (56 ms total)
+
+[----------] 1 test from R94RdmHfqRangeTest
+[ RUN      ] R94RdmHfqRangeTest.R94RdmHfqRangeMergesRealtimeIntoAdjustedCache
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r94_rdm_hfq_range_test.cpp:99: Failure
+Expected equality of these values:
+  got.back().date
+    Which is: 20240107
+  kCurTDate
+    Which is: 20240110
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r94_rdm_hfq_range_test.cpp:100: Failure
+Expected equality of these values:
+  got.back().open
+    Which is: 26.399999999999999
+  41.0 * 1.2
+    Which is: 49.199999999999996
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r94_rdm_hfq_range_test.cpp:101: Failure
+Expected equality of these values:
+  got[got.size() - 2].open
+    Which is: 25.199999999999999
+  40.0 * 1.2
+    Which is: 48
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r94_rdm_hfq_range_test.cpp:107: Failure
+Value of: rtOnly != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R94RdmHfqRangeTest.R94RdmHfqRangeMergesRealtimeIntoAdjustedCache (80 ms)
+[----------] 1 test from R94RdmHfqRangeTest (107 ms total)
+
+[----------] 1 test from R94RdmHotHftTest
+[ RUN      ] R94RdmHotHftTest.R94RdmTodayHftUsesCustomRawCode
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r94_rdm_hot_hft_test.cpp:83: Failure
+Value of: sq != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R94RdmHotHftTest.R94RdmTodayHftUsesCustomRawCode (62 ms)
+[----------] 1 test from R94RdmHotHftTest (62 ms total)
+
+[----------] 2 tests from R94RdmHotMinuteEdgeTest
+[ RUN      ] R94RdmHotMinuteEdgeTest.R94RdmHotQfqStopsWhenSectionEndsBeforeHotTail
+[       OK ] R94RdmHotMinuteEdgeTest.R94RdmHotQfqStopsWhenSectionEndsBeforeHotTail (2 ms)
+[ RUN      ] R94RdmHotMinuteEdgeTest.R94RdmHotEmptySegmentFileBreaksAssembly
+[       OK ] R94RdmHotMinuteEdgeTest.R94RdmHotEmptySegmentFileBreaksAssembly (3 ms)
+[----------] 2 tests from R94RdmHotMinuteEdgeTest (6 ms total)
+
+[----------] 1 test from R94RdmRtRemapTest
+[ RUN      ] R94RdmRtRemapTest.R94RdmAllRtBlocksRemapAfterCapacityGrowth
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r94_rdm_rt_remap_test.cpp:81: Failure
+Value of: ts != __null
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r94_rdm_rt_remap_test.cpp:81: Failure
+Value of: ts != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R94RdmRtRemapTest.R94RdmAllRtBlocksRemapAfterCapacityGrowth (16 ms)
+[----------] 1 test from R94RdmRtRemapTest (16 ms total)
+
+[----------] 1 test from R94RdmTickCountEdgeTest
+[ RUN      ] R94RdmTickCountEdgeTest.R94RdmCountSkipsEmptyAndBeforeFirstHisTick
+[       OK ] R94RdmTickCountEdgeTest.R94RdmCountSkipsEmptyAndBeforeFirstHisTick (74 ms)
+[----------] 1 test from R94RdmTickCountEdgeTest (75 ms total)
+
+[----------] 11 tests from R1RdmHftTest
+[ RUN      ] R1RdmHftTest.ordque_his_roundtrip_and_same_day_window
+[       OK ] R1RdmHftTest.ordque_his_roundtrip_and_same_day_window (38 ms)
+[ RUN      ] R1RdmHftTest.ordque_cross_day_window_returns_full_prefix
+[       OK ] R1RdmHftTest.ordque_cross_day_window_returns_full_prefix (20 ms)
+[ RUN      ] R1RdmHftTest.ordque_cache_hit_survives_file_removal
+[       OK ] R1RdmHftTest.ordque_cache_hit_survives_file_removal (39 ms)
+[ RUN      ] R1RdmHftTest.ordque_size_check_failures_log_error_and_recover_never
+[       OK ] R1RdmHftTest.ordque_size_check_failures_log_error_and_recover_never (43 ms)
+[ RUN      ] R1RdmHftTest.ordque_missing_file_returns_null_without_error_log
+[       OK ] R1RdmHftTest.ordque_missing_file_returns_null_without_error_log (5 ms)
+[ RUN      ] R1RdmHftTest.ordque_today_window_without_rt_block_returns_null
+[       OK ] R1RdmHftTest.ordque_today_window_without_rt_block_returns_null (0 ms)
+[ RUN      ] R1RdmHftTest.orddtl_his_first_read_roundtrip
+[       OK ] R1RdmHftTest.orddtl_his_first_read_roundtrip (16 ms)
+[ RUN      ] R1RdmHftTest.trans_his_first_read_roundtrip
+[       OK ] R1RdmHftTest.trans_his_first_read_roundtrip (37 ms)
+[ RUN      ] R1RdmHftTest.queue_then_detail_and_trans_use_independent_history_caches
+[       OK ] R1RdmHftTest.queue_then_detail_and_trans_use_independent_history_caches (29 ms)
+[ RUN      ] R1RdmHftTest.detail_and_trans_before_queue_keep_reverse_order_caches_independent
+[       OK ] R1RdmHftTest.detail_and_trans_before_queue_keep_reverse_order_caches_independent (19 ms)
+[ RUN      ] R1RdmHftTest.trans_size_check_short_file_logs_error
+[       OK ] R1RdmHftTest.trans_size_check_short_file_logs_error (7 ms)
+[----------] 11 tests from R1RdmHftTest (268 ms total)
+
+[----------] 15 tests from R23RdmCountTest
+[ RUN      ] R23RdmCountTest.CountWalksBackAcrossDaysUntilSatisfied
+[       OK ] R23RdmCountTest.CountWalksBackAcrossDaysUntilSatisfied (6 ms)
+[ RUN      ] R23RdmCountTest.CountStopsAfterThirtyMissingDays
+[       OK ] R23RdmCountTest.CountStopsAfterThirtyMissingDays (11 ms)
+[ RUN      ] R23RdmCountTest.CountTakesRealtimeTailFirstThenOneHisTick
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:154: Failure
+Expected equality of these values:
+  slice->size()
+    Which is: 3
+  4u
+    Which is: 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:155: Failure
+Expected equality of these values:
+  slice->get_block_counts()
+    Which is: 1
+  2u
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:161: Failure
+Expected equality of these values:
+  first->action_time
+    Which is: 143000000
+  143200000u
+    Which is: 143200000
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:162: Failure
+Expected equality of these values:
+  first->price
+    Which is: 130
+  30.0 + 102
+    Which is: 132
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:166: Failure
+Expected equality of these values:
+  second->action_date
+    Which is: 20240109
+  kCurTDate
+    Which is: 20240110
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:167: Failure
+Expected equality of these values:
+  second->action_time
+    Which is: 143100000
+  143000000u
+    Which is: 143000000
+
+[  FAILED  ] R23RdmCountTest.CountTakesRealtimeTailFirstThenOneHisTick (26 ms)
+[ RUN      ] R23RdmCountTest.CountZeroReturnsEmptySliceWithoutTouchingFiles
+[       OK ] R23RdmCountTest.CountZeroReturnsEmptySliceWithoutTouchingFiles (43 ms)
+[ RUN      ] R23RdmCountTest.HisWindowBoundaryKeepsTickExactlyAtEtime
+[       OK ] R23RdmCountTest.HisWindowBoundaryKeepsTickExactlyAtEtime (21 ms)
+[ RUN      ] R23RdmCountTest.RtWindowBoundaryKeepsTickExactlyAtEtime
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:227: Failure
+Expected equality of these values:
+  slice->size()
+    Which is: 0
+  2u
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:228: Failure
+Expected equality of these values:
+  slice->get_block_counts()
+    Which is: 0
+  1u
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:231: Failure
+Value of: first != __null
+  Actual: false
+Expected: true
+
+[  FAILED  ] R23RdmCountTest.RtWindowBoundaryKeepsTickExactlyAtEtime (1 ms)
+[ RUN      ] R23RdmCountTest.HisEarlierActionDateWithLaterClockStaysBeforeEtime
+[       OK ] R23RdmCountTest.HisEarlierActionDateWithLaterClockStaysBeforeEtime (14 ms)
+[ RUN      ] R23RdmCountTest.RtEarlierActionDateWithLaterClockStaysBeforeEtime
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:274: Failure
+Expected equality of these values:
+  slice->size()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] R23RdmCountTest.RtEarlierActionDateWithLaterClockStaysBeforeEtime (6 ms)
+[ RUN      ] R23RdmCountTest.CountSizeCheckFailureCanRecoverAfterFileRepair
+[       OK ] R23RdmCountTest.CountSizeCheckFailureCanRecoverAfterFileRepair (20 ms)
+[ RUN      ] R23RdmCountTest.CountWithNoDataAtAllReturnsEmptySlice
+[       OK ] R23RdmCountTest.CountWithNoDataAtAllReturnsEmptySlice (1 ms)
+[ RUN      ] R23RdmCountTest.KlineCountIsTailWindowOfHisDayBars
+[       OK ] R23RdmCountTest.KlineCountIsTailWindowOfHisDayBars (1 ms)
+[ RUN      ] R23RdmCountTest.KlineCountWithZeroEtimeUsesYear2030Sentinel
+[       OK ] R23RdmCountTest.KlineCountWithZeroEtimeUsesYear2030Sentinel (1 ms)
+[ RUN      ] R23RdmCountTest.KlineCountSplicesHisTailWithRtMin1Block
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:409: Failure
+Expected equality of these values:
+  slice->size()
+    Which is: 3
+  4u
+    Which is: 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:410: Failure
+Expected equality of these values:
+  slice->get_block_counts()
+    Which is: 1
+  2u
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:414: Failure
+Expected equality of these values:
+  first->time % 10000
+    Which is: 1458
+  1500u
+    Which is: 1500
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:415: Failure
+Expected equality of these values:
+  slice->at(1)->time % 10000
+    Which is: 1459
+  1450u
+    Which is: 1450
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:416:2: runtime error: member access within null pointer of type 'WTSBarStruct'
+    #0 0x000100c30350 in r23::R23RdmCountTest_KlineCountSplicesHisTailWithRtMin1Block_Test::TestBody()+0x2308 (i03_slice_rdm_regress:arm64+0x1007a8350)
+    #1 0x000100d92370 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x10090a370)
+    #2 0x000100d922b8 in testing::Test::Run()+0xcc (i03_slice_rdm_regress:arm64+0x10090a2b8)
+    #3 0x000100d92e98 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm_regress:arm64+0x10090ae98)
+    #4 0x000100d9391c in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm_regress:arm64+0x10090b91c)
+    #5 0x000100d9ed44 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm_regress:arm64+0x100916d44)
+    #6 0x000100d9e6f0 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm_regress:arm64+0x1009166f0)
+    #7 0x000100d9e654 in testing::UnitTest::Run()+0x78 (i03_slice_rdm_regress:arm64+0x100916654)
+    #8 0x000100d7fa88 in main+0x40 (i03_slice_rdm_regress:arm64+0x1008f7a88)
+    #9 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/r23_rdm_count_slice_test.cpp:416:2 

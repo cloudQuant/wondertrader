@@ -1,0 +1,76 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S1K25SelIsolation.*
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from S1K25SelIsolation
+[ RUN      ] S1K25SelIsolation.ThrowingScheduleIsIsolatedAndOtherStrategiesStillRun
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:156: Failure
+Expected: engine->on_minute_end(20250110, 930) doesn't throw an exception.
+  Actual: it throws std::runtime_error with description "s1 schedule failure".
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:158: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  b->schedule_calls
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:159: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  c->schedule_calls
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:160: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  b->schedule_fires
+    Which is: 0
+the healthy strategy completed its schedule
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:164: Failure
+Expected: engine->on_minute_end(20250110, 930) doesn't throw an exception.
+  Actual: it throws.
+
+[  FAILED  ] S1K25SelIsolation.ThrowingScheduleIsIsolatedAndOtherStrategiesStillRun (27 ms)
+[ RUN      ] S1K25SelIsolation.ThrowingTickHandlerIsIsolatedAndOtherStrategiesStillReceiveTicks
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:190: Failure
+Expected: engine->on_tick(kS1Code, t1) doesn't throw an exception.
+  Actual: it throws std::runtime_error with description "s1 tick failure".
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:193: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  b->tick_calls
+    Which is: 0
+the healthy strategy still receives the tick
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:196: Failure
+Expected: engine->on_tick(kS1Code, t2) doesn't throw an exception.
+  Actual: it throws std::runtime_error with description "s1 tick failure".
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_k25_sel_isolation_test.cpp:199: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  b->tick_calls
+    Which is: 0
+
+[  FAILED  ] S1K25SelIsolation.ThrowingTickHandlerIsIsolatedAndOtherStrategiesStillReceiveTicks (0 ms)
+[ RUN      ] S1K25SelIsolation.ReentrantTicksBetweenTwoStrategiesAreQueuedAndDeliveredOnce
+[       OK ] S1K25SelIsolation.ReentrantTicksBetweenTwoStrategiesAreQueuedAndDeliveredOnce (2 ms)
+[ RUN      ] S1K25SelIsolation.StopFromInsideAStrategyCallbackDoesNotSelfJoin
+[       OK ] S1K25SelIsolation.StopFromInsideAStrategyCallbackDoesNotSelfJoin (8 ms)
+[----------] 4 tests from S1K25SelIsolation (40 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (41 ms total)
+[  PASSED  ] 2 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] S1K25SelIsolation.ThrowingScheduleIsIsolatedAndOtherStrategiesStillRun
+[  FAILED  ] S1K25SelIsolation.ThrowingTickHandlerIsIsolatedAndOtherStrategiesStillReceiveTicks
+
+ 2 FAILED TESTS

@@ -1,0 +1,50 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp	2026-10-31 10:53:01
++++ src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp	2026-11-04 21:20:47
+@@ -101,11 +101,12 @@
+  *  - POS.cc 挂在 POS120 上，用 POS120_H。
+  * 每个品种都必须带点号，WTSBaseDataMgr::getTplIDByPID 会按 "." 切分。
+  */
++// I03-NEW-053（卡 4a=A）：商品须有正 pricetick 与正整数 volscale 才登记，否则整份不发布。
+ const char* kR84bCommodities = R"JSON({
+ 	"POS": {
+-		"aa": {"name": "正向甲", "session": "POS60", "holiday": "POS60_H"},
+-		"bb": {"name": "正向乙", "session": "POS60", "holiday": "POS60_H"},
+-		"cc": {"name": "正向丙", "session": "POS120", "holiday": "POS120_H"}
++		"aa": {"name": "正向甲", "session": "POS60", "holiday": "POS60_H", "pricetick": 1, "volscale": 1},
++		"bb": {"name": "正向乙", "session": "POS60", "holiday": "POS60_H", "pricetick": 1, "volscale": 1},
++		"cc": {"name": "正向丙", "session": "POS120", "holiday": "POS120_H", "pricetick": 1, "volscale": 1}
+ 	}
+ })JSON";
+ 
+@@ -274,8 +275,7 @@
+ 	EXPECT_NE(_bdMgr.getTradingDate("POS.cc"), 20200102u);
+ }
+ 
+-// StateMonitor.cpp:68-74、L125-132 —— 会话值不是对象（数字）时 getUInt32 全部回落 0，
+-// 但会话模板存在、品种循环照常执行，L127 仍然命中；状态不会被 initialize 推进。
++// 会话值不是对象（数字）：I03-NEW-053 起按 fail-closed 初始化拒绝（原：时间回落 0 并登记）。
+ TEST_F(R84bStateMonitorPositiveOffsetTest, PositiveOffsetNonObjectEntryDefaultsTimes)
+ {
+ 	loadHolidays(r84b_holiday_cfg(r84b_today_window(), "[]"));
+@@ -287,13 +287,18 @@
+ 
+ 	StateMonitor mon;
+ 	fs::path cfg = initCfg(R"JSON({"POS60": 12345})JSON");
+-	ASSERT_TRUE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
++	// I03-NEW-053：合同依据为卡 1=A+C（入口前置校验兜底）及 2026-11-03 已复核的
++	// StateMonitor 初始化“整批校验后发布”：非对象会话项是配置错误，不能以全 0 时间
++	// 登记（全 0 会让状态机在 00:00 收盘/作业），初始化失败且不发布任何状态；
++	// 原用例期望退回默认时间 0 并登记，与之冲突，改写如下。
++	// 失败发生在任何交易日写入之前，预置的交易日缓存保持不变。
++	EXPECT_FALSE(mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr));
+ 
+-	EXPECT_TRUE(mon.isInState("POS60", SS_ORIGINAL));
++	EXPECT_FALSE(mon.isInState("POS60", SS_ORIGINAL));
+ 	EXPECT_FALSE(mon.isAnyInState(SS_INITIALIZED));
+ 	EXPECT_FALSE(mon.isAnyInState(SS_RECEIVING));
+ 	EXPECT_FALSE(mon.isAnyInState(SS_PAUSED));
+-	EXPECT_NE(_bdMgr.getTradingDate("POS.aa"), 20200101u);
++	EXPECT_EQ(_bdMgr.getTradingDate("POS.aa"), 20200101u);
+ }
+ 
+ // StateMonitor.cpp:56-66、L107-134 —— 未知会话 continue 不影响已知正向偏移会话入表；

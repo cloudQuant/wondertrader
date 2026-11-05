@@ -1,0 +1,15 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/q06_porter/r220_trader_ready_owner_registration_test.cpp	2026-11-02 21:52:14
++++ src/TestUnits/coverage/q06_porter/r220_trader_ready_owner_registration_test.cpp	2026-11-04 17:49:32
+@@ -83,6 +83,12 @@
+ 	config->append("id", id);
+ 	config->append("trader", "r220_ready_trader");
+ 	config->append("scale", 1.0);
++	// 卡8b=A（迭代03）：local/diff/arbi 须带含 default 的 policy，否则 eager 校验拒绝整表。
++	WTSVariant* policy = WTSVariant::createObject();
++	WTSVariant* def = WTSVariant::createObject();
++	def->append("name", "WtExeFact.WtMinImpactExeUnit");
++	policy->append("default", def, false);
++	config->append("policy", policy, false);
+ 	return config;
+ }
+ 

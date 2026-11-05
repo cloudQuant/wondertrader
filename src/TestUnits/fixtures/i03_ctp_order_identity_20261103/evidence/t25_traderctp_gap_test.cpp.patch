@@ -1,0 +1,120 @@
+--- src/TestUnits/fixtures/i03_ctp_order_identity_20261103/baseline/t25_traderctp_gap_test.cpp	2026-11-03 17:47:18
++++ src/TestUnits/coverage/t_TraderCTP/t25_traderctp_gap_test.cpp	2026-11-03 18:25:28
+@@ -384,6 +384,8 @@
+     ITraderSpi*     sink() const { return m_sink; }
+ 
+     uint32_t        eidSize() const { return m_eidCache.size(); }
++    bool            seedEid(const char* key, const char* value) { return m_eidCache.try_put(key, value); }
++    bool            seedOid(const char* key, const char* value) { return m_oidCache.try_put(key, value); }
+     uint32_t        oidSize() const { return m_oidCache.size(); }
+     std::string     eidValue(const char* k) const
+     {
+@@ -762,7 +764,9 @@
+ 
+     api_.ret_ = 9;
+     WTSEntrust* e = WTSEntrust::create(kCodeAg, 2, 7000.0, kExchgAg);
+-    e->setEntrustID("012345#0000000067#001001");
++    char reserved[64]{};
++    ASSERT_TRUE(trader_.makeEntrustID(reserved, sizeof(reserved)));
++    e->setEntrustID(reserved);
+     e->setUserTag("TAG-INSERT-ERROR");
+     EXPECT_LT(trader_.orderInsert(e), 0);
+     EXPECT_EQ(1, api_.n_insert_.load());
+@@ -797,19 +801,20 @@
+ //////////////////////////////////////////////////////////////////////////
+ // 6) orderInsert 的 usertag 分支与包装矩阵
+ //
+-TEST_F(T25TraderCTPTest, order_insert_without_usertag_reuses_current_order_ref_and_skips_cache)
++TEST_F(T25TraderCTPTest, order_insert_without_usertag_allocates_identity_and_cache)
+ {
+     bringToReady();
+     uint32_t ref0 = trader_.orderRef();           // bringToReady 后 = 1000（MaxOrderRef）
+     uint32_t eid_sz_before = trader_.eidSize();
+ 
+     WTSEntrust* e = WTSEntrust::create(kCodeAg, 1, 7000.0, kExchgAg);
+-    // 不设 userTag、不设 entrustID ⇒ 走 L486-489，且不能往 eid 缓存里写
++    // 缺少标签和委托 ID 时分配唯一身份，并在发送前记录关联。
+     EXPECT_EQ(0, trader_.orderInsert(e));
+     EXPECT_EQ(1, api_.n_insert_.load());
+-    EXPECT_EQ(std::to_string(ref0), std::string(api_.order_.OrderRef));
+-    EXPECT_EQ(ref0, trader_.orderRef());          // fetch_add(0) 不自增
+-    EXPECT_EQ(eid_sz_before, trader_.eidSize());
++    EXPECT_EQ(std::to_string(ref0 + 1), std::string(api_.order_.OrderRef));
++    EXPECT_EQ(ref0 + 1, trader_.orderRef());
++    EXPECT_EQ(eid_sz_before + 1, trader_.eidSize());
++    EXPECT_EQ(std::string("ctp-auto:") + e->getEntrustID(), e->getUserTag());
+     EXPECT_EQ(THOST_FTDC_OPT_AnyPrice, api_.order_.OrderPriceType);  // WTSEntrust 默认价型 WPT_ANYPRICE
+     EXPECT_EQ(THOST_FTDC_TC_GFD, api_.order_.TimeCondition);         // 默认 WOF_NOR
+     e->release();
+@@ -848,6 +853,7 @@
+     EXPECT_EQ(THOST_FTDC_VC_AV, api_.order_.VolumeCondition);
+ 
+     e->setPriceType(WPT_LASTPRICE);               // 落到 default ⇒ LastPrice
++    e->setEntrustID(""); e->setUserTag("");
+     e->setOffsetType(WOT_CLOSEYESTERDAY);         // ⇒ Close
+     e->setOrderFlag(WOF_FOK);
+     EXPECT_EQ(0, trader_.orderInsert(e));
+@@ -857,6 +863,7 @@
+     EXPECT_EQ(THOST_FTDC_VC_CV, api_.order_.VolumeCondition);
+ 
+     e->setPriceType(WPT_CTP_ASK1);                // 未识别价型也落到 default
++    e->setEntrustID(""); e->setUserTag("");
+     e->setOffsetType(WOT_FORCECLOSE);
+     e->setOrderFlag(WOF_FAK);
+     EXPECT_EQ(0, trader_.orderInsert(e));
+@@ -883,17 +890,20 @@
+ 
+     e->setDirection(WDT_LONG);
+     e->setOffsetType(WOT_CLOSE);
++    e->setEntrustID(""); e->setUserTag("");
+     EXPECT_EQ(0, trader_.orderInsert(e));
+     EXPECT_EQ(THOST_FTDC_D_Sell, api_.order_.Direction);
+ 
+     e->setDirection(WDT_SHORT);
+     e->setOffsetType(WOT_OPEN);
++    e->setEntrustID(""); e->setUserTag("");
+     EXPECT_EQ(0, trader_.orderInsert(e));
+     EXPECT_EQ(THOST_FTDC_D_Sell, api_.order_.Direction);
+ 
+     // 空头平仓在 CTP 侧是 Buy —— lane T2 的 cffex 用例就是把这条期望写反了才红
+     e->setDirection(WDT_SHORT);
+     e->setOffsetType(WOT_CLOSETODAY);
++    e->setEntrustID(""); e->setUserTag("");
+     EXPECT_EQ(0, trader_.orderInsert(e));
+     EXPECT_EQ(THOST_FTDC_D_Buy, api_.order_.Direction);
+     EXPECT_EQ(4, api_.n_insert_.load());
+@@ -902,6 +912,7 @@
+     e->setDirection(WDT_LONG);
+     e->setOffsetType(WOT_OPEN);
+     e->setPriceType(WPT_ANYPRICE);
++    e->setEntrustID(""); e->setUserTag("");
+     EXPECT_EQ(0, trader_.orderInsert(e));
+     EXPECT_EQ(THOST_FTDC_OPT_AnyPrice, api_.order_.OrderPriceType);
+     WTSEntrust* cf = WTSEntrust::create(kCodeIf, 1, 3500.0, kExchgIf);
+@@ -1470,6 +1481,9 @@
+     o.SessionID = 67;
+     strcpy(o.OrderRef, "1001");
+     strcpy(o.OrderSysID, "800001");
++    strcpy(o.BrokerID, "9999");
++    strcpy(o.InvestorID, "88880001");
++    strcpy(o.TradingDay, "20240115");
+     o.LimitPrice = 7000.0;
+     o.VolumeTotalOriginal = 3;
+     o.VolumeTraded = 1;
+@@ -1494,12 +1508,15 @@
+     EXPECT_EQ("已受理", sink_.ord_statemsg_);
+     EXPECT_EQ(20240115u, sink_.ord_date_);
+     EXPECT_EQ(1u, trader_.oidSize());                    // 有 OrderSysID ⇒ 写 oid 缓存（L1254-1257）
+-    EXPECT_EQ("TAG-25", trader_.oidValue("800001"));
++    EXPECT_EQ("TAG-25", trader_.oidValue("9999#88880001#SHFE#ag2512#20240115#800001"));
+ 
+     CThostFtdcTradeField t;
+     memset(&t, 0, sizeof(t));
+     strcpy(t.InstrumentID, kCodeAg);
+     strcpy(t.ExchangeID, kExchgAg);
++    strcpy(t.BrokerID, "9999");
++    strcpy(t.InvestorID, "88880001");
++    strcpy(t.TradingDay, "20240115");
+     strcpy(t.TradeID, "T0001");
+     strcpy(t.OrderSysID, "800001");
+     t.Price = 7000.0;

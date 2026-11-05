@@ -15,6 +15,7 @@
 #include <list>
 #include <mutex>
 #include "../Includes/IDataReader.h"
+#include "../Includes/DateMappingV1.h"
 #include "../Includes/IDataManager.h"
 
 #include "../Includes/FasterDefs.h"
@@ -239,7 +240,17 @@ public:
 	 */
 	inline IHisDataLoader*	loader() { return _loader; }
 
+	/**
+	 * @brief K31=A：登记宿主的 DateMappingV1 表（须在 init 前调用）
+	 * @details 创建读端后若读端模块导出 bindDataReaderDateMappingV1，则注入该表（路径 A）；
+	 *          未登记、无导出或被拒绝时读端保持路径 C。表的 context 须比读端活得久。
+	 */
+	inline void set_date_mapping(const DateMappingV1& table) { _date_mapping = table; _has_date_mapping = true; }
+
 private:
+	DateMappingV1	_date_mapping{};
+	bool			_has_date_mapping = false;
+
 	/**
 	 * @brief 数据读取器指针
 	 * @details 用于读取各种历史和实时数据

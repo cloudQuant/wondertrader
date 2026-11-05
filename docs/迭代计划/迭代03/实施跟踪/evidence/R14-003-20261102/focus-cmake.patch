@@ -1,0 +1,12 @@
+--- src/TestUnits/coverage/CMakeLists.txt	2026-11-01 21:25:00
++++ /tmp/wt-i03-r14-003-20261102/snapshot/src/TestUnits/coverage/CMakeLists.txt	2026-11-02 09:19:10
+@@ -1390,6 +1390,9 @@
+ FOREACH(mod ${WT_MAIN_MODULES})
+ 	file(GLOB mod_tus CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/${mod}/*.cpp")
+ 	file(GLOB mod_tests CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/m_${mod}/*.cpp")
++	if(mod STREQUAL "QuoteFactory" OR mod STREQUAL "WtUftRunner" OR mod STREQUAL "WtLatencyHFT" OR mod STREQUAL "WtLatencyUFT")
++		file(GLOB mod_tests CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/m_${mod}/r14_*_main_test.cpp")
++	endif()
+ 	if(NOT mod_tus OR NOT mod_tests)
+ 		continue()
+ 	endif()

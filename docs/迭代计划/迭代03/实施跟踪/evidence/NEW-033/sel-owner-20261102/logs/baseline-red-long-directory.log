@@ -1,0 +1,67 @@
+=================================================================
+==25725==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x61d000000880 at pc 0x0001046b773c bp 0x00016b75e770 sp 0x00016b75e768
+WRITE of size 1 at 0x61d000000880 thread T0
+    #0 0x0001046b7738 in void fmt::v11::detail::buffer<char>::append<char>(char const*, char const*) base.h:1837
+    #1 0x0001046c7508 in fmt::v11::basic_appender<char> fmt::v11::detail::copy<char, char const*, fmt::v11::basic_appender<char>, 0>(char const*, char const*, fmt::v11::basic_appender<char>) base.h:2043
+    #2 0x0001046ef664 in fmt::v11::basic_appender<char> fmt::v11::detail::copy_noinline<char, char const*, fmt::v11::basic_appender<char>>(char const*, char const*, fmt::v11::basic_appender<char>) format.h:536
+    #3 0x0001046ef4d8 in fmt::v11::basic_appender<char> fmt::v11::detail::write<char, fmt::v11::basic_appender<char>>(fmt::v11::basic_appender<char>, fmt::v11::basic_string_view<char>) format.h:3399
+    #4 0x0001046ef2a8 in fmt::v11::basic_appender<char> fmt::v11::detail::write<char, fmt::v11::basic_appender<char>>(fmt::v11::basic_appender<char>, char const*) format.h:3437
+    #5 0x0001046b4640 in void fmt::v11::detail::default_arg_formatter<char>::operator()<char const*, 0>(char const*) format.h:3476
+    #6 0x0001046b1e70 in decltype(fp(0)) fmt::v11::basic_format_arg<fmt::v11::context>::visit<fmt::v11::detail::default_arg_formatter<char>>(fmt::v11::detail::default_arg_formatter<char>&&) const base.h:2531
+    #7 0x0001046b1e70 in fmt::v11::detail::format_handler<char>::on_replacement_field(int, char const*) format.h:3610
+    #8 0x0001046b1e70 in char const* fmt::v11::detail::parse_replacement_field<char, fmt::v11::detail::format_handler<char>&>(char const*, char const*, fmt::v11::detail::format_handler<char>&) base.h:1595
+    #9 0x0001046b1e70 in void fmt::v11::detail::parse_format_string<char, fmt::v11::detail::format_handler<char>>(fmt::v11::basic_string_view<char>, fmt::v11::detail::format_handler<char>&&) base.h:1638
+    #10 0x0001046afd80 in fmt::v11::detail::vformat_to(fmt::v11::detail::buffer<char>&, fmt::v11::basic_string_view<char>, fmt::v11::basic_format_args<fmt::v11::context>, fmt::v11::detail::locale_ref) format-inl.h:1457
+    #11 0x0001046aeaa8 in std::__1::remove_cv<std::__1::remove_reference<char*&>::type>::type fmt::v11::vformat_to<char*&, 0>(char*&, fmt::v11::basic_string_view<char>, fmt::v11::basic_format_args<fmt::v11::context>) base.h:2837
+    #12 0x000104745fd4 in std::__1::remove_cv<std::__1::remove_reference<char*&>::type>::type fmt::v11::format_to<char*&, char const* const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, 0>(char*&, fmt::v11::fstring<char const* const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>::t, char const* const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) base.h:2856
+    #13 0x000104745fd4 in char* fmtutil::format_to<char const*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>(char*, char const*, char const* const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) fmtlib.h:17
+    #14 0x00010469e2ac in void WTSLogger::error<char const*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>(char const*, char const* const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) WTSLogger.h:244
+    #15 0x00010469d0d0 in SelStrategyMgr::loadFactories(char const*) baseline.cpp:44
+    #16 0x00010475052c in main check.cpp:42
+    #17 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x61d000000880 is located 0 bytes after 2048-byte region [0x61d000000080,0x61d000000880)
+allocated by thread T0 here:
+    #0 0x000104e350f8 in calloc+0x78 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x550f8)
+    #1 0x0001881de6ec in _malloc_type_calloc_outlined+0x64 (libsystem_malloc.dylib:arm64e+0x1e6ec)
+    #2 0x000187fd8f80 in dyld::ThreadLocalVariables::instantiateVariable(dyld::ThreadLocalVariables::Thunk const&)+0x5c (libdyld.dylib:arm64e+0x1df80)
+    #3 0x000187fd83ec in _tlv_get_addr+0x64 (libdyld.dylib:arm64e+0x1d3ec)
+    #4 0x00010474f748 in thread-local wrapper routine for WTSLogger::m_buffer+0x14 (baseline:arm64+0x1000b3748)
+    #5 0x00010469e224 in void WTSLogger::error<char const*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>(char const*, char const* const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) WTSLogger.h:244
+    #6 0x00010469d0d0 in SelStrategyMgr::loadFactories(char const*) baseline.cpp:44
+    #7 0x00010475052c in main check.cpp:42
+    #8 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow base.h:1837 in void fmt::v11::detail::buffer<char>::append<char>(char const*, char const*)
+Shadow bytes around the buggy address:
+  0x61d000000600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x61d000000680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x61d000000700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x61d000000780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x61d000000800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x61d000000880:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x61d000000900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x61d000000980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x61d000000a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x61d000000a80: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x61d000000b00: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==25725==ABORTING

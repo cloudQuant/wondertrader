@@ -8,6 +8,7 @@
  * \brief
  */
 #include "TraderHuaX.h"
+#include "../Share/ProviderRawReport.hpp"
 #include "../Share/Converter.hpp"
 
 #include <filesystem>
@@ -24,6 +25,14 @@ inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, cons
 
 extern "C"
 {
+	// BUG-L01-014 / K42: optional host feature declaration (WT_TRADER_SPI_FEATURES_SYMBOL).
+	EXPORT_FLAG void setTraderSpiFeatures(ITraderApi* trader, uint64_t features)
+	{
+		TraderHuaX* self = dynamic_cast<TraderHuaX*>(trader);
+		if (self != NULL)
+			self->setSpiFeatures(features);
+	}
+
 	EXPORT_FLAG ITraderApi* createTrader()
 	{
 		TraderHuaX *instance = new TraderHuaX();
@@ -356,6 +365,12 @@ void TraderHuaX::OnRtnOrder(CTORATstpOrderField* pOrderField)
 			_sink->onPushOrder(orderInfo);
 		orderInfo->release();
 	}
+	else if (pOrderField != NULL)
+	{
+		// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+		wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderHuaX", "order", "order report could not be converted",
+			wt_provider_raw::hexOf("CTORATstpOrderField", pOrderField));
+	}
 }
 
 void TraderHuaX::OnErrRtnOrderInsert(CTORATstpInputOrderField* pInputOrderField, CTORATstpRspInfoField* pRspInfoField, int nRequestID)
@@ -382,6 +397,12 @@ void TraderHuaX::OnRtnTrade(CTORATstpTradeField* pTradeField)
 
 		trdInfo->release();
 	}
+	else if (pTradeField != NULL)
+	{
+		// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+		wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderHuaX", "trade", "trade report could not be converted",
+			wt_provider_raw::hexOf("CTORATstpTradeField", pTradeField));
+	}
 }
 
 void TraderHuaX::OnErrRtnOrderAction(CTORATstpInputOrderActionField* pInputOrderActionField, CTORATstpRspInfoField* pRspInfoField, int nRequestID)
@@ -406,6 +427,12 @@ void TraderHuaX::OnRspQryOrder(CTORATstpOrderField* pOrderField, CTORATstpRspInf
 		{
 			_orders->append(orderInfo, false);
 		}
+		else
+		{
+			// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the struct); the host pauses the account.
+			wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderHuaX", "order", "order query row could not be converted",
+				wt_provider_raw::hexOf("CTORATstpOrderField", pOrderField));
+		}
 	}
 
 	if (bIsLast)
@@ -429,6 +456,12 @@ void TraderHuaX::OnRspQryTrade(CTORATstpTradeField* pTradeField, CTORATstpRspInf
 		if (trdInfo)
 		{
 			_trades->append(trdInfo, false);
+		}
+		else
+		{
+			// BUG-L01-014 (card 6): keep the unconverted query row (raw hex of the struct); the host pauses the account.
+			wt_provider_raw::report(_sink, m_spiFeatures.load(), "TraderHuaX", "trade", "trade query row could not be converted",
+				wt_provider_raw::hexOf("CTORATstpTradeField", pTradeField));
 		}
 	}
 

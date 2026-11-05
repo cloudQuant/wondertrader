@@ -1,0 +1,797 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before/src/WtCore/TraderAdapter.cpp	2026-11-04 09:26:06
++++ src/WtCore/TraderAdapter.cpp	2026-11-04 21:48:43
+@@ -70,7 +70,29 @@
+ };
+ 
+ thread_local SinkCallbackFrame* g_sink_callback_frame = NULL;
++// Order-entry context of the current thread (owner and pre-send observer).
++thread_local TraderAdapter::OwnerScope::Frame* g_owner_scope = NULL;
++thread_local TraderAdapter::EntrustObserverScope::Frame* g_entrust_observer = NULL;
+ 
++// A sink callback starts a fresh order-entry context: an entry made from a
++// callback (e.g. an HFT strategy reacting to an executer's report) must never
++// inherit the owner or observer of the entry whose report is being delivered.
++struct EntryContextIsolation
++{
++	TraderAdapter::OwnerScope::Frame* owner;
++	TraderAdapter::EntrustObserverScope::Frame* observer;
++	EntryContextIsolation() : owner(g_owner_scope), observer(g_entrust_observer)
++	{
++		g_owner_scope = NULL;
++		g_entrust_observer = NULL;
++	}
++	~EntryContextIsolation()
++	{
++		g_owner_scope = owner;
++		g_entrust_observer = observer;
++	}
++};
++
+ uint64_t allocateOwnerRegistryInstanceId()
+ {
+ 	static std::atomic<uint64_t> next_id(1);
+@@ -188,6 +210,22 @@
+ 	if (_owns_trader_api)
+ 		release();
+ 
++	// NEW-052: no SPI callback may run inside or enter this adapter from now
++	// on, so the adapter-owned order map can be released with it. A callback
++	// that the provider delivers after this object is gone is outside the
++	// host's control (ITraderApi offers no quiescence proof).
++	if (closeSpiIngress(true))
++	{
++		OrderMap* orders = NULL;
++		{
++			SpinLock lock(_mtx_orders);
++			orders = _orders;
++			_orders = NULL;
++		}
++		if (orders)
++			orders->release();
++	}
++
+ 	if (_cfg)
+ 		_cfg->release();
+ 
+@@ -195,6 +233,58 @@
+ 		_stat_map->release();
+ }
+ 
++thread_local const TraderAdapter::SpiIngress* TraderAdapter::s_spi_ingress = NULL;
++
++TraderAdapter::SpiIngress::SpiIngress(TraderAdapter* adapter)
++	: _adapter(adapter), _entered(false), _previous(NULL)
++{
++	// Count first, then check: closeSpiIngress() sets the flag before waiting
++	// for the count, so an admitted callback is always waited for.
++	_adapter->_spi_inflight.fetch_add(1, std::memory_order_seq_cst);
++	if (_adapter->_spi_closed.load(std::memory_order_seq_cst))
++	{
++		// Decrement under the mutex: a waiter in closeSpiIngress(true) can only
++		// observe zero after this thread is done with the adapter's mutex.
++		std::lock_guard<std::mutex> lock(_adapter->_spi_mutex);
++		if (_adapter->_spi_inflight.fetch_sub(1, std::memory_order_seq_cst) == 1)
++			_adapter->_spi_idle.notify_all();
++		return;
++	}
++	_entered = true;
++	_previous = s_spi_ingress;
++	s_spi_ingress = this;
++}
++
++TraderAdapter::SpiIngress::~SpiIngress()
++{
++	if (!_entered)
++		return;
++	s_spi_ingress = _previous;
++	std::lock_guard<std::mutex> lock(_adapter->_spi_mutex);
++	if (_adapter->_spi_inflight.fetch_sub(1, std::memory_order_seq_cst) == 1)
++		_adapter->_spi_idle.notify_all();
++}
++
++bool TraderAdapter::closeSpiIngress(bool wait)
++{
++	_spi_closed.store(true, std::memory_order_seq_cst);
++	if (!wait)
++		return false;
++	for (const SpiIngress* frame = s_spi_ingress; frame != NULL; frame = frame->_previous)
++	{
++		if (frame->_adapter == this)
++			return false;	// cannot wait for the callback this thread is running
++	}
++	std::unique_lock<std::mutex> lock(_spi_mutex);
++	_spi_idle.wait(lock, [this]() { return _spi_inflight.load(std::memory_order_seq_cst) == 0; });
++	return true;
++}
++
++void TraderAdapter::reopenSpiIngress()
++{
++	_spi_closed.store(false, std::memory_order_seq_cst);
++}
++
+ void TraderAdapter::addSink(ITrdNotifySink* sink)
+ {
+ 	if (sink == NULL)
+@@ -377,6 +467,20 @@
+ 		}
+ 
+ 		std::lock_guard<std::mutex> registrationLock(registration->mutex);
++		// NEW-008: a removed sink's owner declaration ends with it. Otherwise a
++		// later sink allocated at the same address would silently inherit the
++		// owner, and a re-created owner would find a stale token and never be
++		// registered (and so receive other owners' events as a plain sink).
++		auto declared = _declared_owner_sinks.find(sink);
++		if (declared != _declared_owner_sinks.end())
++		{
++			auto token = _declared_owner_tokens.find(declared->second);
++			if (token != _declared_owner_tokens.end() &&
++				token->second._generation == registration->owner_generation)
++				_declared_owner_tokens.erase(token);
++			_declared_owner_sinks.erase(declared);
++		}
++
+ 		if (registration->owner_registered)
+ 		{
+ 			auto ownerIt = _owner_sink_registrations.find(registration->owner_id);
+@@ -542,9 +646,18 @@
+ 
+ void TraderAdapter::dispatchOrderEvent(const std::string& owner, const std::function<void(ITrdNotifySink*)>& callback)
+ {
+-	if (owner.empty() || !isOwnerRoutingEnabled())
++	if (!isOwnerRoutingEnabled())
+ 	{
+ 		forEachSink(callback);
++		return;
++	}
++	// NEW-008: with owner routing an owner sink only ever receives events of
++	// its own orders. Unowned events (direct adapter orders, external or
++	// unresolvable orders) reach non-owner observers only and are never
++	// broadcast into an owner's ledger.
++	if (owner.empty())
++	{
++		forEachNonOwnerSink(callback);
+ 		return;
+ 	}
+ 	if (!forEachSinkForOwner(owner, callback))
+@@ -662,6 +775,7 @@
+ 	g_sink_callback_frame = &callbackFrame;
+ 	try
+ 	{
++		EntryContextIsolation isolation;
+ 		callback(registration->sink);
+ 	}
+ 	catch (...)
+@@ -691,6 +805,7 @@
+ 	g_sink_callback_frame = &callbackFrame;
+ 	try
+ 	{
++		EntryContextIsolation isolation;
+ 		callback(registration->sink);
+ 	}
+ 	catch (...)
+@@ -1259,6 +1374,9 @@
+ 		_stat_map = TradeStatMap::create();
+ 
+ 	setState(AS_LOGINING);
++	// A (re)registered SPI accepts callbacks again; callbacks of an earlier
++	// released API instance were drained by release().
++	reopenSpiIngress();
+ 	_trader_api->registerSpi(this);
+ 	_spi_registered = true;
+ 
+@@ -1283,6 +1401,10 @@
+ 		_trader_api->release();
+ 		_api_released = true;
+ 	}
++	// NEW-052: callbacks the provider still delivers after release are
++	// dropped. release() is not a drain barrier (a callback may be blocked on
++	// the caller); the destructor waits for callbacks already running.
++	closeSpiIngress(false);
+ 
+ 	if (_owns_trader_api)
+ 	{
+@@ -1422,8 +1544,6 @@
+ 	const uint32_t IDENTITY_STATUS_MANUAL = 0xFFFF0003u;		///< closed by audited manual reconciliation
+ 	const size_t LEDGER_TOMBSTONE_LIMIT = 65536;
+ 
+-	thread_local TraderAdapter::OwnerScope::Frame* g_owner_scope = NULL;
+-
+ 	struct IdentityJournalAttachment
+ 	{
+ 		std::string path;
+@@ -1456,6 +1576,18 @@
+ 		}
+ 		return localid == 0 ? UINT32_MAX : localid;
+ 	}
++
++	// NEW-154: identity of one trade report for duplicate detection. The order
++	// reference and direction are part of it because the two sides of a self
++	// match share the trade id (checkSelfMatch relies on seeing both). An
++	// empty trade id cannot be deduplicated.
++	std::string tradeReportKey(const WTSTradeInfo* trade)
++	{
++		if (trade == NULL || trade->getTradeID()[0] == '\0')
++			return std::string();
++		return fmt::format("{}|{}|{}|{}", trade->getExchg(), trade->getTradeID(), trade->getRefOrder(),
++			static_cast<int>(trade->getDirection()));
++	}
+ }
+ 
+ TraderAdapter::OwnerScope::OwnerScope(TraderAdapter* adapter, const std::string& owner, bool shared_capable)
+@@ -1472,6 +1604,19 @@
+ 	g_owner_scope = _frame.previous;
+ }
+ 
++TraderAdapter::EntrustObserverScope::EntrustObserverScope(TraderAdapter* adapter, const std::function<void(uint32_t)>& observer)
++{
++	_frame.adapter = adapter;
++	_frame.observer = observer;
++	_frame.previous = g_entrust_observer;
++	g_entrust_observer = &_frame;
++}
++
++TraderAdapter::EntrustObserverScope::~EntrustObserverScope()
++{
++	g_entrust_observer = _frame.previous;
++}
++
+ OrderIDs TraderAdapter::buyAsOwner(const std::string& owner, bool shared_capable, const char* stdCode,
+ 	double price, double qty, int flag, bool bForceClose)
+ {
+@@ -1848,6 +1993,18 @@
+ 			_owner_undone[entry.owner_id][entry.std_code] += entry.sign * delta;
+ 	}
+ 	entry.accounted = accounted;
++}
++
++void TraderAdapter::ledgerRecomputeLocked(OrderLedgerEntry& entry)
++{
++	// I03-NEW-057: one fill can arrive as an order report (volLeft shrinks)
++	// and as a trade report, in either order; deduct it once.
++	double left = entry.volume - entry.trade_filled;
++	if (entry.order_left >= 0)
++		left = (std::min)(left, entry.order_left);
++	if (!(left > 0) || !std::isfinite(left))
++		left = 0;
++	ledgerSetAccountedLocked(entry, left);
+ }
+ 
+ void TraderAdapter::ledgerTombstoneLocked(uint32_t localid, OrderLedgerEntry& entry, OrderLedgerState state)
+@@ -1862,10 +2019,12 @@
+ }
+ 
+ bool TraderAdapter::ledgerApplyOrderLocked(uint32_t localid, const std::string& stdCode, bool isBuy,
+-	bool alive, double volLeft, uint64_t version)
++	bool alive, double volume, double volLeft, uint64_t version)
+ {
+ 	if (volLeft < 0 || !std::isfinite(volLeft))
+ 		volLeft = 0;
++	if (!std::isfinite(volume) || volume < volLeft)
++		volume = volLeft;
+ 	auto it = _ledger.find(localid);
+ 	if (it == _ledger.end())
+ 	{
+@@ -1874,10 +2033,12 @@
+ 		entry.sign = isBuy ? 1.0 : -1.0;
+ 		entry.created_version = entry.last_version = version;
+ 		entry.state = OrderLedgerState::Live;
++		entry.volume = volume;
++		entry.order_left = volLeft;
+ 		OrderLedgerEntry& stored = _ledger[localid] = entry;
+ 		if (alive)
+ 		{
+-			ledgerSetAccountedLocked(stored, volLeft);
++			ledgerRecomputeLocked(stored);
+ 			return false;
+ 		}
+ 		ledgerTombstoneLocked(localid, stored, OrderLedgerState::Terminal);
+@@ -1894,9 +2055,13 @@
+ 		return true;
+ 	}
+ 	// Remaining quantity only decreases; an Absent tombstone is revived by a
+-	// newer realtime report.
+-	double target = entry.state == OrderLedgerState::Absent ? volLeft : (std::min)(entry.accounted, volLeft);
+-	ledgerSetAccountedLocked(entry, target);
++	// newer realtime report. The provider's order volume replaces the entrust
++	// quantity once reported.
++	if (volume > 0)
++		entry.volume = volume;
++	entry.order_left = (entry.state == OrderLedgerState::Absent || entry.order_left < 0) ?
++		volLeft : (std::min)(entry.order_left, volLeft);
++	ledgerRecomputeLocked(entry);
+ 	entry.state = OrderLedgerState::Live;
+ 	return false;
+ }
+@@ -2289,6 +2454,13 @@
+ 
+ 	WTSContractInfo* cInfo = entrust->getContractInfo();
+ 	if (cInfo == NULL) cInfo = getContract(entrust->getCode());
++	if (cInfo == NULL)
++	{
++		// L01-014: unknown/unparseable code; nothing reserved or sent yet.
++		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] entrust rejected: contract of {} unavailable",
++			_id.c_str(), riskCode.c_str());
++		return UINT_MAX;
++	}
+ 
+ 	/*
+ 	 *	By Wesley @ 2024.04.12
+@@ -2351,6 +2523,31 @@
+ 		journalTerminal(localid, intentId, IDENTITY_STATUS_NOT_SENT, 0);
+ 	};
+ 
++	// R15-001: per-order caller data is registered before the provider call,
++	// so synchronous reports can already find it. An observer failure aborts
++	// the entry before anything is sent.
++	for (EntrustObserverScope::Frame* frame = g_entrust_observer; frame != NULL; frame = frame->previous)
++	{
++		if (frame->adapter != this)
++			continue;
++		bool observed = false;
++		try
++		{
++			if (frame->observer)
++				frame->observer(localid);
++			observed = true;
++		}
++		catch (...) {}
++		if (!observed)
++		{
++			WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,
++				"[{}] entrust of local order {} aborted before send: entry observer failed", _id.c_str(), localid);
++			journalTerminal(0, intentId, IDENTITY_STATUS_NOT_SENT, 0);
++			return UINT_MAX;
++		}
++		break;
++	}
++
+ 	if (isTradingAdmissionClosed())
+ 	{
+ 		journalTerminal(0, intentId, IDENTITY_STATUS_NOT_SENT, 0);
+@@ -2375,8 +2572,9 @@
+ 		entry.sign = isBuy ? 1.0 : -1.0;
+ 		entry.created_version = entry.last_version = ++_event_version;
+ 		entry.state = OrderLedgerState::Submitting;
++		entry.volume = qty;
+ 		OrderLedgerEntry& stored = _ledger[localid] = entry;
+-		ledgerSetAccountedLocked(stored, qty);
++		ledgerRecomputeLocked(stored);
+ 	}
+ 
+ 	// Track the localid while the provider call is in progress so reports
+@@ -2500,12 +2698,16 @@
+ 
+ WTSContractInfo* TraderAdapter::getContract(const char* stdCode)
+ {
++	if (_bd_mgr == NULL || stdCode == NULL)
++		return NULL;
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, NULL);
+ 	return _bd_mgr->getContract(cInfo._code, cInfo._exchg);
+ }
+ 
+ WTSCommodityInfo* TraderAdapter::getCommodify(const char* stdCode)
+ {
++	if (_bd_mgr == NULL || stdCode == NULL)
++		return NULL;
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, NULL);
+ 	return _bd_mgr->getCommodity(cInfo._exchg, cInfo._product);
+ }
+@@ -2514,6 +2716,14 @@
+ {
+ 	if (!_risk_mon_enabled)
+ 		return true;
++	// Card 8c=A (BUG-R202-003): with risk control active, a code that does not
++	// resolve to a known contract is rejected.
++	if (stdCode == NULL || getContract(stdCode) == NULL)
++	{
++		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,
++			"[{}] cancel of {} rejected by risk control: unknown contract", _id.c_str(), stdCode ? stdCode : "");
++		return false;
++	}
+ 
+ 	const RiskParams* riskPara = getRiskParams(stdCode);
+ 	{
+@@ -2535,6 +2745,10 @@
+ {
+ 	if (!_risk_mon_enabled)
+ 		return true;
++	// Card 8c=A (BUG-R202-003): unknown contracts are not tradable while risk
++	// control is active (same answer as checkOrderLimits).
++	if (stdCode == NULL || const_cast<TraderAdapter*>(this)->getContract(stdCode) == NULL)
++		return false;
+ 	{
+ 		std::lock_guard<std::mutex> lock(_risk_exclude_mutex);
+ 		if (_exclude_codes.find(stdCode) != _exclude_codes.end())
+@@ -2549,6 +2763,14 @@
+ {
+ 	if (!_risk_mon_enabled)
+ 		return true;
++	// Card 8c=A (BUG-R202-003): with risk control active, a code that does not
++	// resolve to a known contract is rejected before any order is built.
++	if (stdCode == NULL || getContract(stdCode) == NULL)
++	{
++		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,
++			"[{}] order of {} rejected by risk control: unknown contract", _id.c_str(), stdCode ? stdCode : "");
++		return false;
++	}
+ 
+ 	const RiskParams* riskPara = getRiskParams(stdCode);
+ 	{
+@@ -2582,6 +2804,14 @@
+ 	}
+ 
+ 	if(cInfo == NULL) cInfo = getContract(stdCode);
++	// L01-014: an unknown or unparseable standard code never reaches the
++	// ledger or the provider (fail closed instead of dereferencing NULL).
++	if (cInfo == NULL || cInfo->getCommInfo() == NULL || cInfo->getCommInfo()->getSessionInfo() == NULL)
++	{
++		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] {} rejected: contract, commodity or session of {} unavailable",
++			_id.c_str(), "buy", stdCode ? stdCode : "");
++		return ret;
++	}
+ 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
+ 	WTSSessionInfo* sInfo = commInfo->getSessionInfo();
+ 
+@@ -2904,6 +3134,14 @@
+ 	}
+ 
+ 	if (cInfo == NULL) cInfo = getContract(stdCode);
++	// L01-014: an unknown or unparseable standard code never reaches the
++	// ledger or the provider (fail closed instead of dereferencing NULL).
++	if (cInfo == NULL || cInfo->getCommInfo() == NULL || cInfo->getCommInfo()->getSessionInfo() == NULL)
++	{
++		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] {} rejected: contract, commodity or session of {} unavailable",
++			_id.c_str(), "sell", stdCode ? stdCode : "");
++		return ret;
++	}
+ 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
+ 	WTSSessionInfo* sInfo = commInfo->getSessionInfo();
+ 
+@@ -3410,8 +3648,12 @@
+ 		// Each candidate is verified and claimed individually (owner, pause).
+ 		if (!cancelClaimed(item.first, owner))
+ 			continue;
+-		const bool sent = doCancel(orderInfo);
+-		cancelUnclaim(item.first);
++		bool sent = false;
++		{
++			// The claim is released even if the provider call throws.
++			struct Unclaim { TraderAdapter* self; uint32_t localid; ~Unclaim() { self->cancelUnclaim(localid); } } unclaim{ this, item.first };
++			sent = doCancel(orderInfo);
++		}
+ 		if (sent)
+ 		{
+ 			actQty += leftQty;
+@@ -3506,6 +3748,9 @@
+ #pragma region "ITraderSpi接口"
+ void TraderAdapter::handleEvent(WTSTraderEvent e, int32_t ec)
+ {
++	SpiIngress spiIngress(this);
++	if (!spiIngress)
++		return;
+ 	if(e == WTE_Connect)
+ 	{
+ 		if(ec == 0)
+@@ -3555,6 +3800,9 @@
+ 
+ void TraderAdapter::onLoginResult(bool bSucc, const char* msg, uint32_t tradingdate)
+ {
++	SpiIngress spiIngress(this);
++	if (!spiIngress)
++		return;
+ 	if(!bSucc)
+ 	{
+ 		setState(AS_LOGINFAILED);
+@@ -3571,6 +3819,13 @@
+ 		{
+ 			std::lock_guard<std::mutex> lock(_ledger_mutex);
+ 			_positions_query_version = ++_event_version;	// NEW-154: position snapshot epoch
++			if (_trade_dedupe_day != tradingdate)
++			{
++				// Trade ids are only unique within a trading day.
++				_pushed_trades.clear();
++				_counted_trades.clear();
++				_trade_dedupe_day = tradingdate;
++			}
+ 		}
+ 		_trader_api->queryPositions();	//查持仓
+ 	}
+@@ -3578,11 +3833,17 @@
+ 
+ void TraderAdapter::onLogout()
+ {
++	SpiIngress spiIngress(this);
++	if (!spiIngress)
++		return;
+ 	
+ }
+ 
+ void TraderAdapter::onRspEntrust(WTSEntrust* entrust, WTSError *err)
+ {
++	SpiIngress spiIngress(this);
++	if (!spiIngress)
++		return;
+ 	if (err && err->getErrorCode() != WEC_NONE)
+ 	{
+ 		// An external order's tag must not consume this adapter's pending
+@@ -3641,14 +3902,16 @@
+ 			if (it != _ledger.end())
+ 			{
+ 				it->second.last_version = ++_event_version;
++				// I03-NEW-057: read the entry before tombstoning; pruning may
++				// move dense-map entries and invalidate `it`.
++				ledgerCode = it->second.std_code;
++				intentId = it->second.intent_id;
++				entrustOwner = it->second.owner_id;
+ 				if (it->second.state != OrderLedgerState::Terminal)
+ 				{
+ 					ledgerTombstoneLocked(localid, it->second, OrderLedgerState::Terminal);
+ 					firstTerminal = true;
+ 				}
+-				ledgerCode = it->second.std_code;
+-				intentId = it->second.intent_id;
+-				entrustOwner = it->second.owner_id;
+ 			}
+ 		}
+ 		if (!firstTerminal)
+@@ -3706,6 +3969,9 @@
+ 
+ void TraderAdapter::onRspAccount(WTSArray* ayAccounts)
+ {
++	SpiIngress spiIngress(this);
++	if (!spiIngress)
++		return;
+ 	if (_save_data)
+ 	{
+ 		saveData(ayAccounts);
+@@ -3752,6 +4018,9 @@
+ 
+ void TraderAdapter::onRspPosition(const WTSArray* ayPositions)
+ {
++	SpiIngress spiIngress(this);
++	if (!spiIngress)
++		return;
+ 	if (ayPositions && ayPositions->size() > 0)
+ 	{
+ 		for (auto it = ayPositions->begin(); it != ayPositions->end(); it++)
+@@ -3806,13 +4075,35 @@
+ 			{
+ 				// NEW-154 (5d): a realtime trade newer than this position query
+ 				// already moved the position; the snapshot row is stale for it.
+-				std::lock_guard<std::mutex> lock(_ledger_mutex);
+-				auto newer = _position_event_version.find(stdCode);
+-				if (newer != _position_event_version.end() && newer->second > _positions_query_version)
++				// A position is a level and a trade a delta: when no earlier
++				// snapshot established this contract's baseline, the adapter
++				// only holds the newer deltas and cannot tell whether the row
++				// already includes them, so the account is paused (fail closed).
++				bool ambiguous = false;
++				bool ignored = false;
++				uint64_t newerVersion = 0;
++				uint64_t epoch = 0;
++				{
++					std::lock_guard<std::mutex> lock(_ledger_mutex);
++					auto newer = _position_event_version.find(stdCode);
++					epoch = _positions_query_version;
++					if (newer != _position_event_version.end() && newer->second > _positions_query_version)
++					{
++						ignored = true;
++						newerVersion = newer->second;
++						ambiguous = _position_baseline.find(stdCode) == _position_baseline.end();
++					}
++					else
++						_position_baseline.insert(stdCode);
++				}
++				if (ignored)
+ 				{
+ 					WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN,
+ 						"[{}] position snapshot row of {} ignored: realtime trade version {} is newer than snapshot epoch {}",
+-						_id.c_str(), stdCode.c_str(), newer->second, _positions_query_version);
++						_id.c_str(), stdCode.c_str(), newerVersion, epoch);
++					if (ambiguous)
++						pauseAccount("position_snapshot", fmt::format(
++							"position of {} has no snapshot baseline and a newer realtime trade; reconciliation required", stdCode));
+ 					continue;
+ 				}
+ 			}
+@@ -3859,6 +4150,9 @@
+ 
+ void TraderAdapter::onRspOrders(const WTSArray* ayOrders)
+ {
++	SpiIngress spiIngress(this);
++	if (!spiIngress)
++		return;
+ 	// Card 5d: the snapshot epoch is the event version at which the query was
+ 	// issued. Realtime events carry newer versions and win over the snapshot;
+ 	// terminal entries are tombstones; live entries absent from a complete
+@@ -3993,7 +4287,7 @@
+ 				else
+ 				{
+ 					firstTerminal = ledgerApplyOrderLocked(localid, stdCode, isBuy, orderInfo->isAlive(),
+-						orderInfo->getVolLeft(), snapshotEpoch);
++						orderInfo->getVolume(), orderInfo->getVolLeft(), snapshotEpoch);
+ 					keepActive = orderInfo->isAlive();
+ 				}
+ 				entry = _ledger.find(localid);
+@@ -4010,12 +4304,25 @@
+ 			}
+ 		}
+ 
++		// NEW-154: ITraderSpi::onRspOrders cannot say whether a query failed.
++		// Providers deliver an empty (reused, cleared) array both for "no
++		// orders" and for an error response, so an empty snapshot is treated
++		// like a failed query (fail closed): no live order is tombstoned and no
++		// reserved quantity is released. Absence is only trusted in a
++		// non-empty snapshot; a partially failed non-empty snapshot is still
++		// indistinguishable at this interface.
++		const bool trustAbsence = ayOrders->size() != 0;
++		if (!trustAbsence)
++			WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN,
++				"[{}] empty order snapshot epoch {} cannot be told apart from a failed query; live orders kept", _id.c_str(), snapshotEpoch);
+ 		std::vector<uint32_t> absent;
+ 		{
+ 			std::lock_guard<std::mutex> inflightLock(_inflight_mutex);
+ 			std::lock_guard<std::mutex> lock(_ledger_mutex);
+ 			for (auto& item : _ledger)
+ 			{
++				if (!trustAbsence)
++					break;
+ 				OrderLedgerEntry& entry = item.second;
+ 				if (seenIds.count(item.first) != 0)
+ 					continue;
+@@ -4059,6 +4366,9 @@
+ 
+ void TraderAdapter::onRspTrades(const WTSArray* ayTrades)
+ {
++	SpiIngress spiIngress(this);
++	if (!spiIngress)
++		return;
+ 	if (ayTrades)
+ 	{
+ 		for (auto it = ayTrades->begin(); it != ayTrades->end(); it++)
+@@ -4105,6 +4415,14 @@
+ 			bool isOpen = (tInfo->getOffsetType() == WOT_OPEN);
+ 			bool isCloseT = (tInfo->getOffsetType() == WOT_CLOSETODAY);
+ 			double qty = tInfo->getVolume();
++			{
++				// NEW-154: a trade already counted (realtime push or an earlier
++				// query) is not counted again; self-match checks still run.
++				std::lock_guard<std::mutex> lock(_ledger_mutex);
++				const std::string key = tradeReportKey(tInfo);
++				if (!key.empty() && !_counted_trades.insert(key).second)
++					qty = 0;
++			}
+ 
+ 			if (isLong)
+ 			{
+@@ -4202,6 +4520,9 @@
+ 
+ void TraderAdapter::onPushOrder(WTSOrderInfo* orderInfo)
+ {
++	SpiIngress spiIngress(this);
++	if (!spiIngress)
++		return;
+ 	if (orderInfo == NULL)
+ 		return;
+ 
+@@ -4451,7 +4772,7 @@
+ 		{
+ 			std::lock_guard<std::mutex> lock(_ledger_mutex);
+ 			firstTerminal = ledgerApplyOrderLocked(localid, stdCode, isBuy, orderInfo->isAlive(),
+-				orderInfo->getVolLeft(), ++_event_version);
++				orderInfo->getVolume(), orderInfo->getVolLeft(), ++_event_version);
+ 			auto it = _ledger.find(localid);
+ 			if (it != _ledger.end())
+ 			{
+@@ -4507,6 +4828,9 @@
+ 
+ void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
+ {
++	SpiIngress spiIngress(this);
++	if (!spiIngress)
++		return;
+ 	if (tradeRecord == NULL)
+ 		return;
+ 	WTSContractInfo* cInfo = tradeRecord->getContractInfo();
+@@ -4555,8 +4879,21 @@
+ 		"[{}] Trade notified, instrument: {}, usertag: {}, trdqty: {}, trdprice: {}", 
+ 			_id.c_str(), stdCode.c_str(), tradeRecord->getUserTag(), tradeRecord->getVolume(), tradeRecord->getPrice());
+ 
++	bool countStats = true;
+ 	{
+ 		std::lock_guard<std::mutex> lock(_ledger_mutex);
++		// NEW-154: a redelivered realtime trade (same trade id, order reference
++		// and direction) is applied once: no second position, statistic, ledger
++		// or sink effect.
++		const std::string key = tradeReportKey(tradeRecord);
++		if (!key.empty() && !_pushed_trades.insert(key).second)
++		{
++			WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN,
++				"[{}] duplicate trade push {} of {} ignored", _id.c_str(), tradeRecord->getTradeID(), stdCode.c_str());
++			return;
++		}
++		if (!key.empty())
++			countStats = _counted_trades.insert(key).second;
+ 		_position_event_version[stdCode] = ++_event_version;
+ 	}
+ 	PosItem& pItem = _positions[stdCode];
+@@ -4567,7 +4904,10 @@
+ 		_stat_map->add(stdCode, statInfo, false);
+ 	}
+ 
+-	TradeStatInfo& statItem = statInfo->statInfo();
++	// A trade already counted by the trade query keeps its position effect but
++	// is not counted in the statistics twice.
++	TradeStatInfo uncountedStats;
++	TradeStatInfo& statItem = countStats ? statInfo->statInfo() : uncountedStats;
+ 	double vol = tradeRecord->getVolume();
+ 	bool isNet = tradeRecord->isNet();
+ 	bool isBuy = isNet ? tradeRecord->isNetBuy() : tradeRecord->isBuyAction();
+@@ -4701,6 +5041,7 @@
+ 	//如果是自己的订单，则更新未完成单
+ 	uint32_t localid = 0;
+ 	std::string tradeOwner;
++	bool ownerResolved = true;
+ 	if (taggedId != 0)
+ 	{
+ 		localid = taggedId;
+@@ -4715,12 +5056,38 @@
+ 			const bool duplicate = !tradeId.empty() && !it->second.trade_ids.insert(tradeId).second;
+ 			if (!duplicate && it->second.state != OrderLedgerState::Terminal)
+ 			{
+-				ledgerSetAccountedLocked(it->second, (std::max)(0.0, it->second.accounted - vol));
++				it->second.trade_filled += vol;
++				ledgerRecomputeLocked(it->second);
+ 			}
+ 			tradeOwner = it->second.owner_id;
++			ownerResolved = it->second.verified;
+ 		}
++		else
++			ownerResolved = false;
+ 	}
+ 
++	// NEW-008 + L01-014: with owner routing, an own-tagged trade whose order
++	// identity (and so its owner) this adapter cannot verify is never guessed
++	// or broadcast into an owner's ledger. The durable identity journal may
++	// still name the owner; otherwise the trade is retained and the account
++	// paused for manual reconciliation. Observers still see it as unowned.
++	if (!ownerResolved && isOwnerRoutingEnabled())
++	{
++		std::string journalOwner;
++		std::shared_ptr<DiffOrderOwnershipJournalV1> journal = _identity_journal;
++		const std::string ownerPrefix = _identity_owner + "/";
++		if (journal && journal->ownerForLocalOrder(localid, journalOwner) == DiffOrderOwnershipJournalV1::Status::Ok &&
++			(journalOwner == _identity_owner || journalOwner.compare(0, ownerPrefix.size(), ownerPrefix) == 0))
++		{
++			tradeOwner = journalOwner == _identity_owner ? std::string() : journalOwner.substr(ownerPrefix.size());
++		}
++		else
++		{
++			tradeOwner.clear();
++			quarantineTrade(tradeRecord, "order owner unresolvable under owner routing");
++		}
++	}
++
+ 	dispatchOrderEvent(tradeOwner, [&](ITrdNotifySink* sink) {
+ 		sink->on_trade(localid, stdCode.c_str(), isBuy, vol, tradeRecord->getPrice());
+ 	});
+@@ -4740,6 +5107,9 @@
+ 
+ void TraderAdapter::onTraderError(WTSError* err, void* /*pData*/ /* = NULL */)
+ {
++	SpiIngress spiIngress(this);
++	if (!spiIngress)
++		return;
+ 	if(err)
+ 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,"[{}] Error of trading channel occured: {}", _id.c_str(), err->getMessage());
+ 
+@@ -4754,6 +5124,9 @@
+ 
+ void TraderAdapter::handleTraderLog(WTSLogLevel ll, const char* message)
+ {
++	SpiIngress spiIngress(this);
++	if (!spiIngress)
++		return;
+ 	WTSLogger::log_dyn_raw("trader", _id.c_str(), ll, message);
+ }
+ 

@@ -1,0 +1,42 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = WtRunnerParserInitFailure.*
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from WtRunnerParserInitFailure
+[ RUN      ] WtRunnerParserInitFailure.PublicConfigFailsAndQuarantinesUninitializedParser
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/n01_parser_init_failure_test.cpp:153: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  probe.createCount()
+    Which is: 0
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/n01_parser_init_failure_test.cpp:154: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  probe.registerCount()
+    Which is: 0
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/n01_parser_init_failure_test.cpp:155: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  probe.initCount()
+    Which is: 0
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtRunner/n01_parser_init_failure_test.cpp:164: Failure
+Value of: g_failed_runner->shutdown()
+  Actual: true
+Expected: false
+
+[  FAILED  ] WtRunnerParserInitFailure.PublicConfigFailsAndQuarantinesUninitializedParser (669 ms)
+[----------] 1 test from WtRunnerParserInitFailure (669 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (669 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] WtRunnerParserInitFailure.PublicConfigFailsAndQuarantinesUninitializedParser
+
+ 1 FAILED TEST

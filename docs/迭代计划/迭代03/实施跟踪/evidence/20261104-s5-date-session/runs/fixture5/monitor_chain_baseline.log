@@ -1,0 +1,43 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 3 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 3 tests from MonitorSnapshot
+[ RUN      ] MonitorSnapshot.InvalidSnapshotsDoNotMoveAnyState
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/monitor_test.cpp:76: Failure
+Value of: monitor.isInState("DAY", SS_ORIGINAL)
+  Actual: false
+Expected: true
+20240230.1000
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/monitor_test.cpp:76: Failure
+Value of: monitor.isInState("DAY", SS_ORIGINAL)
+  Actual: false
+Expected: true
+0.1000
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/monitor_test.cpp:76: Failure
+Value of: monitor.isInState("DAY", SS_ORIGINAL)
+  Actual: false
+Expected: true
+20240227.960
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/monitor_test.cpp:76: Failure
+Value of: monitor.isInState("DAY", SS_ORIGINAL)
+  Actual: false
+Expected: true
+9991231.1000
+
+[  FAILED  ] MonitorSnapshot.InvalidSnapshotsDoNotMoveAnyState (16 ms)
+[ RUN      ] MonitorSnapshot.ValidSnapshotsStillDriveTransitions
+[       OK ] MonitorSnapshot.ValidSnapshotsStillDriveTransitions (1 ms)
+[ RUN      ] MonitorSnapshot.ConfiguredHolidayIsStillAHoliday
+[       OK ] MonitorSnapshot.ConfiguredHolidayIsStillAHoliday (47 ms)
+[----------] 3 tests from MonitorSnapshot (66 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 1 test suite ran. (68 ms total)
+[  PASSED  ] 2 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] MonitorSnapshot.InvalidSnapshotsDoNotMoveAnyState
+
+ 1 FAILED TEST

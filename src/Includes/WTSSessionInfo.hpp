@@ -87,14 +87,88 @@ public:
 public:
 	int32_t	getOffsetMins() const{return m_uOffsetMins;}
 
-	void addTradingSection(uint32_t sTime, uint32_t eTime)
+	// HHMM accepts 00:00 through 23:59 and the 24:00 endpoint label.
+	static bool isValidSessionTime(uint32_t time)
 	{
-		m_tradingTimes.emplace_back(TradingSection(offsetTime(sTime, true), offsetTime(eTime, false), sTime, eTime));
-		_minutes.clear();
+		return time <= 2400 && time % 100 < 60 && (time / 100 < 24 || time == 2400);
 	}
 
-	void setAuctionTime(uint32_t sTime, uint32_t eTime)
+	// Decision card 2: raw 0-0 is the only full-day section and other equal
+	// endpoints are rejected. A full-day section already covers every minute,
+	// so it cannot be combined with any other section (the aggregate views
+	// would exceed one day). Such a mix is rejected without mutation.
+	// Decision K30=A (2026-11-04): interior overlaps between ordinary sections
+	// are rejected as well; touching endpoints are allowed (see overlapsTradingSection).
+	bool mixesFullDaySection(uint32_t sTime, uint32_t eTime) const
 	{
+		if (m_tradingTimes.empty())
+			return false;
+		if (sTime == 0 && eTime == 0)
+			return true;
+		for (const TradingSection& section : m_tradingTimes)
+		{
+			if (section.first_raw == 0 && section.second_raw == 0)
+				return true;
+		}
+		return false;
+	}
+
+	// Decision K30=A: a new ordinary section must not share any minute with a
+	// registered one. Sections are compared on the 1440-minute circle using the
+	// raw times, which makes the check independent of the (rotating) offset.
+	static void sectionArcs(uint32_t sTime, uint32_t eTime, uint32_t arcs[2][2], int& count)
+	{
+		const uint32_t s = (sTime / 100) * 60 + sTime % 100;
+		uint32_t e = (eTime / 100) * 60 + eTime % 100;
+		count = 0;
+		if (e == 0) e = 1440;
+		if (s < e)
+		{
+			arcs[count][0] = s; arcs[count][1] = e; count++;
+		}
+		else
+		{
+			arcs[count][0] = s; arcs[count][1] = 1440; count++;
+			if (e % 1440 != 0) { arcs[count][0] = 0; arcs[count][1] = e % 1440; count++; }
+		}
+	}
+
+	bool overlapsTradingSection(uint32_t sTime, uint32_t eTime) const
+	{
+		uint32_t mine[2][2]; int mineCount = 0;
+		sectionArcs(sTime, eTime, mine, mineCount);
+		for (const TradingSection& section : m_tradingTimes)
+		{
+			uint32_t other[2][2]; int otherCount = 0;
+			sectionArcs(section.first_raw, section.second_raw, other, otherCount);
+			for (int i = 0; i < mineCount; i++)
+				for (int j = 0; j < otherCount; j++)
+					if (mine[i][0] < other[j][1] && other[j][0] < mine[i][1])
+						return true;
+		}
+		return false;
+	}
+
+	bool tryAddTradingSection(uint32_t sTime, uint32_t eTime)
+	{
+		if (!isValidSessionTime(sTime) || !isValidSessionTime(eTime) ||
+			((sTime % 2400 == eTime % 2400) && !(sTime == 0 && eTime == 0)) ||
+			mixesFullDaySection(sTime, eTime) || overlapsTradingSection(sTime, eTime))
+			return false;
+		m_tradingTimes.emplace_back(TradingSection(offsetTime(sTime, true), offsetTime(eTime, false), sTime, eTime));
+		_minutes.clear();
+		return true;
+	}
+
+	void addTradingSection(uint32_t sTime, uint32_t eTime)
+	{
+		(void)tryAddTradingSection(sTime, eTime);
+	}
+
+	bool trySetAuctionTime(uint32_t sTime, uint32_t eTime)
+	{
+		if (!isValidSessionTime(sTime) || !isValidSessionTime(eTime))
+			return false;
 		if (m_auctionTimes.empty())
 		{
 			m_auctionTimes.emplace_back(makeAuctionSection(sTime, eTime));
@@ -103,11 +177,25 @@ public:
 		{
 			m_auctionTimes[0] = makeAuctionSection(sTime, eTime);
 		}
+		return true;
+	}
+
+	void setAuctionTime(uint32_t sTime, uint32_t eTime)
+	{
+		(void)trySetAuctionTime(sTime, eTime);
+	}
+
+	bool tryAddAuctionTime(uint32_t sTime, uint32_t eTime)
+	{
+		if (!isValidSessionTime(sTime) || !isValidSessionTime(eTime))
+			return false;
+		m_auctionTimes.emplace_back(makeAuctionSection(sTime, eTime));
+		return true;
 	}
 
 	void addAuctionTime(uint32_t sTime, uint32_t eTime)
 	{
-		m_auctionTimes.emplace_back(makeAuctionSection(sTime, eTime));
+		(void)tryAddAuctionTime(sTime, eTime);
 	}
 
 	void setOffsetMins(int32_t offset)
@@ -140,8 +228,59 @@ public:
 	 *	主要用于各种日期比较
 	 *	如夜盘的偏移日期都是下一日
 	 */
+	// Checked proleptic Gregorian date mapping. On failure result is unchanged.
+	bool tryGetOffsetDate(uint32_t uDate, uint32_t uTime, uint32_t& result) const
+	{
+		if (uDate == 0)
+		{
+			uint32_t clockDate = 0, clockTime = 0;
+			if (!TimeUtils::tryGetDateTime(clockDate, clockTime))
+				return false;
+			uDate = clockDate;
+			uTime = clockTime / 100000;
+		}
+		const int64_t year = uDate / 10000;
+		const unsigned month = (uDate / 100) % 100;
+		const unsigned day = uDate % 100;
+		if (year < 1 || year > 9999 || month < 1 || month > 12 || day < 1 ||
+			uTime > 2400 || uTime % 100 >= 60 || (uTime / 100 == 24 && uTime != 2400))
+			return false;
+		static const unsigned monthDays[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+		const unsigned maxDay = monthDays[month - 1] +
+			(month == 2 && (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0)) ? 1 : 0);
+		if (day > maxDay)
+			return false;
+		const int64_t minute = static_cast<int64_t>(uTime / 100) * 60 + uTime % 100 + m_uOffsetMins;
+		int64_t shift = minute / 1440;
+		if (minute % 1440 < 0) --shift;
+		int64_t y = year - (month <= 2 ? 1 : 0);
+		const int64_t era = (y >= 0 ? y : y - 399) / 400;
+		const unsigned yoe = static_cast<unsigned>(y - era * 400);
+		const unsigned mp = month > 2 ? month - 3 : month + 9;
+		const unsigned doy = (153 * mp + 2) / 5 + day - 1;
+		const unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+		int64_t z = era * 146097 + static_cast<int64_t>(doe) + shift;
+		const int64_t destEra = (z >= 0 ? z : z - 146096) / 146097;
+		const unsigned destDoe = static_cast<unsigned>(z - destEra * 146097);
+		const unsigned destYoe = (destDoe - destDoe / 1460 + destDoe / 36524 - destDoe / 146096) / 365;
+		y = static_cast<int64_t>(destYoe) + destEra * 400;
+		const unsigned destDoy = destDoe - (365 * destYoe + destYoe / 4 - destYoe / 100);
+		const unsigned destMp = (5 * destDoy + 2) / 153;
+		const unsigned destDay = destDoy - (153 * destMp + 2) / 5 + 1;
+		const unsigned destMonth = destMp < 10 ? destMp + 3 : destMp - 9;
+		y += destMonth <= 2 ? 1 : 0;
+		if (y < 1 || y > 9999)
+			return false;
+		result = static_cast<uint32_t>(y * 10000 + destMonth * 100 + destDay);
+		return true;
+	}
+
 	uint32_t getOffsetDate(uint32_t uDate = 0, uint32_t uTime = 0)
 	{
+		uint32_t checkedDate = 0;
+		if (tryGetOffsetDate(uDate, uTime, checkedDate))
+			return checkedDate;
+		// Preserve the legacy fallback until its callers gain a checked failure path.
 		if(uDate == 0)
 		{
 			TimeUtils::getDateTime(uDate, uTime);
@@ -181,6 +320,19 @@ public:
 		bool hasAutoAdjustOffset = false;
 		for (const TradingSection& section : m_tradingTimes)
 		{
+			if (section.first_raw == 0 && section.second_raw == 0)
+				return totalOffset + (uTime / 100) * 60 + uTime % 100;
+			if (section.first > section.second)
+			{
+				const uint32_t start = section.first / 100 * 60 + section.first % 100;
+				const uint32_t end = section.second / 100 * 60 + section.second % 100;
+				const uint32_t current = offTime / 100 * 60 + offTime % 100;
+				const uint32_t length = end + 1440 - start;
+				const uint32_t elapsed = (current + 1440 - start) % 1440;
+				if (elapsed <= length) return totalOffset + elapsed;
+				totalOffset += length;
+				continue;
+			}
 			if (section.first <= offTime && offTime <= section.second)
 			{
 				int32_t hour = offTime / 100 - section.first / 100;
@@ -217,8 +369,18 @@ public:
 		for(; it != m_tradingTimes.end(); it++)
 		{
 			TradingSection &section = *it;
+			if (section.first_raw == 0 && section.second_raw == 0)
+			{
+				if (offset < 1440)
+					return (offset / 60) * 100 + offset % 60;
+				if (offset == 1440 && !bHeadFirst)
+					return 2400;
+				offset -= 1440;
+				continue;
+			}
 			uint32_t startMin = section.first/100*60 + section.first%100;
 			uint32_t stopMin = section.second/100*60 + section.second%100;
+			if (stopMin < startMin) stopMin += 1440;
 
 			if(!bHeadFirst)
 			{
@@ -227,7 +389,8 @@ public:
 					offset -= (stopMin - startMin);
 					if (offset == 0)
 					{
-						return originalTime(stopMin / 60 * 100 + stopMin % 60);
+						const uint32_t end = stopMin > 1440 ? stopMin - 1440 : stopMin;
+						return originalTime(end / 60 * 100 + end % 60);
 					}
 				}
 				else
@@ -284,8 +447,22 @@ public:
 		for(; it != m_tradingTimes.end(); it++)
 		{
 			TradingSection &section = *it;
+			if (section.first_raw == 0 && section.second_raw == 0)
+			{
+				uint32_t rawSeconds = (uTime / 10000 * 60 + uTime / 100 % 100) * 60 + uTime % 100;
+				return offset + (rawSeconds == 86400 ? 86399 : rawSeconds);
+			}
 			uint32_t startSecs = (section.first/100*60 + section.first%100)*60;
 			uint32_t stopSecs = (section.second/100*60 + section.second%100)*60;
+			if (stopSecs < startSecs)
+			{
+				const uint32_t length = stopSecs + 86400 - startSecs;
+				const uint32_t elapsed = (seconds + 86400 - startSecs) % 86400;
+				if (elapsed <= length)
+					return offset + elapsed - (elapsed == length ? 1 : 0);
+				offset += length;
+				continue;
+			}
 			//uint32_t s = section.first;
 			//uint32_t e = section.second;
 			//uint32_t hour = (e/100 - s/100);
@@ -321,15 +498,27 @@ public:
 		for(; it != m_tradingTimes.end(); it++)
 		{
 			TradingSection &section = *it;
+			if (section.first_raw == 0 && section.second_raw == 0)
+			{
+				if (offset <= 86400)
+				{
+					uint32_t mins = offset / 60;
+					return ((mins / 60) * 100 + mins % 60) * 100 + offset % 60;
+				}
+				offset -= 86400;
+				continue;
+			}
 			uint32_t startSecs = (section.first/100*60 + section.first%100)*60;
 			uint32_t stopSecs = (section.second/100*60 + section.second%100)*60;
+			if (stopSecs < startSecs) stopSecs += 86400;
 
 			if(startSecs + offset >= stopSecs)
 			{
 				offset -= (stopSecs-startSecs);
 				if(offset == 0)
 				{
-					uint32_t desMin = stopSecs/60;
+					uint32_t end = stopSecs > 86400 ? stopSecs - 86400 : stopSecs;
+					uint32_t desMin = end/60;
 					return originalTime((desMin/60*100 + desMin%60))*100 + stopSecs%60;
 				}
 			}
@@ -386,8 +575,18 @@ public:
 		for(; it != m_tradingTimes.end(); it++)
 		{
 			TradingSection &section = *it;
+			if (section.first_raw == 0 && section.second_raw == 0)
+			{
+				count += 1440;
+				continue;
+			}
 			uint32_t s = section.first;
 			uint32_t e = section.second;
+			if (e < s)
+			{
+				count += 1440 - (s / 100 * 60 + s % 100) + (e / 100 * 60 + e % 100);
+				continue;
+			}
 
 			uint32_t hour = (e/100 - s/100);
 			uint32_t minute = (e%100 - s%100);
@@ -410,8 +609,18 @@ public:
 		for (; it != m_tradingTimes.end(); it++)
 		{
 			TradingSection &section = *it;
+			if (section.first_raw == 0 && section.second_raw == 0)
+			{
+				count += 1440;
+				continue;
+			}
 			uint32_t s = section.first;
 			uint32_t e = section.second;
+			if (e < s)
+			{
+				count += 1440 - (s / 100 * 60 + s % 100) + (e / 100 * 60 + e % 100);
+				continue;
+			}
 
 			uint32_t hour = (e / 100 - s / 100);
 			uint32_t minute = (e % 100 - s % 100);
@@ -435,8 +644,22 @@ public:
 			for (; it != m_tradingTimes.end(); it++)
 			{
 				TradingSection &section = *it;
+				// A single raw 00:00–00:00 section represents a full day.
+				// Nonzero offsets can map both endpoints to the same clock time.
+				if (section.first_raw == 0 && section.second_raw == 0)
+				{
+					total += 1440;
+					_minutes.emplace_back(total);
+					continue;
+				}
 				uint32_t s = section.first;
 				uint32_t e = section.second;
+				if (e < s)
+				{
+					total += 1440 - (s / 100 * 60 + s % 100) + (e / 100 * 60 + e % 100);
+					_minutes.emplace_back(total);
+					continue;
+				}
 
 				uint32_t hour = (e / 100 - s / 100);
 				uint32_t minute = (e % 100 - s % 100);
@@ -460,11 +683,16 @@ public:
 	 */
 	bool	isInTradingTime(uint32_t uTime, bool bStrict = false)
 	{
+		if (!isValidSessionTime(uTime))
+			return false;
 		const uint32_t offTime = offsetTime(uTime, true);
 		bool inTradingSection = false;
 		for (const TradingSection& section : m_tradingTimes)
 		{
-			if (section.first <= offTime && offTime <= section.second)
+			if ((section.first_raw == 0 && section.second_raw == 0) ||
+				(section.first <= section.second ?
+				 (section.first <= offTime && offTime <= section.second) :
+				 (offTime >= section.first || offTime <= section.second)))
 			{
 				inTradingSection = true;
 				break;
@@ -511,14 +739,19 @@ public:
 
 	inline bool	isInAuctionTime(uint32_t uTime)
 	{
-		uint32_t offTime = offsetTime(uTime, true);
-		
+		if (!isValidSessionTime(uTime))
+			return false;
 		for(const TradingSection& aucSec : m_auctionTimes)
 		{
-			if (aucSec.first == 0 && aucSec.second == 0)
+			if (aucSec.first_raw == 0 && aucSec.second_raw == 2400)
+				return true;
+			if (aucSec.first_raw == aucSec.second_raw)
 				continue;
-
-			if (aucSec.first <= offTime && offTime < aucSec.second)
+			const uint32_t time = uTime % 2400;
+			const uint32_t start = aucSec.first_raw % 2400;
+			const uint32_t end = aucSec.second_raw % 2400;
+			if (start < end ? (start <= time && time < end) :
+				(start > end && (time >= start || time < end)))
 				return true;
 		}
 		
@@ -533,42 +766,22 @@ public:
 	 *				如果向左对齐，则0点就做0点算
 	 *				如果向右对齐，则0点就做24点算
 	 */
-	inline uint32_t	offsetTime(uint32_t uTime, bool bAlignLeft) const
+	inline uint32_t offsetTime(uint32_t uTime, bool bAlignLeft) const
 	{
-		int64_t curMinute = static_cast<int64_t>(uTime/100)*60 + uTime%100;
-		curMinute += m_uOffsetMins;
-		if(bAlignLeft)
-		{
-			if (curMinute >= 1440)
-				curMinute -= 1440;
-			else if (curMinute < 0)
-				curMinute += 1440;
-		}
-		else
-		{
-			if (curMinute > 1440)
-				curMinute -= 1440;
-			else if (curMinute <= 0)
-				curMinute += 1440;
-		}
-		
-		return (curMinute/60)*100 + curMinute%60;
+		int64_t value = (static_cast<int64_t>(uTime / 100) * 60 + uTime % 100 + m_uOffsetMins) % 1440;
+		if (value < 0) value += 1440;
+		if (!bAlignLeft && value == 0) return 2400;
+		return static_cast<uint32_t>((value / 60) * 100 + value % 60);
 	}
 
-	inline uint32_t	originalTime(uint32_t uTime) const
+	inline uint32_t originalTime(uint32_t uTime) const
 	{
-		if (m_uOffsetMins == 0)
-			return uTime;
-
-		int64_t curMinute = static_cast<int64_t>(uTime/100)*60 + uTime%100;
-		curMinute -= m_uOffsetMins;
-		if(curMinute >= 1440)
-			curMinute -= 1440;
-		else if(curMinute < 0)
-			curMinute += 1440;
-
-		return (curMinute/60)*100 + curMinute%60;
+		if (m_uOffsetMins == 0) return uTime;
+		int64_t value = (static_cast<int64_t>(uTime / 100) * 60 + uTime % 100 - m_uOffsetMins) % 1440;
+		if (value < 0) value += 1440;
+		return static_cast<uint32_t>((value / 60) * 100 + value % 60);
 	}
+
 };
 
 NS_WTP_END

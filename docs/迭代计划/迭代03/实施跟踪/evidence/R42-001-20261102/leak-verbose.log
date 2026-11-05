@@ -1,0 +1,21 @@
+==14125==AddressSanitizer: libc interceptors initialized
+|| `[0x108000020000, 0x7fffffffffff]` || HighMem    ||
+|| `[0x029000024000, 0x10800001ffff]` || HighShadow ||
+|| `[0x009000024000, 0x029000023fff]` || ShadowGap  ||
+|| `[0x008000020000, 0x009000023fff]` || LowShadow  ||
+|| `[0x000000000000, 0x00800001ffff]` || LowMem     ||
+MemToShadow(shadow): 0x009000024000 0x0092000247ff 0x00d200024800 0x029000023fff
+redzone=16
+max_redzone=2048
+quarantine_size_mb=256M
+thread_local_quarantine_size_kb=1024K
+malloc_context_size=30
+SHADOW_SCALE: 3
+SHADOW_GRANULARITY: 8
+SHADOW_OFFSET: 0x008000020000
+==14125==Installed the sigaction for signal 11
+==14125==Installed the sigaction for signal 10
+==14125==Installed the sigaction for signal 8
+==14125==T0: stack [0x00016d0f4000,0x00016d8f0000) size 0x7fc000; local=0x00016d8eb1b8
+==14125==AddressSanitizer Init done
+==14125==LeakSanitizer: checking for leaks

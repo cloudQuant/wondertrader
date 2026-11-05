@@ -1,5 +1,6 @@
 ﻿#include "WtRdmDtReaderAD.h"
 #include "LMDBKeys.h"
+#include "DayBarContractAD.h"
 
 #include "../Includes/WTSVariant.hpp"
 #include "../Share/TimeUtils.hpp"
@@ -11,9 +12,11 @@
 #include "../Includes/IBaseDataMgr.h"
 #include "../Includes/IHotMgr.h"
 #include "../Includes/WTSDataDef.hpp"
+#include "../Includes/DateMappingClient.hpp"
 #include "../Includes/WTSStruct.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <cstring>
 #include <type_traits>
@@ -332,12 +335,102 @@ inline void pipe_rdmreader_log(IRdmDtReaderSink* sink, WTSLogLevel ll, const cha
 	if (sink == NULL)
 		return;
 
+	// Messages can carry caller-supplied codes and configured paths; bound the
+	// formatter writes to the per-thread buffer instead of trusting their size.
 	static thread_local char buffer[512] = { 0 };
-	memset(buffer, 0, 512);
-	fmt::format_to(buffer, format, args...);
+	try
+	{
+		const std::size_t max_output_size = sizeof(buffer) - 1;
+		const auto formatted = fmt::format_to_n(buffer, max_output_size, format, args...);
+		if (formatted.size > max_output_size)
+		{
+			constexpr char truncation_marker[] = "...[truncated]";
+			constexpr std::size_t marker_size = sizeof(truncation_marker) - 1;
+			std::memcpy(buffer + max_output_size - marker_size, truncation_marker, marker_size);
+			buffer[max_output_size] = '\0';
+		}
+		else
+		{
+			buffer[formatted.size] = '\0';
+		}
+	}
+	catch (...)
+	{
+		constexpr char fallback[] = "WtRdmDtReaderAD log formatting failed";
+		std::memcpy(buffer, fallback, sizeof(fallback));
+	}
 
 	sink->reader_log(ll, buffer);
 }
+
+// Decision card 1 (A+C): trading dates come from the typed client over the
+// guarded legacy IBaseDataMgr virtuals; a failure stops the read.
+static bool ad_rdm_trading_date(IRdmDtReaderSink* sink, wtp::DateMappingClient& mapping, const char* stdPID,
+	uint32_t uDate, uint32_t uTime, uint32_t& tradingDate)
+{
+	const wtp::DateMappingResult32 result = mapping.calcTradingDate(stdPID, uDate, uTime, false);
+	if (result.status != wtp::DateMappingStatus::Ok)
+	{
+		pipe_rdmreader_log(sink, LL_ERROR, "Mapping trading date of {} at {}.{} failed: {}",
+			stdPID == NULL ? "" : stdPID, uDate, uTime, wtp::dateMappingStatusName(result.status));
+		return false;
+	}
+	tradingDate = result.value;
+	return true;
+}
+
+namespace {
+
+// Display at most the bytes the key check inspects; the field may be unterminated.
+std::string key_field_for_log(const char* field, std::size_t capacity)
+{
+	if (field == NULL)
+		return "(null)";
+	std::size_t length = 0;
+	while (length < capacity && field[length] != '\0')
+		++length;
+	std::string text(field, length);
+	if (length == capacity)
+		text += "...";
+	return text;
+}
+
+// BUG-L04-004: reject identities the fixed LMDB key cannot represent before any
+// cache, directory or database side effect, and make the rejection observable.
+bool accept_key_identity(IRdmDtReaderSink* sink, const char* exchg, const char* code, const char* entry)
+{
+	if (lmdbKeyIdentityValid(exchg, code))
+		return true;
+	pipe_rdmreader_log(sink, LL_ERROR,
+		"{} rejected storage identity {}.{}: exchange and code must be non-empty and shorter than {} and {} bytes",
+		entry, key_field_for_log(exchg, MAX_EXCHANGE_LENGTH),
+		key_field_for_log(code, MAX_INSTRUMENT_LENGTH), MAX_EXCHANGE_LENGTH, MAX_INSTRUMENT_LENGTH);
+	return false;
+}
+
+// R21-BUG-07: last committed LMDB transaction of the environment. LMDB keeps it
+// in the shared meta pages, so commits by other processes are observed too.
+bool lmdb_last_txnid(WtLMDB& db, uint64_t& txnid)
+{
+	if (db.env() == NULL)
+		return false;
+	MDB_envinfo info;
+	if (mdb_env_info(db.env(), &info) != MDB_SUCCESS)
+		return false;
+	txnid = (uint64_t)info.me_last_txnid;
+	return true;
+}
+
+// R100-003: minute bar time (date-19900000)*10000+HHMM computed in 64 bits; a
+// date before the 1990 epoch maps to 0 instead of wrapping.
+uint64_t minute_bar_time(uint32_t date, uint32_t hhmm)
+{
+	if (date < 19900000u)
+		return 0;
+	return (uint64_t)(date - 19900000u) * 10000u + hhmm;
+}
+
+} // namespace
 
 extern "C"
 {
@@ -351,6 +444,14 @@ extern "C"
 	{
 		if (reader != NULL)
 			delete reader;
+	}
+
+	// K31=A: optional DateMappingV1 injection (see Includes/DateMappingBinding.h).
+	EXPORT_FLAG int bindRdmDtReaderDateMappingV1(IRdmDtReader* reader, const wtp::DateMappingV1* table)
+	{
+		if (reader == NULL)
+			return 0;
+		return static_cast<WtRdmDtReaderAD*>(reader)->bindDateMapping(table) ? 1 : 0;
 	}
 };
 
@@ -391,11 +492,21 @@ void WtRdmDtReaderAD::init(WTSVariant* cfg, IRdmDtReaderSink* sink)
 	_base_dir = cfg->getCString("path");
 	_base_dir = StrUtil::standardisePath(_base_dir);
 
-	pipe_rdmreader_log(sink, LL_INFO, "WtRdmDtReaderAD initialized, root data folder is {}", _base_dir);
+	// Decision K35=C: bounds of the incremental bar cache (0 disables a bound; the trading
+	// date change of the request end always forces a full check).
+	if (cfg->has("full_check_increments"))
+		_full_check_increments = cfg->getUInt32("full_check_increments");
+	if (cfg->has("full_check_seconds"))
+		_full_check_ms = (int64_t)cfg->getUInt32("full_check_seconds") * 1000;
+
+	pipe_rdmreader_log(sink, LL_INFO, "WtRdmDtReaderAD initialized, root data folder is {}, full bar check every {} increments / {} ms",
+		_base_dir, _full_check_increments, _full_check_ms);
 }
 
 WTSTickSlice* WtRdmDtReaderAD::readTickSliceByCount(const char* stdCode, uint32_t count, uint64_t etime /* = 0 */)
 {
+	if (stdCode == NULL)
+		return NULL;
 	if (count == 0)
 		return NULL;
 	if (etime == 0)
@@ -406,6 +517,8 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByCount(const char* stdCode, uint32_
 	}
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "readTickSliceByCount"))
+		return NULL;
 	const std::string cacheKey = std::string(stdCode) + "#count-history";
 	auto cacheIt = _ticks_cache.find(cacheKey);
 	if (cacheIt == _ticks_cache.end() || cacheIt->second._ticks.empty())
@@ -458,30 +571,51 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByCount(const char* stdCode, uint32_
 		return NULL;
 	const uint32_t actualCount = (uint32_t)std::min<std::size_t>(available, count);
 	WTSTickStruct* first = tickList._ticks.data() + available - actualCount;
-	return WTSTickSlice::create(stdCode, first, actualCount);
+	WTSTickSlice* slice = WTSTickSlice::create(stdCode, first, actualCount);
+	if (slice != NULL)
+		slice->addOwner(tickList._ticks.owner());
+	return slice;
 }
 
 WTSTickSlice* WtRdmDtReaderAD::readTickSliceByRange(const char* stdCode, uint64_t stime, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "readTickSliceByRange"))
+		return NULL;
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
+	if (commInfo == NULL || commInfo->getSessionInfo() == NULL)
+	{
+		// I03-NEW-052: an unknown commodity (or one without a session) is reported
+		// before its session is dereferenced or any date is mapped.
+		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity or session of {} not found, request refused", stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
 	WTSSessionInfo* sInfo = commInfo->getSessionInfo();
 	std::string stdPID = fmtutil::format<64>("{}.{}", cInfo._exchg, cInfo._product);
 
 	uint32_t rDate, rTime, rSecs;
 	//20190807124533900
 	rDate = (uint32_t)(etime / 1000000000);
-	rTime = sInfo->offsetTime((uint32_t)(etime % 1000000000) / 100000, false);
+	const uint32_t rawRTime = (uint32_t)(etime % 1000000000) / 100000;
+	rTime = sInfo->offsetTime(rawRTime, false);
 	rSecs = (uint32_t)(etime % 100000);
 
 	uint32_t lDate, lTime, lSecs;
 	//20190807124533900
 	lDate = (uint32_t)(stime / 1000000000);
-	lTime = sInfo->offsetTime((uint32_t)(stime % 1000000000) / 100000, true);
+	const uint32_t rawLTime = (uint32_t)(stime % 1000000000) / 100000;
+	lTime = sInfo->offsetTime(rawLTime, true);
 	lSecs = (uint32_t)(stime % 100000);
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), rDate, rTime, false);
-	uint32_t beginTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), lDate, lTime, false);
+	// I03-NEW-051: the trading-date mapping applies the session offset itself, so
+	// it takes the natural HHMM. Passing the already offset time shifted it twice
+	// (a +300 night session at 22:00 mapped to the natural date instead of the
+	// next trading date) and missed the writer's (trading date, offset time) keys.
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, beginTDate = 0;
+	if (!ad_rdm_trading_date(_sink, dateMapping, stdPID.c_str(), rDate, rawRTime, endTDate) ||
+		!ad_rdm_trading_date(_sink, dateMapping, stdPID.c_str(), lDate, rawLTime, beginTDate))
+		return NULL;
 
 	std::string key = stdCode;
 
@@ -623,11 +757,9 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByRange(const char* stdCode, uint64_
 	}
 	else if (!newerTicks.empty())
 	{
-		// Append at the end, matching the existing slice-pointer behavior when no reallocation is needed.
-		std::vector<WTSTickStruct>& cachedTicks = cacheIt->second._ticks;
-		const std::size_t old_size = cachedTicks.size();
-		cachedTicks.resize(candidate._ticks.size());
-		std::copy(candidate._ticks.begin() + old_size, candidate._ticks.end(), cachedTicks.begin() + old_size);
+		// 卡11=B：candidate 已是“旧缓存+新增”完整副本，整体替换缓存缓冲区；
+		// 已借出的切片持有旧缓冲区 owner，不再依赖原地追加不重分配。
+		cacheIt->second._ticks.swap(candidate._ticks);
 		cacheIt->second._first_tick_time = candidate._first_tick_time;
 		cacheIt->second._last_tick_time = candidate._last_tick_time;
 	}
@@ -656,12 +788,16 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByRange(const char* stdCode, uint64_
 
 		cnt = (std::size_t)(afterLastTick - firstTick);
 		WTSTickSlice* slice = WTSTickSlice::create(stdCode, &*firstTick, (uint32_t)cnt);
+		if (slice != NULL)
+			slice->addOwner(tickList._ticks.owner());
 		return slice;
 	}
 }
 
 WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByCount(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime /* = 0 */)
 {
+	if (stdCode == NULL)
+		return NULL;
 	if (count == 0)
 		return NULL;
 	if (etime == 0)
@@ -672,7 +808,9 @@ WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByCount(const char* stdCode, WTSKl
 	}
 
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
-	const std::string key = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
+	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "readKlineSliceByCount"))
+		return NULL;
+	const std::string key = fmt::format("{}#{}", stdCode, (uint32_t)period);
 	auto cacheIt = _bars_cache.find(key);
 	if (cacheIt == _bars_cache.end() || cacheIt->second._bars.empty())
 	{
@@ -689,6 +827,8 @@ WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByCount(const char* stdCode, WTSKl
 			log_range_failure<WTSBarStruct>(_sink, "bar", cInfo._exchg, cInfo._code, *db, malformed);
 			return NULL;
 		}
+		if (period == KP_DAY)
+			wt_ad_daybar::normalize(loaded);	//卡3 3c=C：旧 day 记录兼容读取，time 归一为 0
 		if (loaded.empty())
 			return NULL;
 
@@ -718,16 +858,23 @@ WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByCount(const char* stdCode, WTSKl
 		return NULL;
 	const uint32_t actualCount = (uint32_t)std::min<std::size_t>(available, count);
 	WTSBarStruct* first = barsList._bars.data() + available - actualCount;
-	return WTSKlineSlice::create(stdCode, period, 1, first, (int32_t)actualCount);
+	WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, 1, first, (int32_t)actualCount);
+	if (slice != NULL)
+		slice->addOwner(barsList._bars.owner());
+	return slice;
 }
 
 WTSTickSlice* WtRdmDtReaderAD::readTickSliceByDate(const char* stdCode, uint32_t uDate )
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "readTickSliceByDate"))
+		return NULL;
 	if (uDate == 0)
 	{
 		const std::string stdPID = fmtutil::format<64>("{}.{}", cInfo._exchg, cInfo._product);
-		uDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), 0, 0, false);
+		wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+		if (!ad_rdm_trading_date(_sink, dateMapping, stdPID.c_str(), 0, 0, uDate))
+			return NULL;
 	}
 
 	const std::string cacheKey = std::string(stdCode) + "#date#" + std::to_string(uDate);
@@ -766,12 +913,17 @@ WTSTickSlice* WtRdmDtReaderAD::readTickSliceByDate(const char* stdCode, uint32_t
 	TicksList& tickList = cacheIt->second;
 	if (tickList._ticks.empty())
 		return NULL;
-	return WTSTickSlice::create(stdCode, tickList._ticks.data(), (uint32_t)tickList._ticks.size());
+	WTSTickSlice* slice = WTSTickSlice::create(stdCode, tickList._ticks.data(), (uint32_t)tickList._ticks.size());
+	if (slice != NULL)
+		slice->addOwner(tickList._ticks.owner());
+	return slice;
 }
 
 WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByRange(const char* stdCode, WTSKlinePeriod period, uint64_t stime, uint64_t etime /* = 0 */)
 {
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "readKlineSliceByRange"))
+		return NULL;
 	[[maybe_unused]] WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
 	std::string stdPID = fmtutil::format<64>("{}.{}", cInfo._exchg, cInfo._product);
 
@@ -781,64 +933,125 @@ WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByRange(const char* stdCode, WTSKl
 	lDate = (uint32_t)(stime / 10000);
 	lTime = (uint32_t)(stime % 10000);
 
-	uint32_t endTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), rDate, rTime, false);
-	[[maybe_unused]] uint32_t beginTDate = _base_data_mgr->calcTradingDate(stdPID.c_str(), lDate, lTime, false);
+	wtp::DateMappingClient dateMapping = _date_binding.client(_base_data_mgr);
+	uint32_t endTDate = 0, beginTDate = 0;
+	if (!ad_rdm_trading_date(_sink, dateMapping, stdPID.c_str(), rDate, rTime, endTDate) ||
+		!ad_rdm_trading_date(_sink, dateMapping, stdPID.c_str(), lDate, lTime, beginTDate))
+		return NULL;
+	(void)beginTDate;
 
-	bool isDay = period == KP_DAY;
-	//转换成K线时间
-	etime = isDay ? endTDate : (etime - 19000000);
+	const bool isDay = period == KP_DAY;
+	// K35=C：缓存刷新只依据提交与游标，不再用请求终点 etime 判断是否需要更新的数据。
 
 	//暂时不考虑HOT之类的，只针对7×24小时品种做一个实现
-	std::string key = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
-	auto cacheIt = _bars_cache.find(key);
-	BarsList candidate;
-	if (cacheIt != _bars_cache.end())
-		candidate = cacheIt->second;
-	const bool isEmpty = candidate._bars.empty();
-	bool bNeedNewer = (etime > candidate._last_bar_time);
-
-	//全部重载
+	std::string key = fmt::format("{}#{}", stdCode, (uint32_t)period);
 	WtLMDBPtr db = get_k_db(cInfo._exchg, period);
 	if (db == NULL)
 		return NULL;
 
-	std::vector<WTSBarStruct> loaded;
-	if (isEmpty)
+	auto cacheIt = _bars_cache.find(key);
+	const bool isEmpty = cacheIt == _bars_cache.end() || cacheIt->second._bars.empty();
+
+	// R21-BUG-07: while no transaction has been committed to this environment since the
+	// cached snapshot, a rescan returns identical records, so nothing is read.
+	uint64_t txnBefore = 0;
+	const bool txnKnown = lmdb_last_txnid(*db, txnBefore);
+	const bool snapshotCurrent = !isEmpty && cacheIt->second._snapshot_valid && txnKnown &&
+		txnBefore == cacheIt->second._snapshot_txnid;
+
+	// Decision K35=C (2026-11-04): after a commit only the records from the last cached bar
+	// on (inclusive, so a revision of that bar is seen) are read and merged. Revisions of
+	// older bars become visible at the next full check, which runs when the trading date
+	// of the request end changes, after _full_check_increments incremental refreshes or
+	// after _full_check_ms. Slices handed out earlier keep their own buffer (card 11).
+	const int64_t nowMs = (int64_t)std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now().time_since_epoch()).count();
+	bool fullScan = isEmpty;
+	bool incremental = false;
+	if (!isEmpty && !snapshotCurrent)
 	{
-		pipe_rdmreader_log(_sink, LL_DEBUG, "Reading back {} bars of {}.{}...", PERIOD_NAME[period], cInfo._exchg, cInfo._code);
+		const BarsList& cached = cacheIt->second;
+		const bool dayChanged = cached._full_tdate != endTDate;
+		const bool tooMany = _full_check_increments != 0 && cached._incr_since_full >= _full_check_increments;
+		const bool tooOld = _full_check_ms != 0 && nowMs - cached._full_at_ms >= _full_check_ms;
+		fullScan = !cached._cursor_valid || dayChanged || tooMany || tooOld;
+		incremental = !fullScan;
+	}
+
+	auto barKey = [isDay](const WTSBarStruct& bar, uint32_t& out) {
+		const uint64_t value = isDay ? (uint64_t)bar.date : bar.time;
+		if (value > UINT32_MAX)
+			return false;
+		out = (uint32_t)value;
+		return true;
+	};
+
+	if (fullScan || incremental)
+	{
+		const uint32_t cursor = incremental ? cacheIt->second._cursor : 0;
+		std::vector<WTSBarStruct> loaded;
+		if (fullScan)
+			pipe_rdmreader_log(_sink, LL_DEBUG, "Reading back {} bars of {}.{}...", PERIOD_NAME[period], cInfo._exchg, cInfo._code);
+		else
+			pipe_rdmreader_log(_sink, LL_DEBUG, "Reading newer {} bars of {}.{} from cursor {}...", PERIOD_NAME[period], cInfo._exchg, cInfo._code, cursor);
 		LMDBBarKey rKey(cInfo._exchg, cInfo._code, 0xffffffff);
-		LMDBBarKey lKey(cInfo._exchg, cInfo._code, 0);
+		LMDBBarKey lKey(cInfo._exchg, cInfo._code, cursor);
 		MalformedRecord malformed;
 		if (!read_checked_range(*db, lKey, rKey, loaded, malformed))
 		{
 			log_range_failure<WTSBarStruct>(_sink, "bar", cInfo._exchg, cInfo._code, *db, malformed);
 			return NULL;
 		}
-	}
-	else if(bNeedNewer)
-	{
-		//加载更新的数据
-		pipe_rdmreader_log(_sink, LL_DEBUG, "Reading back {} bars of {}.{}...", PERIOD_NAME[period], cInfo._exchg, cInfo._code);
-		LMDBBarKey rKey(cInfo._exchg, cInfo._code, 0xffffffff);
-		LMDBBarKey lKey(cInfo._exchg, cInfo._code, (uint32_t)candidate._last_bar_time);
-		MalformedRecord malformed;
-		if (!read_checked_range(*db, lKey, rKey, loaded, malformed))
+		if (period == KP_DAY)
+			wt_ad_daybar::normalize(loaded);	//卡3 3c=C
+
+		std::vector<WTSBarStruct> merged;
+		if (incremental)
 		{
-			log_range_failure<WTSBarStruct>(_sink, "bar", cInfo._exchg, cInfo._code, *db, malformed);
+			const std::vector<WTSBarStruct>& cachedBars = cacheIt->second._bars.get();
+			auto keep = std::lower_bound(cachedBars.begin(), cachedBars.end(), cursor,
+				[&barKey](const WTSBarStruct& bar, uint32_t value) {
+					uint32_t k = 0;
+					return barKey(bar, k) && k < value;
+				});
+			merged.reserve((std::size_t)(keep - cachedBars.begin()) + loaded.size());
+			merged.assign(cachedBars.begin(), keep);
+			merged.insert(merged.end(), loaded.begin(), loaded.end());
+		}
+		else
+		{
+			merged.swap(loaded);
+		}
+
+		uint64_t txnAfter = 0;
+		const bool snapshotValid = txnKnown && lmdb_last_txnid(*db, txnAfter) && txnAfter == txnBefore;
+		if (merged.empty())
+		{
+			if (cacheIt != _bars_cache.end())
+				_bars_cache.erase(cacheIt);
 			return NULL;
 		}
-	}
-	if (!loaded.empty())
-		candidate._bars.swap(loaded);
-	if (!candidate._bars.empty())
-	{
+
+		uint32_t lastKey = 0;
+		const bool cursorValid = barKey(merged.back(), lastKey);
 		if (cacheIt == _bars_cache.end())
-			cacheIt = _bars_cache.emplace(key, std::move(candidate)).first;
-		else if (isEmpty || !loaded.empty())
+			cacheIt = _bars_cache.emplace(key, BarsList()).first;
+		BarsList& entry = cacheIt->second;
+		// 卡11=B：整体替换缓冲区；已借出的切片持有旧缓冲区 owner。
+		entry._bars = std::move(merged);
+		entry._snapshot_valid = snapshotValid;
+		entry._snapshot_txnid = txnBefore;
+		entry._cursor = lastKey;
+		entry._cursor_valid = cursorValid;
+		if (fullScan)
 		{
-			std::vector<WTSBarStruct>& cachedBars = cacheIt->second._bars;
-			cachedBars.resize(candidate._bars.size());
-			std::copy(candidate._bars.begin(), candidate._bars.end(), cachedBars.begin());
+			entry._full_tdate = endTDate;
+			entry._full_at_ms = nowMs;
+			entry._incr_since_full = 0;
+		}
+		else
+		{
+			entry._incr_since_full++;
 		}
 	}
 	if (cacheIt == _bars_cache.end())
@@ -849,11 +1062,11 @@ WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByRange(const char* stdCode, WTSKl
 	{
 		WTSBarStruct eBar;
 		eBar.date = rDate;
-		eBar.time = (rDate - 19900000) * 10000 + rTime;
+		eBar.time = minute_bar_time(rDate, rTime);	// R100-003: no 32-bit wrap from 2033 on
 
 		WTSBarStruct sBar;
 		sBar.date = lDate;
-		sBar.time = (lDate - 19900000) * 10000 + lTime;
+		sBar.time = minute_bar_time(lDate, lTime);
 
 		WTSBarStruct* pHead = NULL;
 		std::size_t cnt = 0;
@@ -876,6 +1089,8 @@ WTSKlineSlice* WtRdmDtReaderAD::readKlineSliceByRange(const char* stdCode, WTSKl
 		cnt = (std::size_t)(afterLastBar - firstBar);
 
 		WTSKlineSlice* slice = WTSKlineSlice::create(stdCode, period, 1, pHead, cnt);
+		if (slice != NULL)
+			slice->addOwner(barsList._bars.owner());
 		return slice;
 	}
 }

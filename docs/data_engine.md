@@ -39,6 +39,25 @@
  * - `load_raw_bars()` - 加载原始K线数据
  * - `load_raw_ticks()` - 加载原始Tick数据
  * 
+ * @section data_lmdb_minute_limit WtDataStorageAD 分钟K线时间上限（2032-12-31）
+ * 
+ * WtDataStorageAD 的 LMDB K线键（`LMDBBarKey`，V1 磁盘格式）用 32 位无符号整数 `_bartime`
+ * 存放分钟线时间，编码为 `(日期 - 19900000) * 10000 + HHMM`，最大值为 4294967295。
+ * 因此 V1 分钟线（m1/m5）能表示的最后一个交易日是 **2032-12-31**
+ * （20321231 23:59 编码为 4212312359）；2033-01-01 起的分钟时间（20330101 00:00 为 4301010000）
+ * 无法用 V1 键表示。按迭代03 用户裁定 K33=A，本版本不接入 V2 分钟键，规则如下：
+ * 
+ * - **写端**：`WtDataWriterAD` 遇到超过 32 位的分钟时间，拒绝写入 LMDB 并记 ERROR，
+ *   不再截断成回绕键；外部 dumper 仍收到完整的 64 位 `WTSBarStruct`。
+ * - **读端**：`WtDataReaderAD`、`WtRdmDtReaderAD` 的分钟线查询截止时间、区间端点和
+ *   `onMinuteEnd` 都用 64 位计算；超出 32 位键范围时记 ERROR 并拒绝该次查询，不发
+ *   `on_all_bar_updated`，不会返回回绕后指向更早年份的K线。
+ * - **日线不受影响**：日线键按交易日（YYYYMMDD）存放，2033 年及以后可正常读写。
+ * - **WtDataStorage（非 AD）** 的 dsb/dmb 文件使用 64 位时间字段，不受此上限约束。
+ * 
+ * 需要在 2033 年后继续存放 AD 分钟线时，必须先实现并验收版本化的 V2 分钟键与离线迁移
+ * （键编解码草案见 `LMDBBarKeyV2.hpp`/`LMDBBarMigration.hpp`，当前未接入读写路径）。
+ * 
  * @see WtDataStorage
  * @see WtLMDB
  * @see WtDtHelper

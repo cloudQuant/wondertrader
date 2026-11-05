@@ -1,0 +1,62 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = FemasContractFixture.order_query_and_push_callbacks
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FemasContractFixture
+[ RUN      ] FemasContractFixture.order_query_and_push_callbacks
+[       OK ] FemasContractFixture.order_query_and_push_callbacks (0 ms)
+[----------] 1 test from FemasContractFixture (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+
+=================================================================
+==93167==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 48 byte(s) in 1 object(s) allocated from:
+    #0 0x0001092c90e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000103121a24 in wtp::WTSArray::create() WTSCollection.hpp:60
+    #2 0x00010312670c in TraderFemas::OnRspQryOrder(CUstpFtdcOrderField*, CUstpFtdcRspInfoField*, int, bool) TraderFemas.cpp:932
+    #3 0x000102f4b24c in FemasContractFixture_order_query_and_push_callbacks_Test::TestBody() femas_trader_test.cpp:1103
+    #4 0x0001033a5210 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (CoverageTests_t_TraderFemas:arm64+0x1004a5210)
+    #5 0x0001033a5158 in testing::Test::Run()+0xcc (CoverageTests_t_TraderFemas:arm64+0x1004a5158)
+    #6 0x0001033a5d38 in testing::TestInfo::Run()+0xd0 (CoverageTests_t_TraderFemas:arm64+0x1004a5d38)
+    #7 0x0001033a67bc in testing::TestSuite::Run()+0x1c4 (CoverageTests_t_TraderFemas:arm64+0x1004a67bc)
+    #8 0x0001033b1be4 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (CoverageTests_t_TraderFemas:arm64+0x1004b1be4)
+    #9 0x0001033b1590 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (CoverageTests_t_TraderFemas:arm64+0x1004b1590)
+    #10 0x0001033b14f4 in testing::UnitTest::Run()+0x78 (CoverageTests_t_TraderFemas:arm64+0x1004b14f4)
+    #11 0x000103202458 in main+0x40 (CoverageTests_t_TraderFemas:arm64+0x100302458)
+    #12 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x604000001e10 (48 bytes)
+
+Indirect leak of 8 byte(s) in 1 object(s) allocated from:
+    #0 0x0001092c90e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x00010314b59c in wtp::WTSObject** std::__1::__libcpp_allocate[abi:nqe220108]<wtp::WTSObject*>(std::__1::__element_count, unsigned long) allocate.h:42
+    #2 0x00010314b410 in std::__1::allocator<wtp::WTSObject*>::allocate[abi:nqe220108](unsigned long) allocator.h:92
+    #3 0x00010314ae48 in std::__1::__allocation_result<std::__1::allocator_traits<std::__1::allocator<wtp::WTSObject*>>::pointer, std::__1::allocator_traits<std::__1::allocator<wtp::WTSObject*>>::size_type> std::__1::__allocate_at_least[abi:nqe220108]<std::__1::allocator<wtp::WTSObject*>, std::__1::allocator_traits<std::__1::allocator<wtp::WTSObject*>>>(std::__1::allocator<wtp::WTSObject*>&, unsigned long) allocate_at_least.h:46
+    #4 0x00010314a994 in std::__1::__split_buffer<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<wtp::WTSObject*>&) __split_buffer:720
+    #5 0x000103149c94 in std::__1::__split_buffer<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<wtp::WTSObject*>&) __split_buffer:717
+    #6 0x00010314961c in wtp::WTSObject** std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::__emplace_back_slow_path<wtp::WTSObject*&>(wtp::WTSObject*&) vector.h:1120
+    #7 0x0001031483e4 in wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda0'()::operator()() const vector.h:1163
+    #8 0x0001031480bc in void std::__1::__if_likely_else[abi:nqe220108]<wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda'(), wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda0'()>(bool, wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda'(), wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda0'()) vector.h:1143
+    #9 0x000103147b2c in wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&) vector.h:1157
+    #10 0x000103121d14 in wtp::WTSArray::append(wtp::WTSObject*, bool) WTSCollection.hpp:168
+    #11 0x000103126830 in TraderFemas::OnRspQryOrder(CUstpFtdcOrderField*, CUstpFtdcRspInfoField*, int, bool) TraderFemas.cpp:937
+    #12 0x000102f4b24c in FemasContractFixture_order_query_and_push_callbacks_Test::TestBody() femas_trader_test.cpp:1103
+    #13 0x0001033a5210 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (CoverageTests_t_TraderFemas:arm64+0x1004a5210)
+    #14 0x0001033a5158 in testing::Test::Run()+0xcc (CoverageTests_t_TraderFemas:arm64+0x1004a5158)
+    #15 0x0001033a5d38 in testing::TestInfo::Run()+0xd0 (CoverageTests_t_TraderFemas:arm64+0x1004a5d38)
+    #16 0x0001033a67bc in testing::TestSuite::Run()+0x1c4 (CoverageTests_t_TraderFemas:arm64+0x1004a67bc)
+    #17 0x0001033b1be4 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (CoverageTests_t_TraderFemas:arm64+0x1004b1be4)
+    #18 0x0001033b1590 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (CoverageTests_t_TraderFemas:arm64+0x1004b1590)
+    #19 0x0001033b14f4 in testing::UnitTest::Run()+0x78 (CoverageTests_t_TraderFemas:arm64+0x1004b14f4)
+    #20 0x000103202458 in main+0x40 (CoverageTests_t_TraderFemas:arm64+0x100302458)
+    #21 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x602000000dd0 (8 bytes)
+
+SUMMARY: AddressSanitizer: 56 byte(s) leaked in 2 allocation(s).

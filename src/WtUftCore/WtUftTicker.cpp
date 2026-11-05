@@ -19,6 +19,7 @@
 #include "../WTSTools/WTSLogger.h"
 
 #include <exception>
+#include "../Includes/DateMappingClient.hpp"
 
 USING_NS_WTP;
 
@@ -285,8 +286,18 @@ void WtUftRtTicker::run()
 		if (!_stopped.load(std::memory_order_acquire)
 			&& !_engine->_stop_requested.load(std::memory_order_seq_cst))
 		{
-			uint32_t curTDate = _engine->get_basedata_mgr()->calcTradingDate(
+			// BUG-R12-13 (DateMappingV1, card 1 A+C): an unmappable trading date stops startup.
+			wtp::DateMappingClient dateMapping(_engine->get_basedata_mgr());
+			const DateMappingResult32 mappedTDate = dateMapping.calcTradingDate(
 				_s_info->id(), _engine->get_date(), _engine->get_min_time(), true);
+			if (mappedTDate.status != DateMappingStatus::Ok)
+			{
+				WTSLogger::error("UftTicker cannot run: trading date of session {} cannot be mapped ({})",
+					_s_info->id(), wtp::dateMappingStatusName(mappedTDate.status));
+				finish_run();
+				return;
+			}
+			uint32_t curTDate = mappedTDate.value;
 			_engine->set_trading_date(curTDate);
 
 			{

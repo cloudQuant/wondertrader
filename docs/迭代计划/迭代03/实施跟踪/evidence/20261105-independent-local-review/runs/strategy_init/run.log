@@ -1,0 +1,42 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5HftDemoParams.*:I03S5RtRunnerStrategies.*:I03S5RtRunnerStartup.*
+[==========] Running 6 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from I03S5HftDemoParams
+[ RUN      ] I03S5HftDemoParams.ShippedAndJsonFormsAreAccepted
+[       OK ] I03S5HftDemoParams.ShippedAndJsonFormsAreAccepted (522 ms)
+[ RUN      ] I03S5HftDemoParams.MissingOrMalformedParamsAreRejected
+[i03s5_hft_demo] SimpleHft rejected params: params must be an object
+[i03s5_hft_demo] SimpleHft rejected params: params must be an object
+[i03s5_hft_demo] SimpleHft rejected params: missing required parameter code
+[i03s5_hft_demo] SimpleHft rejected params: unknown parameter lots
+[i03s5_hft_demo] SimpleHft rejected params: unknown parameter secnd
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter second
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter freq
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter offset
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter reserve
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter stock
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter code
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter code
+[       OK ] I03S5HftDemoParams.MissingOrMalformedParamsAreRejected (0 ms)
+[----------] 2 tests from I03S5HftDemoParams (523 ms total)
+
+[----------] 2 tests from I03S5RtRunnerStrategies
+[ RUN      ] I03S5RtRunnerStrategies.CtaInitFalseFailsConfigAndPublishesNoContext
+WtStraDualThrust::init begins
+[       OK ] I03S5RtRunnerStrategies.CtaInitFalseFailsConfigAndPublishesNoContext (837 ms)
+[ RUN      ] I03S5RtRunnerStrategies.HftInitFalseFailsBatchWithoutContextOrTraderSink
+[i03s5_hft_noparams] SimpleHft rejected params: params must be an object
+[       OK ] I03S5RtRunnerStrategies.HftInitFalseFailsBatchWithoutContextOrTraderSink (448 ms)
+[----------] 2 tests from I03S5RtRunnerStrategies (1286 ms total)
+
+[----------] 2 tests from I03S5RtRunnerStartup
+[ RUN      ] I03S5RtRunnerStartup.StrategyOnInitExceptionReleasesPartiallyStartedRuntime
+[       OK ] I03S5RtRunnerStartup.StrategyOnInitExceptionReleasesPartiallyStartedRuntime (7 ms)
+[ RUN      ] I03S5RtRunnerStartup.SecondRunIsRejectedAfterSuccessfulStart
+[       OK ] I03S5RtRunnerStartup.SecondRunIsRejectedAfterSuccessfulStart (2 ms)
+[----------] 2 tests from I03S5RtRunnerStartup (10 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 3 test suites ran. (1820 ms total)
+[  PASSED  ] 6 tests.

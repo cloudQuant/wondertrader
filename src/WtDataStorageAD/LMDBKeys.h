@@ -11,7 +11,40 @@
 #pragma once
 #include <stdint.h>
 #include <string.h>
+#include <stdexcept>
 #include "../Includes/WTSMarcos.h"
+
+// BUG-L04-004: the on-disk key layout is fixed (exchange 16 + code 32 bytes,
+// NUL padded). Each field must fit including its terminating NUL. Inspect no
+// more than the field capacity, so a non-terminated fixed-size input is
+// rejected without reading past it. Empty fields still fit (the historical
+// strcpy accepted them); the stricter entry check below rejects them.
+inline bool lmdbKeyFieldLengths(const char* exchg, const char* code,
+	size_t& exchangeLen, size_t& codeLen)
+{
+	if (!exchg || !code)
+		return false;
+	exchangeLen = 0;
+	codeLen = 0;
+	while (exchangeLen < MAX_EXCHANGE_LENGTH && exchg[exchangeLen]) ++exchangeLen;
+	while (codeLen < MAX_INSTRUMENT_LENGTH && code[codeLen]) ++codeLen;
+	return exchangeLen < MAX_EXCHANGE_LENGTH && codeLen < MAX_INSTRUMENT_LENGTH;
+}
+
+// Reader/writer entry check, applied before any cache, directory, database or
+// queue side effect: a usable storage identity is non-empty and fits the key.
+inline bool lmdbKeyIdentityLengths(const char* exchg, const char* code,
+	size_t& exchangeLen, size_t& codeLen)
+{
+	return lmdbKeyFieldLengths(exchg, code, exchangeLen, codeLen) &&
+		exchangeLen != 0 && codeLen != 0;
+}
+
+inline bool lmdbKeyIdentityValid(const char* exchg, const char* code)
+{
+	size_t exchangeLen, codeLen;
+	return lmdbKeyIdentityLengths(exchg, code, exchangeLen, codeLen);
+}
 
 /**
  * \brief 16位无符号整数的字节序转换函数
@@ -88,9 +121,15 @@ typedef struct _LMDBHftKey
 	 */
 	_LMDBHftKey(const char* exchg, const char* code, uint32_t date, uint32_t time)
 	{
+		// A constructor has no status channel: an identity that cannot be
+		// represented is reported by exception instead of being copied past
+		// the fixed field. Product entries pre-check with lmdbKeyIdentityValid.
+		size_t exchangeLen, codeLen;
+		if (!lmdbKeyFieldLengths(exchg, code, exchangeLen, codeLen))
+			throw std::invalid_argument("invalid LMDB key identity");
 		memset(this, 0, sizeof(_LMDBHftKey));
-		strcpy(_exchg, exchg);
-		strcpy(_code, code);
+		memcpy(_exchg, exchg, exchangeLen);
+		memcpy(_code, code, codeLen);
 		_date = reverseEndian(date);
 		_time = reverseEndian(time);
 	}
@@ -116,6 +155,10 @@ public:
 	
 	/**
 	 * \brief K线时间，格式取决于K线周期，存储时会进行字节序转换
+	 *
+	 * 日线为交易日 YYYYMMDD；分钟线为 (日期-19900000)*10000+HHMM。V1 键为 32 位，
+	 * 分钟线可表示的最后一个交易日是 2032-12-31（K33=A）：2033 年起读写两端均明确拒绝
+	 * 并记 ERROR，不得截断回绕。上限说明见 docs/data_engine.md（data_lmdb_minute_limit）。
 	 */
 	uint32_t	_bartime;
 
@@ -130,10 +173,19 @@ public:
 	 */
 	_LMDBBarKey(const char* exchg, const char* code, uint32_t bartime)
 	{
+		size_t exchangeLen, codeLen;
+		if (!lmdbKeyFieldLengths(exchg, code, exchangeLen, codeLen))
+			throw std::invalid_argument("invalid LMDB key identity");
 		memset(this, 0, sizeof(_LMDBBarKey));
-		strcpy(_exchg, exchg);
-		strcpy(_code, code);
+		memcpy(_exchg, exchg, exchangeLen);
+		memcpy(_code, code, codeLen);
 		_bartime = reverseEndian(bartime);
 	}
 } LMDBBarKey;
 #pragma pack(pop)
+
+// The key bytes are the persisted LMDB ABI; bounded copying must not move them.
+static_assert(sizeof(LMDBHftKey) == MAX_EXCHANGE_LENGTH + MAX_INSTRUMENT_LENGTH + 8,
+	"LMDBHftKey on-disk layout changed");
+static_assert(sizeof(LMDBBarKey) == MAX_EXCHANGE_LENGTH + MAX_INSTRUMENT_LENGTH + 4,
+	"LMDBBarKey on-disk layout changed");

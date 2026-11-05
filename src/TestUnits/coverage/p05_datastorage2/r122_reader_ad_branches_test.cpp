@@ -61,13 +61,13 @@ TEST_F(R122ReaderADTest, R122ReaderADKlineZeroCountReturnsEmptySlice)
 	// 第一次填满 capacity=3 的环形缓冲（线性布局，array_two 为空）
 	WTSKlineSlice* s1 = _reader->readKlineSlice("EXA.rb2301", KP_Minute1, 3, 20230103093300000ull);
 	ASSERT_TRUE(s1 != NULL);
-	ASSERT_EQ(s1->size(), 3u);
+	ASSERT_EQ(s1->size(), 3);
 	s1->release();
 
 	// 第二次 count=0、etime 不前进：不走增量回源，也不对空段做指针运算。
 	WTSKlineSlice* s2 = _reader->readKlineSlice("EXA.rb2301", KP_Minute1, 0, 20230103093300000ull);
 	ASSERT_TRUE(s2 != NULL);
-	EXPECT_EQ(s2->size(), 0u);
+	EXPECT_EQ(s2->size(), 0);
 	EXPECT_EQ(s2->get_block_counts(), 1u);
 	EXPECT_EQ(s2->get_block_size(0), 0u);
 	s2->release();
@@ -148,7 +148,7 @@ TEST_F(R122ReaderADTest, R122ReaderADKlineWrappedSlicesUsePhysicalOffsets)
 
 	WTSKlineSlice* first = _reader->readKlineSlice("EXK.rb2301", KP_Minute1, 3, 20230103093300000ull);
 	ASSERT_NE(nullptr, first);
-	ASSERT_EQ(3u, first->size());
+	ASSERT_EQ(3, first->size());
 	EXPECT_EQ((uint64_t)(20230103 - 19900000) * 10000 + 931, first->at(0)->time);
 	EXPECT_EQ((uint64_t)(20230103 - 19900000) * 10000 + 933, first->at(2)->time);
 	first->release();
@@ -161,7 +161,7 @@ TEST_F(R122ReaderADTest, R122ReaderADKlineWrappedSlicesUsePhysicalOffsets)
 
 	WTSKlineSlice* wrapped_tail = _reader->readKlineSlice("EXK.rb2301", KP_Minute1, 2, 20230103093500000ull);
 	ASSERT_NE(nullptr, wrapped_tail);
-	ASSERT_EQ(2u, wrapped_tail->size());
+	ASSERT_EQ(2, wrapped_tail->size());
 	ASSERT_EQ(1u, wrapped_tail->get_block_counts());
 	EXPECT_EQ(2u, wrapped_tail->get_block_size(0));
 	EXPECT_EQ((uint64_t)(20230103 - 19900000) * 10000 + 934, wrapped_tail->at(0)->time);
@@ -172,7 +172,7 @@ TEST_F(R122ReaderADTest, R122ReaderADKlineWrappedSlicesUsePhysicalOffsets)
 
 	WTSKlineSlice* wrapped_all = _reader->readKlineSlice("EXK.rb2301", KP_Minute1, 3, 20230103093500000ull);
 	ASSERT_NE(nullptr, wrapped_all);
-	ASSERT_EQ(3u, wrapped_all->size());
+	ASSERT_EQ(3, wrapped_all->size());
 	ASSERT_EQ(2u, wrapped_all->get_block_counts());
 	EXPECT_EQ(1u, wrapped_all->get_block_size(0));
 	EXPECT_EQ(2u, wrapped_all->get_block_size(1));
@@ -194,7 +194,7 @@ TEST_F(R122ReaderADTest, R122ReaderADKlineRequestLargerThanStoredCountReturnsAva
 
 	WTSKlineSlice* slice = _reader->readKlineSlice("EXL.rb2301", KP_Minute1, 3, 20230103093200000ull);
 	ASSERT_NE(nullptr, slice);
-	ASSERT_EQ(2u, slice->size());
+	ASSERT_EQ(2, slice->size());
 	EXPECT_EQ((uint64_t)(20230103 - 19900000) * 10000 + 931, slice->at(0)->time);
 	EXPECT_EQ((uint64_t)(20230103 - 19900000) * 10000 + 932, slice->at(1)->time);
 	slice->release();
@@ -223,12 +223,12 @@ TEST_F(R122ReaderADTest, DISABLED_R122ReaderADKlineArrayTwoReturnsWrongTail)
 
 	WTSKlineSlice* s1 = _reader->readKlineSlice("EXQ.rb2301", KP_Minute1, 3, 20230103093300000ull);
 	ASSERT_TRUE(s1 != NULL);
-	ASSERT_EQ(s1->size(), 3u);
+	ASSERT_EQ(s1->size(), 3);
 	s1->release();
 
 	WTSKlineSlice* s2 = _reader->readKlineSlice("EXQ.rb2301", KP_Minute1, 2, 20230103093500000ull);
 	ASSERT_TRUE(s2 != NULL);
-	ASSERT_EQ(s2->size(), 2u);
+	ASSERT_EQ(s2->size(), 2);
 	EXPECT_EQ(s2->get_block_addr(0)[0].time, (uint64_t)3301030934ull);
 	EXPECT_EQ(s2->get_block_addr(0)[1].time, (uint64_t)3301030935ull);
 	s2->release();
@@ -250,7 +250,7 @@ TEST_F(R122ReaderADTest, R122ReaderADFirstKlineReadHonorsEtime)
 	const uint64_t cutoff_bar_time = (uint64_t)(20230103 - 19900000) * 10000 + 933;
 	WTSKlineSlice* slice = _reader->readKlineSlice("EXD.rb2301", KP_Minute1, 3, cutoff);
 	ASSERT_NE(nullptr, slice);
-	EXPECT_EQ(3u, slice->size());
+	EXPECT_EQ(3, slice->size());
 	const uint32_t inspect_count = std::min(3u, (uint32_t)slice->size());
 	const uint32_t expected_hhmm[] = { 931, 932, 933 };
 	const double expected_close[] = { 3900.5, 3910.5, 3920.5 };
@@ -281,7 +281,7 @@ TEST_F(R122ReaderADTest, R122ReaderADFirstKlineReadAtLastBarIsPositiveControl)
 
 	WTSKlineSlice* slice = _reader->readKlineSlice("EXE.rb2301", KP_Minute1, 3, 20230103093500000ull);
 	ASSERT_NE(nullptr, slice);
-	EXPECT_EQ(3u, slice->size());
+	EXPECT_EQ(3, slice->size());
 	const uint32_t expected_hhmm[] = { 933, 934, 935 };
 	const double expected_close[] = { 3920.5, 3930.5, 3940.5 };
 	const uint32_t inspect_count = std::min(3u, (uint32_t)slice->size());

@@ -1,0 +1,102 @@
+ninja: Entering directory `/tmp/wt-i03-reverify-20261103/build-asan'
+[0/2] Re-checking globbed directories...
+[1/77] Building CXX object WTSTools/CMakeFiles/WTSTools.dir/WTSDataFactory.cpp.o
+[2/77] Building CXX object WTSTools/CMakeFiles/WTSTools.dir/WTSBaseDataMgr.cpp.o
+[3/77] Building CXX object ParserCTP/CMakeFiles/ParserCTP.dir/ParserCTP.cpp.o
+[4/77] Building CXX object ParserCTPMini/CMakeFiles/ParserCTPMini.dir/ParserCTPMini.cpp.o
+[5/77] Building CXX object ParserCTPOpt/CMakeFiles/ParserCTPOpt.dir/ParserCTPOpt.cpp.o
+[6/77] Building CXX object ParserFemas/CMakeFiles/ParserFemas.dir/ParserFemas.cpp.o
+[7/77] Building CXX object ParserXTP/CMakeFiles/ParserXTP.dir/ParserXTP.cpp.o
+[8/77] Building CXX object ParserShm/CMakeFiles/ParserShm.dir/ParserShm.cpp.o
+[9/77] Building CXX object WtDataStorage/CMakeFiles/WtDataStorage.dir/WtDataReader.cpp.o
+[10/77] Building CXX object WtDataStorage/CMakeFiles/WtDataStorage.dir/WtDataWriter.cpp.o
+[11/77] Building CXX object WtDataStorage/CMakeFiles/WtDataStorage.dir/WtRdmDtReader.cpp.o
+[12/77] Building CXX object WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/WtDataReaderAD.cpp.o
+[13/77] Building CXX object WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/WtDataWriterAD.cpp.o
+[14/77] Building CXX object WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/WtRdmDtReaderAD.cpp.o
+[15/77] Building CXX object WtDtCore/CMakeFiles/WtDtCore.dir/IndexWorkerMgr.cpp.o
+[16/77] Building CXX object WtDtCore/CMakeFiles/WtDtCore.dir/ParserAdapter.cpp.o
+[17/77] Building CXX object WtDtCore/CMakeFiles/WtDtCore.dir/ShmCaster.cpp.o
+[18/77] Building CXX object WtDtCore/CMakeFiles/WtDtCore.dir/UDPCaster.cpp.o
+[19/77] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/CtaMocker.cpp.o
+[20/77] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/ExecMocker.cpp.o
+[21/77] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/HftMocker.cpp.o
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.cpp:10:
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.h:985:11: warning: first argument in call to 'memset' is a pointer to non-trivially copyable type 'HftMocker::_OrderInfo' [-Wnontrivial-memcall]
+  985 |                         memset(this, 0, sizeof(_OrderInfo));
+      |                                ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.h:985:11: note: explicitly cast the pointer to silence this warning
+  985 |                         memset(this, 0, sizeof(_OrderInfo));
+      |                                ^
+      |                                (void*)
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.h:995:11: warning: first argument in call to 'memcpy' is a pointer to non-trivially copyable type 'HftMocker::_OrderInfo' [-Wnontrivial-memcall]
+  995 |                         memcpy(this, &rhs, sizeof(_OrderInfo));
+      |                                ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.h:995:11: note: explicitly cast the pointer to silence this warning
+  995 |                         memcpy(this, &rhs, sizeof(_OrderInfo));
+      |                                ^
+      |                                (void*)
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.h:1006:11: warning: first argument in call to 'memcpy' is a pointer to non-trivially copyable type 'HftMocker::_OrderInfo' [-Wnontrivial-memcall]
+ 1006 |                         memcpy(this, &rhs, sizeof(_OrderInfo));
+      |                                ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtBtCore/HftMocker.h:1006:11: note: explicitly cast the pointer to silence this warning
+ 1006 |                         memcpy(this, &rhs, sizeof(_OrderInfo));
+      |                                ^
+      |                                (void*)
+3 warnings generated.
+[22/77] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/MatchEngine.cpp.o
+[23/77] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/SelMocker.cpp.o
+[24/77] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/HisDataReplayer.cpp.o
+[25/77] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/UftMocker.cpp.o
+[26/77] Building CXX object ParserUDP/CMakeFiles/ParserUDP.dir/ParserUDP.cpp.o
+[27/77] Building CXX object TraderCTP/CMakeFiles/TraderCTP.dir/TraderCTP.cpp.o
+[28/77] Building CXX object TraderCTPMini/CMakeFiles/TraderCTPMini.dir/TraderCTPMini.cpp.o
+[29/77] Building CXX object TraderCTPOpt/CMakeFiles/TraderCTPOpt.dir/TraderCTPOpt.cpp.o
+[30/77] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtDiffMinImpactExeUnit.cpp.o
+[31/77] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtExeFact.cpp.o
+[32/77] Building CXX object TraderMocker/CMakeFiles/TraderMocker.dir/TraderMocker.cpp.o
+[33/77] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtMinImpactExeUnit.cpp.o
+[34/77] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtStockMinImpactExeUnit.cpp.o
+[35/77] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtStockVWapExeUnit.cpp.o
+[36/77] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtTWapExeUnit.cpp.o
+[37/77] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtVWapExeUnit.cpp.o
+[38/77] Building CXX object WtCore/CMakeFiles/WtCore.dir/CtaStraContext.cpp.o
+[39/77] Building CXX object WtCore/CMakeFiles/WtCore.dir/CtaStraBaseCtx.cpp.o
+[40/77] Building CXX object WtCore/CMakeFiles/WtCore.dir/HftStraContext.cpp.o
+[41/77] Building CXX object WtCore/CMakeFiles/WtCore.dir/HftStraBaseCtx.cpp.o
+[42/77] Building CXX object WtCore/CMakeFiles/WtCore.dir/ParserAdapter.cpp.o
+[43/77] Building CXX object WtCore/CMakeFiles/WtCore.dir/SelStraContext.cpp.o
+[44/77] Building CXX object WtCore/CMakeFiles/WtCore.dir/SelStraBaseCtx.cpp.o
+[45/77] Linking CXX static library build_x64/Debug/libs/libWTSTools.a
+[46/77] Linking CXX shared library build_x64/Debug/bin/libParserCTP.dylib
+[47/77] Linking CXX shared library build_x64/Debug/bin/libParserCTPMini.dylib
+[48/77] Linking CXX shared library build_x64/Debug/bin/libParserCTPOpt.dylib
+[49/77] Linking CXX shared library build_x64/Debug/bin/libParserFemas.dylib
+[50/77] Linking CXX shared library build_x64/Debug/bin/libParserXTP.dylib
+[51/77] Linking CXX shared library build_x64/Debug/bin/libParserShm.dylib
+[52/77] Linking CXX shared library build_x64/Debug/bin/libWtDataStorage.dylib
+[53/77] Linking CXX shared library build_x64/Debug/bin/libWtDataStorageAD.dylib
+[54/77] Linking CXX static library build_x64/Debug/libs/libWtDtCore.a
+[55/77] Linking CXX static library build_x64/Debug/libs/libWtBtCore.a
+[56/77] Linking CXX shared library build_x64/Debug/bin/libParserUDP.dylib
+[57/77] Linking CXX shared library build_x64/Debug/bin/libTraderCTP.dylib
+[58/77] Linking CXX shared library build_x64/Debug/bin/libTraderCTPMini.dylib
+[59/77] Linking CXX shared library build_x64/Debug/bin/libTraderCTPOpt.dylib
+[60/77] Linking CXX shared library build_x64/Debug/bin/libTraderMocker.dylib
+[61/77] Linking CXX shared library build_x64/Debug/bin/libWtExeFact.dylib
+[62/77] Linking CXX shared library build_x64/Debug/bin/WtDtPorter/libWtDtHelper.dylib
+[63/77] Building CXX object WtCore/CMakeFiles/WtCore.dir/WtDiffExecuter.cpp.o
+[64/77] Linking CXX shared library build_x64/Debug/bin/WtDtPorter/libWtDtPorter.dylib
+[65/77] Linking CXX shared library build_x64/Debug/bin/WtDtPorter/libWtDtServo.dylib
+[66/77] Linking CXX static library build_x64/Debug/libs/libWtCore.a
+[67/77] Linking CXX shared library build_x64/Debug/bin/WtBtPorter/libWtBtPorter.dylib
+[68/77] Linking CXX shared library build_x64/Debug/bin/WtPorter/libWtExecMon.dylib
+[69/77] Linking CXX shared library build_x64/Debug/bin/WtPorter/libWtPorter.dylib
+[70/77] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/q01_wtcore3/r130_misc_tail_test.cpp.o
+[71/77] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/q01_wtcore3/r170_trader_risk_test.cpp.o
+[72/77] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/q01_wtcore3/r90_trader_risk_init_test.cpp.o
+[73/77] Linking CXX executable build_x64/Debug/bin/TestUnits/CoverageTests_t_TraderFemas
+[74/77] Linking CXX executable build_x64/Debug/bin/TestUnits/CoverageTests_t_TraderMocker
+[75/77] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_wtcore.dir/__/__/WtCore/WtDiffExecuter.cpp.o
+[76/77] Linking CXX executable build_x64/Debug/bin/TestUnits/CoverageTests_wtcore
+exit=0

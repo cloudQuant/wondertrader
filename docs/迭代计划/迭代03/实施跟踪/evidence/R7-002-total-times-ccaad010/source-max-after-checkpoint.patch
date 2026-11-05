@@ -1,0 +1,13 @@
+diff --git a/src/WtExeFact/WtTWapExeUnit.cpp b/src/WtExeFact/WtTWapExeUnit.cpp
+index eec489e8..a4b43410 100644
+--- a/src/WtExeFact/WtTWapExeUnit.cpp
++++ b/src/WtExeFact/WtTWapExeUnit.cpp
+@@ -199,7 +199,7 @@ void WtTWapExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* c
+ 	WTSVariant* totalTimesValue = cfg->get("total_times");
+ 	const double totalTimes = totalTimesValue ? totalTimesValue->asDouble() : 0.0;
+ 	if (!std::isfinite(totalTimes) || totalTimes < 1.0 ||
+-		totalTimes > static_cast<double>(std::numeric_limits<uint32_t>::max()))
++		totalTimes > static_cast<double>((std::numeric_limits<uint32_t>::max)()))
+ 	{
+ 		ctx->writeLog(fmt::format("TWAP init rejected for {}: total_times must be greater than zero and fit in uint32", stdCode).c_str());
+ 		return;

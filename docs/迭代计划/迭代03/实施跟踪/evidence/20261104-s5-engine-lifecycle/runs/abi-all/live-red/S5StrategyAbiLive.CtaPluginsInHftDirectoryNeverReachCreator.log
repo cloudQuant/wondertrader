@@ -1,0 +1,32 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5StrategyAbiLive.CtaPluginsInHftDirectoryNeverReachCreator
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5StrategyAbiLive
+[ RUN      ] S5StrategyAbiLive.CtaPluginsInHftDirectoryNeverReachCreator
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_strategy_plugin_abi_20261104s5/check_live.cpp:188: Failure
+Value of: mgr.loadFactories(dirOf("CTA", "LEGACY").c_str())
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_strategy_plugin_abi_20261104s5/check_live.cpp:190: Failure
+Expected equality of these values:
+  0
+  c.legacy()
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_strategy_plugin_abi_20261104s5/check_live.cpp:191: Failure
+Value of: mgr.createStrategy("abi_fake", "unit", "foreign_legacy")
+  Actual: true
+Expected: false
+
+[  FAILED  ] S5StrategyAbiLive.CtaPluginsInHftDirectoryNeverReachCreator (3 ms)
+[----------] 1 test from S5StrategyAbiLive (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S5StrategyAbiLive.CtaPluginsInHftDirectoryNeverReachCreator
+
+ 1 FAILED TEST

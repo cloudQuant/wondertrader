@@ -1,0 +1,104 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-ctp/before/src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp	2026-11-03 21:37:58
++++ src/TestUnits/coverage/t_TraderCTPOpt/r61_traderctpopt_api_test.cpp	2026-11-04 17:58:58
+@@ -616,14 +616,31 @@
+ 	probe.disconnect();
+ 	EXPECT_EQ(1u, api.release_calls);
+ 
+-	/* quick 分支：订阅 QUICK 主题 */
++	/* 迭代03 s5（卡9/T2-CTP-03 同型）改写：旧断言要求同实例 disconnect 后可再次 connect 新 API。
++	 * 旧 SDK 对象的迟到回调无法与新对象区分，实例改为单次使用：再次 connect 被拒绝且不调用 creator。
++	 * 原断言见证据 before/。 */
+ 	R61OptApi api2;
+ 	g_created_opt_api = &api2;
+ 	probe.setQuick(true);
+ 	probe.connect();
++	EXPECT_EQ(0u, api2.init_calls);
++	EXPECT_EQ(nullptr, probe.api());
++	EXPECT_TRUE(probe.workerNull());
++	probe.disconnect();
++	EXPECT_EQ(0u, api2.release_calls);
++
++	/* quick 分支：新实例订阅 QUICK 主题 */
++	R61OptProbe quick;
++	quick.harden();
++	quick.setFlowDir(tmp.path + "/");
++	quick.setBrokerUser("9999", "tester");
++	quick.setFront("tcp://127.0.0.1:1");
++	quick.setCreator(&r61_opt_creator);
++	quick.setQuick(true);
++	quick.connect();
+ 	EXPECT_EQ((int)THOST_TERT_QUICK, (int)api2.pub_topic);
+ 	EXPECT_EQ((int)THOST_TERT_QUICK, (int)api2.priv_topic);
+-	probe.disconnect();
++	quick.disconnect();
+ 	EXPECT_EQ(1u, api2.release_calls);
+ 	g_created_opt_api = nullptr;
+ }
+@@ -843,14 +860,26 @@
+ 	EXPECT_EQ(2, api.order.VolumeTotalOriginal);
+ 	EXPECT_EQ((int)THOST_FTDC_TC_IOC, (int)api.order.TimeCondition);
+ 	EXPECT_EQ((int)THOST_FTDC_VC_AV, (int)api.order.VolumeCondition);
+-	EXPECT_EQ("0", std::string(api.order.OrderRef));
++	/* 迭代03 s5 / T2-CTP-08（卡6d 用户裁定：缺委托 ID 统一原子分配唯一 OrderRef）改写：
++	 * 旧断言要求无 tag 单取 m_orderRef 当前值 "0" 且第二单复用同一 OrderRef（BUG-R61-004），
++	 * 与 6d 冲突。现合同：缺 ID 分配 1、2…，写回委托 ID 与自动 tag；同一身份不重复提交。原断言见证据 before/。 */
++	EXPECT_EQ("1", std::string(api.order.OrderRef));
++	EXPECT_STREQ("000005#0000000006#000001", ent->getEntrustID());
++	EXPECT_STREQ("ctpopt-auto:000005#0000000006#000001", ent->getUserTag());
+ 
+-	/* 发送失败日志 */
++	/* 发送失败日志：第二张无 tag 单分配不同 OrderRef */
++	WTSEntrust* ent2 = WTSEntrust::create("rb2610", 1, 3510.0, "CFFEX");
++	ent2->setContractInfo(fx.ct);
+ 	api.stub_ret_ = -7;
+-	EXPECT_EQ(0, probe.orderInsert(ent));
++	EXPECT_EQ(0, probe.orderInsert(ent2));
+ 	EXPECT_TRUE(sink.hasLog("Order inserting failed"));
+-	/* 无 userTag 的第二单仍复用同一 OrderRef（BUG-R61-004） */
+-	EXPECT_EQ("0", std::string(api.order.OrderRef));
++	EXPECT_EQ("2", std::string(api.order.OrderRef));
++	/* 同一身份再次提交（含已发送失败）被拒绝，不调用 SDK */
++	api.stub_ret_ = 0;
++	EXPECT_EQ(-1, probe.orderInsert(ent));
++	EXPECT_EQ(-1, probe.orderInsert(ent2));
++	EXPECT_EQ(2u, api.order_calls);
++	ent2->release();
+ 
+ 	/* 带 userTag：orderRef 取 entrustID 的第三段，并写入 ini */
+ 	api.stub_ret_ = 0;
+@@ -1075,15 +1104,30 @@
+ 	EXPECT_EQ(3, api.exec_order.Volume);
+ 	EXPECT_EQ("55", std::string(api.exec_order.ExecOrderRef));
+ 
++	/* 迭代03 s5 / T2-CTP-08（卡6d）改写：旧断言重复提交同一委托并期望无 tag 时 ExecOrderRef 取
++	 * m_orderRef 当前值 "0"（BUG-R61-004）。现合同：同一身份不重复提交；缺 ID 原子分配且高于已保留的
++	 * 预分配引用（55）；空 tag 补自动 tag。原断言见证据 before/。 */
++	EXPECT_EQ(-1, probe.orderInsertOpt(ent));
++	EXPECT_EQ(1u, api.exec_order_calls);
++
++	WTSEntrust* failing = WTSEntrust::create("rb2610", 3, 0, "CFFEX", BT_EXECUTE);
++	failing->setContractInfo(fx.ct);
++	failing->setUserTag("exectag2");
++	failing->setEntrustID("000009#0000000010#000056");
+ 	api.stub_ret_ = -8;
+-	EXPECT_EQ(0, probe.orderInsertOpt(ent));
++	EXPECT_EQ(0, probe.orderInsertOpt(failing));
+ 	EXPECT_TRUE(sink.hasLog("Option execution order inserting failed"));
++	EXPECT_EQ("56", std::string(api.exec_order.ExecOrderRef));
++	failing->release();
+ 
+-	/* 无 userTag：ExecOrderRef 直接取 m_orderRef 当前值且不递增（BUG-R61-004） */
+-	ent->setUserTag("");
++	WTSEntrust* untagged = WTSEntrust::create("rb2610", 3, 0, "CFFEX", BT_EXECUTE);
++	untagged->setContractInfo(fx.ct);
+ 	api.stub_ret_ = 0;
+-	EXPECT_EQ(0, probe.orderInsertOpt(ent));
+-	EXPECT_EQ("0", std::string(api.exec_order.ExecOrderRef));
++	EXPECT_EQ(0, probe.orderInsertOpt(untagged));
++	EXPECT_EQ("57", std::string(api.exec_order.ExecOrderRef));
++	EXPECT_STREQ("000009#0000000010#000057", untagged->getEntrustID());
++	EXPECT_STREQ("ctpopt-auto:000009#0000000010#000057", untagged->getUserTag());
++	untagged->release();
+ 
+ 	/* 非行权业务 → 拒绝并记日志；空指针 → -1 */
+ 	ent->setBusinessType(BT_CASH);

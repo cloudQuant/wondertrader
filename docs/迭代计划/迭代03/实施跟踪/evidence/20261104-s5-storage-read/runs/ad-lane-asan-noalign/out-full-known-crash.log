@@ -1,0 +1,339 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 274 tests from 30 test suites.
+[----------] Global test environment set-up.
+[----------] 54 tests from R4WriterADTest
+[ RUN      ] R4WriterADTest.L03AlignedBarCachesFirstWriteAndSameMinuteUpdate
+[       OK ] R4WriterADTest.L03AlignedBarCachesFirstWriteAndSameMinuteUpdate (75 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars
+[       OK ] R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars (91 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCacheRejectsTruncatedFileWithoutMutation
+[       OK ] R4WriterADTest.L03AlignedBarCacheRejectsTruncatedFileWithoutMutation (32 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCacheRejectsMalformedIdentityAndRetries
+[       OK ] R4WriterADTest.L03AlignedBarCacheRejectsMalformedIdentityAndRetries (79 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCacheRejectsSizeBeyondCapacity
+[       OK ] R4WriterADTest.L03AlignedBarCacheRejectsSizeBeyondCapacity (1 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheFirstWriteAndRawDiskLayout
+[       OK ] R4WriterADTest.L03AlignedTickCacheFirstWriteAndRawDiskLayout (13 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRecoveryAndSecondRecordUpdate
+[       OK ] R4WriterADTest.L03AlignedTickCacheRecoveryAndSecondRecordUpdate (11 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRejectsTruncatedRecordWithoutMutation
+[       OK ] R4WriterADTest.L03AlignedTickCacheRejectsTruncatedRecordWithoutMutation (3 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRejectsUnterminatedIdentityAndRetries
+[       OK ] R4WriterADTest.L03AlignedTickCacheRejectsUnterminatedIdentityAndRetries (12 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRejectsSizeBeyondCapacity
+[       OK ] R4WriterADTest.L03AlignedTickCacheRejectsSizeBeyondCapacity (6 ms)
+[ RUN      ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects
+[       OK ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects (22 ms)
+[ RUN      ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeAsyncAdmission
+[       OK ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeAsyncAdmission (55 ms)
+[ RUN      ] R4WriterADTest.L03MissingOrInvalidActionDateIsRejected
+[       OK ] R4WriterADTest.L03MissingOrInvalidActionDateIsRejected (15 ms)
+[ RUN      ] R4WriterADTest.L03MissingSessionIsRejected
+[       OK ] R4WriterADTest.L03MissingSessionIsRejected (5 ms)
+[ RUN      ] R4WriterADTest.L03QueuedTickIsRecheckedBeforeProcessing
+[       OK ] R4WriterADTest.L03QueuedTickIsRecheckedBeforeProcessing (5 ms)
+[ RUN      ] R4WriterADTest.FailedInitThenDifferentRootUsesOnlyNewRoot
+[       OK ] R4WriterADTest.FailedInitThenDifferentRootUsesOnlyNewRoot (14 ms)
+[ RUN      ] R4WriterADTest.FailedReinitDoesNotDiscardPreviouslyMappedCache
+[       OK ] R4WriterADTest.FailedReinitDoesNotDiscardPreviouslyMappedCache (9 ms)
+[ RUN      ] R4WriterADTest.FreshInitBuildsFourBlockFilesWithValidADHeader
+[       OK ] R4WriterADTest.FreshInitBuildsFourBlockFilesWithValidADHeader (7 ms)
+[ RUN      ] R4WriterADTest.DisableFlagsKeepTickCacheButTouchNothingElse
+[       OK ] R4WriterADTest.DisableFlagsKeepTickCacheButTouchNothingElse (13 ms)
+[ RUN      ] R4WriterADTest.ReloadExistingCacheRebuildsIndex
+[       OK ] R4WriterADTest.ReloadExistingCacheRebuildsIndex (17 ms)
+[ RUN      ] R4WriterADTest.RejectsMalformedCacheFilesWithoutModifyingAnyCache
+[       OK ] R4WriterADTest.RejectsMalformedCacheFilesWithoutModifyingAnyCache (213 ms)
+[ RUN      ] R4WriterADTest.TickCacheAtCapacityResizesFileAndKeepsOldItems
+[       OK ] R4WriterADTest.TickCacheAtCapacityResizesFileAndKeepsOldItems (57 ms)
+[ RUN      ] R4WriterADTest.BarCacheExpansionFailureKeepsStateAndRetriesAfterFileRestore
+[       OK ] R4WriterADTest.BarCacheExpansionFailureKeepsStateAndRetriesAfterFileRestore (151 ms)
+[ RUN      ] R4WriterADTest.ProcFlagZeroOverwritesCacheVerbatim
+[       OK ] R4WriterADTest.ProcFlagZeroOverwritesCacheVerbatim (69 ms)
+[ RUN      ] R4WriterADTest.ProcFlagOneTurnsTotalsIntoDeltas
+[       OK ] R4WriterADTest.ProcFlagOneTurnsTotalsIntoDeltas (38 ms)
+[ RUN      ] R4WriterADTest.ProcFlagOneOnNewTradingDateRebaselinesCache
+[       OK ] R4WriterADTest.ProcFlagOneOnNewTradingDateRebaselinesCache (54 ms)
+[ RUN      ] R4WriterADTest.ProcFlagOneZeroPreInterestKeepsFullSnapshot
+[       OK ] R4WriterADTest.ProcFlagOneZeroPreInterestKeepsFullSnapshot (41 ms)
+[ RUN      ] R4WriterADTest.ProcFlagTwoAccumulatesTotals
+[       OK ] R4WriterADTest.ProcFlagTwoAccumulatesTotals (46 ms)
+[ RUN      ] R4WriterADTest.IdenticalActionTimeIsBumpedBy200Ms
+[       OK ] R4WriterADTest.IdenticalActionTimeIsBumpedBy200Ms (21 ms)
+[ RUN      ] R4WriterADTest.OlderTradingDateThanCacheIsRejected
+[       OK ] R4WriterADTest.OlderTradingDateThanCacheIsRejected (35 ms)
+[ RUN      ] R4WriterADTest.OffsetDateAheadOfTradingDateIsAbandoned
+[       OK ] R4WriterADTest.OffsetDateAheadOfTradingDateIsAbandoned (17 ms)
+[ RUN      ] R4WriterADTest.DecreasingTotalVolumeIsAbandoned
+[       OK ] R4WriterADTest.DecreasingTotalVolumeIsAbandoned (26 ms)
+[ RUN      ] R4WriterADTest.BarCacheMergesTicksOfDayMinute5AndMinute1
+[       OK ] R4WriterADTest.BarCacheMergesTicksOfDayMinute5AndMinute1 (55 ms)
+[ RUN      ] R4WriterADTest.LastOfSectionTickRollsBackOneMinute
+[       OK ] R4WriterADTest.LastOfSectionTickRollsBackOneMinute (30 ms)
+[ RUN      ] R4WriterADTest.TickOutsideSessionUpdatesTickCacheOnly
+[       OK ] R4WriterADTest.TickOutsideSessionUpdatesTickCacheOnly (9 ms)
+[ RUN      ] R4WriterADTest.WriteTickGuardsNullTickNullContractAndClosedSession
+[       OK ] R4WriterADTest.WriteTickGuardsNullTickNullContractAndClosedSession (95 ms)
+[ RUN      ] R4WriterADTest.GetCurTickCoversEmptyUnknownMissAndHit
+[       OK ] R4WriterADTest.GetCurTickCoversEmptyUnknownMissAndHit (22 ms)
+[ RUN      ] R4WriterADTest.ReleaseWithoutTaskThreadIsInert
+[       OK ] R4WriterADTest.ReleaseWithoutTaskThreadIsInert (53 ms)
+[ RUN      ] R4WriterADTest.WriterDefaultsToSynchronousWhenAsyncIsMissing
+[       OK ] R4WriterADTest.WriterDefaultsToSynchronousWhenAsyncIsMissing (4 ms)
+[ RUN      ] R4WriterADTest.AsyncWriterDrainsAcceptedTicksOnReleaseAndRejectsNewTicks
+[       OK ] R4WriterADTest.AsyncWriterDrainsAcceptedTicksOnReleaseAndRejectsNewTicks (102 ms)
+[ RUN      ] R4WriterADTest.AsyncWriterTickCountersAreSafeAcrossInstances
+[       OK ] R4WriterADTest.AsyncWriterTickCountersAreSafeAcrossInstances (250 ms)
+[ RUN      ] R4WriterADTest.MissingGroupSizeUsesDefaultInterval
+[       OK ] R4WriterADTest.MissingGroupSizeUsesDefaultInterval (311 ms)
+[ RUN      ] R4WriterADTest.ZeroGroupSizeRejectsInitAndBlocksWrites
+[       OK ] R4WriterADTest.ZeroGroupSizeRejectsInitAndBlocksWrites (0 ms)
+[ RUN      ] R4WriterADTest.LogGroupSizeEmitsCountEveryNthTick
+[       OK ] R4WriterADTest.LogGroupSizeEmitsCountEveryNthTick (38 ms)
+[ RUN      ] R4WriterADTest.TickDbStoresAllTradingDateKeyedRecords
+[       OK ] R4WriterADTest.TickDbStoresAllTradingDateKeyedRecords (55 ms)
+[ RUN      ] R4WriterADTest.InterleavedTickAndM1WritesReuseDatabaseCacheSlots
+[       OK ] R4WriterADTest.InterleavedTickAndM1WritesReuseDatabaseCacheSlots (170 ms)
+[ RUN      ] R4WriterADTest.HftKeysSortChronologicallyAcrossTradingDates
+[       OK ] R4WriterADTest.HftKeysSortChronologicallyAcrossTradingDates (38 ms)
+[ RUN      ] R4WriterADTest.EachCodeGetsItsOwnTickDbDirectory
+[       OK ] R4WriterADTest.EachCodeGetsItsOwnTickDbDirectory (52 ms)
+[ RUN      ] R4WriterADTest.MinuteBarRolloverPipesAllCompletedBarsIntoMin1Db
+[       OK ] R4WriterADTest.MinuteBarRolloverPipesAllCompletedBarsIntoMin1Db (58 ms)
+[ RUN      ] R4WriterADTest.DayBarRolloverPipesIntoDayDbUsesCorrectVolumeMoney
+[       OK ] R4WriterADTest.DayBarRolloverPipesIntoDayDbUsesCorrectVolumeMoney (61 ms)
+[ RUN      ] R4WriterADTest.MinuteFiveBarPipesIntoMin5Db
+[       OK ] R4WriterADTest.MinuteFiveBarPipesIntoMin5Db (36 ms)
+[ RUN      ] R4WriterADTest.ExtendedDumperReceivesPipedTicksAndBars
+[       OK ] R4WriterADTest.ExtendedDumperReceivesPipedTicksAndBars (96 ms)
+[ RUN      ] R4WriterADTest.ExplicitMapSizesStillPipeData
+[       OK ] R4WriterADTest.ExplicitMapSizesStillPipeData (43 ms)
+[ RUN      ] R4WriterADTest.BumpedActionTimeIsPersistedToTickDb
+[       OK ] R4WriterADTest.BumpedActionTimeIsPersistedToTickDb (161 ms)
+[ DISABLED ] R4WriterADTest.DISABLED_TickDbPathOccupiedByRegularFileThrowsOutOfWriteTick
+[----------] 54 tests from R4WriterADTest (3033 ms total)
+
+[----------] 13 tests from P05BtReaderADTest
+[ RUN      ] P05BtReaderADTest.NullCfgMakesEveryReadFail
+[       OK ] P05BtReaderADTest.NullCfgMakesEveryReadFail (11 ms)
+[ RUN      ] P05BtReaderADTest.MissingExchangeDirReturnsFalse
+[       OK ] P05BtReaderADTest.MissingExchangeDirReturnsFalse (13 ms)
+[ RUN      ] P05BtReaderADTest.DayBarRoundTripFieldByField
+[       OK ] P05BtReaderADTest.DayBarRoundTripFieldByField (12 ms)
+[ RUN      ] P05BtReaderADTest.RepeatedDayBarReadsReturnStableBytes
+[       OK ] P05BtReaderADTest.RepeatedDayBarReadsReturnStableBytes (7 ms)
+[ RUN      ] P05BtReaderADTest.Min1AndMin5UseSeparateDatabases
+[       OK ] P05BtReaderADTest.Min1AndMin5UseSeparateDatabases (22 ms)
+[ RUN      ] P05BtReaderADTest.OnlyThreePeriodsAreRoutable
+[       OK ] P05BtReaderADTest.OnlyThreePeriodsAreRoutable (0 ms)
+[ RUN      ] P05BtReaderADTest.CodePrefixFilterKeepsOtherCodesOut
+[       OK ] P05BtReaderADTest.CodePrefixFilterKeepsOtherCodesOut (27 ms)
+[ RUN      ] P05BtReaderADTest.EmptyDatabaseReturnsTrueWithNoBytes
+[       OK ] P05BtReaderADTest.EmptyDatabaseReturnsTrueWithNoBytes (27 ms)
+[ RUN      ] P05BtReaderADTest.NoMatchInPopulatedDatabaseClearsExistingOutput
+[       OK ] P05BtReaderADTest.NoMatchInPopulatedDatabaseClearsExistingOutput (41 ms)
+[ RUN      ] P05BtReaderADTest.TickRoundTripFilteredByTradingDate
+[       OK ] P05BtReaderADTest.TickRoundTripFilteredByTradingDate (2 ms)
+[ RUN      ] P05BtReaderADTest.TickDbCacheReusesHandlePerExchangeAndContract
+[       OK ] P05BtReaderADTest.TickDbCacheReusesHandlePerExchangeAndContract (27 ms)
+[ RUN      ] P05BtReaderADTest.GetRangeCursorErrorDoesNotPublishPartialResults
+[       OK ] P05BtReaderADTest.GetRangeCursorErrorDoesNotPublishPartialResults (16 ms)
+[ RUN      ] P05BtReaderADTest.MalformedLmdbValuesAreRejectedWithoutChangingOutput
+[       OK ] P05BtReaderADTest.MalformedLmdbValuesAreRejectedWithoutChangingOutput (367 ms)
+[----------] 13 tests from P05BtReaderADTest (594 ms total)
+
+[----------] 5 tests from P05KeyTailTest
+[ RUN      ] P05KeyTailTest.MinBarTimeGrowsMonotonicallyUpTo2032
+[       OK ] P05KeyTailTest.MinBarTimeGrowsMonotonicallyUpTo2032 (6 ms)
+[ RUN      ] P05KeyTailTest.BarsBeyond2033EscapeTheUpperSentinel
+[       OK ] P05KeyTailTest.BarsBeyond2033EscapeTheUpperSentinel (26 ms)
+[ RUN      ] P05KeyTailTest.TruncatedKeyTailCollidesWithOlderBar
+[       OK ] P05KeyTailTest.TruncatedKeyTailCollidesWithOlderBar (108 ms)
+[ RUN      ] P05KeyTailTest.DayBarsKeyedByDateNeverOverflowSentinel
+[       OK ] P05KeyTailTest.DayBarsKeyedByDateNeverOverflowSentinel (4 ms)
+[ RUN      ] P05KeyTailTest.KeyTailOrderMatchesNumericOrderInsideUint32
+[       OK ] P05KeyTailTest.KeyTailOrderMatchesNumericOrderInsideUint32 (0 ms)
+[----------] 5 tests from P05KeyTailTest (149 ms total)
+
+[----------] 39 tests from P05RdmReaderADTest
+[ RUN      ] P05RdmReaderADTest.NullCfgLeavesEmptyBaseDirButSinksAreWired
+[       OK ] P05RdmReaderADTest.NullCfgLeavesEmptyBaseDirButSinksAreWired (0 ms)
+[ RUN      ] P05RdmReaderADTest.NullCfgRangeReadsRejectWithoutCwdWrites
+[       OK ] P05RdmReaderADTest.NullCfgRangeReadsRejectWithoutCwdWrites (0 ms)
+[ RUN      ] P05RdmReaderADTest.NotProvidedSlicesReturnNull
+[       OK ] P05RdmReaderADTest.NotProvidedSlicesReturnNull (0 ms)
+[ RUN      ] P05RdmReaderADTest.DayKlineSliceRoundTripFieldByField
+[       OK ] P05RdmReaderADTest.DayKlineSliceRoundTripFieldByField (162 ms)
+[ RUN      ] P05RdmReaderADTest.ConfiguredRootReadsKlineAndTick
+[       OK ] P05RdmReaderADTest.ConfiguredRootReadsKlineAndTick (24 ms)
+[ RUN      ] P05RdmReaderADTest.WindowClippingUsesCachedBars
+[       OK ] P05RdmReaderADTest.WindowClippingUsesCachedBars (10 ms)
+[ RUN      ] P05RdmReaderADTest.RepeatedKlineSlicesAndCodesReuseExchangeDatabase
+[       OK ] P05RdmReaderADTest.RepeatedKlineSlicesAndCodesReuseExchangeDatabase (28 ms)
+[ RUN      ] P05RdmReaderADTest.MinuteBarsUseTimeAsKeyTail
+[       OK ] P05RdmReaderADTest.MinuteBarsUseTimeAsKeyTail (9 ms)
+[ RUN      ] P05RdmReaderADTest.OutOfRangeEndBeforeFirstBarYieldsEmptySlice
+[       OK ] P05RdmReaderADTest.OutOfRangeEndBeforeFirstBarYieldsEmptySlice (21 ms)
+[ RUN      ] P05RdmReaderADTest.UnknownPeriodYieldsNullSlice
+[       OK ] P05RdmReaderADTest.UnknownPeriodYieldsNullSlice (0 ms)
+[ RUN      ] P05RdmReaderADTest.EmptyDailyDatabaseReturnsEmptyKlineSlice
+[       OK ] P05RdmReaderADTest.EmptyDailyDatabaseReturnsEmptyKlineSlice (9 ms)
+[ RUN      ] P05RdmReaderADTest.DailyDatabaseWithOtherContractReturnsEmptyKlineSlice
+[       OK ] P05RdmReaderADTest.DailyDatabaseWithOtherContractReturnsEmptyKlineSlice (3 ms)
+[ RUN      ] P05RdmReaderADTest.EmptyMinuteDatabaseReturnsEmptyKlineSlice
+[       OK ] P05RdmReaderADTest.EmptyMinuteDatabaseReturnsEmptyKlineSlice (26 ms)
+[ RUN      ] P05RdmReaderADTest.EmptyTickDatabaseReturnsEmptyTickSlice
+[       OK ] P05RdmReaderADTest.EmptyTickDatabaseReturnsEmptyTickSlice (10 ms)
+[ RUN      ] P05RdmReaderADTest.TickCountCheckedQueryFailureCanRetry
+[       OK ] P05RdmReaderADTest.TickCountCheckedQueryFailureCanRetry (5 ms)
+[ RUN      ] P05RdmReaderADTest.TickDateCheckedQueryFailureCanRetry
+[       OK ] P05RdmReaderADTest.TickDateCheckedQueryFailureCanRetry (12 ms)
+[ RUN      ] P05RdmReaderADTest.KlineCountCheckedQueryFailureCanRetry
+[       OK ] P05RdmReaderADTest.KlineCountCheckedQueryFailureCanRetry (23 ms)
+[ RUN      ] P05RdmReaderADTest.TickCountRejectsMismatchedCheckedRangeResultsAndCanRetry
+[       OK ] P05RdmReaderADTest.TickCountRejectsMismatchedCheckedRangeResultsAndCanRetry (13 ms)
+[ RUN      ] P05RdmReaderADTest.TickDateRejectsMismatchedCheckedRangeResultsAndCanRetry
+[       OK ] P05RdmReaderADTest.TickDateRejectsMismatchedCheckedRangeResultsAndCanRetry (8 ms)
+[ RUN      ] P05RdmReaderADTest.TickRangeRejectsMismatchedCheckedRangeResultsWithoutPartialPublish
+[       OK ] P05RdmReaderADTest.TickRangeRejectsMismatchedCheckedRangeResultsWithoutPartialPublish (68 ms)
+[ RUN      ] P05RdmReaderADTest.KlineCountRejectsMismatchedCheckedRangeResultsAndCanRetry
+[       OK ] P05RdmReaderADTest.KlineCountRejectsMismatchedCheckedRangeResultsAndCanRetry (70 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeRejectsMismatchedCheckedRangeResultsWithoutPartialPublish
+[       OK ] P05RdmReaderADTest.KlineRangeRejectsMismatchedCheckedRangeResultsWithoutPartialPublish (52 ms)
+[ RUN      ] P05RdmReaderADTest.TickDatabaseWithoutMatchingTradingDateReturnsEmptySlice
+[       OK ] P05RdmReaderADTest.TickDatabaseWithoutMatchingTradingDateReturnsEmptySlice (18 ms)
+[ RUN      ] P05RdmReaderADTest.TickCountRejectsShortAndLongLmdbValues
+[       OK ] P05RdmReaderADTest.TickCountRejectsShortAndLongLmdbValues (11 ms)
+[ RUN      ] P05RdmReaderADTest.TickDateRejectsShortAndLongLmdbValues
+[       OK ] P05RdmReaderADTest.TickDateRejectsShortAndLongLmdbValues (36 ms)
+[ RUN      ] P05RdmReaderADTest.TickRangeRejectsShortAndLongLmdbValues
+[       OK ] P05RdmReaderADTest.TickRangeRejectsShortAndLongLmdbValues (73 ms)
+[ RUN      ] P05RdmReaderADTest.KlineCountRejectsShortAndLongLmdbValues
+[       OK ] P05RdmReaderADTest.KlineCountRejectsShortAndLongLmdbValues (40 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeRejectsShortAndLongLmdbValues
+[       OK ] P05RdmReaderADTest.KlineRangeRejectsShortAndLongLmdbValues (91 ms)
+[ RUN      ] P05RdmReaderADTest.TickRangeDoesNotPublishOlderBatchWhenNewerRecordIsMalformed
+[       OK ] P05RdmReaderADTest.TickRangeDoesNotPublishOlderBatchWhenNewerRecordIsMalformed (84 ms)
+[ RUN      ] P05RdmReaderADTest.TickRangeLeavesCacheUnchangedWhenNewerQueryFails
+[       OK ] P05RdmReaderADTest.TickRangeLeavesCacheUnchangedWhenNewerQueryFails (20 ms)
+[ RUN      ] P05RdmReaderADTest.NewerTickAppendPreservesActiveSliceWhenCapacityIsAvailable
+[       OK ] P05RdmReaderADTest.NewerTickAppendPreservesActiveSliceWhenCapacityIsAvailable (38 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeKeepsExistingCacheWhenReloadFindsMalformedValue
+[       OK ] P05RdmReaderADTest.KlineRangeKeepsExistingCacheWhenReloadFindsMalformedValue (30 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeKeepsExistingCacheWhenCheckedQueryFails
+[       OK ] P05RdmReaderADTest.KlineRangeKeepsExistingCacheWhenCheckedQueryFails (14 ms)
+[ RUN      ] P05RdmReaderADTest.TickReadEntrypointsAcceptCurrentPackedV2AndOldValues
+[       OK ] P05RdmReaderADTest.TickReadEntrypointsAcceptCurrentPackedV2AndOldValues (11 ms)
+[ RUN      ] P05RdmReaderADTest.KlineReadEntrypointsAcceptCurrentPackedV2AndOldValues
+[       OK ] P05RdmReaderADTest.KlineReadEntrypointsAcceptCurrentPackedV2AndOldValues (25 ms)
+[ RUN      ] P05RdmReaderADTest.CountReadersRejectShortAndLongLmdbKeys
+[       OK ] P05RdmReaderADTest.CountReadersRejectShortAndLongLmdbKeys (40 ms)
+[ RUN      ] P05RdmReaderADTest.TickDateRejectsShortAndLongLmdbKeys
+[       OK ] P05RdmReaderADTest.TickDateRejectsShortAndLongLmdbKeys (85 ms)
+[ RUN      ] P05RdmReaderADTest.TickRangeRejectsShortAndLongLmdbKeys
+[       OK ] P05RdmReaderADTest.TickRangeRejectsShortAndLongLmdbKeys (26 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeRejectsShortAndLongLmdbKeys
+[       OK ] P05RdmReaderADTest.KlineRangeRejectsShortAndLongLmdbKeys (104 ms)
+[----------] 39 tests from P05RdmReaderADTest (1328 ms total)
+
+[----------] 2 tests from R100ADReaderTest
+[ RUN      ] R100ADReaderTest.R100ReaderADOnMinuteEndMinutes
+[       OK ] R100ADReaderTest.R100ReaderADOnMinuteEndMinutes (33 ms)
+[ RUN      ] R100ADReaderTest.R100ReaderADHotReloadDayAndRtCacheGrowth
+[       OK ] R100ADReaderTest.R100ReaderADHotReloadDayAndRtCacheGrowth (243 ms)
+[----------] 2 tests from R100ADReaderTest (276 ms total)
+
+[----------] 3 tests from R100MixedPeriodReaderTest
+[ RUN      ] R100MixedPeriodReaderTest.R100ReaderADMixedPeriodsDailyFirstKeepsMinuteCutoff
+[       OK ] R100MixedPeriodReaderTest.R100ReaderADMixedPeriodsDailyFirstKeepsMinuteCutoff (68 ms)
+[ RUN      ] R100MixedPeriodReaderTest.R100ReaderADMixedPeriodsMinutesFirstKeepsMinuteCutoff
+[       OK ] R100MixedPeriodReaderTest.R100ReaderADMixedPeriodsMinutesFirstKeepsMinuteCutoff (25 ms)
+[ RUN      ] R100MixedPeriodReaderTest.R100ReaderADMixedPeriodsDailyBetweenMinutesKeepsMinuteCutoff
+[       OK ] R100MixedPeriodReaderTest.R100ReaderADMixedPeriodsDailyBetweenMinutesKeepsMinuteCutoff (59 ms)
+[----------] 3 tests from R100MixedPeriodReaderTest (153 ms total)
+
+[----------] 2 tests from R100WriterADTest
+[ RUN      ] R100WriterADTest.R100WriterADReloadCachesThenResizeAllPeriods
+[       OK ] R100WriterADTest.R100WriterADReloadCachesThenResizeAllPeriods (61 ms)
+[ RUN      ] R100WriterADTest.R100WriterADProcFlag2ZeroFillAndDayDumper
+[       OK ] R100WriterADTest.R100WriterADProcFlag2ZeroFillAndDayDumper (93 ms)
+[----------] 2 tests from R100WriterADTest (163 ms total)
+
+[----------] 1 test from R112ReaderADDayTest
+[ RUN      ] R112ReaderADDayTest.R112ReaderADDayOnMinuteEndAppendsRtBar
+[       OK ] R112ReaderADDayTest.R112ReaderADDayOnMinuteEndAppendsRtBar (15 ms)
+[----------] 1 test from R112ReaderADDayTest (18 ms total)
+
+[----------] 1 test from R112ReaderADKlineTest
+[ RUN      ] R112ReaderADKlineTest.R112ReaderADKlineUpdateThenArrayTwoTail
+[       OK ] R112ReaderADKlineTest.R112ReaderADKlineUpdateThenArrayTwoTail (45 ms)
+[----------] 1 test from R112ReaderADKlineTest (45 ms total)
+
+[----------] 1 test from R112ReaderADTickTest
+[ RUN      ] R112ReaderADTickTest.R112ReaderADTickIncrementalAndRepeatedReadPreservesLatestData
+[       OK ] R112ReaderADTickTest.R112ReaderADTickIncrementalAndRepeatedReadPreservesLatestData (79 ms)
+[----------] 1 test from R112ReaderADTickTest (79 ms total)
+
+[----------] 1 test from R112WriterADDumperTest
+[ RUN      ] R112WriterADDumperTest.R112WriterADFailingDumperAndZeroPriceMerge
+[       OK ] R112WriterADDumperTest.R112WriterADFailingDumperAndZeroPriceMerge (114 ms)
+[----------] 1 test from R112WriterADDumperTest (114 ms total)
+
+[----------] 1 test from R112WriterADMidnightTest
+[ RUN      ] R112WriterADMidnightTest.R112WriterADMidnightMinuteBarsWrapToTradingDate
+[       OK ] R112WriterADMidnightTest.R112WriterADMidnightMinuteBarsWrapToTradingDate (31 ms)
+[----------] 1 test from R112WriterADMidnightTest (31 ms total)
+
+[----------] 8 tests from R122ReaderADTest
+[ RUN      ] R122ReaderADTest.R122ReaderADKlineZeroCountReturnsEmptySlice
+[       OK ] R122ReaderADTest.R122ReaderADKlineZeroCountReturnsEmptySlice (37 ms)
+[ RUN      ] R122ReaderADTest.R122ReaderADTickArrayTwoUsesPhysicalOffsetAfterWrap
+[       OK ] R122ReaderADTest.R122ReaderADTickArrayTwoUsesPhysicalOffsetAfterWrap (66 ms)
+[ RUN      ] R122ReaderADTest.R122ReaderADKlineWrappedSlicesUsePhysicalOffsets
+[       OK ] R122ReaderADTest.R122ReaderADKlineWrappedSlicesUsePhysicalOffsets (53 ms)
+[ RUN      ] R122ReaderADTest.R122ReaderADKlineRequestLargerThanStoredCountReturnsAvailableBars
+[       OK ] R122ReaderADTest.R122ReaderADKlineRequestLargerThanStoredCountReturnsAvailableBars (17 ms)
+[ DISABLED ] R122ReaderADTest.DISABLED_R122ReaderADKlineArrayTwoReturnsWrongTail
+[ RUN      ] R122ReaderADTest.R122ReaderADFirstKlineReadHonorsEtime
+[       OK ] R122ReaderADTest.R122ReaderADFirstKlineReadHonorsEtime (106 ms)
+[ RUN      ] R122ReaderADTest.R122ReaderADFirstKlineReadAtLastBarIsPositiveControl
+[       OK ] R122ReaderADTest.R122ReaderADFirstKlineReadAtLastBarIsPositiveControl (11 ms)
+[ RUN      ] R122ReaderADTest.R122ReaderADKlineDbOpenFailure
+[       OK ] R122ReaderADTest.R122ReaderADKlineDbOpenFailure (11 ms)
+[ RUN      ] R122ReaderADTest.R122ReaderADTickDbOpenFailure
+[       OK ] R122ReaderADTest.R122ReaderADTickDbOpenFailure (2 ms)
+[----------] 8 tests from R122ReaderADTest (307 ms total)
+
+[----------] 2 tests from R122WriterADErrorsTest
+[ RUN      ] R122WriterADErrorsTest.R122WriterADDbOpenFailuresLogged
+[       OK ] R122WriterADErrorsTest.R122WriterADDbOpenFailuresLogged (227 ms)
+[ RUN      ] R122WriterADErrorsTest.R122WriterADUpdateTickCacheUninitialized
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==15818==ERROR: AddressSanitizer: SEGV on unknown address 0x17d7d857d7d9d7d7 (pc 0x000102f312c0 bp 0x00016d0a98b0 sp 0x00016d0a9800 T0)
+==15818==The signal is caused by a READ memory access.
+    #0 0x000102f312c0 in (anonymous namespace)::checkedTickSessionDate(wtp::IBaseDataMgr*, wtp::WTSTickData const*, unsigned int&)+0x10c (s5_ad_lane:arm64+0x1001dd2c0)
+    #1 0x000102f30a84 in WtDataWriterAD::writeTick(wtp::WTSTickData*, unsigned int)+0x42c (s5_ad_lane:arm64+0x1001dca84)
+    #2 0x0001031b5ba0 in r122adw::R122WriterADErrorsTest_R122WriterADUpdateTickCacheUninitialized_Test::TestBody()+0x920 (s5_ad_lane:arm64+0x100461ba0)
+    #3 0x0001034f27b0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (s5_ad_lane:arm64+0x10079e7b0)
+    #4 0x0001034f26f8 in testing::Test::Run()+0xcc (s5_ad_lane:arm64+0x10079e6f8)
+    #5 0x0001034f32d8 in testing::TestInfo::Run()+0xd0 (s5_ad_lane:arm64+0x10079f2d8)
+    #6 0x0001034f3d5c in testing::TestSuite::Run()+0x1c4 (s5_ad_lane:arm64+0x10079fd5c)
+    #7 0x0001034ff184 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (s5_ad_lane:arm64+0x1007ab184)
+    #8 0x0001034feb30 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (s5_ad_lane:arm64+0x1007aab30)
+    #9 0x0001034fea94 in testing::UnitTest::Run()+0x78 (s5_ad_lane:arm64+0x1007aaa94)
+    #10 0x0001034dfe9c in main+0x40 (s5_ad_lane:arm64+0x10078be9c)
+    #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+==15818==Register values:
+ x[0] = 0x0000000109a15310   x[1] = 0x0000000109a152f0   x[2] = 0x000000016d0a98e0   x[3] = 0x000000016d0a97e0  
+ x[4] = 0x0000000063694b70   x[5] = 0x0000000000000010   x[6] = 0x0000000000000031   x[7] = 0x0000000000000001  
+ x[8] = 0x17d7d857d7d9d7d7   x[9] = 0xbebebebebebebebe  x[10] = 0x000000016d0a98c0  x[11] = 0x0000000000000004  
+x[12] = 0x000000802da3531c  x[13] = 0xffffff7fdec9d597  x[14] = 0x0000008021362a62  x[15] = 0x0000000000000000  
+x[16] = 0x0000000102f31124  x[17] = 0x00000001f5b8cb40  x[18] = 0x0000000000000000  x[19] = 0x000000016d0a9a20  
+x[20] = 0x0000000000000001  x[21] = 0x000060600000d520  x[22] = 0x000060600000d520  x[23] = 0x0000000000000001  
+x[24] = 0x0000000103f7c000  x[25] = 0x0000000000000000  x[26] = 0x000000000000000d  x[27] = 0x000000016d0aa9d0  
+x[28] = 0x0000000000000001     fp = 0x000000016d0a98b0     lr = 0x0000000102f312ac     sp = 0x000000016d0a9800  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (s5_ad_lane:arm64+0x1001dd2c0) in (anonymous namespace)::checkedTickSessionDate(wtp::IBaseDataMgr*, wtp::WTSTickData const*, unsigned int&)+0x10c
+==15818==ABORTING

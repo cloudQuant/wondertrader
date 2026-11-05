@@ -12,6 +12,7 @@
  * 调用 init 但不 run、不起线程；临时文件只写 temp_directory_path()/q01sel_r130fee_<pid>/。
  */
 #include <gtest/gtest.h>
+#include <algorithm>
 
 #include <cstdio>
 #include <filesystem>
@@ -180,31 +181,34 @@ TEST(R130EngineFee, LoadFeesMakesTemplateAvailableForEngineCalculation)
     ASSERT_NE(nullptr, dceComm);
     EXPECT_DOUBLE_EQ(0.1, comm->getMarginRate());
     EXPECT_DOUBLE_EQ(3.0, comm->calcFee(3500.0, 2.0, 0));
-    EXPECT_DOUBLE_EQ(3.0, engine.calc_fee(kAg, 3500.0, 2.0, 0));
+    // 决策 K10=A（2026-11-04）：实盘按笔应用 minfee（与回测 FeeSchedule 同规则），
+    // 品种对象 calcFee 不含 minfee；原断言（实盘不应用，3.0）见证据 before/。
+    EXPECT_DOUBLE_EQ(5.0, engine.calc_fee(kAg, 3500.0, 2.0, 0));
     EXPECT_TRUE(engine.fee_config_valid());
     EXPECT_DOUBLE_EQ(4.0, dceComm->calcFee(3500.0, 2.0, 0));
     EXPECT_DOUBLE_EQ(4.0, engine.calc_fee("DCE.a.2512", 3500.0, 2.0, 0));
     EXPECT_DOUBLE_EQ(0.3, dceComm->getMarginRate());
-    EXPECT_DOUBLE_EQ(comm->calcFee(3500.0, 2.0, 1),
+    EXPECT_DOUBLE_EQ(std::max(comm->calcFee(3500.0, 2.0, 1), 5.0),
         engine.calc_fee(kAg, 3500.0, 2.0, 1));
-    EXPECT_DOUBLE_EQ(comm->calcFee(3500.0, 2.0, 2),
+    EXPECT_DOUBLE_EQ(std::max(comm->calcFee(3500.0, 2.0, 2), 5.0),
         engine.calc_fee(kAg, 3500.0, 2.0, 2));
     EXPECT_DOUBLE_EQ(4500000000.0, engine.calc_fee(kAg, 3500.0, 3000000000.0, 0));
     EXPECT_DOUBLE_EQ(comm->calcFee(3500.0, 3000000000.0, 0),
         engine.calc_fee(kAg, 3500.0, 3000000000.0, 0));
     EXPECT_DOUBLE_EQ(0.0, engine.calc_fee("SHFE.au.2512", 3500.0, 2.0, 0));
 
-    auto expectOriginalSnapshot = [&]()
+    // K10=A：快照中 SHFE.ag 是否带 minfee（5.0）决定实盘按笔最低费。
+    auto expectOriginalSnapshot = [&](double minFee)
     {
-        EXPECT_DOUBLE_EQ(3.0, engine.calc_fee(kAg, 3500.0, 2.0, 0));
-        EXPECT_DOUBLE_EQ(2.4, engine.calc_fee(kAg, 3500.0, 2.0, 1));
-        EXPECT_DOUBLE_EQ(2.0, engine.calc_fee(kAg, 3500.0, 2.0, 2));
+        EXPECT_DOUBLE_EQ(std::max(3.0, minFee), engine.calc_fee(kAg, 3500.0, 2.0, 0));
+        EXPECT_DOUBLE_EQ(std::max(2.4, minFee), engine.calc_fee(kAg, 3500.0, 2.0, 1));
+        EXPECT_DOUBLE_EQ(std::max(2.0, minFee), engine.calc_fee(kAg, 3500.0, 2.0, 2));
         EXPECT_DOUBLE_EQ(3.0, comm->calcFee(3500.0, 2.0, 0));
         EXPECT_DOUBLE_EQ(0.1, comm->getMarginRate());
     };
-    auto expectOriginalTwoProductSnapshot = [&]()
+    auto expectOriginalTwoProductSnapshot = [&](double minFee)
     {
-        expectOriginalSnapshot();
+        expectOriginalSnapshot(minFee);
         EXPECT_DOUBLE_EQ(4.0, engine.calc_fee("DCE.a.2512", 3500.0, 2.0, 0));
         EXPECT_DOUBLE_EQ(4.0, dceComm->calcFee(3500.0, 2.0, 0));
         EXPECT_DOUBLE_EQ(0.3, dceComm->getMarginRate());
@@ -219,30 +223,30 @@ TEST(R130EngineFee, LoadFeesMakesTemplateAvailableForEngineCalculation)
         "\"DCE.a\":{\"open\":99.0,\"close\":{},\"closetoday\":99.0,"
         "\"byvolume\":true,\"margin\":0.9}}");
     engine.reloadFees(path.c_str());
-    expectOriginalTwoProductSnapshot();
+    expectOriginalTwoProductSnapshot(5.0);
 
     overwriteFeeFile(path,
         "{\"SHFE.ag\":{\"open\":\"99.0partial\",\"close\":99.0,\"closetoday\":99.0,"
         "\"byvolume\":true,\"margin\":0.9}}");
     engine.reloadFees(path.c_str());
-    expectOriginalTwoProductSnapshot();
+    expectOriginalTwoProductSnapshot(5.0);
 
     overwriteFeeFile(path,
         "{\"SHFE.ag\":{\"open\":99.0,\"close\":99.0,\"closetoday\":99.0,"
         "\"byvolume\":true,\"margin\":\"0.9partial\"}}");
     engine.reloadFees(path.c_str());
-    expectOriginalTwoProductSnapshot();
+    expectOriginalTwoProductSnapshot(5.0);
 
     overwriteFeeFile(path,
         "{\"SHFE.ag\":{\"open\":99.0,\"close\":99.0,\"closetoday\":99.0,"
         "\"byvolume\":true,\"margin\":0.9,\"minfee\":\"5.0partial\"}}");
     engine.reloadFees(path.c_str());
-    expectOriginalTwoProductSnapshot();
+    expectOriginalTwoProductSnapshot(5.0);
 
     // WTSVariant omits null-valued top-level entries, which remain a no-op.
     overwriteFeeFile(path, "{\"SHFE.ag\":null}");
     engine.reloadFees(path.c_str());
-    expectOriginalTwoProductSnapshot();
+    expectOriginalTwoProductSnapshot(5.0);
 
     // Missing and null fee fields use getDouble/getBoolean's historical
     // defaults (0 / false), and an explicit entry updates only that product.
@@ -267,20 +271,20 @@ TEST(R130EngineFee, LoadFeesMakesTemplateAvailableForEngineCalculation)
         "{\"SHFE.ag\":{\"open\":1.5,\"close\":1.2,\"closetoday\":1.0,"
         "\"byvolume\":true,\"margin\":0.1}}");
     engine.reloadFees(path.c_str());
-    expectOriginalTwoProductSnapshot();
+    expectOriginalTwoProductSnapshot(0.0);
 
     // JSON string numbers and legacy true/yes string booleans stay compatible.
     overwriteFeeFile(path,
         "{\"SHFE.ag\":{\"open\":\"1.5\",\"close\":\"1.2\",\"closetoday\":\"1.0\","
         "\"byvolume\":\"yes\",\"margin\":\"0.1\",\"minfee\":\"5.0\"}}");
     engine.reloadFees(path.c_str());
-    expectOriginalTwoProductSnapshot();
+    expectOriginalTwoProductSnapshot(5.0);
 
     overwriteFeeFile(path,
         "{\"SHFE.ag\":{\"open\":\"1.5\",\"close\":\"1.2\",\"closetoday\":\"1.0\","
         "\"byvolume\":\"true\",\"margin\":\"0.1\"}}");
     engine.reloadFees(path.c_str());
-    expectOriginalTwoProductSnapshot();
+    expectOriginalTwoProductSnapshot(0.0);
 
     overwriteFeeFile(path,
         "{\"SHFE.ag\":{\"open\":\"0.0002\",\"close\":\"0.0001\",\"closetoday\":\"0.00005\","

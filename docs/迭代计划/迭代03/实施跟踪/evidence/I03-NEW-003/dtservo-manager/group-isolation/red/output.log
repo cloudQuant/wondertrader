@@ -1,0 +1,46 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R45ParserAdapterFakeTest.Exported*
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from R45ParserAdapterFakeTest
+[ RUN      ] R45ParserAdapterFakeTest.ExportedStatusReportsConnectSubmissionFailure
+[       OK ] R45ParserAdapterFakeTest.ExportedStatusReportsConnectSubmissionFailure (5 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ExportedStatusReportsSuccessfulConnectSubmission
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05b_dtservo/r45_parseradapter_test.cpp:622: Failure
+Value of: ::are_parser_connect_commands_submitted()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05b_dtservo/r45_parseradapter_test.cpp:623: Failure
+Expected equality of these values:
+  probe.connect()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] R45ParserAdapterFakeTest.ExportedStatusReportsSuccessfulConnectSubmission (1 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ExportedInitializationStateRemainsVisibleDuringConnect
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05b_dtservo/r45_parseradapter_test.cpp:636: Failure
+Value of: r45_initialized_during_connect
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05b_dtservo/r45_parseradapter_test.cpp:637: Failure
+Value of: r45_submitted_during_connect
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05b_dtservo/r45_parseradapter_test.cpp:639: Failure
+Value of: ::are_parser_connect_commands_submitted()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05b_dtservo/r45_parseradapter_test.cpp:640: Failure
+Expected equality of these values:
+  probe.connect()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] R45ParserAdapterFakeTest.ExportedInitializationStateRemainsVisibleDuringConnect (1 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ExportedConnectStatusCanBeReadDuringStartup

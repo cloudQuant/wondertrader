@@ -1,0 +1,134 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R21ReaderADTest.K35*:R21ReaderADTest.S5*:P05RdmReaderADTest.KlineRange*
+[==========] Running 15 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 5 tests from P05RdmReaderADTest
+[ RUN      ] P05RdmReaderADTest.KlineRangeRejectsMismatchedCheckedRangeResultsWithoutPartialPublish
+[       OK ] P05RdmReaderADTest.KlineRangeRejectsMismatchedCheckedRangeResultsWithoutPartialPublish (2 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeRejectsShortAndLongLmdbValues
+[       OK ] P05RdmReaderADTest.KlineRangeRejectsShortAndLongLmdbValues (1 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeKeepsExistingCacheWhenReloadFindsMalformedValue
+[       OK ] P05RdmReaderADTest.KlineRangeKeepsExistingCacheWhenReloadFindsMalformedValue (1 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeKeepsExistingCacheWhenCheckedQueryFails
+[       OK ] P05RdmReaderADTest.KlineRangeKeepsExistingCacheWhenCheckedQueryFails (1 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeRejectsShortAndLongLmdbKeys
+[       OK ] P05RdmReaderADTest.KlineRangeRejectsShortAndLongLmdbKeys (1 ms)
+[----------] 5 tests from P05RdmReaderADTest (8 ms total)
+
+[----------] 10 tests from R21ReaderADTest
+[ RUN      ] R21ReaderADTest.K35AppendAndLastBarRevisionAreReadFromTheCursor
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:81: Failure
+Expected equality of these values:
+  sink()->count_containing("Reading back")
+    Which is: 2
+  1u
+    Which is: 1
+only the first read scans everything
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:82: Failure
+Expected equality of these values:
+  sink()->count_containing("Reading newer")
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] R21ReaderADTest.K35AppendAndLastBarRevisionAreReadFromTheCursor (1 ms)
+[ RUN      ] R21ReaderADTest.K35OlderRevisionBecomesVisibleAfterTheIncrementBound
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:96: Failure
+The difference between k35_close_of(s1, 20240102) and 101.0 is 400, which exceeds 1e-9, where
+k35_close_of(s1, 20240102) evaluates to 501,
+101.0 evaluates to 101, and
+1e-9 evaluates to 1.0000000000000001e-09.
+an older revision stays stale until a full check
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:102: Failure
+The difference between k35_close_of(s2, 20240102) and 101.0 is 400, which exceeds 1e-9, where
+k35_close_of(s2, 20240102) evaluates to 501,
+101.0 evaluates to 101, and
+1e-9 evaluates to 1.0000000000000001e-09.
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:112: Failure
+Expected equality of these values:
+  sink()->count_containing("Reading back")
+    Which is: 4
+  2u
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:113: Failure
+Expected equality of these values:
+  sink()->count_containing("Reading newer")
+    Which is: 0
+  2u
+    Which is: 2
+
+[  FAILED  ] R21ReaderADTest.K35OlderRevisionBecomesVisibleAfterTheIncrementBound (1 ms)
+[ RUN      ] R21ReaderADTest.K35OlderRevisionBecomesVisibleAfterTheTimeBound
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:127: Failure
+The difference between k35_close_of(s1, 20240102) and 101.0 is 400, which exceeds 1e-9, where
+k35_close_of(s1, 20240102) evaluates to 501,
+101.0 evaluates to 101, and
+1e-9 evaluates to 1.0000000000000001e-09.
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:136: Failure
+Expected equality of these values:
+  sink()->count_containing("Reading back")
+    Which is: 3
+  2u
+    Which is: 2
+
+[  FAILED  ] R21ReaderADTest.K35OlderRevisionBecomesVisibleAfterTheTimeBound (1115 ms)
+[ RUN      ] R21ReaderADTest.K35MinuteBarsMergeFromTheCursor
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_main_k35_cursor_test.cpp:162: Failure
+Expected equality of these values:
+  sink()->count_containing("Reading newer")
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] R21ReaderADTest.K35MinuteBarsMergeFromTheCursor (4 ms)
+[ RUN      ] R21ReaderADTest.S5SameWindowWithoutCommitReusesSnapshot
+[       OK ] R21ReaderADTest.S5SameWindowWithoutCommitReusesSnapshot (3 ms)
+[ RUN      ] R21ReaderADTest.S5CommitAfterSnapshotReadsFromCursorAndBoundsRevisionStaleness
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp:61: Failure
+The difference between second->get_block_addr(0)[0].close and 101.0 is 400, which exceeds 1e-9, where
+second->get_block_addr(0)[0].close evaluates to 501,
+101.0 evaluates to 101, and
+1e-9 evaluates to 1.0000000000000001e-09.
+an older revision is not read incrementally
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp:75: Failure
+Expected equality of these values:
+  sink()->count_containing("Reading back")
+    Which is: 3
+  2u
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/s5_rdm_ad_snapshot_test.cpp:76: Failure
+Expected equality of these values:
+  sink()->count_containing("Reading newer")
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] R21ReaderADTest.S5CommitAfterSnapshotReadsFromCursorAndBoundsRevisionStaleness (4 ms)
+[ RUN      ] R21ReaderADTest.S5MinuteRangeEndingIn2033DoesNotWrap
+[       OK ] R21ReaderADTest.S5MinuteRangeEndingIn2033DoesNotWrap (2 ms)
+[ RUN      ] R21ReaderADTest.S5OverlongIdentityRejectedBeforeOpeningDatabases
+[       OK ] R21ReaderADTest.S5OverlongIdentityRejectedBeforeOpeningDatabases (0 ms)
+[ RUN      ] R21ReaderADTest.S5NightSessionTickRangeUsesNaturalTimeForTradingDate
+[       OK ] R21ReaderADTest.S5NightSessionTickRangeUsesNaturalTimeForTradingDate (2 ms)
+[ RUN      ] R21ReaderADTest.S5UnknownCommodityTickRangeIsRefusedWithoutDereference
+[       OK ] R21ReaderADTest.S5UnknownCommodityTickRangeIsRefusedWithoutDereference (0 ms)
+[----------] 10 tests from R21ReaderADTest (1136 ms total)
+
+[----------] Global test environment tear-down
+[==========] 15 tests from 2 test suites ran. (1145 ms total)
+[  PASSED  ] 10 tests.
+[  FAILED  ] 5 tests, listed below:
+[  FAILED  ] R21ReaderADTest.K35AppendAndLastBarRevisionAreReadFromTheCursor
+[  FAILED  ] R21ReaderADTest.K35OlderRevisionBecomesVisibleAfterTheIncrementBound
+[  FAILED  ] R21ReaderADTest.K35OlderRevisionBecomesVisibleAfterTheTimeBound
+[  FAILED  ] R21ReaderADTest.K35MinuteBarsMergeFromTheCursor
+[  FAILED  ] R21ReaderADTest.S5CommitAfterSnapshotReadsFromCursorAndBoundsRevisionStaleness
+
+ 5 FAILED TESTS

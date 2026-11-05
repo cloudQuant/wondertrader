@@ -1,0 +1,46 @@
+# suite: i03_wp1_identity_gate_20261104
+# cwd: /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104
+# env overrides: {}
+# command: /bin/bash /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/run.sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/_deps/plain /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/baseline-asan baseline-asan
+
+
+[  FAILED  ] Wp1Test.AbsentOrderBecomesRevivableTombstone (1492 ms)
+[ RUN      ] Wp1Test.StalePositionSnapshotRowDoesNotOverwriteNewerTrade
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:361: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  adapter.getPosition(kStdCode, false)
+    Which is: 0
+stale snapshot row must not erase the newer trade
+
+[  FAILED  ] Wp1Test.StalePositionSnapshotRowDoesNotOverwriteNewerTrade (1020 ms)
+[ RUN      ] Wp1Test.FailedSnapshotKeepsLedger
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:372: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  adapter.getUndoneQty(kStdCode)
+    Which is: 0
+
+[  FAILED  ] Wp1Test.FailedSnapshotKeepsLedger (277 ms)
+[----------] 11 tests from Wp1Test (9204 ms total)
+
+[----------] Global test environment tear-down
+[==========] 11 tests from 1 test suite ran. (9204 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 11 tests, listed below:
+[  FAILED  ] Wp1Test.SharedAccountPauseClosesEverySiblingAdapter
+[  FAILED  ] Wp1Test.PausedAccountCancelsOnlyVerifiedIdentities
+[  FAILED  ] Wp1Test.MonthCodeContractKeepsThreeToSixDigitsAndRejectsOthers
+[  FAILED  ] Wp1Test.NonDigitMonthTradeIsQuarantinedAndLongMonthKeptIntact
+[  FAILED  ] Wp1Test.DirectOrderReservesAndDuplicateCancelReleasesOnce
+[  FAILED  ] Wp1Test.BuySplitDuplicateTradeLateTradeAndDuplicateCancelAreIdempotent
+[  FAILED  ] Wp1Test.RejectionOfUnknownLocalIdDoesNotConsumeOtherOrders
+[  FAILED  ] Wp1Test.StaleSnapshotRowDoesNotResurrectNewerCancel
+[  FAILED  ] Wp1Test.AbsentOrderBecomesRevivableTombstone
+[  FAILED  ] Wp1Test.StalePositionSnapshotRowDoesNotOverwriteNewerTrade
+[  FAILED  ] Wp1Test.FailedSnapshotKeepsLedger
+
+11 FAILED TESTS
+exit=1

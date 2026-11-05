@@ -1,0 +1,82 @@
+[
+ {
+  "id": "tsan-xtp",
+  "name": "XtpS5Lifecycle.error_callbacks_after_register_spi_null_do_not_crash",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-tsan/tests",
+  "filter": "XtpS5Lifecycle.error_callbacks_after_register_spi_null_do_not_crash",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:die_after_fork=0:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "tsan-xtp",
+  "name": "XtpS5Lifecycle.delete_trader_from_sdk_callback_quarantines",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-tsan/tests",
+  "filter": "XtpS5Lifecycle.delete_trader_from_sdk_callback_quarantines",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:die_after_fork=0:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "tsan-xtp",
+  "name": "XtpS5Lifecycle.release_waits_for_inflight_callback_before_api_release",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-tsan/tests",
+  "filter": "XtpS5Lifecycle.release_waits_for_inflight_callback_before_api_release",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:die_after_fork=0:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "tsan-xtp",
+  "name": "XtpS5Lifecycle.callback_drain_timeout_retains_api_and_remover_quarantines",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-tsan/tests",
+  "filter": "XtpS5Lifecycle.callback_drain_timeout_retains_api_and_remover_quarantines",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:die_after_fork=0:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "tsan-xtp",
+  "name": "XtpS5Lifecycle.late_disconnect_of_replaced_api_session_does_not_relogin",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-tsan/tests",
+  "filter": "XtpS5Lifecycle.late_disconnect_of_replaced_api_session_does_not_relogin",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:die_after_fork=0:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "tsan-xtp",
+  "name": "XtpS5Lifecycle.disconnect_of_current_session_still_relogins",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-tsan/tests",
+  "filter": "XtpS5Lifecycle.disconnect_of_current_session_still_relogins",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:die_after_fork=0:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "tsan-xtp",
+  "name": "XtpS5Lifecycle.init_fails_without_module_and_rejects_repeated_init",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-tsan/tests",
+  "filter": "XtpS5Lifecycle.init_fails_without_module_and_rejects_repeated_init",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:die_after_fork=0:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "tsan-xtp",
+  "name": "R93XtpTest",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-tsan/tests",
+  "filter": "R93XtpTest.*",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:die_after_fork=0:second_deadlock_stack=1"
+  },
+  "timeout": 600
+ }
+]

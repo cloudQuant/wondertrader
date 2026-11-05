@@ -1,0 +1,1370 @@
+#include "../../../WtPorter/WtRtRunner.h"
+
+#include <gtest/gtest.h>
+
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <cstdlib>
+#include <cerrno>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <new>
+#include <set>
+#include <string>
+#include <thread>
+
+#ifndef _WIN32
+#include <poll.h>
+#include <signal.h>
+#include <sys/mman.h>
+#include <sys/resource.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#endif
+
+#include "WtCore/ExecUnitInitStatus.h"
+#include "WtCore/ExecCommandQuiesce.h"
+#include "WtCore/IExecCommand.h"
+#include "WtCore/WtCtaEngine.h"
+#include "WtCore/WtSelEngine.h"
+#include "WtCore/WtHelper.h"
+#include "WtPorter/WtPorter.h"
+
+USING_NS_WTP;
+
+extern WtRtRunner& getRunner();
+// BUG-R42-002 gate: HFT contexts bind only a registered trader (module-less local adapter).
+TraderAdapterPtr i03s5_register_test_trader(WtRtRunner& runner, const char* id);
+
+class WtRtRunnerTestAccess
+{
+public:
+	static WtRtRunner::LifecycleState state(WtRtRunner& runner)
+	{
+		std::lock_guard<std::mutex> lock(runner._status_config_mutex);
+		return runner._lifecycle_state;
+	}
+
+	static bool waitForState(WtRtRunner& runner, WtRtRunner::LifecycleState state,
+		std::chrono::milliseconds timeout)
+	{
+		std::unique_lock<std::mutex> lock(runner._status_config_mutex);
+		return runner._lifecycle_changed.wait_for(lock, timeout, [&runner, state]() {
+			return runner._lifecycle_state == state;
+		});
+	}
+
+	// I03-NEW-099：生命周期状态只前进（STOPPING 之后为 RELEASED）。release 不等待阻塞中的 provider 时，
+	// 会在等待线程被唤醒前从 STOPPING 进到 RELEASED，精确等 STOPPING 在并行负载下会错过；此处等“已到达或越过”。
+	static bool waitForStateAtLeast(WtRtRunner& runner, WtRtRunner::LifecycleState state,
+		std::chrono::milliseconds timeout)
+	{
+		std::unique_lock<std::mutex> lock(runner._status_config_mutex);
+		return runner._lifecycle_changed.wait_for(lock, timeout, [&runner, state]() {
+			return static_cast<uint8_t>(runner._lifecycle_state) >= static_cast<uint8_t>(state);
+		});
+	}
+
+	static bool waitForReleaseWaiters(WtRtRunner& runner, uint32_t count,
+		std::chrono::milliseconds timeout)
+	{
+		std::unique_lock<std::mutex> lock(runner._status_config_mutex);
+		return runner._lifecycle_changed.wait_for(lock, timeout, [&runner, count]() {
+			return runner._release_waiters >= count;
+		});
+	}
+
+	static void markReleasedForScopeTest(WtRtRunner& runner)
+	{
+		std::lock_guard<std::mutex> lock(runner._status_config_mutex);
+		runner._lifecycle_state = WtRtRunner::LifecycleState::RELEASED;
+		runner._status_ready.store(false, std::memory_order_release);
+	}
+
+	static bool exitRequested(WtRtRunner& runner)
+	{
+		return runner._to_exit.load(std::memory_order_acquire);
+	}
+
+	static bool deferredReleaseRequested(WtRtRunner& runner)
+	{
+		return runner._deferred_release_requested.load(std::memory_order_acquire);
+	}
+
+	static void lockRunStartMutex(WtRtRunner& runner)
+	{
+		runner._run_start_mutex.lock();
+	}
+
+	static void unlockRunStartMutex(WtRtRunner& runner)
+	{
+		runner._run_start_mutex.unlock();
+	}
+};
+
+namespace {
+
+const char* kReadyCode = "SHFE.rb.2510";
+const char* kFailedCode = "SHFE.ag.2512";
+const char* kMissingCode = "SHFE.cu.2512";
+const char* kFailureText = "controlled unit initialization failure";
+
+// These fakes answer status calls synchronously and own no plugin units or
+// background command work. CrossThreadReleaseStatusExecutor's helper thread is
+// test orchestration and is explicitly joined by its test after the query.
+class NoopStatusCommandQuiesce : public IExecCommandQuiesce,
+	public IExecCommandQuiesceStages
+{
+public:
+	void requestQuiesce() override {}
+	bool canWaitQuiescedOnCurrentThread() const override { return true; }
+	bool waitQuiesced() override { return true; }
+	bool preflightQuiesceOnCurrentThread() const override { return true; }
+	bool drainHostQuiesced() override { return true; }
+	bool snapshotQuiescePluginOwners(std::vector<ExecQuiesceOwnerPtr>& out) const override
+	{
+		out.clear();
+		return true;
+	}
+	bool completeQuiesceAfterGlobalPluginWait() override { return true; }
+	WtExecuterFactory* quiesceFactory() const override { return nullptr; }
+};
+
+class StartupBarrier
+{
+public:
+	void blockStartup()
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		_entered = true;
+		_condition.notify_all();
+		_condition.wait(lock, [this]() { return _continue; });
+	}
+
+	bool waitUntilEntered(std::chrono::milliseconds timeout)
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		return _condition.wait_for(lock, timeout, [this]() { return _entered; });
+	}
+
+	void continueStartup()
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		_continue = true;
+		_condition.notify_all();
+	}
+
+private:
+	std::mutex _mutex;
+	std::condition_variable _condition;
+	bool _entered = false;
+	bool _continue = false;
+};
+
+std::atomic<StartupBarrier*> g_startup_barrier{ nullptr };
+WtRtRunner* g_startup_release_target = nullptr;
+std::atomic<bool> g_startup_release_callback_called{ false };
+std::atomic<bool> g_child_startup_release_returned{ false };
+std::atomic<bool> g_parser_release_callback_called{ false };
+std::atomic<bool> g_parser_release_reentry_returned{ false };
+std::atomic<bool> g_parser_child_release_returned{ false };
+std::atomic<bool> g_parser_child_release_saw_stopping{ false };
+std::atomic<bool> g_parser_child_release_returned_in_callback{ false };
+std::mutex g_parser_child_release_mutex;
+std::condition_variable g_parser_child_release_condition;
+
+void PORTER_FLAG block_hft_init_callback(CtxHandler)
+{
+	StartupBarrier* barrier = g_startup_barrier.load(std::memory_order_acquire);
+	if (barrier != nullptr)
+		barrier->blockStartup();
+}
+
+void PORTER_FLAG release_other_runner_on_hft_init(CtxHandler)
+{
+	g_startup_release_callback_called.store(true, std::memory_order_release);
+	if (g_startup_release_target != nullptr)
+		g_startup_release_target->release();
+}
+
+void PORTER_FLAG release_from_child_then_block_hft_init(CtxHandler)
+{
+	std::thread releaseThread([]() { getRunner().release(); });
+	releaseThread.join();
+	g_child_startup_release_returned.store(true, std::memory_order_release);
+	StartupBarrier* barrier = g_startup_barrier.load(std::memory_order_acquire);
+	if (barrier != nullptr)
+		barrier->blockStartup();
+}
+
+void PORTER_FLAG reenter_runner_release_on_parser_release(uint32_t eventId, const char*)
+{
+	if (eventId != EVENT_PARSER_RELEASE)
+		return;
+	g_parser_release_callback_called.store(true, std::memory_order_release);
+	release_porter();
+	g_parser_release_reentry_returned.store(true, std::memory_order_release);
+}
+
+void PORTER_FLAG spawn_child_release_on_parser_release(uint32_t eventId, const char*)
+{
+	if (eventId != EVENT_PARSER_RELEASE)
+		return;
+	std::thread releaseThread([]() {
+		release_porter();
+		g_parser_child_release_saw_stopping.store(
+			WtRtRunnerTestAccess::state(getRunner()) == WtRtRunner::LifecycleState::STOPPING,
+			std::memory_order_release);
+		g_parser_child_release_returned.store(true, std::memory_order_release);
+		g_parser_child_release_condition.notify_all();
+	});
+	bool returnedDuringCallback = false;
+	{
+		std::unique_lock<std::mutex> lock(g_parser_child_release_mutex);
+		returnedDuringCallback = g_parser_child_release_condition.wait_for(lock,
+			std::chrono::seconds(2), []() {
+				return g_parser_child_release_returned.load(std::memory_order_acquire);
+			});
+	}
+	g_parser_child_release_returned_in_callback.store(returnedDuringCallback,
+		std::memory_order_release);
+	releaseThread.join();
+}
+
+class ControlledStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider,
+	public NoopStatusCommandQuiesce
+{
+public:
+	explicit ControlledStatusExecutor(const char* id) : IExecCommand(id) {}
+
+	void setStatus(const char* code, ExecUnitInitState state, uint64_t generation,
+		const char* error)
+	{
+		ExecUnitInitStatus status;
+		status.state = state;
+		status.generation = generation;
+		status.error = error != NULL ? error : "";
+		std::lock_guard<std::mutex> lock(_mutex);
+		_statuses[code] = status;
+	}
+
+	void setRetryBlocked(const char* code)
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		_retry_blocked.insert(code);
+	}
+
+	ExecUnitInitStatus queryUnitInitStatus(const char* code) const override
+	{
+		if (code == NULL || code[0] == '\0')
+		{
+			ExecUnitInitStatus invalid;
+			invalid.query_result = ExecUnitInitQueryResult::INVALID_ARGUMENT;
+			invalid.error = "standard code is empty";
+			return invalid;
+		}
+
+		std::lock_guard<std::mutex> lock(_mutex);
+		auto it = _statuses.find(code);
+		return it == _statuses.end() ? ExecUnitInitStatus() : it->second;
+	}
+
+	ExecUnitInitClearResult clearFailedUnitInitStatus(const char* code) override
+	{
+		if (code == NULL || code[0] == '\0')
+			return ExecUnitInitClearResult::INVALID_ARGUMENT;
+
+		std::lock_guard<std::mutex> lock(_mutex);
+		auto it = _statuses.find(code);
+		if (it == _statuses.end())
+			return ExecUnitInitClearResult::NOT_FOUND;
+		if (it->second.state != ExecUnitInitState::FAILED)
+			return ExecUnitInitClearResult::NOT_FAILED;
+		if (_retry_blocked.find(code) != _retry_blocked.end())
+			return ExecUnitInitClearResult::RETRY_BLOCKED;
+		_statuses.erase(it);
+		return ExecUnitInitClearResult::CLEARED;
+	}
+
+private:
+	mutable std::mutex _mutex;
+	std::map<std::string, ExecUnitInitStatus> _statuses;
+	std::set<std::string> _retry_blocked;
+};
+
+class ReentrantStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider,
+	public NoopStatusCommandQuiesce
+{
+public:
+	explicit ReentrantStatusExecutor(const char* id) : IExecCommand(id) {}
+
+	ExecUnitInitStatus queryUnitInitStatus(const char* code) const override
+	{
+		tryReenter(code);
+		ExecUnitInitStatus status;
+		status.state = ExecUnitInitState::READY;
+		status.generation = 21;
+		return status;
+	}
+
+	ExecUnitInitClearResult clearFailedUnitInitStatus(const char* code) override
+	{
+		tryReenter(code);
+		return ExecUnitInitClearResult::CLEARED;
+	}
+
+	int32_t nestedQueryResult() const { return _nested_query_result.load(std::memory_order_acquire); }
+	bool reentrantReleaseReturned() const { return _release_returned.load(std::memory_order_acquire); }
+
+private:
+	void tryReenter(const char* code) const
+	{
+		getRunner().release();
+		_release_returned.store(true, std::memory_order_release);
+
+		uint32_t state = WT_EXEC_UNIT_INIT_UNKNOWN_V2;
+		uint64_t generation = 0;
+		char error[64] = {};
+		_nested_query_result.store(exec_get_unit_init_status_v2(WT_EXEC_ENGINE_CTA_V2,
+			"status_api_reentrant", code, &state, &generation, error, sizeof(error)),
+			std::memory_order_release);
+	}
+
+	mutable std::atomic<int32_t> _nested_query_result{ -1 };
+	mutable std::atomic<bool> _release_returned{ false };
+};
+
+class BlockingStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider,
+	public NoopStatusCommandQuiesce
+{
+public:
+	BlockingStatusExecutor(const char* id, StartupBarrier& barrier)
+		: IExecCommand(id), _barrier(barrier) {}
+
+	ExecUnitInitStatus queryUnitInitStatus(const char*) const override
+	{
+		_barrier.blockStartup();
+		ExecUnitInitStatus status;
+		status.state = ExecUnitInitState::READY;
+		status.generation = 31;
+		return status;
+	}
+
+	ExecUnitInitClearResult clearFailedUnitInitStatus(const char*) override
+	{
+		return ExecUnitInitClearResult::NOT_FAILED;
+	}
+
+private:
+	StartupBarrier& _barrier;
+};
+
+struct SnapshotLifetimeObservation
+{
+	std::atomic<bool> executor_destroyed{ false };
+	std::atomic<bool> module_unloaded{ false };
+};
+
+class SnapshotLifetimeStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider,
+	public NoopStatusCommandQuiesce
+{
+public:
+	SnapshotLifetimeStatusExecutor(const char* id, StartupBarrier& barrier,
+		const std::shared_ptr<SnapshotLifetimeObservation>& observation)
+		: IExecCommand(id), _barrier(barrier), _observation(observation) {}
+
+	~SnapshotLifetimeStatusExecutor() override
+	{
+		_observation->executor_destroyed.store(true, std::memory_order_release);
+	}
+
+	ExecUnitInitStatus queryUnitInitStatus(const char*) const override
+	{
+		_barrier.blockStartup();
+		ExecUnitInitStatus status;
+		status.state = ExecUnitInitState::READY;
+		status.generation = 44;
+		return status;
+	}
+
+	ExecUnitInitClearResult clearFailedUnitInitStatus(const char*) override
+	{
+		return ExecUnitInitClearResult::NOT_FAILED;
+	}
+
+private:
+	StartupBarrier& _barrier;
+	std::shared_ptr<SnapshotLifetimeObservation> _observation;
+};
+
+struct CrossThreadReleaseObservation
+{
+	std::mutex mutex;
+	std::condition_variable condition;
+	bool release_done = false;
+	bool release_done_before_provider_return = false;
+};
+
+class CrossThreadReleaseStatusExecutor : public IExecCommand, public IExecUnitInitStatusProvider,
+	public NoopStatusCommandQuiesce
+{
+public:
+	explicit CrossThreadReleaseStatusExecutor(const char* id)
+		: IExecCommand(id), _observation(std::make_shared<CrossThreadReleaseObservation>()) {}
+
+	ExecUnitInitStatus queryUnitInitStatus(const char*) const override
+	{
+		const std::shared_ptr<CrossThreadReleaseObservation> observation = _observation;
+		_release_thread = std::thread([observation]() {
+			getRunner().release();
+			{
+				std::lock_guard<std::mutex> lock(observation->mutex);
+				observation->release_done = true;
+			}
+			observation->condition.notify_all();
+		});
+
+		{
+			std::unique_lock<std::mutex> lock(observation->mutex);
+			observation->release_done_before_provider_return = observation->condition.wait_for(
+				lock, std::chrono::seconds(2), [observation]() {
+					return observation->release_done;
+				});
+		}
+
+		ExecUnitInitStatus status;
+		status.state = ExecUnitInitState::READY;
+		status.generation = 32;
+		return status;
+	}
+
+	ExecUnitInitClearResult clearFailedUnitInitStatus(const char*) override
+	{
+		return ExecUnitInitClearResult::NOT_FAILED;
+	}
+
+	bool releaseCompletedBeforeProviderReturn() const
+	{
+		std::lock_guard<std::mutex> lock(_observation->mutex);
+		return _observation->release_done_before_provider_return;
+	}
+
+	bool waitForReleaseCompletion(std::chrono::milliseconds timeout) const
+	{
+		std::unique_lock<std::mutex> lock(_observation->mutex);
+		return _observation->condition.wait_for(lock, timeout, [this]() {
+			return _observation->release_done;
+		});
+	}
+
+	void joinReleaseThread()
+	{
+		if (_release_thread.joinable())
+			_release_thread.join();
+	}
+
+private:
+	std::shared_ptr<CrossThreadReleaseObservation> _observation;
+	mutable std::thread _release_thread;
+};
+
+void reset_status_test_runner()
+{
+	WtRtRunner& runner = getRunner();
+	runner.WtRtRunner::~WtRtRunner();
+	new (&runner) WtRtRunner();
+}
+
+class ExecUnitStatusApiV2Fixture : public ::testing::Test
+{
+protected:
+	void SetUp() override
+	{
+		reset_status_test_runner();
+		// I03-NEW-098：按进程区分目录，并行逐例运行时互不覆盖夹具。
+		_dir = std::filesystem::temp_directory_path() / ("wt_exec_status_api_v2_" + std::to_string(static_cast<long>(::getpid())));
+		std::error_code ec;
+		std::filesystem::remove_all(_dir, ec);
+		std::filesystem::create_directories(_dir, ec);
+		ASSERT_FALSE(static_cast<bool>(ec));
+
+		std::ofstream actions(_dir / "actions.json", std::ios::binary | std::ios::trunc);
+		actions << "{\"default\":{}}";
+		ASSERT_TRUE(actions.good());
+
+		// 卡2 2b=A（用户裁定 2026-11-03）：交易时段全天只能写 0-0，0-2400 被会话加载器拒绝，
+		// 会话缺失后 HFT ticker 解引用空会话（迭代03 s5-runners 更新，原为 to: 2400）。
+		std::ofstream sessions(_dir / "sessions.yaml", std::ios::binary | std::ios::trunc);
+		sessions << "ALLDAY:\n"
+			"    name: AllDay\n"
+			"    offset: 0\n"
+			"    sections:\n"
+			"        - from: 0\n"
+			"          to: 0\n";
+		ASSERT_TRUE(sessions.good());
+	}
+
+	void TearDown() override
+	{
+		reset_status_test_runner();
+		restore_marker_file();
+		std::error_code ec;
+		std::filesystem::remove_all(_dir, ec);
+	}
+
+	bool configure(const char* mode)
+	{
+		const std::string absentLog = (_dir / "no_log_config.yaml").string();
+		getRunner().init(absentLog.c_str(), true, _dir.string().c_str());
+		remember_marker_file();
+		_config = make_config(mode);
+		return getRunner().config(_config.c_str(), false);
+	}
+
+	std::string make_config(const char* mode) const
+	{
+		const std::string basefiles = (_dir / "sessions.yaml").generic_string();
+		const std::string actionFile = (_dir / "actions.json").generic_string();
+		return "{\"basefiles\":{\"session\":\"" + basefiles + "\"},"
+			"\"env\":{\"name\":\"" + mode + "\",\"product\":{\"session\":\"ALLDAY\"}},"
+			"\"data\":{},\"bspolicy\":\"" + actionFile + "\","
+			"\"parsers\":[],\"traders\":[],\"executers\":[],"
+			"\"strategies\":{\"cta\":[{\"active\":false,\"id\":\"status_test_off\","
+			"\"name\":\"status_test_off\"}]}}";
+	}
+
+	void remember_marker_file()
+	{
+		if (!_marker_path.empty())
+			return;
+		_marker_path = std::filesystem::path(WtHelper::getBaseDir()) / "marker.json";
+		_marker_existed = std::filesystem::exists(_marker_path);
+		if (_marker_existed)
+		{
+			std::ifstream input(_marker_path, std::ios::binary);
+			_marker_contents.assign(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
+		}
+	}
+
+	void restore_marker_file()
+	{
+		if (_marker_path.empty())
+			return;
+		if (_marker_existed)
+		{
+			std::ofstream output(_marker_path, std::ios::binary | std::ios::trunc);
+			output.write(_marker_contents.data(), static_cast<std::streamsize>(_marker_contents.size()));
+		}
+		else
+		{
+			std::error_code ec;
+			std::filesystem::remove(_marker_path, ec);
+		}
+	}
+
+	void exercise_status_api(uint32_t engineType)
+	{
+		std::shared_ptr<ControlledStatusExecutor> provider(new ControlledStatusExecutor("status_api_fake"));
+		provider->setStatus(kReadyCode, ExecUnitInitState::READY, 7, "");
+		provider->setStatus(kFailedCode, ExecUnitInitState::FAILED, 8, kFailureText);
+		ExecCmdPtr command = provider;
+
+		if (engineType == WT_EXEC_ENGINE_CTA_V2)
+		{
+			WtCtaEngine* engine = dynamic_cast<WtCtaEngine*>(getRunner().getEngine());
+			ASSERT_NE(engine, nullptr);
+			engine->addExecuter(command);
+		}
+		else
+		{
+			WtSelEngine* engine = dynamic_cast<WtSelEngine*>(getRunner().getEngine());
+			ASSERT_NE(engine, nullptr);
+			engine->addExecuter(command);
+		}
+
+		uint32_t state = UINT32_MAX;
+		uint64_t generation = UINT64_MAX;
+		char error[128] = {};
+		EXPECT_EQ(WT_EXEC_UNIT_STATUS_OK_V2, exec_get_unit_init_status_v2(engineType,
+			"status_api_fake", kReadyCode, &state, &generation, error, sizeof(error)));
+		EXPECT_EQ(WT_EXEC_UNIT_INIT_READY_V2, state);
+		EXPECT_EQ(7u, generation);
+		EXPECT_STREQ("", error);
+
+		EXPECT_EQ(WT_EXEC_UNIT_STATUS_OK_V2, exec_get_unit_init_status_v2(engineType,
+			"status_api_fake", kFailedCode, &state, &generation, error, sizeof(error)));
+		EXPECT_EQ(WT_EXEC_UNIT_INIT_FAILED_V2, state);
+		EXPECT_EQ(8u, generation);
+		EXPECT_STREQ(kFailureText, error);
+
+		EXPECT_EQ(WT_EXEC_UNIT_STATUS_OK_V2, exec_get_unit_init_status_v2(engineType,
+			"status_api_fake", kMissingCode, &state, &generation, error, sizeof(error)));
+		EXPECT_EQ(WT_EXEC_UNIT_INIT_UNKNOWN_V2, state);
+		EXPECT_EQ(0u, generation);
+		EXPECT_STREQ("", error);
+
+		EXPECT_EQ(WT_EXEC_UNIT_STATUS_NOT_FAILED_V2,
+			exec_clear_failed_unit_init_status_v2(engineType, "status_api_fake",
+				kReadyCode, error, sizeof(error)));
+		EXPECT_EQ(WT_EXEC_UNIT_STATUS_CODE_NOT_FOUND_V2,
+			exec_clear_failed_unit_init_status_v2(engineType, "status_api_fake",
+				kMissingCode, error, sizeof(error)));
+		EXPECT_EQ(WT_EXEC_UNIT_STATUS_OK_V2,
+			exec_clear_failed_unit_init_status_v2(engineType, "status_api_fake",
+				kFailedCode, error, sizeof(error)));
+		EXPECT_STREQ("", error);
+
+		EXPECT_EQ(WT_EXEC_UNIT_STATUS_OK_V2, exec_get_unit_init_status_v2(engineType,
+			"status_api_fake", kFailedCode, &state, &generation, error, sizeof(error)));
+		EXPECT_EQ(WT_EXEC_UNIT_INIT_UNKNOWN_V2, state);
+		EXPECT_EQ(0u, generation);
+		EXPECT_STREQ("", error);
+
+		EXPECT_EQ(WT_EXEC_UNIT_STATUS_EXECUTOR_NOT_FOUND_V2, exec_get_unit_init_status_v2(engineType,
+			"status_api_missing", kReadyCode, &state, &generation, error, sizeof(error)));
+		EXPECT_EQ(WT_EXEC_UNIT_INIT_UNKNOWN_V2, state);
+		EXPECT_EQ(0u, generation);
+		EXPECT_NE('\0', error[0]);
+	}
+
+#ifndef _WIN32
+	void expect_sync_run_exit_on_signal(int signum)
+	{
+		int events[2];
+		ASSERT_EQ(0, pipe(events));
+		const pid_t child = fork();
+		if (child < 0)
+		{
+			close(events[0]);
+			close(events[1]);
+			FAIL() << "fork failed";
+			return;
+		}
+
+		if (child == 0)
+		{
+			close(events[0]);
+			const rlimit no_core = { 0, 0 };
+			setrlimit(RLIMIT_CORE, &no_core);
+			if (!configure("cta"))
+				std::_Exit(10);
+			std::thread runThread([]() { getRunner().run(false); });
+			if (!WtRtRunnerTestAccess::waitForState(getRunner(),
+				WtRtRunner::LifecycleState::RUNNING, std::chrono::seconds(3)))
+				std::_Exit(11);
+			const char ready = 'R';
+			if (write(events[1], &ready, 1) != 1)
+				std::_Exit(12);
+			runThread.join();
+			getRunner().release();
+			const char done = 'D';
+			if (write(events[1], &done, 1) != 1)
+				std::_Exit(13);
+			std::_Exit(0);
+		}
+
+		close(events[1]);
+		auto wait_for_event = [&events](char expected, int timeout_ms) {
+			pollfd descriptor;
+			descriptor.fd = events[0];
+			descriptor.events = POLLIN;
+			descriptor.revents = 0;
+			int poll_result;
+			do
+			{
+				poll_result = poll(&descriptor, 1, timeout_ms);
+			} while (poll_result < 0 && errno == EINTR);
+			if (poll_result <= 0 || (descriptor.revents & POLLIN) == 0)
+				return false;
+			char event = 0;
+			return read(events[0], &event, 1) == 1 && event == expected;
+		};
+
+		const bool run_ready = wait_for_event('R', 3000);
+		const bool signal_sent = run_ready && kill(child, signum) == 0;
+		const bool run_finished = signal_sent && wait_for_event('D', 3000);
+		if (!run_finished)
+			kill(child, SIGKILL);
+		int child_status = 0;
+		const pid_t waited = waitpid(child, &child_status, 0);
+		close(events[0]);
+		EXPECT_TRUE(run_ready);
+		EXPECT_TRUE(signal_sent);
+		EXPECT_TRUE(run_finished);
+		ASSERT_EQ(child, waited);
+		ASSERT_TRUE(WIFEXITED(child_status));
+		EXPECT_EQ(0, WEXITSTATUS(child_status));
+	}
+
+	void expect_sync_fault_fail_fast()
+	{
+		// The OS can report a write to PROT_NONE as SIGSEGV or SIGBUS.
+		// Observe the exact same fault with default handlers in a separate child
+		// so the runner must exit with the signal actually delivered here.
+		int probe_events[2];
+		ASSERT_EQ(0, pipe(probe_events));
+		const pid_t probe = fork();
+		if (probe < 0)
+		{
+			close(probe_events[0]);
+			close(probe_events[1]);
+			FAIL() << "fault probe fork failed";
+			return;
+		}
+		if (probe == 0)
+		{
+			close(probe_events[0]);
+			const rlimit no_core = { 0, 0 };
+			setrlimit(RLIMIT_CORE, &no_core);
+			if (signal(SIGSEGV, SIG_DFL) == SIG_ERR || signal(SIGBUS, SIG_DFL) == SIG_ERR)
+				std::_Exit(10);
+			const long page_size = sysconf(_SC_PAGESIZE);
+			if (page_size <= 0)
+				std::_Exit(11);
+#if defined(MAP_ANONYMOUS)
+			const int anonymous_map = MAP_ANONYMOUS;
+#else
+			const int anonymous_map = MAP_ANON;
+#endif
+			void* fault_page = mmap(NULL, static_cast<size_t>(page_size), PROT_NONE,
+				MAP_PRIVATE | anonymous_map, -1, 0);
+			if (fault_page == MAP_FAILED)
+				std::_Exit(12);
+			const char ready = 'F';
+			if (write(probe_events[1], &ready, 1) != 1)
+				std::_Exit(13);
+			*static_cast<volatile int*>(fault_page) = 1;
+			std::_Exit(20);
+		}
+		close(probe_events[1]);
+		pollfd probe_fd = { probe_events[0], POLLIN, 0 };
+		int probe_poll;
+		do { probe_poll = poll(&probe_fd, 1, 3000); }
+		while (probe_poll < 0 && errno == EINTR);
+		char probe_ready = 0;
+		const bool probe_reached_fault = probe_poll > 0 && (probe_fd.revents & POLLIN) != 0 &&
+			read(probe_events[0], &probe_ready, 1) == 1 && probe_ready == 'F';
+		probe_fd.events = POLLHUP;
+		probe_fd.revents = 0;
+		do { probe_poll = poll(&probe_fd, 1, 3000); }
+		while (probe_poll < 0 && errno == EINTR);
+		const bool probe_finished = probe_poll > 0 && (probe_fd.revents & POLLHUP) != 0;
+		if (!probe_finished)
+			kill(probe, SIGKILL);
+		int probe_status = 0;
+		const pid_t probe_waited = waitpid(probe, &probe_status, 0);
+		close(probe_events[0]);
+		ASSERT_TRUE(probe_reached_fault);
+		ASSERT_TRUE(probe_finished);
+		ASSERT_EQ(probe, probe_waited);
+		ASSERT_TRUE(WIFSIGNALED(probe_status));
+		const int expected_signal = WTERMSIG(probe_status);
+		ASSERT_TRUE(expected_signal == SIGSEGV || expected_signal == SIGBUS);
+		RecordProperty("fault_probe_signal", expected_signal);
+
+		int events[2];
+		ASSERT_EQ(0, pipe(events));
+		const pid_t child = fork();
+		if (child < 0)
+		{
+			close(events[0]);
+			close(events[1]);
+			FAIL() << "fork failed";
+			return;
+		}
+
+		if (child == 0)
+		{
+			close(events[0]);
+			const rlimit no_core = { 0, 0 };
+			setrlimit(RLIMIT_CORE, &no_core);
+			if (!configure("cta"))
+				std::_Exit(10);
+			std::thread runThread([]() { getRunner().run(false); });
+			if (!WtRtRunnerTestAccess::waitForState(getRunner(),
+				WtRtRunner::LifecycleState::RUNNING, std::chrono::seconds(3)))
+				std::_Exit(11);
+			const char ready = 'R';
+			if (write(events[1], &ready, 1) != 1)
+				std::_Exit(12);
+
+			const long page_size = sysconf(_SC_PAGESIZE);
+			if (page_size <= 0)
+				std::_Exit(13);
+#if defined(MAP_ANONYMOUS)
+			const int anonymous_map = MAP_ANONYMOUS;
+#else
+			const int anonymous_map = MAP_ANON;
+#endif
+			void* fault_page = mmap(NULL, static_cast<size_t>(page_size), PROT_NONE,
+				MAP_PRIVATE | anonymous_map, -1, 0);
+			if (fault_page == MAP_FAILED)
+				std::_Exit(14);
+			const char faulting = 'F';
+			if (write(events[1], &faulting, 1) != 1)
+				std::_Exit(15);
+			*static_cast<volatile int*>(fault_page) = 1;
+			std::_Exit(20); // Reached only if the fault handler returned.
+		}
+
+		close(events[1]);
+		// I03-NEW-097：子进程启动（含 runner 配置）在并行覆盖率负载下可能超过 3 秒；启动就绪只设宽松上限，
+		// “故障后快速退出”的 3 秒界限保持不变。
+		const bool run_ready = [&events]() {
+			pollfd descriptor;
+			descriptor.fd = events[0];
+			descriptor.events = POLLIN;
+			descriptor.revents = 0;
+			int poll_result;
+			do
+			{
+				poll_result = poll(&descriptor, 1, 30000);
+			} while (poll_result < 0 && errno == EINTR);
+			if (poll_result <= 0 || (descriptor.revents & POLLIN) == 0)
+				return false;
+			char event = 0;
+			return read(events[0], &event, 1) == 1 && event == 'R';
+		}();
+
+		bool fault_ready = false;
+		if (run_ready)
+		{
+			pollfd descriptor;
+			descriptor.fd = events[0];
+			descriptor.events = POLLIN;
+			descriptor.revents = 0;
+			int poll_result;
+			do
+			{
+				poll_result = poll(&descriptor, 1, 3000);
+			} while (poll_result < 0 && errno == EINTR);
+			char event = 0;
+			fault_ready = poll_result > 0 && (descriptor.revents & POLLIN) != 0 &&
+				read(events[0], &event, 1) == 1 && event == 'F';
+		}
+		bool exited_after_fault = false;
+		if (fault_ready)
+		{
+			pollfd descriptor = { events[0], POLLHUP, 0 };
+			int poll_result;
+			do { poll_result = poll(&descriptor, 1, 3000); }
+			while (poll_result < 0 && errno == EINTR);
+			exited_after_fault = poll_result > 0 && (descriptor.revents & POLLHUP) != 0;
+		}
+		if (!exited_after_fault)
+			kill(child, SIGKILL);
+		int child_status = 0;
+		const pid_t waited = waitpid(child, &child_status, 0);
+		close(events[0]);
+		EXPECT_TRUE(run_ready);
+		EXPECT_TRUE(fault_ready);
+		EXPECT_TRUE(exited_after_fault);
+		ASSERT_EQ(child, waited);
+		ASSERT_TRUE(WIFEXITED(child_status));
+		EXPECT_EQ(expected_signal, WEXITSTATUS(child_status));
+	}
+#endif
+
+	std::filesystem::path _dir;
+	std::string _config;
+	std::filesystem::path _marker_path;
+	std::string _marker_contents;
+	bool _marker_existed = false;
+};
+
+} // namespace
+
+TEST_F(ExecUnitStatusApiV2Fixture, HftQueryIsUnsupportedAndKeepsInitStateSeparate)
+{
+	uint32_t state = WT_EXEC_UNIT_INIT_FAILED_V2;
+	uint64_t generation = 99;
+	char error[1] = { 'x' };
+
+	const int32_t result = exec_get_unit_init_status_v2(WT_EXEC_ENGINE_HFT_V2,
+		"status_test", kReadyCode, &state, &generation, error, sizeof(error));
+
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_UNSUPPORTED_V2, result);
+	EXPECT_EQ(WT_EXEC_UNIT_INIT_UNKNOWN_V2, state);
+	EXPECT_EQ(0u, generation);
+	EXPECT_EQ('\0', error[0]);
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, OutputPointerValidationInitializesAvailableOutput)
+{
+	uint64_t generation = 99;
+	char error[4] = { 'x', 'x', 'x', 'x' };
+
+	const int32_t result = exec_get_unit_init_status_v2(WT_EXEC_ENGINE_CTA_V2,
+		"status_test", kReadyCode, NULL, &generation, error, sizeof(error));
+
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_INVALID_ARGUMENT_V2, result);
+	EXPECT_EQ(0u, generation);
+	EXPECT_EQ('\0', error[sizeof(error) - 1]);
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, QueryBeforeConfigurationReturnsNotReady)
+{
+	uint32_t state = WT_EXEC_UNIT_INIT_FAILED_V2;
+	uint64_t generation = 99;
+	char error[64] = {};
+
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_NOT_READY_V2, exec_get_unit_init_status_v2(
+		WT_EXEC_ENGINE_CTA_V2, "status_test", kReadyCode, &state, &generation,
+		error, sizeof(error)));
+	EXPECT_EQ(WT_EXEC_UNIT_INIT_UNKNOWN_V2, state);
+	EXPECT_EQ(0u, generation);
+	EXPECT_NE('\0', error[0]);
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, CtaReadyFailureAndClearTraverseCAbiRunnerManagerAndProvider)
+{
+	ASSERT_TRUE(configure("cta"));
+	exercise_status_api(WT_EXEC_ENGINE_CTA_V2);
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, SelReadyFailureAndClearTraverseCAbiRunnerManagerAndProvider)
+{
+	ASSERT_TRUE(configure("sel"));
+	exercise_status_api(WT_EXEC_ENGINE_SEL_V2);
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, RetryBlockedClearHasNewCStatusWithoutChangingExistingValues)
+{
+	static_assert(WT_EXEC_UNIT_STATUS_OK_V2 == 0, "existing C status values are ABI-stable");
+	static_assert(WT_EXEC_UNIT_STATUS_INVALID_ARGUMENT_V2 == 1, "existing C status values are ABI-stable");
+	static_assert(WT_EXEC_UNIT_STATUS_NOT_READY_V2 == 2, "existing C status values are ABI-stable");
+	static_assert(WT_EXEC_UNIT_STATUS_UNSUPPORTED_V2 == 3, "existing C status values are ABI-stable");
+	static_assert(WT_EXEC_UNIT_STATUS_EXECUTOR_NOT_FOUND_V2 == 4, "existing C status values are ABI-stable");
+	static_assert(WT_EXEC_UNIT_STATUS_ENGINE_MISMATCH_V2 == 5, "existing C status values are ABI-stable");
+	static_assert(WT_EXEC_UNIT_STATUS_INTERNAL_ERROR_V2 == 6, "existing C status values are ABI-stable");
+	static_assert(WT_EXEC_UNIT_STATUS_CODE_NOT_FOUND_V2 == 7, "existing C status values are ABI-stable");
+	static_assert(WT_EXEC_UNIT_STATUS_NOT_FAILED_V2 == 8, "existing C status values are ABI-stable");
+	static_assert(WT_EXEC_UNIT_STATUS_RETRY_BLOCKED_V2 == 9, "new C status is append-only");
+	ASSERT_TRUE(configure("cta"));
+
+	std::shared_ptr<ControlledStatusExecutor> provider(
+		new ControlledStatusExecutor("status_api_terminal_failure"));
+	provider->setStatus(kFailedCode, ExecUnitInitState::FAILED, 19, kFailureText);
+	provider->setRetryBlocked(kFailedCode);
+	ExecCmdPtr command = provider;
+	WtCtaEngine* engine = dynamic_cast<WtCtaEngine*>(getRunner().getEngine());
+	ASSERT_NE(engine, nullptr);
+	engine->addExecuter(command);
+
+	char error[128] = {};
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_RETRY_BLOCKED_V2,
+		exec_clear_failed_unit_init_status_v2(WT_EXEC_ENGINE_CTA_V2,
+			"status_api_terminal_failure", kFailedCode, error, sizeof(error)));
+	EXPECT_STREQ("retry is blocked because plugin side effects cannot be ruled out", error);
+
+	uint32_t state = WT_EXEC_UNIT_INIT_UNKNOWN_V2;
+	uint64_t generation = 0;
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_OK_V2, exec_get_unit_init_status_v2(WT_EXEC_ENGINE_CTA_V2,
+		"status_api_terminal_failure", kFailedCode, &state, &generation, error, sizeof(error)));
+	EXPECT_EQ(WT_EXEC_UNIT_INIT_FAILED_V2, state);
+	EXPECT_EQ(19u, generation);
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, RunIsSynchronizedAndRejectsRuntimeReconfiguration)
+{
+	ASSERT_TRUE(configure("cta"));
+	getRunner().run(true);
+	EXPECT_FALSE(getRunner().config(_config.c_str(), false));
+	getRunner().release();
+}
+
+#ifndef _WIN32
+TEST_F(ExecUnitStatusApiV2Fixture, SynchronousRunExitsOnSigterm)
+{
+	expect_sync_run_exit_on_signal(SIGTERM);
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, SynchronousRunExitsOnSigint)
+{
+	expect_sync_run_exit_on_signal(SIGINT);
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, SynchronousRunFailsFastOnSynchronousSegmentationFault)
+{
+	expect_sync_fault_fail_fast();
+}
+#endif
+
+TEST_F(ExecUnitStatusApiV2Fixture, ReleaseDuringStartupIsDeferredAndWakesSynchronousRun)
+{
+	ASSERT_TRUE(configure("hft"));
+	getRunner().registerHftCallbacks(&block_hft_init_callback, NULL, NULL, NULL, NULL,
+		NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+	// R42-002 gate: bind a registered local adapter (an unknown trader yields no context).
+	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "status_bound_trader") != nullptr);
+	ASSERT_NE(0u, getRunner().createHftContext("status_startup_barrier", "status_bound_trader", false, 0));
+
+	StartupBarrier barrier;
+	g_startup_barrier.store(&barrier, std::memory_order_release);
+	std::atomic<bool> runReturned{ false };
+	std::thread runThread([&]() {
+		getRunner().run(false);
+		runReturned.store(true, std::memory_order_release);
+	});
+	if (!barrier.waitUntilEntered(std::chrono::seconds(2)))
+	{
+		barrier.continueStartup();
+		getRunner().release();
+		runThread.join();
+		g_startup_barrier.store(nullptr, std::memory_order_release);
+		FAIL() << "HFT initialization callback did not enter the startup barrier";
+		return;
+	}
+
+	std::atomic<bool> releaseReturned{ false };
+	std::mutex releaseMutex;
+	std::condition_variable releaseCondition;
+	std::thread releaseThread([&]() {
+		getRunner().release();
+		{
+			std::lock_guard<std::mutex> lock(releaseMutex);
+			releaseReturned.store(true, std::memory_order_release);
+		}
+		releaseCondition.notify_all();
+	});
+	const bool stoppingObserved = WtRtRunnerTestAccess::waitForState(getRunner(),
+		WtRtRunner::LifecycleState::STOPPING, std::chrono::seconds(2));
+	EXPECT_TRUE(stoppingObserved);
+	bool releaseReturnedWhileStartupBlocked = false;
+	{
+		std::unique_lock<std::mutex> lock(releaseMutex);
+		releaseReturnedWhileStartupBlocked = releaseCondition.wait_for(lock,
+			std::chrono::seconds(2), [&releaseReturned]() {
+				return releaseReturned.load(std::memory_order_acquire);
+			});
+	}
+	EXPECT_TRUE(releaseReturnedWhileStartupBlocked);
+	EXPECT_FALSE(runReturned.load(std::memory_order_acquire));
+
+	barrier.continueStartup();
+	runThread.join();
+	releaseThread.join();
+	g_startup_barrier.store(nullptr, std::memory_order_release);
+	EXPECT_TRUE(releaseReturned.load(std::memory_order_acquire));
+	EXPECT_TRUE(runReturned.load(std::memory_order_acquire));
+	EXPECT_EQ(WtRtRunner::LifecycleState::RELEASED,
+		WtRtRunnerTestAccess::state(getRunner()));
+
+	uint32_t state = WT_EXEC_UNIT_INIT_READY_V2;
+	uint64_t generation = 42;
+	char error[64] = {};
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_NOT_READY_V2, exec_get_unit_init_status_v2(
+		WT_EXEC_ENGINE_CTA_V2, "status_test", kReadyCode, &state, &generation,
+		error, sizeof(error)));
+	EXPECT_EQ(WT_EXEC_UNIT_INIT_UNKNOWN_V2, state);
+	EXPECT_EQ(0u, generation);
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, StartupCallbackCanJoinChildThreadRequestingRelease)
+{
+	ASSERT_TRUE(configure("hft"));
+	getRunner().registerHftCallbacks(&release_from_child_then_block_hft_init, NULL, NULL,
+		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+	// R42-002 gate: an unknown trader no longer yields a context; bind a
+	// registered local adapter so the startup callback still runs.
+	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "status_bound_trader") != nullptr);
+	ASSERT_NE(0u, getRunner().createHftContext("status_child_release_barrier",
+		"status_bound_trader", false, 0));
+
+	StartupBarrier barrier;
+	g_child_startup_release_returned.store(false, std::memory_order_release);
+	g_startup_barrier.store(&barrier, std::memory_order_release);
+	std::atomic<bool> runReturned{ false };
+	std::thread runThread([&]() {
+		getRunner().run(false);
+		runReturned.store(true, std::memory_order_release);
+	});
+	if (!barrier.waitUntilEntered(std::chrono::seconds(2)))
+	{
+		barrier.continueStartup();
+		getRunner().release();
+		runThread.join();
+		g_startup_barrier.store(nullptr, std::memory_order_release);
+		FAIL() << "startup callback did not reach the barrier after joining release";
+		return;
+	}
+
+	EXPECT_TRUE(g_child_startup_release_returned.load(std::memory_order_acquire));
+	EXPECT_EQ(WtRtRunner::LifecycleState::STOPPING,
+		WtRtRunnerTestAccess::state(getRunner()));
+	EXPECT_FALSE(runReturned.load(std::memory_order_acquire));
+	barrier.continueStartup();
+	runThread.join();
+	g_startup_barrier.store(nullptr, std::memory_order_release);
+	EXPECT_TRUE(runReturned.load(std::memory_order_acquire));
+	EXPECT_EQ(WtRtRunner::LifecycleState::RELEASED,
+		WtRtRunnerTestAccess::state(getRunner()));
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, ConcurrentReleaseCallsShareOneTeardown)
+{
+	ASSERT_TRUE(configure("cta"));
+	WtRtRunnerTestAccess::lockRunStartMutex(getRunner());
+	std::atomic<bool> firstReturned{ false };
+	std::atomic<bool> secondReturned{ false };
+	std::thread firstRelease([&]() {
+		getRunner().release();
+		firstReturned.store(true, std::memory_order_release);
+	});
+	EXPECT_TRUE(WtRtRunnerTestAccess::waitForState(getRunner(),
+		WtRtRunner::LifecycleState::STOPPING, std::chrono::seconds(2)));
+	std::thread secondRelease([&]() {
+		getRunner().release();
+		secondReturned.store(true, std::memory_order_release);
+	});
+	EXPECT_TRUE(WtRtRunnerTestAccess::waitForReleaseWaiters(getRunner(), 1,
+		std::chrono::seconds(2)));
+	EXPECT_FALSE(firstReturned.load(std::memory_order_acquire));
+	EXPECT_FALSE(secondReturned.load(std::memory_order_acquire));
+	WtRtRunnerTestAccess::unlockRunStartMutex(getRunner());
+	firstRelease.join();
+	secondRelease.join();
+	EXPECT_TRUE(firstReturned.load(std::memory_order_acquire));
+	EXPECT_TRUE(secondReturned.load(std::memory_order_acquire));
+	EXPECT_EQ(WtRtRunner::LifecycleState::RELEASED,
+		WtRtRunnerTestAccess::state(getRunner()));
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, ParserReleaseCallbackCannotReenterRunnerTeardown)
+{
+	ASSERT_TRUE(configure("cta"));
+	g_parser_release_callback_called.store(false, std::memory_order_release);
+	g_parser_release_reentry_returned.store(false, std::memory_order_release);
+	register_parser_callbacks(&reenter_runner_release_on_parser_release, NULL);
+	ASSERT_TRUE(create_ext_parser("status_teardown_parser"));
+
+	getRunner().release();
+	EXPECT_TRUE(g_parser_release_callback_called.load(std::memory_order_acquire));
+	EXPECT_TRUE(g_parser_release_reentry_returned.load(std::memory_order_acquire));
+	EXPECT_EQ(WtRtRunner::LifecycleState::RELEASED,
+		WtRtRunnerTestAccess::state(getRunner()));
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, ParserReleaseCallbackCanJoinChildReleaseWithoutDeadlock)
+{
+	ASSERT_TRUE(configure("cta"));
+	g_parser_child_release_returned.store(false, std::memory_order_release);
+	g_parser_child_release_saw_stopping.store(false, std::memory_order_release);
+	g_parser_child_release_returned_in_callback.store(false, std::memory_order_release);
+	register_parser_callbacks(&spawn_child_release_on_parser_release, NULL);
+	ASSERT_TRUE(create_ext_parser("status_teardown_child_parser"));
+
+	getRunner().release();
+	EXPECT_TRUE(g_parser_child_release_returned_in_callback.load(std::memory_order_acquire));
+	EXPECT_TRUE(g_parser_child_release_returned.load(std::memory_order_acquire));
+	EXPECT_TRUE(g_parser_child_release_saw_stopping.load(std::memory_order_acquire));
+	EXPECT_EQ(WtRtRunner::LifecycleState::RELEASED,
+		WtRtRunnerTestAccess::state(getRunner()));
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, StartupReentryScopeIsBoundToRunnerInstance)
+{
+	ASSERT_TRUE(configure("hft"));
+	WtRtRunner otherRunner;
+	WtRtRunnerTestAccess::markReleasedForScopeTest(otherRunner);
+	g_startup_release_target = &otherRunner;
+	g_startup_release_callback_called.store(false, std::memory_order_release);
+	getRunner().registerHftCallbacks(&release_other_runner_on_hft_init, NULL, NULL, NULL,
+		NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+	// R42-002 gate: bind a registered local adapter (see above).
+	ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "status_bound_trader") != nullptr);
+	ASSERT_NE(0u, getRunner().createHftContext("status_other_runner_scope",
+		"status_bound_trader", false, 0));
+
+	getRunner().run(true);
+	g_startup_release_target = nullptr;
+	EXPECT_TRUE(g_startup_release_callback_called.load(std::memory_order_acquire));
+	EXPECT_EQ(WtRtRunner::LifecycleState::RELEASED,
+		WtRtRunnerTestAccess::state(otherRunner));
+	EXPECT_FALSE(WtRtRunnerTestAccess::exitRequested(otherRunner));
+	EXPECT_FALSE(WtRtRunnerTestAccess::deferredReleaseRequested(otherRunner));
+	getRunner().release();
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, ProviderReentryIsRejectedAndExternalCloseCompletes)
+{
+	ASSERT_TRUE(configure("cta"));
+	std::shared_ptr<ReentrantStatusExecutor> provider(new ReentrantStatusExecutor("status_api_reentrant"));
+	ExecCmdPtr command = provider;
+	WtCtaEngine* engine = dynamic_cast<WtCtaEngine*>(getRunner().getEngine());
+	ASSERT_NE(engine, nullptr);
+	engine->addExecuter(command);
+
+	uint32_t state = WT_EXEC_UNIT_INIT_UNKNOWN_V2;
+	uint64_t generation = 0;
+	char error[128] = {};
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_OK_V2, exec_get_unit_init_status_v2(WT_EXEC_ENGINE_CTA_V2,
+		"status_api_reentrant", kReadyCode, &state, &generation, error, sizeof(error)));
+	EXPECT_EQ(WT_EXEC_UNIT_INIT_READY_V2, state);
+	EXPECT_EQ(21u, generation);
+	EXPECT_TRUE(provider->reentrantReleaseReturned());
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_INTERNAL_ERROR_V2, provider->nestedQueryResult());
+	EXPECT_EQ(WtRtRunner::LifecycleState::CONFIGURED,
+		WtRtRunnerTestAccess::state(getRunner()));
+
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_OK_V2, exec_clear_failed_unit_init_status_v2(
+		WT_EXEC_ENGINE_CTA_V2, "status_api_reentrant", kReadyCode, error, sizeof(error)));
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_INTERNAL_ERROR_V2, provider->nestedQueryResult());
+	EXPECT_TRUE(provider->reentrantReleaseReturned());
+	EXPECT_EQ(WtRtRunner::LifecycleState::CONFIGURED,
+		WtRtRunnerTestAccess::state(getRunner()));
+
+	getRunner().release();
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_NOT_READY_V2, exec_get_unit_init_status_v2(
+		WT_EXEC_ENGINE_CTA_V2, "status_api_reentrant", kReadyCode, &state, &generation,
+		error, sizeof(error)));
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, ExternalReleaseDoesNotWaitForInFlightProviderSnapshot)
+{
+	ASSERT_TRUE(configure("cta"));
+	StartupBarrier barrier;
+	std::shared_ptr<BlockingStatusExecutor> provider(
+		new BlockingStatusExecutor("status_api_blocking", barrier));
+	ExecCmdPtr command = provider;
+	WtCtaEngine* engine = dynamic_cast<WtCtaEngine*>(getRunner().getEngine());
+	ASSERT_NE(engine, nullptr);
+	engine->addExecuter(command);
+
+	uint32_t state = WT_EXEC_UNIT_INIT_UNKNOWN_V2;
+	uint64_t generation = 0;
+	char error[128] = {};
+	std::atomic<int32_t> queryResult{ -1 };
+	std::thread queryThread([&]() {
+		queryResult.store(exec_get_unit_init_status_v2(WT_EXEC_ENGINE_CTA_V2,
+			"status_api_blocking", kReadyCode, &state, &generation, error, sizeof(error)),
+			std::memory_order_release);
+	});
+	if (!barrier.waitUntilEntered(std::chrono::seconds(2)))
+	{
+		barrier.continueStartup();
+		queryThread.join();
+		FAIL() << "execution-unit provider did not enter the query barrier";
+		return;
+	}
+
+	std::atomic<bool> releaseReturned{ false };
+	std::mutex releaseMutex;
+	std::condition_variable releaseCondition;
+	std::thread releaseThread([&]() {
+		getRunner().release();
+		{
+			std::lock_guard<std::mutex> lock(releaseMutex);
+			releaseReturned.store(true, std::memory_order_release);
+		}
+		releaseCondition.notify_all();
+	});
+	const bool stoppingObserved = WtRtRunnerTestAccess::waitForStateAtLeast(getRunner(),
+		WtRtRunner::LifecycleState::STOPPING, std::chrono::seconds(2));
+	EXPECT_TRUE(stoppingObserved);
+	bool releaseFinishedWhileProviderBlocked = false;
+	{
+		std::unique_lock<std::mutex> lock(releaseMutex);
+		releaseFinishedWhileProviderBlocked = releaseCondition.wait_for(lock,
+			std::chrono::seconds(2), [&releaseReturned]() {
+				return releaseReturned.load(std::memory_order_acquire);
+			});
+	}
+	EXPECT_TRUE(releaseFinishedWhileProviderBlocked);
+
+	barrier.continueStartup();
+	queryThread.join();
+	releaseThread.join();
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_OK_V2, queryResult.load(std::memory_order_acquire));
+	EXPECT_EQ(WT_EXEC_UNIT_INIT_READY_V2, state);
+	EXPECT_EQ(31u, generation);
+	EXPECT_TRUE(releaseReturned.load(std::memory_order_acquire));
+
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_NOT_READY_V2, exec_get_unit_init_status_v2(
+		WT_EXEC_ENGINE_CTA_V2, "status_api_blocking", kReadyCode, &state, &generation,
+		error, sizeof(error)));
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, ProviderSnapshotAlonePinsExecutorAndModuleDuringCallback)
+{
+	ASSERT_TRUE(configure("cta"));
+	StartupBarrier barrier;
+	std::shared_ptr<SnapshotLifetimeObservation> lifetime(
+		new SnapshotLifetimeObservation());
+	std::shared_ptr<SnapshotLifetimeObservation> moduleLifetime(
+		new SnapshotLifetimeObservation());
+	std::shared_ptr<SnapshotLifetimeStatusExecutor> executorOwner(
+		new SnapshotLifetimeStatusExecutor("status_api_snapshot_lifetime", barrier, lifetime),
+		[moduleLifetime](SnapshotLifetimeStatusExecutor* executor) {
+			delete executor;
+			moduleLifetime->module_unloaded.store(true, std::memory_order_release);
+		});
+	ExecCmdPtr command = executorOwner;
+	executorOwner.reset();
+	WtCtaEngine* engine = dynamic_cast<WtCtaEngine*>(getRunner().getEngine());
+	ASSERT_NE(engine, nullptr);
+	engine->addExecuter(command);
+
+	uint32_t state = WT_EXEC_UNIT_INIT_UNKNOWN_V2;
+	uint64_t generation = 0;
+	char error[128] = {};
+	std::atomic<int32_t> queryResult{ -1 };
+	std::thread queryThread([&]() {
+		queryResult.store(exec_get_unit_init_status_v2(WT_EXEC_ENGINE_CTA_V2,
+			"status_api_snapshot_lifetime", kReadyCode, &state, &generation,
+			error, sizeof(error)), std::memory_order_release);
+	});
+	if (!barrier.waitUntilEntered(std::chrono::seconds(2)))
+	{
+		barrier.continueStartup();
+		queryThread.join();
+		FAIL() << "snapshot provider did not enter the query barrier";
+		return;
+	}
+
+	std::shared_ptr<ControlledStatusExecutor> replacement(
+		new ControlledStatusExecutor("status_api_snapshot_lifetime"));
+	ExecCmdPtr replacementCommand = replacement;
+	engine->addExecuter(replacementCommand);
+	command.reset();
+	EXPECT_FALSE(lifetime->executor_destroyed.load(std::memory_order_acquire));
+	EXPECT_FALSE(moduleLifetime->module_unloaded.load(std::memory_order_acquire));
+
+	barrier.continueStartup();
+	queryThread.join();
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_OK_V2, queryResult.load(std::memory_order_acquire));
+	EXPECT_EQ(WT_EXEC_UNIT_INIT_READY_V2, state);
+	EXPECT_EQ(44u, generation);
+	EXPECT_TRUE(lifetime->executor_destroyed.load(std::memory_order_acquire));
+	EXPECT_TRUE(moduleLifetime->module_unloaded.load(std::memory_order_acquire));
+}
+
+TEST_F(ExecUnitStatusApiV2Fixture, ProviderCanJoinSameRunnerReleaseFromAnotherThread)
+{
+	ASSERT_TRUE(configure("cta"));
+	std::shared_ptr<CrossThreadReleaseStatusExecutor> provider(
+		new CrossThreadReleaseStatusExecutor("status_api_cross_thread_release"));
+	ExecCmdPtr command = provider;
+	WtCtaEngine* engine = dynamic_cast<WtCtaEngine*>(getRunner().getEngine());
+	ASSERT_NE(engine, nullptr);
+	engine->addExecuter(command);
+
+	uint32_t state = WT_EXEC_UNIT_INIT_UNKNOWN_V2;
+	uint64_t generation = 0;
+	char error[128] = {};
+	EXPECT_EQ(WT_EXEC_UNIT_STATUS_OK_V2, exec_get_unit_init_status_v2(WT_EXEC_ENGINE_CTA_V2,
+		"status_api_cross_thread_release", kReadyCode, &state, &generation, error, sizeof(error)));
+	EXPECT_EQ(WT_EXEC_UNIT_INIT_READY_V2, state);
+	EXPECT_EQ(32u, generation);
+	EXPECT_TRUE(provider->releaseCompletedBeforeProviderReturn());
+	EXPECT_TRUE(provider->waitForReleaseCompletion(std::chrono::seconds(2)));
+	provider->joinReleaseThread();
+	EXPECT_EQ(WtRtRunner::LifecycleState::RELEASED,
+		WtRtRunnerTestAccess::state(getRunner()));
+}

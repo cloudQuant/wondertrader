@@ -1,0 +1,21 @@
+--->>> Name confirmed automatically: SHFE.rb2510
+--->>> warning: No session configured for SHFE.rb
+--->>> Quering instruments: succeed
+--->>> Quering queue left: 2
+--->>> Quering commission ratio: succeed
+--->>> Quering queue left: 1
+--->>> Quering margin ratio: succeed
+--->>> Quering queue left: 0
+--->>> 1 commodities dumped into : /tmp/wt-i03-t26-completion-check4-20261102/tsan-query-delayed/commodities.json
+--->>> 1 contracts dumped into : /tmp/wt-i03-t26-completion-check4-20261102/tsan-query-delayed/contracts.json
+--->>> 1 fees dumped into : /tmp/wt-i03-t26-completion-check4-20261102/tsan-query-delayed/fees.json
+==================
+WARNING: ThreadSanitizer: thread leak (pid=35675)
+  Thread T1 (tid=1644315, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 boost::thread::start_thread_noexcept() thread.cpp:261 (tsan-query-probe:arm64+0x1000a40b8)
+    #2 CTraderSpiQueueTestAccess::start(CTraderSpi&) query_probe.cpp:28 (tsan-query-probe:arm64+0x1000013e8)
+    #3 main query_probe.cpp:98 (tsan-query-probe:arm64+0x1000013e8)
+
+SUMMARY: ThreadSanitizer: thread leak thread.cpp:261 in boost::thread::start_thread_noexcept()
+==================

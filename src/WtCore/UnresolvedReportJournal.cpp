@@ -26,6 +26,10 @@
 
 NS_WTP_BEGIN
 
+#ifdef WT_JOURNAL_BOOTSTRAP_TEST_HOOKS
+void wtJournalBootstrapTestHook(int stage);
+#endif
+
 namespace
 {
 const uint8_t kPrimaryMagic[8] = { 'W', 'T', 'U', 'R', 'J', 'N', 'L', '2' };
@@ -392,14 +396,26 @@ bool noExtendedAcl(int fd, bool directory)
 {
 #if defined(__APPLE__)
 	(void)directory;
-	errno = 0;
-	acl_t acl = acl_get_fd_np(fd, ACL_TYPE_EXTENDED);
-	if (acl != NULL)
+	// An existing ACL is always returned as an object. In a forked child the
+	// first lookup can fail spuriously with EINVAL (observed on macOS 26), so
+	// EINVAL/EINTR are retried a bounded number of times; any other error, or
+	// a persistent one, still fails closed.
+	for (int attempt = 0; attempt < 3; ++attempt)
 	{
-		acl_free(acl);
-		return false;
+		errno = 0;
+		acl_t acl = acl_get_fd_np(fd, ACL_TYPE_EXTENDED);
+		if (acl != NULL)
+		{
+			acl_free(acl);
+			return false;
+		}
+		const int error = errno;
+		if (error == ENOENT || error == ENODATA || error == ENOATTR)
+			return true;
+		if (error != EINVAL && error != EINTR)
+			return false;
 	}
-	return errno == ENOENT || errno == ENODATA || errno == ENOATTR;
+	return false;
 #elif defined(__linux__)
 	const char* names[] = { "system.posix_acl_access", "system.posix_acl_default" };
 	const size_t count = directory ? 2 : 1;
@@ -843,6 +859,52 @@ UnresolvedReportJournal::Status UnresolvedReportJournal::openLocked(
 		releaseHandlesLocked();
 		return Status::UnsafePath;
 	}
+	if (create_new)
+	{
+		// A known pre-existing component must not be accompanied by freshly
+		// created lock/WAL files. This preflight does not replace O_EXCL or
+		// claim atomicity against a concurrent external creator.
+		const ComponentState lock_state = componentStateAt(_directory_fd, _lock_name);
+		const ComponentState wal_state = componentStateAt(_directory_fd, _wal_name,
+			_test_fault_point == TestFaultPoint::FailComponentProbe);
+		const ComponentState guard_state = componentStateAt(_directory_fd, _guard_name);
+		const ComponentState inflight_state = componentStateAt(_directory_fd, _inflight_name);
+		const ComponentState cleanup_state = componentStateAt(_directory_fd, _cleanup_name);
+		if (lock_state == ComponentState::Error || wal_state == ComponentState::Error ||
+			guard_state == ComponentState::Error || inflight_state == ComponentState::Error ||
+			cleanup_state == ComponentState::Error)
+		{
+			if (error) *error = "unable to inspect journal components before bootstrap";
+			releaseHandlesLocked();
+			return Status::StorageFailed;
+		}
+		if (lock_state == ComponentState::Present)
+		{
+			if (error) *error = "journal lock already exists";
+			releaseHandlesLocked();
+			return Status::AlreadyExists;
+		}
+		if (inflight_state == ComponentState::Present || cleanup_state == ComponentState::Present)
+		{
+			captureInFlightMarker(_directory_fd, _inflight_name, _recovery_inspection);
+			captureCleanupMarker(_directory_fd, _cleanup_name, _recovery_inspection);
+			_recovery_inspection.requires_manual_recovery = true;
+			_has_recovery_inspection = true;
+			if (error) *error = "orphan journal marker prevents explicit bootstrap";
+			releaseHandlesLocked();
+			return Status::RecoveryRequired;
+		}
+		if (wal_state == ComponentState::Present || guard_state == ComponentState::Present)
+		{
+			if (error) *error = "journal WAL or guard already exists";
+			releaseHandlesLocked();
+			return Status::AlreadyExists;
+		}
+	}
+
+#ifdef WT_JOURNAL_BOOTSTRAP_TEST_HOOKS
+	if (create_new) wtJournalBootstrapTestHook(0);
+#endif
 
 	int commonFlags = O_RDWR;
 #ifdef O_CLOEXEC
@@ -884,6 +946,9 @@ UnresolvedReportJournal::Status UnresolvedReportJournal::openLocked(
 		if (!create_new && osError == ENOENT) return Status::NotFound;
 		return osError == ELOOP ? Status::UnsafePath : Status::StorageFailed;
 	}
+#ifdef WT_JOURNAL_BOOTSTRAP_TEST_HOOKS
+	if (create_new) wtJournalBootstrapTestHook(1);
+#endif
 	if (create_new && fchmod(_lock_fd, 0600) != 0)
 	{
 		if (error) *error = "unable to set private journal lock permissions";
@@ -908,12 +973,26 @@ UnresolvedReportJournal::Status UnresolvedReportJournal::openLocked(
 		releaseHandlesLocked();
 		return Status::UnsafePath;
 	}
-	if (create_new && (componentStateAt(_directory_fd, _inflight_name) != ComponentState::Absent ||
-		componentStateAt(_directory_fd, _cleanup_name) != ComponentState::Absent))
+	if (create_new)
 	{
-		if (error) *error = "orphan journal marker prevents explicit bootstrap";
-		releaseHandlesLocked();
-		return Status::RecoveryRequired;
+		const ComponentState inflight_state = componentStateAt(_directory_fd, _inflight_name);
+		const ComponentState cleanup_state = componentStateAt(_directory_fd, _cleanup_name);
+		if (inflight_state == ComponentState::Error || cleanup_state == ComponentState::Error)
+		{
+			if (error) *error = "unable to inspect journal markers during bootstrap";
+			releaseHandlesLocked();
+			return Status::StorageFailed;
+		}
+		if (inflight_state == ComponentState::Present || cleanup_state == ComponentState::Present)
+		{
+			captureInFlightMarker(_directory_fd, _inflight_name, _recovery_inspection);
+			captureCleanupMarker(_directory_fd, _cleanup_name, _recovery_inspection);
+			_recovery_inspection.requires_manual_recovery = true;
+			_has_recovery_inspection = true;
+			if (error) *error = "orphan journal marker prevents explicit bootstrap";
+			releaseHandlesLocked();
+			return Status::RecoveryRequired;
+		}
 	}
 	if (!create_new)
 	{
@@ -947,6 +1026,9 @@ UnresolvedReportJournal::Status UnresolvedReportJournal::openLocked(
 		if (!create_new && osError == ENOENT) return Status::NotFound;
 		return osError == ELOOP ? Status::UnsafePath : Status::StorageFailed;
 	}
+#ifdef WT_JOURNAL_BOOTSTRAP_TEST_HOOKS
+	if (create_new) wtJournalBootstrapTestHook(2);
+#endif
 	if (create_new && fchmod(_fd, 0600) != 0)
 	{
 		if (error) *error = "unable to set private journal WAL permissions";
@@ -999,6 +1081,9 @@ UnresolvedReportJournal::Status UnresolvedReportJournal::openLocked(
 		if (!create_new && osError == ENOENT) return Status::NotFound;
 		return osError == ELOOP ? Status::UnsafePath : Status::StorageFailed;
 	}
+#ifdef WT_JOURNAL_BOOTSTRAP_TEST_HOOKS
+	if (create_new) wtJournalBootstrapTestHook(3);
+#endif
 	if (create_new && fchmod(_guard_fd, 0600) != 0)
 	{
 		if (error) *error = "unable to set private journal guard permissions";
@@ -1050,6 +1135,9 @@ UnresolvedReportJournal::Status UnresolvedReportJournal::openLocked(
 	if (create_new)
 	{
 		_healthy = true;
+#ifdef WT_JOURNAL_BOOTSTRAP_TEST_HOOKS
+		wtJournalBootstrapTestHook(4);
+#endif
 		uint64_t sequence = 0;
 		const Status status = appendGuardedFrameLocked(RecordType::Bootstrap,
 			bootstrap_evidence_reference, sequence);
@@ -1309,7 +1397,14 @@ UnresolvedReportJournal::Status UnresolvedReportJournal::writeInFlightMarkerLock
 		}
 		return storageFailureLocked("unable to create exclusive in-flight marker");
 	}
-	if (fchmod(marker_fd, 0600) != 0)
+	// Once creation succeeds, even a later permission/identity check failure
+	// leaves an on-disk artifact that requires inspection after this call.
+	// Do not claim its contents are valid until the marker has been prepared.
+	_recovery_inspection.has_in_flight_marker = true;
+	_recovery_inspection.requires_manual_recovery = true;
+	_recovery_inspection.in_flight_marker_bytes.clear();
+	_has_recovery_inspection = true;
+	if (_test_fault_point == TestFaultPoint::FailMarkerPermissions || fchmod(marker_fd, 0600) != 0)
 	{
 		::close(marker_fd);
 		return storageFailureLocked("unable to set in-flight marker permissions");
@@ -1565,6 +1660,9 @@ UnresolvedReportJournal::Status UnresolvedReportJournal::appendGuardedFrameLocke
 			exposeWriteFailureRecovery();
 		return status;
 	}
+#ifdef WT_JOURNAL_BOOTSTRAP_TEST_HOOKS
+	if (type == RecordType::Bootstrap) wtJournalBootstrapTestHook(5);
+#endif
 
 	std::string prepare_frame;
 	uint64_t guard_offset = 0;
@@ -1577,6 +1675,9 @@ UnresolvedReportJournal::Status UnresolvedReportJournal::appendGuardedFrameLocke
 		return status;
 	}
 	_guard_sequence = prepare_sequence;
+#ifdef WT_JOURNAL_BOOTSTRAP_TEST_HOOKS
+	if (type == RecordType::Bootstrap) wtJournalBootstrapTestHook(6);
+#endif
 
 	std::string primary_frame;
 	uint64_t primary_offset = 0;
@@ -1589,6 +1690,9 @@ UnresolvedReportJournal::Status UnresolvedReportJournal::appendGuardedFrameLocke
 		return status;
 	}
 	const uint32_t primary_checksum = getU32(primary_frame.data() + 24);
+#ifdef WT_JOURNAL_BOOTSTRAP_TEST_HOOKS
+	if (type == RecordType::Bootstrap) wtJournalBootstrapTestHook(7);
+#endif
 
 	const std::string commit_payload = makeCommitPayload(
 		prepare_sequence, primary_sequence, primary_checksum);
@@ -1603,6 +1707,9 @@ UnresolvedReportJournal::Status UnresolvedReportJournal::appendGuardedFrameLocke
 	}
 	_guard_sequence = commit_sequence;
 	_last_sequence = primary_sequence;
+#ifdef WT_JOURNAL_BOOTSTRAP_TEST_HOOKS
+	if (type == RecordType::Bootstrap) wtJournalBootstrapTestHook(8);
+#endif
 
 	if (type == RecordType::RawReport)
 		_pending.push_back(Report{ primary_sequence, payload, true, true });

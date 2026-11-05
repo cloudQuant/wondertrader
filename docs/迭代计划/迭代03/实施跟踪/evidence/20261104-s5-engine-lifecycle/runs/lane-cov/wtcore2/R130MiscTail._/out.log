@@ -1,0 +1,215 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R130MiscTail.*
+[==========] Running 7 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 7 tests from R130MiscTail
+[ RUN      ] R130MiscTail.ParserInitFailsWhenModuleCannotBeLoaded
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r130_wtcore_r130misc_82465_1/parsers/libR130NoSuchParserModule.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r130_wtcore_r130misc_82465_1/parsers/libR130NoSuchParserModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r130_wtcore_r130misc_82465_1/parsers/libR130NoSuchParserModule.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r130_wtcore_r130misc_82465_1/parsers/libR130NoSuchParserModule.dylib' (no such file)
+[       OK ] R130MiscTail.ParserInitFailsWhenModuleCannotBeLoaded (0 ms)
+[ RUN      ] R130MiscTail.ParserSuccessfulInitReleaseAndRepeatReleaseBalanceCfgRetain
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:239: Failure
+Value of: adapter.init("r130_lifecycle_parser", cfg, &stub, &bd, &hot)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:240: Failure
+Value of: adapter.hasApi()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:241: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.createCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:242: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.initCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:243: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.registerCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:244: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.subscribeCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:245: Failure
+Expected equality of these values:
+  cfgRetainBaseline + 1u
+    Which is: 2
+  cfg->retainCount()
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:252: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.releaseCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:253: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.deleteCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:257: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.releaseCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:258: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.deleteCount()
+    Which is: 0
+
+[  FAILED  ] R130MiscTail.ParserSuccessfulInitReleaseAndRepeatReleaseBalanceCfgRetain (428 ms)
+[ RUN      ] R130MiscTail.ParserOrdinaryInitFalsePropagatesAndRetainsApiUntilQuiescent
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:297: Failure
+Value of: adapter.hasApi()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:299: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.createCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:300: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.registerCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:301: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.initCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:307: Failure
+Expected equality of these values:
+  cfgRetainBaseline + 1u
+    Which is: 2
+  cfg->retainCount()
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:312: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.releaseCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:313: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.deleteCount()
+    Which is: 0
+
+[  FAILED  ] R130MiscTail.ParserOrdinaryInitFalsePropagatesAndRetainsApiUntilQuiescent (260 ms)
+[ RUN      ] R130MiscTail.ParserOrdinaryInitSuccessSubscribesContractsAndConnects
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:352: Failure
+Value of: adapter.init("r130_init_success", cfg, &stub, &bd, &hot)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:353: Failure
+Value of: adapter.isInitialized()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:354: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.registerCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:355: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.initCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:356: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.subscribeCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:357: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.lastSubscribeSize()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:358: Failure
+Value of: adapter.run()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:359: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.connectCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:363: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.releaseCount()
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/r130_misc_tail_test.cpp:364: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  counters.deleteCount()
+    Which is: 0
+
+[  FAILED  ] R130MiscTail.ParserOrdinaryInitSuccessSubscribesContractsAndConnects (259 ms)
+[ RUN      ] R130MiscTail.ParserOrdinaryInitRejectsNullBaseDataManagerBeforeProviderWork
+[       OK ] R130MiscTail.ParserOrdinaryInitRejectsNullBaseDataManagerBeforeProviderWork (268 ms)
+[ RUN      ] R130MiscTail.SelMinuteEndSkipsTaskOnHoliday
+[       OK ] R130MiscTail.SelMinuteEndSkipsTaskOnHoliday (17 ms)
+[ RUN      ] R130MiscTail.CtaRunStartsRiskMonitor
+[       OK ] R130MiscTail.CtaRunStartsRiskMonitor (1 ms)
+[----------] 7 tests from R130MiscTail (1235 ms total)
+
+[----------] Global test environment tear-down
+[==========] 7 tests from 1 test suite ran. (1238 ms total)
+[  PASSED  ] 4 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] R130MiscTail.ParserSuccessfulInitReleaseAndRepeatReleaseBalanceCfgRetain
+[  FAILED  ] R130MiscTail.ParserOrdinaryInitFalsePropagatesAndRetainsApiUntilQuiescent
+[  FAILED  ] R130MiscTail.ParserOrdinaryInitSuccessSubscribesContractsAndConnects
+
+ 3 FAILED TESTS

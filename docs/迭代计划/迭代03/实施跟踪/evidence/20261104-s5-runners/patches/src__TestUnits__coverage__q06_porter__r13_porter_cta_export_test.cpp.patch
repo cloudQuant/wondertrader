@@ -1,0 +1,19 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/q06_porter/r13_porter_cta_export_test.cpp	2026-10-27 21:59:37
++++ src/TestUnits/coverage/q06_porter/r13_porter_cta_export_test.cpp	2026-11-04 21:25:56
+@@ -33,6 +33,8 @@
+ 
+ /* WtPorter.cpp:33 的进程单例；本族导出入口全部经它转发 */
+ extern WtRtRunner& getRunner();
++// I03-NEW-064（迭代03）：C API 只在 runner 已配置的引擎上建上下文（.before 见 s5-runners 证据）。
++bool i03s5_fresh_configured_porter(const char* engine);
+ 
+ namespace {
+ 
+@@ -117,6 +119,7 @@
+ 		g_cta.clear();
+ 		register_cta_recorder();
+ 
++		ASSERT_TRUE(i03s5_fresh_configured_porter("cta"));
+ 		_h = create_cta_context("r13_cta_export", 3);
+ 		ASSERT_NE(_h, 0U) << "create_cta_context 返回 0 说明上下文没进 _cta_engine 的 _ctx_map";
+ 		ASSERT_TRUE(getRunner().getCtaContext(_h) != NULL);

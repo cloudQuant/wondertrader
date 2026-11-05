@@ -1,0 +1,36 @@
+--- src/TestUnits/fixtures/i03_parser_event_contract_20261103/baseline/ParserXeleSkt/ParserXeleSkt.h	2026-11-03 21:49:09
++++ src/ParserXeleSkt/ParserXeleSkt.h	2026-11-03 21:49:33
+@@ -201,6 +201,14 @@
+ 	bool	ensure_worker();
+ 	void	close_sockets();
+ 	void	emit_close_once();
++	// Card 14a=C event contract, all guarded by _mtx_io:
++	// WPE_Connect = transport established for an epoch (snapshot synced and
++	// multicast receive armed); WPE_Login = confirmed by the first valid feed
++	// frame of that epoch (fail-closed: never inferred from local success).
++	void	begin_event_epoch();
++	void	emit_connect_event(uint64_t epoch);
++	void	emit_login_event(uint64_t epoch);
++	void	emit_queued_close(uint64_t epoch);
+ 	void	schedule_retry(uint64_t failed_epoch);
+ 
+ 	void	arm_receive(uint64_t connection_epoch);
+@@ -213,7 +221,7 @@
+ 	bool	open_channel();
+ 	bool	open_on_worker();
+ 
+-	void	extract_buffer(uint32_t length, const char* buffer_data);
++	void	extract_buffer(uint32_t length, const char* buffer_data, uint64_t login_epoch = 0);
+ 
+ private:
+ 	void	doOnConnected();
+@@ -249,6 +257,9 @@
+ 	uint64_t		_connection_epoch;
+ 	// Guarded by _mtx_io; reset for each successful connect.
+ 	bool			_close_event_emitted;
++	// Highest epochs for which WPE_Connect / WPE_Login were emitted.
++	uint64_t		_connect_event_epoch = 0;
++	uint64_t		_login_event_epoch = 0;
+ 
+ 	std::atomic<bool>	_stop_requested{ false };
+ 	std::atomic<bool>	_worker_running{ false };

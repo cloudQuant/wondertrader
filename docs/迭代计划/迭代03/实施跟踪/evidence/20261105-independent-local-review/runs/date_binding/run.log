@@ -1,0 +1,36 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5MainK31DateBinding.*:S5MainK31HostChain.*:S5MainR1213TickerDate.*
+[==========] Running 5 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from S5MainK31DateBinding
+[ RUN      ] S5MainK31DateBinding.BindingHolderValidatesOnceAndFallsBackToLegacy
+[       OK ] S5MainK31DateBinding.BindingHolderValidatesOnceAndFallsBackToLegacy (0 ms)
+[ RUN      ] S5MainK31DateBinding.StorageAndXeleModulesExportVersionedBinders
+/tmp/wt-i03-independent-20261105-mKLfbHZv/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:157: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+missing module ParserXeleSkt
+
+[  FAILED  ] S5MainK31DateBinding.StorageAndXeleModulesExportVersionedBinders (534 ms)
+[----------] 2 tests from S5MainK31DateBinding (534 ms total)
+
+[----------] 2 tests from S5MainK31HostChain
+[ RUN      ] S5MainK31HostChain.InjectedTableDrivesTheReaderDateMapping
+[       OK ] S5MainK31HostChain.InjectedTableDrivesTheReaderDateMapping (313 ms)
+[ RUN      ] S5MainK31HostChain.WithoutHostTableTheReaderKeepsTheLegacyPath
+[       OK ] S5MainK31HostChain.WithoutHostTableTheReaderKeepsTheLegacyPath (233 ms)
+[----------] 2 tests from S5MainK31HostChain (547 ms total)
+
+[----------] 1 test from S5MainR1213TickerDate
+[ RUN      ] S5MainR1213TickerDate.CtaTickerRefusesToStartWhenTradingDateCannotBeMapped
+[       OK ] S5MainR1213TickerDate.CtaTickerRefusesToStartWhenTradingDateCannotBeMapped (2 ms)
+[----------] 1 test from S5MainR1213TickerDate (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 3 test suites ran. (1086 ms total)
+[  PASSED  ] 4 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S5MainK31DateBinding.StorageAndXeleModulesExportVersionedBinders
+
+ 1 FAILED TEST

@@ -1,0 +1,64 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R44DataManagerEdgesTest.*
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from R44DataManagerEdgesTest
+[ RUN      ] R44DataManagerEdgesTest.InitFailsOnExistingButCorruptDefaultModuleFile
+/tmp/wt-i03-s5-dt-writer-before/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:133: Failure
+Value of: _mon.initialize((_dir / "state.json").string().c_str(), &_bdMgr, nullptr)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R44DataManagerEdgesTest.InitFailsOnExistingButCorruptDefaultModuleFile (2 ms)
+[ RUN      ] R44DataManagerEdgesTest.InitFailsWhenDefaultModuleNameIsDirectory
+/tmp/wt-i03-s5-dt-writer-before/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:133: Failure
+Value of: _mon.initialize((_dir / "state.json").string().c_str(), &_bdMgr, nullptr)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R44DataManagerEdgesTest.InitFailsWhenDefaultModuleNameIsDirectory (1 ms)
+[ RUN      ] R44DataManagerEdgesTest.DuplicateCasterIsFannedOutTwice
+/tmp/wt-i03-s5-dt-writer-before/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:133: Failure
+Value of: _mon.initialize((_dir / "state.json").string().c_str(), &_bdMgr, nullptr)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R44DataManagerEdgesTest.DuplicateCasterIsFannedOutTwice (2 ms)
+[ RUN      ] R44DataManagerEdgesTest.FourBroadcastOverloadsReachCaster
+/tmp/wt-i03-s5-dt-writer-before/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:133: Failure
+Value of: _mon.initialize((_dir / "state.json").string().c_str(), &_bdMgr, nullptr)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R44DataManagerEdgesTest.FourBroadcastOverloadsReachCaster (1 ms)
+[ RUN      ] R44DataManagerEdgesTest.ReleaseWithoutWriterIsIdempotent
+/tmp/wt-i03-s5-dt-writer-before/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:133: Failure
+Value of: _mon.initialize((_dir / "state.json").string().c_str(), &_bdMgr, nullptr)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R44DataManagerEdgesTest.ReleaseWithoutWriterIsIdempotent (2 ms)
+[ RUN      ] R44DataManagerEdgesTest.SessionCommsExposeCommodityFullPids
+/tmp/wt-i03-s5-dt-writer-before/src/TestUnits/coverage/q05_dtsrv/r44_datamgr_caster_edges_test.cpp:133: Failure
+Value of: _mon.initialize((_dir / "state.json").string().c_str(), &_bdMgr, nullptr)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R44DataManagerEdgesTest.SessionCommsExposeCommodityFullPids (1 ms)
+[ DISABLED ] R44DataManagerEdgesTest.DISABLED_NullBaseDataManagerIsAnInvalidDependencyProbe
+[----------] 6 tests from R44DataManagerEdgesTest (12 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (12 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 6 tests, listed below:
+[  FAILED  ] R44DataManagerEdgesTest.InitFailsOnExistingButCorruptDefaultModuleFile
+[  FAILED  ] R44DataManagerEdgesTest.InitFailsWhenDefaultModuleNameIsDirectory
+[  FAILED  ] R44DataManagerEdgesTest.DuplicateCasterIsFannedOutTwice
+[  FAILED  ] R44DataManagerEdgesTest.FourBroadcastOverloadsReachCaster
+[  FAILED  ] R44DataManagerEdgesTest.ReleaseWithoutWriterIsIdempotent
+[  FAILED  ] R44DataManagerEdgesTest.SessionCommsExposeCommodityFullPids
+
+ 6 FAILED TESTS
+  YOU HAVE 1 DISABLED TEST
+

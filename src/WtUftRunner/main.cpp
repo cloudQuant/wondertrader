@@ -19,6 +19,37 @@
 #endif
 
 #include <Share/cppcli.hpp>
+
+#include <chrono>
+#include <memory>
+#include <thread>
+
+namespace
+{
+// I03-NEW-058 / 卡9a：离开 main 前在控制线程完成关闭；只因无回调排空证明的 parser owner
+// 而无法完成时，按合同把 runner 及其借用图保留到进程退出（诊断 + 刻意不销毁，不 abort）；
+// 其他无法完成的关闭仍经析构 fail-stop。有限重试以等待 PENDING 的排空。
+int finish_runner(std::unique_ptr<WtUftRunner>& runner, int exitCode)
+{
+	for (int attempt = 0; attempt < 30; ++attempt)
+	{
+		if (runner->shutdown())
+		{
+			runner.reset();
+			return exitCode;
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
+	if (runner->parserOwnersRetained())
+	{
+		WTSLogger::error("WtUftRunner exit: parser owners without callback-drain proof are retained until process exit; runner intentionally not destroyed");
+		(void)runner.release(); // deliberate process-lifetime retention
+		return exitCode;
+	}
+	runner.reset(); // unrecoverable teardown failure: the destructor fails stop
+	return exitCode;
+}
+}
 //#include <vld.h>
 
 /**
@@ -62,9 +93,9 @@ int main(int argc, char* argv[])
 		filename = "./logcfg.yaml";
 
 	// 创建UFT运行器实例
-	WtUftRunner runner;
+	std::unique_ptr<WtUftRunner> runner(new WtUftRunner());
 	// 使用日志配置文件初始化日志系统
-	runner.init(filename);
+	runner->init(filename);
 
 	// 读取配置文件路径，如果命令行参数中没有指定，则使用默认路径
 	if (cParam->exists())
@@ -72,10 +103,10 @@ int main(int argc, char* argv[])
 	else
 		filename = "./config.yaml";
 	// 加载并应用配置
-	if (!runner.config(filename))
-		return 1;
+	if (!runner->config(filename))
+		return finish_runner(runner, 1);
 
 	// 启动UFT策略引擎（非异步模式）
-	runner.run(false);
-	return 0;
+	runner->run(false);
+	return finish_runner(runner, 0);
 }

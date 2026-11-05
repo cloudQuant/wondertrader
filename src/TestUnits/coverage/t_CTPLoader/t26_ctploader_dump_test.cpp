@@ -11,6 +11,7 @@
  */
 #include "t26_ctploader_common.hpp"
 #include "t26_ctp_api_stub.hpp"
+#include "t26_spi_access.hpp"
 
 #include <sys/wait.h>
 #include <unistd.h>
@@ -22,7 +23,9 @@ namespace rj = rapidjson;
 
 namespace
 {
-	/// 在子进程里执行 fn（fn 应当以生产代码的 exit(0) 收尾），并断言子进程正常退出
+	/// 在子进程里执行 fn，并断言其发布的终态结果码为 0。
+	/// K02=B（2026-11-04 用户裁定）：生产代码不再 exit 宿主进程，而是经 loader_completion
+	/// 发布终态；子进程以该结果码退出以保留原断言语义（原实现依赖回调内 exit(0)，见证据 before/）。
 	void run_in_child(const std::function<void()>& fn)
 	{
 		fflush(nullptr);
@@ -30,8 +33,12 @@ namespace
 		ASSERT_TRUE(pid >= 0) << "fork failed";
 		if (pid == 0)
 		{
+			loader_completion::reset();
 			fn();
-			// fn 没在预期位置 exit(0) —— 用非零码让父进程能区分「dump 出口失效」
+			int code = 0;
+			if (loader_completion::finished(&code))
+				_exit(code);
+			// fn 没有发布终态 —— 用非零码让父进程能区分「dump 出口失效」
 			_exit(42);
 		}
 		int status = 0;
@@ -247,13 +254,21 @@ TEST(t26_ctploader_dump, default_feesfile_dumps_to_savepath_fees_json)
 	CThostFtdcInstrumentMarginRateField mf;
 	std::memset(&mf, 0, sizeof(mf));
 	t26::set_fixed(mf.InstrumentID, sizeof(mf.InstrumentID), "rb2510");
+	// T26-007：导出格式只有单一保证金比例，多空须相等（改前 0.11/0.13 会被拒绝而不落盘）。
 	mf.LongMarginRatioByMoney = 0.11;
-	mf.ShortMarginRatioByMoney = 0.13;
+	mf.ShortMarginRatioByMoney = 0.11;
 
 	CTraderSpi spi;
 	auto ok = t26::ok_rsp();
+	// 卡14 14a（I03-NEW-093）：QRYFEES 下只接受本批次登记的请求号，且合约查询封口、全部请求确认后才收口落盘。
+	// 按生产登记路径登记合约查询（并封口）与本条费率查询，再用登记的请求号回报（改前直接用未登记号 7x）。
+	const int instId = CTraderSpiQueueTestAccess::begin_instrument_query(spi);
+	ASSERT_NE(0, instId);
+	CTraderSpiQueueTestAccess::seal_instrument_query(spi, instId);
+	const int marginId = CTraderSpiQueueTestAccess::begin_rate_query(spi, false, _contracts["rb2510"]);
+	ASSERT_NE(0, marginId);
 	// Exercise the regular margin callback and real file writer with the default name.
-	run_in_child([&spi, &mf, &ok]() { spi.OnRspQryInstrumentMarginRate(&mf, &ok, 76, true); });
+	run_in_child([&spi, &mf, &ok, marginId]() { spi.OnRspQryInstrumentMarginRate(&mf, &ok, marginId, true); });
 
 	const std::string feesPath = SAVEPATH + "fees.json";
 	ASSERT_TRUE(std::filesystem::exists(feesPath));
@@ -286,13 +301,21 @@ TEST(t26_ctploader_dump, margin_response_dumps_fees_to_configured_relative_name_
 	CThostFtdcInstrumentMarginRateField mf;
 	std::memset(&mf, 0, sizeof(mf));
 	t26::set_fixed(mf.InstrumentID, sizeof(mf.InstrumentID), "ao2512");
+	// T26-007：多空保证金须相等（改前 0.07/0.08 会被拒绝而不落盘）。
 	mf.LongMarginRatioByMoney = 0.07;
-	mf.ShortMarginRatioByMoney = 0.08;
+	mf.ShortMarginRatioByMoney = 0.07;
 
 	CTraderSpi spi;
 	auto ok = t26::ok_rsp();
+	// 卡14 14a（I03-NEW-093）：QRYFEES 下只接受本批次登记的请求号，且合约查询封口、全部请求确认后才收口落盘。
+	// 按生产登记路径登记合约查询（并封口）与本条费率查询，再用登记的请求号回报（改前直接用未登记号 7x）。
+	const int instId = CTraderSpiQueueTestAccess::begin_instrument_query(spi);
+	ASSERT_NE(0, instId);
+	CTraderSpiQueueTestAccess::seal_instrument_query(spi, instId);
+	const int marginId = CTraderSpiQueueTestAccess::begin_rate_query(spi, false, _contracts["ao2512"]);
+	ASSERT_NE(0, marginId);
 	// _queries 全程为空（QRYFEES 的 bIsLast 队列路径没走），回报一进即触发终局
-	run_in_child([&spi, &mf, &ok]() { spi.OnRspQryInstrumentMarginRate(&mf, &ok, 77, true); });
+	run_in_child([&spi, &mf, &ok, marginId]() { spi.OnRspQryInstrumentMarginRate(&mf, &ok, marginId, true); });
 
 	const std::string feesPath = SAVEPATH + FEES_FILE;
 	ASSERT_TRUE(std::filesystem::exists(feesPath));
@@ -320,7 +343,7 @@ TEST(t26_ctploader_dump, commission_response_with_absolute_feesfile_dumps_to_tha
 	_commodities["SHFE.rb"] = make_commodity("SHFE", "rb");
 	loader::MarginInfo mi;
 	mi._long = 0.11;
-	mi._short = 0.13;
+	mi._short = 0.11;						// T26-007：多空须相等（改前 0.11/0.13）
 	_margins["rb2510"] = mi;				// 先把保证金表备好（否则没有行可落）
 
 	CThostFtdcInstrumentCommissionRateField cf;
@@ -332,7 +355,14 @@ TEST(t26_ctploader_dump, commission_response_with_absolute_feesfile_dumps_to_tha
 
 	CTraderSpi spi;
 	auto ok = t26::ok_rsp();
-	run_in_child([&spi, &cf, &ok]() { spi.OnRspQryInstrumentCommissionRate(&cf, &ok, 78, true); });
+	// 卡14 14a（I03-NEW-093）：QRYFEES 下只接受本批次登记的请求号，且合约查询封口、全部请求确认后才收口落盘。
+	// 按生产登记路径登记合约查询（并封口）与本条费率查询，再用登记的请求号回报（改前直接用未登记号 7x）。
+	const int instId = CTraderSpiQueueTestAccess::begin_instrument_query(spi);
+	ASSERT_NE(0, instId);
+	CTraderSpiQueueTestAccess::seal_instrument_query(spi, instId);
+	const int commId = CTraderSpiQueueTestAccess::begin_rate_query(spi, true, _contracts["rb2510"]);
+	ASSERT_NE(0, commId);
+	run_in_child([&spi, &cf, &ok, commId]() { spi.OnRspQryInstrumentCommissionRate(&cf, &ok, commId, true); });
 
 	ASSERT_TRUE(std::filesystem::exists(absFees));
 	rj::Document fees;

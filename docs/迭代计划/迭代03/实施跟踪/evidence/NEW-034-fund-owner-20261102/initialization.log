@@ -1,0 +1,34 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R42SelEngineLifecycle.SuccessfulInitializationReleasesConfigAfterDestruction
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R42SelEngineLifecycle
+[ RUN      ] R42SelEngineLifecycle.SuccessfulInitializationReleasesConfigAfterDestruction
+[       OK ] R42SelEngineLifecycle.SuccessfulInitializationReleasesConfigAfterDestruction (7 ms)
+[----------] 1 test from R42SelEngineLifecycle (7 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (7 ms total)
+[  PASSED  ] 1 test.
+
+=================================================================
+==7516==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 144 byte(s) in 1 object(s) allocated from:
+    #0 0x00010b3fd0e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000102733110 in wtp::WTSPortFundInfo::create() WTSRiskDef.hpp:155
+    #2 0x000103842cd4 in wtp::WtEngine::load_datas() WtEngine.cpp:511
+    #3 0x00010383ccfc in wtp::WtEngine::init(wtp::WTSVariant*, wtp::IBaseDataMgr*, wtp::WtDtMgr*, wtp::IHotMgr*, wtp::EventNotifier*) WtEngine.cpp:336
+    #4 0x000103dd8d48 in wtp::WtSelEngine::init(wtp::WTSVariant*, wtp::IBaseDataMgr*, wtp::WtDtMgr*, wtp::IHotMgr*, wtp::EventNotifier*) WtSelEngine.cpp:397
+    #5 0x00010277b744 in (anonymous namespace)::R42SelEngineLifecycle_SuccessfulInitializationReleasesConfigAfterDestruction_Test::TestBody() r42_sel_ctx_test.cpp:388
+    #6 0x000104225b28 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (CoverageTests_wtcore:arm64+0x101b69b28)
+    #7 0x000104225a70 in testing::Test::Run()+0xcc (CoverageTests_wtcore:arm64+0x101b69a70)
+    #8 0x000104226650 in testing::TestInfo::Run()+0xd0 (CoverageTests_wtcore:arm64+0x101b6a650)
+    #9 0x0001042270d4 in testing::TestSuite::Run()+0x1c4 (CoverageTests_wtcore:arm64+0x101b6b0d4)
+    #10 0x0001042324fc in testing::internal::UnitTestImpl::RunAllTests()+0x52c (CoverageTests_wtcore:arm64+0x101b764fc)
+    #11 0x000104231ea8 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (CoverageTests_wtcore:arm64+0x101b75ea8)
+    #12 0x000104231e0c in testing::UnitTest::Run()+0x78 (CoverageTests_wtcore:arm64+0x101b75e0c)
+    #13 0x000103eebeac in main+0x40 (CoverageTests_wtcore:arm64+0x10182feac)
+    #14 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: 144 byte(s) leaked in 1 allocation(s).

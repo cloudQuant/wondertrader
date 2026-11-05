@@ -1,0 +1,141 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 44 tests from 12 test suites.
+[----------] Global test environment set-up.
+[----------] 6 tests from R76ParserUDPTest
+[ RUN      ] R76ParserUDPTest.InitAcceptsIpv6HostAndZeroPorts
+[       OK ] R76ParserUDPTest.InitAcceptsIpv6HostAndZeroPorts (0 ms)
+[ RUN      ] R76ParserUDPTest.InitRejectsRepeatWithoutOverwritingEndpoints
+[       OK ] R76ParserUDPTest.InitRejectsRepeatWithoutOverwritingEndpoints (0 ms)
+[ RUN      ] R76ParserUDPTest.RegisterSpiNullMakesNextRegistrationSilent
+[       OK ] R76ParserUDPTest.RegisterSpiNullMakesNextRegistrationSilent (0 ms)
+[ RUN      ] R76ParserUDPTest.SubscribeAcceptsMixedCodeShapesWithoutCallbacks
+[       OK ] R76ParserUDPTest.SubscribeAcceptsMixedCodeShapesWithoutCallbacks (0 ms)
+[ RUN      ] R76ParserUDPTest.DisconnectBeforeAndAfterRegisterSpiIsIdempotent
+[       OK ] R76ParserUDPTest.DisconnectBeforeAndAfterRegisterSpiIsIdempotent (0 ms)
+[ RUN      ] R76ParserUDPTest.FactoryDeleteWithRegisteredSinkIsSafe
+[       OK ] R76ParserUDPTest.FactoryDeleteWithRegisteredSinkIsSafe (0 ms)
+[----------] 6 tests from R76ParserUDPTest (0 ms total)
+
+[----------] 2 tests from t6_parserudp_factory
+[ RUN      ] t6_parserudp_factory.createParser_returns_api_and_delete_clears_pointer
+[       OK ] t6_parserudp_factory.createParser_returns_api_and_delete_clears_pointer (0 ms)
+[ RUN      ] t6_parserudp_factory.deleteParser_accepts_null_without_touching_anything
+[       OK ] t6_parserudp_factory.deleteParser_accepts_null_without_touching_anything (0 ms)
+[----------] 2 tests from t6_parserudp_factory (0 ms total)
+
+[----------] 6 tests from t6_parserudp_init
+[ RUN      ] t6_parserudp_init.valid_multicast_host_without_gpsize_falls_back_to_default
+[       OK ] t6_parserudp_init.valid_multicast_host_without_gpsize_falls_back_to_default (0 ms)
+[ RUN      ] t6_parserudp_init.explicit_gpsize_and_unicast_host_accepted
+[       OK ] t6_parserudp_init.explicit_gpsize_and_unicast_host_accepted (0 ms)
+[ RUN      ] t6_parserudp_init.non_numeric_host_reports_initialization_failure
+[       OK ] t6_parserudp_init.non_numeric_host_reports_initialization_failure (0 ms)
+[ RUN      ] t6_parserudp_init.missing_host_reports_initialization_failure
+[       OK ] t6_parserudp_init.missing_host_reports_initialization_failure (0 ms)
+[ RUN      ] t6_parserudp_init.wtcore_parser_adapter_init_ext_passes_null_and_releases_real_parser
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserUDP/t6_parserudp_reachable_test.cpp:229: Failure
+Value of: adapter.hasApi()
+  Actual: true
+Expected: false
+
+[  FAILED  ] t6_parserudp_init.wtcore_parser_adapter_init_ext_passes_null_and_releases_real_parser (0 ms)
+[ RUN      ] t6_parserudp_init.repeated_init_is_rejected
+[       OK ] t6_parserudp_init.repeated_init_is_rejected (0 ms)
+[----------] 6 tests from t6_parserudp_init (0 ms total)
+
+[----------] 2 tests from t6_parserudp_spi
+[ RUN      ] t6_parserudp_spi.first_register_is_silent_and_second_one_warns
+[       OK ] t6_parserudp_spi.first_register_is_silent_and_second_one_warns (0 ms)
+[ RUN      ] t6_parserudp_spi.handle_event_is_not_emitted_without_io_context
+[       OK ] t6_parserudp_spi.handle_event_is_not_emitted_without_io_context (0 ms)
+[----------] 2 tests from t6_parserudp_spi (0 ms total)
+
+[----------] 2 tests from t6_parserudp_subs
+[ RUN      ] t6_parserudp_subs.subscribe_is_idempotent_and_duplicate_codes_are_dropped
+[       OK ] t6_parserudp_subs.subscribe_is_idempotent_and_duplicate_codes_are_dropped (0 ms)
+[ RUN      ] t6_parserudp_subs.single_code_subscribe_helper_adds_one_entry
+[       OK ] t6_parserudp_subs.single_code_subscribe_helper_adds_one_entry (0 ms)
+[----------] 2 tests from t6_parserudp_subs (0 ms total)
+
+[----------] 1 test from t6_parserudp_state
+[ RUN      ] t6_parserudp_state.release_and_disconnect_without_connect_are_safe
+[       OK ] t6_parserudp_state.release_and_disconnect_without_connect_are_safe (0 ms)
+[----------] 1 test from t6_parserudp_state (0 ms total)
+
+[----------] 2 tests from t6_parserudp_packets
+[ RUN      ] t6_parserudp_packets.short_and_unknown_frames_are_ignored
+[       OK ] t6_parserudp_packets.short_and_unknown_frames_are_ignored (0 ms)
+[ RUN      ] t6_parserudp_packets.complete_packets_dispatch_aligned_payload_fields
+[       OK ] t6_parserudp_packets.complete_packets_dispatch_aligned_payload_fields (0 ms)
+[----------] 2 tests from t6_parserudp_packets (0 ms total)
+
+[----------] 4 tests from ParserUDPSubscribeTest
+[ RUN      ] ParserUDPSubscribeTest.MultiContractPacketIsReadableByUdpCaster
+[       OK ] ParserUDPSubscribeTest.MultiContractPacketIsReadableByUdpCaster (0 ms)
+[ RUN      ] ParserUDPSubscribeTest.ExactlyFullReceiverFieldIsNulTerminated
+[       OK ] ParserUDPSubscribeTest.ExactlyFullReceiverFieldIsNulTerminated (0 ms)
+[ RUN      ] ParserUDPSubscribeTest.OverCapacityContractsAreChunkedWithoutLoss
+[       OK ] ParserUDPSubscribeTest.OverCapacityContractsAreChunkedWithoutLoss (0 ms)
+[ RUN      ] ParserUDPSubscribeTest.UnencodableSingleTokenDoesNotCorruptValidSubscriptions
+[       OK ] ParserUDPSubscribeTest.UnencodableSingleTokenDoesNotCorruptValidSubscriptions (0 ms)
+[----------] 4 tests from ParserUDPSubscribeTest (0 ms total)
+
+[----------] 3 tests from ParserUDPQueueLockTest
+[ RUN      ] ParserUDPQueueLockTest.SuccessfulWriteReleasesQueueLockBeforeSchedulingNextSend
+[       OK ] ParserUDPQueueLockTest.SuccessfulWriteReleasesQueueLockBeforeSchedulingNextSend (0 ms)
+[ RUN      ] ParserUDPQueueLockTest.StaleWriteCompletionCannotConsumeNextEpochPacket
+[       OK ] ParserUDPQueueLockTest.StaleWriteCompletionCannotConsumeNextEpochPacket (0 ms)
+[ RUN      ] ParserUDPQueueLockTest.AsyncSendBufferLivesUntilItsCancellationCompletion
+[       OK ] ParserUDPQueueLockTest.AsyncSendBufferLivesUntilItsCancellationCompletion (0 ms)
+[----------] 3 tests from ParserUDPQueueLockTest (0 ms total)
+
+[----------] 13 tests from ParserUDPShutdownTest
+[ RUN      ] ParserUDPShutdownTest.CurrentSendErrorRecoversPairOnceAndIgnoresStaleOrAbortedCompletions
+[       OK ] ParserUDPShutdownTest.CurrentSendErrorRecoversPairOnceAndIgnoresStaleOrAbortedCompletions (0 ms)
+[ RUN      ] ParserUDPShutdownTest.ReceiveOperationsOwnDistinctBuffersAndPartialReconnectIsRejected
+[       OK ] ParserUDPShutdownTest.ReceiveOperationsOwnDistinctBuffersAndPartialReconnectIsRejected (0 ms)
+[ RUN      ] ParserUDPShutdownTest.ExternalReleaseWaitsForActiveSpiCallbackAndBlocksLaterDispatch
+[       OK ] ParserUDPShutdownTest.ExternalReleaseWaitsForActiveSpiCallbackAndBlocksLaterDispatch (0 ms)
+[ RUN      ] ParserUDPShutdownTest.SelfReleaseAndDeleteRetainOwnerForExternalRetry
+[       OK ] ParserUDPShutdownTest.SelfReleaseAndDeleteRetainOwnerForExternalRetry (0 ms)
+[ RUN      ] ParserUDPShutdownTest.ActiveUdpDisconnectEmitsOneCloseAndReconnectStartsNewEventEpoch
+[       OK ] ParserUDPShutdownTest.ActiveUdpDisconnectEmitsOneCloseAndReconnectStartsNewEventEpoch (0 ms)
+[ RUN      ] ParserUDPShutdownTest.AutomaticReconnectStartsANewCloseEventCycle
+[       OK ] ParserUDPShutdownTest.AutomaticReconnectStartsANewCloseEventCycle (0 ms)
+[ RUN      ] ParserUDPShutdownTest.ExpectedOperationAbortedDoesNotReportOrReconnect
+[       OK ] ParserUDPShutdownTest.ExpectedOperationAbortedDoesNotReportOrReconnect (0 ms)
+[ RUN      ] ParserUDPShutdownTest.ReentrantRecoveryLogDisconnectPreventsReconnectAndAllowsControlThreadRestart
+[       OK ] ParserUDPShutdownTest.ReentrantRecoveryLogDisconnectPreventsReconnectAndAllowsControlThreadRestart (0 ms)
+[ RUN      ] ParserUDPShutdownTest.PersistentSendErrorsStopAfterBoundedRecoveryAttempts
+[       OK ] ParserUDPShutdownTest.PersistentSendErrorsStopAfterBoundedRecoveryAttempts (0 ms)
+[ RUN      ] ParserUDPShutdownTest.PersistentReadErrorsStopAfterBoundedRecoveryAttempts
+[       OK ] ParserUDPShutdownTest.PersistentReadErrorsStopAfterBoundedRecoveryAttempts (0 ms)
+[ RUN      ] ParserUDPShutdownTest.SuccessfulCurrentSendResetsItsRecoveryBudget
+[       OK ] ParserUDPShutdownTest.SuccessfulCurrentSendResetsItsRecoveryBudget (0 ms)
+[ RUN      ] ParserUDPShutdownTest.OldTwoChannelReadCompletionsBelongToOneReconnectEpoch
+[       OK ] ParserUDPShutdownTest.OldTwoChannelReadCompletionsBelongToOneReconnectEpoch (0 ms)
+[ RUN      ] ParserUDPShutdownTest.BroadcastOnlyRecoveryStartsOneNewCloseCycle
+[       OK ] ParserUDPShutdownTest.BroadcastOnlyRecoveryStartsOneNewCloseCycle (0 ms)
+[----------] 13 tests from ParserUDPShutdownTest (5 ms total)
+
+[----------] 2 tests from ParserUDPSpiLockTest
+[ RUN      ] ParserUDPSpiLockTest.CallbacksSerializeReenterIoAndReplacementWaitsForTheOldSink
+[       OK ] ParserUDPSpiLockTest.CallbacksSerializeReenterIoAndReplacementWaitsForTheOldSink (0 ms)
+[ RUN      ] ParserUDPSpiLockTest.NestedParserCallbacksRetainOuterParserIdentity
+[       OK ] ParserUDPSpiLockTest.NestedParserCallbacksRetainOuterParserIdentity (0 ms)
+[----------] 2 tests from ParserUDPSpiLockTest (0 ms total)
+
+[----------] 1 test from ParserUDPReceiveTest
+[ RUN      ] ParserUDPReceiveTest.EmptyBroadcastDatagramRearmsBeforeTheNextValidTick
+[       OK ] ParserUDPReceiveTest.EmptyBroadcastDatagramRearmsBeforeTheNextValidTick (3 ms)
+[----------] 1 test from ParserUDPReceiveTest (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 44 tests from 12 test suites ran. (11 ms total)
+[  PASSED  ] 43 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] t6_parserudp_init.wtcore_parser_adapter_init_ext_passes_null_and_releases_real_parser
+
+ 1 FAILED TEST
+  YOU HAVE 1 DISABLED TEST
+

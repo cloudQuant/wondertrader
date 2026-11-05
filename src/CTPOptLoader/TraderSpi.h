@@ -2,9 +2,26 @@
 //v3.5.8P4
 #include <API/CTPOpt3.5.8/ThostFtdcTraderApi.h>
 
+#include <chrono>
+
+// Decision K02=B (2026-11-04): the loader never terminates its host process.
+// Callbacks publish the first terminal result here; run() waits for it on its own
+// thread, releases the API and returns the code to the host.
+namespace loader_completion
+{
+	void reset();
+	void finish(int code);
+	bool finished(int* code = nullptr);
+	bool wait_for(int& code, std::chrono::milliseconds timeout);
+	int wait();
+}
+
 class CTraderSpi : public CThostFtdcTraderSpi
 {
 public:
+	// K02=B: run() deletes the SPI after the API is released; tests derive from it.
+	virtual ~CTraderSpi() = default;
+
 	///当客户端与交易后台建立起通信连接时（还未登录前）,该方法被调用。
 	virtual void OnFrontConnected();
 

@@ -1,0 +1,78 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-uftcore/before2/src/WtUftCore/TraderAdapter.cpp	2026-11-04 19:08:10
++++ src/WtUftCore/TraderAdapter.cpp	2026-11-04 21:21:25
+@@ -1142,8 +1142,28 @@
+ 	{
+ 		return (std::isfinite(value) && value > 0) ? value : 0.0;
+ 	}
++}
++
++namespace
++{
++	thread_local wtp::TraderAdapter::LocalOrderRegistrar* g_local_order_registrar = NULL;
++}
++
++TraderAdapter::LocalOrderRegistrar::LocalOrderRegistrar(TraderAdapter* adapter, Callback callback, void* owner)
++	: _adapter(adapter)
++	, _callback(callback)
++	, _owner(owner)
++	, _previous(g_local_order_registrar)
++{
++	g_local_order_registrar = this;
+ }
+ 
++TraderAdapter::LocalOrderRegistrar::~LocalOrderRegistrar()
++{
++	if (g_local_order_registrar == this)
++		g_local_order_registrar = _previous;
++}
++
+ uint32_t TraderAdapter::parseOwnLocalId(const char* tag, std::size_t capacity) const
+ {
+ 	if (tag == NULL || capacity == 0 || _order_pattern.empty())
+@@ -1391,6 +1411,29 @@
+ 		}
+ 	};
+ 
++	// I03-NEW-059: let the submitting owner register this id before any report
++	// of it can be delivered.
++	for (LocalOrderRegistrar* registrar = g_local_order_registrar; registrar != NULL; registrar = registrar->_previous)
++	{
++		if (registrar->_adapter != this)
++			continue;
++		if (registrar->_callback != NULL)
++		{
++			try
++			{
++				registrar->_callback(registrar->_owner, localid);
++			}
++			catch (...)
++			{
++				closeUnsent();
++				WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR,
++					"[{}] Registering local order {} with its owner failed; order not sent", _id.c_str(), localid);
++				return UINT_MAX;
++			}
++		}
++		break;
++	}
++
+ 	// Track the id while the provider call is in progress so reports delivered
+ 	// synchronously (or concurrently) are reconciled with the return value.
+ 	struct InflightGuard
+@@ -2369,7 +2412,15 @@
+ 		return;
+ 
+ 	WTSLogger::log_dyn("trader", _id.c_str(), LL_WARN, "[{}] Trading channel logged out", _id.c_str());
+-	notifyChannelLost();
++	// BUG-R11-008 only decided to reset the login state on logout; the sink
++	// logout-notification semantics were explicitly left unchanged (I03-NEW-060),
++	// so no on_channel_lost is broadcast here. The ready flag is cleared so a
++	// sink added after logout is not told the channel is ready.
++	{
++		std::lock_guard<std::mutex> lock(_mtx_sink_notifications);
++		_sink_channel_ready = false;
++		_state.store(AS_NOTLOGIN, std::memory_order_release);
++	}
+ }
+ 
+ void TraderAdapter::onRspEntrust(WTSEntrust* entrust, WTSError *err)

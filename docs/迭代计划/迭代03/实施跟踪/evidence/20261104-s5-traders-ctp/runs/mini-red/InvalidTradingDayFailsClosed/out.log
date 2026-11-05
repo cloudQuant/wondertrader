@@ -1,0 +1,71 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5TraderCTPMini.InvalidTradingDayFailsClosed
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03S5TraderCTPMini
+[ RUN      ] I03S5TraderCTPMini.InvalidTradingDayFailsClosed
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:402: Failure
+Expected equality of these values:
+  TraderCTPMini::WS_LOGINFAILED
+    Which is: 3
+  trader_.state()
+    Which is: 6
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:403: Failure
+Expected equality of these values:
+  0
+  sink_.login_ok.load()
+    Which is: 1
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:404: Failure
+Expected equality of these values:
+  1
+  sink_.login_fail.load()
+    Which is: 0
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:405: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  trader_.tradingDate()
+    Which is: 2026013
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:406: Failure
+Expected equality of these values:
+  "2026013X"
+  trader_.rawDay()
+    Which is: "<baseline>"
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:407: Failure
+Value of: trader_.isConnected()
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:410: Failure
+Expected equality of these values:
+  0
+  sink_.pushed_orders.load()
+    Which is: 2
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:411: Failure
+Expected equality of these values:
+  0
+  sink_.pushed_trades.load()
+    Which is: 2
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTPMini/i03s5_traderctpmini_lifecycle_test.cpp:412: Failure
+Expected equality of these values:
+  -1
+  trader_.queryAccount()
+    Which is: 0
+
+[  FAILED  ] I03S5TraderCTPMini.InvalidTradingDayFailsClosed (42 ms)
+[----------] 1 test from I03S5TraderCTPMini (42 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (48 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] I03S5TraderCTPMini.InvalidTradingDayFailsClosed
+
+ 1 FAILED TEST

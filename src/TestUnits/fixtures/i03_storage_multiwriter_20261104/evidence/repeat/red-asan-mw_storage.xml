@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="3" failures="3" disabled="0" errors="0" time="140.636" timestamp="2026-11-04T03:09:21.052" name="AllTests">
+  <testsuite name="MwStorage" tests="3" failures="3" disabled="0" skipped="0" errors="0" time="140.636" timestamp="2026-11-04T03:18:43.888">
+    <testcase name="TwoProcessTransAppendNoLossNoTear" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp" line="360" status="run" result="completed" time="0.201" timestamp="2026-11-04T03:18:43.888" classname="MwStorage">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:375&#x0A;Expected equality of these values:&#x0A;  head._size&#x0A;    Which is: 11905&#x0A;  2 * N&#x0A;    Which is: 12000&#x0A;published record count&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:375
+Expected equality of these values:
+  head._size
+    Which is: 11905
+  2 * N
+    Which is: 12000
+published record count
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:398&#x0A;Expected equality of these values:&#x0A;  torn&#x0A;    Which is: 549&#x0A;  0u&#x0A;    Which is: 0&#x0A;records with mixed or empty payload&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:398
+Expected equality of these values:
+  torn
+    Which is: 549
+  0u
+    Which is: 0
+records with mixed or empty payload
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:400&#x0A;Expected equality of these values:&#x0A;  reordered&#x0A;    Which is: 418&#x0A;  0u&#x0A;    Which is: 0&#x0A;each writer&apos;s own records must keep their order&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:400
+Expected equality of these values:
+  reordered
+    Which is: 418
+  0u
+    Which is: 0
+each writer's own records must keep their order
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:401&#x0A;Expected equality of these values:&#x0A;  seen.size()&#x0A;    Which is: 11356&#x0A;  (size_t)(2 * N)&#x0A;    Which is: 12000&#x0A;lost records&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:401
+Expected equality of these values:
+  seen.size()
+    Which is: 11356
+  (size_t)(2 * N)
+    Which is: 12000
+lost records
+]]></failure>
+    </testcase>
+    <testcase name="TwoProcessTickCacheIndexAndSharedStream" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp" line="410" status="run" result="completed" time="0.22" timestamp="2026-11-04T03:18:44.089" classname="MwStorage">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:425&#x0A;Expected equality of these values:&#x0A;  ch._size&#x0A;    Which is: 50&#x0A;  2 * codes + 1&#x0A;    Which is: 49&#x0A;every code exactly one cache entry&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:425
+Expected equality of these values:
+  ch._size
+    Which is: 50
+  2 * codes + 1
+    Which is: 49
+every code exactly one cache entry
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442&#x0A;Expected equality of these values:&#x0A;  entries[code]&#x0A;    Which is: 0&#x0A;  1u&#x0A;    Which is: 1&#x0A;m1c0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c0
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442&#x0A;Expected equality of these values:&#x0A;  entries[code]&#x0A;    Which is: 0&#x0A;  1u&#x0A;    Which is: 1&#x0A;m1c17&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c17
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442&#x0A;Expected equality of these values:&#x0A;  entries[code]&#x0A;    Which is: 0&#x0A;  1u&#x0A;    Which is: 1&#x0A;m1c18&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c18
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442&#x0A;Expected equality of these values:&#x0A;  entries[code]&#x0A;    Which is: 0&#x0A;  1u&#x0A;    Which is: 1&#x0A;m1c19&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c19
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442&#x0A;Expected equality of these values:&#x0A;  entries[code]&#x0A;    Which is: 0&#x0A;  1u&#x0A;    Which is: 1&#x0A;m1c20&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c20
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442&#x0A;Expected equality of these values:&#x0A;  entries[code]&#x0A;    Which is: 0&#x0A;  1u&#x0A;    Which is: 1&#x0A;m1c21&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c21
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442&#x0A;Expected equality of these values:&#x0A;  entries[code]&#x0A;    Which is: 0&#x0A;  1u&#x0A;    Which is: 1&#x0A;m1c22&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c22
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442&#x0A;Expected equality of these values:&#x0A;  entries[code]&#x0A;    Which is: 0&#x0A;  1u&#x0A;    Which is: 1&#x0A;m1c23&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:442
+Expected equality of these values:
+  entries[code]
+    Which is: 0
+  1u
+    Which is: 1
+m1c23
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:444&#x0A;Expected equality of these values:&#x0A;  th._size&#x0A;    Which is: 2&#x0A;  rounds&#x0A;    Which is: 60&#x0A;m2c0&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:444
+Expected equality of these values:
+  th._size
+    Which is: 2
+  rounds
+    Which is: 60
+m2c0
+]]></failure>
+    </testcase>
+    <testcase name="ConcurrentReaderSeesOnlyCompletePublishedRecords" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp" line="592" status="run" result="completed" time="140.214" timestamp="2026-11-04T03:18:44.310" classname="MwStorage">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:652&#x0A;Expected equality of these values:&#x0A;  rr&#x0A;    Which is: 2&#x0A;  0&#x0A;reader exit (2=torn/foreign record seen, 3=published count never reached, -1=signal 0)&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:652
+Expected equality of these values:
+  rr
+    Which is: 2
+  0
+reader exit (2=torn/foreign record seen, 3=published count never reached, -1=signal 0)
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

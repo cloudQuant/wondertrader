@@ -1,0 +1,49 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 17 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 11 tests from R1BaseDataMgrTest
+[ RUN      ] R1BaseDataMgrTest.loaders_reject_missing_and_broken_files
+[       OK ] R1BaseDataMgrTest.loaders_reject_missing_and_broken_files (3 ms)
+[ RUN      ] R1BaseDataMgrTest.sessions_loaded_and_missing_sections_skipped
+[       OK ] R1BaseDataMgrTest.sessions_loaded_and_missing_sections_skipped (9 ms)
+[ RUN      ] R1BaseDataMgrTest.commodities_lookup_and_missing_session_branches
+[       OK ] R1BaseDataMgrTest.commodities_lookup_and_missing_session_branches (2 ms)
+[ RUN      ] R1BaseDataMgrTest.contract_lookup_by_code_fullcode_altcode_and_dates
+[       OK ] R1BaseDataMgrTest.contract_lookup_by_code_fullcode_altcode_and_dates (2 ms)
+[ RUN      ] R1BaseDataMgrTest.code_list_sorted_by_fullcode_and_index_queries
+[       OK ] R1BaseDataMgrTest.code_list_sorted_by_fullcode_and_index_queries (5 ms)
+[ RUN      ] R1BaseDataMgrTest.holidays_and_trading_date_arithmetic
+[       OK ] R1BaseDataMgrTest.holidays_and_trading_date_arithmetic (10 ms)
+[ RUN      ] R1BaseDataMgrTest.invalid_dates_fail_closed_for_trading_calendar_queries
+[       OK ] R1BaseDataMgrTest.invalid_dates_fail_closed_for_trading_calendar_queries (3 ms)
+[ RUN      ] R1BaseDataMgrTest.boundary_time_offsets_and_weekend_shift
+[       OK ] R1BaseDataMgrTest.boundary_time_offsets_and_weekend_shift (2 ms)
+[ RUN      ] R1BaseDataMgrTest.calc_trading_date_branches
+[       OK ] R1BaseDataMgrTest.calc_trading_date_branches (5 ms)
+[ RUN      ] R1BaseDataMgrTest.missing_commodity_pid_falls_back_to_empty_tpl
+[       OK ] R1BaseDataMgrTest.missing_commodity_pid_falls_back_to_empty_tpl (1 ms)
+[ RUN      ] R1BaseDataMgrTest.getTplIDByPID_malformed_and_valid_pid_holiday_semantics
+[       OK ] R1BaseDataMgrTest.getTplIDByPID_malformed_and_valid_pid_holiday_semantics (4 ms)
+[----------] 11 tests from R1BaseDataMgrTest (51 ms total)
+
+[----------] 3 tests from R1BaseDataMgrOwnership
+[ RUN      ] R1BaseDataMgrOwnership.created_map_values_are_released_with_manager
+[       OK ] R1BaseDataMgrOwnership.created_map_values_are_released_with_manager (1 ms)
+[ RUN      ] R1BaseDataMgrOwnership.commodity_session_assignment_owns_references
+[       OK ] R1BaseDataMgrOwnership.commodity_session_assignment_owns_references (0 ms)
+[ RUN      ] R1BaseDataMgrOwnership.reload_and_external_commodity_keep_sessions_alive
+[       OK ] R1BaseDataMgrOwnership.reload_and_external_commodity_keep_sessions_alive (27 ms)
+[----------] 3 tests from R1BaseDataMgrOwnership (29 ms total)
+
+[----------] 3 tests from R1BaseDataMgrConfigBoundary
+[ RUN      ] R1BaseDataMgrConfigBoundary.commodity_identity_fields_enforce_caps_and_retain_values
+[       OK ] R1BaseDataMgrConfigBoundary.commodity_identity_fields_enforce_caps_and_retain_values (24 ms)
+[ RUN      ] R1BaseDataMgrConfigBoundary.contract_identity_fields_enforce_caps_and_retain_values
+[       OK ] R1BaseDataMgrConfigBoundary.contract_identity_fields_enforce_caps_and_retain_values (55 ms)
+[ RUN      ] R1BaseDataMgrConfigBoundary.configured_altcode_caps_and_empty_fallback_are_observable
+[       OK ] R1BaseDataMgrConfigBoundary.configured_altcode_caps_and_empty_fallback_are_observable (7 ms)
+[----------] 3 tests from R1BaseDataMgrConfigBoundary (87 ms total)
+
+[----------] Global test environment tear-down
+[==========] 17 tests from 3 test suites ran. (169 ms total)
+[  PASSED  ] 17 tests.

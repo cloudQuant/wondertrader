@@ -1,0 +1,42 @@
+    #8 0x000100600ab4 in testing::UnitTest::Run()+0x78 (test:arm64+0x1002bcab4)
+    #9 0x00010034bf54 in main+0x104 (test:arm64+0x100007f54)
+    #10 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-s5-wp1-ledger-run/fxF-baseline3-asan/overlay/src/WtCore/TraderAdapter.cpp:2585:38 
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1438: Failure
+Value of: (((*(int *)&(status)) & 0177) != 0177 && ((*(int *)&(status)) & 0177) != 0)
+  Actual: true
+Expected: false
+child crashed with signal 6
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1439: Failure
+Value of: (((*(int *)&(status)) & 0177) == 0) && (((*(int *)&(status)) >> 8) & 0x000000ff) == 0
+  Actual: false
+Expected: true
+child assertions failed
+
+[  FAILED  ] Wp1Test.BuySellOnUnknownCodeFailClosedWithoutDereferencingNull (2168 ms)
+[----------] 40 tests from Wp1Test (24839 ms total)
+
+[----------] Global test environment tear-down
+[==========] 40 tests from 1 test suite ran. (24839 ms total)
+[  PASSED  ] 27 tests.
+[  SKIPPED ] 2 tests, listed below:
+[  SKIPPED ] Wp1Test.ChildScenario
+[  SKIPPED ] Wp1Test.UnknownCodeChild
+[  FAILED  ] 11 tests, listed below:
+[  FAILED  ] Wp1Test.EmptyOrderSnapshotIsAmbiguousAndKeepsLiveOrders
+[  FAILED  ] Wp1Test.OwnerScopeDoesNotLeakIntoSinkCallbacks
+[  FAILED  ] Wp1Test.RemovedOwnerSinkDeclarationEndsWithTheSink
+[  FAILED  ] Wp1Test.UnownedEventsNeverReachOwnerSinksUnderRouting
+[  FAILED  ] Wp1Test.UnresolvableOwnerTradeIsQuarantinedUnderRouting
+[  FAILED  ] Wp1Test.PositionSnapshotWithoutBaselineAndNewerTradePausesAccount
+[  FAILED  ] Wp1Test.DuplicateTradePushIsAppliedOnceButSelfMatchSidesAreNot
+[  FAILED  ] Wp1Test.ThrowingCancelReleasesItsClaim
+[  FAILED  ] Wp1Test.ReleaseClosesSpiIngressAndDestructorDrainsBeforeFreeingOrderMap
+[  FAILED  ] Wp1Test.OrderReportThenTradeOfSameFillDeductsOnce
+[  FAILED  ] Wp1Test.BuySellOnUnknownCodeFailClosedWithoutDereferencingNull
+
+11 FAILED TESTS
+exit=1
+exit=1

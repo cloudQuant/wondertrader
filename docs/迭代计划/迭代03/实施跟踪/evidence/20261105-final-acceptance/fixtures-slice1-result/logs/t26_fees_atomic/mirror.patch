@@ -1,0 +1,22 @@
+--- tree/src/TestUnits/fixtures/t26_fees_atomic/run.sh
++++ mirror/src/TestUnits/fixtures/t26_fees_atomic/run.sh
+@@ -71,7 +71,7 @@
+  -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include \
+  -I/opt/homebrew/Cellar/spdlog/1.15.3/include -isystem /usr/local/include \
+  src/TestUnits/fixtures/t26_fees_atomic/consumer_key_probe.cpp -o "$out/consumer-key-probe" > "$out/consumer-key-build.log" 2>&1
+-/Users/yunjinqi/opt/anaconda3/bin/conda run --no-capture-output -n base python \
++/usr/bin/python3 -I \
+  src/TestUnits/fixtures/t26_fees_atomic/run_tests.py "$out" | tee "$out/results.txt"
+ shasum -a 256 "${sources[@]}" > "$out/source-after.sha256"
+ cmp "$out/source-before.sha256" "$out/source-after.sha256"
+--- tree/src/TestUnits/fixtures/t26_fees_atomic/run.sh
++++ mirror/src/TestUnits/fixtures/t26_fees_atomic/run.sh
+@@ -59,7 +59,7 @@
+   set -x
+   "$compiler" "${args[@]}" "${flags[@]}" -c "$snap/CTPLoader/TraderSpi.cpp" -o "$out/$variant.o"
+   "$compiler" "${args[@]}" "${flags[@]}" src/TestUnits/fixtures/t26_fees_atomic/fee_probe.cpp "$out/$variant.o" \
+-   /tmp/wt-i03-r41-drain/libs/libWTSUtils.a \
++   /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build/build_x64/Debug/libs/libWTSUtils.a \
+    /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.a \
+    /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_thread.a \
+    /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_system.a \

@@ -1,0 +1,13 @@
+--- a/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp
++++ b/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp
+@@ -59,4 +59,9 @@
+ 	WTSTickSlice* getTicks(const char*, uint32_t, uint64_t) override { return NULL; }
+ 	WTSTickData* grabLastTick(const char*) override { return NULL; }
+-	double getPosition(const char*, bool = true, int32_t = 3) override { return pos; }
++	double getPosition(const char*, bool = true, int32_t flag = 3) override
++	{
++		if (flag == 1) return pos > 0 ? pos : 0;
++		if (flag == 2) return pos < 0 ? pos : 0;
++		return pos;
++	}
+ 	OrderMap* getOrders(const char*) override { return NULL; }

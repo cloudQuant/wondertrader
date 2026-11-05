@@ -250,7 +250,10 @@ int main(int argc, char* argv[])
 
 	if (!replayer->prepare())
 	{
-		WTSLogger::error("Preparing historical data replayer failed");
+		// I03-NEW-019：输出回放器记录的错误码与消息，便于定位 prepare 失败原因
+		const WtReplayStatusV1 status = replayer->replay_status();
+		WTSLogger::error("Preparing historical data replayer failed: replay error {}: {}",
+			status.error_code, status.message[0] != '\0' ? status.message : "no message");
 		if (execMocker)
 		{
 			std::string quiesceError;

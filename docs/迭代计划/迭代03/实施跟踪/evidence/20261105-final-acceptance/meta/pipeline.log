@@ -1,0 +1,23 @@
+20:28:32 freeze start
+frozen 2026-11-05T20:28:32+0800 files=6717 digest=e9f734487a6a49f706bad47e178f739c7b11badab0b054ef76c6237c1a24427f
+20:28:39 freeze exit=0
+20:28:39 configure normal
+20:28:54 configure exit=0
+20:37:17 build exit=0 warnings=       0
+20:37:17 normal run start
+20:43:03 normal run exit=0 {"total": 6342, "by_status": {"pass": 6338, "skipped": 4}, "disabled_total": 163, "list_failures": [], "external_platform_skipped": 9}
+20:43:03 disabled run start
+20:45:16 disabled run exit=0 {"total": 163, "by_status": {"signal-11": 30, "pass": 53, "fail": 39, "skipped": 32, "signal-6": 1, "signal-10": 1, "noxml-exit-0": 3, "timeout": 4}, "disabled_total": 163, "list_failures": [], "external_platform_skipped": 9}
+20:45:16 asan configure
+20:45:35 asan configure exit=0
+20:59:11 asan build exit=0 FAILED=0
+20:59:11 asan run start
+21:13:11 asan run exit=0 {"total": 6342, "by_status": {"pass": 6338, "skipped": 4}, "disabled_total": 163, "list_failures": [], "external_platform_skipped": 9}
+21:13:11 lsan run start
+21:34:42 lsan run exit=0 {"total": 6342, "by_status": {"pass": 5109, "sanitizer-lsan(fail)": 45, "sanitizer-lsan(exit-1)": 1175, "skipped": 4, "fail": 9}, "disabled_total": 163, "list_failures": [], "external_platform_skipped": 9}
+21:34:42 tsan configure
+21:35:05 tsan configure exit=0
+22:04:23 tsan build exit=0 FAILED=0
+22:04:23 tsan run start
+22:34:29 tsan run exit=0 {"total": 6342, "by_status": {"pass": 6181, "skipped": 4, "signal-6": 100, "sanitizer-tsan(signal-6)": 53, "fail": 3, "timeout": 1}, "disabled_total": 163, "list_failures": [], "external_platform_skipped": 9}
+22:34:29 pipeline done: freeze build run disabled asanbuild asanrun lsanrun tsanbuild tsanrun

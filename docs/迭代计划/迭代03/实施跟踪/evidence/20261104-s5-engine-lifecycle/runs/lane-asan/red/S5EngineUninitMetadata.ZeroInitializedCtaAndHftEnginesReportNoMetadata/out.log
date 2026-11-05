@@ -1,0 +1,60 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5EngineUninitMetadata.ZeroInitializedCtaAndHftEnginesReportNoMetadata
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5EngineUninitMetadata
+[ RUN      ] S5EngineUninitMetadata.ZeroInitializedCtaAndHftEnginesReportNoMetadata
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_engine_uninit_metadata_test.cpp:80: Failure
+Death test: std::exit(probeUninitializedEngine<WtCtaEngine>(0x00))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtEngine.cpp:132:25: runtime error: member call on null pointer of type 'wtp::IBaseDataMgr'
+[  DEATH   ]     #0 0x0001032b921c in wtp::WtEngine::get_commodity_info(char const*)+0x254 (red-s5_engine_uninit_metadata_test:arm64+0x10061921c)
+[  DEATH   ]     #1 0x000102cac718 in int (anonymous namespace)::probeUninitializedEngine<wtp::WtCtaEngine>(unsigned char)+0x2a0 (red-s5_engine_uninit_metadata_test:arm64+0x10000c718)
+[  DEATH   ]     #2 0x000102cab1f4 in S5EngineUninitMetadata_ZeroInitializedCtaAndHftEnginesReportNoMetadata_Test::TestBody()+0x654 (red-s5_engine_uninit_metadata_test:arm64+0x10000b1f4)
+[  DEATH   ]     #3 0x000103749434 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-s5_engine_uninit_metadata_test:arm64+0x100aa9434)
+[  DEATH   ]     #4 0x00010374937c in testing::Test::Run()+0xcc (red-s5_engine_uninit_metadata_test:arm64+0x100aa937c)
+[  DEATH   ]     #5 0x000103749f5c in testing::TestInfo::Run()+0xd0 (red-s5_engine_uninit_metadata_test:arm64+0x100aa9f5c)
+[  DEATH   ]     #6 0x00010374a9e0 in testing::TestSuite::Run()+0x1c4 (red-s5_engine_uninit_metadata_test:arm64+0x100aaa9e0)
+[  DEATH   ]     #7 0x000103755e08 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-s5_engine_uninit_metadata_test:arm64+0x100ab5e08)
+[  DEATH   ]     #8 0x0001037557b4 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-s5_engine_uninit_metadata_test:arm64+0x100ab57b4)
+[  DEATH   ]     #9 0x000103755718 in testing::UnitTest::Run()+0x78 (red-s5_engine_uninit_metadata_test:arm64+0x100ab5718)
+[  DEATH   ]     #10 0x000103736790 in main+0x40 (red-s5_engine_uninit_metadata_test:arm64+0x100a96790)
+[  DEATH   ]     #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+[  DEATH   ] 
+[  DEATH   ] SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtEngine.cpp:132:25 
+[  DEATH   ] 
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_engine_uninit_metadata_test.cpp:82: Failure
+Death test: std::exit(probeUninitializedEngine<WtHftEngine>(0x00))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtEngine.cpp:132:25: runtime error: member call on null pointer of type 'wtp::IBaseDataMgr'
+[  DEATH   ]     #0 0x0001032b921c in wtp::WtEngine::get_commodity_info(char const*)+0x254 (red-s5_engine_uninit_metadata_test:arm64+0x10061921c)
+[  DEATH   ]     #1 0x000102cad1c8 in int (anonymous namespace)::probeUninitializedEngine<wtp::WtHftEngine>(unsigned char)+0x2a0 (red-s5_engine_uninit_metadata_test:arm64+0x10000d1c8)
+[  DEATH   ]     #2 0x000102cabc50 in S5EngineUninitMetadata_ZeroInitializedCtaAndHftEnginesReportNoMetadata_Test::TestBody()+0x10b0 (red-s5_engine_uninit_metadata_test:arm64+0x10000bc50)
+[  DEATH   ]     #3 0x000103749434 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-s5_engine_uninit_metadata_test:arm64+0x100aa9434)
+[  DEATH   ]     #4 0x00010374937c in testing::Test::Run()+0xcc (red-s5_engine_uninit_metadata_test:arm64+0x100aa937c)
+[  DEATH   ]     #5 0x000103749f5c in testing::TestInfo::Run()+0xd0 (red-s5_engine_uninit_metadata_test:arm64+0x100aa9f5c)
+[  DEATH   ]     #6 0x00010374a9e0 in testing::TestSuite::Run()+0x1c4 (red-s5_engine_uninit_metadata_test:arm64+0x100aaa9e0)
+[  DEATH   ]     #7 0x000103755e08 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-s5_engine_uninit_metadata_test:arm64+0x100ab5e08)
+[  DEATH   ]     #8 0x0001037557b4 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-s5_engine_uninit_metadata_test:arm64+0x100ab57b4)
+[  DEATH   ]     #9 0x000103755718 in testing::UnitTest::Run()+0x78 (red-s5_engine_uninit_metadata_test:arm64+0x100ab5718)
+[  DEATH   ]     #10 0x000103736790 in main+0x40 (red-s5_engine_uninit_metadata_test:arm64+0x100a96790)
+[  DEATH   ]     #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+[  DEATH   ] 
+[  DEATH   ] SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtEngine.cpp:132:25 
+[  DEATH   ] 
+
+[  FAILED  ] S5EngineUninitMetadata.ZeroInitializedCtaAndHftEnginesReportNoMetadata (3869 ms)
+[----------] 1 test from S5EngineUninitMetadata (3869 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3870 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S5EngineUninitMetadata.ZeroInitializedCtaAndHftEnginesReportNoMetadata
+
+ 1 FAILED TEST

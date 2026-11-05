@@ -1,0 +1,31 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/WtUftRunner/WtUftRunner.h	2026-11-02 17:56:24
++++ src/WtUftRunner/WtUftRunner.h	2026-11-04 21:19:15
+@@ -43,7 +43,7 @@
+  * @details 负责初始化并运行整个UFT策略引擎，包括加载配置、初始化各个模块、
+  *          管理策略和各种适配器、处理日志输出等。继承ILogHandler接口实现日志处理功能。
+  */
+-class WtUftRunner : public ILogHandler
++class WtUftRunner final : public ILogHandler // final: owned/deleted by main (I03-NEW-058)
+ {
+ public:
+ 	/**
+@@ -94,6 +94,11 @@
+ 	 */
+ 	bool shutdown();
+ 
++	// I03-NEW-058 / card 9a: true when the last shutdown attempt was blocked only by
++	// parser owners lacking callback-drain proof; such a runner is retained (never
++	// destroyed) by the process entry until process exit instead of aborting.
++	bool parserOwnersRetained() const { return _parser_owners_retained.load(std::memory_order_acquire); }
++
+ private:
+ 	bool configImpl(const std::string& filename);
+ 	bool registerParserCandidate(const std::string& id, ParserAdapterPtr& adapter);
+@@ -183,6 +188,7 @@
+ 	std::atomic<bool>   _config_succeeded{false};
+ 	std::atomic<bool>   _share_domain_attached{false};
+ 	std::atomic<bool>   _parser_quarantine_pending{false};
++	std::atomic<bool>   _parser_owners_retained{false};
+ 	std::vector<ParserAdapterPtr> _quarantined_parsers;
+ 	std::mutex _parser_start_mutex;
+ 	std::condition_variable _parser_start_cv;

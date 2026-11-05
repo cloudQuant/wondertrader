@@ -205,12 +205,8 @@ TEST_F(R73HftCtxTest, DirtyUserDataAndNonAgentCallbacks)
     EXPECT_FALSE(std::filesystem::exists(hft_out_file("r73_hft_data", "funds.csv")));
 }
 
-/*
- * DISABLED：stra_sell 在合约不存在时先解引用 commInfo。
- * getCommodity("DCE","rr") 返回 NULL 后直接调用 canShort()，公开 API 必崩。
- * 见 BUG-R73-002。
- */
-TEST_F(R73HftCtxTest, DISABLED_SellUnknownProductDereferencesNullCommodity)
+/* 迭代03 最终验收复核后启用（原禁用：BUG-R73-002）。 */
+TEST_F(R73HftCtxTest, SellUnknownProductDereferencesNullCommodity)
 {
     auto ctx = makeCtx("r73_hft_bad", false);
     EXPECT_TRUE(ctx->stra_sell("DCE.rr.2509", 100.0, 1.0, "x").empty());

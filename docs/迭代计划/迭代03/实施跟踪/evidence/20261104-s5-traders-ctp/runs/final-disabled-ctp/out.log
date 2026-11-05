@@ -1,0 +1,22 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5TraderCTPOrderState.*
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from I03S5TraderCTPOrderState
+[ RUN      ] I03S5TraderCTPOrderState.KnownCtpStatusesKeepWtsMeaning
+[       OK ] I03S5TraderCTPOrderState.KnownCtpStatusesKeepWtsMeaning (1 ms)
+[ RUN      ] I03S5TraderCTPOrderState.DISABLED_T2CTP07_TouchedIsNotReportedAsUntouched_PendingDecision
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTP/i03s5_traderctp_lifecycle_test.cpp:674: Failure
+Expected: ((int)WOS_Nottouched) != (pushedStateFor('c')), actual: 99 vs 99
+CTP Touched('c') is cast to WOS_Nottouched('c'): a triggered order is reported as not triggered
+
+[  FAILED  ] I03S5TraderCTPOrderState.DISABLED_T2CTP07_TouchedIsNotReportedAsUntouched_PendingDecision (0 ms)
+[----------] 2 tests from I03S5TraderCTPOrderState (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (1 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] I03S5TraderCTPOrderState.DISABLED_T2CTP07_TouchedIsNotReportedAsUntouched_PendingDecision
+
+ 1 FAILED TEST

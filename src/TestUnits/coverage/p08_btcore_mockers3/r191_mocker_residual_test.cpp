@@ -231,10 +231,8 @@ TEST_F(R191MockerFixture, R191HftMocker_CancelByCodeDrainsMultipleOrders)
 	EXPECT_DOUBLE_EQ(0.0, m.stra_get_undone(kRb));
 }
 
-// BUG-R191-001 复现占位：插件工厂加载成功后，UftMocker 析构在 _StraFactInfo::~_StraFactInfo
-// 调用 _remover(_fact) 时 SIGSEGV（R121 R135ProbeMinimalDtor 日志亦停在 leaving scope）。
-// 启用即崩溃，故禁用；本轮启用用例改用 new 后不 delete 的写法规避。
-TEST_F(R191MockerFixture, DISABLED_R191Uft_PluginFactoryDestructorCrashes)
+// 迭代03 最终验收复核后启用（原禁用：BUG-R191-001，主记录 BUG-R64-002）。
+TEST_F(R191MockerFixture, R191Uft_PluginFactoryDestructorCrashes)
 {
 	UftMocker m(&_rp, "r191_uft_dtor");
 	WTSVariant* cfg = r191::make_uft_cfg(

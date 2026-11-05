@@ -12,6 +12,9 @@
 #include <string>
 #include <queue>
 #include <stdint.h>
+#include <atomic>
+#include <mutex>
+#include <unordered_set>
 
 #include "../Includes/WTSTypes.h"
 #include "../Includes/ITraderApi.h"
@@ -22,6 +25,7 @@
 #include "../Share/StdUtils.hpp"
 #include "../Share/DLLHelper.hpp"
 #include "../Share/WtKVCache.hpp"
+#include "../TraderCTP/VendorTdLifecycle.hpp"
 
 USING_NS_WTP;
 
@@ -122,6 +126,22 @@ public:
 
 	virtual void OnRtnInstrumentStatus(CThostFtdcInstrumentStatusField *pInstrumentStatus) override;
 
+	//////////////////////////////////////////////////////////////////////////
+	//卡9 生命周期（T3-006）与 T3-015 交易日 fail-closed 的可观察结果
+public:
+	wt_vendor_td::StopState lifecycleState() const { return m_lifecycle.stopState(); }
+	bool removableByFactory() const;
+	bool onProviderThread() const { return wt_vendor_td::Lifecycle::reentered(this); }
+	// T3-015：SDK GetTradingDay 原始串校验失败时保留的诊断（空串表示未失败）。
+	std::string invalidTradingDayRaw() const;
+
+private:
+	void			shutdown(const char* reason);
+	ITraderSpi*		currentSink() const { return m_sink.load(std::memory_order_acquire); }
+	bool			assignOrderIdentity(WTSEntrust* entrust, uint32_t& orderRef, std::string& tag);
+	// 当前登录交易日；未经校验或校验失败时返回 0（fail-closed）。
+	uint32_t		validTradingDate() const { return m_lDate; }
+
 protected:
 	/*
 	*	检查错误信息
@@ -175,7 +195,7 @@ protected:
 
 	std::string		m_strUserName;
 
-	ITraderSpi*	m_sink;
+	std::atomic<ITraderSpi*>	m_sink;
 	uint64_t		m_uLastQryTime;
 
 	uint32_t					m_lDate;
@@ -183,7 +203,7 @@ protected:
 	TThostFtdcSessionIDType		m_sessionID;	//会话编号
 	std::atomic<uint32_t>		m_orderRef;		//报单引用
 
-	WrapperState				m_wrapperState;
+	std::atomic<WrapperState>	m_wrapperState;
 
 	CThostFtdcTraderApi*		m_pUserAPI;
 	std::atomic<uint32_t>		m_iRequestID;
@@ -192,6 +212,14 @@ protected:
 	PositionMap*				m_mapPosition;
 	WTSArray*					m_ayTrades;
 	WTSArray*					m_ayOrders;
+public:
+	// BUG-L01-014: host features declared through setTraderSpiFeatures.
+	void setSpiFeatures(uint64_t features) { m_spiFeatures.store(features); }
+	std::atomic<uint64_t>		m_spiFeatures{ 0 };
+protected:
+	// K42 / BUG-I02-NEW-154: state of the order query in flight (SPI callback thread only).
+	bool						m_qryOrdersFailed = false;
+	bool						m_qryOrdersDropped = false;
 	WTSArray*					m_ayPosDetail;
 	WTSArray*					m_ayFunds;
 
@@ -199,11 +227,11 @@ protected:
 
 	typedef std::queue<CommonExecuter>	QueryQue;
 	QueryQue				m_queQuery;
-	bool					m_bInQuery;
+	std::atomic<bool>		m_bInQuery;
 	StdUniqueMutex			m_mtxQuery;
 	uint64_t				m_lastQryTime;
 
-	bool					m_bStopped;
+	std::atomic<bool>		m_bStopped;
 	StdThreadPtr			m_thrdWorker;
 
 	std::string		m_strModule;
@@ -215,4 +243,18 @@ protected:
 	WtKVCache		m_eidCache;
 	//订单标记缓存器
 	WtKVCache		m_oidCache;
+
+	//卡9：接口/回调准入、worker 标记与停止结果
+	wt_vendor_td::Lifecycle	m_lifecycle;
+	uint32_t				m_stopBoundMs = wt_vendor_td::DEFAULT_STOP_BOUND_MS;
+
+	//T2-CTP-08：本会话已提交的 OrderRef（不回收、不重复），按前置/会话区分
+	std::mutex					m_identityMutex;
+	std::unordered_set<uint32_t>	m_submittedRefs;
+	uint64_t					m_identitySession = 0;
+	//委托/订单标记缓存的读写互斥（下单线程与 SDK 回调线程并发访问）
+	std::mutex					m_cacheMutex;
+	//T3-015：最近一次被拒绝的 GetTradingDay 原始串
+	mutable std::mutex			m_dateDiagMutex;
+	std::string					m_invalidTradingDay;
 };

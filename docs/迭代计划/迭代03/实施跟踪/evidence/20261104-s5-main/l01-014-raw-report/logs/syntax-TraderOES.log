@@ -1,0 +1,24 @@
+src/TraderOES/TraderOES.cpp:216:4: warning: field '_tradingday' will be initialized after field '_trades' [-Wreorder-ctor]
+  216 |         , _tradingday(0)
+      |           ^~~~~~~~~~~~~~
+      |           _trades(NULL)
+  217 |         , _trades(NULL)
+      |           ~~~~~~~~~~~~~
+      |           _orders(NULL)
+  218 |         , _orders(NULL)
+      |           ~~~~~~~~~~~~~
+      |           _funds(NULL)
+  219 |         , _funds(NULL)
+      |           ~~~~~~~~~~~~
+      |           _positions(NULL)
+  220 |         , _positions(NULL)
+      |           ~~~~~~~~~~~~~~~~
+      |           _tradingday(0)
+In file included from src/TraderOES/TraderOES.cpp:10:
+src/TraderOES/TraderOES.h:108:23: warning: private field '_channel_qry' is not used [-Wunused-private-field]
+  108 |         OesAsyncApiChannelT*    _channel_qry;
+      |                                 ^
+src/TraderOES/TraderOES.h:120:9: warning: private field '_inited' is not used [-Wunused-private-field]
+  120 |         bool                    _inited;
+      |                                 ^
+3 warnings generated.

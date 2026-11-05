@@ -1,0 +1,138 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = q04_trader_entrust.*:q04_trader_buysell.*
+[==========] Running 27 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 11 tests from q04_trader_buysell
+[ RUN      ] q04_trader_buysell.zero_quantity_returns_empty_without_touching_channel
+[       OK ] q04_trader_buysell.zero_quantity_returns_empty_without_touching_channel (1 ms)
+[ RUN      ] q04_trader_buysell.malformed_standard_codes_fail_before_contract_lookup
+[       OK ] q04_trader_buysell.malformed_standard_codes_fail_before_contract_lookup (2 ms)
+[ RUN      ] q04_trader_buysell.open_rule_respects_max_limit_volume_per_order
+[       OK ] q04_trader_buysell.open_rule_respects_max_limit_volume_per_order (1 ms)
+[ RUN      ] q04_trader_buysell.buy_closes_short_by_yestoday_then_today_then_opens
+[       OK ] q04_trader_buysell.buy_closes_short_by_yestoday_then_today_then_opens (1 ms)
+[ RUN      ] q04_trader_buysell.sell_closes_long_with_covermode_branches
+[       OK ] q04_trader_buysell.sell_closes_long_with_covermode_branches (1 ms)
+[ RUN      ] q04_trader_buysell.pure_rules_are_skipped_when_opposite_side_is_not_clean
+[       OK ] q04_trader_buysell.pure_rules_are_skipped_when_opposite_side_is_not_clean (0 ms)
+[ RUN      ] q04_trader_buysell.long_open_limit_is_consumed_by_reported_trades
+[       OK ] q04_trader_buysell.long_open_limit_is_consumed_by_reported_trades (0 ms)
+[ RUN      ] q04_trader_buysell.short_open_limit_only_constrains_the_sell_side
+[       OK ] q04_trader_buysell.short_open_limit_only_constrains_the_sell_side (0 ms)
+[ RUN      ] q04_trader_buysell.total_limit_shares_the_quota_between_both_directions
+[       OK ] q04_trader_buysell.total_limit_shares_the_quota_between_both_directions (0 ms)
+[ RUN      ] q04_trader_buysell.registered_contract_with_explicit_info_reaches_close_first_rules
+[       OK ] q04_trader_buysell.registered_contract_with_explicit_info_reaches_close_first_rules (0 ms)
+[ RUN      ] q04_trader_buysell.unknown_contract_is_rejected_through_strategy_context
+[       OK ] q04_trader_buysell.unknown_contract_is_rejected_through_strategy_context (2 ms)
+[----------] 11 tests from q04_trader_buysell (14 ms total)
+
+[----------] 16 tests from q04_trader_entrust
+[ RUN      ] q04_trader_entrust.four_direction_actions_are_assembled_correctly
+[       OK ] q04_trader_entrust.four_direction_actions_are_assembled_correctly (0 ms)
+[ RUN      ] q04_trader_entrust.price_type_and_order_flag_mapping
+[       OK ] q04_trader_entrust.price_type_and_order_flag_mapping (0 ms)
+[ RUN      ] q04_trader_entrust.malformed_standard_codes_fail_before_vendor_calls
+[       OK ] q04_trader_entrust.malformed_standard_codes_fail_before_vendor_calls (0 ms)
+[ RUN      ] q04_trader_entrust.insert_failure_returns_uint_max_without_counting_undone
+/tmp/wt-i03-zreview-20261104/snap/src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:250: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  env._adapter.getUndoneQty(kStdAg)
+    Which is: 2
+
+/tmp/wt-i03-zreview-20261104/snap/src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:252: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  env._adapter.getUndoneQty(kStdAg)
+    Which is: 3
+
+/tmp/wt-i03-zreview-20261104/snap/src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:254: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  env._adapter.getUndoneQty(kStdAg)
+    Which is: 3.5
+
+/tmp/wt-i03-zreview-20261104/snap/src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:256: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  env._adapter.getUndoneQty(kStdAg)
+    Which is: 4.25
+
+/tmp/wt-i03-zreview-20261104/snap/src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:265: Failure
+Expected equality of these values:
+  3.0
+    Which is: 3
+  env._adapter.getUndoneQty(kStdAg)
+    Which is: 7.25
+
+[  FAILED  ] q04_trader_entrust.insert_failure_returns_uint_max_without_counting_undone (0 ms)
+[ RUN      ] q04_trader_entrust.rejection_without_this_adapters_usertag_does_not_change_undone
+[       OK ] q04_trader_entrust.rejection_without_this_adapters_usertag_does_not_change_undone (0 ms)
+[ RUN      ] q04_trader_entrust.duplicate_rejection_does_not_consume_another_live_order
+/tmp/wt-i03-zreview-20261104/snap/src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:310: Failure
+Expected equality of these values:
+  3.0
+    Which is: 3
+  env._adapter.getUndoneQty(kStdAg)
+    Which is: 1
+
+[  FAILED  ] q04_trader_entrust.duplicate_rejection_does_not_consume_another_live_order (0 ms)
+[ RUN      ] q04_trader_entrust.reentrant_rejection_and_negative_return_leave_other_order_unchanged
+[       OK ] q04_trader_entrust.reentrant_rejection_and_negative_return_leave_other_order_unchanged (0 ms)
+[ RUN      ] q04_trader_entrust.duplicate_trade_does_not_reduce_undone_twice
+/tmp/wt-i03-zreview-20261104/snap/src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:377: Failure
+Expected equality of these values:
+  3.0
+    Which is: 3
+  env._adapter.getUndoneQty(kStdAg)
+    Which is: 1
+
+[  FAILED  ] q04_trader_entrust.duplicate_trade_does_not_reduce_undone_twice (0 ms)
+[ RUN      ] q04_trader_entrust.duplicate_cancellation_does_not_reduce_undone_twice
+/tmp/wt-i03-zreview-20261104/snap/src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:392: Failure
+Expected equality of these values:
+  3.0
+    Which is: 3
+  env._adapter.getUndoneQty(kStdAg)
+    Which is: -2
+
+[  FAILED  ] q04_trader_entrust.duplicate_cancellation_does_not_reduce_undone_twice (1 ms)
+[ RUN      ] q04_trader_entrust.older_order_snapshot_does_not_undo_live_trade
+/tmp/wt-i03-zreview-20261104/snap/src/TestUnits/coverage/q04_uftcore3/q04_trader_entrust_paths_test.cpp:417: Failure
+Expected equality of these values:
+  3.0
+    Which is: 3
+  env._adapter.getUndoneQty(kStdAg)
+    Which is: 5
+
+[  FAILED  ] q04_trader_entrust.older_order_snapshot_does_not_undo_live_trade (0 ms)
+[ RUN      ] q04_trader_entrust.usertag_pattern_is_scoped_per_channel
+[       OK ] q04_trader_entrust.usertag_pattern_is_scoped_per_channel (1 ms)
+[ RUN      ] q04_trader_entrust.cancel_single_order_goes_through_doCancel
+[       OK ] q04_trader_entrust.cancel_single_order_goes_through_doCancel (0 ms)
+[ RUN      ] q04_trader_entrust.cancel_single_order_fails_closed_without_manager_or_contract
+[       OK ] q04_trader_entrust.cancel_single_order_fails_closed_without_manager_or_contract (1 ms)
+[ RUN      ] q04_trader_entrust.cancel_all_filters_alive_orders_by_full_code
+[       OK ] q04_trader_entrust.cancel_all_filters_alive_orders_by_full_code (0 ms)
+[ RUN      ] q04_trader_entrust.cancel_all_with_lookup_only_contract_info
+[       OK ] q04_trader_entrust.cancel_all_with_lookup_only_contract_info (1 ms)
+[ RUN      ] q04_trader_entrust.cancel_all_skips_unknown_contract_and_cancels_known_orders
+[       OK ] q04_trader_entrust.cancel_all_skips_unknown_contract_and_cancels_known_orders (1 ms)
+[----------] 16 tests from q04_trader_entrust (16 ms total)
+
+[----------] Global test environment tear-down
+[==========] 27 tests from 2 test suites ran. (30 ms total)
+[  PASSED  ] 22 tests.
+[  FAILED  ] 5 tests, listed below:
+[  FAILED  ] q04_trader_entrust.insert_failure_returns_uint_max_without_counting_undone
+[  FAILED  ] q04_trader_entrust.duplicate_rejection_does_not_consume_another_live_order
+[  FAILED  ] q04_trader_entrust.duplicate_trade_does_not_reduce_undone_twice
+[  FAILED  ] q04_trader_entrust.duplicate_cancellation_does_not_reduce_undone_twice
+[  FAILED  ] q04_trader_entrust.older_order_snapshot_does_not_undo_live_trade
+
+ 5 FAILED TESTS

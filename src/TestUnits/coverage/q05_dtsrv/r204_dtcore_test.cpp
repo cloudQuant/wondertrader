@@ -17,6 +17,7 @@
  * 边界：StateMonitor 线程由产品自身创建，观察后立即 stop（单测约 1.2s）；
  * 不建真实 shm、不网连、不加载解析插件；UDP 只做地址解析失败路径，不 bind。
  */
+// 迭代03 第五会话（I03-NEW-053/卡2）：品种须带 pricetick/volscale 才能整批发布；起止相同的非 0–0 时段（旧夹具 1–1）被拒，改为 1–2。仅改测试输入。
 #include <gtest/gtest.h>
 
 #include <chrono>
@@ -109,13 +110,13 @@ TEST(R204StateMonitor, QueryPredicatesOnOriginalStates)
 	write_file(dir / "sessions.json",
 		R"JSON({
 			"R204A": {"name": "连续", "offset": 0, "sections": [{"from": 1, "to": 2359}]},
-			"R204B": {"name": "缺口", "offset": 0, "sections": [{"from": 1, "to": 1}]}
+			"R204B": {"name": "缺口", "offset": 0, "sections": [{"from": 1, "to": 2}]}
 		})JSON");
 	write_file(dir / "commodities.json",
 		R"JSON({
 			"R204": {
-				"CA": {"name": "A", "session": "R204A", "holiday": "R204_NONE"},
-				"CB": {"name": "B", "session": "R204B", "holiday": "R204_NONE"}
+				"CA": {"name": "A", "session": "R204A", "holiday": "R204_NONE", "pricetick": 1, "volscale": 1},
+				"CB": {"name": "B", "session": "R204B", "holiday": "R204_NONE", "pricetick": 1, "volscale": 1}
 			}
 		})JSON");
 	write_file(dir / "holidays.json", R"JSON({"R204_NONE": [19990101]})JSON");
@@ -177,8 +178,8 @@ TEST(R204StateMonitor, RunCoversContinuousAndGapSections)
 	write_file(dir / "commodities.json",
 		R"JSON({
 			"R204": {
-				"CA": {"name": "A", "session": "R204A", "holiday": "R204_NONE"},
-				"CB": {"name": "B", "session": "R204B", "holiday": "R204_NONE"}
+				"CA": {"name": "A", "session": "R204A", "holiday": "R204_NONE", "pricetick": 1, "volscale": 1},
+				"CB": {"name": "B", "session": "R204B", "holiday": "R204_NONE", "pricetick": 1, "volscale": 1}
 			}
 		})JSON");
 	write_file(dir / "holidays.json", R"JSON({"R204_NONE": [19990101]})JSON");
@@ -223,11 +224,11 @@ TEST(R204StateMonitor, HolidayNightSessionSecondRound)
 	write_file(dir / "sessions.json",
 		R"JSON({
 			"R204H": {"name": "夜盘节假日", "offset": 300,
-				"sections": [{"from": 1, "to": 1}]}
+				"sections": [{"from": 1, "to": 2}]}
 		})JSON");
 	write_file(dir / "commodities.json",
 		R"JSON({
-			"R204": {"HN": {"name": "夜盘品种", "session": "R204H", "holiday": "R204_HOL"}}
+			"R204": {"HN": {"name": "夜盘品种", "session": "R204H", "holiday": "R204_HOL", "pricetick": 1, "volscale": 1}}
 		})JSON");
 	write_file(dir / "holidays.json", std::string("{\"R204_HOL\":") + today_window() + "}");
 	write_file(dir / "state.json",

@@ -1,0 +1,466 @@
+{
+ "binary": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-result-build/build_x64/Debug/bin/TestUnits/CoverageTests_t_TraderCTP",
+ "filter": "*",
+ "summary": {
+  "pass": 91,
+  "fail": 0,
+  "skipped": 0
+ },
+ "cases": [
+  {
+   "test": "gate_placeholder_TraderCTP.compiles_with_module_flags",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03S5TraderCTPLifecycle.NoFinalFrameDisconnectIsBoundedJoinsAndReleasesOnce",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03S5TraderCTPLifecycle.FinalFrameThenDisconnectReleasesOnce",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03S5TraderCTPLifecycle.ErrorFinalFrameThenLateErrorCallbackIsIgnored",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03S5TraderCTPLifecycle.SynchronousQueryRejectReleasesGateForNextQuery",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03S5TraderCTPLifecycle.WorkerBlockedInsideSdkRequestIsUncertainThenRetrySucceeds",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03S5TraderCTPLifecycle.ReleaseFromCallbackIsDeferredToSafePoint",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03S5TraderCTPLifecycle.ReleaseNeverOverlapsInFlightOrderInsert",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03S5TraderCTPLifecycle.RepeatedConnectKeepsApiAndConnectAfterReleaseIsRejected",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03S5TraderCTPLifecycle.ConnectFailuresAreObservableEvents",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03S5TraderCTPLifecycle.FactoryRemoverQuarantinesInstanceWithSdkAndDeletesOthers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03S5TraderCTPOrderState.KnownCtpStatusesKeepWtsMeaning",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "I03S5TraderCTPOrderState.T2CTP07_TouchedIsReportedAsSubmitting",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.plugin_entry_points_build_and_destroy_trader",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.init_falls_back_to_ctptdflow_and_ignores_non_string_front",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.init_keeps_trailing_slash_of_given_flowdir",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.str_to_time_strips_colons_and_parses_to_uint",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.login_rsp_with_error_marks_login_failed_and_never_queries_confirm",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.login_rsp_with_null_rspinfo_is_taken_as_success",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.do_login_send_failure_is_logged_without_waiting_for_response",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.order_insert_and_action_send_failures_return_error_and_are_logged",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.authenticate_sync_failure_returns_error_without_waiting_for_login",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.order_insert_without_usertag_allocates_identity_and_cache",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.order_insert_rejects_malformed_entrust_id_when_usertag_set",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.order_insert_wraps_bestprice_lastprice_and_every_offset",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.order_insert_direction_flag_is_swapped_for_short_close",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.order_action_rejects_entrust_id_with_only_one_hash",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.disconnect_without_worker_only_queues_release",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.release_after_ready_clears_api_and_every_container",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.connect_with_stub_creator_wires_spi_fronts_and_worker_sends_query",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.settlement_confirm_older_than_trading_day_goes_through_confirm",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.settlement_confirm_query_with_null_field_or_error_keeps_or_skips_state",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.settlement_confirm_rsp_only_acts_in_confirm_qryed_state",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.confirm_send_failure_fails_login_without_waiting_for_callback",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.query_confirm_send_failure_is_logged_inside_worker_item",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.query_confirm_sync_failure_clears_gate_and_worker_releases",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.position_cover_today_short_today_row_subtracts_long_frozen",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.position_cover_today_history_rows_clamp_negative_availability",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.position_direct_cover_splits_new_pre_and_both_freeze_sides",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.position_combination_skips_availability_and_zero_margin_clears_it",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.position_zero_total_sets_avg_price_to_zero_and_still_pushes",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.position_error_last_row_pushs_accumulated_then_map_is_reset",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.usertag_round_trips_from_eid_cache_into_order_then_trade",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.order_rsp_maps_rejected_submit_status_and_mv_volume_and_reverse_types",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.entrust_rsp_maps_ioc_cv_to_fok_and_usertag_from_cache",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.rsp_order_insert_with_unknown_contract_pushes_only_trader_error",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.rsp_order_action_error_carries_action_fields_and_bare_message",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.trade_with_unknown_contract_is_dropped_by_both_channels",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.qry_order_and_trade_rows_accumulate_and_clear_after_last",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.settlement_info_concatenates_rows_and_pushes_only_when_non_empty",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.unsupported_time_condition_keeps_other_order_mappings",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.front_and_heartbeat_paths_are_quiet_when_sink_is_unregistered",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.front_disconnect_resets_state_and_logout_reports_reason",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.confirm_guard_rejects_when_api_is_gone_or_state_moved_on",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.login_warns_and_continues_when_cache_dir_is_not_writable",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.order_insert_rejects_when_user_tag_cache_init_failed",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.settlement_info_null_last_row_ends_query_with_cached_content",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.settlement_info_empty_response_without_payload_reports_empty_result",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.settlement_info_error_last_frame_without_payload_reports_nothing",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.settlement_info_empty_content_last_row_reports_empty_result",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.account_null_last_frame_reports_empty_account_list",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.disconnect_hangs_when_no_response_clears_in_query",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T25TraderCTPTest.plugin_created_trader_has_indeterminate_sink",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.init_reads_broker_user_and_defaults",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.init_accepts_front_array_and_quick_flag",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.release_without_api_only_marks_stopped",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.connect_rejects_missing_creator_without_starting_worker",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.connect_rejects_null_api_created_by_creator",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.login_logout_and_queries_rejected_without_api",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.order_and_query_rejected_when_state_not_ready",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.authenticate_failure_marks_login_failed_and_reports",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.login_rsp_carries_credentials_and_session_params",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.settlement_unconfirmed_goes_through_confirm",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.make_entrust_id_is_fixed_width_and_increments_ref",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.make_entrust_id_is_rejected_until_login_session_exists",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.order_insert_maps_types_and_ref_for_shfe",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.order_insert_cffex_anyprice_and_close_offsets",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.order_action_rejects_bad_entrust_id_and_builds_cancel",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.queries_enqueue_then_send_on_drain",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.rtn_order_conversion_maps_state_and_night_date",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.rtn_order_untouched_and_known_states_keep_wts_meaning",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.queried_order_untouched_and_known_states_keep_wts_meaning",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.instrument_statuses_keep_existing_0_to_6_mapping",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.trade_conversion_amount_and_usertag_chain",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.rsp_order_insert_and_action_error_paths",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.rsp_account_position_and_settlement",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.rsp_qry_order_and_trade_arrays",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.front_events_and_logout_and_status_pushes",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.k42_order_query_reports_completeness_when_host_supports_it",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.l01014_unconvertible_trade_is_forwarded_raw_only_to_a_host_that_keeps_it",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "T2TraderCTPTest.l01014_unconvertible_position_and_trade_query_rows_are_forwarded_raw",
+   "status": "pass",
+   "rc": 0
+  }
+ ]
+}

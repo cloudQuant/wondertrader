@@ -1,0 +1,190 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 48 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 28 tests from TraderFemasTest
+[ RUN      ] TraderFemasTest.fresh_instance_reports_disconnected_and_refuses_every_business_call
+[       OK ] TraderFemasTest.fresh_instance_reports_disconnected_and_refuses_every_business_call (0 ms)
+[ RUN      ] TraderFemasTest.login_without_api_handles_credentials_but_still_fails
+[       OK ] TraderFemasTest.login_without_api_handles_credentials_but_still_fails (0 ms)
+[ RUN      ] TraderFemasTest.ready_state_flips_connectivity_flag
+[       OK ] TraderFemasTest.ready_state_flips_connectivity_flag (0 ms)
+[ RUN      ] TraderFemasTest.release_marks_stopped_and_is_repeatable
+[       OK ] TraderFemasTest.release_marks_stopped_and_is_repeatable (0 ms)
+[ RUN      ] TraderFemasTest.register_spi_binds_sink_and_base_data_manager
+[       OK ] TraderFemasTest.register_spi_binds_sink_and_base_data_manager (0 ms)
+[ RUN      ] TraderFemasTest.front_disconnected_resets_state_and_publishes_close_event
+[       OK ] TraderFemasTest.front_disconnected_resets_state_and_publishes_close_event (0 ms)
+[ RUN      ] TraderFemasTest.qry_front_disconnected_only_clears_query_flag
+[       OK ] TraderFemasTest.qry_front_disconnected_only_clears_query_flag (0 ms)
+[ RUN      ] TraderFemasTest.heartbeat_warning_is_routed_to_sink_log
+[       OK ] TraderFemasTest.heartbeat_warning_is_routed_to_sink_log (0 ms)
+[ RUN      ] TraderFemasTest.make_entrust_id_rejects_null_and_zero_length_buffer
+[       OK ] TraderFemasTest.make_entrust_id_rejects_null_and_zero_length_buffer (0 ms)
+[ RUN      ] TraderFemasTest.make_entrust_id_pads_local_order_id_to_twelve_digits
+[       OK ] TraderFemasTest.make_entrust_id_pads_local_order_id_to_twelve_digits (0 ms)
+[ RUN      ] TraderFemasTest.make_entrust_id_prefixes_session_id
+[       OK ] TraderFemasTest.make_entrust_id_prefixes_session_id (0 ms)
+[ RUN      ] TraderFemasTest.make_entrust_id_accepts_exact_capacity_and_preserves_canaries
+[       OK ] TraderFemasTest.make_entrust_id_accepts_exact_capacity_and_preserves_canaries (0 ms)
+[ RUN      ] TraderFemasTest.wrap_wts_enums_into_femas_codes
+[       OK ] TraderFemasTest.wrap_wts_enums_into_femas_codes (0 ms)
+[ RUN      ] TraderFemasTest.wrap_femas_codes_back_into_wts_enums
+[       OK ] TraderFemasTest.wrap_femas_codes_back_into_wts_enums (0 ms)
+[ RUN      ] TraderFemasTest.wrap_order_state_maps_accepted_no_reply_and_canceled
+[       OK ] TraderFemasTest.wrap_order_state_maps_accepted_no_reply_and_canceled (0 ms)
+[ RUN      ] TraderFemasTest.is_error_rsp_info_and_make_error
+[       OK ] TraderFemasTest.is_error_rsp_info_and_make_error (0 ms)
+[ RUN      ] TraderFemasTest.certification_rejection_fails_login_without_touching_api
+[       OK ] TraderFemasTest.certification_rejection_fails_login_without_touching_api (0 ms)
+[ RUN      ] TraderFemasTest.login_rejection_fails_login_without_touching_api
+[       OK ] TraderFemasTest.login_rejection_fails_login_without_touching_api (0 ms)
+[ RUN      ] TraderFemasTest.qry_login_completes_initialization_when_already_logined
+[       OK ] TraderFemasTest.qry_login_completes_initialization_when_already_logined (0 ms)
+[ RUN      ] TraderFemasTest.qry_login_before_user_login_does_not_open_channel
+[       OK ] TraderFemasTest.qry_login_before_user_login_does_not_open_channel (0 ms)
+[ RUN      ] TraderFemasTest.logout_rsp_returns_channel_to_not_login
+[       OK ] TraderFemasTest.logout_rsp_returns_channel_to_not_login (0 ms)
+[ RUN      ] TraderFemasTest.order_action_rejection_pushes_cancel_error
+[       OK ] TraderFemasTest.order_action_rejection_pushes_cancel_error (0 ms)
+[ RUN      ] TraderFemasTest.queries_are_enqueued_only_after_channel_is_ready
+[       OK ] TraderFemasTest.queries_are_enqueued_only_after_channel_is_ready (0 ms)
+[ RUN      ] TraderFemasTest.order_insert_reaches_contract_lookup_before_using_api
+[       OK ] TraderFemasTest.order_insert_reaches_contract_lookup_before_using_api (0 ms)
+[ RUN      ] TraderFemasTest.instrument_status_push_casts_vendor_status
+[       OK ] TraderFemasTest.instrument_status_push_casts_vendor_status (0 ms)
+[ RUN      ] TraderFemasTest.error_rsp_is_written_to_log_with_request_id
+[       OK ] TraderFemasTest.error_rsp_is_written_to_log_with_request_id (0 ms)
+[ RUN      ] TraderFemasTest.set_and_get_tag
+[       OK ] TraderFemasTest.set_and_get_tag (0 ms)
+[ DISABLED ] TraderFemasTest.DISABLED_user_login_success_branch_needs_vendor_api
+[ RUN      ] TraderFemasTest.make_entrust_id_rejects_insufficient_logical_capacity
+[       OK ] TraderFemasTest.make_entrust_id_rejects_insufficient_logical_capacity (0 ms)
+[----------] 28 tests from TraderFemasTest (2 ms total)
+
+[----------] 11 tests from FemasContractFixture
+[ RUN      ] FemasContractFixture.make_order_info_maps_vendor_order_fields
+[       OK ] FemasContractFixture.make_order_info_maps_vendor_order_fields (112 ms)
+[ RUN      ] FemasContractFixture.make_order_info_falls_back_to_local_id_and_maps_fok
+[       OK ] FemasContractFixture.make_order_info_falls_back_to_local_id_and_maps_fok (0 ms)
+[ RUN      ] FemasContractFixture.make_entrust_maps_vendor_input_order
+[       OK ] FemasContractFixture.make_entrust_maps_vendor_input_order (0 ms)
+[ RUN      ] FemasContractFixture.make_trade_record_scales_amount_by_contract_volume_scale
+[       OK ] FemasContractFixture.make_trade_record_scales_amount_by_contract_volume_scale (0 ms)
+[ RUN      ] FemasContractFixture.order_insert_response_carries_error_and_entrust
+[       OK ] FemasContractFixture.order_insert_response_carries_error_and_entrust (0 ms)
+[ RUN      ] FemasContractFixture.account_query_response_computes_balance
+[       OK ] FemasContractFixture.account_query_response_computes_balance (0 ms)
+[ RUN      ] FemasContractFixture.position_query_response_appends_the_reported_item
+[       OK ] FemasContractFixture.position_query_response_appends_the_reported_item (0 ms)
+[ RUN      ] FemasContractFixture.position_query_unknown_contract_returns_empty_final_array
+[       OK ] FemasContractFixture.position_query_unknown_contract_returns_empty_final_array (0 ms)
+[ RUN      ] FemasContractFixture.trade_query_response_reports_appended_records
+[       OK ] FemasContractFixture.trade_query_response_reports_appended_records (0 ms)
+[ RUN      ] FemasContractFixture.order_query_and_push_callbacks
+[       OK ] FemasContractFixture.order_query_and_push_callbacks (0 ms)
+[ RUN      ] FemasContractFixture.i03_new016_destructor_returns_query_container_ownership_once
+[       OK ] FemasContractFixture.i03_new016_destructor_returns_query_container_ownership_once (0 ms)
+[----------] 11 tests from FemasContractFixture (114 ms total)
+
+[----------] 9 tests from T4003FemasLifecycle
+[ RUN      ] T4003FemasLifecycle.release_joins_worker_and_delete_does_not_terminate
+[       OK ] T4003FemasLifecycle.release_joins_worker_and_delete_does_not_terminate (523 ms)
+[ RUN      ] T4003FemasLifecycle.idle_worker_still_executes_later_query
+[       OK ] T4003FemasLifecycle.idle_worker_still_executes_later_query (610 ms)
+[ RUN      ] T4003FemasLifecycle.release_waits_for_inflight_request_before_api_release
+[       OK ] T4003FemasLifecycle.release_waits_for_inflight_request_before_api_release (696 ms)
+[ RUN      ] T4003FemasLifecycle.release_waits_for_inflight_order_insert_before_api_release
+[       OK ] T4003FemasLifecycle.release_waits_for_inflight_order_insert_before_api_release (718 ms)
+[ RUN      ] T4003FemasLifecycle.release_from_callback_defers_and_external_release_completes
+[       OK ] T4003FemasLifecycle.release_from_callback_defers_and_external_release_completes (465 ms)
+[ RUN      ] T4003FemasLifecycle.delete_trader_from_callback_quarantines
+[TraderFemas] deleteTrader: instance quarantined until process exit (called from a worker or SPI callback thread)
+==================
+WARNING: ThreadSanitizer: data race (pid=23706)
+  Write of size 8 at 0x000107203d60 by main thread:
+    #0 void std::__1::shared_ptr<std::__1::thread>::reset[abi:nqe220108]<std::__1::thread, 0>(std::__1::thread*) <null> (tests:arm64+0x100009d3c)
+    #1 TraderFemas::connect() <null> (tests:arm64+0x10000960c)
+    #2 std::__1::__function::__func<T4003FemasLifecycle_delete_trader_from_callback_quarantines_Test::TestBody()::$_0, int ()>::operator()() <null> (tests:arm64+0x100082fec)
+    #3 std::__1::function<int ()>::operator()() const <null> (tests:arm64+0x10007c3ac)
+    #4 (anonymous namespace)::run_forked(std::__1::function<int ()> const&) <null> (tests:arm64+0x10007b4c4)
+    #5 T4003FemasLifecycle_delete_trader_from_callback_quarantines_Test::TestBody() <null> (tests:arm64+0x10007ba40)
+    #6 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (tests:arm64+0x10009aaf4)
+
+  Previous read of size 8 at 0x000107203d60 by thread T1 (mutexes: write M0):
+    #0 deleteTrader <null> (tests:arm64+0x1000057f8)
+    #1 std::__1::__function::__func<T4003FemasLifecycle_delete_trader_from_callback_quarantines_Test::TestBody()::$_0::operator()() const::'lambda'(), void ()>::operator()() <null> (tests:arm64+0x1000836a0)
+    #2 (anonymous namespace)::Sink::onRspAccount(wtp::WTSArray*) <null> (tests:arm64+0x10007ebc4)
+    #3 TraderFemas::OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField*, CUstpFtdcRspInfoField*, int, bool) <null> (tests:arm64+0x10000ef6c)
+    #4 non-virtual thunk to TraderFemas::OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField*, CUstpFtdcRspInfoField*, int, bool) <null> (tests:arm64+0x10000f080)
+    #5 (anonymous namespace)::FakeApi::ReqQryInvestorAccount(CUstpFtdcQryInvestorAccountField*, int) <null> (tests:arm64+0x10007e22c)
+    #6 std::__1::__function::__func<TraderFemas::queryAccount()::$_0, void ()>::operator()() <null> (tests:arm64+0x10003cb14)
+    #7 boost::asio::detail::completion_handler<boost::asio::detail::binder0<TraderFemas::triggerQuery()::$_0>, boost::asio::io_context::basic_executor_type<std::__1::allocator<void>, 0ul>>::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) <null> (tests:arm64+0x10003e88c)
+    #8 boost::asio::detail::strand_service::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) <null> (tests:arm64+0x10001d620)
+    #9 boost::asio::detail::scheduler::do_run_one(boost::asio::detail::conditionally_enabled_mutex::scoped_lock&, boost::asio::detail::scheduler_thread_info&, boost::system::error_code const&) <null> (tests:arm64+0x10001aac8)
+    #10 boost::asio::detail::scheduler::run(boost::system::error_code&) <null> (tests:arm64+0x10001a290)
+    #11 TraderFemas::workerMain() <null> (tests:arm64+0x100008368)
+    #12 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderFemas::connect()::$_0>>(void*) <null> (tests:arm64+0x10003b6f0)
+
+  Location is heap block of size 880 at 0x000107203b80 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x92928)
+    #1 std::__1::__function::__func<T4003FemasLifecycle_delete_trader_from_callback_quarantines_Test::TestBody()::$_0, int ()>::operator()() <null> (tests:arm64+0x100082d5c)
+    #2 std::__1::function<int ()>::operator()() const <null> (tests:arm64+0x10007c3ac)
+    #3 (anonymous namespace)::run_forked(std::__1::function<int ()> const&) <null> (tests:arm64+0x10007b4c4)
+    #4 T4003FemasLifecycle_delete_trader_from_callback_quarantines_Test::TestBody() <null> (tests:arm64+0x10007ba40)
+    #5 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (tests:arm64+0x10009aaf4)
+
+  Mutex M0 (0x000107203df0) created at:
+    #0 pthread_mutex_trylock <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x33e50)
+    #1 std::__1::mutex::try_lock() <null> (libc++.1.dylib:arm64e+0x8ff4)
+    #2 std::__1::__function::__func<T4003FemasLifecycle_delete_trader_from_callback_quarantines_Test::TestBody()::$_0::operator()() const::'lambda'(), void ()>::operator()() <null> (tests:arm64+0x1000836a0)
+    #3 (anonymous namespace)::Sink::onRspAccount(wtp::WTSArray*) <null> (tests:arm64+0x10007ebc4)
+    #4 TraderFemas::OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField*, CUstpFtdcRspInfoField*, int, bool) <null> (tests:arm64+0x10000ef6c)
+    #5 non-virtual thunk to TraderFemas::OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField*, CUstpFtdcRspInfoField*, int, bool) <null> (tests:arm64+0x10000f080)
+    #6 (anonymous namespace)::FakeApi::ReqQryInvestorAccount(CUstpFtdcQryInvestorAccountField*, int) <null> (tests:arm64+0x10007e22c)
+    #7 std::__1::__function::__func<TraderFemas::queryAccount()::$_0, void ()>::operator()() <null> (tests:arm64+0x10003cb14)
+    #8 boost::asio::detail::completion_handler<boost::asio::detail::binder0<TraderFemas::triggerQuery()::$_0>, boost::asio::io_context::basic_executor_type<std::__1::allocator<void>, 0ul>>::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) <null> (tests:arm64+0x10003e88c)
+    #9 boost::asio::detail::strand_service::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) <null> (tests:arm64+0x10001d620)
+    #10 boost::asio::detail::scheduler::do_run_one(boost::asio::detail::conditionally_enabled_mutex::scoped_lock&, boost::asio::detail::scheduler_thread_info&, boost::system::error_code const&) <null> (tests:arm64+0x10001aac8)
+    #11 boost::asio::detail::scheduler::run(boost::system::error_code&) <null> (tests:arm64+0x10001a290)
+    #12 TraderFemas::workerMain() <null> (tests:arm64+0x100008368)
+    #13 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, TraderFemas::connect()::$_0>>(void*) <null> (tests:arm64+0x10003b6f0)
+
+  Thread T1 (tid=6566309, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::thread::thread[abi:nqe220108]<TraderFemas::connect()::$_0, 0>(TraderFemas::connect()::$_0&&) <null> (tests:arm64+0x100009e54)
+    #2 TraderFemas::connect() <null> (tests:arm64+0x1000095fc)
+    #3 std::__1::__function::__func<T4003FemasLifecycle_delete_trader_from_callback_quarantines_Test::TestBody()::$_0, int ()>::operator()() <null> (tests:arm64+0x100082fec)
+    #4 std::__1::function<int ()>::operator()() const <null> (tests:arm64+0x10007c3ac)
+    #5 (anonymous namespace)::run_forked(std::__1::function<int ()> const&) <null> (tests:arm64+0x10007b4c4)
+    #6 T4003FemasLifecycle_delete_trader_from_callback_quarantines_Test::TestBody() <null> (tests:arm64+0x10007ba40)
+    #7 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (tests:arm64+0x10009aaf4)
+
+SUMMARY: ThreadSanitizer: data race (tests:arm64+0x100009d3c) in void std::__1::shared_ptr<std::__1::thread>::reset[abi:nqe220108]<std::__1::thread, 0>(std::__1::thread*)+0xc0
+==================
+src/TestUnits/coverage/t_TraderFemas/t4_003_femas_lifecycle_test.cpp:286: Failure
+Value of: (((*(int *)&(status)) & 0177) == 0)
+  Actual: false
+Expected: true
+child killed by signal 6
+
+[  FAILED  ] T4003FemasLifecycle.delete_trader_from_callback_quarantines (9030 ms)
+[ RUN      ] T4003FemasLifecycle.admission_closed_after_release_and_repeated_connect_rejected
+[       OK ] T4003FemasLifecycle.admission_closed_after_release_and_repeated_connect_rejected (555 ms)
+[ RUN      ] T4003FemasLifecycle.late_callback_after_release_is_not_delivered
+[       OK ] T4003FemasLifecycle.late_callback_after_release_is_not_delivered (489 ms)
+[ RUN      ] T4003FemasLifecycle.callback_drain_timeout_reports_unquiesced_and_remover_quarantines
+[TraderFemas] release: worker, API calls or callbacks did not drain within 200 ms; instance kept
+[TraderFemas] release: worker, API calls or callbacks did not drain within 200 ms; instance kept
+[TraderFemas] deleteTrader: instance quarantined until process exit (worker, API calls or callbacks did not drain)
+[       OK ] T4003FemasLifecycle.callback_drain_timeout_reports_unquiesced_and_remover_quarantines (1122 ms)
+[----------] 9 tests from T4003FemasLifecycle (14223 ms total)
+
+[----------] Global test environment tear-down
+[==========] 48 tests from 3 test suites ran. (14341 ms total)
+[  PASSED  ] 47 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] T4003FemasLifecycle.delete_trader_from_callback_quarantines
+
+ 1 FAILED TEST
+  YOU HAVE 3 DISABLED TESTS
+

@@ -1,0 +1,123 @@
+argv=["/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++", "-std=c++17", "-g", "-O1", "-fsanitize=thread", "-fprofile-instr-generate", "-fno-omit-frame-pointer", "-include", "stdlib.h", "-include", "/tmp/wt-r22-owner-20261102/green/Share/fmt_enum_compat.h", "-DFMT_HEADER_ONLY", "-DSPDLOG_FMT_EXTERNAL", "-I/tmp/wt-r22-owner-20261102/green", "-I/opt/homebrew/Cellar/boost/1.88.0/include", "-I/opt/homebrew/Cellar/fmt/11.2.0/include", "-I/opt/homebrew/Cellar/spdlog/1.15.3/include", "/tmp/wt-r22-owner-20261102/green/WtDtCore/StateMonitor.cpp", "/tmp/wt-r22-owner-20261102/green/WtDtCore/DataManager.cpp", "/tmp/wt-r22-owner-20261102/green/WtDtPorter/WtDtRunner.cpp", "/tmp/wt-r22-owner-20261102/green/WtDtPorter/WtDtPorter.cpp", "/tmp/wt-r22-owner-20261102/green/WtDtPorter/ExpParser.cpp", "/tmp/wt-r22-owner-20261102/green/WtDtPorter/ExpDumper.cpp", "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_monitor_owner/runner_owner_probe.cpp", "-L/tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs", "-lWtDtCore", "-lWTSTools", "-lWTSUtils", "-L/opt/homebrew/lib", "-Wl,-rpath,/opt/homebrew/lib", "-lboost_filesystem", "-lboost_thread", "/usr/local/lib/libiconv.dylib", "-o", "/tmp/wt-r22-owner-20261102/green-runner-tsan"]
+exit=0
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtPorter/WtDtRunner.cpp:10:
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtPorter/WtDtRunner.h:18:
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtPorter/../WtDtCore/IndexWorkerMgr.h:17:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/threadpool.hpp:34:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/pool.hpp:26:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/./detail/pool_core.hpp:29:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/./detail/worker_thread.hpp:29:
+/opt/homebrew/Cellar/boost/1.88.0/include/boost/bind.hpp:36:1: warning: The practice of declaring the Bind placeholders (_1, _2, ...) in the global namespace is deprecated. Please use <boost/bind/bind.hpp> + using namespace boost::placeholders, or define BOOST_BIND_GLOBAL_PLACEHOLDERS to retain the current behavior. [-W#pragma-messages]
+   36 | BOOST_PRAGMA_MESSAGE(
+      | ^
+/opt/homebrew/Cellar/boost/1.88.0/include/boost/config/pragma_message.hpp:24:34: note: expanded from macro 'BOOST_PRAGMA_MESSAGE'
+   24 | # define BOOST_PRAGMA_MESSAGE(x) _Pragma(BOOST_STRINGIZE(message(x)))
+      |                                  ^
+<scratch space>:127:2: note: expanded from here
+  127 |  message("The practice of declaring the Bind placeholders (_1, _2, ...) " "in the global namespace is deprecated. Please use " "<boost/bind/bind.hpp> + using namespace boost::placeholders, " "or define BOOST_BIND_GLOBAL_PLACEHOLDERS to retain the current behavior.")
+      |  ^
+1 warning generated.
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtPorter/WtDtPorter.cpp:11:
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtPorter/WtDtRunner.h:18:
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtPorter/../WtDtCore/IndexWorkerMgr.h:17:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/threadpool.hpp:34:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/pool.hpp:26:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/./detail/pool_core.hpp:29:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/./detail/worker_thread.hpp:29:
+/opt/homebrew/Cellar/boost/1.88.0/include/boost/bind.hpp:36:1: warning: The practice of declaring the Bind placeholders (_1, _2, ...) in the global namespace is deprecated. Please use <boost/bind/bind.hpp> + using namespace boost::placeholders, or define BOOST_BIND_GLOBAL_PLACEHOLDERS to retain the current behavior. [-W#pragma-messages]
+   36 | BOOST_PRAGMA_MESSAGE(
+      | ^
+/opt/homebrew/Cellar/boost/1.88.0/include/boost/config/pragma_message.hpp:24:34: note: expanded from macro 'BOOST_PRAGMA_MESSAGE'
+   24 | # define BOOST_PRAGMA_MESSAGE(x) _Pragma(BOOST_STRINGIZE(message(x)))
+      |                                  ^
+<scratch space>:127:2: note: expanded from here
+  127 |  message("The practice of declaring the Bind placeholders (_1, _2, ...) " "in the global namespace is deprecated. Please use " "<boost/bind/bind.hpp> + using namespace boost::placeholders, " "or define BOOST_BIND_GLOBAL_PLACEHOLDERS to retain the current behavior.")
+      |  ^
+1 warning generated.
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtPorter/ExpParser.cpp:14:
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtPorter/WtDtRunner.h:18:
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtPorter/../WtDtCore/IndexWorkerMgr.h:17:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/threadpool.hpp:34:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/pool.hpp:26:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/./detail/pool_core.hpp:29:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/./detail/worker_thread.hpp:29:
+/opt/homebrew/Cellar/boost/1.88.0/include/boost/bind.hpp:36:1: warning: The practice of declaring the Bind placeholders (_1, _2, ...) in the global namespace is deprecated. Please use <boost/bind/bind.hpp> + using namespace boost::placeholders, or define BOOST_BIND_GLOBAL_PLACEHOLDERS to retain the current behavior. [-W#pragma-messages]
+   36 | BOOST_PRAGMA_MESSAGE(
+      | ^
+/opt/homebrew/Cellar/boost/1.88.0/include/boost/config/pragma_message.hpp:24:34: note: expanded from macro 'BOOST_PRAGMA_MESSAGE'
+   24 | # define BOOST_PRAGMA_MESSAGE(x) _Pragma(BOOST_STRINGIZE(message(x)))
+      |                                  ^
+<scratch space>:127:2: note: expanded from here
+  127 |  message("The practice of declaring the Bind placeholders (_1, _2, ...) " "in the global namespace is deprecated. Please use " "<boost/bind/bind.hpp> + using namespace boost::placeholders, " "or define BOOST_BIND_GLOBAL_PLACEHOLDERS to retain the current behavior.")
+      |  ^
+1 warning generated.
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtPorter/ExpDumper.cpp:13:
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtPorter/WtDtRunner.h:18:
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtPorter/../WtDtCore/IndexWorkerMgr.h:17:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/threadpool.hpp:34:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/pool.hpp:26:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/./detail/pool_core.hpp:29:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/./detail/worker_thread.hpp:29:
+/opt/homebrew/Cellar/boost/1.88.0/include/boost/bind.hpp:36:1: warning: The practice of declaring the Bind placeholders (_1, _2, ...) in the global namespace is deprecated. Please use <boost/bind/bind.hpp> + using namespace boost::placeholders, or define BOOST_BIND_GLOBAL_PLACEHOLDERS to retain the current behavior. [-W#pragma-messages]
+   36 | BOOST_PRAGMA_MESSAGE(
+      | ^
+/opt/homebrew/Cellar/boost/1.88.0/include/boost/config/pragma_message.hpp:24:34: note: expanded from macro 'BOOST_PRAGMA_MESSAGE'
+   24 | # define BOOST_PRAGMA_MESSAGE(x) _Pragma(BOOST_STRINGIZE(message(x)))
+      |                                  ^
+<scratch space>:127:2: note: expanded from here
+  127 |  message("The practice of declaring the Bind placeholders (_1, _2, ...) " "in the global namespace is deprecated. Please use " "<boost/bind/bind.hpp> + using namespace boost::placeholders, " "or define BOOST_BIND_GLOBAL_PLACEHOLDERS to retain the current behavior.")
+      |  ^
+1 warning generated.
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_monitor_owner/runner_owner_probe.cpp:17:
+In file included from /tmp/wt-r22-owner-20261102/green/WtDtCore/IndexWorkerMgr.h:17:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/threadpool.hpp:34:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/pool.hpp:26:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/./detail/pool_core.hpp:29:
+In file included from /tmp/wt-r22-owner-20261102/green/Share/./threadpool/./detail/worker_thread.hpp:29:
+/opt/homebrew/Cellar/boost/1.88.0/include/boost/bind.hpp:36:1: warning: The practice of declaring the Bind placeholders (_1, _2, ...) in the global namespace is deprecated. Please use <boost/bind/bind.hpp> + using namespace boost::placeholders, or define BOOST_BIND_GLOBAL_PLACEHOLDERS to retain the current behavior. [-W#pragma-messages]
+   36 | BOOST_PRAGMA_MESSAGE(
+      | ^
+/opt/homebrew/Cellar/boost/1.88.0/include/boost/config/pragma_message.hpp:24:34: note: expanded from macro 'BOOST_PRAGMA_MESSAGE'
+   24 | # define BOOST_PRAGMA_MESSAGE(x) _Pragma(BOOST_STRINGIZE(message(x)))
+      |                                  ^
+<scratch space>:127:2: note: expanded from here
+  127 |  message("The practice of declaring the Bind placeholders (_1, _2, ...) " "in the global namespace is deprecated. Please use " "<boost/bind/bind.hpp> + using namespace boost::placeholders, " "or define BOOST_BIND_GLOBAL_PLACEHOLDERS to retain the current behavior.")
+      |  ^
+1 warning generated.
+ld: warning: can't parse dwarf compilation unit info in /var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/DataManager-f7b72d.o
+ld: warning: can't parse dwarf compilation unit info in /var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/StateMonitor-8c101e.o
+ld: warning: can't parse dwarf compilation unit info in /var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/WtDtRunner-970766.o
+ld: warning: can't parse dwarf compilation unit info in /var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/WtDtPorter-64b41d.o
+ld: warning: can't parse dwarf compilation unit info in /var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/ExpParser-0ed6ae.o
+ld: warning: can't parse dwarf compilation unit info in /var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/ExpDumper-2cdb8f.o
+ld: warning: can't parse dwarf compilation unit info in /var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/runner_owner_probe-5b21ea.o
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(StackTracer.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(WTSCfgLoader.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWtDtCore.a(ParserAdapter.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWtDtCore.a(IndexWorkerMgr.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSTools.a(WTSBaseDataMgr.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWtDtCore.a(WtHelper.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWtDtCore.a(ShmCaster.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWtDtCore.a(UDPCaster.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSTools.a(WTSHotMgr.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSTools.a(WTSLogger.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(exceptions.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(parse.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(node_data.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(nodebuilder.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(parser.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(memory.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(directives.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(singledocparser.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(scanner.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(null.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(depthguard.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(tag.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(regex_yaml.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(stream.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(scantoken.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(simplekey.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(scanscalar.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(scantag.cpp.o)
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-r22-lifecycle-20261102/cmake/build_x64/Debug/libs/libWTSUtils.a(exp.cpp.o)
+warning: no debug symbols in executable (-arch arm64)

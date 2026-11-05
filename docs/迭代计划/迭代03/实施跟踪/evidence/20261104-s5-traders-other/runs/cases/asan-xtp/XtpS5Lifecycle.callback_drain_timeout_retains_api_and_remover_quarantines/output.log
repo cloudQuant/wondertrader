@@ -1,0 +1,15 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = XtpS5Lifecycle.callback_drain_timeout_retains_api_and_remover_quarantines
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from XtpS5Lifecycle
+[ RUN      ] XtpS5Lifecycle.callback_drain_timeout_retains_api_and_remover_quarantines
+[TraderXTP] release: SDK callbacks did not drain within 200 ms; API kept, instance must be quarantined
+[TraderXTP] deleteTrader: instance quarantined until process exit (worker, API calls or SDK callbacks did not drain)
+dlopen(/private/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/libwt_xtp_s5_module_absent.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/libwt_xtp_s5_module_absent.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/libwt_xtp_s5_module_absent.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/libwt_xtp_s5_module_absent.dylib' (no such file)
+[       OK ] XtpS5Lifecycle.callback_drain_timeout_retains_api_and_remover_quarantines (495 ms)
+[----------] 1 test from XtpS5Lifecycle (495 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (495 ms total)
+[  PASSED  ] 1 test.

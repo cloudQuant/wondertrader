@@ -1,0 +1,196 @@
+--- src/TestUnits/fixtures/i03_parser_event_contract_20261103/baseline/ParserXeleSkt/ParserXeleSkt.cpp	2026-11-03 21:49:09
++++ src/ParserXeleSkt/ParserXeleSkt.cpp	2026-11-03 21:53:34
+@@ -26,19 +26,19 @@
+ #include <stdexcept>
+ #include <system_error>
+ 
+- //By Wesley @ 2022.01.05
+-#include "../Share/fmtlib.h"
+-template<typename... Args>
+-inline void write_log(IParserSpi* sink, WTSLogLevel ll, const char* format, const Args&... args)
+-{
+-	if (sink == NULL)
+-		return;
+-
+-	static thread_local char buffer[512] = { 0 };
+-	memset(buffer, 0, 512);
+-	fmt::format_to(buffer, format, args...);
+-
+-	sink->handleParserLog(ll, buffer);
++ //By Wesley @ 2022.01.05
++#include "../Share/fmtlib.h"
++template<typename... Args>
++inline void write_log(IParserSpi* sink, WTSLogLevel ll, const char* format, const Args&... args)
++{
++	if (sink == NULL)
++		return;
++
++	static thread_local char buffer[512] = { 0 };
++	memset(buffer, 0, 512);
++	fmt::format_to(buffer, format, args...);
++
++	sink->handleParserLog(ll, buffer);
+ }
+ 
+ inline uint32_t strToTime(const char* strTime)
+@@ -411,9 +411,49 @@
+ 		return;
+ 
+ 	_close_event_emitted = true;
++	emit_connect_event(_connection_epoch);
+ 	with_spi([](IParserSpi* sink) { sink->handleEvent(WPE_Close, 0); });
+ }
+ 
++void ParserXeleSkt::begin_event_epoch()
++{
++	std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++	_close_event_emitted = false;
++	const uint64_t epoch = _connection_epoch;
++	// Queued on the strand; the matching queued Close of this epoch is posted
++	// later, so strand order keeps Connect before Close.
++	boost::asio::post(_strand, [this, epoch]() { emit_connect_event(epoch); });
++}
++
++void ParserXeleSkt::emit_connect_event(uint64_t epoch)
++{
++	std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++	if (epoch == 0 || epoch <= _connect_event_epoch)
++		return;
++	_connect_event_epoch = epoch;
++	with_spi([](IParserSpi* sink) { sink->handleEvent(WPE_Connect, 0); });
++}
++
++void ParserXeleSkt::emit_login_event(uint64_t epoch)
++{
++	std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++	if (epoch == 0 || epoch != _connection_epoch || epoch <= _login_event_epoch || _stopped ||
++		_close_event_emitted || _stop_requested.load(std::memory_order_acquire))
++		return;
++	emit_connect_event(epoch);
++	if (_stopped || epoch != _connection_epoch || _stop_requested.load(std::memory_order_acquire))
++		return;
++	_login_event_epoch = epoch;
++	with_spi([](IParserSpi* sink) { sink->handleEvent(WPE_Login, 0); });
++}
++
++void ParserXeleSkt::emit_queued_close(uint64_t epoch)
++{
++	std::lock_guard<std::recursive_mutex> io_lock(_mtx_io);
++	emit_connect_event(epoch);
++	with_spi([](IParserSpi* sink) { sink->handleEvent(WPE_Close, 0); });
++}
++
+ bool ParserXeleSkt::shutdown()
+ {
+ 	ApiGuard api(this, true);
+@@ -791,6 +831,9 @@
+ 			return false;
+ 		_prepared = true;
+ 	}
++	// A stop requested during the blocking snapshot read must not start work.
++	if (_stop_requested.load(std::memory_order_acquire))
++		return false;
+ 
+ 	if (!ensure_worker())
+ 		return false;
+@@ -820,7 +863,7 @@
+ 					_stopped = false;
+ 					ok = reconnect();
+ 					if (ok)
+-						_close_event_emitted = false;
++						begin_event_epoch();
+ 					else
+ 					{
+ 						_stopped = true;
+@@ -878,7 +921,10 @@
+ 		_close_event_emitted = true;
+ 		close_sockets();
+ 		if (had_active_connection)
+-			boost::asio::post(_strand, [this]() { doOnDisconnected(); });
++		{
++			const uint64_t epoch = _connection_epoch;
++			boost::asio::post(_strand, [this, epoch]() { emit_queued_close(epoch); });
++		}
+ 	}
+ 
+ 	return true;
+@@ -958,7 +1004,7 @@
+ 			failed_epoch != _connection_epoch)
+ 			return;
+ 		if (open_channel())
+-			_close_event_emitted = false;
++			begin_event_epoch();
+ 	});
+ }
+ 
+@@ -983,7 +1029,7 @@
+ 	}
+ 
+ 	if (bytes_transferred > 0)
+-		extract_buffer(static_cast<uint32_t>(bytes_transferred), operation->buffer.data());
++		extract_buffer(static_cast<uint32_t>(bytes_transferred), operation->buffer.data(), connection_epoch);
+ 
+ 	if (_stop_requested.load(std::memory_order_acquire) || _stopped || connection_epoch != _connection_epoch)
+ 		return;
+@@ -996,7 +1042,7 @@
+ #define ZERO_MS 0
+ #define XELE_MD_MS_MASK 0x000f
+ 
+-void ParserXeleSkt::extract_buffer(uint32_t length, const char* buffer_data)
++void ParserXeleSkt::extract_buffer(uint32_t length, const char* buffer_data, uint64_t login_epoch)
+ {
+ 	// Called on the worker with _mtx_io held. Every frame must fit inside the
+ 	// received datagram; an unknown type stops parsing instead of looping.
+@@ -1021,6 +1067,13 @@
+ 			if (length - len < packLen)
+ 				return;
+ 			len += packLen;
++			// A complete, valid feed frame is the only confirmation (card 14).
++			if (login_epoch != 0)
++			{
++				emit_login_event(login_epoch);
++				if (_stop_requested.load(std::memory_order_acquire) || _stopped)
++					return;
++			}
+ 
+ 			//write_log(_sink, LL_DEBUG, "[ParserXeleSkt] Receiving market data, length: {}", packLen);
+ 
+@@ -1086,6 +1139,12 @@
+ 			if (length - len < packLen)
+ 				return;
+ 			len += packLen;
++			if (login_epoch != 0)
++			{
++				emit_login_event(login_epoch);
++				if (_stop_requested.load(std::memory_order_acquire) || _stopped)
++					return;
++			}
+ 
+ 			//write_log(_sink, LL_DEBUG, "[ParserXeleSkt] Receiving depth market data of {}, length: {}", p->InstrumentNo, packLen);
+ 
+@@ -1167,6 +1226,12 @@
+ 			if (length - len < packLen)
+ 				return;
+ 			len += packLen;
++			if (login_epoch != 0)
++			{
++				emit_login_event(login_epoch);
++				if (_stop_requested.load(std::memory_order_acquire) || _stopped)
++					return;
++			}
+ 			with_spi([&](IParserSpi* sink) { write_log(sink, LL_DEBUG, "[ParserXeleSkt] Receiving heartbeat packet, length: {}\n", packLen); });
+ 		}
+ 		else
+@@ -1178,9 +1243,9 @@
+ 
+ void ParserXeleSkt::doOnConnected()
+ {
+-	// Not called: the Connect/Login event contract (R76-03) is undecided.
+-	with_spi([](IParserSpi* sink) { sink->handleEvent(WPE_Connect, 0); });
+-	with_spi([](IParserSpi* sink) { sink->handleEvent(WPE_Login, 0); });
++	// Legacy helper, not called: Connect and Login are emitted separately per
++	// epoch by begin_event_epoch()/emit_login_event() (card 14a=C).
++	emit_connect_event(_connection_epoch);
+ }
+ 
+ void ParserXeleSkt::doOnDisconnected()

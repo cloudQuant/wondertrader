@@ -33,6 +33,13 @@
 USING_NS_WTP;
 
 extern WtRtRunner& getRunner();
+// BUG-R42-002 gate (迭代03): HFT contexts bind only a registered trader; the
+// fixtures below register a module-less local adapter (see i03_s5_test_trader_support.cpp).
+TraderAdapterPtr i03s5_register_test_trader(WtRtRunner& runner, const char* id);
+uint32_t i03s5_inject_cta_context(WtRtRunner& runner, const char* name, int32_t slippage);
+uint32_t i03s5_inject_sel_context(WtRtRunner& runner, const char* name, uint32_t date, uint32_t time,
+	TaskPeriodType period, int32_t slippage);
+uint32_t i03s5_inject_hft_context(WtRtRunner& runner, const char* name, const char* trader, int32_t slippage);
 
 namespace {
 
@@ -110,9 +117,12 @@ protected:
 		g.clear();
 		wire_all();
 
-		_cta = create_cta_context("r13_exp_cta", 1);
-		_sel = create_sel_context("r13_exp_sel", 20240601, 153000, "d", "CHINA", "TRADING", 0);
-		_hft = create_hft_context("r13_exp_hft", "R13_TRADER_NOT_EXISTS", false, 0);
+		// I03-NEW-064（迭代03）：C API 只在 runner 已配置的引擎上建上下文；本组只验证导出
+		// 上下文的回调转发，三类上下文同处一个未配置的进程级 runner，故直接安装（.before 见证据）。
+		_cta = i03s5_inject_cta_context(getRunner(), "r13_exp_cta", 1);
+		_sel = i03s5_inject_sel_context(getRunner(), "r13_exp_sel", 20240601, 153000, TPT_Daily, 0);
+		ASSERT_TRUE(i03s5_register_test_trader(getRunner(), "r13_test_trader") != nullptr);
+		_hft = i03s5_inject_hft_context(getRunner(), "r13_exp_hft", "r13_test_trader", 0);
 
 		ASSERT_NE(_cta, 0U);
 		ASSERT_NE(_sel, 0U);

@@ -294,4 +294,254 @@ TEST_F(R68IndexWorkerFactoryTest, RepeatedSameModuleDoesNotRecreateFactoryOrInva
 	EXPECT_EQ(0, std::count(events.begin(), events.end(), "module-unloaded"));
 }
 
+TEST_F(R68IndexWorkerFactoryTest, DifferentModulesWithSameFactoryNameSealWithoutReplacingOwner)
+{
+#if !defined(WT_R68_COUNTING_PLUGIN_PATH) || !defined(WT_R68_CONFLICT_PLUGIN_PATH)
+	FAIL() << "Both counting fixture modules must be supplied by the dedicated CMake fixture";
+#else
+	const fs::path first = WT_R68_COUNTING_PLUGIN_PATH;
+	const fs::path second = WT_R68_CONFLICT_PLUGIN_PATH;
+	std::error_code ec;
+	ASSERT_TRUE(fs::is_regular_file(first, ec));
+	ASSERT_FALSE(ec);
+	ASSERT_TRUE(fs::is_regular_file(second, ec));
+	ASSERT_FALSE(ec);
+	const fs::path firstDir = _dir / "first";
+	const fs::path secondDir = _dir / "second";
+	const fs::path thirdDir = _dir / "third";
+	ASSERT_TRUE(fs::create_directories(firstDir));
+	ASSERT_TRUE(fs::create_directories(secondDir));
+	ASSERT_TRUE(fs::create_directories(thirdDir));
+	ASSERT_TRUE(fs::copy_file(first, firstDir / first.filename(), ec));
+	ASSERT_FALSE(ec);
+	ASSERT_TRUE(fs::copy_file(second, secondDir / second.filename(), ec));
+	ASSERT_FALSE(ec);
+	ASSERT_TRUE(fs::copy_file(first, thirdDir / first.filename(), ec));
+	ASSERT_FALSE(ec);
+	const std::string log = (_dir / "duplicate-events.txt").string();
+	const char* oldEnv = std::getenv("WT_R68_FACTORY_EVENTS");
+	const bool hadEnv = oldEnv != nullptr;
+	const std::string previous = hadEnv ? oldEnv : "";
+	struct EnvRestore
+	{
+		bool hadValue;
+		std::string value;
+		~EnvRestore() { if (hadValue) setenv("WT_R68_FACTORY_EVENTS", value.c_str(), 1); else unsetenv("WT_R68_FACTORY_EVENTS"); }
+	} envRestore{hadEnv, previous};
+	ASSERT_EQ(0, setenv("WT_R68_FACTORY_EVENTS", log.c_str(), 1));
+
+	WTSVariant* firstCfg = loadCfg("first.json", R"JSON({
+		"poolsize":0,"indice":[{"active":true,"id":"before","name":"R68Counter.Counter"}]
+	})JSON");
+	WTSVariant* secondCfg = loadCfg("second.json", R"JSON({
+		"poolsize":0,"indice":[{"active":true,"id":"after","name":"R68Counter.Counter"}]
+	})JSON");
+	ASSERT_NE(nullptr, firstCfg);
+	ASSERT_NE(nullptr, secondCfg);
+	WTSBaseDataMgr bdMgr;
+	DataManager dm;
+	IndexWorkerMgr mgr;
+	ASSERT_TRUE(mgr.loadFactories(firstDir.string().c_str()));
+	ASSERT_TRUE(mgr.init(firstCfg, nullptr, &bdMgr, &dm));
+	firstCfg->release();
+	EXPECT_EQ(nullptr, mgr.sub_ticks("SHFE.rb2410"));
+	WTSTickData* tick = makeTick("rb2410", "SHFE");
+	ASSERT_NE(nullptr, tick);
+	mgr.handle_quote(tick);
+	EXPECT_FALSE(mgr.loadFactories(secondDir.string().c_str()));
+	EXPECT_FALSE(mgr.loadFactories(secondDir.string().c_str()));
+	EXPECT_FALSE(mgr.loadFactories(thirdDir.string().c_str()));
+	ASSERT_TRUE(mgr.init(secondCfg, nullptr, &bdMgr, &dm));
+	secondCfg->release();
+	mgr.handle_quote(tick);
+	EXPECT_EQ(1u, tick->retainCount());
+	tick->release();
+
+	std::ifstream input(log);
+	std::vector<std::string> events;
+	for (std::string line; std::getline(input, line);)
+		events.push_back(line);
+	EXPECT_EQ(2, std::count(events.begin(), events.end(), "module-loaded"));
+	EXPECT_EQ(1, std::count(events.begin(), events.end(), "factory-from-first"));
+	EXPECT_EQ(1, std::count(events.begin(), events.end(), "factory-from-second"));
+	EXPECT_EQ(2, std::count(events.begin(), events.end(), "worker-from-first"));
+	EXPECT_EQ(0, std::count(events.begin(), events.end(), "worker-from-second"));
+	EXPECT_EQ(3, std::count(events.begin(), events.end(), "worker-quote"));
+	EXPECT_EQ(0, std::count(events.begin(), events.end(), "module-unloaded"));
+#endif
+}
+
+TEST_F(R68IndexWorkerFactoryTest, BadFactoryNamesAndThrowingCreatorAreQuarantined)
+{
+#if !defined(WT_R68_COUNTING_PLUGIN_PATH) || !defined(WT_R68_CONFLICT_PLUGIN_PATH)
+	FAIL() << "Both counting fixture modules must be supplied by the dedicated CMake fixture";
+#else
+	const char* oldMode = std::getenv("WT_R68_FACTORY_MODE");
+	const bool hadMode = oldMode != nullptr;
+	const std::string previousMode = hadMode ? oldMode : "";
+	const char* oldLog = std::getenv("WT_R68_FACTORY_EVENTS");
+	const bool hadLog = oldLog != nullptr;
+	const std::string previousLog = hadLog ? oldLog : "";
+	struct EnvRestore
+	{
+		bool hadMode, hadLog;
+		std::string mode, log;
+		~EnvRestore()
+		{
+			if (hadMode) setenv("WT_R68_FACTORY_MODE", mode.c_str(), 1); else unsetenv("WT_R68_FACTORY_MODE");
+			if (hadLog) setenv("WT_R68_FACTORY_EVENTS", log.c_str(), 1); else unsetenv("WT_R68_FACTORY_EVENTS");
+		}
+	} restore{hadMode, hadLog, previousMode, previousLog};
+
+	const fs::path first = WT_R68_COUNTING_PLUGIN_PATH;
+	const fs::path second = WT_R68_CONFLICT_PLUGIN_PATH;
+	for (const char* mode : {"null-name", "empty-name", "throw-name", "throw-create"})
+	{
+		SCOPED_TRACE(mode);
+		const fs::path root = _dir / mode;
+		const fs::path firstDir = root / "first", badDir = root / "bad", nextDir = root / "next";
+		ASSERT_TRUE(fs::create_directories(firstDir));
+		ASSERT_TRUE(fs::create_directories(badDir));
+		ASSERT_TRUE(fs::create_directories(nextDir));
+		std::error_code ec;
+		ASSERT_TRUE(fs::copy_file(first, firstDir / first.filename(), ec)); ASSERT_FALSE(ec);
+		ASSERT_TRUE(fs::copy_file(second, badDir / second.filename(), ec)); ASSERT_FALSE(ec);
+		ASSERT_TRUE(fs::copy_file(first, nextDir / first.filename(), ec)); ASSERT_FALSE(ec);
+		const std::string log = (root / "events.txt").string();
+		ASSERT_EQ(0, setenv("WT_R68_FACTORY_EVENTS", log.c_str(), 1));
+		ASSERT_EQ(0, unsetenv("WT_R68_FACTORY_MODE"));
+		IndexWorkerMgr mgr;
+		ASSERT_TRUE(mgr.loadFactories(firstDir.string().c_str()));
+		ASSERT_EQ(0, setenv("WT_R68_FACTORY_MODE", mode, 1));
+		EXPECT_FALSE(mgr.loadFactories(badDir.string().c_str()));
+		ASSERT_EQ(0, unsetenv("WT_R68_FACTORY_MODE"));
+		EXPECT_FALSE(mgr.loadFactories(nextDir.string().c_str()));
+
+		const std::string cfgName = std::string(mode) + ".json";
+		WTSVariant* cfg = loadCfg(cfgName.c_str(), R"JSON({
+			"poolsize":0,"indice":[{"active":true,"id":"survivor","name":"R68Counter.Counter"}]
+		})JSON");
+		ASSERT_NE(nullptr, cfg);
+		WTSBaseDataMgr bdMgr;
+		DataManager dm;
+		EXPECT_TRUE(mgr.init(cfg, nullptr, &bdMgr, &dm));
+		cfg->release();
+		std::ifstream input(log);
+		std::vector<std::string> events;
+		for (std::string line; std::getline(input, line);) events.push_back(line);
+		EXPECT_EQ(2, std::count(events.begin(), events.end(), "module-loaded"));
+		EXPECT_EQ(1, std::count(events.begin(), events.end(), "factory-from-first"));
+		EXPECT_EQ(1, std::count(events.begin(), events.end(), "factory-from-second"));
+		EXPECT_EQ(1, std::count(events.begin(), events.end(), "worker-from-first"));
+		EXPECT_EQ(0, std::count(events.begin(), events.end(), "module-unloaded"));
+	}
+#endif
+}
+
+TEST_F(R68IndexWorkerFactoryTest, CreatorReentryCannotStartAnotherScan)
+{
+#if !defined(WT_R68_COUNTING_PLUGIN_PATH)
+	FAIL() << "Counting fixture module must be supplied by the dedicated CMake fixture";
+#else
+	const fs::path fixture = WT_R68_COUNTING_PLUGIN_PATH;
+	const fs::path dir = _dir / "reentry";
+	ASSERT_TRUE(fs::create_directories(dir));
+	const fs::path plugin = dir / fixture.filename();
+	std::error_code ec;
+	ASSERT_TRUE(fs::copy_file(fixture, plugin, ec)); ASSERT_FALSE(ec);
+	DllHandle handle = DLLHelper::load_library(plugin.string().c_str());
+	ASSERT_NE(nullptr, handle);
+	struct HandleGuard { DllHandle value; ~HandleGuard() { DLLHelper::free_library(value); } } handleGuard{handle};
+	using SetHook = void (*)(void (*)(void*), void*);
+	auto setHook = reinterpret_cast<SetHook>(DLLHelper::get_symbol(handle, "r68_set_reentry"));
+	ASSERT_NE(nullptr, setHook);
+	const char* old = std::getenv("WT_R68_FACTORY_MODE");
+	const bool hadMode = old != nullptr;
+	const std::string previous = hadMode ? old : "";
+	struct EnvRestore { bool had; std::string value; ~EnvRestore() {
+		if (had) setenv("WT_R68_FACTORY_MODE", value.c_str(), 1); else unsetenv("WT_R68_FACTORY_MODE");
+	} } restore{hadMode, previous};
+	IndexWorkerMgr mgr;
+	struct Context { IndexWorkerMgr* manager; std::string path; bool called = false; bool result = true; } ctx{&mgr, dir.string()};
+	setHook([](void* p) {
+		auto* c = static_cast<Context*>(p);
+		c->called = true;
+		c->result = c->manager->loadFactories(c->path.c_str());
+	}, &ctx);
+	ASSERT_EQ(0, setenv("WT_R68_FACTORY_MODE", "reenter", 1));
+	EXPECT_TRUE(mgr.loadFactories(dir.string().c_str()));
+	EXPECT_TRUE(ctx.called);
+	EXPECT_FALSE(ctx.result);
+	setHook(nullptr, nullptr);
+#endif
+}
+
 }	// namespace
+
+// BUG-R68-003 (iteration 03): release() drains scheduled pool tasks before it
+// deletes workers through their factory, then stops admitting quotes. The
+// factory and its module stay loaded: the exported delete_index_factory and
+// FuncDeleteIndexFact disagree on the parameter type, so no remover is called.
+TEST_F(R68IndexWorkerFactoryTest, ReleaseDrainsPoolThenDeletesWorkersAndPinsFactoryModule)
+{
+#ifndef WT_R68_COUNTING_PLUGIN_PATH
+	FAIL() << "counting fixture unavailable: build its target";
+#else
+	const char* fixture = WT_R68_COUNTING_PLUGIN_PATH;
+	std::error_code ec;
+	const fs::path factDir = _dir / "release_order";
+	ASSERT_TRUE(fs::create_directories(factDir));
+#ifdef __APPLE__
+	const fs::path plugin = factDir / "libR68Counter.dylib";
+#else
+	const fs::path plugin = factDir / "libR68Counter.so";
+#endif
+	ASSERT_TRUE(fs::copy_file(fixture, plugin, fs::copy_options::none, ec));
+	ASSERT_FALSE(ec);
+	const std::string log = (_dir / "release-events.txt").string();
+	const char* oldEnv = std::getenv("WT_R68_FACTORY_EVENTS");
+	const bool hadEnv = oldEnv != nullptr;
+	const std::string previous = hadEnv ? oldEnv : "";
+	struct EnvRestore
+	{
+		bool hadValue;
+		std::string value;
+		~EnvRestore() { if (hadValue) setenv("WT_R68_FACTORY_EVENTS", value.c_str(), 1); else unsetenv("WT_R68_FACTORY_EVENTS"); }
+	} envRestore{hadEnv, previous};
+	ASSERT_EQ(0, setenv("WT_R68_FACTORY_EVENTS", log.c_str(), 1));
+
+	WTSVariant* cfg = loadCfg("release_order.json", R"JSON({
+		"poolsize":1,"indice":[{"active":true,"id":"released","name":"R68Counter.Counter"}]
+	})JSON");
+	ASSERT_NE(cfg, nullptr);
+	WTSBaseDataMgr bdMgr;
+	DataManager dm;
+	IndexWorkerMgr mgr;
+	ASSERT_TRUE(mgr.loadFactories(factDir.string().c_str()));
+	ASSERT_TRUE(mgr.init(cfg, nullptr, &bdMgr, &dm));
+	cfg->release();
+	EXPECT_EQ(nullptr, mgr.sub_ticks("SHFE.rb2410"));
+	WTSTickData* tick = makeTick("rb2410", "SHFE");
+	ASSERT_NE(tick, nullptr);
+	mgr.handle_quote(tick);		// scheduled on the pool
+	mgr.release();
+	EXPECT_TRUE(mgr.isReleased());
+	mgr.handle_quote(tick);		// no longer admitted
+	mgr.release();				// idempotent
+	EXPECT_EQ(1u, tick->retainCount());
+	tick->release();
+
+	std::ifstream input(log);
+	std::vector<std::string> events;
+	for (std::string line; std::getline(input, line);)
+		events.push_back(line);
+	const auto quote = std::find(events.begin(), events.end(), "worker-quote");
+	const auto deleted = std::find(events.begin(), events.end(), "worker-deleted");
+	ASSERT_NE(quote, events.end());
+	ASSERT_NE(deleted, events.end());
+	EXPECT_LT(quote - events.begin(), deleted - events.begin());	// drained before delete
+	EXPECT_EQ(1, std::count(events.begin(), events.end(), "worker-quote"));
+	EXPECT_EQ(1, std::count(events.begin(), events.end(), "worker-deleted"));
+	EXPECT_EQ(0, std::count(events.begin(), events.end(), "module-unloaded"));
+#endif
+}

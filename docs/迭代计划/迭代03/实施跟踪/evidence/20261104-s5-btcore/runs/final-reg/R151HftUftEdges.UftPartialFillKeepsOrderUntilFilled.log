@@ -1,0 +1,58 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R151HftUftEdges.UftPartialFillKeepsOrderUntilFilled
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R151HftUftEdges
+[ RUN      ] R151HftUftEdges.UftPartialFillKeepsOrderUntilFilled
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r151_mocker_edges_test.cpp:254: Failure
+Expected equality of these values:
+  (std::vector<uint32_t>{ 93100000u, 93130000u, 93200000u, 93230000u })
+    Which is: { 93100000, 93130000, 93200000, 93230000 }
+  m.actionTimes
+    Which is: { 93100000 }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r151_mocker_edges_test.cpp:255: Failure
+Expected equality of these values:
+  (std::vector<double>{ 70000.0, 70001.0, 70002.0, 70003.0 })
+    Which is: { 70000, 70001, 70002, 70003 }
+  m.prices
+    Which is: { 70000 }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r151_mocker_edges_test.cpp:256: Failure
+Expected equality of these values:
+  (std::vector<double>{ 3.0, 6.0, 9.0, 10.0 })
+    Which is: { 3, 6, 9, 10 }
+  m.positions
+    Which is: { 0 }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r151_mocker_edges_test.cpp:257: Failure
+Expected equality of these values:
+  (std::vector<double>{ 7.0, 4.0, 1.0, 0.0 })
+    Which is: { 7, 4, 1, 0 }
+  m.undone
+    Which is: { 10 }
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r151_mocker_edges_test.cpp:258: Failure
+Expected equality of these values:
+  10.0
+    Which is: 10
+  m.stra_get_position(kCu)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p08_btcore_mockers3/r151_mocker_edges_test.cpp:259: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  m.stra_get_undone(kCu)
+    Which is: 10
+
+[  FAILED  ] R151HftUftEdges.UftPartialFillKeepsOrderUntilFilled (28 ms)
+[----------] 1 test from R151HftUftEdges (28 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (28 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R151HftUftEdges.UftPartialFillKeepsOrderUntilFilled
+
+ 1 FAILED TEST

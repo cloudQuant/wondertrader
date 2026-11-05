@@ -1,0 +1,71 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R68IndexWorkerFactoryTest.*:R18IdxWorkerMgrTest.*:R44IndexWorkerFreshTest.*
+[==========] Running 23 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 7 tests from R18IdxWorkerMgrTest
+[ RUN      ] R18IdxWorkerMgrTest.LoadFactoriesSkipsDirectoryAndNonLibraryAndUnloadableFiles
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus.dylib' (slice is not valid mach-o file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus.dylib' (slice is not valid mach-o file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus.dylib' (slice is not valid mach-o file), '/System/Volumes/Preboot/Cryptexes/OS/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus.dylib' (slice is not valid mach-o file)
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus2.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus2.dylib' (), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus2.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus2.dylib' (), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus2.dylib' (), '/System/Volumes/Preboot/Cryptexes/OS/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus2.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r18_idx_61890_0/idxfact/bogus2.dylib' ()
+[       OK ] R18IdxWorkerMgrTest.LoadFactoriesSkipsDirectoryAndNonLibraryAndUnloadableFiles (305 ms)
+[ RUN      ] R18IdxWorkerMgrTest.LoadFactoriesSurvivesLibraryWithoutFactorySymbol
+[       OK ] R18IdxWorkerMgrTest.LoadFactoriesSurvivesLibraryWithoutFactorySymbol (781 ms)
+[ RUN      ] R18IdxWorkerMgrTest.InitAcceptsEmptyIndiceArrayButRejectsNonArrayIndice
+[       OK ] R18IdxWorkerMgrTest.InitAcceptsEmptyIndiceArrayButRejectsNonArrayIndice (7 ms)
+[ RUN      ] R18IdxWorkerMgrTest.SyncHandleQuoteReleasesTemporaryRetainForEachQuote
+[       OK ] R18IdxWorkerMgrTest.SyncHandleQuoteReleasesTemporaryRetainForEachQuote (3 ms)
+[ RUN      ] R18IdxWorkerMgrTest.SyncHandleQuoteReleasesTemporaryRetainWhenWorkerThrows
+[       OK ] R18IdxWorkerMgrTest.SyncHandleQuoteReleasesTemporaryRetainWhenWorkerThrows (6 ms)
+[ RUN      ] R18IdxWorkerMgrTest.AsyncQueuedDispatchKeepsTickAliveUntilWorkerCompletes
+[       OK ] R18IdxWorkerMgrTest.AsyncQueuedDispatchKeepsTickAliveUntilWorkerCompletes (10 ms)
+[ RUN      ] R18IdxWorkerMgrTest.ContextDelegatesToDataManagerAndLogger
+[       OK ] R18IdxWorkerMgrTest.ContextDelegatesToDataManagerAndLogger (236 ms)
+[ DISABLED ] R18IdxWorkerMgrTest.DISABLED_HandleQuoteCrashesWhenContractInfoMissing
+[ DISABLED ] R18IdxWorkerMgrTest.DISABLED_SubTicksWithoutDotCrashesOnIndex
+[----------] 7 tests from R18IdxWorkerMgrTest (1353 ms total)
+
+[----------] 8 tests from R44IndexWorkerFreshTest
+[ RUN      ] R44IndexWorkerFreshTest.FreshMgrHandleQuoteReturnsBeforeDataManager
+[       OK ] R44IndexWorkerFreshTest.FreshMgrHandleQuoteReturnsBeforeDataManager (0 ms)
+[ RUN      ] R44IndexWorkerFreshTest.FreshMgrOutputLogIsSafe
+[       OK ] R44IndexWorkerFreshTest.FreshMgrOutputLogIsSafe (0 ms)
+[ RUN      ] R44IndexWorkerFreshTest.InitWithSparseIndiceEntriesSkipsEachItem
+[       OK ] R44IndexWorkerFreshTest.InitWithSparseIndiceEntriesSkipsEachItem (1 ms)
+[ RUN      ] R44IndexWorkerFreshTest.WrapperWithNullWorkerSkipsFactoryDelete
+[       OK ] R44IndexWorkerFreshTest.WrapperWithNullWorkerSkipsFactoryDelete (1 ms)
+[ RUN      ] R44IndexWorkerFreshTest.SubTicksHandlesMultiSegmentAndEmptySegment
+[       OK ] R44IndexWorkerFreshTest.SubTicksHandlesMultiSegmentAndEmptySegment (2 ms)
+[ RUN      ] R44IndexWorkerFreshTest.GetTickWithNullCodeIsStoppedByWriterGuard
+[       OK ] R44IndexWorkerFreshTest.GetTickWithNullCodeIsStoppedByWriterGuard (1 ms)
+[ RUN      ] R44IndexWorkerFreshTest.LoadFactoriesOnRegularFileReturnsFalse
+[       OK ] R44IndexWorkerFreshTest.LoadFactoriesOnRegularFileReturnsFalse (6 ms)
+[ RUN      ] R44IndexWorkerFreshTest.LoadFactoriesOnEmptyDirectorySucceeds
+[       OK ] R44IndexWorkerFreshTest.LoadFactoriesOnEmptyDirectorySucceeds (1 ms)
+[ DISABLED ] R44IndexWorkerFreshTest.DISABLED_InitCrashesWithNullConfig
+[ DISABLED ] R44IndexWorkerFreshTest.DISABLED_FreshPushTickCrashesOnUninitializedDataManager
+[----------] 8 tests from R44IndexWorkerFreshTest (15 ms total)
+
+[----------] 8 tests from R68IndexWorkerFactoryTest
+[ RUN      ] R68IndexWorkerFactoryTest.LoadFactoriesRegistersPluginAndUnknownWorkerSkips
+[       OK ] R68IndexWorkerFactoryTest.LoadFactoriesRegistersPluginAndUnknownWorkerSkips (562 ms)
+[ RUN      ] R68IndexWorkerFactoryTest.InitCreatesBuiltinWorkerAndInitializesIt
+[       OK ] R68IndexWorkerFactoryTest.InitCreatesBuiltinWorkerAndInitializesIt (750 ms)
+[ RUN      ] R68IndexWorkerFactoryTest.RepeatedLoadKeepsFactoryUsable
+[       OK ] R68IndexWorkerFactoryTest.RepeatedLoadKeepsFactoryUsable (301 ms)
+[ RUN      ] R68IndexWorkerFactoryTest.RepeatedSameModuleDoesNotRecreateFactoryOrInvalidateWorker
+[       OK ] R68IndexWorkerFactoryTest.RepeatedSameModuleDoesNotRecreateFactoryOrInvalidateWorker (779 ms)
+[ RUN      ] R68IndexWorkerFactoryTest.DifferentModulesWithSameFactoryNameSealWithoutReplacingOwner
+[       OK ] R68IndexWorkerFactoryTest.DifferentModulesWithSameFactoryNameSealWithoutReplacingOwner (774 ms)
+[ RUN      ] R68IndexWorkerFactoryTest.BadFactoryNamesAndThrowingCreatorAreQuarantined
+[       OK ] R68IndexWorkerFactoryTest.BadFactoryNamesAndThrowingCreatorAreQuarantined (2229 ms)
+[ RUN      ] R68IndexWorkerFactoryTest.CreatorReentryCannotStartAnotherScan
+[       OK ] R68IndexWorkerFactoryTest.CreatorReentryCannotStartAnotherScan (282 ms)
+[ RUN      ] R68IndexWorkerFactoryTest.ReleaseDrainsPoolThenDeletesWorkersAndPinsFactoryModule
+[       OK ] R68IndexWorkerFactoryTest.ReleaseDrainsPoolThenDeletesWorkersAndPinsFactoryModule (363 ms)
+[----------] 8 tests from R68IndexWorkerFactoryTest (6046 ms total)
+
+[----------] Global test environment tear-down
+[==========] 23 tests from 3 test suites ran. (7415 ms total)
+[  PASSED  ] 23 tests.
+
+  YOU HAVE 4 DISABLED TESTS
+

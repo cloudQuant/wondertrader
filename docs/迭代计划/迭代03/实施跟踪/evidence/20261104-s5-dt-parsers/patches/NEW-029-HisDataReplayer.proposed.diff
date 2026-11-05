@@ -1,0 +1,36 @@
+# 未应用的建议补丁（src/WtBtCore/HisDataReplayer.cpp 不属于 dt-parsers 包）。
+# 卡E（NEW-029）合同：四类流（tick/detail/queue/trans）各自在非交易时段
+#   - 不派发（不调用 _listener->handle_*，也不设置 _has_dispatched_hft_event、不更新价格/对账状态）；
+#   - 不对账（不推进 tick 相关的 _bar_real_tick_codes/_last_dispatched_ticks 等对账记录）；
+#   - 可观察诊断（逐流计数 + 每流每交易日首条跳过时打一条 WARN）。
+# 现状：只有 kind==2（tick）在 enqueue 阶段按 session 过滤，0/1/3 按自然区间直接派发。
+--- a/src/WtBtCore/HisDataReplayer.cpp
++++ b/src/WtBtCore/HisDataReplayer.cpp
+@@ enqueue lambda inside replayHftDatasNatural (约 3765 行)
+-			if (kind == 2)
+-			{
+-				WTSSessionInfo* session = get_session_info(code.c_str(), true);
+-				...
+-				{ ++list._cursor; continue; }
+-			}
++			// NEW-029: every HFT stream uses the same session/validity filter.
++			{
++				WTSSessionInfo* session = get_session_info(code.c_str(), true);
++				const uint32_t hhmm = item.action_time / 100000;
++				const uint32_t second = (item.action_time % 100000) / 1000;
++				const bool validActionTime = hhmm / 100 < 24 && hhmm % 100 < 60 && second < 60;
++				if (session == NULL || !validActionTime || (session->getTradingMins() != 1440 &&
++					(session->offsetTime(hhmm, false) > session->getCloseTime(true) ||
++						!session->isInTradingTime(hhmm))))
++				{
++					note_out_of_session_hft(kind, code, date, item.action_time);	// counter + first-skip WARN per stream/day
++					++list._cursor; continue;
++				}
++			}
+# 新增（头文件 HisDataReplayer.h）：
+#   uint64_t _hft_out_of_session[4] = {0,0,0,0};            // 0 detail,1 trans,2 tick,3 queue
+#   std::set<std::tuple<uint32_t,std::string,uint32_t>> _hft_out_of_session_logged;
+#   uint64_t get_out_of_session_count(uint32_t kind) const;  // 诊断查询，供测试与运行器读取
+# 验收（R91 lane，q02_btcore3）：多日回放中对四类流分别构造开盘前、收盘边界（=close、close+1）、收盘后、
+# 无效时刻记录各一条与盘中正控各一条；断言各流派发记录/时间、计数器增量与首条 WARN；
+# 旧代码 detail/queue/trans 三流负控应失败（被派发），tick 流正控保持。

@@ -107,7 +107,7 @@ namespace
 	{
 		const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
 		fs::path root = fs::temp_directory_path() /
-			(std::string("r222_bt_runner_") + tag + "_" + std::to_string(stamp));
+			(std::string("r222_bt_runner_") + tag + "_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(stamp));
 		std::error_code ec;
 		fs::remove_all(root, ec);
 		fs::create_directories(root, ec);
@@ -138,9 +138,12 @@ namespace
 		write_text(root / "sessions.json",
 			R"({"TRADING":{"name":"Trading","offset":0,"sections":[{"from":0,"to":2359}]}})");
 		write_text(root / "commodities.json",
-			R"({"SHFE":{"rb":{"name":"Rebar","session":"TRADING","pricetick":1,"volscale":10,"covermode":0,"pricemode":0,"trademode":0,"category":1}}})");
+			R"({"SHFE":{"rb":{"name":"Rebar","session":"TRADING","holiday":"CHINA","pricetick":1,"volscale":10,"covermode":0,"pricemode":0,"trademode":0,"category":1}}})");
 		write_text(root / "contracts.json",
 			R"({"SHFE":{"rb2510":{"name":"rb2510","product":"rb","exchg":"SHFE"}}})");
+		// prepare() maps the initial trading date with checked mapping (card 1
+		// A+C), which requires the default calendar; same fixture fix as I03-NEW-018.
+		write_text(root / "holidays.json", R"({"CHINA":[]})");
 	}
 
 	std::string no_mocker_config(const fs::path& root)
@@ -155,7 +158,8 @@ namespace
 			<< "\"stime\":20240102000000,\"etime\":20240103000000,\"tick\":false,"
 			<< "\"basefiles\":{\"session\":\"" << sessionsPath
 			<< "\",\"commodity\":\"" << commoditiesPath
-			<< "\",\"contract\":\"" << contractsPath << "\"}},"
+			<< "\",\"contract\":\"" << contractsPath
+			<< "\",\"holiday\":\"" << json_escape((root / "holidays.json").string()) << "\"}},"
 			<< "\"env\":{\"mocker\":\"none\"}}";
 		return cfg.str();
 	}
@@ -175,7 +179,8 @@ namespace
 			<< ",\"tick\":" << (csvReplay ? "true" : "false") << ","
 			<< "\"basefiles\":{\"session\":\"" << sessionsPath
 			<< "\",\"commodity\":\"" << commoditiesPath
-			<< "\",\"contract\":\"" << contractsPath << "\"}},"
+			<< "\",\"contract\":\"" << contractsPath
+			<< "\",\"holiday\":\"" << json_escape((root / "holidays.json").string()) << "\"}},"
 			<< "\"env\":{\"mocker\":\"exec\"},"
 			<< "\"exec\":{\"name\":\"r222_exec\",\"module\":\"" << json_escape(module)
 			<< "\",\"code\":\"SHFE.rb.2510\",\"period\":\"m1\","
@@ -320,7 +325,9 @@ TEST(WtBtRunnerShutdown, ImmediateStopWaitsForPrepareThenJoinsTheWorker)
 	stopThread.join();
 	EXPECT_TRUE(runReturned.load(std::memory_order_acquire));
 	EXPECT_TRUE(stopReturned.load(std::memory_order_acquire));
-	EXPECT_TRUE(runner.isAsync());
+	// 决策 K46=B（2026-11-05 用户裁定）：isAsync() 表示是否启动过后台 worker；stop 在 prepare 期间生效时
+	// 回放不启动 worker，isAsync() 为 false（改前期望 true，即“请求的运行模式”，见 I03-NEW-081）。
+	EXPECT_FALSE(runner.isAsync());
 	runner.release();
 	std::error_code ec;
 	fs::remove_all(root, ec);

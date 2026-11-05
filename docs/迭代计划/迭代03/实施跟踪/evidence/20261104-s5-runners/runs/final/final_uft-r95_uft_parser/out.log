@@ -1,0 +1,26 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r95_uft_parser.*
+[==========] Running 3 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 3 tests from r95_uft_parser
+[ RUN      ] r95_uft_parser.active_missing_module_fails_config_and_runner_start
+dlopen(parsers/libno_such_parser_module.dylib, 0x0002): tried: 'parsers/libno_such_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OSparsers/libno_such_parser_module.dylib' (no such file), '/opt/homebrew/lib/parsers/libno_such_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/parsers/libno_such_parser_module.dylib' (no such file), '/usr/local/lib/parsers/libno_such_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/parsers/libno_such_parser_module.dylib' (no such file), '/opt/homebrew/lib/parsers/libno_such_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/opt/homebrew/lib/parsers/libno_such_parser_module.dylib' (no such file), '/usr/local/lib/parsers/libno_such_parser_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/lib/parsers/libno_such_parser_module.dylib' (no such file), '/usr/lib/parsers/libno_such_parser_module.dylib' (no such file, not in dyld cache), 'parsers/libno_such_parser_module.dylib' (no such file)
+[       OK ] r95_uft_parser.active_missing_module_fails_config_and_runner_start (4 ms)
+[ RUN      ] r95_uft_parser.inactive_missing_module_is_skipped
+[       OK ] r95_uft_parser.inactive_missing_module_is_skipped (2 ms)
+[ RUN      ] r95_uft_parser.successful_fake_parser_registers_runs_and_quiesces_before_release
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp:1141: Failure
+Value of: runner.config("cfg_parser_success.yaml")
+  Actual: false
+Expected: true
+
+[  FAILED  ] r95_uft_parser.successful_fake_parser_registers_runs_and_quiesces_before_release (467 ms)
+[----------] 3 tests from r95_uft_parser (474 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 1 test suite ran. (474 ms total)
+[  PASSED  ] 2 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] r95_uft_parser.successful_fake_parser_registers_runs_and_quiesces_before_release
+
+ 1 FAILED TEST

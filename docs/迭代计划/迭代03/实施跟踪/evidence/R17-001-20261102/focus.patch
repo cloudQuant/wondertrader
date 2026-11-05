@@ -1,0 +1,11 @@
+--- src/TestUnits/coverage/CMakeLists.txt	2026-11-01 21:25:00
++++ /tmp/wt-i03-r17-20261102/snapshot/src/TestUnits/coverage/CMakeLists.txt	2026-11-02 10:34:26
+@@ -297,7 +297,7 @@
+ 	# WtDataStorage 的 TU 留在主目标（l04 用例用它），AD 单独成目标。
+ 	"adstorage|WtDataStorageAD|dir:p05_datastorage2"
+ 	"idxfactory|WtIndexFactory|n03b_idxfactory/n03_idxfactory_worker_test.cpp"
+-	"exefact|WtExeFact,WtExecMon|n05_exec_factories/n05_exe_fact_test.cpp+n05_exec_factories/n05_minimpact_calc_test.cpp+n05_exec_factories/n05_channel_ready_test.cpp+n05_exec_factories/n05_unmanaged_cancel_latch_test.cpp+n05_exec_factories/n05_ordmon_test.cpp+dir:r7_exefact+dir:r24_exefact2"
++	"exefact|WtExeFact,WtExecMon|r7_exefact/r17_diff_minimpact_unit_test.cpp"
+ 	"riskmon|WtRiskMonFact,WtExecMon|n05_exec_factories/n05_riskmon_datamgr_test.cpp"
+ 	"mqshare|WtShareHelper,WtMsgQue|n06_strategies_mq_share/n06_mq_share_test.cpp+dir:r19_mq")
+ 

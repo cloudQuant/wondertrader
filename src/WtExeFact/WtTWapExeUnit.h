@@ -46,7 +46,10 @@ private:
 	 * @details 根据给定的数量立即发送交易订单，包括计算委托价格、确定交易方向等
 	 * @param qty 目标交易数量，正数表示买入，负数表示卖出
 	 */
-	void	fire_at_once(double qty);
+	void	fire_at_once(double qty, bool forceClose = false);
+	bool	rememberOrders(const OrderIDs& ids, uint64_t now);
+	bool	submitOrder(bool isBuy, double price, double qty, bool forceClose, uint64_t now,
+		bool newSlice = false, double sliceTarget = 0.0);
 
 public:
 	/**
@@ -158,6 +161,9 @@ private:
 
 	/// @brief 配置通过时间与切片参数校验后才允许执行
 	bool			_config_valid;
+	// Empty or invalid IDs do not prove that the provider submitted nothing.
+	std::atomic<bool> _submission_unverified{ false };
+	std::atomic<bool> _submission_in_progress{ false };
 
 	/// @brief 计算锁，防止多线程同时执行计算
 	StdUniqueMutex	_mtx_calc;
@@ -179,6 +185,7 @@ private:
 
 	/// @brief 订单监控器，用于管理和跟踪所有发出的订单
 	WtOrdMon		_orders_mon;
+	bool		_host_order_identity{ false };	///< host-verified order identity enabled for this unit (cards 5b/5c)
 
 	/// @brief 当前正在撤销的订单数量
 	uint32_t		_cancel_cnt;

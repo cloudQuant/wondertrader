@@ -18,6 +18,9 @@
 
 #include "../Share/DLLHelper.hpp"
 #include "../Share/StdUtils.hpp"
+#include "../ParserCTP/VendorMdLifecycleV2.hpp"
+
+#include <mutex>
 
 
 
@@ -80,6 +83,23 @@ public:
 	virtual void OnDepthMarketData(XTPMD *market_data, int64_t bid1_qty[], int32_t bid1_count, int32_t max_bid1_count, int64_t ask1_qty[], int32_t ask1_count, int32_t max_ask1_count) override;
 	virtual void OnTickByTick(XTPTBT *tbt_data) override;
 
+//Parser lifecycle V2（迭代03 卡9，见 ../ParserCTP/VendorMdLifecycleV2.hpp）
+public:
+	WtParserLifecycleV2Status requestStopV2() noexcept;
+	WtParserLifecycleV2Status canWaitV2() const noexcept;
+	WtParserLifecycleV2Status waitDrainedV2(uint32_t timeoutMs) noexcept;
+	bool destroyableV2() const noexcept;
+	/*
+	 *	deleteParser 的移除判定（卡9 9b）：
+	 *	回调/接口重入时延后并保留；曾创建过 SDK 对象时也保留（无线程退出确认）
+	 */
+	bool removableLegacy() noexcept;
+
+private:
+	bool shutdownLegacy() noexcept;
+	void releaseSdk() noexcept;
+	bool sdkSeen() const noexcept;
+
 private:
 	/*
 	 *	发送登录请求
@@ -131,5 +151,11 @@ private:
 	BoostWorkerPtr				_worker;
 	std::atomic<bool>			_worker_stopping;
 	bool stopWorker();
+
+	// 追加在末尾：t_ParserXTP/t27_seam.hpp 的布局镜像按同一顺序追加
+	wt_vendor_md_v2::Lifecycle	_lc;
+	std::mutex					_sdk_mutex;		//串行化 SDK 释放
+	std::recursive_mutex		_data_mutex;	//订阅缓存 / 交易日（宿主线程、worker 共享）
+	bool						_init_done = false;
 };
 

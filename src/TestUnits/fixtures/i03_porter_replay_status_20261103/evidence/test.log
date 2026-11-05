@@ -1,0 +1,13 @@
+PASS arguments idle
+scenario=normal bars=1 ticks=12 event=1 callback=4/0/0 final=4/0/1 generation=1 message=
+PASS normal
+scenario=normal-async bars=1 ticks=12 event=1 callback=4/0/0 final=4/0/1 generation=1 message=
+PASS normal-async
+scenario=fee bars=1 ticks=1 event=1 callback=6/3/0 final=6/3/1 generation=1 message=Cta fee preflight for SHFE.rb.2405: missing or invalid fee schedule for SHFE.rb2405
+PASS fee
+scenario=stop bars=1 ticks=0 event=1 callback=5/0/0 final=5/0/1 generation=1 message=Stopped by user
+PASS stop
+scenario=callback-throw bars=1 ticks=12 event=1 callback=4/0/0 final=6/7/1 generation=1 message=Replay completion callback threw
+PASS callback-throw
+scenario=init-throw bars=1 ticks=0 event=1 callback=6/7/0 final=6/7/1 generation=1 message=Replay preparation callback threw
+PASS init-throw

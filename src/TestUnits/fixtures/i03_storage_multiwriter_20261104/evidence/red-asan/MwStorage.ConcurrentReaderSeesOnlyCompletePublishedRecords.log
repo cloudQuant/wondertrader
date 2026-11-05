@@ -1,0 +1,23 @@
+Note: Google Test filter = MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from MwStorage
+[ RUN      ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+checked=11949 bad=413 remaps=3
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_storage_test.cpp:652: Failure
+Expected equality of these values:
+  rr
+    Which is: 2
+  0
+reader exit (2=torn/foreign record seen, 3=published count never reached, -1=signal 0)
+
+[  FAILED  ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords (140183 ms)
+[----------] 1 test from MwStorage (140183 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (140183 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] MwStorage.ConcurrentReaderSeesOnlyCompletePublishedRecords
+
+ 1 FAILED TEST

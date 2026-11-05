@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="1" failures="1" disabled="0" errors="0" time="0.02" timestamp="2026-11-05T15:36:18.144" name="AllTests">
+  <testsuite name="S4R132LiveReaderBudget" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="0.02" timestamp="2026-11-05T15:36:18.144">
+    <testcase name="RdmReaderConfiguredBytesCeilingRejectsTheCompressedBlock" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp" line="176" status="run" result="completed" time="0.02" timestamp="2026-11-05T15:36:18.144" classname="S4R132LiveReaderBudget">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp:185&#x0A;Expected equality of these values:&#x0A;  4096u&#x0A;    Which is: 4096&#x0A;  WTSCmpHelper::uncompress_max_bytes()&#x0A;    Which is: 1073741824&#x0A;store config must reach this module&apos;s budget&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp:185
+Expected equality of these values:
+  4096u
+    Which is: 4096
+  WTSCmpHelper::uncompress_max_bytes()
+    Which is: 1073741824
+store config must reach this module's budget
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp:187&#x0A;Expected equality of these values:&#x0A;  0u&#x0A;    Which is: 0&#x0A;  rdm_read(reader, &quot;SSE.STK.600000&quot;)&#x0A;    Which is: 2000&#x0A;declared size above the configured 4 KiB ceiling&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp:187
+Expected equality of these values:
+  0u
+    Which is: 0
+  rdm_read(reader, "SSE.STK.600000")
+    Which is: 2000
+declared size above the configured 4 KiB ceiling
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp:188&#x0A;Expected: (sink.count_of(LL_ERROR)) &gt; (0u), actual: 0 vs 0&#x0A;the rejected block must be reported&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp:188
+Expected: (sink.count_of(LL_ERROR)) > (0u), actual: 0 vs 0
+the rejected block must be reported
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

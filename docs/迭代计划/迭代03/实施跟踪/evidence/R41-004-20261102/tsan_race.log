@@ -1,0 +1,22 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=95871)
+  Write of size 4 at 0x000100c84000 by thread T1:
+    #0 main::$_0::operator()() const tsan_race.cpp:3 (tsan_race:arm64+0x100001430)
+    #1 std::__1::__invoke_result_impl<void, main::$_0>::type std::__1::__invoke[abi:nqe220108]<main::$_0>(main::$_0&&) invoke.h:90 (tsan_race:arm64+0x100001394)
+    #2 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (tsan_race:arm64+0x1000012b8)
+    #3 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>>(void*) thread.h:169 (tsan_race:arm64+0x100000be8)
+
+  Previous write of size 4 at 0x000100c84000 by main thread:
+    #0 main tsan_race.cpp:3 (tsan_race:arm64+0x100000734)
+
+  Location is global 'value' at 0x000100c84000 (tsan_race+0x100008000)
+
+  Thread T1 (tid=713985, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (tsan_race:arm64+0x100000b4c)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_0, 0>(main::$_0&&) thread.h:218 (tsan_race:arm64+0x1000008e4)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_0, 0>(main::$_0&&) thread.h:209 (tsan_race:arm64+0x100000808)
+    #4 main tsan_race.cpp:3 (tsan_race:arm64+0x10000071c)
+
+SUMMARY: ThreadSanitizer: data race tsan_race.cpp:3 in main::$_0::operator()() const
+==================

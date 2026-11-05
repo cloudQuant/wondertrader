@@ -1,0 +1,19 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/TestUnits/coverage/q01_wtcore3/r15_mgr_executers.cpp	2026-11-01 18:07:33
++++ src/TestUnits/coverage/q01_wtcore3/r15_mgr_executers.cpp	2026-11-04 20:02:11
+@@ -368,12 +368,15 @@
+ {
+     // on_tick only queues callbacks for existing _unit_states; an empty state map
+     // returns without entering unit creation. The empty factory probes confirm no unit was created.
++    // 卡8b=A（eager 全量校验）：scale 必须为有限正数、policy name 严格为 "<factory>.<unit>"；
++    // 原夹具缺 scale 且 name 无工厂段，按新合同补齐（工厂仍未加载）。
+     WTSVariant* root = WTSVariant::createObject();
+     WTSVariant* policy = WTSVariant::createObject();
+     WTSVariant* def = WTSVariant::createObject();
+-    def->append("name", "R15NoSuchUnit");
++    def->append("name", "R15NoSuchFact.R15NoSuchUnit");
+     policy->append("default", def);
+     root->append("policy", policy);
++    root->append("scale", 1.0);
+ 
+     WtExecuterFactory factory;
+     WtExecuterMgr manager;

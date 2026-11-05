@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="61" failures="30" disabled="5" errors="0" time="414.264" timestamp="2026-11-04T20:04:18.586" name="AllTests">
+  <testsuite name="Q05StateMonitorTest" tests="8" failures="0" disabled="0" skipped="0" errors="0" time="0.052" timestamp="2026-11-04T20:04:18.586">
+    <testcase name="InitializeMissingFileReturnsFalse" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/q05_state_monitor_test.cpp" line="149" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:04:18.586" classname="Q05StateMonitorTest" />
+    <testcase name="InitializeMalformedJsonReturnsFalse" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/q05_state_monitor_test.cpp" line="160" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:04:18.588" classname="Q05StateMonitorTest" />
+    <testcase name="ConfigReferenceReturnsToObserverAfterEmptyAndPopulatedSuccess" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/q05_state_monitor_test.cpp" line="168" status="run" result="completed" time="0.008" timestamp="2026-11-04T20:04:18.590" classname="Q05StateMonitorTest" />
+    <testcase name="ConfigReferenceReturnsToObserverAfterMidSessionException" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/q05_state_monitor_test.cpp" line="190" status="run" result="completed" time="0.003" timestamp="2026-11-04T20:04:18.598" classname="Q05StateMonitorTest" />
+    <testcase name="InitializeEmptyObjectSucceedsWithNoSessions" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/q05_state_monitor_test.cpp" line="209" status="run" result="completed" time="0.004" timestamp="2026-11-04T20:04:18.602" classname="Q05StateMonitorTest" />
+    <testcase name="InitializeSkipsUnknownSessionTemplate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/q05_state_monitor_test.cpp" line="218" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:04:18.606" classname="Q05StateMonitorTest" />
+    <testcase name="InitializeAssemblesOriginalStateForKnownSessions" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/q05_state_monitor_test.cpp" line="232" status="run" result="completed" time="0.008" timestamp="2026-11-04T20:04:18.608" classname="Q05StateMonitorTest" />
+    <testcase name="RepeatedInitializeReplacesNothingButStaysIdempotentTrue" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/q05_state_monitor_test.cpp" line="261" status="run" result="completed" time="0.018" timestamp="2026-11-04T20:04:18.619" classname="Q05StateMonitorTest" />
+  </testsuite>
+  <testsuite name="R145StateMonitorRunTest" tests="9" failures="0" disabled="1" skipped="0" errors="0" time="407.846" timestamp="2026-11-04T20:04:18.638">
+    <testcase name="HolidaySessionWithoutCommoditiesTransitionsToHoliday" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r145_state_monitor_run_test.cpp" line="42" status="run" result="completed" time="0.04" timestamp="2026-11-04T20:04:18.638" classname="R145StateMonitorRunTest" />
+    <testcase name="CommodityMarkedHolidayDrivesHolidayBranchOfOriginal" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r145_state_monitor_run_test.cpp" line="63" status="run" result="completed" time="0.071" timestamp="2026-11-04T20:04:18.678" classname="R145StateMonitorRunTest" />
+    <testcase name="ClosedSessionAfterConfiguredCloseTime" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r145_state_monitor_run_test.cpp" line="89" status="run" result="completed" time="0.11" timestamp="2026-11-04T20:04:18.750" classname="R145StateMonitorRunTest" />
+    <testcase name="SessionWithoutAuctionReachesInitialized" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r145_state_monitor_run_test.cpp" line="125" status="run" result="completed" time="0.062" timestamp="2026-11-04T20:04:18.861" classname="R145StateMonitorRunTest" />
+    <testcase name="AuctionStartedInsideSectionsReachesReceiving" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r145_state_monitor_run_test.cpp" line="156" status="run" result="completed" time="0.05" timestamp="2026-11-04T20:04:18.924" classname="R145StateMonitorRunTest" />
+    <testcase name="AuctionStartedOutsideSectionsReachesPaused" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r145_state_monitor_run_test.cpp" line="188" status="run" result="completed" time="400.196" timestamp="2026-11-04T20:04:18.974" classname="R145StateMonitorRunTest" />
+    <testcase name="OutsideSectionsPastMarketCloseStillReceivesSettlement" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r145_state_monitor_run_test.cpp" line="223" status="run" result="completed" time="0.024" timestamp="2026-11-04T20:10:59.169" classname="R145StateMonitorRunTest" />
+    <testcase name="EmptyMapRunThenStopJoinsWithoutWriter" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r145_state_monitor_run_test.cpp" line="255" status="run" result="completed" time="7.287" timestamp="2026-11-04T20:10:59.194" classname="R145StateMonitorRunTest" />
+    <testcase name="DISABLED_SecondStopAfterRunThrows" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r145_state_monitor_run_test.cpp" line="278" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="R145StateMonitorRunTest" />
+  </testsuite>
+  <testsuite name="R154StateMonitorStatesTest" tests="6" failures="6" disabled="0" skipped="0" errors="0" time="0.009" timestamp="2026-11-04T20:11:06.491">
+    <testcase name="InitializedThenReceivingStaysReceiving" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_state_monitor_states_test.cpp" line="50" status="run" result="completed" time="0.005" timestamp="2026-11-04T20:11:06.491" classname="R154StateMonitorStatesTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="InitializedOutsideSectionsTransitionsToPaused" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_state_monitor_states_test.cpp" line="80" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:06.496" classname="R154StateMonitorStatesTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="ClosedProcessingProcedThenResetToOriginal" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_state_monitor_states_test.cpp" line="106" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:06.497" classname="R154StateMonitorStatesTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="ClosedBeforeProcTimeFallsBackToPaused" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_state_monitor_states_test.cpp" line="137" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:06.498" classname="R154StateMonitorStatesTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="HolidaySessionStaysHolidayAcrossSecondRound" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_state_monitor_states_test.cpp" line="160" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:06.499" classname="R154StateMonitorStatesTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="InitializedWaitsForAuctionStart" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_state_monitor_states_test.cpp" line="185" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:06.500" classname="R154StateMonitorStatesTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r154_test_util.h:152
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="R164StateMonitorHolidayTest" tests="2" failures="2" disabled="0" skipped="0" errors="0" time="6.013" timestamp="2026-11-04T20:11:06.501">
+    <testcase name="AuctionStartedSessionStaysReceiving" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp" line="79" status="run" result="completed" time="6.011" timestamp="2026-11-04T20:11:06.501" classname="R164StateMonitorHolidayTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp:50&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp:50
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp:104&#x0A;Value of: r164::wait_state(mon, &quot;AUCREC&quot;, SS_RECEIVING)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;首轮未由 auction 分支进入 SS_RECEIVING&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp:104
+Value of: r164::wait_state(mon, "AUCREC", SS_RECEIVING)
+  Actual: false
+Expected: true
+首轮未由 auction 分支进入 SS_RECEIVING
+]]></failure>
+    </testcase>
+    <testcase name="HolidayInstrumentStaysHolidayAcrossSecondRound" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp" line="122" status="run" result="completed" time="0.002" timestamp="2026-11-04T20:11:12.521" classname="R164StateMonitorHolidayTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp:50&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp:50
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp:141&#x0A;Value of: _bdMgr.isTradingDate(&quot;SHFE.HA&quot;, today)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r164_state_monitor_holiday_test.cpp:141
+Value of: _bdMgr.isTradingDate("SHFE.HA", today)
+  Actual: true
+Expected: false
+]]></failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="R174StateInfoSectionsTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2026-11-04T20:11:12.523">
+    <testcase name="HalfOpenBoundsAndEmptySections" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r174_state_monitor_queries_test.cpp" line="78" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.523" classname="R174StateInfoSectionsTest" />
+  </testsuite>
+  <testsuite name="R174StateMonitorQueryTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="0.001" timestamp="2026-11-04T20:11:12.523">
+    <testcase name="InitializedMapHitAndMissThroughMemberPointers" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r174_state_monitor_queries_test.cpp" line="106" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.523" classname="R174StateMonitorQueryTest" />
+  </testsuite>
+  <testsuite name="R174StateMonitorEmptyQueryTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2026-11-04T20:11:12.525">
+    <testcase name="EmptyMapQueriesAreVacuous" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r174_state_monitor_queries_test.cpp" line="134" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.525" classname="R174StateMonitorEmptyQueryTest" />
+  </testsuite>
+  <testsuite name="R44StateMonitorLifecycleTest" tests="6" failures="0" disabled="2" skipped="0" errors="0" time="0.003" timestamp="2026-11-04T20:11:12.525">
+    <testcase name="StopBeforeRunIsSafeAndIdempotent" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_state_monitor_lifecycle_test.cpp" line="104" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.525" classname="R44StateMonitorLifecycleTest" />
+    <testcase name="MissingFileWithNullBdMgrReturnsBeforeDeref" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_state_monitor_lifecycle_test.cpp" line="130" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.526" classname="R44StateMonitorLifecycleTest" />
+    <testcase name="EmptyConfigFileReturnsFalse" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_state_monitor_lifecycle_test.cpp" line="140" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.527" classname="R44StateMonitorLifecycleTest" />
+    <testcase name="EmptySessionKeyIsSkippedButValidSessionAssembles" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_state_monitor_lifecycle_test.cpp" line="151" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.527" classname="R44StateMonitorLifecycleTest" />
+    <testcase name="DISABLED_ReinitializeSemanticsNeedContract" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_state_monitor_lifecycle_test.cpp" line="166" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="R44StateMonitorLifecycleTest" />
+    <testcase name="DISABLED_InitializeCrashesWithNullBdMgr" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_state_monitor_lifecycle_test.cpp" line="181" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="R44StateMonitorLifecycleTest" />
+  </testsuite>
+  <testsuite name="R22StateMonitorStop" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="0.301" timestamp="2026-11-04T20:11:12.529">
+    <testcase name="RunningWorkerObservesStopAcrossThreads" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r44_state_monitor_lifecycle_test.cpp" line="118" status="run" result="completed" time="0.3" timestamp="2026-11-04T20:11:12.529" classname="R22StateMonitorStop" />
+  </testsuite>
+  <testsuite name="R5StateMonitorBdtTest" tests="14" failures="13" disabled="1" skipped="0" errors="0" time="0.019" timestamp="2026-11-04T20:11:12.830">
+    <testcase name="SessionCommsPresentOverwritesSeededTradingDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="236" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.830" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="SessionWithoutCommsKeepsSeededTradingDate" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="263" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.832" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="TodayAsHolidayDrivesHolidayLogBranchOfInitLoop" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="290" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.834" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="FifteenCharSessionIdFitsStateKeyBuffer" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="308" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.835" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="MissingTimeFieldsDefaultToZeroAndStillAssembleSections" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="325" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.837" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="ReinitializeWithExtraSessionGrowsStateTable" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="340" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.839" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="SessionWithoutAuctionKeepsOnlyTradingSections" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="358" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.840" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="373" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.842" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="438" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.843" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="CrossMidnightPaddingOverlapCollapsesToFullDay" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="476" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.845" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="ZeroStartSectionUsesClampedMidnightPadding" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="526" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.846" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="NonObjectEntriesDegradeToDefaultTimes" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="579" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.848" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="MixedKnownAndUnknownSessionsKeepTableConsistent" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="596" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.848" classname="R5StateMonitorBdtTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209&#x0A;Value of: _bdMgr.loadSessions((_dir / &quot;sessions.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp:209
+Value of: _bdMgr.loadSessions((_dir / "sessions.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="DISABLED_StateMachineAdvanceNeedsInjectableClockSeam" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r5_state_monitor_bdt_test.cpp" line="625" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="R5StateMonitorBdtTest" />
+  </testsuite>
+  <testsuite name="R68StateMonitorInputsTest" tests="4" failures="2" disabled="0" skipped="0" errors="0" time="0.003" timestamp="2026-11-04T20:11:12.849">
+    <testcase name="JsonNullMemberIsTreatedAsAbsent" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r68_state_monitor_inputs_test.cpp" line="87" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.849" classname="R68StateMonitorInputsTest" />
+    <testcase name="NumericSessionEntryDefaultsTimesToZero" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r68_state_monitor_inputs_test.cpp" line="105" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.850" classname="R68StateMonitorInputsTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r68_state_monitor_inputs_test.cpp:109&#x0A;Value of: mon.initialize(cfg.string().c_str(), &amp;_bdMgr, nullptr)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r68_state_monitor_inputs_test.cpp:109
+Value of: mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="BooleanSessionEntryDefaultsTimesToZero" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r68_state_monitor_inputs_test.cpp" line="121" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.852" classname="R68StateMonitorInputsTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r68_state_monitor_inputs_test.cpp:125&#x0A;Value of: mon.initialize(cfg.string().c_str(), &amp;_bdMgr, nullptr)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r68_state_monitor_inputs_test.cpp:125
+Value of: mon.initialize(cfg.string().c_str(), &_bdMgr, nullptr)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="EmptyFilenameReturnsFalseBeforeConfigLoad" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r68_state_monitor_inputs_test.cpp" line="136" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.852" classname="R68StateMonitorInputsTest" />
+  </testsuite>
+  <testsuite name="R84bStateMonitorPositiveOffsetTest" tests="8" failures="7" disabled="1" skipped="0" errors="0" time="0.006" timestamp="2026-11-04T20:11:12.853">
+    <testcase name="PositiveOffsetSingleCommodityTodayHoliday" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp" line="164" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.853" classname="R84bStateMonitorPositiveOffsetTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="PositiveOffsetMultipleCommoditiesShareHoliday" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp" line="192" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.854" classname="R84bStateMonitorPositiveOffsetTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="TwoPositiveSessionsUseIndependentHolidayTemplates" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp" line="225" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.854" classname="R84bStateMonitorPositiveOffsetTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="PositiveOffsetAcrossMidnightWithHoliday" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp" line="252" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.855" classname="R84bStateMonitorPositiveOffsetTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="PositiveOffsetNonObjectEntryDefaultsTimes" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp" line="279" status="run" result="completed" time="0.001" timestamp="2026-11-04T20:11:12.856" classname="R84bStateMonitorPositiveOffsetTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="PositiveOffsetMixedWithUnknownSession" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp" line="301" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.858" classname="R84bStateMonitorPositiveOffsetTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="PositiveOffsetSessionWithoutCommoditiesSkipsDateLoop" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp" line="325" status="run" result="completed" time="0." timestamp="2026-11-04T20:11:12.859" classname="R84bStateMonitorPositiveOffsetTest">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121&#x0A;Value of: _bdMgr.loadCommodities((_dir / &quot;commodities.json&quot;).string().c_str())&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp:121
+Value of: _bdMgr.loadCommodities((_dir / "commodities.json").string().c_str())
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="DISABLED_NullSessionIdContractUnproven" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/r84b_state_monitor_positive_offset_test.cpp" line="343" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="R84bStateMonitorPositiveOffsetTest" />
+  </testsuite>
+</testsuites>

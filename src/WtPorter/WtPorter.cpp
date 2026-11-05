@@ -9,6 +9,7 @@
  */
 #include "WtPorter.h"
 #include "WtRtRunner.h"
+#include "ExpHftContext.h"
 
 #include "../WtCore/WtHelper.h"
 #include "../WTSTools/WTSLogger.h"
@@ -16,6 +17,7 @@
 #include "../Includes/WTSVersion.h"
 
 #include <cstring>
+#include <limits>
 #include <exception>
 
 namespace
@@ -108,6 +110,19 @@ WtRtRunner& getRunner()
 {
 	static WtRtRunner runner;
 	return runner;
+}
+
+/*
+ * I03-NEW-128 (card 4a): the cta/sel/hft engine getters are reachable before
+ * config_porter() has created an engine. Each one reports "not ready" with a
+ * diagnostic and returns its failure value (0) instead of dereferencing NULL.
+ */
+static WtEngine* ready_engine(const char* entry)
+{
+	WtEngine* engine = getRunner().getEngine();
+	if (engine == NULL)
+		WTSLogger::error("{} called before the engine is configured (config_porter); not ready, returning 0", entry);
+	return engine;
 }
 
 
@@ -320,6 +335,11 @@ int32_t exec_clear_failed_unit_init_status_v2(uint32_t engine_type,
  */
 void register_ext_data_loader(FuncLoadFnlBars fnlBarLoader, FuncLoadRawBars rawBarLoader, FuncLoadAdjFactors fctLoader, FuncLoadRawTicks tickLoader)
 {
+	// BUG-R134-004: no data manager path requests ticks from an external
+	// loader (IHisDataLoader has no tick entry), so a tick loader is never
+	// called. Make that observable instead of silently accepting it.
+	if (tickLoader != NULL)
+		WTSLogger::warn("External tick loader is not supported by the live runner and will never be called");
 	getRunner().registerExtDataLoader(fnlBarLoader, rawBarLoader, fctLoader, tickLoader);
 }
 
@@ -428,6 +448,17 @@ void run_porter(bool bAsync)
 void release_porter()
 {
 	getRunner().release();
+}
+
+int32_t resume_account_trading(WtString traderId, WtString operatorId, WtString reason,
+	WtUInt64 expectedGeneration, WtString reference)
+{
+	return getRunner().resumeAccountTrading(traderId, operatorId, reason, expectedGeneration, reference);
+}
+
+WtUInt64 get_account_pause_generation(WtString traderId)
+{
+	return getRunner().getAccountPauseGeneration(traderId);
 }
 
 /**
@@ -1001,7 +1032,8 @@ WtString cta_get_last_entertag(CtxHandler cHandle, const char* stdCode)
  */
 double cta_get_price(const char* stdCode)
 {
-	return getRunner().getEngine()->get_cur_price(stdCode);
+	WtEngine* engine = ready_engine("cta_get_price");
+	return engine == NULL ? 0.0 : engine->get_cur_price(stdCode);
 }
 
 /**
@@ -1016,7 +1048,8 @@ double cta_get_price(const char* stdCode)
  */
 double cta_get_day_price(const char* stdCode, int flag)
 {
-	return getRunner().getEngine()->get_day_price(stdCode, flag);
+	WtEngine* engine = ready_engine("cta_get_day_price");
+	return engine == NULL ? 0.0 : engine->get_day_price(stdCode, flag);
 }
 
 /**
@@ -1027,7 +1060,8 @@ double cta_get_day_price(const char* stdCode, int flag)
  */
 WtUInt32 cta_get_tdate()
 {
-	return getRunner().getEngine()->get_trading_date();
+	WtEngine* engine = ready_engine("cta_get_tdate");
+	return engine == NULL ? 0 : engine->get_trading_date();
 }
 
 /**
@@ -1038,7 +1072,8 @@ WtUInt32 cta_get_tdate()
  */
 WtUInt32 cta_get_date()
 {
-	return getRunner().getEngine()->get_date();
+	WtEngine* engine = ready_engine("cta_get_date");
+	return engine == NULL ? 0 : engine->get_date();
 }
 
 /**
@@ -1049,7 +1084,8 @@ WtUInt32 cta_get_date()
  */
 WtUInt32 cta_get_time()
 {
-	return getRunner().getEngine()->get_min_time();
+	WtEngine* engine = ready_engine("cta_get_time");
+	return engine == NULL ? 0 : engine->get_min_time();
 }
 
 /**
@@ -1359,7 +1395,8 @@ void sel_log_text(CtxHandler cHandle, WtUInt32 level, const char* message)
  */
 double sel_get_price(const char* stdCode)
 {
-	return getRunner().getEngine()->get_cur_price(stdCode);
+	WtEngine* engine = ready_engine("sel_get_price");
+	return engine == NULL ? 0.0 : engine->get_cur_price(stdCode);
 }
 
 /**
@@ -1370,7 +1407,8 @@ double sel_get_price(const char* stdCode)
  */
 WtUInt32 sel_get_date()
 {
-	return getRunner().getEngine()->get_date();
+	WtEngine* engine = ready_engine("sel_get_date");
+	return engine == NULL ? 0 : engine->get_date();
 }
 
 /**
@@ -1381,7 +1419,8 @@ WtUInt32 sel_get_date()
  */
 WtUInt32 sel_get_time()
 {
-	return getRunner().getEngine()->get_min_time();
+	WtEngine* engine = ready_engine("sel_get_time");
+	return engine == NULL ? 0 : engine->get_min_time();
 }
 
 /**
@@ -1553,7 +1592,8 @@ void sel_sub_ticks(CtxHandler cHandle, const char* stdCode)
  */
 double sel_get_day_price(const char* stdCode, int flag)
 {
-	return getRunner().getEngine()->get_day_price(stdCode, flag);
+	WtEngine* engine = ready_engine("sel_get_day_price");
+	return engine == NULL ? 0.0 : engine->get_day_price(stdCode, flag);
 }
 
 /**
@@ -1565,7 +1605,8 @@ double sel_get_day_price(const char* stdCode, int flag)
  */
 WtUInt32 sel_get_tdate()
 {
-	return getRunner().getEngine()->get_trading_date();
+	WtEngine* engine = ready_engine("sel_get_tdate");
+	return engine == NULL ? 0 : engine->get_trading_date();
 }
 
 /**
@@ -1876,6 +1917,47 @@ double hft_get_undone(CtxHandler cHandle, const char* stdCode)
 	return ctx->stra_get_undone(stdCode);
 }
 
+namespace
+{
+	// BUG-R42-002: resolve a bound export context or report a distinguishable
+	// status. A failed query never presents 0 as a legal quantity.
+	int32_t resolve_hft_qty_context(CtxHandler cHandle, const char* stdCode, double* outQty,
+		HftContextPtr& ctx)
+	{
+		if (outQty != NULL)
+			*outQty = std::numeric_limits<double>::quiet_NaN();
+		if (outQty == NULL || stdCode == NULL || stdCode[0] == '\0')
+			return WT_HFT_QTY_INVALID_ARGUMENT_V2;
+		ctx = getRunner().getHftContext(cHandle);
+		if (ctx == NULL)
+			return WT_HFT_QTY_UNKNOWN_CONTEXT_V2;
+		ExpHftContext* exported = dynamic_cast<ExpHftContext*>(ctx.get());
+		if (exported == NULL || !exported->isTraderBound())
+			return WT_HFT_QTY_TRADER_UNBOUND_V2;
+		return WT_HFT_QTY_OK_V2;
+	}
+}
+
+int32_t hft_get_position_v2(CtxHandler cHandle, const char* stdCode, bool bOnlyValid, double* outQty)
+{
+	HftContextPtr ctx;
+	const int32_t status = resolve_hft_qty_context(cHandle, stdCode, outQty, ctx);
+	if (status != WT_HFT_QTY_OK_V2)
+		return status;
+	*outQty = ctx->stra_get_position(stdCode, bOnlyValid);
+	return WT_HFT_QTY_OK_V2;
+}
+
+int32_t hft_get_undone_v2(CtxHandler cHandle, const char* stdCode, double* outQty)
+{
+	HftContextPtr ctx;
+	const int32_t status = resolve_hft_qty_context(cHandle, stdCode, outQty, ctx);
+	if (status != WT_HFT_QTY_OK_V2)
+		return status;
+	*outQty = ctx->stra_get_undone(stdCode);
+	return WT_HFT_QTY_OK_V2;
+}
+
 /**
  * @brief 获取高频策略合约当前价格
  * @param stdCode 合约代码
@@ -1887,7 +1969,8 @@ double hft_get_undone(CtxHandler cHandle, const char* stdCode)
  */
 double hft_get_price(const char* stdCode)
 {
-	return getRunner().getEngine()->get_cur_price(stdCode);
+	WtEngine* engine = ready_engine("hft_get_price");
+	return engine == NULL ? 0.0 : engine->get_cur_price(stdCode);
 }
 
 /**
@@ -1899,7 +1982,8 @@ double hft_get_price(const char* stdCode)
  */
 WtUInt32 hft_get_date()
 {
-	return getRunner().getEngine()->get_date();
+	WtEngine* engine = ready_engine("hft_get_date");
+	return engine == NULL ? 0 : engine->get_date();
 }
 
 /**
@@ -1911,7 +1995,8 @@ WtUInt32 hft_get_date()
  */
 WtUInt32 hft_get_time()
 {
-	return getRunner().getEngine()->get_raw_time();
+	WtEngine* engine = ready_engine("hft_get_time");
+	return engine == NULL ? 0 : engine->get_raw_time();
 }
 
 /**
@@ -1923,7 +2008,8 @@ WtUInt32 hft_get_time()
  */
 WtUInt32 hft_get_secs()
 {
-	return getRunner().getEngine()->get_secs();
+	WtEngine* engine = ready_engine("hft_get_secs");
+	return engine == NULL ? 0 : engine->get_secs();
 }
 
 /**

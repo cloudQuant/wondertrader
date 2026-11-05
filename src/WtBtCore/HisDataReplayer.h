@@ -12,6 +12,7 @@
 #pragma once
 #include <atomic>
 #include <map>
+#include <mutex>
 #include <string>
 #include <set>
 #include <utility>
@@ -22,9 +23,12 @@
 #include "../Includes/FasterDefs.h"
 #include "../Includes/WTSMarcos.h"
 #include "../Includes/WTSTypes.h"
+#include "../Includes/WTSDataDef.hpp"
 
 #include "../WTSTools/WTSHotMgr.h"
 #include "../WTSTools/WTSBaseDataMgr.h"
+#include "../Share/FeeSchedule.hpp"
+#include "../Includes/ReplayStatusV1.h"
 
 NS_WTP_BEGIN
 class WTSTickData;
@@ -36,6 +40,7 @@ class WTSOrdQueSlice;
 class WTSTransSlice;
 class WTSSessionInfo;
 class WTSCommodityInfo;
+class WTSContractInfo;
 
 class WTSOrdDtlData;
 class WTSOrdQueData;
@@ -288,7 +293,9 @@ private:
 		std::size_t		_query_cursor;	///< 历史查询游标，与回放事件游标隔离
 		std::size_t		_count;	///< 数据项总数
 
-		std::vector<T> _items;	///< 数据项存储容器
+		// 卡11=B：写时复制容器。切片持有当前缓冲区 owner，跨交易日重载/clear_cache
+		// 只替换或释放缓存这一份引用，已借出的切片在 release 前保持有效。
+		WTSSharedBuffer<std::vector<T>> _items;	///< 数据项存储容器
 
 		/**
 		 * @brief 构造函数
@@ -303,7 +310,7 @@ private:
 	typedef wt_hashmap<std::string, HftDataList<WTSTransStruct>>	TransCache;
 
 	// Replay buckets are deliberately separate from the query caches above:
-	// WTSTick/Level2 slices borrow pointers into those query-cache vectors.
+	// WTSTick/Level2 slices share ownership of those query-cache buffers (card 11=B).
 	template <typename T>
 	using ReplayDateCache = std::map<uint32_t, HftDataList<T>>;
 	template <typename T>
@@ -332,6 +339,8 @@ private:
 		bool			_notify_close;	// true only for a series explicitly requested by strategy code
 
 		std::vector<WTSBarStruct>	_bars;
+		// Optional per-bar physical raw code; empty means provenance unknown.
+		std::vector<std::string> _physical_sources;
 		double			_factor;	//最后一条复权因子
 
 		uint32_t		_untouch_days;	//未用到的天数
@@ -605,6 +614,10 @@ private:
 	 * @return false 数据不存在
 	 */
 	inline bool		checkTicks(const char* stdCode, uint32_t uDate);
+	/// P04-011：从与 checkTicks 相同的数据源装载指定交易日的查询桶（不触碰 _ticks_cache）
+	bool		loadTickQueryBucket(HftDataList<WTSTickStruct>& list, const char* stdCode, uint32_t uDate);
+	/// P04-011：历史查询使用的品种自身交易日（按回放时钟映射；无品种时为全局交易日；映射失败返回 0 并记错误）
+	uint32_t	query_trading_date(const char* stdCode);
 
 	/**
 	 * @brief 检查指定合约在指定交易日的委托明细数据是否存在
@@ -962,13 +975,30 @@ public:
 	 */
 	uint32_t get_trading_date() const{ return _cur_tdate; }
 
+	// A running replay rejects reload without changing its schedule. Once a
+	// reload starts, failure invalidates the previous schedule.
+	bool loadFeesChecked(const char* filename);
+	// On failure, out is unchanged. Continuous subscriptions require the actual
+	// verified fill contract; context is an owning value snapshot.
+	bool prepare_fee_context(const char* stdCode, const WTSContractInfo* fillContract, wt_fee::Context& out, std::string& error);
+	void report_fee_error(const std::string& message);
+	std::string fee_error() const;
+	WtReplayStatusV1 replay_status() const;
+	// BUG-I02-NEW-029 (E): HFT records outside the code's trading session are
+	// neither dispatched nor reconciled; this counts them per stream kind
+	// (0 order detail, 1 transaction, 2 tick, 3 order queue) since prepare().
+	uint64_t get_out_of_session_count(uint32_t kind) const;
+	// Active runs record their first error; finalizing calls are ignored.
+	// Outside a run this sets the legacy abort flag without changing status.
+	void report_replay_error(uint32_t errorCode, const std::string& message);
+
 	/**
 	 * @brief 计算交易费用
 	 * @param stdCode 标准合约代码
 	 * @param price 交易价格
 	 * @param qty 交易数量
 	 * @param offset 开平仓标记（0-开仓，1-平仓，2-平今）
-	 * @return 计算出的交易费用
+	 * @return 计算出的交易费用；缺失来源、费率或无效计算返回 NaN
 	 * @details 根据交易品种、价格、数量和开平仓标志计算交易费用
 	 */
 	double calc_fee(const char* stdCode, double price, double qty, uint32_t offset);
@@ -1090,14 +1120,25 @@ private:
 	bool apply_time_range(const char* stime, const char* etime, const char* source);
 	uint64_t get_daily_bar_close_time(const BarsListPtr& barsList, const WTSBarStruct& bar);
 
+	// BUG-R12-13（卡1 路径 A）：回放经具体基础数据管理器的 checked 映射；失败记录状态并返回 0
+	// （调用方已对 0 中止回放），不再以旧接口的哨兵/兜底值区分失败。
+	uint32_t checked_trading_date(const char* commId, uint32_t date, uint32_t time);
+	uint64_t checked_boundary_time(const char* commId, uint32_t tradingDate, bool isStart);
+	uint32_t checked_next_tdate(const char* commId, uint32_t tradingDate);
+	uint32_t checked_prev_tdate(const char* commId, uint32_t tradingDate);
+
 	IDataSink*		_listener;		///< 数据接收器指针，用于接收回放数据
 	IBtDataLoader*	_bt_loader;		///< 回测数据加载器指针，用于加载历史数据
 	std::string		_stra_name;		///< 策略名称
 
 	TickCache		_ticks_cache;		///< Tick数据缓存，存储逐笔行情数据
+	TickCache		_tick_query_cache;	///< P04-011：按品种交易日的历史查询桶，不改写派发共用的 _ticks_cache
 	OrdDtlCache		_orddtl_cache;	///< 委托明细缓存，存储高级别委托数据
 	OrdQueCache		_ordque_cache;	///< 委托队列缓存，存储市场深度数据
 	TransCache		_trans_cache;	///< 成交数据缓存，存储逐笔成交数据
+	OrdDtlCache		_orddtl_query_cache;	///< P04-011：按品种交易日的委托明细查询桶
+	OrdQueCache		_ordque_query_cache;	///< P04-011：按品种交易日的委托队列查询桶
+	TransCache		_trans_query_cache;		///< P04-011：按品种交易日的逐笔成交查询桶
 	ReplayHftCache<WTSTickStruct>	_replay_ticks_cache;	///< 独立回放Tick桶，不影响历史查询切片
 	ReplayHftCache<WTSOrdDtlStruct>	_replay_orddtl_cache;	///< 独立回放委托明细桶
 	ReplayHftCache<WTSOrdQueStruct>	_replay_ordque_cache;	///< 独立回放委托队列桶
@@ -1118,6 +1159,9 @@ private:
 	std::set<std::string> _bar_real_tick_codes;	///< 当前主K区间已派发真实Tick的合约；这些合约跳过该区间OHLC模拟
 	uint64_t		_last_replay_hft_time { 0 };
 	bool			_has_last_replay_hft_time { false };
+	bool            _has_dispatched_hft_event { false };
+	std::atomic<uint64_t> _hft_out_of_session[4] {};	///< NEW-029: skipped out-of-session records per stream kind
+	std::set<std::string> _hft_out_of_session_logged;	///< NEW-029: stream#code#date already reported once
 	// Replay scheduling is monotonic in natural time. Keep completed half-open
 	// chunks for only the latest natural date; an older request must reset first.
 	uint32_t		_replay_completed_natural_date { 0 };
@@ -1212,6 +1256,17 @@ private:
 	 */
 	typedef wt_hashmap<std::string, FeeItem>	FeeMap;
 	FeeMap		_fee_map;		///< 品种手续费设置映射表
+	wt_fee::Schedule _fee_schedule;
+	mutable std::mutex _replay_status_mutex;
+	WtReplayStatusV1 _replay_status { sizeof(WtReplayStatusV1), 1, 0, WT_REPLAY_IDLE, WT_REPLAY_ERROR_NONE, 0, {0} };
+	bool _replay_finishing = false;
+	bool _replay_stop_requested = false;
+	uint32_t _replay_failure_code = WT_REPLAY_ERROR_NONE;
+	std::string _replay_failure_message;
+	void finish_replay();
+	mutable std::mutex _fee_error_mutex;
+	std::string _fee_error;
+	WTSContractInfo* resolve_fee_contract(const char* stdCode, const char* rawCode, const char* exchange, uint32_t tradingDate);
 
 	//////////////////////////////////////////////////////////////////////////
 	//
@@ -1270,5 +1325,19 @@ private:
 	EventNotifier*	_notifier;		///< 事件通知器，用于处理回测过程中的事件
 
 	HisDataMgr		_his_dt_mgr;	///< 历史数据管理器，管理历史行情数据
+
+	// The event cursor also advances over filtered records. Keep an independent
+	// owned snapshot only after a tick has actually been dispatched.
+	struct DispatchedTickSnapshot
+	{
+		uint32_t tradingDate;
+		WTSTickStruct tick;
+		bool adjustedSource;
+		std::string physicalCode;
+		std::string exchange;
+	};
+	std::mutex _dispatched_ticks_mutex;
+	std::set<std::string> _dispatched_tick_subscriptions;
+	wt_hashmap<std::string, DispatchedTickSnapshot> _last_dispatched_ticks;
 };
 

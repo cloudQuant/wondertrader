@@ -1,0 +1,533 @@
+{
+ "BUG-L03-002": {
+  "post_class": "B",
+  "note": "最终复核修复：缺 trademode 诊断正反控（S1TradeModeDefault）",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests",
+    "test": "S1TradeModeDefault.*"
+   }
+  ]
+ },
+ "BUG-P01-004": {
+  "post_class": "B",
+  "note": "最终复核修复：K45 恢复期 bad_alloc 注入正反控",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "R42CtaPersistTest.K45*"
+   }
+  ]
+ },
+ "BUG-R10-004": {
+  "post_class": "B",
+  "note": "最终复核修复：三引擎 run() 防重复与 SEL tick 隔离；K25 补测",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S1EngineRunGuard.*"
+   },
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S1K25SelIsolation.*"
+   }
+  ]
+ },
+ "BUG-R41-003": {
+  "post_class": "B",
+  "note": "最终复核修复：K24 有界停止迁入 coverage（S1K24NotifierStop）",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S1K24NotifierStop.*"
+   }
+  ]
+ },
+ "BUG-P02-005": {
+  "post_class": "B",
+  "note": "最终复核修复：K05 账户级在途合计与原子复核+卡8 整手拒绝四插件",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S1TraderEntryGate.K05*"
+   },
+   {
+    "binary": "CoverageTests_t_TraderCTPMini",
+    "test": "I03S5TraderCTPMini.Card8*"
+   },
+   {
+    "binary": "CoverageTests_t_TraderCTPOpt",
+    "test": "R61_TraderCTPOpt.card8_*"
+   },
+   {
+    "binary": "CoverageTests_t_TraderFemas",
+    "test": "R93FemasTest.card8_*"
+   },
+   {
+    "binary": "CoverageTests_t_TraderYD",
+    "test": "R93YdTest.card8_*"
+   }
+  ]
+ },
+ "BUG-R202-003": {
+  "post_class": "B",
+  "note": "最终复核修复：K05 同上",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S1TraderEntryGate.K05*"
+   }
+  ]
+ },
+ "R2_wtbtcore#2": {
+  "post_class": "A",
+  "note": "最终复核修复：返回复权因子断言",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_btcore",
+    "test": "R91Fixture.R2AdjFactors_*"
+   }
+  ]
+ },
+ "BUG-R100-003": {
+  "post_class": "A",
+  "note": "最终复核修复：2032 上限文档化（docs/data_engine.md）"
+ },
+ "BUG-R32-003": {
+  "post_class": "A",
+  "note": "最终复核修复：同 R100-003"
+ },
+ "BUG-R100-004": {
+  "post_class": "B",
+  "note": "最终复核修复：跨进程 RDM 未发布槽不可见用例",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests",
+    "test": "I03S2R100RdmCrossProcess.*"
+   }
+  ]
+ },
+ "BUG-R132-001": {
+  "post_class": "B",
+  "note": "最终复核修复：解压预算宿主可配置（回放器/BtDtReader/写端/实盘读端）",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests",
+    "test": "I03R132*"
+   },
+   {
+    "binary": "CoverageTests",
+    "test": "S4R132LiveReaderBudget.*"
+   },
+   {
+    "binary": "CoverageTests_btcore",
+    "test": "I03R132ReplayerBudget.*"
+   }
+  ]
+ },
+ "BUG-P10-001": {
+  "post_class": "A",
+  "note": "最终复核修复：最终 ASan 运行"
+ },
+ "BUG-P10-006": {
+  "post_class": "B",
+  "note": "最终复核修复：WtDataWriter dumper 并发用例",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests",
+    "test": "I03S2P10006DumperConcurrency.*"
+   }
+  ]
+ },
+ "BUG-P10-007": {
+  "post_class": "A",
+  "note": "最终复核修复：最终 TSan 运行"
+ },
+ "BUG-R18-011": {
+  "post_class": "B",
+  "note": "最终复核修复：ParserShm acquire 栅栏+跨进程用例；慢消费者溢出未裁定",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_t_ParserShm",
+    "test": "I03S2ShmCrossProcess.*"
+   },
+   {
+    "binary": "CoverageTests_dtcore",
+    "test": "I03S2ShmCasterCrossProcess.*"
+   }
+  ]
+ },
+ "BUG-R104-002": {
+  "post_class": "A",
+  "note": "最终复核修复：K13/K14 其余宿主 required+WtRunner 回滚",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_m_WtRunner",
+    "test": "I03S2K1*"
+   },
+   {
+    "binary": "CoverageTests_porter",
+    "test": "I03S2K13*"
+   },
+   {
+    "binary": "CoverageTests_m_WtUftRunner",
+    "test": "I03S2K13*"
+   },
+   {
+    "binary": "CoverageTests",
+    "test": "I03S2K13*"
+   },
+   {
+    "binary": "CoverageTests_dtservo",
+    "test": "I03S2K13*"
+   }
+  ]
+ },
+ "BUG-R13-004": {
+  "post_class": "B",
+  "note": "最终复核修复：K27 触发正控+公开 API 端到端",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S3K27SelPeriodFire.*"
+   },
+   {
+    "binary": "CoverageTests_porter",
+    "test": "S3R13SelPublicSchedule.*"
+   }
+  ]
+ },
+ "BUG-N05-003": {
+  "post_class": "B",
+  "note": "最终复核修复：K41 加载期诊断正反控",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_execv2",
+    "test": "S3K41IdentityDiagnostic.*"
+   }
+  ]
+ },
+ "BUG-I02-NEW-008": {
+  "post_class": "B",
+  "note": "最终复核修复：两 Diff 执行器同账户端到端+StockVWap owner 视图",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S4TwoDiffOwnerRouting.*"
+   },
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S4StockVWapOwnerE2E.*"
+   }
+  ]
+ },
+ "BUG-I02-NEW-032": {
+  "post_class": "A",
+  "note": "最终复核修复：最终 ASan 运行"
+ },
+ "BUG-I02-NEW-033": {
+  "post_class": "B",
+  "note": "最终复核修复：夹具注入点修正",
+  "extra_fixtures": [
+   "hft_factory_quarantine"
+  ]
+ },
+ "BUG-I02-NEW-082": {
+  "post_class": "A",
+  "note": "最终复核修复：损坏块不污染缓存正反控",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests",
+    "test": "Q03RdmKlineTest.day_damaged_block_leaves_no_cache_entry"
+   }
+  ]
+ },
+ "BUG-I02-NEW-096": {
+  "post_class": "A",
+  "note": "最终复核修复：重查 B（红控为部分）"
+ },
+ "BUG-I02-NEW-154": {
+  "post_class": "B",
+  "note": "最终复核修复：K42 迁移 CTP/CTPMini/CTPOpt/Femas/XTP/YD",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_t_TraderCTPMini",
+    "test": "S4CTPMiniQueryStatus.*"
+   },
+   {
+    "binary": "CoverageTests_t_TraderCTPOpt",
+    "test": "S4CTPOptQueryStatus.*"
+   },
+   {
+    "binary": "CoverageTests_t_TraderFemas",
+    "test": "S4FemasQueryStatus.*"
+   },
+   {
+    "binary": "CoverageTests_t_TraderYD",
+    "test": "R93YdTest.k42_*"
+   },
+   {
+    "binary": "CoverageTests_t_TraderXTP",
+    "test": "TraderXTPTest.k42_*"
+   }
+  ]
+ },
+ "BUG-I02-NEW-155": {
+  "post_class": "A",
+  "note": "最终复核修复：K26 生命周期用例",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S4K26Lifecycle.*"
+   }
+  ]
+ },
+ "BUG-I02-NEW-026": {
+  "post_class": "D",
+  "note": "工作日路径与夹具缺陷已修；周末/正偏移会话合同不确定，卡15 用户指示忽略（子项）"
+ },
+ "T3-015": {
+  "post_class": "E",
+  "note": "GetTradingDay 失效登录后恢复策略待用户裁定（建议 A=现实现）；真实 CTPMini SDK 合同外部"
+ },
+ "BUG-L01-014": {
+  "allow_skip": true
+ },
+ "I03-NEW-017": {
+  "allow_skip": true
+ },
+ "BUG-R54-001": {
+  "allow_skip": true
+ },
+ "I03-NEW-029": {
+  "allow_skip": true
+ },
+ "BUG-R18-006": {
+  "allow_skip": true
+ },
+ "BUG-R22-002": {
+  "allow_skip": true
+ },
+ "BUG-R7-002": {
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_execv2",
+    "test": "*"
+   }
+  ]
+ },
+ "I03-NEW-107": {
+  "no_test_ok": true,
+  "note": "证据为最终干净构建 -Werror 0 告警"
+ },
+ "I03-NEW-013": {
+  "no_test_ok": true,
+  "note": "证据为最终干净构建 -Werror 0 告警"
+ },
+ "I03-NEW-003": {
+  "post_class": "A",
+  "note": "最终复核修复：跨实例探针按 K16=A 改写；其余宿主 required 由 R104-002 实施"
+ },
+ "I03-NEW-005": {
+  "post_class": "A",
+  "note": "最终复核修复：WtCore 宿主 K03 NOT_SENT 后存活回报暂停账户（S1TraderEntryGate.K03*）；UFT 按 K07a 不建账户门禁",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S1TraderEntryGate.K03*"
+   }
+  ]
+ },
+ "I03-NEW-006": {
+  "post_class": "A",
+  "note": "最终复核修复：WtCore 与 UFT 无 journal 时校验时钟快照 fail-closed",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S1TraderEntryGate.New006*"
+   },
+   {
+    "binary": "CoverageTests_uftcore",
+    "test": "S1New006UftOrderClock.*"
+   }
+  ]
+ },
+ "I03-NEW-009": {
+  "post_class": "A",
+  "note": "最终复核修复：UDP 未知帧/越界帧长用例",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_t_ParserXeleSkt",
+    "test": "R76ParserXeleSktUdpFrameTest.*"
+   }
+  ]
+ },
+ "I03-NEW-012": {
+  "post_class": "A",
+  "note": "最终复核修复：根因 11-04 已修（测试缺陷）；改前 125/300 失败，现 300 次进程内 0 失败、300 次独立进程 0 失败"
+ },
+ "I03-NEW-025": {
+  "post_class": "A",
+  "note": "最终复核修复：-I /opt/homebrew/include 配置下 sign-compare 43 文件 107 处修至 0",
+  "no_test_ok": true
+ },
+ "I03-NEW-038": {
+  "post_class": "A",
+  "note": "最终复核修复：写端/读端日志有界格式化",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests",
+    "test": "I03New038*"
+   }
+  ]
+ },
+ "I03-NEW-039": {
+  "post_class": "A",
+  "note": "最终复核修复：24 处缓存键改 std::string；≥32 字节代码受切片布局限制另记 I03-NEW-127",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_dtservo",
+    "test": "I03S2New039ServoCacheKey.*"
+   }
+  ]
+ },
+ "I03-NEW-045": {
+  "post_class": "A",
+  "note": "最终复核修复：runner 析构保留未排空 parser 补测",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_porter",
+    "test": "I03S2RtRunnerTeardown.*"
+   },
+   {
+    "binary": "CoverageTests_exefact",
+    "test": "I03S2ExecRunnerTeardown.*"
+   }
+  ]
+ },
+ "I03-NEW-046": {
+  "post_class": "A",
+  "note": "最终复核修复：析构期关闭宿主回调补测",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_porter",
+    "test": "I03S2PorterHostCallbacks.*"
+   }
+  ]
+ },
+ "I03-NEW-055": {
+  "post_class": "A",
+  "note": "最终复核修复：CoverageTests_uftcore 链接集隔离"
+ },
+ "I03-NEW-063": {
+  "post_class": "A",
+  "note": "最终复核修复：SEL 增量开仓费正控与红控",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S3New063SelOpenFee.*"
+   }
+  ]
+ },
+ "I03-NEW-072": {
+  "post_class": "A",
+  "note": "最终复核修复：Diff 四回调创建在途不阻塞（卡9d=A 排队）",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S3New072DiffCallbacks.*"
+   }
+  ]
+ },
+ "I03-NEW-077": {
+  "post_class": "B",
+  "note": "最终复核修复：r28 sidecar 子进程隔离已修；porter ExternalReleaseDoesNotWaitForInFlightProviderSnapshot 300 次无复现，无红控未改"
+ },
+ "I03-NEW-083": {
+  "post_class": "A",
+  "note": "最终复核修复：切片超长代码 fail-closed，4 调用方判空",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests",
+    "test": "S4SliceLongCode.*"
+   }
+  ]
+ },
+ "I03-NEW-084": {
+  "post_class": "A",
+  "note": "最终复核修复：q03 夹具按值读取打包字段"
+ },
+ "I03-NEW-087": {
+  "post_class": "A",
+  "note": "最终复核修复：ParserAdapter 无商品信息丢弃并告警",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S4ParserAdapterNullComm.*"
+   }
+  ]
+ },
+ "I03-NEW-094": {
+  "post_class": "A",
+  "note": "最终复核修复：SEL/HFT ticker 与 handle_push_quote 补测",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "R66Fixture.S4*"
+   }
+  ]
+ },
+ "I03-NEW-100": {
+  "post_class": "A",
+  "note": "最终复核修复：根因候选 WtEngine 持仓表/资金竞争由 I03-NEW-115 修复（红控 SIGSEGV 5/5 → 绿）；最终 TSan 复核",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "R41EngineFixture.R41OnScheduleWithPoolCommitsLeftoverPositionToZero"
+   },
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "I03New115EngineRace.*"
+   }
+  ]
+ },
+ "I03-NEW-101": {
+  "post_class": "A",
+  "note": "最终复核修复：TraderOES 末行失败仍交付末包并报 PARTIAL（独立夹具 i03_trader_oes_query_s4）",
+  "extra_fixtures": [
+   "i03_trader_oes_query_s4"
+  ],
+  "no_test_ok": true
+ },
+ "I03-NEW-089": {
+  "post_class": "E",
+  "note": "最终复核修复：执行器（Local/Arbi/Diff）与 HFT 生命周期结束归还认领已实施；人工认领释放方式待用户裁定",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_wtcore",
+    "test": "S4OwnerRelease.*"
+   }
+  ]
+ },
+ "I03-NEW-091": {
+  "post_class": "A",
+  "note": "最终复核修复：K02=B：Loader 配置错误返回非零",
+  "extra_tests": [
+   {
+    "binary": "CoverageTests_t_CTPLoader",
+    "test": "t6_ctploader_run.*"
+   },
+   {
+    "binary": "CoverageTests_t_CTPOptLoader",
+    "test": "*"
+   }
+  ]
+ },
+ "I03-NEW-123": {
+  "note": "slice4 修复"
+ },
+ "BUG-L00-004": {
+  "no_test_ok": true,
+  "note": "最终复核：公开头编译自足检查在最终冻结树 F5 上复跑 13/13 exit 0（evidence/20261105-final-acceptance/l00-004-header-check/）"
+ }
+}

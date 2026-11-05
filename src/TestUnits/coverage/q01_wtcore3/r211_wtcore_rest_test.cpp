@@ -19,6 +19,10 @@
  */
 #include <gtest/gtest.h>
 
+#include <Share/TimeUtils.hpp>
+#include <WtCore/TraderAdapter.h>
+
+#include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -234,6 +238,50 @@ TEST(R211Engine, IncompatibleRiskMonModuleIsRejected)
 }
 
 /* ------------------------------------------------------------------ *
+ * 1b. BUG-R211-001 卡15最终复查：发行的 WtRiskMonFact 对未知 name 的
+ *     createRiskMonotor 返回 NULL。init_riskmon 不得对空监控器调用 init，
+ *     应与不兼容模块分支一致：返回失败且不安装风控包装器。
+ *     子进程执行，旧实现在子进程内崩溃即为红控。
+ * ------------------------------------------------------------------ */
+TEST(R211Engine, UnknownRiskMonNameFromShippedFactoryIsRejectedWithoutCrash)
+{
+    const R211InstDirGuard instDir(binDir());
+    const std::string moduleName = DLLHelper::wrap_module("WtRiskMonFact");
+    const fs::path modulePath = binDir() / moduleName;
+
+    // 前置条件：真实发行模块存在且导出 createRiskMonFact，且走 getInstDir() 回退路径。
+    ASSERT_TRUE(fs::is_regular_file(modulePath)) << modulePath.string();
+    ASSERT_FALSE(fs::exists(fs::path(WtHelper::getCWD()) / moduleName))
+        << "测试必须走 getInstDir() 的回退路径";
+    DllHandle module = DLLHelper::load_library(modulePath.string().c_str());
+    ASSERT_NE(nullptr, module);
+    const bool hasRiskMonFactory = DLLHelper::get_symbol(module, "createRiskMonFact") != nullptr;
+    DLLHelper::free_library(module);
+    ASSERT_TRUE(hasRiskMonFactory);
+
+    GTEST_FLAG_SET(death_test_style, "threadsafe");
+    EXPECT_EXIT(
+        {
+            R211Temp tmp("risk_unknown_name");
+            q01sel::BaseDataMgr bd;
+            q01sel::HotMgr hot;
+            WtDtMgr dm;
+            WTSVariant* cfg = WTSCfgLoader::load_from_content(
+                "{\"product\":{\"session\":\"TRADING\"},\"fees\":\"\",\"filters\":\"\","
+                "\"riskmon\":{\"active\":true,\"module\":\"WtRiskMonFact\","
+                "\"name\":\"R211NoSuchRiskMon\"}}");
+            if (cfg == nullptr)
+                std::_Exit(2);
+            // 与上例相同，WtSelEngine 析构问题（BUG-R42-001）未闭合，堆分配且不回收。
+            R211SelEngine* engine = new R211SelEngine();
+            engine->init(cfg, &bd, &dm, &hot, NULL);
+            cfg->release();
+            std::_Exit(engine->has_riskmon() ? 3 : 0);
+        },
+        ::testing::ExitedWithCode(0), "");
+}
+
+/* ------------------------------------------------------------------ *
  * 2. WtExecuterMgr::handle_pos_change：被过滤的执行器收不到信号，
  *    显式路由（execid==执行器名）走 104-105。
  * ------------------------------------------------------------------ */
@@ -343,15 +391,31 @@ TEST(R211CtaTicker, LastMinuteOfFiniteSessionIsNotClosedByData)
     comm->setSessionInfo(bd.session("TRADING"));
     bd.regis(comm, q01sel::makeCt("SHFE", "ag", "ag2512"));
 
+    // 启动的 ticker 会经 on_schedule 排入资金刷新任务，任务使用 adapter 管理器；须在 engine.release() 前存活（同 R192）。
+    // 启动的 ticker 会驱动引擎初始化与资金刷新，引擎须按 R192 同样方式完整 init。
+    q01sel::HotMgr hot;
+    WtDtMgr dm;
+    TraderAdapterMgr adapterMgr;
     R211CtaEngine engine;
+    WTSVariant* cfg = WTSCfgLoader::load_from_content(
+        "{\"product\":{\"session\":\"TRADING\"},\"fees\":\"\",\"filters\":\"\"}");
+    ASSERT_NE(nullptr, cfg);
+    engine.init(cfg, &bd, &dm, &hot, NULL);
+    cfg->release();
     engine.attach(&bd);
+    engine.set_adapter_mgr(&adapterMgr);
     R211Reader reader;
 
     WtCtaRtTicker ticker(&engine);
     ticker.init(&reader, "TRADING");
+    // 未 run() 的 ticker 只走 trigger_price（HEAD 亦然：_thrd==NULL 即直接转发），不会按数据闭合分钟；
+    // 本用例验证的是数据驱动闭合，必须先启动 ticker（迭代03 第五会话 int2 归因；worker 在盘外长睡不干扰）。
+    ASSERT_TRUE(ticker.run());
 
+    // 行情日期须晚于 ticker 初始化时取到的本地日期，否则按“早于本地时间”只做价格转发（与 R192 同法）。
+    const uint32_t tickDate = TimeUtils::getNextDate(TimeUtils::getCurDate(), 1);
     auto feed = [&](uint32_t t, double px) {
-        WTSTickData* tk = q01sel::makeTick("SHFE", "ag2512", 20250110, 20250110, t, px);
+        WTSTickData* tk = q01sel::makeTick("SHFE", "ag2512", tickDate, tickDate, t, px);
         ASSERT_NE(nullptr, tk);
         ticker.on_tick(tk);
         tk->release();
@@ -367,13 +431,14 @@ TEST(R211CtaTicker, LastMinuteOfFiniteSessionIsNotClosedByData)
     feed(103000000, 7102.0);   // 10:30 是最后一分钟，数据侧不再闭合
     EXPECT_EQ(1u, reader.count);
     EXPECT_EQ(0, engine.session_ends);
+    ticker.stop();
+    engine.release(); // joins queued fund-refresh tasks before adapterMgr leaves scope
 }
 
 /* ------------------------------------------------------------------ *
- * 6. BUG-R192-002/003 固化：到期任务创建局部 std::thread，析构即 abort；
- *    即便不 abort，任务 id 与上下文 id 也是两套序列。DISABLED_，不参与覆盖率。
+ * 6. 迭代03 最终验收复核后启用（原禁用：BUG-R192-002/003 到期任务局部线程析构 abort、任务 id 序列）。
  * ------------------------------------------------------------------ */
-TEST(R211SelEngine, DISABLED_ExpiredTaskTerminatesBeforeSchedule)
+TEST(R211SelEngine, ExpiredTaskTerminatesBeforeSchedule)
 {
     R211Temp tmp("task");
     q01sel::BaseDataMgr bd;
@@ -391,10 +456,9 @@ TEST(R211SelEngine, DISABLED_ExpiredTaskTerminatesBeforeSchedule)
 }
 
 /* ------------------------------------------------------------------ *
- * 7. BUG-R31-002 固化：HFT 装载器与 CTA 插件共用 createStrategyFact，
- *    类型双关后在登记路径 SIGSEGV。DISABLED_，不参与覆盖率。
+ * 7. 迭代03 最终验收复核后启用（原禁用：BUG-R31-002；现按卡4b=A 拒绝异族插件，装载返回 true）。
  * ------------------------------------------------------------------ */
-TEST(R211HftStrategyMgr, DISABLED_CtaPluginTypePunCrashesOnRegistration)
+TEST(R211HftStrategyMgr, CtaPluginTypePunCrashesOnRegistration)
 {
     const fs::path bin = binDir();
     ASSERT_TRUE(fs::exists(bin / "libWtCtaStraFact.dylib")) << bin;

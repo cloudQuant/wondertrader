@@ -1,0 +1,26 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Lifecycle.RealWriterReleaseIsBoundedWhenCallbackBlocks
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Lifecycle
+[ RUN      ] Lifecycle.RealWriterReleaseIsBoundedWhenCallbackBlocks
+[       OK ] Lifecycle.RealWriterReleaseIsBoundedWhenCallbackBlocks (747 ms)
+[----------] 1 test from Lifecycle (747 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (747 ms total)
+[  PASSED  ] 1 test.
+==================
+WARNING: ThreadSanitizer: thread leak (pid=94623)
+  Thread T1 (tid=6781099, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::thread::thread[abi:nqe220108]<boost::_bi::bind_t<boost::_bi::unspecified, boost::_mfi::mf<void (WtDataWriter::*)(), void, WtDataWriter>, boost::_bi::list<boost::_bi::value<WtDataWriter*>>>, 0>(boost::_bi::bind_t<boost::_bi::unspecified, boost::_mfi::mf<void (WtDataWriter::*)(), void, WtDataWriter>, boost::_bi::list<boost::_bi::value<WtDataWriter*>>>&&) <null> (libWtDataStorage.dylib:arm64+0x9b090)
+    #2 WtDataWriter::init(wtp::WTSVariant*, wtp::IDataWriterSink*) <null> (libWtDataStorage.dylib:arm64+0x57c0c)
+    #3 DataManager::init(wtp::WTSVariant*, WTSBaseDataMgr*, StateMonitor*) <null> (s5_lifecycle_tests:arm64+0x10002f1d8)
+    #4 (anonymous namespace)::Lifecycle::init(DataManager&, char const*, bool, unsigned int) <null> (s5_lifecycle_tests:arm64+0x10000c17c)
+    #5 (anonymous namespace)::Lifecycle_RealWriterReleaseIsBoundedWhenCallbackBlocks_Test::TestBody() <null> (s5_lifecycle_tests:arm64+0x10001acd0)
+    #6 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (s5_lifecycle_tests:arm64+0x100126cf8)
+
+SUMMARY: ThreadSanitizer: thread leak (libWtDataStorage.dylib:arm64+0x9b090) in std::__1::thread::thread[abi:nqe220108]<boost::_bi::bind_t<boost::_bi::unspecified, boost::_mfi::mf<void (WtDataWriter::*)(), void, WtDataWriter>, boost::_bi::list<boost::_bi::value<WtDataWriter*>>>, 0>(boost::_bi::bind_t<boost::_bi::unspecified, boost::_mfi::mf<void (WtDataWriter::*)(), void, WtDataWriter>, boost::_bi::list<boost::_bi::value<WtDataWriter*>>>&&)+0x98
+==================
+ThreadSanitizer: reported 1 warnings

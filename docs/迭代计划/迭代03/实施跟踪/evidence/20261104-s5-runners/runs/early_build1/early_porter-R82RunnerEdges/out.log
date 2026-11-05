@@ -1,0 +1,56 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R82RunnerEdges.*
+[==========] Running 8 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 8 tests from R82RunnerEdges
+[ RUN      ] R82RunnerEdges.LoaderPeriodMatrixAndDispatchDefaults
+[       OK ] R82RunnerEdges.LoaderPeriodMatrixAndDispatchDefaults (59 ms)
+[ RUN      ] R82RunnerEdges.ConfigFailureArmsAcrossSections
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q06_porter/r82_porter_runner_edges_test.cpp:868: Failure
+Value of: r->config(cfg.c_str(), false)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q06_porter/r82_porter_runner_edges_test.cpp:876: Failure
+Value of: r->config(cfg.c_str(), false)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R82RunnerEdges.ConfigFailureArmsAcrossSections (25 ms)
+[ RUN      ] R82RunnerEdges.HftStrategyListAndEngineWithoutEnv
+[       OK ] R82RunnerEdges.HftStrategyListAndEngineWithoutEnv (1 ms)
+[ RUN      ] R82RunnerEdges.HftFactoryNullUnitFailsAndSupportedUnitConfigures
+[r82_hft_valid] SimpleHft rejected params: missing required parameter code
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q06_porter/r82_porter_runner_edges_test.cpp:1007: Failure
+Value of: r->config(cfg.c_str(), false)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R82RunnerEdges.HftFactoryNullUnitFailsAndSupportedUnitConfigures (1079 ms)
+[ RUN      ] R82RunnerEdges.LaterInvalidHftFactoryDoesNotLeaveEarlierContextInstalled
+[       OK ] R82RunnerEdges.LaterInvalidHftFactoryDoesNotLeaveEarlierContextInstalled (637 ms)
+[ RUN      ] R82RunnerEdges.ActiveCtaStrategyRequiresNameAndResolvableFactory
+[       OK ] R82RunnerEdges.ActiveCtaStrategyRequiresNameAndResolvableFactory (30 ms)
+[ RUN      ] R82RunnerEdges.ExecuterKindFallbacksAndMissingTraders
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q06_porter/r82_porter_runner_edges_test.cpp:1123: Failure
+Value of: r->config(cfg.c_str(), false)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q06_porter/r82_porter_runner_edges_test.cpp:1124: Failure
+Expected: (r->getEngine()) != (nullptr), actual: NULL vs (nullptr)
+
+[  FAILED  ] R82RunnerEdges.ExecuterKindFallbacksAndMissingTraders (1 ms)
+[ RUN      ] R82RunnerEdges.ReleasePorterStopsConfiguredRunner
+[       OK ] R82RunnerEdges.ReleasePorterStopsConfiguredRunner (3 ms)
+[----------] 8 tests from R82RunnerEdges (1838 ms total)
+
+[----------] Global test environment tear-down
+[==========] 8 tests from 1 test suite ran. (1839 ms total)
+[  PASSED  ] 5 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] R82RunnerEdges.ConfigFailureArmsAcrossSections
+[  FAILED  ] R82RunnerEdges.HftFactoryNullUnitFailsAndSupportedUnitConfigures
+[  FAILED  ] R82RunnerEdges.ExecuterKindFallbacksAndMissingTraders
+
+ 3 FAILED TESTS

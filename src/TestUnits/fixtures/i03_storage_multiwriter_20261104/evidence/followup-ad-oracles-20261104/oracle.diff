@@ -1,0 +1,82 @@
+--- /tmp/wt-i03-storage-mw-20261104/r122.before.cpp	2026-11-04 07:56:43
++++ src/TestUnits/coverage/p05_datastorage2/r122_writer_ad_errors_test.cpp	2026-11-04 07:56:53
+@@ -37,15 +37,33 @@
+ 
+ 	WTSTickStruct s1 = make_tick("EXC", "rb2301", 20230103, 20230103, 93000000,
+ 		3900.0, 10.0, 39000.0, 500.0, 0.0, 100.0, 390000.0);
+-	write_or_fail(tick_of(ct, s1), 0);
+-
+-	// 换交易日：先把 20230103 的日线转储到 day/EXC，触发 get_k_db 打开失败
+ 	WTSTickStruct s2 = make_tick("EXC", "rb2301", 20230104, 20230104, 93000000,
+ 		3910.0, 10.0, 39100.0, 500.0, 0.0, 110.0, 429000.0);
++
++	// 卡13（13a=A，用户裁定 2026-11-03）：tick 库打不开 = LMDB 提交失败 → 该 tick 不发布
++	// 缓存、不广播，同步 writeTick 返回 false，失败计数可观察（旧合同"仍缓存并广播"已废止）。
++	for (WTSTickStruct* s : { &s1, &s2 })
++	{
++		WTSTickData* t = tick_of(ct, *s);
++		EXPECT_FALSE(_writer->writeTick(t, 0));
++		t->release();
++	}
++	EXPECT_EQ(_sink->bcast_tick(), 0u);
++	EXPECT_EQ(_writer->tickPersistFailures(), 2u);
++	WTSTickData* cur = _writer->getCurTick("rb2301", "EXC");
++	EXPECT_TRUE(cur == NULL);
++	if (cur) cur->release();
++	EXPECT_GE(_sink->count_containing("Opening tick db at"), 1u);
++
++	// 日线库打开失败的日志：未发布的 tick 不会推进 K 线，因此改用不落 tick 库的 writer
++	// （disabletick=true）走到换交易日的日线转储，触发 get_k_db 打开失败。
++	_writer->release();
++	init_writer(make_writer_cfg(_root.string(), 1000, true, false, false, false));
++	write_or_fail(tick_of(ct, s1), 0);
++	// 换交易日：先把 20230103 的日线转储到 day/EXC，触发 get_k_db 打开失败
+ 	write_or_fail(tick_of(ct, s2), 0);
+ 
+ 	EXPECT_EQ(_sink->bcast_tick(), 2u);
+-	EXPECT_GE(_sink->count_containing("Opening tick db at"), 1u);
+ 	EXPECT_GE(_sink->count_containing("Opening day db at"), 1u);
+ }
+ 
+--- /tmp/wt-i03-storage-mw-20261104/r132.before.cpp	2026-11-04 07:56:43
++++ src/TestUnits/coverage/p05_datastorage2/r132_writer_ad_mapsize_test.cpp	2026-11-04 07:56:53
+@@ -96,9 +96,37 @@
+ 	cfg->append("tickmapsize", kMapSize);
+ 	init_writer(cfg);
+ 
+-	write_ticks(ct);
+-
++	// 卡13（13a=A，用户裁定 2026-11-03）：tick 库 put 失败 → 不发布缓存、不广播，
++	// 同步 writeTick 返回 false 并计入 tickPersistFailures()（旧合同"仍缓存并广播"已废止）。
++	const uint32_t n = 30;
++	for (uint32_t i = 0; i < n; i++)
++	{
++		const uint32_t tdate = 20230103 + i / 2;
++		WTSTickStruct ts = r4fx::make_tick("EXQ", "rb2301", tdate, tdate,
++			(930 + i) * 100000, 100.0 + i, 1.0, 1.0, 1000.0, 0.0,
++			(double)(i + 1), (double)(i + 1));
++		WTSTickData* tick = tick_of(ct, ts);
++		EXPECT_FALSE(_writer->writeTick(tick, 0)) << i;
++		tick->release();
++	}
+ 	EXPECT_GE(_sink->count_containing("pipe tick"), 1u);
++	EXPECT_EQ(_sink->bcast_tick(), 0u);
++	EXPECT_EQ(_writer->tickPersistFailures(), n);
++	WTSTickData* cur = _writer->getCurTick("rb2301", "EXQ");
++	EXPECT_TRUE(cur == NULL);
++	if (cur) cur->release();
++
++	// 可重试：换用足够的 mapsize 重新打开后，同一笔首 tick 原样落库并发布
++	_writer->release();
++	init_writer(r4fx::make_writer_cfg(_root.string(), 1000, false, false, false, false));
++	WTSTickStruct first = r4fx::make_tick("EXQ", "rb2301", 20230103, 20230103,
++		930 * 100000, 100.0, 1.0, 1.0, 1000.0, 0.0, 1.0, 1.0);
++	write_or_fail(tick_of(ct, first), 0);
++	EXPECT_EQ(_sink->bcast_tick(), 1u);
++	cur = _writer->getCurTick("rb2301", "EXQ");
++	ASSERT_TRUE(cur != NULL);
++	EXPECT_EQ(cur->actiontime(), 930u * 100000u);
++	cur->release();
+ }
+ 
+ // WtDataWriterAD.cpp: L450-547（m1/m5/day 库 put 失败；关掉 tick 落库以隔离）

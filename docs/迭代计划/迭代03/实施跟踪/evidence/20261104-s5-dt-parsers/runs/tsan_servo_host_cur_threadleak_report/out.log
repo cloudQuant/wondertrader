@@ -1,0 +1,41 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 8 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 8 tests from ServoHost
+[ RUN      ] ServoHost.LegacyModuleWithoutV2IsRejectedBeforeCreateParser
+[       OK ] ServoHost.LegacyModuleWithoutV2IsRejectedBeforeCreateParser (20 ms)
+[ RUN      ] ServoHost.FailedProviderInitRollsBackThroughV2AndReturnsConfig
+[       OK ] ServoHost.FailedProviderInitRollsBackThroughV2AndReturnsConfig (25 ms)
+[ RUN      ] ServoHost.SuccessfulInitReleaseDrainsBeforeDestroy
+[       OK ] ServoHost.SuccessfulInitReleaseDrainsBeforeDestroy (142 ms)
+[ RUN      ] ServoHost.ReleaseFromProviderThreadDefersToSafePoint
+[       OK ] ServoHost.ReleaseFromProviderThreadDefersToSafePoint (84 ms)
+[ RUN      ] ServoHost.RunnerDestructionStopsAndDrainsParsersFirst
+[       OK ] ServoHost.RunnerDestructionStopsAndDrainsParsersFirst (40 ms)
+[ RUN      ] ServoHost.RunnerFailedParserIsNotStartedAndIsRolledBack
+[       OK ] ServoHost.RunnerFailedParserIsNotStartedAndIsRolledBack (8 ms)
+[ RUN      ] ServoHost.RunnerShutdownReportsAndRetainsUnprovableOwner
+[       OK ] ServoHost.RunnerShutdownReportsAndRetainsUnprovableOwner (18 ms)
+[ RUN      ] ServoHost.RepeatedShutdownAfterCompleteTeardownIsNoop
+[       OK ] ServoHost.RepeatedShutdownAfterCompleteTeardownIsNoop (11 ms)
+[----------] 8 tests from ServoHost (355 ms total)
+
+[----------] Global test environment tear-down
+[==========] 8 tests from 1 test suite ran. (355 ms total)
+[  PASSED  ] 8 tests.
+==================
+WARNING: ThreadSanitizer: thread leak (pid=54588)
+  Thread T6 (tid=6319989, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) <null> (libI03DtFakeV2.dylib:arm64+0x8a7c)
+    #2 std::__1::thread::thread[abi:nqe220108]<(anonymous namespace)::FakeParser::init(wtp::WTSVariant*)::'lambda'(), 0>((anonymous namespace)::FakeParser::init(wtp::WTSVariant*)::'lambda'()&&) <null> (libI03DtFakeV2.dylib:arm64+0x8814)
+    #3 std::__1::thread::thread[abi:nqe220108]<(anonymous namespace)::FakeParser::init(wtp::WTSVariant*)::'lambda'(), 0>((anonymous namespace)::FakeParser::init(wtp::WTSVariant*)::'lambda'()&&) <null> (libI03DtFakeV2.dylib:arm64+0x8684)
+    #4 (anonymous namespace)::FakeParser::init(wtp::WTSVariant*) <null> (libI03DtFakeV2.dylib:arm64+0x7ea4)
+    #5 ParserAdapter::init(char const*, wtp::WTSVariant*) <null> (servo_host_cur:arm64+0x1000291ec)
+    #6 WtDtRunner::initParsers(wtp::WTSVariant*) <null> (servo_host_cur:arm64+0x100079598)
+    #7 WtDtRunner::initialize(char const*, bool, char const*, char const*, void (*)(char const*, wtp::WTSTickStruct*), void (*)(char const*, char const*, wtp::WTSBarStruct*)) <null> (servo_host_cur:arm64+0x100078334)
+    #8 (anonymous namespace)::ServoHost_RunnerShutdownReportsAndRetainsUnprovableOwner_Test::TestBody() <null> (servo_host_cur:arm64+0x100022cc8)
+    #9 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (servo_host_cur:arm64+0x1001af72c)
+
+SUMMARY: ThreadSanitizer: thread leak (libI03DtFakeV2.dylib:arm64+0x8a7c) in std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*)+0x54
+==================

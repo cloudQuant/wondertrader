@@ -1,0 +1,119 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5RtRunnerPreflight.*
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from I03S5RtRunnerPreflight
+[ RUN      ] I03S5RtRunnerPreflight.InvalidExecuterInMiddleRejectsBeforeMutationAndConfigIsRetryable
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:196: Failure
+Value of: runner->config(config(dir, "cta", bad, "").c_str(), false)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:197: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner->_config
+    Which is: 0x9030102e0
+a pure preflight rejection must keep config() retryable
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:198: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner->_cta_engine.findExecuter("i03s5_ok_a").get()
+    Which is: 0x1069c8b40
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:200: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner->_engine
+    Which is: 0x1069c3d88
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:201: Failure
+Expected equality of these values:
+  WtRtRunner::LifecycleState::UNCONFIGURED
+    Which is: 1-byte object <00>
+  state_of(*runner)
+    Which is: 1-byte object <02>
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:204: Failure
+Value of: runner->config(config(dir, "cta", good, "").c_str(), false)
+  Actual: false
+Expected: true
+
+[  FAILED  ] I03S5RtRunnerPreflight.InvalidExecuterInMiddleRejectsBeforeMutationAndConfigIsRetryable (44 ms)
+[ RUN      ] I03S5RtRunnerPreflight.UnknownExecuterKindIsRejectedInsteadOfBecomingDist
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:216: Failure
+Value of: runner->config(config(dir, "cta", list, "").c_str(), false)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:217: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner->_cta_engine.findExecuter("i03s5_kind").get()
+    Which is: 0x1069caad0
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:218: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner->_config
+    Which is: 0x903010a60
+
+[  FAILED  ] I03S5RtRunnerPreflight.UnknownExecuterKindIsRejectedInsteadOfBecomingDist (4 ms)
+[ RUN      ] I03S5RtRunnerPreflight.MissingExecuterSidecarFailsConfig
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:227: Failure
+Value of: runner->config(config(dir, "cta", sidecar, "").c_str(), false)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:228: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  runner->_config
+    Which is: 0x903010c40
+
+[  FAILED  ] I03S5RtRunnerPreflight.MissingExecuterSidecarFailsConfig (2 ms)
+[ RUN      ] I03S5RtRunnerPreflight.SidecarExecutersAndRoutersAreValidatedAndLoaded
+[       OK ] I03S5RtRunnerPreflight.SidecarExecutersAndRoutersAreValidatedAndLoaded (2 ms)
+[ RUN      ] I03S5RtRunnerPreflight.InvalidRouterRuleFailsConfig
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:250: Failure
+Value of: runner->config(config(dir, "cta", "\"" + dir.file("executers.json") + "\"", "").c_str(), false)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:252: Failure
+Expected: (WtRtRunner::LifecycleState::RUNNING) != (state_of(*runner)), actual: 1-byte object <04> vs 1-byte object <04>
+
+[  FAILED  ] I03S5RtRunnerPreflight.InvalidRouterRuleFailsConfig (4 ms)
+[ RUN      ] I03S5RtRunnerPreflight.DiffInitFailureAfterValidationFailsConfigAndRetainsHostForQuiesce
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:267: Failure
+Value of: runner->config(config(dir, "cta", list, "").c_str(), false)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:270: Failure
+Expected: (nullptr) != (runner->_cta_engine.findExecuter("i03s5_bad_diff").get()), actual: (nullptr) vs NULL
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/i03_s5_rt_runner_preflight_test.cpp:272: Failure
+Expected: (WtRtRunner::LifecycleState::RUNNING) != (state_of(*runner)), actual: 1-byte object <04> vs 1-byte object <04>
+
+[  FAILED  ] I03S5RtRunnerPreflight.DiffInitFailureAfterValidationFailsConfigAndRetainsHostForQuiesce (7 ms)
+[----------] 6 tests from I03S5RtRunnerPreflight (66 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (66 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 5 tests, listed below:
+[  FAILED  ] I03S5RtRunnerPreflight.InvalidExecuterInMiddleRejectsBeforeMutationAndConfigIsRetryable
+[  FAILED  ] I03S5RtRunnerPreflight.UnknownExecuterKindIsRejectedInsteadOfBecomingDist
+[  FAILED  ] I03S5RtRunnerPreflight.MissingExecuterSidecarFailsConfig
+[  FAILED  ] I03S5RtRunnerPreflight.InvalidRouterRuleFailsConfig
+[  FAILED  ] I03S5RtRunnerPreflight.DiffInitFailureAfterValidationFailsConfigAndRetainsHostForQuiesce
+
+ 5 FAILED TESTS

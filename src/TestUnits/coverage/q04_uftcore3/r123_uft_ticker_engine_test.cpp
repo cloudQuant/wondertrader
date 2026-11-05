@@ -108,7 +108,8 @@ TEST(R123UftTicker, firstSameDayQuoteBeforeStartupClockSetsTimeBeforeStrategy)
 	WTSSessionInfo* session = WTSSessionInfo::create("R123FIRST", "r123 first quote", 0);
 	ASSERT_NE(nullptr, session);
 	R123SessionGuard sessionGuard{ session };
-	session->addTradingSection(0, 2400);
+	// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；迭代03 第五会话 int2 归因更新。
+	session->addTradingSection(0, 0);
 	bd._session = session;
 	ASSERT_NE(nullptr, bd.add("SHFE", "ag", "ag2406", 0, 0,
 		CM_OpenCover, TM_Both, 10));
@@ -335,7 +336,8 @@ TEST(R123UftTicker, auto_close_after_check_time)
 	r123::SessionBaseDataMgr bd;
 	WTSSessionInfo* session = WTSSessionInfo::create("R123ALL", "r123 allday", 0);
 	ASSERT_NE(nullptr, session);
-	session->addTradingSection(0, 2400);
+	// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；迭代03 第五会话 int2 归因更新。
+	session->addTradingSection(0, 0);
 	bd._session = session;
 
 	{
@@ -431,7 +433,8 @@ TEST(R123UftEngine, product_session_run_and_push_quote)
 	r123::SessionBaseDataMgr bd;
 	WTSSessionInfo* session = WTSSessionInfo::create("R123PROD", "r123 product", 0);
 	ASSERT_NE(nullptr, session);
-	session->addTradingSection(0, 2400);
+	// 卡2 2b=A（用户裁定 2026-11-03）：全天时段只能写 0-0，0-2400 被拒（会话无时段）；迭代03 第五会话 int2 归因更新。
+	session->addTradingSection(0, 0);
 	bd._session = session;
 
 	WTSVariant* cfg = WTSVariant::createObject();

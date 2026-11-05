@@ -1,0 +1,92 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R8ParserAdapterTest.*:R45ParserAdapterFakeTest.*
+[==========] Running 37 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 23 tests from R45ParserAdapterFakeTest
+[ RUN      ] R45ParserAdapterFakeTest.InitExtRegistersSpiAndSubscribesAllContracts
+[       OK ] R45ParserAdapterFakeTest.InitExtRegistersSpiAndSubscribesAllContracts (1 ms)
+[ RUN      ] R45ParserAdapterFakeTest.RunReportsConnectionCommandSubmission
+[       OK ] R45ParserAdapterFakeTest.RunReportsConnectionCommandSubmission (0 ms)
+[ RUN      ] R45ParserAdapterFakeTest.InitExtApiInitFailureSkipsSubscribe
+[       OK ] R45ParserAdapterFakeTest.InitExtApiInitFailureSkipsSubscribe (0 ms)
+[ RUN      ] R45ParserAdapterFakeTest.InitExtApiInitExceptionSkipsSubscribeAndConnect
+[       OK ] R45ParserAdapterFakeTest.InitExtApiInitExceptionSkipsSubscribeAndConnect (0 ms)
+[ RUN      ] R45ParserAdapterFakeTest.RunnerStartsInitializedFakeParser
+[       OK ] R45ParserAdapterFakeTest.RunnerStartsInitializedFakeParser (417 ms)
+[ RUN      ] R45ParserAdapterFakeTest.RunnerReportsConnectSubmissionFailureAndRetainsOwner
+[       OK ] R45ParserAdapterFakeTest.RunnerReportsConnectSubmissionFailureAndRetainsOwner (3 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ExportedStatusReportsConnectSubmissionFailure
+[       OK ] R45ParserAdapterFakeTest.ExportedStatusReportsConnectSubmissionFailure (14 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ExportedStatusReportsSuccessfulConnectSubmission
+[       OK ] R45ParserAdapterFakeTest.ExportedStatusReportsSuccessfulConnectSubmission (15 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ExportedInitializationStateRemainsVisibleDuringConnect
+[       OK ] R45ParserAdapterFakeTest.ExportedInitializationStateRemainsVisibleDuringConnect (14 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ExportedConnectStatusCanBeReadDuringStartup
+[       OK ] R45ParserAdapterFakeTest.ExportedConnectStatusCanBeReadDuringStartup (15 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ExportedIsolationStopsBlockedChild
+[       OK ] R45ParserAdapterFakeTest.ExportedIsolationStopsBlockedChild (1014 ms)
+[ RUN      ] R45ParserAdapterFakeTest.RunnerQuarantinesFalseAndThrowingParserCandidates
+[       OK ] R45ParserAdapterFakeTest.RunnerQuarantinesFalseAndThrowingParserCandidates (7 ms)
+[ RUN      ] R45ParserAdapterFakeTest.InitExtTransfersNonNullApiEvenWhenIdIsInvalid
+[       OK ] R45ParserAdapterFakeTest.InitExtTransfersNonNullApiEvenWhenIdIsInvalid (2 ms)
+[ RUN      ] R45ParserAdapterFakeTest.BusyInitExtRetainsEachUniqueTransferredApi
+[       OK ] R45ParserAdapterFakeTest.BusyInitExtRetainsEachUniqueTransferredApi (2 ms)
+[ RUN      ] R45ParserAdapterFakeTest.InitExtWithoutBaseDataManagerRetainsApi
+[       OK ] R45ParserAdapterFakeTest.InitExtWithoutBaseDataManagerRetainsApi (2 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ReleaseCallsApiReleaseThenDeletesIt
+[       OK ] R45ParserAdapterFakeTest.ReleaseCallsApiReleaseThenDeletesIt (1 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ReleaseRetainsModuleContextWhileV2DrainIsPending
+[       OK ] R45ParserAdapterFakeTest.ReleaseRetainsModuleContextWhileV2DrainIsPending (2 ms)
+[ RUN      ] R45ParserAdapterFakeTest.NonconformingV2DestroyQuarantinesOwnerPermanently
+[       OK ] R45ParserAdapterFakeTest.NonconformingV2DestroyQuarantinesOwnerPermanently (1 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ManagerRetainsAdapterWhenV2DestroyFails
+[       OK ] R45ParserAdapterFakeTest.ManagerRetainsAdapterWhenV2DestroyFails (1 ms)
+[ RUN      ] R45ParserAdapterFakeTest.HandleQuoteForwardsTickToRunnerCallback
+[       OK ] R45ParserAdapterFakeTest.HandleQuoteForwardsTickToRunnerCallback (2 ms)
+[ RUN      ] R45ParserAdapterFakeTest.DetailHandlersPassContractLookup
+[       OK ] R45ParserAdapterFakeTest.DetailHandlersPassContractLookup (1 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ManagerRunsAndReleasesLiveAdapters
+[       OK ] R45ParserAdapterFakeTest.ManagerRunsAndReleasesLiveAdapters (1 ms)
+[ RUN      ] R45ParserAdapterFakeTest.ManagerReportsPartialConnectSubmission
+[       OK ] R45ParserAdapterFakeTest.ManagerReportsPartialConnectSubmission (1 ms)
+[ DISABLED ] R45ParserAdapterFakeTest.DISABLED_ReleaseTwiceContractPending
+[----------] 23 tests from R45ParserAdapterFakeTest (1528 ms total)
+
+[----------] 14 tests from R8ParserAdapterTest
+[ RUN      ] R8ParserAdapterTest.InitWithNullCfgRejectsAndKeepsIdEmpty
+[       OK ] R8ParserAdapterTest.InitWithNullCfgRejectsAndKeepsIdEmpty (0 ms)
+[ RUN      ] R8ParserAdapterTest.FailedEmptyModuleInitCanRetryAfterCleanup
+[       OK ] R8ParserAdapterTest.FailedEmptyModuleInitCanRetryAfterCleanup (0 ms)
+[ RUN      ] R8ParserAdapterTest.BusyInitExtRejectsWithoutChangingFirstId
+[       OK ] R8ParserAdapterTest.BusyInitExtRejectsWithoutChangingFirstId (0 ms)
+[ RUN      ] R8ParserAdapterTest.InitWithUnloadableModuleReturnsFalse
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r8_pa_11782_3/bin/parsers/libr8_no_such_parser.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r8_pa_11782_3/bin/parsers/libr8_no_such_parser.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r8_pa_11782_3/bin/parsers/libr8_no_such_parser.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r8_pa_11782_3/bin/parsers/libr8_no_such_parser.dylib' (no such file)
+[       OK ] R8ParserAdapterTest.InitWithUnloadableModuleReturnsFalse (0 ms)
+[ RUN      ] R8ParserAdapterTest.InitExtWithNullApiIsRejected
+[       OK ] R8ParserAdapterTest.InitExtWithNullApiIsRejected (0 ms)
+[ RUN      ] R8ParserAdapterTest.RunOnFreshAdapterIsFalseAndReleaseIsSafe
+[       OK ] R8ParserAdapterTest.RunOnFreshAdapterIsFalseAndReleaseIsSafe (0 ms)
+[ RUN      ] R8ParserAdapterTest.HandleQuoteIgnoresNullAndZeroDateTicks
+[       OK ] R8ParserAdapterTest.HandleQuoteIgnoresNullAndZeroDateTicks (0 ms)
+[ RUN      ] R8ParserAdapterTest.HandleQuoteAfterReleaseStopsForwarding
+[       OK ] R8ParserAdapterTest.HandleQuoteAfterReleaseStopsForwarding (0 ms)
+[ RUN      ] R8ParserAdapterTest.HandleParserLogAliveBranchIsSafe
+[       OK ] R8ParserAdapterTest.HandleParserLogAliveBranchIsSafe (0 ms)
+[ RUN      ] R8ParserAdapterTest.DetailHandlersReturnOnZeroDates
+[       OK ] R8ParserAdapterTest.DetailHandlersReturnOnZeroDates (0 ms)
+[ RUN      ] R8ParserAdapterTest.DetailHandlersReturnOnUnknownContract
+[       OK ] R8ParserAdapterTest.DetailHandlersReturnOnUnknownContract (0 ms)
+[ RUN      ] R8ParserAdapterTest.AddAdapterRejectsNullPtrAndEmptyId
+[       OK ] R8ParserAdapterTest.AddAdapterRejectsNullPtrAndEmptyId (0 ms)
+[ RUN      ] R8ParserAdapterTest.AddAdapterKeepsFirstOnDuplicateId
+[       OK ] R8ParserAdapterTest.AddAdapterKeepsFirstOnDuplicateId (0 ms)
+[ RUN      ] R8ParserAdapterTest.ManagerReleaseOnEmptyMapIsSafe
+[       OK ] R8ParserAdapterTest.ManagerReleaseOnEmptyMapIsSafe (0 ms)
+[----------] 14 tests from R8ParserAdapterTest (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 37 tests from 2 test suites ran. (1533 ms total)
+[  PASSED  ] 37 tests.
+
+  YOU HAVE 1 DISABLED TEST
+

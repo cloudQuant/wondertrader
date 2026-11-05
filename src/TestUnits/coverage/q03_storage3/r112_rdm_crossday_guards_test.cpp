@@ -233,12 +233,8 @@ TEST_F(R112RdmResidualTest, R112RdmMissingAndShortFileGuards)
 		20240110090000000ull, 20240110100000000ull) == NULL);
 }
 
-// NOT_RUN: true cache-order regression. This uses valid queue/detail/trans files
-// for one reader/key and checks each type's record after queue is loaded first.
-// The CMP_V2 reader resizes/appends the backing string and then writes via its old
-// V2-header pointer; append may reallocate it. Keep disabled until the reader path
-// can be exercised safely; missing-file guards above do not stand in for this case.
-TEST_F(R112RdmResidualTest, DISABLED_R112RdmQueueDetailTransCachesAreIndependent)
+// 迭代03 最终验收复核后启用（原禁用：CMP_V2 读端 V2 头指针重分配风险，未运行）。
+TEST_F(R112RdmResidualTest, R112RdmQueueDetailTransCachesAreIndependent)
 {
 	const uint32_t date = 20240105;
 	const char* const stdCode = "SSE.STK.610705";

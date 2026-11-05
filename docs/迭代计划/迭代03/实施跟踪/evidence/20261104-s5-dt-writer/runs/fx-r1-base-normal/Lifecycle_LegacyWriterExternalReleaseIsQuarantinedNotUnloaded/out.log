@@ -1,0 +1,33 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Lifecycle.LegacyWriterExternalReleaseIsQuarantinedNotUnloaded
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Lifecycle
+[ RUN      ] Lifecycle.LegacyWriterExternalReleaseIsQuarantinedNotUnloaded
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_writer_lifecycle_20261104s5/lifecycle_test.cpp:205: Failure
+Expected equality of these values:
+  index_of(ev, "delete")
+    Which is: 3
+  -1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_writer_lifecycle_20261104s5/lifecycle_test.cpp:206: Failure
+Expected equality of these values:
+  index_of(ev, "destroy")
+    Which is: 4
+  -1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_writer_lifecycle_20261104s5/lifecycle_test.cpp:207: Failure
+Value of: moduleStillLoaded("s5_fake_legacy")
+  Actual: false
+Expected: true
+
+[  FAILED  ] Lifecycle.LegacyWriterExternalReleaseIsQuarantinedNotUnloaded (5 ms)
+[----------] 1 test from Lifecycle (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (5 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Lifecycle.LegacyWriterExternalReleaseIsQuarantinedNotUnloaded
+
+ 1 FAILED TEST

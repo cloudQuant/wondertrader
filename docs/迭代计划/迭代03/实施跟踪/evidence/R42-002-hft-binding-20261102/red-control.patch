@@ -1,0 +1,29 @@
+--- a/src/WtPorter/WtRtRunner.cpp
++++ b/src/WtPorter/WtRtRunner.cpp
+@@ -810,16 +810,18 @@
+ 
+ uint32_t WtRtRunner::createHftContext(const char* name, const char* trader, bool bAgent, int32_t slippage /* = 0 */)
+ {
+-	TraderAdapterPtr trdPtr = (trader && trader[0]) ? _traders.getAdapter(trader) : TraderAdapterPtr();
+-	if (!trdPtr)
+-	{
+-		WTSLogger::error("Trader {} not exists, Binding trader to HFT strategy failed", trader ? trader : "");
+-		return 0;
+-	}
+ 	ExpHftContext* ctx = new ExpHftContext(&_hft_engine, name, bAgent, slippage);
+-	ctx->setTrader(trdPtr.get());
+ 	_hft_engine.addContext(HftContextPtr(ctx));
+-	trdPtr->addSink(ctx);
++	TraderAdapterPtr trdPtr = _traders.getAdapter(trader);
++	if (trdPtr)
++	{
++		ctx->setTrader(trdPtr.get());
++		trdPtr->addSink(ctx);
++	}
++	else
++	{
++		WTSLogger::error("Trader {} not exists, Binding trader to HFT strategy failed", trader);
++	}
+ 	return ctx->id();
+ }
+ 

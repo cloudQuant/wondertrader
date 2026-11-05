@@ -1,0 +1,195 @@
+#include "../../coverage/p11_wtcore_traderadapter/p11_trader_fixture.h"
+#include <WtCore/UnresolvedReportJournal.h>
+#include <rapidjson/document.h>
+#include <sys/stat.h>
+#include <climits>
+
+using namespace wtp;
+
+class I03Quarantine : public P11TraderTest
+{
+protected:
+    WTSTradeInfo* trade(const char* code = "unknown", const char* exchange = "SHFE") {
+        WTSTradeInfo* t = WTSTradeInfo::create(code, exchange);
+        t->setTradeID("trade-1"); t->setRefOrder("order-1"); t->setUserTag("tag-1");
+        t->setTradeDate(20261103); t->setTradeTime(123456); t->setDirection(WDT_SHORT);
+        t->setOffsetType(WOT_CLOSE); t->setVolume(3); t->setPrice(101.25); t->setAmount(303.75);
+        return t;
+    }
+    std::string path() {
+        auto dir = tmp_ / "journal";
+        std::filesystem::create_directory(dir);
+        ::chmod(dir.c_str(), 0700);
+        return (dir / "reports.wal").string();
+    }
+    std::string oldInstall;
+    void SetUp() override {
+        P11TraderTest::SetUp();
+        oldInstall = WtHelper::getInstDir();
+        const char* plugin = std::getenv("I03_REPORT_FAKE_PLUGIN"); ASSERT_NE(nullptr, plugin);
+        const auto install = tmp_ / "install"; std::filesystem::create_directories(install / "traders");
+        ASSERT_TRUE(std::filesystem::copy_file(plugin, install / "traders" / "libI03ReportFake.dylib"));
+        WtHelper::setInstDir((install.string() + "/").c_str());
+    }
+    void TearDown() override { WtHelper::setInstDir(oldInstall.c_str()); P11TraderTest::TearDown(); }
+    void startConfigured(TraderAdapter& adapter, const std::string& journal) {
+        WTSVariant* cfg = WTSVariant::createObject();
+        cfg->append("module", "I03ReportFake");
+        cfg->append("unresolved_report_journal", journal.c_str());
+        ASSERT_TRUE(adapter.init(id_.c_str(), cfg, &bd_, NULL));
+        cfg->release();
+        EXPECT_TRUE(adapter.isUnresolvedReportPaused());
+        ASSERT_TRUE(adapter.run());
+    }
+};
+
+TEST_F(I03Quarantine, NewlyConstructedTradeFieldsAreDeterministicAfterReuse)
+{
+    for (int i = 0; i < 3; ++i) {
+        WTSTradeInfo* t = WTSTradeInfo::create("", "");
+        EXPECT_STREQ("", t->getCode()); EXPECT_STREQ("", t->getExchg());
+        EXPECT_EQ(0u, t->getTradeDate()); EXPECT_EQ(0u, t->getTradeTime());
+        EXPECT_DOUBLE_EQ(0, t->getVolume()); EXPECT_FALSE(t->isNet()); EXPECT_FALSE(t->isNetBuy());
+        EXPECT_EQ(WDT_LONG, t->getDirection()); EXPECT_EQ(WOT_OPEN, t->getOffsetType());
+        t->setTradeDate(20261103); t->setVolume(9); t->setNetDirection(true); t->release();
+    }
+}
+
+TEST_F(I03Quarantine, ValidControlAndUnknownPauseAllOrderEntries)
+{
+    TraderAdapter adapter; buildReady(adapter);
+    EXPECT_NE(UINT_MAX, adapter.openLong(p11fix::kStdCode, 100, 1, 0, ct_));
+    EXPECT_EQ(1u, api_.n_insert_);
+    WTSTradeInfo* good = trade(p11fix::kRawCode); good->setContractInfo(ct_); good->setDirection(WDT_LONG); good->setOffsetType(WOT_OPEN);
+    adapter.onPushTrade(good); good->release();
+    EXPECT_DOUBLE_EQ(3.0, adapter.getPosition(p11fix::kStdCode, false));
+    EXPECT_FALSE(adapter.isUnresolvedReportPaused());
+    const auto tradeNotifications = sink_.trades_.size();
+    const auto positionNotifications = sink_.poss_.size();
+    WTSTradeInfo* bad = trade(); adapter.onPushTrade(bad);
+    EXPECT_STREQ("unknown", bad->getCode()); EXPECT_STREQ("SHFE", bad->getExchg()); EXPECT_STREQ("trade-1", bad->getTradeID());
+    auto records = adapter.unresolvedTradeReports(); ASSERT_EQ(1u, records.size());
+    EXPECT_FALSE(records[0].persisted); EXPECT_NE(std::string::npos, records[0].diagnostic.find("memory"));
+    rapidjson::Document doc; doc.Parse(records[0].payload.c_str()); ASSERT_FALSE(doc.HasParseError());
+    EXPECT_EQ(1u, doc["schema_version"].GetUint()); EXPECT_STREQ("unknown", doc["code"].GetString());
+    EXPECT_STREQ("order-1", doc["ref_order"].GetString()); EXPECT_STREQ("tag-1", doc["user_tag"].GetString());
+    EXPECT_EQ(20261103u, doc["trade_date"].GetUint()); EXPECT_EQ(123456u, doc["trade_time"].GetUint64());
+    EXPECT_EQ(static_cast<int>(WDT_SHORT), doc["direction"].GetInt()); EXPECT_EQ(static_cast<int>(WOT_CLOSE), doc["offset_type"].GetInt());
+    EXPECT_STREQ("0x1.8p+1", doc["volume_hex"].GetString()); EXPECT_STREQ("0x1.95p+6", doc["price_hex"].GetString());
+    EXPECT_EQ(tradeNotifications, sink_.trades_.size()); EXPECT_EQ(positionNotifications, sink_.poss_.size());
+    EXPECT_FALSE(doc["provider_field_completeness_verified"].GetBool());
+    EXPECT_DOUBLE_EQ(3.0, adapter.getPosition(p11fix::kStdCode, false));
+    EXPECT_TRUE(adapter.buy(p11fix::kStdCode, 100, 1, 0, false, ct_).empty());
+    EXPECT_TRUE(adapter.sell(p11fix::kStdCode, 100, 1, 0, false, ct_).empty());
+    EXPECT_EQ(UINT_MAX, adapter.openLong(p11fix::kStdCode, 100, 1, 0, ct_));
+    EXPECT_EQ(UINT_MAX, adapter.openShort(p11fix::kStdCode, 100, 1, 0, ct_));
+    EXPECT_EQ(UINT_MAX, adapter.closeLong(p11fix::kStdCode, 100, 1, false, 0, ct_));
+    EXPECT_EQ(UINT_MAX, adapter.closeShort(p11fix::kStdCode, 100, 1, false, 0, ct_));
+    EXPECT_EQ(1u, api_.n_insert_); EXPECT_DOUBLE_EQ(0.0, adapter.getUndoneQty(p11fix::kStdCode));
+    bad->release();
+}
+
+TEST_F(I03Quarantine, InvalidStandardCodeAndMissingCommodityAreNotApplied)
+{
+    TraderAdapter invalid; buildReady(invalid);
+    WTSContractInfo* malformed = WTSContractInfo::create("bad", "bad", "SHFE", "ag"); malformed->setCommInfo(comm_);
+    WTSTradeInfo* t = trade("original"); t->setContractInfo(malformed); invalid.onPushTrade(t);
+    EXPECT_TRUE(invalid.isUnresolvedReportPaused()); EXPECT_STREQ("original", t->getCode());
+    EXPECT_DOUBLE_EQ(0.0, invalid.getPosition("", false)); EXPECT_EQ(1u, invalid.unresolvedTradeReports().size());
+    t->release(); malformed->release();
+    TraderAdapter noCommodity; ASSERT_TRUE(noCommodity.initExt("p11b", &api_, &bd_, NULL)); ASSERT_TRUE(noCommodity.run());
+    WTSContractInfo* bare = WTSContractInfo::create("ag2512", "ag2512", "SHFE", "ag");
+    t = trade("original"); t->setContractInfo(bare); noCommodity.onPushTrade(t);
+    EXPECT_TRUE(noCommodity.isUnresolvedReportPaused()); EXPECT_STREQ("original", t->getCode());
+    EXPECT_EQ(1u, noCommodity.unresolvedTradeReports().size()); t->release(); bare->release();
+}
+
+TEST_F(I03Quarantine, ExistingJournalPersistsAndStartupRemainsPaused)
+{
+    const auto journalPath = path();
+    { UnresolvedReportJournal journal; ASSERT_EQ(UnresolvedReportJournal::Status::Ok, journal.createNew(journalPath, "fixture")); }
+    {
+        TraderAdapter adapter; startConfigured(adapter, journalPath);
+        EXPECT_NE(std::string::npos, adapter.unresolvedReportDiagnostic().find("startup"));
+        WTSTradeInfo* t = trade(); adapter.onPushTrade(t); t->release();
+        auto records = adapter.unresolvedTradeReports(); ASSERT_EQ(1u, records.size()); EXPECT_TRUE(records[0].persisted); EXPECT_GT(records[0].journal_sequence, 0u);
+    }
+    UnresolvedReportJournal reopened; ASSERT_EQ(UnresolvedReportJournal::Status::Ok, reopened.open(journalPath));
+    std::vector<UnresolvedReportJournal::Report> pending; ASSERT_EQ(UnresolvedReportJournal::Status::Ok, reopened.pending(pending)); ASSERT_EQ(1u, pending.size());
+    EXPECT_NE(std::string::npos, pending[0].raw_payload.find("wts_trade_visible_snapshot"));
+    reopened.close();
+    TraderAdapter restarted; startConfigured(restarted, journalPath);
+    EXPECT_NE(std::string::npos, restarted.unresolvedReportDiagnostic().find("unresolved reports"));
+    EXPECT_EQ(UINT_MAX, restarted.openLong(p11fix::kStdCode, 100, 1, 0, ct_));
+}
+
+TEST_F(I03Quarantine, JournalMissingAndAppendFailureRetainMemory)
+{
+    auto missing = path();
+    { TraderAdapter adapter; startConfigured(adapter, missing); EXPECT_NE(std::string::npos, adapter.unresolvedReportDiagnostic().find("open failed"));
+      WTSTradeInfo* t = trade(); adapter.onPushTrade(t); t->release(); auto r = adapter.unresolvedTradeReports(); ASSERT_EQ(1u, r.size()); EXPECT_FALSE(r[0].persisted); }
+    { UnresolvedReportJournal journal; ASSERT_EQ(UnresolvedReportJournal::Status::Ok, journal.createNew(missing, "fixture")); }
+    { TraderAdapter adapter; startConfigured(adapter, missing); ASSERT_TRUE(std::filesystem::remove(missing + ".guard"));
+      WTSTradeInfo* t = trade(); adapter.onPushTrade(t); t->release(); auto r = adapter.unresolvedTradeReports(); ASSERT_EQ(1u, r.size()); EXPECT_FALSE(r[0].persisted); EXPECT_NE(std::string::npos, r[0].diagnostic.find("failed")); }
+}
+
+class PauseDuringEntrustId : public p11fix::FakeTraderApi
+{
+public:
+    TraderAdapter* adapter = nullptr;
+    bool makeEntrustID(char* buffer, int length) override {
+        bool result = FakeTraderApi::makeEntrustID(buffer, length);
+        WTSTradeInfo* t = WTSTradeInfo::create("unknown", "SHFE");
+        adapter->onPushTrade(t); t->release();
+        return result;
+    }
+};
+TEST_F(I03Quarantine, ReentrantPauseDuringAdmissionDoesNotBlockOrCallInsert)
+{
+    PauseDuringEntrustId api; TraderAdapter adapter; api.adapter = &adapter;
+    ASSERT_TRUE(adapter.initExt(id_.c_str(), &api, &bd_, NULL)); ASSERT_TRUE(adapter.run());
+    EXPECT_EQ(UINT_MAX, adapter.openLong(p11fix::kStdCode, 100, 1, 0, ct_));
+    EXPECT_TRUE(adapter.isUnresolvedReportPaused()); EXPECT_EQ(0u, api.n_insert_); EXPECT_EQ(1u, adapter.unresolvedTradeReports().size());
+}
+
+TEST_F(I03Quarantine, SuccessfulPluginInitializationAndInvalidConfigFailClosed)
+{
+    auto journalPath = path();
+    { UnresolvedReportJournal journal; ASSERT_EQ(UnresolvedReportJournal::Status::Ok, journal.createNew(journalPath, "fixture")); }
+    {
+        WTSVariant* cfg = WTSVariant::createObject(); cfg->append("module", "I03ReportFake"); cfg->append("unresolved_report_journal", journalPath.c_str());
+        TraderAdapter adapter; ASSERT_TRUE(adapter.init("plug", cfg, &bd_, NULL)); cfg->release(); ASSERT_TRUE(adapter.run());
+        EXPECT_TRUE(adapter.isUnresolvedReportPaused()); EXPECT_EQ(UINT_MAX, adapter.openLong(p11fix::kStdCode, 100, 1, 0, ct_));
+        WTSTradeInfo* t = trade(); adapter.onPushTrade(t); t->release();
+        auto reports = adapter.unresolvedTradeReports(); ASSERT_EQ(1u, reports.size()); EXPECT_TRUE(reports[0].persisted);
+    }
+    {
+        WTSVariant* cfg = WTSVariant::createObject(); cfg->append("module", "I03ReportFake"); cfg->append("unresolved_report_journal", uint32_t(42));
+        TraderAdapter adapter; ASSERT_TRUE(adapter.init("badconfig", cfg, &bd_, NULL)); cfg->release(); ASSERT_TRUE(adapter.run());
+        EXPECT_TRUE(adapter.isUnresolvedReportPaused()); EXPECT_NE(std::string::npos, adapter.unresolvedReportDiagnostic().find("must be a nonempty string"));
+        EXPECT_EQ(UINT_MAX, adapter.openLong(p11fix::kStdCode, 100, 1, 0, ct_));
+    }
+    {
+        WTSVariant* cfg = WTSVariant::createObject(); cfg->append("module", "I03ReportFake"); cfg->append("unresolved_report_journal", "");
+        TraderAdapter adapter; ASSERT_TRUE(adapter.init("emptyconfig", cfg, &bd_, NULL)); cfg->release(); ASSERT_TRUE(adapter.run());
+        EXPECT_TRUE(adapter.isUnresolvedReportPaused()); EXPECT_NE(std::string::npos, adapter.unresolvedReportDiagnostic().find("nonempty"));
+    }
+}
+
+TEST_F(I03Quarantine, ReconfigureDoesNotReuseOldJournalOrClearPause)
+{
+    const auto journalPath = path();
+    { UnresolvedReportJournal journal; ASSERT_EQ(UnresolvedReportJournal::Status::Ok, journal.createNew(journalPath, "fixture")); }
+    TraderAdapter adapter; startConfigured(adapter, journalPath);
+    WTSTradeInfo* first = trade(); adapter.onPushTrade(first); first->release();
+    ASSERT_TRUE(adapter.unresolvedTradeReports().front().persisted);
+    adapter.release();
+    WTSVariant* cfg = WTSVariant::createObject(); cfg->append("module", "I03ReportFake"); cfg->append("unresolved_report_journal", uint32_t(42));
+    ASSERT_TRUE(adapter.init("newid", cfg, &bd_, NULL)); cfg->release(); ASSERT_TRUE(adapter.run());
+    EXPECT_TRUE(adapter.isUnresolvedReportPaused());
+    WTSTradeInfo* second = trade("other"); adapter.onPushTrade(second); second->release();
+    auto reports = adapter.unresolvedTradeReports(); ASSERT_EQ(2u, reports.size()); EXPECT_FALSE(reports[1].persisted);
+    UnresolvedReportJournal previous; ASSERT_EQ(UnresolvedReportJournal::Status::Ok, previous.open(journalPath));
+    std::vector<UnresolvedReportJournal::Report> pending; ASSERT_EQ(UnresolvedReportJournal::Status::Ok, previous.pending(pending));
+    EXPECT_EQ(1u, pending.size());
+}

@@ -42,12 +42,16 @@ const char* WtHelper::get_cwd()
 	static std::string _cwd;
 	if(_cwd.empty())
 	{
-		char   buffer[255];
+		// I03-NEW-112: the old fixed 255-byte buffer ignored getcwd() failure (ERANGE once the
+		// path reaches 255 bytes) and then read the uninitialized buffer. Use a larger buffer,
+		// check the result, and fall back to "./" (the current directory) without caching it.
+		char   buffer[4096] = { 0 };
 #ifdef _MSC_VER
-		_getcwd(buffer, 255);
+		if (_getcwd(buffer, (int)sizeof(buffer)) == NULL)
 #else	//UNIX
-		getcwd(buffer, 255);
+		if (getcwd(buffer, sizeof(buffer)) == NULL)
 #endif
+			return "./";
 		_cwd = buffer;
 		_cwd = StrUtil::standardisePath(_cwd);
 	}	

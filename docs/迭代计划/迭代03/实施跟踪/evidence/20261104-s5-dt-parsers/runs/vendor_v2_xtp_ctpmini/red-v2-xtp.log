@@ -1,0 +1,96 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 11 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from V2Adapter
+[ RUN      ] V2Adapter.A_FailedInitBeforeSdkDrainsAndReleasesOwner
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:92: Failure
+Value of: adapter->hasApi()
+  Actual: false
+Expected: true
+failed candidate is retained until drained
+
+[  FAILED  ] V2Adapter.A_FailedInitBeforeSdkDrainsAndReleasesOwner (926 ms)
+[ RUN      ] V2Adapter.B_RealParserAdapterQuarantinesSdkParser
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:276: Failure
+Value of: adapter->init(kName, cfg, nullptr, bd)
+  Actual: false
+Expected: true
+V2 table must be accepted by the real adapter
+
+[  FAILED  ] V2Adapter.B_RealParserAdapterQuarantinesSdkParser (0 ms)
+[----------] 2 tests from V2Adapter (927 ms total)
+
+[----------] 9 tests from V2
+[ RUN      ] V2.TableShape
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37: Failure
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+
+[  FAILED  ] V2.TableShape (0 ms)
+[ RUN      ] V2.NeverInitializedDrainsAndDestroys
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37: Failure
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+
+[  FAILED  ] V2.NeverInitializedDrainsAndDestroys (0 ms)
+[ RUN      ] V2.FailedInitBeforeSdkDrainsAndDestroys
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37: Failure
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+
+[  FAILED  ] V2.FailedInitBeforeSdkDrainsAndDestroys (0 ms)
+[ RUN      ] V2.SdkCreatedIsReportedUncertainAndQuarantined
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37: Failure
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+
+[  FAILED  ] V2.SdkCreatedIsReportedUncertainAndQuarantined (0 ms)
+[ RUN      ] V2.StopInsideSdkCallbackIsNonBlockingAndWaitIsUnsafe
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37: Failure
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+
+[  FAILED  ] V2.StopInsideSdkCallbackIsNonBlockingAndWaitIsUnsafe (0 ms)
+[ RUN      ] V2.PendingWhileCallbackInFlight
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37: Failure
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+
+[  FAILED  ] V2.PendingWhileCallbackInFlight (0 ms)
+[ RUN      ] V2.PendingWhileHostApiCallInFlight
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37: Failure
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+
+[  FAILED  ] V2.PendingWhileHostApiCallInFlight (0 ms)
+[ RUN      ] V2.LegacyReleaseThenV2StaysQuarantined
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37: Failure
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+
+[  FAILED  ] V2.LegacyReleaseThenV2StaysQuarantined (0 ms)
+[ RUN      ] V2.IndependentInstances
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37: Failure
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+
+[  FAILED  ] V2.IndependentInstances (0 ms)
+[----------] 9 tests from V2 (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 11 tests from 2 test suites ran. (936 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 11 tests, listed below:
+[  FAILED  ] V2Adapter.A_FailedInitBeforeSdkDrainsAndReleasesOwner
+[  FAILED  ] V2Adapter.B_RealParserAdapterQuarantinesSdkParser
+[  FAILED  ] V2.TableShape
+[  FAILED  ] V2.NeverInitializedDrainsAndDestroys
+[  FAILED  ] V2.FailedInitBeforeSdkDrainsAndDestroys
+[  FAILED  ] V2.SdkCreatedIsReportedUncertainAndQuarantined
+[  FAILED  ] V2.StopInsideSdkCallbackIsNonBlockingAndWaitIsUnsafe
+[  FAILED  ] V2.PendingWhileCallbackInFlight
+[  FAILED  ] V2.PendingWhileHostApiCallInFlight
+[  FAILED  ] V2.LegacyReleaseThenV2StaysQuarantined
+[  FAILED  ] V2.IndependentInstances
+
+11 FAILED TESTS

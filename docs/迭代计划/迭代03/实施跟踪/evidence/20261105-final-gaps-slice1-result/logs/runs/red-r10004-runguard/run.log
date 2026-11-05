@@ -1,0 +1,46 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S1EngineRunGuard.*
+[==========] Running 3 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 3 tests from S1EngineRunGuard
+[ RUN      ] S1EngineRunGuard.SelSecondRunIsRejectedAndKeepsTheRunningTicker
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_engine_run_guard_test.cpp:117: Failure
+Expected equality of these values:
+  first
+    Which is: 0x1075a9420
+  second
+    Which is: 0x1075a9560
+a repeated run() must not replace (and leak) the running ticker
+
+[  FAILED  ] S1EngineRunGuard.SelSecondRunIsRejectedAndKeepsTheRunningTicker (3 ms)
+[ RUN      ] S1EngineRunGuard.CtaSecondRunIsRejectedAndKeepsTheRunningTicker
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_engine_run_guard_test.cpp:137: Failure
+Expected equality of these values:
+  first
+    Which is: 0x1075a9680
+  second
+    Which is: 0x1075a9a40
+a repeated run() must not replace (and leak) the running ticker
+
+[  FAILED  ] S1EngineRunGuard.CtaSecondRunIsRejectedAndKeepsTheRunningTicker (5 ms)
+[ RUN      ] S1EngineRunGuard.HftSecondRunIsRejectedAndKeepsTheRunningTicker
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s1_engine_run_guard_test.cpp:157: Failure
+Expected equality of these values:
+  first
+    Which is: 0x1075a9a40
+  second
+    Which is: 0x1075aa200
+a repeated run() must not replace (and leak) the running ticker
+
+[  FAILED  ] S1EngineRunGuard.HftSecondRunIsRejectedAndKeepsTheRunningTicker (6 ms)
+[----------] 3 tests from S1EngineRunGuard (15 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 1 test suite ran. (18 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] S1EngineRunGuard.SelSecondRunIsRejectedAndKeepsTheRunningTicker
+[  FAILED  ] S1EngineRunGuard.CtaSecondRunIsRejectedAndKeepsTheRunningTicker
+[  FAILED  ] S1EngineRunGuard.HftSecondRunIsRejectedAndKeepsTheRunningTicker
+
+ 3 FAILED TESTS

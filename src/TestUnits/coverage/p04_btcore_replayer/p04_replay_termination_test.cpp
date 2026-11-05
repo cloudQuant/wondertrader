@@ -77,6 +77,7 @@ namespace
 		cfg->append("fees", "");
 		WTSVariant* basefiles = WTSVariant::createObject();
 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
+		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());	// 卡1 A+C：prepare 起点 checked 映射需日历（同 I03-NEW-018）
 		basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
 		cfg->append("basefiles", basefiles);
 		basefiles->release();
@@ -207,7 +208,8 @@ TEST_F(P04ReplayTermTest, invertedTimeRangeIsRejectedBeforePrepare)
 	EXPECT_EQ(0u, sink.beginCalls);
 	EXPECT_EQ(0u, sink.scheduleCalls);
 	EXPECT_EQ(0u, sink.endCalls);
-	EXPECT_EQ(0u, sink.replayDoneCalls);
+	// K38 BT-B（2026-11-04 用户裁定）：回放状态 V1 每代恰好一次 handle_replay_done（含 prepare 被拒、停止、回调异常），状态可区分；原断言见证据 before/。
+	EXPECT_EQ(1u, sink.replayDoneCalls);
 }
 
 // 有序回放区间完全早于首根日线：upper-bound 定位不得在 begin() 上自减，也不得回放伪 bar。

@@ -22,6 +22,25 @@ IF(NOT COV_SRCS)
 	file(GLOB_RECURSE COV_SRCS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 ENDIF()
 
+# I03-NEW-015：coverage/ 下自带 CMakeLists.txt 的子目录是独立 CMake 夹具工程
+# （例如 p08_btcore_mockers3/r20_mq_fixture，自带 int main 与 fake MQ 导出），
+# 由其自身工程单独构建。dir: lane 只做非递归 GLOB，这些文件不会被分派走，
+# 若留在主目标会以自带 main 取代 gtest_main。这里从递归源列表整目录排除。
+file(GLOB_RECURSE WT_COV_STANDALONE_PROJECTS CONFIGURE_DEPENDS
+	"${CMAKE_CURRENT_SOURCE_DIR}/*/CMakeLists.txt")
+FOREACH(_proj ${WT_COV_STANDALONE_PROJECTS})
+	GET_FILENAME_COMPONENT(_proj_dir "${_proj}" DIRECTORY)
+	SET(_kept_srcs "")
+	FOREACH(_s ${COV_SRCS})
+		STRING(FIND "${_s}" "${_proj_dir}/" _pos)
+		IF(NOT _pos EQUAL 0)
+			LIST(APPEND _kept_srcs "${_s}")
+		ENDIF()
+	ENDFOREACH()
+	SET(COV_SRCS ${_kept_srcs})
+	MESSAGE(STATUS "coverage: 独立夹具工程 ${_proj_dir} 不并入 CoverageTests 主目标")
+ENDFOREACH()
+
 # ModuleHelper.hpp now uses a translation-unit-local anchor. Keep this workaround for
 # legacy product TUs such as TraderDD.cpp and TraderHTS.cpp that define their own external
 # inst_hlp() symbols. The dedicated BUG-L00-008 regression below bypasses this macro.
@@ -426,6 +445,19 @@ FOREACH(spec ${WT_COV_SPLIT_TARGETS})
 		SET(WT_COV_PORTER_SHARED_LIBS ${WT_COV_SHARED_LIBS})
 		LIST(REMOVE_ITEM WT_COV_PORTER_SHARED_LIBS WtBtPorter)
 		TARGET_LINK_LIBRARIES(CoverageTests_${suffix} PRIVATE ${WT_COV_PORTER_SHARED_LIBS})
+	ELSEIF(suffix STREQUAL "uftcore")
+		# I03-NEW-055: WtExecMon/WtPorter (and the other porter DSOs) embed the
+		# WtCore/WtBtCore/WtDtCore static libraries with default visibility, so
+		# their same-named wtp:: inline members are exported as weak definitions
+		# and dyld may bind this binary's WtUftCore inline members to them at run
+		# time. Link only what the UFT core itself links (as m_WtUftRunner does).
+		SET(WT_COV_UFTCORE_LIBS
+			GTest::gtest_main Threads::Threads
+			WTSTools WTSUtils boost_filesystem boost_thread ${ICONV_LIBRARY})
+		IF(CMAKE_DL_LIBS)
+			LIST(APPEND WT_COV_UFTCORE_LIBS ${CMAKE_DL_LIBS})
+		ENDIF()
+		TARGET_LINK_LIBRARIES(CoverageTests_${suffix} PRIVATE ${WT_COV_UFTCORE_LIBS})
 	ELSE()
 		TARGET_LINK_LIBRARIES(CoverageTests_${suffix} PRIVATE ${WT_COV_SHARED_LIBS})
 	ENDIF()
@@ -590,7 +622,9 @@ endif()
 # IParserApi. Keep the module separate from the coverage executable so its
 # createParser/deleteParser exports are only visible through dlopen/dlsym.
 if(TARGET CoverageTests_dtservo)
-	set(WT_COV_R45_DTSERVO_PARSER_ROOT "${CMAKE_CURRENT_BINARY_DIR}/r45_dtservo_parser_fixture")
+	# The exported C API (::initialize) resolves parser modules from <executable dir>/parsers, so
+	# the fixture lives beside the test executable; probe, runner and exported cases share one image.
+	set(WT_COV_R45_DTSERVO_PARSER_ROOT "${CMAKE_BINARY_DIR}/build_${PLATFORM}/${CMAKE_BUILD_TYPE}/bin/TestUnits")
 	add_library(R45DtServoParserFixture MODULE
 		"${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r45_dtservo_parser_fixture.cpp")
 	target_include_directories(R45DtServoParserFixture PRIVATE ${WT_COV_INCS})
@@ -876,6 +910,18 @@ endif()
 # UFT TraderAdapter lifecycle tests use a real loadable fixture so factory,
 # init, release and delete exceptions cross the same module boundary as plugins.
 if(TARGET CoverageTests_uftcore)
+	add_library(R78NoParserFixture MODULE "${CMAKE_SOURCE_DIR}/TestUnits/fixtures/r78_no_parser/no_parser.cpp")
+	set_target_properties(R78NoParserFixture PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+	if(WIN32)
+		set_target_properties(R78NoParserFixture PROPERTIES PREFIX "" SUFFIX ".dll")
+	elseif(APPLE)
+		set_target_properties(R78NoParserFixture PROPERTIES PREFIX "lib" SUFFIX ".dylib")
+	else()
+		set_target_properties(R78NoParserFixture PROPERTIES PREFIX "lib" SUFFIX ".so")
+	endif()
+	add_dependencies(CoverageTests_uftcore R78NoParserFixture)
+	target_compile_definitions(CoverageTests_uftcore PRIVATE
+		"WT_R78_NO_PARSER_FIXTURE_PATH=\"$<TARGET_FILE:R78NoParserFixture>\"")
 	add_library(UftLifecycleFakeTrader MODULE q04_uftcore3/fake_plugin/uft_lifecycle_trader.cpp)
 	target_include_directories(UftLifecycleFakeTrader PRIVATE "${CMAKE_SOURCE_DIR}/src")
 	set_target_properties(UftLifecycleFakeTrader PROPERTIES
@@ -1099,6 +1145,8 @@ WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2FactoryPreflightFalse factory_preflight_false
 WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2FactoryPreflightInvalid factory_preflight_invalid 25)
 WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2FactoryPreflightThrow factory_preflight_throw 26)
 WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2NullFactory null_factory 27)
+# BUG-N05-003 / K41 positive control: declares WT_EXEC_PLUGIN_V2_CAP_HOST_ORDER_IDENTITY.
+WT_COV_ADD_EXEC_V2_PLUGIN(CovExecV2HostIdentity host_identity 28)
 
 add_library(CovExecV2InitFailDrainsWorker MODULE
 	v2_exec_plugin/init_fail_drains_worker_fixture.cpp)
@@ -1147,7 +1195,8 @@ set_target_properties(CovExecLegacy PROPERTIES
 add_executable(CoverageTests_execv2
 	v2_exec_plugin/v2_exec_plugin_factory_test.cpp
 	v2_exec_plugin/v2_exec_plugin_quiesce_lifecycle_test.cpp
-	v2_exec_plugin/init_fail_drains_worker_test.cpp)
+	v2_exec_plugin/init_fail_drains_worker_test.cpp
+	v2_exec_plugin/s3_k41_identity_diagnostic_test.cpp)
 target_include_directories(CoverageTests_execv2 PRIVATE ${WT_COV_INCS})
 target_link_libraries(CoverageTests_execv2 PRIVATE
 	GTest::gtest_main Threads::Threads WtCore WTSTools WTSUtils boost_filesystem boost_thread)
@@ -1183,7 +1232,8 @@ target_compile_definitions(CoverageTests_execv2 PRIVATE
 	"WT_COV_EXEC_V2_FACTORY_PREFLIGHT_THROW_PATH=\"$<TARGET_FILE:CovExecV2FactoryPreflightThrow>\""
 	"WT_COV_EXEC_V2_INIT_FAIL_DRAINS_WORKER_PATH=\"$<TARGET_FILE:CovExecV2InitFailDrainsWorker>\""
 	"WT_COV_EXEC_V2_INIT_FAIL_PATH=\"$<TARGET_FILE:CovExecV2InitFail>\""
-	"WT_COV_EXEC_V2_VALID_PATH=\"$<TARGET_FILE:CovExecV2Valid>\"")
+	"WT_COV_EXEC_V2_VALID_PATH=\"$<TARGET_FILE:CovExecV2Valid>\""
+	"WT_COV_EXEC_V2_HOST_IDENTITY_PATH=\"$<TARGET_FILE:CovExecV2HostIdentity>\"")
 add_dependencies(CoverageTests_execv2
 	CovExecLegacy CovExecV2BadVersion CovExecV2BadSize CovExecV2InitFail
 	CovExecV2BadCallback CovExecV2Abi20 CovExecV2NoQuiesceCapability
@@ -1195,13 +1245,14 @@ add_dependencies(CoverageTests_execv2
 	CovExecV2NoFactoryPreflight CovExecV2FactoryPreflightFalse
 	CovExecV2FactoryPreflightInvalid CovExecV2FactoryPreflightThrow
 	CovExecV2NullFactory
-	CovExecV2InitFailDrainsWorker CovExecV2Valid)
+	CovExecV2InitFailDrainsWorker CovExecV2Valid CovExecV2HostIdentity)
 set_target_properties(CoverageTests_execv2 PROPERTIES
 	CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 list(APPEND MOVED_SRCS
 	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/v2_exec_plugin_factory_test.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/v2_exec_plugin_quiesce_lifecycle_test.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/init_fail_drains_worker_test.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/s3_k41_identity_diagnostic_test.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/init_fail_drains_worker_fixture.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/fake_exec_plugin.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/v2_exec_plugin/legacy_exec_plugin.cpp")
@@ -1518,6 +1569,32 @@ FOREACH(m ${MOVED_SRCS})
 	LIST(REMOVE_ITEM COV_SRCS "${m}")
 ENDFOREACH()
 
+# Keep the WtDtPorter startup-status test in its own executable: its WtDtCore
+# ParserAdapter has the same C++ name as the incompatible WtCore adapter.
+SET(I03_DTPORTER_START_TEST "${CMAKE_CURRENT_SOURCE_DIR}/r22_dtporter/i03_parser_start_status_test.cpp")
+LIST(REMOVE_ITEM COV_SRCS "${I03_DTPORTER_START_TEST}")
+ADD_EXECUTABLE(CoverageTests_i03_dtporter_start
+	"${I03_DTPORTER_START_TEST}"
+	"${CMAKE_SOURCE_DIR}/WtDtPorter/WtDtRunner.cpp"
+	"${CMAKE_SOURCE_DIR}/WtDtPorter/WtDtPorter.cpp"
+	"${CMAKE_SOURCE_DIR}/WtDtPorter/ExpParser.cpp"
+	"${CMAKE_SOURCE_DIR}/WtDtPorter/ExpDumper.cpp")
+TARGET_INCLUDE_DIRECTORIES(CoverageTests_i03_dtporter_start PRIVATE ${WT_COV_INCS})
+TARGET_LINK_LIBRARIES(CoverageTests_i03_dtporter_start PRIVATE
+	WtDtCore WTSTools WTSUtils GTest::gtest_main Threads::Threads)
+IF(MSVC)
+	TARGET_SOURCES(CoverageTests_i03_dtporter_start PRIVATE "${CMAKE_SOURCE_DIR}/Common/mdump.cpp")
+ELSE()
+	TARGET_LINK_LIBRARIES(CoverageTests_i03_dtporter_start PRIVATE
+		${CMAKE_DL_LIBS} boost_filesystem boost_thread ${STDCXXFS})
+	IF(WIN32)
+		TARGET_LINK_LIBRARIES(CoverageTests_i03_dtporter_start PRIVATE ws2_32 iconv)
+	ELSEIF(APPLE)
+		TARGET_LINK_LIBRARIES(CoverageTests_i03_dtporter_start PRIVATE ${ICONV_LIBRARY})
+	ENDIF()
+ENDIF()
+SET_TARGET_PROPERTIES(CoverageTests_i03_dtporter_start PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
 # WtDataStorage / WtDtPorter 的 TU 仍编进主目标（两者互不冲突，且主目标的用例需要它们）
 file(GLOB MAIN_PLUGIN_TUNS CONFIGURE_DEPENDS
 	"${CMAKE_SOURCE_DIR}/WtDataStorage/*.cpp"
@@ -1534,6 +1611,10 @@ LIST(APPEND COV_SRCS ${MAIN_PLUGIN_TUNS})
 WT_COV_ISOLATE_INST_HLP(${COV_SRCS})
 
 ADD_EXECUTABLE(CoverageTests ${COV_SRCS})
+IF(TARGET R78NoParserFixture)
+	ADD_DEPENDENCIES(CoverageTests R78NoParserFixture)
+	TARGET_COMPILE_DEFINITIONS(CoverageTests PRIVATE "WT_R78_NO_PARSER_FIXTURE_PATH=\"$<TARGET_FILE:R78NoParserFixture>\"")
+ENDIF()
 TARGET_INCLUDE_DIRECTORIES(CoverageTests PRIVATE ${WT_COV_INCS})
 TARGET_LINK_LIBRARIES(CoverageTests PRIVATE ${WT_COV_SHARED_LIBS} WtDtCore WtCore)
 TARGET_COMPILE_DEFINITIONS(CoverageTests PRIVATE WT_DATA_WRITER_TEST_HOOKS WT_RDM_DT_READER_TEST_HOOKS)

@@ -27,6 +27,8 @@ USING_NS_WTP;
  * 提供了从文件或内容字符串加载配置的方法
  * 支持JSON和YAML格式的配置文件解析，自动识别文件扩展名
  * 并将解析后的配置转换为WTSVariant对象供程序使用
+ * 配置原始内容、键或字符串值含嵌入NUL时返回NULL并输出诊断。
+ * YAML语法异常继续按原有方式抛出；正常Unicode及转义字符保持不变。
  */
 class WTSCfgLoader
 {
@@ -74,6 +76,9 @@ public:
 	 * @return WTSVariant* 解析后的可变类型对象，解析失败时返回NULL
 	 */
 	static WTSVariant*	load_from_content(const std::string& content, bool isYaml = false);
+
+	/** Parse content already normalized to the platform encoding, without conversion. */
+	static WTSVariant*	load_from_normalized_content(const std::string& content, bool isYaml = false);
 
 	/**
 	 * @brief 从文件加载配置（std::string版本）

@@ -7,7 +7,10 @@
  * 
  * \brief 
  */
+#include <cmath>
+#include <climits>
 #include "TraderYD.h"
+#include "../Share/ProviderRawReport.hpp"
 #include <API/yd1.108.360/ydError.h>
 
 #include "../Includes/WTSContractInfo.hpp"
@@ -25,6 +28,13 @@
 #include <filesystem>
 #include <limits>
 #include <memory>
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
 namespace fs = std::filesystem;
 
 const char* ENTRUST_SECTION = "entrusts";
@@ -207,8 +217,51 @@ constexpr inline const char* getErrorMsg(int ydError) noexcept
 	}
 }
 
+namespace
+{
+	// Card 9d: the TraderYD whose query worker runs on this thread, and the
+	// innermost TraderYD YD callback on this thread.
+	thread_local const TraderYD* t_yd_worker_owner = NULL;
+	thread_local const TraderYD* t_yd_callback_owner = NULL;
+
+	// Card 9a/9b: keep this module mapped while a retained instance may run.
+	void pin_yd_module()
+	{
+#ifdef _WIN32
+		HMODULE self = NULL;
+		::GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_PIN,
+			reinterpret_cast<LPCSTR>(&pin_yd_module), &self);
+#else
+		Dl_info info;
+		if (::dladdr(reinterpret_cast<void*>(&pin_yd_module), &info) != 0 && info.dli_fname != NULL)
+			(void)::dlopen(info.dli_fname, RTLD_NOW | RTLD_NOLOAD | RTLD_NODELETE);
+#endif
+	}
+
+	// The registry is never destroyed so retained instances stay reachable.
+	void quarantine_yd(TraderYD* trader, const char* reason)
+	{
+		static std::mutex* mtx = new std::mutex();
+		static std::vector<TraderYD*>* retained = new std::vector<TraderYD*>();
+		{
+			std::lock_guard<std::mutex> lock(*mtx);
+			retained->push_back(trader);
+		}
+		pin_yd_module();
+		std::fprintf(stderr, "[TraderYD] deleteTrader: instance quarantined until process exit (%s)\n", reason);
+	}
+}
+
 extern "C"
 {
+	// BUG-L01-014 / K42: optional host feature declaration (WT_TRADER_SPI_FEATURES_SYMBOL).
+	EXPORT_FLAG void setTraderSpiFeatures(ITraderApi* trader, uint64_t features)
+	{
+		TraderYD* self = dynamic_cast<TraderYD*>(trader);
+		if (self != NULL)
+			self->setSpiFeatures(features);
+	}
+
 	EXPORT_FLAG ITraderApi* createTrader()
 	{
 		TraderYD *instance = new TraderYD();
@@ -219,11 +272,81 @@ extern "C"
 	{
 		if (NULL != trader)
 		{
+			TraderYD* yd = dynamic_cast<TraderYD*>(trader);
+			if (yd != NULL)
+			{
+				if (yd->isCallbackContext())
+				{
+					// Card 9d/9b: a YD callback or the query worker cannot confirm
+					// its own exit nor wait for notifyAfterApiDestroy().
+					yd->release();
+					yd->detachForQuarantine();
+					quarantine_yd(yd, "called from a YD callback or worker thread");
+					trader = NULL;
+					return;
+				}
+				yd->release();
+				if (!yd->isQuiesced())
+				{
+					// Card 9a / ydApi.h: the listener may not be deleted before
+					// notifyAfterApiDestroy() and drained callbacks.
+					yd->detachForQuarantine();
+					quarantine_yd(yd, "YD destroy notification or callbacks did not complete");
+					trader = NULL;
+					return;
+				}
+			}
 			delete trader;
 			trader = NULL;
 		}
 	}
 }
+
+class TraderYD::ApiLease
+{
+public:
+	explicit ApiLease(TraderYD* owner) : _owner(owner), _held(owner->acquireApiLease()) {}
+	~ApiLease() { if (_held) _owner->releaseApiLease(); }
+	ApiLease(const ApiLease&) = delete;
+	ApiLease& operator=(const ApiLease&) = delete;
+	explicit operator bool() const { return _held; }
+
+private:
+	TraderYD*	_owner;
+	bool		_held;
+};
+
+class TraderYD::CallbackScope
+{
+public:
+	CallbackScope(TraderYD* owner, bool gated)
+		: _owner(owner)
+		, _previous(t_yd_callback_owner)
+	{
+		t_yd_callback_owner = owner;
+		_admitted = owner->enterCallback(gated);
+	}
+	~CallbackScope()
+	{
+		_owner->leaveCallback();
+		t_yd_callback_owner = _previous;
+	}
+	CallbackScope(const CallbackScope&) = delete;
+	CallbackScope& operator=(const CallbackScope&) = delete;
+	bool admitted() const { return _admitted; }
+
+private:
+	TraderYD*		_owner;
+	const TraderYD*	_previous;
+	bool			_admitted = false;
+};
+
+// Every YD trading callback counts itself while inside this wrapper and is
+// dropped once release() has been requested (card 9 isolation).
+#define YD_CALLBACK_SCOPE() \
+	CallbackScope ydCallbackScope(this, true); \
+	if (!ydCallbackScope.admitted()) \
+		return
 
 TraderYD::TraderYD()
 	: m_bCatchup(false)
@@ -238,6 +361,13 @@ TraderYD::TraderYD()
 	, m_mapOrders(NULL)
 	, m_ayFunds(NULL)
 	, m_bStopped(false)
+	, m_apiLeases(0)
+	, m_activeCallbacks(0)
+	, m_workerExited(true)
+	, m_destroyStarted(false)
+	, m_apiDestroyed(false)
+	, m_stopState(YS_RUNNING)
+	, m_drainTimeoutMs(2000)
 	, m_hInstYD(NULL)
 	, m_funcCreator(NULL)
 	{
@@ -246,11 +376,158 @@ TraderYD::TraderYD()
 
 TraderYD::~TraderYD()
 {
+	if (isCallbackContext())
+	{
+		std::fprintf(stderr, "[TraderYD] Direct delete on a YD callback/worker thread is unsupported; use deleteTrader\n");
+		std::abort();
+	}
+	release();
+	if (!isQuiesced())
+	{
+		// ydApi.h: the listener must outlive notifyAfterApiDestroy().
+		std::fprintf(stderr, "[TraderYD] Destroyed before notifyAfterApiDestroy/callback drain; use deleteTrader\n");
+		std::abort();
+	}
+
+	// I03-NEW-067: the result containers are created lazily by YD callbacks and
+	// owned by this instance; release() only clears them. The worker, host calls
+	// and callbacks are proven drained above, so return ownership exactly once.
+	DataMap** maps[] = { &m_mapOrders, &m_mapPosition, &m_mapTrades };
+	for (DataMap** slot : maps)
+	{
+		if (*slot != NULL)
+		{
+			(*slot)->release();
+			*slot = NULL;
+		}
+	}
+	if (m_ayFunds != NULL)
+	{
+		m_ayFunds->release();
+		m_ayFunds = NULL;
+	}
+}
+
+TraderYD::StopState TraderYD::stopState() const
+{
+	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+	return m_stopState;
+}
+
+bool TraderYD::isCallbackContext() const
+{
+	return t_yd_worker_owner == this || t_yd_callback_owner == this;
+}
+
+bool TraderYD::isQuiesced() const
+{
+	return stopState() == YS_RELEASED;
+}
+
+bool TraderYD::acquireApiLease()
+{
+	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+	if (m_bStopped.load(std::memory_order_acquire))
+		return false;
+	++m_apiLeases;
+	return true;
+}
+
+void TraderYD::releaseApiLease()
+{
+	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+	if (m_apiLeases > 0)
+		--m_apiLeases;
+	m_cvLifecycle.notify_all();
+}
+
+bool TraderYD::enterCallback(bool gated)
+{
+	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+	++m_activeCallbacks;
+	return !gated || !m_bStopped.load(std::memory_order_acquire);
+}
+
+void TraderYD::leaveCallback()
+{
+	// Notify under the lock: a releaser may free this object as soon as it
+	// observes the drained state and reacquires the mutex.
+	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+	if (m_activeCallbacks > 0)
+		--m_activeCallbacks;
+	m_cvLifecycle.notify_all();
+}
+
+void TraderYD::requestStop()
+{
+	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+	m_bStopped.store(true, std::memory_order_release);
+	if (m_stopState == YS_RUNNING)
+		m_stopState = YS_STOP_DEFERRED;
+}
+
+void TraderYD::detachForQuarantine()
+{
+	std::unique_lock<std::mutex> releaseLock(m_mtxRelease, std::try_to_lock);
+	if (!releaseLock.owns_lock())
+		return;
+	StdThreadPtr worker;
+	{
+		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+		worker = m_thrdWorker;
+	}
+	if (worker && worker->joinable())
+		worker->detach();
+}
+
+void TraderYD::workerMain()
+{
+	{
+		// Barrier: connect() publishes m_thrdWorker under this mutex.
+		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+	}
+	t_yd_worker_owner = this;
+	while (!m_bStopped.load(std::memory_order_acquire))
+	{
+		CommonExecuter handler;
+		{
+			StdUniqueLock lock(m_mtxQuery);
+			if (!m_queQuery.empty())
+			{
+				handler = m_queQuery.front();
+				m_queQuery.pop();
+			}
+		}
+		if (!handler)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			continue;
+		}
+		handler();
+	}
+	t_yd_worker_owner = NULL;
+	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+	m_workerExited = true;
+	m_cvLifecycle.notify_all();
+}
+
+void TraderYD::notifyBeforeApiDestroy()
+{
+	CallbackScope scope(this, false);
+}
+
+void TraderYD::notifyAfterApiDestroy()
+{
+	CallbackScope scope(this, false);
+	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+	m_apiDestroyed = true;
+	m_cvLifecycle.notify_all();
 }
 
 
 void TraderYD::notifyReadyForLogin(bool /*hasLoginFailed*/)
 {
+	YD_CALLBACK_SCOPE();
 	if (m_sink)
 		m_sink->handleEvent(WTE_Connect, 0);
 }
@@ -262,6 +539,7 @@ void TraderYD::on_kvcache_message(const char* message)
 
 void TraderYD::notifyLogin(int errorNo, int maxOrderRef, bool /*isMonitor*/)
 {
+	YD_CALLBACK_SCOPE();
 	if (errorNo == 0)
 	{
 		m_wrapperState = WS_LOGINED;
@@ -308,6 +586,7 @@ void TraderYD::notifyLogin(int errorNo, int maxOrderRef, bool /*isMonitor*/)
 
 void TraderYD::notifyFailedOrder(const YDInputOrder *pFailedOrder, const YDInstrument *pInstrument, const YDAccount */*pAccount*/)
 {
+	YD_CALLBACK_SCOPE();
 	if (!m_bCatchup)
 		return;
 
@@ -331,6 +610,7 @@ void TraderYD::notifyFailedOrder(const YDInputOrder *pFailedOrder, const YDInstr
 
 void TraderYD::notifyFailedCancelOrder(const YDFailedCancelOrder *pFailedCancelOrder, const YDExchange */*pExchange*/, const YDAccount */*pAccount*/)
 {
+	YD_CALLBACK_SCOPE();
 	if (!m_bCatchup)
 		return;
 
@@ -350,6 +630,7 @@ void TraderYD::notifyFailedCancelOrder(const YDFailedCancelOrder *pFailedCancelO
 
 void TraderYD::notifyFinishInit()
 {
+	YD_CALLBACK_SCOPE();
 	/*
 	 *	这里的处理逻辑比较复杂
 	 *	在第一次登陆成功以后，底层会去查询各种数据
@@ -430,6 +711,7 @@ void TraderYD::notifyFinishInit()
 
 void TraderYD::notifyOrder(const YDOrder *pOrder, const YDInstrument *pInstrument, const YDAccount */*pAccount*/)
 {
+	YD_CALLBACK_SCOPE();
 	WTSOrderInfo *orderInfo = makeOrderInfo(pOrder, pInstrument);
 	if (orderInfo)
 	{
@@ -456,23 +738,27 @@ void TraderYD::notifyOrder(const YDOrder *pOrder, const YDInstrument *pInstrumen
 					double availNew = pos->getAvailNewPos();
 
 					WTSCommodityInfo* commInfo = orderInfo->getContractInfo()->getCommInfo();
+					FrozenSources frozen = { 0.0, 0.0 };
 					if (commInfo->getCoverMode() == CM_CoverToday)
 					{
 						if (orderInfo->getOffsetType() == WOT_CLOSETODAY)
-							availNew -= orderInfo->getVolume();
+							frozen._new = orderInfo->getVolume();
 						else
-							availPre -= orderInfo->getVolume();
+							frozen._pre = orderInfo->getVolume();
 					}
 					else
 					{
 						//不区分平昨平今，则先冻结昨仓，再冻结今仓
-						double maxQty = std::min(availPre, orderInfo->getVolume());
-						availPre -= maxQty;
-						if (decimal::lt(orderInfo->getVolume(), maxQty))
-						{
-							availNew -= orderInfo->getVolume() - maxQty;
-						}
+						// BUG-R93-006: the remainder beyond the available yesterday
+						// quantity is frozen from today (the comparison was inverted,
+						// so it was never frozen). Never freeze a negative amount.
+						frozen._pre = std::max(0.0, std::min(availPre, orderInfo->getVolume()));
+						if (decimal::lt(frozen._pre, orderInfo->getVolume()))
+							frozen._new = orderInfo->getVolume() - frozen._pre;
 					}
+					availPre -= frozen._pre;
+					availNew -= frozen._new;
+					m_mapFrozen[oid] = frozen;
 
 					pos->setAvailPrePos(availPre);
 					pos->setAvailNewPos(availNew);
@@ -487,30 +773,26 @@ void TraderYD::notifyOrder(const YDOrder *pOrder, const YDInstrument *pInstrumen
 				{
 					std::string key = fmtutil::format("{}-{}", orderInfo->getCode(), orderInfo->getDirection());
 					WTSPositionItem* pos = (WTSPositionItem*)m_mapPosition->get(key);
-					[[maybe_unused]] double preQty = pos->getPrePosition();
-					double newQty = pos->getNewPosition();
 					double availPre = pos->getAvailPrePos();
 					double availNew = pos->getAvailNewPos();
 
-					double untrade = orderInfo->getVolume() - orderInfo->getVolTraded();
+					double untrade = std::max(0.0, orderInfo->getVolume() - orderInfo->getVolTraded());
 
-					WTSCommodityInfo* commInfo = orderInfo->getContractInfo()->getCommInfo();
-					if (commInfo->getCoverMode() == CM_CoverToday)
+					// BUG-R93-006: restore the untraded part to the sources this
+					// order froze when it was first seen. Fills consume yesterday
+					// first (see notifyTrade), so the untraded remainder is returned
+					// to today first, then to yesterday, never beyond what this
+					// order froze. Partial-fill/TradeVolume vendor semantics remain
+					// unverified (external evidence required).
+					auto fit = m_mapFrozen.find(oid);
+					if (fit != m_mapFrozen.end())
 					{
-						if (orderInfo->getOffsetType() == WOT_CLOSETODAY)
-							availNew += untrade;
-						else
-							availPre += untrade;
-					}
-					else
-					{
-						//不区分平昨平今，则先释放今仓，再释放昨仓
-						double maxQty = std::min(newQty - availNew, untrade);
-						availNew += maxQty;
-						if (decimal::lt(untrade, maxQty))
-						{
-							availPre += orderInfo->getVolume() - maxQty;
-						}
+						const FrozenSources& frozen = fit->second;
+						const double restoreNew = std::min(frozen._new, untrade);
+						const double restorePre = std::min(frozen._pre, untrade - restoreNew);
+						availNew += restoreNew;
+						availPre += restorePre;
+						m_mapFrozen.erase(fit);
 					}
 
 					pos->setAvailPrePos(availPre);
@@ -526,11 +808,19 @@ void TraderYD::notifyOrder(const YDOrder *pOrder, const YDInstrument *pInstrumen
 			m_sink->onPushOrder(orderInfo);
 		}
 	}
+	else
+	{
+		m_bOrderCacheDropped.store(true, std::memory_order_release);
+		// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+		wt_provider_raw::report(m_sink, m_spiFeatures.load(), "TraderYD", "order", "order report could not be converted",
+			(wt_provider_raw::hexOf("YDOrder", pOrder) + ";InstrumentID=" + ((pInstrument != NULL) ? std::string(pInstrument->InstrumentID, strnlen(pInstrument->InstrumentID, sizeof(pInstrument->InstrumentID))) : std::string())));
+	}
 }
 
 
 void TraderYD::notifyTrade(const YDTrade *pTrade, const YDInstrument *pInstrument, const YDAccount */*pAccount*/)
 {
+	YD_CALLBACK_SCOPE();
 	WTSTradeInfo *trdInfo = makeTradeRecord(pTrade, pInstrument);
 	if (trdInfo)
 	{
@@ -593,9 +883,12 @@ void TraderYD::notifyTrade(const YDTrade *pTrade, const YDInstrument *pInstrumen
 					else
 					{
 						//不区分平昨平今，则先减掉昨仓，在调整今仓
-						double maxQty = std::min(preQty, qty);
+						// R93-006 s5: the part beyond yesterday's quantity closes today's
+						// position (same order as the freeze in notifyOrder). The old
+						// comparison was inverted and never reduced today's quantity.
+						double maxQty = std::max(0.0, std::min(preQty, qty));
 						preQty -= maxQty;
-						if (decimal::lt(qty, maxQty))
+						if (decimal::lt(maxQty, qty))
 						{
 							newQty -= (qty - maxQty);
 						}
@@ -610,10 +903,17 @@ void TraderYD::notifyTrade(const YDTrade *pTrade, const YDInstrument *pInstrumen
 		if (m_sink && m_bCatchup)
 			m_sink->onPushTrade(trdInfo);
 	}
+	else
+	{
+		// BUG-L01-014: keep the unconverted SDK event for reconciliation (raw hex of the struct).
+		wt_provider_raw::report(m_sink, m_spiFeatures.load(), "TraderYD", "trade", "trade report could not be converted",
+			(wt_provider_raw::hexOf("YDTrade", pTrade) + ";InstrumentID=" + ((pInstrument != NULL) ? std::string(pInstrument->InstrumentID, strnlen(pInstrument->InstrumentID, sizeof(pInstrument->InstrumentID))) : std::string())));
+	}
 }
 
 void TraderYD::notifyCaughtUp()
 {
+	YD_CALLBACK_SCOPE();
 	m_bCatchup = true;
 
 	if(!m_bApiInited)
@@ -630,6 +930,7 @@ void TraderYD::notifyCaughtUp()
 
 void TraderYD::notifyAccount(const YDAccount *accInfo)
 {
+	YD_CALLBACK_SCOPE();
 	if (m_ayFunds == NULL || m_ayFunds->size() == 0)
 		return;
 
@@ -678,22 +979,103 @@ bool TraderYD::init(WTSVariant* config)
 
 void TraderYD::release()
 {
-	m_bStopped = true;
-
-	if (m_pUserAPI)
+	if (isCallbackContext())
 	{
-		m_pUserAPI->startDestroy();
-		m_pUserAPI = NULL;
+		// Card 9d: never wait for the worker, the callbacks or the YD destroy
+		// notifications on a YD callback or the worker. The stop is completed by a
+		// later external release(), the destructor, or never (quarantine).
+		requestStop();
+		return;
 	}
+
+	std::lock_guard<std::mutex> releaseLock(m_mtxRelease);
+	requestStop();
+	{
+		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+		if (m_stopState == YS_RELEASED)
+			return;
+	}
+
+	const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(m_drainTimeoutMs);
+	bool drained = true;
+
+	// 1. Host calls that may still use the YD API (leases) and the query worker.
+	{
+		std::unique_lock<std::mutex> lock(m_mtxLifecycle);
+		if (!m_cvLifecycle.wait_until(lock, deadline, [this]() { return m_apiLeases == 0; }))
+			drained = false;
+	}
+	StdThreadPtr worker;
+	{
+		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+		worker = m_thrdWorker;
+	}
+	if (drained && worker && worker->joinable())
+	{
+		std::unique_lock<std::mutex> lock(m_mtxLifecycle);
+		const bool exited = m_cvLifecycle.wait_until(lock, deadline, [this]() { return m_workerExited; });
+		lock.unlock();
+		if (exited)
+			worker->join();
+		else
+			drained = false;
+	}
+
+	// 2. YD callbacks already inside this wrapper may still read API data, which
+	//    stays valid only until startDestroy() completes its first period.
+	if (drained)
+	{
+		std::unique_lock<std::mutex> lock(m_mtxLifecycle);
+		if (!m_cvLifecycle.wait_until(lock, deadline, [this]() { return m_activeCallbacks == 0; }))
+			drained = false;
+	}
+
+	// 3. ydApi.h: startDestroy() is asynchronous and the listener (this object)
+	//    may only be deleted after notifyAfterApiDestroy().
+	YDApi* api = m_pUserAPI;
+	if (drained && api != NULL)
+	{
+		bool start = false;
+		{
+			std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+			start = !m_destroyStarted;
+			m_destroyStarted = true;
+		}
+		if (start)
+			api->startDestroy();
+		std::unique_lock<std::mutex> lock(m_mtxLifecycle);
+		if (!m_cvLifecycle.wait_until(lock, deadline, [this]() { return m_apiDestroyed && m_activeCallbacks == 0; }))
+			drained = false;
+	}
+
+	if (!drained)
+	{
+		{
+			std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+			m_stopState = YS_DRAIN_UNCERTAIN;
+		}
+		std::fprintf(stderr, "[TraderYD] release: worker, calls, callbacks or notifyAfterApiDestroy did not complete within %u ms; instance kept\n",
+			m_drainTimeoutMs);
+		return;
+	}
+
+	// The YD API freed itself; it must never be used or deleted again.
+	m_pUserAPI = NULL;
 
 	if (m_mapOrders)
 		m_mapOrders->clear();
+	m_bOrderCacheDropped.store(false, std::memory_order_release);
+
+	m_mapFrozen.clear();
 
 	if (m_mapPosition)
 		m_mapPosition->clear();
 
 	if (m_mapTrades)
 		m_mapTrades->clear();
+
+	std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+	m_stopState = YS_RELEASED;
 }
 
 void TraderYD::connect()
@@ -704,6 +1086,25 @@ void TraderYD::connect()
 		return;
 	}
 
+	{
+		// Card 9c: a stopped instance is terminal and a connected one keeps its API.
+		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+		if (m_bStopped.load(std::memory_order_acquire))
+		{
+			write_log(m_sink, LL_ERROR, "[TraderYD] Cannot connect after release");
+			return;
+		}
+		if (m_pUserAPI != NULL)
+		{
+			write_log(m_sink, LL_ERROR, "[TraderYD] Repeated connect rejected; the existing YD API is kept");
+			return;
+		}
+	}
+
+	ApiLease lease(this);
+	if (!lease)
+		return;
+
 	m_pUserAPI = m_funcCreator(m_strCfgFile.c_str());
 	if (m_pUserAPI == NULL)
 	{
@@ -713,32 +1114,19 @@ void TraderYD::connect()
 
 	m_pUserAPI->start(this);
 
-	if (m_thrdWorker == NULL)
+	if (m_thrdWorker == NULL && !m_bStopped.load(std::memory_order_acquire))
 	{
-		m_thrdWorker.reset(new StdThread([this]() {
-			while (!m_bStopped)
-			{
-				if (m_queQuery.empty())
-				{
-					std::this_thread::sleep_for(std::chrono::milliseconds(1));
-					continue;
-				}
-
-				CommonExecuter& handler = m_queQuery.front();
-				handler();
-
-				{
-					StdUniqueLock lock(m_mtxQuery);
-					m_queQuery.pop();
-				}
-			}
-		}));
+		// Publish the thread before it runs any handler.
+		std::lock_guard<std::mutex> lock(m_mtxLifecycle);
+		m_workerExited = false;
+		m_thrdWorker.reset(new StdThread([this]() { workerMain(); }));
 	}
 }
 
 void TraderYD::disconnect()
 {
-	if (m_pUserAPI == NULL)
+	ApiLease lease(this);
+	if (!lease || m_pUserAPI == NULL)
 		return;
 
 	m_pUserAPI->disconnect();
@@ -768,7 +1156,8 @@ int TraderYD::login(const char* user, const char* pass, const char* /*productInf
 	m_strUser = user;
 	m_strPass = pass;
 
-	if (m_pUserAPI == NULL)
+	ApiLease lease(this);
+	if (!lease || m_pUserAPI == NULL)
 	{
 		return -1;
 	}
@@ -797,7 +1186,8 @@ int TraderYD::doLogin()
 
 int TraderYD::logout()
 {
-	if (m_pUserAPI == NULL)
+	ApiLease lease(this);
+	if (!lease || m_pUserAPI == NULL)
 	{
 		return -1;
 	}
@@ -805,10 +1195,26 @@ int TraderYD::logout()
 	return 0;
 }
 
+// Card 8 (BUG-P02-005, slice1 final gaps): this provider trades whole lots. A
+// quantity that is not finite, not positive, larger than the SDK int field or
+// fractional is rejected before any order identity is consumed: the strategy
+// rounds, the adapter never truncates through the integer SDK field.
+static bool isWholeLotVolume(double volume)
+{
+	return std::isfinite(volume) && volume >= 1 && volume <= (double)INT_MAX && std::floor(volume) == volume;
+}
+
 int TraderYD::orderInsert(WTSEntrust* entrust)
 {
-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+	ApiLease lease(this);
+	if (!lease || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 	{
+		return -1;
+	}
+
+	if (entrust == NULL || !isWholeLotVolume(entrust->getVolume()))
+	{
+		write_log(m_sink, LL_ERROR, "[TraderYD] Order rejected: quantity {} is not a positive whole number of lots", entrust != NULL ? entrust->getVolume() : 0.0);
 		return -1;
 	}
 
@@ -864,7 +1270,8 @@ int TraderYD::orderInsert(WTSEntrust* entrust)
 
 int TraderYD::orderAction(WTSEntrustAction* action)
 {
-	if (m_wrapperState != WS_ALLREADY)
+	ApiLease lease(this);
+	if (!lease || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 		return -1;
 
 	uint32_t orderref;
@@ -893,7 +1300,7 @@ int TraderYD::orderAction(WTSEntrustAction* action)
 
 int TraderYD::queryAccount()
 {
-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+	if (m_bStopped.load(std::memory_order_acquire) || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 	{
 		return -1;
 	}
@@ -910,7 +1317,7 @@ int TraderYD::queryAccount()
 
 int TraderYD::queryPositions()
 {
-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+	if (m_bStopped.load(std::memory_order_acquire) || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 	{
 		return -1;
 	}
@@ -940,7 +1347,7 @@ int TraderYD::queryPositions()
 
 int TraderYD::queryOrders()
 {
-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+	if (m_bStopped.load(std::memory_order_acquire) || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 	{
 		return -1;
 	}
@@ -957,7 +1364,20 @@ int TraderYD::queryOrders()
 					ayOrders->append(it->second, true);
 				}
 			}
-			if (m_sink) m_sink->onRspOrders(ayOrders.get());
+			if (m_sink == NULL)
+				return;
+			// K42 / BUG-I02-NEW-154: YD has no order query; the snapshot is the local
+			// cache built from the pushed reports. It is complete only while the cache
+			// follows the live reports (update_cache) and no order report of this
+			// session was dropped; otherwise the host merges rows without concluding
+			// anything from a missing order.
+			if (m_spiFeatures.load(std::memory_order_acquire) & WT_TRADER_SPI_FEATURE_QUERY_STATUS)
+			{
+				const bool current = m_bUpdateCache && !m_bOrderCacheDropped.load(std::memory_order_acquire);
+				m_sink->onRspOrdersWithStatus(ayOrders.get(), current ? WT_QUERY_STATUS_COMPLETE : WT_QUERY_STATUS_PARTIAL);
+			}
+			else
+				m_sink->onRspOrders(ayOrders.get());
 		});
 	}
 
@@ -966,7 +1386,7 @@ int TraderYD::queryOrders()
 
 int TraderYD::queryTrades()
 {
-	if (m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
+	if (m_bStopped.load(std::memory_order_acquire) || m_pUserAPI == NULL || m_wrapperState != WS_ALLREADY)
 	{
 		return -1;
 	}

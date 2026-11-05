@@ -1,0 +1,71 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5*
+[==========] Running 19 tests from 6 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from I03S5HftDemoParams
+[ RUN      ] I03S5HftDemoParams.ShippedAndJsonFormsAreAccepted
+[       OK ] I03S5HftDemoParams.ShippedAndJsonFormsAreAccepted (471 ms)
+[ RUN      ] I03S5HftDemoParams.MissingOrMalformedParamsAreRejected
+[i03s5_hft_demo] SimpleHft rejected params: params must be an object
+[i03s5_hft_demo] SimpleHft rejected params: params must be an object
+[i03s5_hft_demo] SimpleHft rejected params: missing required parameter code
+[i03s5_hft_demo] SimpleHft rejected params: unknown parameter lots
+[i03s5_hft_demo] SimpleHft rejected params: unknown parameter secnd
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter second
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter freq
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter offset
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter reserve
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter stock
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter code
+[i03s5_hft_demo] SimpleHft rejected params: invalid parameter code
+[       OK ] I03S5HftDemoParams.MissingOrMalformedParamsAreRejected (0 ms)
+[----------] 2 tests from I03S5HftDemoParams (479 ms total)
+
+[----------] 3 tests from I03S5R42HftQuantity
+[ RUN      ] I03S5R42HftQuantity.CApiV2QueriesReportUnknownHandleAndInvalidArguments
+[       OK ] I03S5R42HftQuantity.CApiV2QueriesReportUnknownHandleAndInvalidArguments (22 ms)
+[ RUN      ] I03S5R42HftQuantity.CApiV2QueriesSucceedForBoundContextAndReportUnboundContext
+[       OK ] I03S5R42HftQuantity.CApiV2QueriesSucceedForBoundContextAndReportUnboundContext (23 ms)
+[ RUN      ] I03S5R42HftQuantity.UnknownTraderCreatesNothingAndRegisteredTraderBinds
+[       OK ] I03S5R42HftQuantity.UnknownTraderCreatesNothingAndRegisteredTraderBinds (14 ms)
+[----------] 3 tests from I03S5R42HftQuantity (59 ms total)
+
+[----------] 6 tests from I03S5RtRunnerPreflight
+[ RUN      ] I03S5RtRunnerPreflight.InvalidExecuterInMiddleRejectsBeforeMutationAndConfigIsRetryable
+[       OK ] I03S5RtRunnerPreflight.InvalidExecuterInMiddleRejectsBeforeMutationAndConfigIsRetryable (30 ms)
+[ RUN      ] I03S5RtRunnerPreflight.UnknownExecuterKindIsRejectedInsteadOfBecomingDist
+[       OK ] I03S5RtRunnerPreflight.UnknownExecuterKindIsRejectedInsteadOfBecomingDist (0 ms)
+[ RUN      ] I03S5RtRunnerPreflight.MissingExecuterSidecarFailsConfig
+[       OK ] I03S5RtRunnerPreflight.MissingExecuterSidecarFailsConfig (0 ms)
+[ RUN      ] I03S5RtRunnerPreflight.SidecarExecutersAndRoutersAreValidatedAndLoaded
+[       OK ] I03S5RtRunnerPreflight.SidecarExecutersAndRoutersAreValidatedAndLoaded (6 ms)
+[ RUN      ] I03S5RtRunnerPreflight.InvalidRouterRuleFailsConfig
+[       OK ] I03S5RtRunnerPreflight.InvalidRouterRuleFailsConfig (1 ms)
+[ RUN      ] I03S5RtRunnerPreflight.DiffInitFailureAfterValidationFailsConfigAndRetainsHostForQuiesce
+[       OK ] I03S5RtRunnerPreflight.DiffInitFailureAfterValidationFailsConfigAndRetainsHostForQuiesce (67 ms)
+[----------] 6 tests from I03S5RtRunnerPreflight (109 ms total)
+
+[----------] 4 tests from I03S5RtRunnerSel
+[ RUN      ] I03S5RtRunnerSel.ValidSelConfigPublishesSelContextAndExecutersWithoutReadingCta
+[       OK ] I03S5RtRunnerSel.ValidSelConfigPublishesSelContextAndExecutersWithoutReadingCta (517 ms)
+[ RUN      ] I03S5RtRunnerSel.UnknownSelFactoryFailsWithoutPartialContext
+[       OK ] I03S5RtRunnerSel.UnknownSelFactoryFailsWithoutPartialContext (305 ms)
+[ RUN      ] I03S5RtRunnerSel.SelInitFalseFailsWholeBatchBeforePublication
+[       OK ] I03S5RtRunnerSel.SelInitFalseFailsWholeBatchBeforePublication (322 ms)
+[ RUN      ] I03S5RtRunnerSel.InvalidSelPeriodIsRejectedByPreflight
+[       OK ] I03S5RtRunnerSel.InvalidSelPeriodIsRejectedByPreflight (9 ms)
+[----------] 4 tests from I03S5RtRunnerSel (1155 ms total)
+
+[----------] 2 tests from I03S5RtRunnerStrategies
+[ RUN      ] I03S5RtRunnerStrategies.CtaInitFalseFailsConfigAndPublishesNoContext
+WtStraDualThrust::init begins
+[       OK ] I03S5RtRunnerStrategies.CtaInitFalseFailsConfigAndPublishesNoContext (765 ms)
+[ RUN      ] I03S5RtRunnerStrategies.HftInitFalseFailsBatchWithoutContextOrTraderSink
+[i03s5_hft_noparams] SimpleHft rejected params: params must be an object
+[       OK ] I03S5RtRunnerStrategies.HftInitFalseFailsBatchWithoutContextOrTraderSink (352 ms)
+[----------] 2 tests from I03S5RtRunnerStrategies (1118 ms total)
+
+[----------] 2 tests from I03S5RtRunnerStartup
+[ RUN      ] I03S5RtRunnerStartup.StrategyOnInitExceptionReleasesPartiallyStartedRuntime
+[       OK ] I03S5RtRunnerStartup.StrategyOnInitExceptionReleasesPartiallyStartedRuntime (20 ms)
+[ RUN      ] I03S5RtRunnerStartup.SecondRunIsRejectedAfterSuccessfulStart

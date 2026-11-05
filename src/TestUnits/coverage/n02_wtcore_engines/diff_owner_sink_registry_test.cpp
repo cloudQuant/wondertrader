@@ -7,6 +7,7 @@
 #include <future>
 #include <mutex>
 #include <string>
+#include <stdexcept>
 #include <thread>
 
 #include <boost/core/noncopyable.hpp>
@@ -87,9 +88,9 @@ private:
 	bool _released = false;
 };
 
-void routeTrade(TraderAdapter& adapter, const std::string& owner_id)
+bool routeTrade(TraderAdapter& adapter, const std::string& owner_id)
 {
-	adapter.forEachSinkForOwner(owner_id, [](ITrdNotifySink* sink) {
+	return adapter.forEachSinkForOwner(owner_id, [](ITrdNotifySink* sink) {
 		sink->on_trade(17, "EX.TEST", true, 1.0, 100.0);
 	});
 }
@@ -233,8 +234,9 @@ TEST(DiffOwnerSinkRegistry, ReentrantUnregisterAndRemoveDoNotHoldRoutingLocks)
 		ownerUnregistered = adapter.unregisterOwnerSink(token);
 		sinkRemoved = adapter.removeSink(&owner);
 	};
-	routeTrade(adapter, "diff-A");
+	const bool routed = routeTrade(adapter, "diff-A");
 
+	EXPECT_TRUE(routed); // Invocation began before the reentrant unregister.
 	EXPECT_FALSE(ownerUnregistered);
 	EXPECT_FALSE(sinkRemoved);
 	EXPECT_EQ(1u, owner.trade_calls.load());
@@ -251,3 +253,118 @@ TEST(DiffOwnerSinkRegistry, ReentrantUnregisterAndRemoveDoNotHoldRoutingLocks)
 	EXPECT_TRUE(adapter.removeSink(&ordinary));
 }
 
+#ifdef WT_OWNER_ROUTING_TEST_HOOKS
+namespace {
+std::atomic<Gate*> ownerLookupGate{nullptr};
+}
+
+// Called only by a specially compiled TraderAdapter TU at the race boundary.
+void wtOwnerRoutingTestAfterLookup()
+{
+	Gate* gate = ownerLookupGate.load(std::memory_order_acquire);
+	if (gate)
+		gate->arriveAndWait();
+}
+
+namespace {
+enum class RouteInterruption { Unregister, Remove, Stop, Replace };
+
+void verifyInterruptedOwnerRoute(RouteInterruption interruption)
+{
+	TraderAdapter adapter;
+	RecordingSink oldOwner;
+	RecordingSink replacement;
+	adapter.addSink(&oldOwner);
+	ASSERT_TRUE(adapter.configureOwnerRoutingCapabilities(completeCapabilities()));
+	TraderAdapter::OwnerSinkRegistrationToken token;
+	ASSERT_TRUE(adapter.registerOwnerSink("diff-A", &oldOwner, token));
+	Gate gate;
+	ownerLookupGate.store(&gate, std::memory_order_release);
+	bool routed = true;
+	std::thread route([&]() {
+		routed = adapter.forEachSinkForOwner("diff-A", [](ITrdNotifySink* sink) {
+			sink->on_trade(17, "EX.TEST", true, 1.0, 100.0);
+		});
+	});
+	if (!gate.waitUntilEntered(std::chrono::seconds(2)))
+	{
+		gate.release();
+		route.join();
+		ownerLookupGate.store(nullptr, std::memory_order_release);
+		FAIL() << "owner route did not reach the lookup barrier";
+		return;
+	}
+
+	TraderAdapter::OwnerSinkRegistrationToken replacementToken;
+	switch (interruption)
+	{
+	case RouteInterruption::Unregister:
+		EXPECT_TRUE(adapter.unregisterOwnerSink(token));
+		break;
+	case RouteInterruption::Remove:
+		EXPECT_TRUE(adapter.removeSink(&oldOwner));
+		break;
+	case RouteInterruption::Stop:
+		adapter.requestStopSinkNotifications();
+		break;
+	case RouteInterruption::Replace:
+		EXPECT_TRUE(adapter.unregisterOwnerSink(token));
+		EXPECT_TRUE(adapter.removeSink(&oldOwner));
+		adapter.addSink(&replacement);
+		EXPECT_TRUE(adapter.registerOwnerSink("diff-A", &replacement, replacementToken));
+		break;
+	}
+	gate.release();
+	route.join();
+	ownerLookupGate.store(nullptr, std::memory_order_release);
+	EXPECT_FALSE(routed);
+	EXPECT_EQ(0u, oldOwner.trade_calls.load());
+	EXPECT_EQ(0u, replacement.trade_calls.load());
+	if (interruption == RouteInterruption::Stop)
+		EXPECT_TRUE(adapter.waitSinkNotificationsStopped());
+	else if (interruption == RouteInterruption::Replace)
+	{
+		EXPECT_TRUE(adapter.forEachSinkForOwner("diff-A", [](ITrdNotifySink* sink) {
+			sink->on_trade(18, "EX.TEST", true, 1.0, 100.0);
+		}));
+		EXPECT_EQ(1u, replacement.trade_calls.load());
+		EXPECT_TRUE(adapter.unregisterOwnerSink(replacementToken));
+		EXPECT_TRUE(adapter.removeSink(&replacement));
+	}
+	else if (interruption == RouteInterruption::Unregister)
+		EXPECT_TRUE(adapter.removeSink(&oldOwner));
+}
+} // namespace
+
+TEST(DiffOwnerSinkDelivery, UnregisterBeforeCallbackReportsNotDelivered)
+{
+	verifyInterruptedOwnerRoute(RouteInterruption::Unregister);
+}
+TEST(DiffOwnerSinkDelivery, RemoveBeforeCallbackReportsNotDelivered)
+{
+	verifyInterruptedOwnerRoute(RouteInterruption::Remove);
+}
+TEST(DiffOwnerSinkDelivery, StopBeforeCallbackReportsNotDelivered)
+{
+	verifyInterruptedOwnerRoute(RouteInterruption::Stop);
+}
+TEST(DiffOwnerSinkDelivery, ReplacementCannotReceiveOldReservation)
+{
+	verifyInterruptedOwnerRoute(RouteInterruption::Replace);
+}
+#endif
+
+TEST(DiffOwnerSinkDelivery, CallbackExceptionPropagatesAndReleasesReservation)
+{
+	TraderAdapter adapter;
+	RecordingSink owner;
+	adapter.addSink(&owner);
+	ASSERT_TRUE(adapter.configureOwnerRoutingCapabilities(completeCapabilities()));
+	TraderAdapter::OwnerSinkRegistrationToken token;
+	ASSERT_TRUE(adapter.registerOwnerSink("diff-A", &owner, token));
+	EXPECT_THROW(adapter.forEachSinkForOwner("diff-A", [](ITrdNotifySink*) {
+		throw std::runtime_error("intentional callback exception");
+	}), std::runtime_error);
+	EXPECT_TRUE(adapter.unregisterOwnerSink(token));
+	EXPECT_TRUE(adapter.removeSink(&owner));
+}

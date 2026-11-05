@@ -182,6 +182,9 @@ TEST_F(r31_stra_mgr, cta_plugins_export_create_strategy_fact_entry)
     EXPECT_TRUE(exportsSymbol(kCtaFactLib, "deleteStrategyFact"));
     EXPECT_TRUE(exportsSymbol(kTwoMaLib, "createStrategyFact"));
     EXPECT_TRUE(exportsSymbol(kTwoMaLib, "deleteStrategyFact"));
+    // Card 4b=A: current hosts only use the versioned CTA table.
+    EXPECT_TRUE(exportsSymbol(kCtaFactLib, "getCtaStrategyPluginApiV2"));
+    EXPECT_TRUE(exportsSymbol(kTwoMaLib, "getCtaStrategyPluginApiV2"));
     // 反例：执行器/指标插件没有策略入口
     EXPECT_FALSE(exportsSymbol(kExeFactLib, "createStrategyFact"));
     EXPECT_FALSE(exportsSymbol(kIdxFactLib, "createStrategyFact"));
@@ -232,9 +235,11 @@ TEST_F(r31_stra_mgr, sel_manager_loads_real_sel_plugin_and_creates_strategy)
     EXPECT_STREQ("WtSelStraFact", strategy->self()->getFactName());
     EXPECT_STREQ("DualThrustSelection", strategy->self()->getName());
     EXPECT_EQ(mgr.getStrategy("sel_real").get(), strategy.get());
+    // 迭代03 当前树：SelStrategyMgr::createStrategy 在工厂返回空策略时 fail-closed，返回空指针并释放 id
+    // 预占（不登记空包装）；改前期望为“非空包装、self()==nullptr”。CTA 管理器仍保留旧行为（见下方用例）。
     SelStrategyPtr unknown = mgr.createStrategy("WtSelStraFact", "NoSuchSelection", "sel_missing");
-    ASSERT_NE(unknown.get(), nullptr);
-    EXPECT_EQ(unknown->self(), nullptr);
+    EXPECT_EQ(unknown.get(), nullptr);
+    EXPECT_EQ(mgr.getStrategy("sel_missing").get(), nullptr);
 }
 
 TEST_F(r31_stra_mgr, sel_manager_handles_duplicate_factory_name_plugins)
@@ -428,6 +433,26 @@ TEST_F(r31_stra_mgr, sel_mixed_dir_with_unloadable_and_text_files_still_returns_
  * 对照事实：同样两份插件喂给 CtaStrategyMgr（本文件上面 6 条用例）完全正常，
  * 差别只在管理器的接口类型 —— 说明缺的是产品侧的插件类型标识，不是用例写法。
  */
+/* BUG-R31-002 (card 4b=A): the disabled crash case above stays disabled. Its
+ * safe-refusal replacement: the real CTA plugin now also exports the
+ * versioned CTA getter, so HftStrategyMgr classifies it as a foreign-family
+ * plugin and never calls its shared-name createStrategyFact. */
+TEST_F(r31_stra_mgr, hft_refuses_cta_plugin_before_creator)
+{
+    ASSERT_TRUE(stage(kCtaFactLib));
+    EXPECT_TRUE(exportsSymbol(kCtaFactLib, "getCtaStrategyPluginApiV2"));
+    EXPECT_FALSE(exportsSymbol(kCtaFactLib, "getHftStrategyPluginApiV2"));
+
+    HftStrategyMgr mgr;
+    // Foreign versioned plugins are skipped like other non-HFT modules.
+    EXPECT_TRUE(mgr.loadFactories(_dir.string().c_str()));
+    EXPECT_EQ(mgr.createStrategy("WtCtaStraFact", "DualThrust", "hft_refused").get(), nullptr);
+    EXPECT_EQ(mgr.getStrategy("hft_refused").get(), nullptr);
+    // A rescan neither crashes nor registers the CTA factory.
+    EXPECT_TRUE(mgr.loadFactories(_dir.string().c_str()));
+    EXPECT_EQ(mgr.createStrategy("WtCtaStraFact", "DualThrust", "hft_refused2").get(), nullptr);
+}
+
 TEST_F(r31_stra_mgr, DISABLED_hft_loads_cta_plugin_via_shared_symbol_name)
 {
     ASSERT_TRUE(stage(kCtaFactLib));

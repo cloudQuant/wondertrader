@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="13" failures="6" disabled="0" errors="0" time="14.35" timestamp="2026-11-03T21:55:59.788" name="AllTests">
+  <testsuite name="XeleEvents" tests="7" failures="3" disabled="0" skipped="0" errors="0" time="7.277" timestamp="2026-11-03T21:55:59.789">
+    <testcase name="ConnectThenLoginOnlyAfterFirstValidFrame" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="103" status="run" result="completed" time="2.464" timestamp="2026-11-03T21:55:59.789" classname="XeleEvents">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:106&#x0A;Value of: x.sink.waitCount(&apos;C&apos;, 1)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;transport event after snapshot + join&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:106
+Value of: x.sink.waitCount('C', 1)
+  Actual: false
+Expected: true
+transport event after snapshot + join
+]]></failure>
+    </testcase>
+    <testcase name="SnapshotFailureEmitsNoSuccessEvent" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="115" status="run" result="completed" time="0.055" timestamp="2026-11-03T21:56:02.253" classname="XeleEvents" />
+    <testcase name="InvalidFramesDoNotConfirm" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="122" status="run" result="completed" time="2.008" timestamp="2026-11-03T21:56:02.309" classname="XeleEvents">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:125&#x0A;Value of: x.sink.waitCount(&apos;C&apos;, 1)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:125
+Value of: x.sink.waitCount('C', 1)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="ReconnectStartsNewEventEpoch" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="136" status="run" result="completed" time="2.002" timestamp="2026-11-03T21:56:04.318" classname="XeleEvents">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:142&#x0A;Value of: x.sink.waitCount(&apos;C&apos;, epoch)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:142
+Value of: x.sink.waitCount('C', epoch)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="ReleaseFromAnotherThreadDuringConnectEmitsNothing" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="151" status="run" result="completed" time="0.37" timestamp="2026-11-03T21:56:06.321" classname="XeleEvents" />
+    <testcase name="ReleaseFromLogCallbackDuringConnectEmitsNothing" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="167" status="run" result="completed" time="0.052" timestamp="2026-11-03T21:56:06.691" classname="XeleEvents" />
+    <testcase name="V2StopDuringConnectDrainsWithoutEvents" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="180" status="run" result="completed" time="0.319" timestamp="2026-11-03T21:56:06.746" classname="XeleEvents" />
+  </testsuite>
+  <testsuite name="UdpEvents" tests="6" failures="3" disabled="0" skipped="0" errors="0" time="7.073" timestamp="2026-11-03T21:56:07.066">
+    <testcase name="ConnectThenLoginOnlyAfterFirstValidMessage" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="228" status="run" result="completed" time="2.475" timestamp="2026-11-03T21:56:07.066" classname="UdpEvents">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:231&#x0A;Value of: u.sink.waitCount(&apos;C&apos;, 1)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;transport event after both channels are armed&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:231
+Value of: u.sink.waitCount('C', 1)
+  Actual: false
+Expected: true
+transport event after both channels are armed
+]]></failure>
+    </testcase>
+    <testcase name="PartialConnectFailureEmitsNoSuccessEvent" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="240" status="run" result="completed" time="0.522" timestamp="2026-11-03T21:56:09.542" classname="UdpEvents" />
+    <testcase name="InvalidMessagesDoNotConfirm" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="250" status="run" result="completed" time="2.006" timestamp="2026-11-03T21:56:10.064" classname="UdpEvents">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:253&#x0A;Value of: u.sink.waitCount(&apos;C&apos;, 1)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:253
+Value of: u.sink.waitCount('C', 1)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="ReconnectStartsNewEventEpoch" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="264" status="run" result="completed" time="2.002" timestamp="2026-11-03T21:56:12.070" classname="UdpEvents">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:270&#x0A;Value of: u.sink.waitCount(&apos;C&apos;, epoch)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:270
+Value of: u.sink.waitCount('C', epoch)
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="ReleaseFromLogCallbackDuringConnectEmitsNothing" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="279" status="run" result="completed" time="0.054" timestamp="2026-11-03T21:56:14.072" classname="UdpEvents" />
+    <testcase name="V2StopFromLogCallbackDuringConnectDrainsWithoutEvents" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp" line="292" status="run" result="completed" time="0.012" timestamp="2026-11-03T21:56:14.127" classname="UdpEvents" />
+  </testsuite>
+</testsuites>

@@ -66,6 +66,15 @@ void WtHftEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, I
 
 void WtHftEngine::run()
 {
+	// BUG-R10-004 (slice1 final gaps): a repeated run() is rejected. Creating a
+	// second ticker would overwrite _tm_ticker and leak the running ticker and
+	// its worker, which would keep driving this engine.
+	if (_tm_ticker != NULL)
+	{
+		WTSLogger::error("HFT engine is already running; repeated run() rejected");
+		return;
+	}
+
 	if (!fee_config_valid())
 	{
 		WTSLogger::error("HFT engine start rejected: fee template configuration is invalid");
@@ -116,7 +125,8 @@ void WtHftEngine::run()
 		StdFile::write_file_content(filename.c_str(), sb.GetString());
 	}
 
-	_tm_ticker->run();
+	if (!_tm_ticker->run())
+		WTSLogger::error("HFT engine start failed: time ticker could not start (trading session unavailable)");
 }
 
 void WtHftEngine::handle_push_quote(WTSTickData* newTick)
@@ -278,7 +288,7 @@ void WtHftEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 							newTS.low *= factor;
 							newTS.price *= factor;
 
-							_price_map[wCode] = newTS.price;
+							set_cur_price(wCode.c_str(), newTS.price);
 
 							ctx->on_tick(wCode.c_str(), newTick);
 							newTick->release();
@@ -292,8 +302,8 @@ void WtHftEngine::on_tick(const char* stdCode, WTSTickData* curTick)
 
 void WtHftEngine::on_bar(const char* stdCode, const char* period, uint32_t times, WTSBarStruct* newBar)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}-{}-{}", stdCode, period, times);
+	// I03-NEW-039: a legal stdCode plus period and times can exceed 64 bytes.
+	const std::string key = fmt::format("{}-{}-{}", stdCode, period, times);
 
 	const SubList& sids = _bar_sub_map[key];
 	for (auto it = sids.begin(); it != sids.end(); it++)

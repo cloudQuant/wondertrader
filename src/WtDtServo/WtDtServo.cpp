@@ -46,10 +46,29 @@ const char* getModuleName()
 }
 #endif
 
+namespace
+{
+// The runner lives on the heap. At process exit its parsers are stopped and
+// drained first; the runner (and every manager the parsers borrow) is deleted
+// only when all parser owners were released. Otherwise it is retained until
+// the process ends (card 9a: unprovable owners are never destroyed).
+struct RunnerHolder
+{
+	WtDtRunner* runner;
+	RunnerHolder() : runner(new WtDtRunner()) {}
+	~RunnerHolder()
+	{
+		if (runner->shutdown())
+			delete runner;
+		runner = NULL;
+	}
+};
+}
+
 WtDtRunner& getRunner()
 {
-	static WtDtRunner runner;
-	return runner;
+	static RunnerHolder holder;
+	return *holder.runner;
 }
 
 void initialize(WtString cfgFile, bool isFile, WtString logCfg, FuncOnTickCallback cbTick, FuncOnBarCallback cbBar)
@@ -60,6 +79,11 @@ void initialize(WtString cfgFile, bool isFile, WtString logCfg, FuncOnTickCallba
 bool is_initialized()
 {
 	return getRunner().isInitialized();
+}
+
+bool are_parser_connect_commands_submitted()
+{
+	return getRunner().parserCommandsSubmitted();
 }
 
 bool has_retained_parser_adapters()

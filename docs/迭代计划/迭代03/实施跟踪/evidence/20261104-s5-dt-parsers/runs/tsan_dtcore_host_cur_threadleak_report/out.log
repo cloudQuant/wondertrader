@@ -1,0 +1,43 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 10 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 10 tests from DtCoreHost
+[ RUN      ] DtCoreHost.LegacyModuleWithoutV2IsRejectedBeforeCreateParser
+[       OK ] DtCoreHost.LegacyModuleWithoutV2IsRejectedBeforeCreateParser (1343 ms)
+[ RUN      ] DtCoreHost.FailedProviderInitRollsBackThroughV2AndReturnsConfig
+[       OK ] DtCoreHost.FailedProviderInitRollsBackThroughV2AndReturnsConfig (12 ms)
+[ RUN      ] DtCoreHost.ProviderInitThrowRollsBackThroughV2
+[       OK ] DtCoreHost.ProviderInitThrowRollsBackThroughV2 (6 ms)
+[ RUN      ] DtCoreHost.SuccessfulInitReleaseDrainsBeforeDestroy
+[       OK ] DtCoreHost.SuccessfulInitReleaseDrainsBeforeDestroy (28 ms)
+[ RUN      ] DtCoreHost.SecondInitIsRejectedAndKeepsOriginal
+[       OK ] DtCoreHost.SecondInitIsRejectedAndKeepsOriginal (17 ms)
+[ RUN      ] DtCoreHost.ReleaseFromProviderThreadDefersToSafePoint
+[       OK ] DtCoreHost.ReleaseFromProviderThreadDefersToSafePoint (14 ms)
+[ RUN      ] DtCoreHost.ManagerTeardownReleasesEveryDrainedAdapter
+[       OK ] DtCoreHost.ManagerTeardownReleasesEveryDrainedAdapter (19 ms)
+[ RUN      ] DtCoreHost.UncertainDrainQuarantinesOwnerAndIsNotRetried
+[       OK ] DtCoreHost.UncertainDrainQuarantinesOwnerAndIsNotRetried (5 ms)
+[ RUN      ] DtCoreHost.PendingDrainIsRetriedUntilDrained
+[       OK ] DtCoreHost.PendingDrainIsRetriedUntilDrained (5 ms)
+[ RUN      ] DtCoreHost.DestructorDrainsProvableV2Owner
+[       OK ] DtCoreHost.DestructorDrainsProvableV2Owner (6 ms)
+[----------] 10 tests from DtCoreHost (1459 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 1 test suite ran. (1459 ms total)
+[  PASSED  ] 10 tests.
+==================
+WARNING: ThreadSanitizer: thread leak (pid=54449)
+  Thread T7 (tid=6319516, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) <null> (libI03DtFakeV2.dylib:arm64+0x8a7c)
+    #2 std::__1::thread::thread[abi:nqe220108]<(anonymous namespace)::FakeParser::init(wtp::WTSVariant*)::'lambda'(), 0>((anonymous namespace)::FakeParser::init(wtp::WTSVariant*)::'lambda'()&&) <null> (libI03DtFakeV2.dylib:arm64+0x8814)
+    #3 std::__1::thread::thread[abi:nqe220108]<(anonymous namespace)::FakeParser::init(wtp::WTSVariant*)::'lambda'(), 0>((anonymous namespace)::FakeParser::init(wtp::WTSVariant*)::'lambda'()&&) <null> (libI03DtFakeV2.dylib:arm64+0x8684)
+    #4 (anonymous namespace)::FakeParser::init(wtp::WTSVariant*) <null> (libI03DtFakeV2.dylib:arm64+0x7ea4)
+    #5 ParserAdapter::init(char const*, wtp::WTSVariant*) <null> (dtcore_host_cur:arm64+0x10002da8c)
+    #6 (anonymous namespace)::DtCoreHost_UncertainDrainQuarantinesOwnerAndIsNotRetried_Test::TestBody() <null> (dtcore_host_cur:arm64+0x100024bd0)
+    #7 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (dtcore_host_cur:arm64+0x1001824a8)
+
+SUMMARY: ThreadSanitizer: thread leak (libI03DtFakeV2.dylib:arm64+0x8a7c) in std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*)+0x54
+==================

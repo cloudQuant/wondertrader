@@ -1,0 +1,68 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R69PorterRunnerConfig.*
+[==========] Running 15 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 15 tests from R69PorterRunnerConfig
+[ RUN      ] R69PorterRunnerConfig.BasefilesStringFormsAndEmptyEnvNameBuildCtaEngine
+[       OK ] R69PorterRunnerConfig.BasefilesStringFormsAndEmptyEnvNameBuildCtaEngine (7 ms)
+[ RUN      ] R69PorterRunnerConfig.BasefilesArrayFormsAndInactiveInlineParserBuildCtaEngine
+[       OK ] R69PorterRunnerConfig.BasefilesArrayFormsAndInactiveInlineParserBuildCtaEngine (1 ms)
+[ RUN      ] R69PorterRunnerConfig.ActiveInlineParserWithoutModuleFailsConfig
+[       OK ] R69PorterRunnerConfig.ActiveInlineParserWithoutModuleFailsConfig (0 ms)
+[ RUN      ] R69PorterRunnerConfig.ParserFileMissingKeyFailsConfig
+[       OK ] R69PorterRunnerConfig.ParserFileMissingKeyFailsConfig (0 ms)
+[ RUN      ] R69PorterRunnerConfig.BrokenParserFileFailsConfig
+[       OK ] R69PorterRunnerConfig.BrokenParserFileFailsConfig (1 ms)
+[ RUN      ] R69PorterRunnerConfig.TraderAndExecuterFilesLoadWithRouterSections
+[       OK ] R69PorterRunnerConfig.TraderAndExecuterFilesLoadWithRouterSections (1 ms)
+[ RUN      ] R69PorterRunnerConfig.TraderInitFailureInExternalFileFailsConfig
+dlopen(/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/traders/libr69_module_that_does_not_exist.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/traders/libr69_module_that_does_not_exist.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/traders/libr69_module_that_does_not_exist.dylib' (no such file), '/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/traders/libr69_module_that_does_not_exist.dylib' (no such file)
+[       OK ] R69PorterRunnerConfig.TraderInitFailureInExternalFileFailsConfig (3 ms)
+[ RUN      ] R69PorterRunnerConfig.MissingExecuterFileAndEmptyDataStillReturnTrue
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp:355: Failure
+Value of: r->config(missingExecFile.c_str(), false)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp:356: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  r->getEngine()
+    Which is: 0xc070382d8
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp:363: Failure
+Value of: r->config(cfg.c_str(), false)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R69PorterRunnerConfig.MissingExecuterFileAndEmptyDataStillReturnTrue (2 ms)
+[ RUN      ] R69PorterRunnerConfig.ExplicitMissingDataStoreModuleFailsConfigAndLeavesRunnerNotReady
+dlopen(/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/libr69_no_such_data_storage.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/libr69_no_such_data_storage.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/libr69_no_such_data_storage.dylib' (no such file), '/private/tmp/wt-i03-s5-runners-snap/build/build_x64/Debug/bin/TestUnits/libr69_no_such_data_storage.dylib' (no such file)
+[       OK ] R69PorterRunnerConfig.ExplicitMissingDataStoreModuleFailsConfigAndLeavesRunnerNotReady (2 ms)
+[ RUN      ] R69PorterRunnerConfig.ValidDataStoreModuleLoadsAndServesKlineQuery
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/r69_porter_runner_config_test.cpp:444: Failure
+Expected: (nullptr) != (bars), actual: (nullptr) vs NULL
+the real WtDataStorage reader should return the fed history bars
+
+[  FAILED  ] R69PorterRunnerConfig.ValidDataStoreModuleLoadsAndServesKlineQuery (1 ms)
+[ RUN      ] R69PorterRunnerConfig.UnknownEnvNameFallsBackToHftEngine
+[       OK ] R69PorterRunnerConfig.UnknownEnvNameFallsBackToHftEngine (0 ms)
+[ RUN      ] R69PorterRunnerConfig.HotTagsRefreshAfterRulesLoadedLater
+[       OK ] R69PorterRunnerConfig.HotTagsRefreshAfterRulesLoadedLater (1 ms)
+[ RUN      ] R69PorterRunnerConfig.HotTagsAreIsolatedBetweenInstances
+[       OK ] R69PorterRunnerConfig.HotTagsAreIsolatedBetweenInstances (1 ms)
+[ RUN      ] R69PorterRunnerConfig.RepeatedHotTagQueriesDoNotDuplicateTags
+[       OK ] R69PorterRunnerConfig.RepeatedHotTagQueriesDoNotDuplicateTags (0 ms)
+[ RUN      ] R69PorterRunnerConfig.ReleaseClearsTagsAndHotCodesBeforeReload
+[       OK ] R69PorterRunnerConfig.ReleaseClearsTagsAndHotCodesBeforeReload (1 ms)
+[----------] 15 tests from R69PorterRunnerConfig (29 ms total)
+
+[----------] Global test environment tear-down
+[==========] 15 tests from 1 test suite ran. (29 ms total)
+[  PASSED  ] 13 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] R69PorterRunnerConfig.MissingExecuterFileAndEmptyDataStillReturnTrue
+[  FAILED  ] R69PorterRunnerConfig.ValidDataStoreModuleLoadsAndServesKlineQuery
+
+ 2 FAILED TESTS

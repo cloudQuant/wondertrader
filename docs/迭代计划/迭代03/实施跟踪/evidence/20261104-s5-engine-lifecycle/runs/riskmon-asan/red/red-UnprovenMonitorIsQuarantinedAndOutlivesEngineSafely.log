@@ -1,0 +1,18 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5RiskMonQuiesce.UnprovenMonitorIsQuarantinedAndOutlivesEngineSafely
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5RiskMonQuiesce
+[ RUN      ] S5RiskMonQuiesce.UnprovenMonitorIsQuarantinedAndOutlivesEngineSafely
+/private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtEngine.cpp:237:40: runtime error: member call on null pointer of type 'wtp::WTSPortFundInfo'
+    #0 0x000100b890b8 in wtp::WtEngine::update_fund_dynprofit() WtEngine.cpp:237
+    #1 0x000100b8b9f4 in wtp::WtEngine::getFundInfo() WtEngine.cpp:332
+    #2 0x000102020c10 in (anonymous namespace)::Monitor::init(wtp::WtPortContext*, wtp::WTSVariant*)::'lambda'()::operator()() const fake_riskmon.cpp:43
+    #3 0x000102020820 in std::__1::__invoke_result_impl<void, (anonymous namespace)::Monitor::init(wtp::WtPortContext*, wtp::WTSVariant*)::'lambda'()>::type std::__1::__invoke[abi:nqe220108]<(anonymous namespace)::Monitor::init(wtp::WtPortContext*, wtp::WTSVariant*)::'lambda'()>((anonymous namespace)::Monitor::init(wtp::WtPortContext*, wtp::WTSVariant*)::'lambda'()&&) invoke.h:90
+    #4 0x0001020206fc in void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, (anonymous namespace)::Monitor::init(wtp::WtPortContext*, wtp::WTSVariant*)::'lambda'(), 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, (anonymous namespace)::Monitor::init(wtp::WtPortContext*, wtp::WTSVariant*)::'lambda'()>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161
+    #5 0x00010201f854 in void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, (anonymous namespace)::Monitor::init(wtp::WtPortContext*, wtp::WTSVariant*)::'lambda'()>>(void*) thread.h:169
+    #6 0x0001025556d4 in asan_thread_start(void*)+0x48 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x516d4)
+    #7 0x0001883cdc54 in _pthread_start+0x84 (libsystem_pthread.dylib:arm64e+0x6c54)
+    #8 0x0001883c8c18 in thread_start+0x4 (libsystem_pthread.dylib:arm64e+0x1c18)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /private/tmp/wt-i03-s5-engine-lifecycle-asan/snap/src/WtCore/WtEngine.cpp:237:40 

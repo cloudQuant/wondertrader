@@ -1,0 +1,10 @@
+--- original
++++ naive-control
+@@ -1184,6 +1184,7 @@
+ 	int32_t ret = _trader_api->orderInsert(entrust);
+ 	if(ret < 0)
+ 	{
++		rollbackUndoneIfNonzero(stdCode.c_str(), entrust->getVolume());
+ 		WTSLogger::log_dyn("trader", _id.c_str(), LL_ERROR, "[{}] Order placing failed: {}", _id, ret);
+ 		return UINT_MAX;
+ 	}

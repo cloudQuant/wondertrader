@@ -1,0 +1,664 @@
+/*!
+ * \file q04_uftctx_local_report_test.cpp
+ * \brief UftStraContext 本地块装载与成交/委托回报推进(迭代01 第五波 q04)
+ *
+ * 覆盖: on_channel_ready -> load_local_data 的 position/order/trade/round 四个 membin
+ * 块建立(含 mannual.yaml 手工持仓导入与改名)、on_trade 的净头寸推进与回合盈亏、
+ * on_order/on_entrust/on_position 的本单认领、stra_* 下单与查询转发、
+ * 交易日切换时的过期块清理。
+ * 落盘只发生在 temp_directory_path() 下的唯一根目录, 用例结束删除。
+ */
+#include "q04_trader_fixture.h"
+
+#include "WtUftCore/UftStraContext.h"
+#include "WtUftCore/WtUftEngine.h"
+#include "WtUftCore/WtUftDtMgr.h"
+
+#include <unistd.h>
+#include <filesystem>
+#include <string>
+#include <vector>
+
+using namespace wtp;
+
+namespace {
+
+const char* kAg = "SHFE.ag2406";
+
+//WtHelper::getOutputDir() 把路径缓存成函数内静态, 所以根目录一次定死,
+//每个用例再用唯一的策略名区分自己的子目录
+const std::string& ctxRoot()
+{
+	static std::string root =
+		(std::filesystem::temp_directory_path() / ("q04_uftctx_root_" + std::to_string(static_cast<long>(::getpid())))).string() + "/";
+	std::error_code ec;
+	std::filesystem::create_directories(root, ec);
+	WtHelper::setGenerateDir(root.c_str());
+	return root;
+}
+
+struct CtxEnv
+{
+	q04::TempRoot			_tmp{ "ctx" };
+	q04::FakeTraderApi		_api;
+	q04::FakeBaseDataMgr	_bd;
+	ActionPolicyMgr			_policy;
+	TraderAdapter			_adapter;
+	WtUftDtMgr				_dtMgr;
+	WtUftEngine				_engine;
+	UftStraContext			_ctx;
+	std::string				_name;
+
+	explicit CtxEnv(const char* name)
+		: _ctx(&_engine, name)
+	{
+		_name = name;
+		ctxRoot();
+		_bd.add("SHFE", "ag", "ag2406", 0, 0, CM_OpenCover, TM_Both, 1);
+		const std::string path = _tmp.file("policy.json");
+		_tmp.write(path, q04::policyJsonOpenCloseLimited());
+		EXPECT_TRUE(_policy.init(path.c_str()));
+		_engine.init(nullptr, &_bd, nullptr, nullptr);
+		EXPECT_TRUE(_adapter.initExt(name, &_api, &_bd, &_policy));
+		_adapter.run();
+		//交易日必须先写好, 后续回报才会带正确的 _trading_day
+		_adapter.onLoginResult(true, "ok", 20240315);
+		_adapter.addSink(&_ctx);
+		_ctx.setTrader(&_adapter);
+	}
+
+	std::string straFolder()
+	{
+		return ctxRoot() + "outputs/" + _name + "/";
+	}
+
+	std::string straFile(const char* suffix)
+	{
+		return straFolder() + suffix;
+	}
+
+	void removeOwnFolder()
+	{
+		std::error_code ec;
+		std::filesystem::remove_all(ctxRoot() + "outputs/" + _name, ec);
+	}
+};
+
+}	// namespace
+
+TEST(q04_uftctx_local, channel_ready_builds_the_four_local_blocks)
+{
+	CtxEnv ctx("q04ctx_ready");
+	ctx.removeOwnFolder();
+
+	//_tradingday 为 0 时 load_local_data 直接早退, 不建任何文件
+	ctx._ctx.on_position(kAg, true, 1, 1, 1, 1, 20240315);
+	EXPECT_FALSE(std::filesystem::exists(ctx.straFile("position.membin")));
+
+	ctx._ctx.on_channel_ready(20240315);
+	EXPECT_TRUE(std::filesystem::exists(ctx.straFile("position.membin")));
+	EXPECT_TRUE(std::filesystem::exists(ctx.straFile("order.membin")));
+	EXPECT_TRUE(std::filesystem::exists(ctx.straFile("trade.membin")));
+	EXPECT_TRUE(std::filesystem::exists(ctx.straFile("round.membin")));
+
+	//本地无历史持仓
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_posprofit(kAg));
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_closeprofit(kAg));
+
+	//同一天重复就绪不再重建
+	ctx._ctx.on_channel_ready(20240315);
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_position(kAg));
+	ctx.removeOwnFolder();
+}
+
+TEST(q04_uftctx_local, manual_positions_are_imported_then_file_is_renamed)
+{
+	CtxEnv ctx("q04ctx_manual");
+	ctx.removeOwnFolder();
+
+	std::error_code ec;
+	std::filesystem::create_directories(ctx.straFolder(), ec);
+
+	//手工持仓表: 一条可识别（K08 b=B：含未知合约的文件整份拒绝，未知合约条目移到专门用例）
+	ctx._tmp.write(ctx.straFolder() + "mannual.yaml", R"JSON({
+	"details": [
+		{"exchg":"SHFE","code":"ag2406","direct":0,"volume":3,"openprice":5000}
+	]
+})JSON");
+
+	ctx._ctx.on_channel_ready(20240315);
+
+	//导入的 3 手多头进入本地净持仓, 成本 3*5000*1
+	EXPECT_DOUBLE_EQ(3.0, ctx._ctx.stra_get_local_position(kAg));
+	//原文件被改名, 不会二次生效
+	long renamed = 0;
+	for (auto& e : std::filesystem::directory_iterator(ctx.straFolder(), ec))
+	{
+		if (e.path().string().find("mannual.yaml.") != std::string::npos)
+			renamed++;
+	}
+	EXPECT_EQ(1L, renamed);
+	EXPECT_FALSE(std::filesystem::exists(ctx.straFolder() + "mannual.yaml"));
+	ctx.removeOwnFolder();
+}
+
+// 原用例 manual_unknown_contract_does_not_hide_later_valid_details（部分导入 5 手）按 K08 b=B 改写。
+TEST(q04_uftctx_local, manual_file_with_unknown_contract_is_rejected_as_a_whole)
+{
+	// 决策 K08（2026-11-04 用户裁定）：a=B/b=B 解析失败、缺 details、含未知合约或非法条目的手工文件整份拒绝，
+	// 不导入、不归档、本次切日失败；c=C 先改名归档再应用。改前期望见证据 k08-manual-file/before。
+	CtxEnv ctx("q04ctx_manual_unknown_first");
+	ctx.removeOwnFolder();
+	std::filesystem::create_directories(ctx.straFolder());
+	const std::string manual = ctx.straFolder() + "mannual.yaml";
+	ctx._tmp.write(manual, R"JSON({
+		"details": [
+			{"exchg":"DCE","code":"unknown","direct":0,"volume":1,"openprice":100},
+			{"exchg":"SHFE","code":"ag2406","direct":0,"volume":3,"openprice":5000},
+			{"exchg":"DCE","code":"unknown2","direct":0,"volume":1,"openprice":100},
+			{"exchg":"SHFE","code":"ag2406","direct":0,"volume":2,"openprice":5100}
+		]
+	})JSON");
+	ctx._ctx.on_channel_ready(20240315);
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_TRUE(std::filesystem::exists(manual)) << "a rejected manual file must stay in place";
+	EXPECT_FALSE(std::filesystem::exists(ctx.straFile("position.membin"))) << "the rejected switch must not prepare local blocks";
+
+	// e=A：运维修正文件后，下一次就绪重试并导入，导入后归档。
+	ctx._tmp.write(manual, R"JSON({
+		"details": [
+			{"exchg":"SHFE","code":"ag2406","direct":0,"volume":3,"openprice":5000},
+			{"exchg":"SHFE","code":"ag2406","direct":0,"volume":2,"openprice":5100}
+		]
+	})JSON");
+	ctx._ctx.on_channel_ready(20240315);
+	EXPECT_DOUBLE_EQ(5.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_FALSE(std::filesystem::exists(manual));
+	ctx.removeOwnFolder();
+}
+
+TEST(q04_uftctx_local, manual_file_with_invalid_entries_is_rejected_as_a_whole)
+{
+	CtxEnv ctx("q04ctx_manual_invalid");
+	ctx.removeOwnFolder();
+	std::filesystem::create_directories(ctx.straFolder());
+	const std::string manual = ctx.straFolder() + "mannual.yaml";
+	const char* invalid[] = {
+		R"JSON({"details":[{"exchg":"SHFE","code":"ag2406","direct":2,"volume":1,"openprice":5000}]})JSON",
+		R"JSON({"details":[{"exchg":"SHFE","code":"ag2406","direct":0,"volume":-1,"openprice":5000}]})JSON",
+		R"JSON({"details":[{"exchg":"SHFE","code":"ag2406","direct":0,"volume":1,"openprice":-5}]})JSON",
+		R"JSON({"details":[{"exchg":"","code":"ag2406","direct":0,"volume":1,"openprice":5000}]})JSON",
+		R"JSON({"details":{"exchg":"SHFE"}})JSON",
+		R"JSON([1,2,3])JSON",
+		"details: [unterminated\n",
+	};
+	for (const char* content : invalid)
+	{
+		SCOPED_TRACE(content);
+		ctx._tmp.write(manual, content);
+		ctx._ctx.on_channel_ready(20240315);
+		EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_position(kAg));
+		EXPECT_TRUE(std::filesystem::exists(manual));
+	}
+	std::error_code ec;
+	for (const auto& entry : std::filesystem::directory_iterator(ctx.straFolder(), ec))
+		EXPECT_EQ(std::string::npos, entry.path().filename().string().find("mannual.yaml.")) << "nothing may be archived";
+
+	// 空明细列表是合法的“清空持仓”指令
+	ctx._tmp.write(manual, R"JSON({"details":[]})JSON");
+	ctx._ctx.on_channel_ready(20240315);
+	EXPECT_FALSE(std::filesystem::exists(manual));
+	EXPECT_TRUE(std::filesystem::exists(ctx.straFile("position.membin")));
+	ctx.removeOwnFolder();
+}
+
+TEST(q04_uftctx_local, manual_file_is_not_applied_when_it_cannot_be_archived)
+{
+	if (::geteuid() == 0)
+		GTEST_SKIP() << "directory permissions do not bind root";
+	CtxEnv ctx("q04ctx_manual_archive_fail");
+	ctx.removeOwnFolder();
+	ctx._ctx.on_channel_ready(20240315);	// 建好本地块
+	uint32_t idOpen = ctx._ctx.stra_enter_long(kAg, 5000.0, 4.0, 0);
+	ctx._ctx.on_trade(idOpen, kAg, true, 0, 4.0, 5000.0);
+	ASSERT_DOUBLE_EQ(4.0, ctx._ctx.stra_get_local_position(kAg));
+
+	const std::string manual = ctx.straFolder() + "mannual.yaml";
+	ctx._tmp.write(manual, R"JSON({"details":[{"exchg":"SHFE","code":"ag2406","direct":0,"volume":3,"openprice":4900}]})JSON");
+	// 目录只读：已有块可打开，归档改名失败。c=C：归档失败则本次切日失败、不覆盖持仓（改前先应用、再改名失败，下次切日会重复导入）。
+	std::filesystem::permissions(ctx.straFolder(), std::filesystem::perms::owner_read | std::filesystem::perms::owner_exec,
+		std::filesystem::perm_options::replace);
+	ctx._ctx.on_channel_ready(20240318);
+	std::filesystem::permissions(ctx.straFolder(), std::filesystem::perms::owner_all, std::filesystem::perm_options::replace);
+	EXPECT_DOUBLE_EQ(4.0, ctx._ctx.stra_get_local_position(kAg)) << "positions must not be overwritten when archiving fails";
+	EXPECT_TRUE(std::filesystem::exists(manual));
+
+	// 恢复权限后重试：导入恰好一次并归档
+	ctx._ctx.on_channel_ready(20240318);
+	EXPECT_DOUBLE_EQ(3.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_FALSE(std::filesystem::exists(manual));
+	ctx.removeOwnFolder();
+}
+
+TEST(q04_uftctx_local, trade_reports_advance_position_and_round_profit)
+{
+	CtxEnv ctx("q04ctx_trade");
+	ctx.removeOwnFolder();
+	ctx._ctx.on_channel_ready(20240315);
+
+	//开多 4 手
+	uint32_t idOpen = ctx._ctx.stra_enter_long(kAg, 5000.0, 4.0, 0);
+	EXPECT_NE(UINT_MAX, idOpen);
+	//委托回报(此时订单尚未登记, on_order 只落块)
+	ctx._ctx.on_order(idOpen, kAg, true, 0, 4.0, 4.0, 5000.0, false);
+	//非本策略的单子要被拒掉
+	ctx._ctx.on_trade(idOpen + 100000, kAg, true, 0, 1.0, 5000.0);
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_position(kAg));
+	//委托回报同样只认自己的单
+	ctx._ctx.on_entrust(idOpen + 100000, kAg, false, "no");
+	ctx._ctx.on_entrust(idOpen, kAg, true, "accepted");
+
+	ctx._ctx.on_trade(idOpen, kAg, true, 0, 4.0, 5000.0);
+	EXPECT_DOUBLE_EQ(4.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_closeprofit(kAg));
+
+	//平多 4 手: 净头寸归零, 回合盈亏 (5100-5000)*4*1 = 400
+	uint32_t idClose = ctx._ctx.stra_exit_long(kAg, 5100.0, 4.0, false, 0);
+	EXPECT_NE(UINT_MAX, idClose);
+	ctx._ctx.on_trade(idClose, kAg, true, 1, 4.0, 5100.0);
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_DOUBLE_EQ(400.0, ctx._ctx.stra_get_local_closeprofit(kAg));
+	//浮动盈亏只在盯市时更新, 成交推进不动它
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_posprofit(kAg));
+
+	//反向: 先开空 2, 再买 5 -> 平空 2 + 开多 3
+	uint32_t idS = ctx._ctx.stra_enter_short(kAg, 5200.0, 2.0, 0);
+	ctx._ctx.on_trade(idS, kAg, false, 0, 2.0, 5200.0);
+	EXPECT_DOUBLE_EQ(-2.0, ctx._ctx.stra_get_local_position(kAg));
+	uint32_t idB = ctx._ctx.stra_exit_short(kAg, 5150.0, 5.0, false, 0);
+	ctx._ctx.on_trade(idB, kAg, false, 1, 5.0, 5150.0);
+	//空头被平 2 手获利 (5200-5150)*2 = 100, 剩余 3 手开多
+	EXPECT_DOUBLE_EQ(3.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_DOUBLE_EQ(500.0, ctx._ctx.stra_get_local_closeprofit(kAg));
+	ctx.removeOwnFolder();
+}
+
+TEST(q04_uftctx_local, order_and_cancel_forward_through_the_channel)
+{
+	CtxEnv ctx("q04ctx_cancel");
+	ctx.removeOwnFolder();
+	ctx._ctx.on_channel_ready(20240315);
+
+	// stra_buy/stra_sell 走动作规则(default 组只有 open), 并登记 localid
+	OrderIDs buys = ctx._ctx.stra_buy(kAg, 5000.0, 2.0, 0);
+	ASSERT_EQ(1u, buys.size());
+	OrderIDs sells = ctx._ctx.stra_sell(kAg, 5000.0, 3.0, 0);
+	ASSERT_EQ(1u, sells.size());
+	EXPECT_EQ(2u, ctx._api._entrusts.size());
+	EXPECT_EQ((int)WDT_LONG, ctx._api._entrusts[0]._dir);
+	EXPECT_EQ((int)WDT_SHORT, ctx._api._entrusts[1]._dir);
+
+	//查询转发
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_position(kAg, true, 3));
+	EXPECT_DOUBLE_EQ(5.0, ctx._ctx.stra_get_undone(kAg));
+	EXPECT_EQ(0u, ctx._ctx.stra_get_infos(kAg));
+	EXPECT_NE(nullptr, ctx._ctx.stra_get_comminfo(kAg));
+	EXPECT_EQ(nullptr, ctx._ctx.stra_get_comminfo("SHFE.unknown"));
+
+	//没有活单时撤单/撤全部都返回空
+	EXPECT_FALSE(ctx._ctx.stra_cancel(buys[0]));
+	EXPECT_EQ(0u, ctx._ctx.stra_cancel_all("").size());
+
+	//把第一笔委托按活单回报推进通道(cancelAll 需要 ContractInfo, 见 BUG-Q04-008)
+	const q04::FakeTraderApi::EntrustSnap& snap = ctx._api._entrusts[0];
+	WTSOrderInfo* ord = q04::orderFromSnap(snap, "CTX-1");
+	ord->setContractInfo(ctx._bd.getContract("ag2406", "SHFE"));
+	WTSArray* ay = WTSArray::create();
+	ay->append(ord);
+	ctx._adapter.onRspOrders(ay);
+	ay->release();
+	ord->release();
+
+	//通道里的活单会经 sink 回到 ctx.on_order
+	ctx._ctx.on_order(buys[0], kAg, true, 0, 2.0, 2.0, 5000.0, false);
+	EXPECT_TRUE(ctx._ctx.stra_cancel(buys[0]));
+	ASSERT_EQ(1u, ctx._api._actions.size());
+	EXPECT_EQ("CTX-1", ctx._api._actions[0]._code);
+
+	//撤全部: 空代码撤掉所有活单
+	OrderIDs all = ctx._ctx.stra_cancel_all("");
+	EXPECT_EQ(1u, all.size());
+	//带标准代码的过滤在 cancelAll 里按 fullcode 比较, 可以命中
+	OrderIDs byCode = ctx._ctx.stra_cancel_all(kAg);
+	EXPECT_EQ(1u, byCode.size());
+
+	//通道持仓经 stra_enum_position 回调到本 ctx(on_position 是空实现, 不推进本地块)
+	WTSArray* posAy = WTSArray::create();
+	WTSPositionItem* pItem = q04::posItem("SHFE", "ag2406", WDT_LONG, 2, 2, 0, 0);
+	posAy->append(pItem);
+	ctx._adapter.onRspPosition(posAy);
+	posAy->release();
+	pItem->release();
+	EXPECT_DOUBLE_EQ(2.0, ctx._ctx.stra_enum_position(kAg));
+	EXPECT_DOUBLE_EQ(2.0, ctx._ctx.stra_get_position(kAg, false, 1));
+	ctx._ctx.on_channel_lost();
+	ctx.removeOwnFolder();
+}
+
+TEST(q04_uftctx_local, trading_day_switch_rebuilds_stale_blocks)
+{
+	CtxEnv ctx("q04ctx_switch");
+	ctx.removeOwnFolder();
+
+	ctx._ctx.on_channel_ready(20240315);
+	uint32_t idOpen = ctx._ctx.stra_enter_long(kAg, 5000.0, 4.0, 0);
+	ctx._ctx.on_trade(idOpen, kAg, true, 0, 4.0, 5000.0);
+	ASSERT_DOUBLE_EQ(4.0, ctx._ctx.stra_get_local_position(kAg));
+
+	//切到新交易日: 明细文件按 _date 判定过期并清理
+	ctx._ctx.on_channel_ready(20240318);
+	//切日无新成交: 已有4手在重载持仓块后仍应只累计一次
+	EXPECT_DOUBLE_EQ(4.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_TRUE(std::filesystem::exists(ctx.straFile("position.membin")));
+	ctx.removeOwnFolder();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// BUG-Q04-007: transactional trading-day reload (2026-11-04).
+namespace {
+uint32_t blockDate(const std::string& file)
+{
+	// BlockHeader: 8-byte flag, uint32 type, uint32 date (packed)
+	std::ifstream in(file, std::ios::binary);
+	char header[16] = { 0 };
+	in.read(header, sizeof(header));
+	uint32_t date = 0;
+	std::memcpy(&date, header + 12, sizeof(date));
+	return date;
+}
+}
+
+// After a day switch every persisted detail is referenced once: closing the
+// carried position consumes exactly the carried quantity.
+TEST(q04_uftctx_local, trading_day_switch_then_close_uses_each_detail_once)
+{
+	CtxEnv ctx("q04ctx_switch_close");
+	ctx.removeOwnFolder();
+	ctx._ctx.on_channel_ready(20240315);
+	uint32_t idOpen = ctx._ctx.stra_enter_long(kAg, 5000.0, 4.0, 0);
+	ctx._ctx.on_trade(idOpen, kAg, true, 0, 4.0, 5000.0);
+
+	ctx._ctx.on_channel_ready(20240318);
+	uint32_t idClose = ctx._ctx.stra_exit_long(kAg, 5100.0, 4.0, false, 0);
+	ctx._ctx.on_trade(idClose, kAg, true, 1, 4.0, 5100.0);
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_DOUBLE_EQ(400.0, ctx._ctx.stra_get_local_closeprofit(kAg));
+	ctx.removeOwnFolder();
+}
+
+// The in-memory state after a hot switch equals what a cold start derives
+// from the same files on the new day (the persisted rollover resets daily
+// closed profit and keeps open details).
+TEST(q04_uftctx_local, trading_day_switch_matches_cold_start_of_the_new_day)
+{
+	CtxEnv ctx("q04ctx_switch_cold");
+	ctx.removeOwnFolder();
+	ctx._ctx.on_channel_ready(20240315);
+	uint32_t idOpen = ctx._ctx.stra_enter_long(kAg, 5000.0, 4.0, 0);
+	ctx._ctx.on_trade(idOpen, kAg, true, 0, 4.0, 5000.0);
+	uint32_t idClose = ctx._ctx.stra_exit_long(kAg, 5100.0, 2.0, false, 0);
+	ctx._ctx.on_trade(idClose, kAg, true, 1, 2.0, 5100.0);
+	ASSERT_DOUBLE_EQ(2.0, ctx._ctx.stra_get_local_position(kAg));
+	ASSERT_DOUBLE_EQ(200.0, ctx._ctx.stra_get_local_closeprofit(kAg));
+
+	ctx._ctx.on_channel_ready(20240318);
+	UftStraContext cold(&ctx._engine, "q04ctx_switch_cold");
+	cold.on_channel_ready(20240318);
+	EXPECT_DOUBLE_EQ(2.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_DOUBLE_EQ(cold.stra_get_local_position(kAg), ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_DOUBLE_EQ(cold.stra_get_local_closeprofit(kAg), ctx._ctx.stra_get_local_closeprofit(kAg));
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_closeprofit(kAg));
+	ctx.removeOwnFolder();
+}
+
+// A reload that cannot map one block publishes nothing, does not roll the
+// position file over and does not advance the trading day; the next ready
+// event retries and succeeds exactly once.
+TEST(q04_uftctx_local, failed_day_switch_keeps_state_and_retries)
+{
+	CtxEnv ctx("q04ctx_switch_retry");
+	ctx.removeOwnFolder();
+	ctx._ctx.on_channel_ready(20240315);
+	uint32_t idOpen = ctx._ctx.stra_enter_long(kAg, 5000.0, 4.0, 0);
+	ctx._ctx.on_trade(idOpen, kAg, true, 0, 4.0, 5000.0);
+
+	const std::string orderFile = ctx.straFile("order.membin");
+	std::filesystem::permissions(orderFile, std::filesystem::perms::none);
+	EXPECT_NO_THROW(ctx._ctx.on_channel_ready(20240318));
+	std::filesystem::permissions(orderFile, std::filesystem::perms::owner_read | std::filesystem::perms::owner_write);
+	EXPECT_DOUBLE_EQ(4.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_EQ(20240315u, blockDate(ctx.straFile("position.membin")));
+
+	ctx._ctx.on_channel_ready(20240318);
+	EXPECT_DOUBLE_EQ(4.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_EQ(20240318u, blockDate(ctx.straFile("position.membin")));
+	uint32_t idClose = ctx._ctx.stra_exit_long(kAg, 5000.0, 4.0, false, 0);
+	ctx._ctx.on_trade(idClose, kAg, true, 1, 4.0, 5000.0);
+	EXPECT_DOUBLE_EQ(0.0, ctx._ctx.stra_get_local_position(kAg));
+	ctx.removeOwnFolder();
+}
+
+// A manual position file found at a day switch replaces the persisted
+// positions; the previous in-memory positions are not added on top of it.
+TEST(q04_uftctx_local, manual_file_at_day_switch_replaces_positions)
+{
+	CtxEnv ctx("q04ctx_switch_manual");
+	ctx.removeOwnFolder();
+	ctx._ctx.on_channel_ready(20240315);
+	uint32_t idOpen = ctx._ctx.stra_enter_long(kAg, 5000.0, 4.0, 0);
+	ctx._ctx.on_trade(idOpen, kAg, true, 0, 4.0, 5000.0);
+
+	ctx._tmp.write(ctx.straFolder() + "mannual.yaml", R"JSON({
+	"details": [
+		{"exchg":"SHFE","code":"ag2406","direct":0,"volume":3,"openprice":4900}
+	]
+})JSON");
+	ctx._ctx.on_channel_ready(20240318);
+	EXPECT_DOUBLE_EQ(3.0, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_FALSE(std::filesystem::exists(ctx.straFolder() + "mannual.yaml"));
+	ctx.removeOwnFolder();
+}
+
+//崩溃/阻塞类输入整类收在这里
+TEST(DISABLED_q04_uftctx_local, uninitialized_trader_and_shared_param_class)
+{
+	CtxEnv ctx("q04ctx_disabled");
+
+	//1) _trader 由 setTrader 装配, 未装配时 8 个下单/查询接口直接解引用(BUG-P06-004)
+	UftStraContext bare(&ctx._engine, "q04ctx_bare");
+	bare.stra_get_position(kAg, true, 3);
+	bare.stra_get_undone(kAg);
+	bare.stra_get_infos(kAg);
+	bare.stra_cancel(1);
+	bare.stra_buy(kAg, 5000.0, 1.0, 0);
+
+	//2) 未 on_channel_ready(块指针为 NULL) 时推成交: _pos_blk._block 解引用
+	ctx._ctx.on_channel_ready(20240315);
+	uint32_t id = ctx._ctx.stra_enter_long(kAg, 5000.0, 1.0, 0);
+	ctx._ctx.on_trade(id, "SHFE.unknown", true, 0, 1.0, 5000.0);
+
+	//3) watch_param/read_param/sync_param 需要共享内存段(BUG-P06 同类)
+	ctx._ctx.watch_param("k", 1.0);
+	ctx._ctx.read_param("k", 1.0);
+	ctx._ctx.sync_param("k", 1.0);
+	ctx._ctx.commit_param_watcher();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// I03-NEW-056 / I03-NEW-059 (2026-11-04).
+namespace {
+uint32_t blockHeaderField(const std::string& file, std::size_t offset)
+{
+	// BlockHeader (packed): flag[8], type, date, capacity, size
+	std::ifstream in(file, std::ios::binary);
+	char header[24] = { 0 };
+	in.read(header, sizeof(header));
+	uint32_t value = 0;
+	std::memcpy(&value, header + offset, sizeof(value));
+	return value;
+}
+uint32_t blockCapacity(const std::string& file) { return blockHeaderField(file, 16); }
+uint32_t blockSize(const std::string& file) { return blockHeaderField(file, 20); }
+
+// A provider that reports the order live and filled from inside orderInsert,
+// before the adapter returns the local id to the caller.
+class SyncFillApi : public q04::FakeTraderApi
+{
+public:
+	bool fill = true;
+	int orderInsert(WTSEntrust* entrust) override
+	{
+		const int ret = q04::FakeTraderApi::orderInsert(entrust);
+		if (!fill || _spi == nullptr)
+			return ret;
+		WTSOrderInfo* order = WTSOrderInfo::create(entrust);
+		order->setOrderID("sync-order");
+		order->setVolLeft(0);
+		order->setVolTraded(entrust->getVolume());
+		order->setOrderState(WOS_AllTraded);
+		_spi->onPushOrder(order);
+		order->release();
+		WTSTradeInfo* trade = WTSTradeInfo::create(entrust->getCode(), entrust->getExchg());
+		trade->setTradeID((std::string("sync-trade-") + entrust->getUserTag()).c_str());
+		trade->setUserTag(entrust->getUserTag());
+		trade->setDirection(entrust->getDirection());
+		trade->setOffsetType(entrust->getOffsetType());
+		trade->setVolume(entrust->getVolume());
+		trade->setPrice(entrust->getPrice());
+		_spi->onPushTrade(trade);
+		trade->release();
+		return ret;
+	}
+};
+
+struct SyncCtxEnv
+{
+	q04::TempRoot			_tmp{ "ctx_sync" };
+	SyncFillApi				_api;
+	q04::FakeBaseDataMgr	_bd;
+	ActionPolicyMgr			_policy;
+	TraderAdapter			_adapter;
+	WtUftDtMgr				_dtMgr;
+	WtUftEngine				_engine;
+	UftStraContext			_ctx;
+	std::string				_name;
+
+	explicit SyncCtxEnv(const char* name) : _ctx(&_engine, name)
+	{
+		_name = name;
+		ctxRoot();
+		_bd.add("SHFE", "ag", "ag2406", 0, 0, CM_OpenCover, TM_Both, 1);
+		const std::string path = _tmp.file("policy.json");
+		_tmp.write(path, q04::policyJsonOpenCloseLimited());
+		EXPECT_TRUE(_policy.init(path.c_str()));
+		_engine.init(nullptr, &_bd, nullptr, nullptr);
+		EXPECT_TRUE(_adapter.initExt(name, &_api, &_bd, &_policy));
+		_adapter.run();
+		_adapter.onLoginResult(true, "ok", 20240315);
+		_adapter.addSink(&_ctx);
+		_ctx.setTrader(&_adapter);
+	}
+	std::string straFile(const char* suffix) { return ctxRoot() + "outputs/" + _name + "/" + suffix; }
+	void removeOwnFolder()
+	{
+		std::error_code ec;
+		std::filesystem::remove_all(ctxRoot() + "outputs/" + _name, ec);
+	}
+};
+}
+
+// I03-NEW-059: reports delivered synchronously from orderInsert belong to the
+// context that submitted the order; they are not dropped as foreign.
+TEST(q04_uftctx_local, synchronous_fill_during_insert_is_attributed_to_the_context)
+{
+	SyncCtxEnv env("q04ctx_sync_fill");
+	env.removeOwnFolder();
+	env._ctx.on_channel_ready(20240315);
+
+	const uint32_t id = env._ctx.stra_enter_long(kAg, 5000.0, 2.0, 0);
+	ASSERT_NE(UINT_MAX, id);
+	EXPECT_DOUBLE_EQ(2.0, env._ctx.stra_get_local_position(kAg));
+	EXPECT_EQ(1u, blockSize(env.straFile("order.membin")));
+	// A later report of the same order does not create a second order record.
+	env._ctx.on_order(id, kAg, true, 0, 2.0, 0.0, 5000.0, false);
+	EXPECT_EQ(1u, blockSize(env.straFile("order.membin")));
+	env.removeOwnFolder();
+}
+
+// I03-NEW-056: more than one block of records in a day extends the local
+// blocks in place instead of writing past their mapping; all records persist.
+TEST(q04_uftctx_local, local_blocks_grow_beyond_one_day_of_capacity)
+{
+	CtxEnv ctx("q04ctx_capacity");
+	ctx.removeOwnFolder();
+	ctx._ctx.on_channel_ready(20240315);
+	const uint32_t id = ctx._ctx.stra_enter_long(kAg, 5000.0, 1.0, 0);
+	ASSERT_NE(UINT_MAX, id);
+	const uint32_t initialCapacity = blockCapacity(ctx.straFile("position.membin"));
+	ASSERT_GT(initialCapacity, 0u);
+	const uint32_t total = initialCapacity + 100;
+	for (uint32_t i = 0; i < total; i++)
+		ctx._ctx.on_trade(id, kAg, true, 0, 1.0, 5000.0);
+	EXPECT_DOUBLE_EQ((double)total, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_EQ(total, blockSize(ctx.straFile("position.membin")));
+	EXPECT_GE(blockCapacity(ctx.straFile("position.membin")), total);
+	EXPECT_EQ(total, blockSize(ctx.straFile("trade.membin")));
+	EXPECT_GE(blockCapacity(ctx.straFile("trade.membin")), total);
+
+	// Every detail is persisted: a cold start of the same day sees all of them.
+	UftStraContext cold(&ctx._engine, "q04ctx_capacity");
+	cold.on_channel_ready(20240315);
+	EXPECT_DOUBLE_EQ((double)total, cold.stra_get_local_position(kAg));
+	ctx.removeOwnFolder();
+}
+
+// I03-NEW-056: when a block cannot be extended the event is neither written
+// past the mapping nor dropped: it is retained in order, new orders are
+// refused, and it is applied once the block can grow again.
+TEST(q04_uftctx_local, unextendable_block_retains_events_and_refuses_new_orders)
+{
+	CtxEnv ctx("q04ctx_capacity_blocked");
+	ctx.removeOwnFolder();
+	ctx._ctx.on_channel_ready(20240315);
+	const uint32_t id = ctx._ctx.stra_enter_long(kAg, 5000.0, 1.0, 0);
+	ASSERT_NE(UINT_MAX, id);
+	const std::string posFile = ctx.straFile("position.membin");
+	const uint32_t capacity = blockCapacity(posFile);
+	for (uint32_t i = 0; i < capacity; i++)
+		ctx._ctx.on_trade(id, kAg, true, 0, 1.0, 5000.0);
+	ASSERT_DOUBLE_EQ((double)capacity, ctx._ctx.stra_get_local_position(kAg));
+
+	std::filesystem::permissions(posFile, std::filesystem::perms::none);
+	ctx._ctx.on_trade(id, kAg, true, 0, 1.0, 5000.0);
+	// Restore access only to inspect the file; the context has not seen another event.
+	std::filesystem::permissions(posFile, std::filesystem::perms::owner_read | std::filesystem::perms::owner_write);
+	EXPECT_DOUBLE_EQ((double)capacity, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_EQ(capacity, blockSize(posFile));
+#ifdef WT_UFT_LOCAL_LEDGER_BACKLOG	// absent from the pre-change header (red control)
+	EXPECT_TRUE(ctx._ctx.local_ledger_blocked());
+	EXPECT_EQ(1u, ctx._ctx.local_backlog_size());
+#endif
+	const std::size_t sent = ctx._api._entrusts.size();
+	EXPECT_EQ(UINT_MAX, ctx._ctx.stra_enter_long(kAg, 5000.0, 1.0, 0));
+	EXPECT_EQ(sent, ctx._api._entrusts.size()) << "a blocked local ledger must refuse new orders";
+
+	ctx._ctx.on_trade(id, kAg, true, 0, 1.0, 5000.0);
+	EXPECT_DOUBLE_EQ((double)capacity + 2, ctx._ctx.stra_get_local_position(kAg));
+	EXPECT_EQ(capacity + 2, blockSize(posFile));
+#ifdef WT_UFT_LOCAL_LEDGER_BACKLOG
+	EXPECT_FALSE(ctx._ctx.local_ledger_blocked());
+#endif
+	EXPECT_NE(UINT_MAX, ctx._ctx.stra_enter_long(kAg, 5000.0, 1.0, 0));
+	ctx.removeOwnFolder();
+}

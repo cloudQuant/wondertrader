@@ -1,0 +1,70 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before/src/WtDataStorageAD/LMDBKeys.h	2026-11-02 21:45:29
++++ src/WtDataStorageAD/LMDBKeys.h	2026-11-04 13:14:21
+@@ -14,12 +14,15 @@
+ #include <stdexcept>
+ #include "../Includes/WTSMarcos.h"
+ 
+-// Each field must fit including its terminating NUL. Inspect no more than the
+-// field capacity, so a non-terminated fixed-size input is rejected as well.
+-inline bool lmdbKeyIdentityLengths(const char* exchg, const char* code,
++// BUG-L04-004: the on-disk key layout is fixed (exchange 16 + code 32 bytes,
++// NUL padded). Each field must fit including its terminating NUL. Inspect no
++// more than the field capacity, so a non-terminated fixed-size input is
++// rejected without reading past it. Empty fields still fit (the historical
++// strcpy accepted them); the stricter entry check below rejects them.
++inline bool lmdbKeyFieldLengths(const char* exchg, const char* code,
+ 	size_t& exchangeLen, size_t& codeLen)
+ {
+-	if (!exchg || !code || !*exchg || !*code)
++	if (!exchg || !code)
+ 		return false;
+ 	exchangeLen = 0;
+ 	codeLen = 0;
+@@ -28,6 +31,15 @@
+ 	return exchangeLen < MAX_EXCHANGE_LENGTH && codeLen < MAX_INSTRUMENT_LENGTH;
+ }
+ 
++// Reader/writer entry check, applied before any cache, directory, database or
++// queue side effect: a usable storage identity is non-empty and fits the key.
++inline bool lmdbKeyIdentityLengths(const char* exchg, const char* code,
++	size_t& exchangeLen, size_t& codeLen)
++{
++	return lmdbKeyFieldLengths(exchg, code, exchangeLen, codeLen) &&
++		exchangeLen != 0 && codeLen != 0;
++}
++
+ inline bool lmdbKeyIdentityValid(const char* exchg, const char* code)
+ {
+ 	size_t exchangeLen, codeLen;
+@@ -109,8 +121,11 @@
+ 	 */
+ 	_LMDBHftKey(const char* exchg, const char* code, uint32_t date, uint32_t time)
+ 	{
++		// A constructor has no status channel: an identity that cannot be
++		// represented is reported by exception instead of being copied past
++		// the fixed field. Product entries pre-check with lmdbKeyIdentityValid.
+ 		size_t exchangeLen, codeLen;
+-		if (!lmdbKeyIdentityLengths(exchg, code, exchangeLen, codeLen))
++		if (!lmdbKeyFieldLengths(exchg, code, exchangeLen, codeLen))
+ 			throw std::invalid_argument("invalid LMDB key identity");
+ 		memset(this, 0, sizeof(_LMDBHftKey));
+ 		memcpy(_exchg, exchg, exchangeLen);
+@@ -155,7 +170,7 @@
+ 	_LMDBBarKey(const char* exchg, const char* code, uint32_t bartime)
+ 	{
+ 		size_t exchangeLen, codeLen;
+-		if (!lmdbKeyIdentityLengths(exchg, code, exchangeLen, codeLen))
++		if (!lmdbKeyFieldLengths(exchg, code, exchangeLen, codeLen))
+ 			throw std::invalid_argument("invalid LMDB key identity");
+ 		memset(this, 0, sizeof(_LMDBBarKey));
+ 		memcpy(_exchg, exchg, exchangeLen);
+@@ -164,3 +179,9 @@
+ 	}
+ } LMDBBarKey;
+ #pragma pack(pop)
++
++// The key bytes are the persisted LMDB ABI; bounded copying must not move them.
++static_assert(sizeof(LMDBHftKey) == MAX_EXCHANGE_LENGTH + MAX_INSTRUMENT_LENGTH + 8,
++	"LMDBHftKey on-disk layout changed");
++static_assert(sizeof(LMDBBarKey) == MAX_EXCHANGE_LENGTH + MAX_INSTRUMENT_LENGTH + 4,
++	"LMDBBarKey on-disk layout changed");

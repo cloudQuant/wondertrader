@@ -18,12 +18,20 @@
 #include <gtest/gtest.h>
 
 #include <atomic>
+#include <cerrno>
+#include <chrono>
+#include <cstdio>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <dlfcn.h>
+#ifndef _WIN32
+#include <signal.h>
+#include <sys/wait.h>
+#endif
 #include <unistd.h>
 #include <vector>
 
@@ -36,6 +44,7 @@
 #include <WTSTools/WTSBaseDataMgr.h>
 #include <WtDtServo/ParserAdapter.h>
 #include <WtDtServo/WtDtRunner.h>
+#include <WtDtServo/WtDtServo.h>
 #include <WtDtServo/WtHelper.h>
 
 #include "r45_fake_parserapi.h"
@@ -51,24 +60,11 @@ int FakeParserApi::s_release_calls = 0;
 // without building or loading a test plugin DLL.
 struct ParserAdapterTestAccess
 {
-	static void setRemover(ParserAdapter& adapter, FuncDeleteParser remover)
-	{
-		adapter._remover = remover;
-	}
-
-	static FuncDeleteParser remover(const ParserAdapter& adapter)
-	{
-		return adapter._remover;
-	}
-
+	// Card 9 (iteration 03): module APIs are destroyed only through lifecycle V2
+	// destroy_api; the legacy deleteParser remover is no longer stored or called.
 	static IParserApi* api(const ParserAdapter& adapter)
 	{
 		return adapter._parser_api;
-	}
-
-	static IParserApi* uncertainOriginalApi(const ParserAdapter& adapter)
-	{
-		return adapter._uncertain_original_api;
 	}
 
 	static bool releaseUncertain(const ParserAdapter& adapter)
@@ -76,38 +72,58 @@ struct ParserAdapterTestAccess
 		return adapter._release_uncertain;
 	}
 
-	static void setModuleHandle(ParserAdapter& adapter, void* handle)
-	{
-		adapter._module_handle = handle;
-	}
-
 	static void* moduleHandle(const ParserAdapter& adapter)
 	{
 		return adapter._module_handle;
-	}
-
-	static void setConfig(ParserAdapter& adapter, WTSVariant* cfg)
-	{
-		adapter._cfg = cfg;
 	}
 
 	static WTSVariant* config(const ParserAdapter& adapter)
 	{
 		return adapter._cfg;
 	}
-
-	static void abandonUncertainStateForTest(ParserAdapter& adapter)
-	{
-		adapter._parser_api = nullptr;
-		adapter._uncertain_original_api = nullptr;
-		adapter._release_uncertain = false;
-		adapter._remover = nullptr;
-		adapter._module_handle = nullptr;
-		adapter._cfg = nullptr;
-	}
 };
 
 namespace {
+
+#ifndef _WIN32
+// Each exported-API case needs its own copy of the process-wide runner.
+// The child alarm and parent watchdog bound both callback waits and failures.
+template <typename F>
+int r45_run_isolated(F&& body, unsigned timeoutSeconds = 10)
+{
+	std::fflush(nullptr);
+	const pid_t pid = ::fork();
+	if (pid < 0)
+		return -1;
+	if (pid == 0)
+	{
+		::alarm(timeoutSeconds);
+		body();
+		const bool failed = ::testing::Test::HasFailure();
+		std::fflush(nullptr);
+		::_exit(failed ? 1 : 0);
+	}
+	const auto deadline = std::chrono::steady_clock::now()
+		+ std::chrono::seconds(timeoutSeconds + 2);
+	int childStatus = 0;
+	for (;;)
+	{
+		const pid_t waited = ::waitpid(pid, &childStatus, WNOHANG);
+		if (waited == pid)
+			return WIFEXITED(childStatus) ? WEXITSTATUS(childStatus)
+				: WIFSIGNALED(childStatus) ? 128 + WTERMSIG(childStatus) : -1;
+		if (waited < 0 && errno != EINTR)
+			return -1;
+		if (std::chrono::steady_clock::now() >= deadline)
+		{
+			::kill(pid, SIGKILL);
+			while (::waitpid(pid, &childStatus, 0) < 0 && errno == EINTR) {}
+			return -1;
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+}
+#endif
 
 // This fake has no worker thread and cannot emit callbacks asynchronously.
 // Its release() marks this fake's callback source quiescent; this does not
@@ -192,16 +208,6 @@ int R45ControlledDeleterApi::s_deleter_calls = 0;
 int R45ControlledDeleterApi::s_deleted_before_quiescence = 0;
 int R45ControlledDeleterApi::s_deleted_after_quiescence = 0;
 
-void r45_pa_controlled_delete_parser(wtp::IParserApi*& api)
-{
-	++R45ControlledDeleterApi::s_deleter_calls;
-	if (api != nullptr && R45ControlledDeleterApi::s_quiescent)
-	{
-		delete api;
-		api = nullptr;
-	}
-}
-
 class R45MutatingParserDeleter
 {
 public:
@@ -264,6 +270,7 @@ struct R45DtServoParserProbe
 {
 	using Counter = uint32_t (*)();
 	using Reset = void (*)();
+	using SetCallback = void (*)(void (*)());
 
 	explicit R45DtServoParserProbe()
 		: handle(::dlopen(WT_R45_DTSERVO_PARSER_FIXTURE_PATH, RTLD_NOW))
@@ -281,6 +288,7 @@ struct R45DtServoParserProbe
 		destroy = symbol<Counter>("r45_dtservo_parser_destroy_count");
 		unsafe_delete = symbol<Counter>("r45_dtservo_parser_unsafe_delete_count");
 		mark_quiescent = symbol<Reset>("r45_dtservo_parser_mark_quiescent");
+		set_on_connect = symbol<SetCallback>("r45_dtservo_parser_set_on_connect");
 	}
 
 	~R45DtServoParserProbe()
@@ -294,7 +302,7 @@ struct R45DtServoParserProbe
 		return handle != nullptr && reset != nullptr && create != nullptr && init != nullptr
 			&& register_spi != nullptr && subscribe != nullptr && connect != nullptr
 			&& release != nullptr && deletes != nullptr && destroy != nullptr
-			&& unsafe_delete != nullptr && mark_quiescent != nullptr;
+			&& unsafe_delete != nullptr && mark_quiescent != nullptr && set_on_connect != nullptr;
 	}
 
 	void reset_counts() const { reset(); }
@@ -317,7 +325,25 @@ struct R45DtServoParserProbe
 	Counter destroy = nullptr;
 	Counter unsafe_delete = nullptr;
 	Reset mark_quiescent = nullptr;
+	SetCallback set_on_connect = nullptr;
 };
+
+bool r45_initialized_during_connect = false;
+bool r45_submitted_during_connect = true;
+void r45_observe_exported_state_during_connect()
+{
+	r45_initialized_during_connect = ::is_initialized();
+	r45_submitted_during_connect = ::are_parser_connect_commands_submitted();
+}
+
+std::atomic<bool> r45_connect_entered { false };
+std::atomic<bool> r45_connect_can_return { false };
+void r45_block_connect_for_exported_status()
+{
+	r45_connect_entered.store(true);
+	while (!r45_connect_can_return.load())
+		std::this_thread::yield();
+}
 
 struct R45PaTickProbe
 {
@@ -537,6 +563,7 @@ TEST_F(R45ParserAdapterFakeTest, RunnerStartsInitializedFakeParser)
 	initRunnerWithParser(*runner, "r45_runner_ok", "true");
 
 	EXPECT_TRUE(runner->isInitialized());
+	EXPECT_TRUE(runner->parserCommandsSubmitted());
 	EXPECT_EQ(runner->activeParserCount(), 1u);
 	EXPECT_FALSE(runner->hasQuarantinedParser());
 	EXPECT_EQ(probe.create(), 1u);
@@ -561,7 +588,8 @@ TEST_F(R45ParserAdapterFakeTest, RunnerReportsConnectSubmissionFailureAndRetains
 	probe.reset_counts();
 	std::unique_ptr<WtDtRunner> runner(new WtDtRunner());
 	initRunnerWithParser(*runner, "r45_connect_false", "true", "false");
-	EXPECT_FALSE(runner->isInitialized());
+	EXPECT_TRUE(runner->isInitialized());
+	EXPECT_FALSE(runner->parserCommandsSubmitted());
 	EXPECT_EQ(runner->activeParserCount(), 1u);
 	EXPECT_TRUE(runner->hasRetainedParserAdapters());
 	EXPECT_EQ(probe.connect(), 1u);
@@ -570,6 +598,101 @@ TEST_F(R45ParserAdapterFakeTest, RunnerReportsConnectSubmissionFailureAndRetains
 	// A failed command does not prove provider callback quiescence.
 	r45_retained_runner_graphs().push_back(runner.release());
 }
+
+#ifndef _WIN32
+TEST_F(R45ParserAdapterFakeTest, ExportedStatusReportsConnectSubmissionFailure)
+{
+	EXPECT_EQ(r45_run_isolated([&] {
+	R45DtServoParserProbe probe;
+	ASSERT_TRUE(probe.valid());
+	probe.reset_counts();
+	EXPECT_FALSE(::is_initialized());
+	EXPECT_FALSE(::are_parser_connect_commands_submitted());
+	const char* config = R"JSON({"disable_dump":true,"basefiles":{},"parsers":[{"id":"exported_failure","active":true,"module":"R45DtServoParserFixture","r45_connect_mode":"false"}]})JSON";
+	::initialize(config, false, (_dir / "no_such_logcfg.yaml").string().c_str(), r45_pa_on_tick, r45_pa_on_bar);
+	EXPECT_TRUE(::is_initialized());
+	EXPECT_FALSE(::are_parser_connect_commands_submitted());
+	EXPECT_TRUE(::has_retained_parser_adapters());
+	EXPECT_EQ(probe.connect(), 1u);
+	EXPECT_EQ(probe.release(), 0u);
+	}), 0);
+}
+
+TEST_F(R45ParserAdapterFakeTest, ExportedStatusReportsSuccessfulConnectSubmission)
+{
+	EXPECT_EQ(r45_run_isolated([&] {
+	R45DtServoParserProbe probe;
+	ASSERT_TRUE(probe.valid());
+	probe.reset_counts();
+	const char* config = R"JSON({"disable_dump":true,"basefiles":{},"parsers":[{"id":"exported_success","active":true,"module":"R45DtServoParserFixture","r45_connect_mode":"true"}]})JSON";
+	::initialize(config, false, (_dir / "no_such_logcfg.yaml").string().c_str(), r45_pa_on_tick, r45_pa_on_bar);
+	EXPECT_TRUE(::is_initialized());
+	EXPECT_TRUE(::are_parser_connect_commands_submitted());
+	EXPECT_EQ(probe.connect(), 1u);
+	}), 0);
+}
+
+TEST_F(R45ParserAdapterFakeTest, ExportedInitializationStateRemainsVisibleDuringConnect)
+{
+	EXPECT_EQ(r45_run_isolated([&] {
+	R45DtServoParserProbe probe;
+	ASSERT_TRUE(probe.valid());
+	probe.reset_counts();
+	r45_initialized_during_connect = false;
+	r45_submitted_during_connect = true;
+	probe.set_on_connect(&r45_observe_exported_state_during_connect);
+	const char* config = R"JSON({"disable_dump":true,"basefiles":{},"parsers":[{"id":"exported_reentry","active":true,"module":"R45DtServoParserFixture","r45_connect_mode":"true"}]})JSON";
+	::initialize(config, false, (_dir / "no_such_logcfg.yaml").string().c_str(), r45_pa_on_tick, r45_pa_on_bar);
+	EXPECT_TRUE(r45_initialized_during_connect);
+	EXPECT_FALSE(r45_submitted_during_connect);
+	EXPECT_TRUE(::is_initialized());
+	EXPECT_TRUE(::are_parser_connect_commands_submitted());
+	EXPECT_EQ(probe.connect(), 1u);
+	}), 0);
+}
+
+TEST_F(R45ParserAdapterFakeTest, ExportedConnectStatusCanBeReadDuringStartup)
+{
+	EXPECT_EQ(r45_run_isolated([&] {
+	R45DtServoParserProbe probe;
+	ASSERT_TRUE(probe.valid());
+	probe.reset_counts();
+	r45_connect_entered.store(false);
+	r45_connect_can_return.store(false);
+	probe.set_on_connect(&r45_block_connect_for_exported_status);
+	const char* config = R"JSON({"disable_dump":true,"basefiles":{},"parsers":[{"id":"exported_concurrent","active":true,"module":"R45DtServoParserFixture","r45_connect_mode":"true"}]})JSON";
+	const std::string logConfig = (_dir / "no_such_logcfg.yaml").string();
+	std::thread starter([&] {
+		::initialize(config, false, logConfig.c_str(), r45_pa_on_tick, r45_pa_on_bar);
+	});
+	while (!r45_connect_entered.load())
+		std::this_thread::yield();
+	for (unsigned i = 0; i < 10000; ++i)
+		EXPECT_FALSE(::are_parser_connect_commands_submitted());
+	r45_connect_can_return.store(true);
+	starter.join();
+	EXPECT_TRUE(::are_parser_connect_commands_submitted());
+	EXPECT_EQ(probe.connect(), 1u);
+	}), 0);
+}
+
+TEST_F(R45ParserAdapterFakeTest, ExportedIsolationStopsBlockedChild)
+{
+	EXPECT_EQ(r45_run_isolated([] {
+		for (;;)
+			::pause();
+	}, 1), 128 + SIGALRM);
+}
+#else
+#define R45_EXPORTED_PROCESS_TEST_SKIPPED(name) \
+	TEST_F(R45ParserAdapterFakeTest, name) { GTEST_SKIP() << "Windows subprocess isolation is not implemented"; }
+R45_EXPORTED_PROCESS_TEST_SKIPPED(ExportedStatusReportsConnectSubmissionFailure)
+R45_EXPORTED_PROCESS_TEST_SKIPPED(ExportedStatusReportsSuccessfulConnectSubmission)
+R45_EXPORTED_PROCESS_TEST_SKIPPED(ExportedInitializationStateRemainsVisibleDuringConnect)
+R45_EXPORTED_PROCESS_TEST_SKIPPED(ExportedConnectStatusCanBeReadDuringStartup)
+R45_EXPORTED_PROCESS_TEST_SKIPPED(ExportedIsolationStopsBlockedChild)
+#undef R45_EXPORTED_PROCESS_TEST_SKIPPED
+#endif
 
 TEST_F(R45ParserAdapterFakeTest, RunnerQuarantinesFalseAndThrowingParserCandidates)
 {
@@ -687,148 +810,146 @@ TEST_F(R45ParserAdapterFakeTest, ReleaseCallsApiReleaseThenDeletesIt)
 	tick->release();
 }
 
-TEST_F(R45ParserAdapterFakeTest, ReleaseRetainsModuleContextWhenDeleterDefersSamePointer)
+// Card 9 (9a=A, 9b=A): the three legacy-remover cases below were rewritten for
+// the lifecycle V2 contract. The old versions injected a deleteParser remover
+// through test access; the adapter no longer calls any legacy remover. The
+// same ownership properties are now checked through the real fixture module's
+// V2 table: PENDING keeps everything for retry, a nonconforming or failing
+// destroy_api quarantines the owner permanently, and nothing is retried.
+namespace
 {
-	void* moduleHandle = ::dlopen(nullptr, RTLD_NOW);
-	ASSERT_NE(moduleHandle, nullptr);
-	R45ControlledDeleterApi* api = new R45ControlledDeleterApi(true);
+using R45SetMode = void (*)(int);
+using R45Count = uint32_t (*)();
+
+WTSVariant* r45_module_cfg()
+{
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("module", "R45DtServoParserFixture");
+	return cfg;
+}
+
+void r45_point_module_dir_at_fixture()
+{
+	const fs::path fixturePath(WT_R45_DTSERVO_PARSER_FIXTURE_PATH);
+	WtHelper::set_module_dir((fixturePath.parent_path().parent_path().string() + "/").c_str());
+}
+}
+
+TEST_F(R45ParserAdapterFakeTest, ReleaseRetainsModuleContextWhileV2DrainIsPending)
+{
+	R45DtServoParserProbe probe;
+	ASSERT_TRUE(probe.valid());
+	probe.reset_counts();
+	r45_point_module_dir_at_fixture();
+	WTSVariant* context = r45_module_cfg();
 	ParserAdapterPtr adapter(new ParserAdapter(&_bdMgr, nullptr));
-	ASSERT_TRUE(adapter->initExt("r45_deferred_delete", api));
-
-	WTSVariant* context = WTSVariant::createObject();
-	ASSERT_NE(context, nullptr);
-	context->retain(); // one ref remains with the test; one is installed as adapter context
-	ParserAdapterTestAccess::setRemover(*adapter, &r45_pa_controlled_delete_parser);
-	ParserAdapterTestAccess::setModuleHandle(*adapter, moduleHandle);
-	ParserAdapterTestAccess::setConfig(*adapter, context);
+	ASSERT_TRUE(adapter->init("r45_pending_drain", context));
+	EXPECT_EQ(context->retainCount(), 2u);
+	IParserApi* api = ParserAdapterTestAccess::api(*adapter);
+	void* moduleHandle = ParserAdapterTestAccess::moduleHandle(*adapter);
+	ASSERT_NE(api, nullptr);
+	ASSERT_NE(moduleHandle, nullptr);
 	ParserAdapterMgr mgr;
-	ASSERT_TRUE(mgr.addAdapter("r45_deferred_delete", adapter));
-	adapter.reset(); // the manager is now the only adapter owner
+	ASSERT_TRUE(mgr.addAdapter("r45_pending_drain", adapter));
+	adapter.reset();
 
-	// The fake deleter leaves the same API pointer while callback-stack cleanup
-	// is not yet safe. IParserApi::release() does not set the fake's quiescence bit.
+	// The provider has not reached its independent drain barrier: wait_drained
+	// stays PENDING, so API, module and config stay with the manager.
 	mgr.release();
-	EXPECT_EQ(R45ControlledDeleterApi::s_deleter_calls, 1);
-	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
-	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
+	EXPECT_EQ(probe.deletes(), 0u);
+	EXPECT_EQ(probe.destroy(), 0u);
+	EXPECT_EQ(probe.unsafe_delete(), 0u);
 	EXPECT_TRUE(mgr.hasRetainedAdapters());
-	EXPECT_EQ(mgr.size(), 1u);
-	ParserAdapterPtr retained = mgr.getAdapter("r45_deferred_delete");
+	ParserAdapterPtr retained = mgr.getAdapter("r45_pending_drain");
 	ASSERT_NE(retained.get(), nullptr);
-	EXPECT_EQ(ParserAdapterTestAccess::api(*retained), static_cast<IParserApi*>(api));
-	EXPECT_EQ(ParserAdapterTestAccess::remover(*retained), &r45_pa_controlled_delete_parser);
+	EXPECT_EQ(ParserAdapterTestAccess::api(*retained), api);
 	EXPECT_FALSE(ParserAdapterTestAccess::releaseUncertain(*retained));
 	EXPECT_EQ(ParserAdapterTestAccess::moduleHandle(*retained), moduleHandle);
 	EXPECT_EQ(ParserAdapterTestAccess::config(*retained), context);
 	EXPECT_EQ(context->retainCount(), 2u);
 	retained.reset();
 
-	// A separate test-controlled barrier marks callbacks drained. Retry on that
-	// safe path; successful cleanup also releases the valid process module handle.
-	R45ControlledDeleterApi::markCallbacksQuiescent();
+	// After the barrier, a retry destroys the API inside its module and returns
+	// the module and config references.
+	probe.mark_quiescent();
 	mgr.release();
-	EXPECT_EQ(R45ControlledDeleterApi::s_deleter_calls, 2);
-	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 2);
-	EXPECT_EQ(r45::FakeParserApi::s_deleted, 1);
-	EXPECT_EQ(R45ControlledDeleterApi::s_deleted_before_quiescence, 0);
-	EXPECT_EQ(R45ControlledDeleterApi::s_deleted_after_quiescence, 1);
+	EXPECT_EQ(probe.deletes(), 1u);
+	EXPECT_EQ(probe.destroy(), 1u);
+	EXPECT_EQ(probe.unsafe_delete(), 0u);
 	EXPECT_FALSE(mgr.hasRetainedAdapters());
 	EXPECT_EQ(mgr.size(), 0u);
 	EXPECT_EQ(context->retainCount(), 1u);
 	context->release();
 }
 
-TEST_F(R45ParserAdapterFakeTest, ReleaseStopsWhenDeleterChangesApiPointer)
+TEST_F(R45ParserAdapterFakeTest, NonconformingV2DestroyQuarantinesOwnerPermanently)
 {
-	void* moduleHandle = ::dlopen(nullptr, RTLD_NOW);
-	ASSERT_NE(moduleHandle, nullptr);
-	r45::FakeParserApi* original = new r45::FakeParserApi(true, true);
-	r45::FakeParserApi* replacement = new r45::FakeParserApi(true, true);
-	ParserAdapter pa(&_bdMgr, nullptr);
-	ASSERT_TRUE(pa.initExt("r45_uncertain_delete", original));
+	R45DtServoParserProbe probe;
+	ASSERT_TRUE(probe.valid());
+	probe.reset_counts();
+	auto setDestroyMode = probe.symbol<R45SetMode>("r45_dtservo_parser_set_destroy_mode");
+	auto destroyApiCalls = probe.symbol<R45Count>("r45_dtservo_parser_destroy_api_count");
+	ASSERT_NE(setDestroyMode, nullptr);
+	ASSERT_NE(destroyApiCalls, nullptr);
+	setDestroyMode(1);		// OK but the handle is left non-null
+	probe.mark_quiescent();
+	r45_point_module_dir_at_fixture();
+	WTSVariant* context = r45_module_cfg();
+	ParserAdapter* pa = new ParserAdapter(&_bdMgr, nullptr);	// retained to process exit
+	ASSERT_TRUE(pa->init("r45_uncertain_destroy", context));
+	IParserApi* api = ParserAdapterTestAccess::api(*pa);
+	void* moduleHandle = ParserAdapterTestAccess::moduleHandle(*pa);
 
-	WTSVariant* context = WTSVariant::createObject();
-	ASSERT_NE(context, nullptr);
-	context->retain();
-	R45MutatingParserDeleter::s_replacement = replacement;
-	ParserAdapterTestAccess::setRemover(pa, &R45MutatingParserDeleter::replacePointer);
-	ParserAdapterTestAccess::setModuleHandle(pa, moduleHandle);
-	ParserAdapterTestAccess::setConfig(pa, context);
-
-	// V1 does not define a non-null replacement pointer's identity. Preserve both
-	// addresses and all context, then make later release attempts inert.
-	pa.release();
-	EXPECT_EQ(R45MutatingParserDeleter::s_calls, 1);
-	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
-	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
-	EXPECT_EQ(ParserAdapterTestAccess::api(pa), static_cast<IParserApi*>(replacement));
-	EXPECT_EQ(ParserAdapterTestAccess::uncertainOriginalApi(pa), static_cast<IParserApi*>(original));
-	EXPECT_TRUE(ParserAdapterTestAccess::releaseUncertain(pa));
-	EXPECT_EQ(ParserAdapterTestAccess::moduleHandle(pa), moduleHandle);
-	EXPECT_EQ(ParserAdapterTestAccess::config(pa), context);
+	pa->release();
+	EXPECT_EQ(destroyApiCalls(), 1u);
+	EXPECT_EQ(probe.destroy(), 0u);
+	EXPECT_TRUE(ParserAdapterTestAccess::releaseUncertain(*pa));
+	EXPECT_EQ(ParserAdapterTestAccess::api(*pa), api);
+	EXPECT_EQ(ParserAdapterTestAccess::moduleHandle(*pa), moduleHandle);
+	EXPECT_EQ(ParserAdapterTestAccess::config(*pa), context);
 	EXPECT_EQ(context->retainCount(), 2u);
 
-	pa.release();
-	EXPECT_EQ(R45MutatingParserDeleter::s_calls, 1);
-	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
-	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
-	EXPECT_EQ(ParserAdapterTestAccess::moduleHandle(pa), moduleHandle);
-	EXPECT_EQ(ParserAdapterTestAccess::config(pa), context);
-
-	// The deliberately nonconforming fake left ownership identity unresolved.
-	// Detach only in test cleanup, then reclaim its two synchronous fake objects.
-	ParserAdapterTestAccess::abandonUncertainStateForTest(pa);
-	::dlclose(moduleHandle);
-	delete original;
-	delete replacement;
-	context->release(); // adapter's retained reference
-	context->release(); // test's reference
+	pa->release();		// sticky: never retried
+	EXPECT_EQ(destroyApiCalls(), 1u);
+	EXPECT_TRUE(pa->hasApi());
+	context->release();	// the test's reference; the adapter keeps its own
 }
 
-TEST_F(R45ParserAdapterFakeTest, ManagerRetainsAdapterWhenPluginDeleterThrows)
+TEST_F(R45ParserAdapterFakeTest, ManagerRetainsAdapterWhenV2DestroyFails)
 {
-	r45::FakeParserApi* api = new r45::FakeParserApi(true, true);
+	R45DtServoParserProbe probe;
+	ASSERT_TRUE(probe.valid());
+	probe.reset_counts();
+	auto setDestroyMode = probe.symbol<R45SetMode>("r45_dtservo_parser_set_destroy_mode");
+	auto destroyApiCalls = probe.symbol<R45Count>("r45_dtservo_parser_destroy_api_count");
+	ASSERT_NE(setDestroyMode, nullptr);
+	ASSERT_NE(destroyApiCalls, nullptr);
+	setDestroyMode(2);		// ERROR
+	probe.mark_quiescent();
+	r45_point_module_dir_at_fixture();
+	WTSVariant* context = r45_module_cfg();
 	ParserAdapterPtr adapter(new ParserAdapter(&_bdMgr, nullptr));
-	ASSERT_TRUE(adapter->initExt("r45_throwing_deleter", api));
-	ParserAdapterTestAccess::setRemover(*adapter, &R45ThrowingParserDeleter::throwAfterCall);
-
-	ParserAdapterMgr mgr;
-	ASSERT_TRUE(mgr.addAdapter("r45_throwing_deleter", adapter));
+	ASSERT_TRUE(adapter->init("r45_destroy_error", context));
+	ParserAdapterMgr* mgr = new ParserAdapterMgr();	// quarantine owner, retained
+	ASSERT_TRUE(mgr->addAdapter("r45_destroy_error", adapter));
 	adapter.reset();
 
-	// The adapter catches the plugin exception and marks ownership uncertain;
-	// manager release must retain its sole shared owner instead of clearing it.
-	mgr.release();
-	EXPECT_TRUE(mgr.hasRetainedAdapters());
-	EXPECT_EQ(mgr.size(), 1u);
-	EXPECT_EQ(R45ThrowingParserDeleter::s_calls, 1);
-	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
-	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
-	ParserAdapterPtr retained = mgr.getAdapter("r45_throwing_deleter");
+	mgr->release();
+	EXPECT_TRUE(mgr->hasRetainedAdapters());
+	EXPECT_EQ(mgr->size(), 1u);
+	EXPECT_EQ(destroyApiCalls(), 1u);
+	EXPECT_EQ(probe.destroy(), 0u);
+	ParserAdapterPtr retained = mgr->getAdapter("r45_destroy_error");
 	ASSERT_NE(retained.get(), nullptr);
 	EXPECT_TRUE(ParserAdapterTestAccess::releaseUncertain(*retained));
-	EXPECT_EQ(ParserAdapterTestAccess::api(*retained), static_cast<IParserApi*>(api));
 	retained.reset();
 
-	// Sticky uncertainty blocks further provider calls until an external recovery
-	// decision; it must not silently clear the map on another shutdown pass.
-	mgr.release();
-	EXPECT_TRUE(mgr.hasRetainedAdapters());
-	EXPECT_EQ(mgr.size(), 1u);
-	EXPECT_EQ(R45ThrowingParserDeleter::s_calls, 1);
-	EXPECT_EQ(r45::FakeParserApi::s_release_calls, 1);
-	EXPECT_EQ(r45::FakeParserApi::s_deleted, 0);
-
-	// Test cleanup manually reclaims the synchronous fake after proving it stayed
-	// retained; this is not an adapter recovery path.
-	retained = mgr.getAdapter("r45_throwing_deleter");
-	ASSERT_NE(retained.get(), nullptr);
-	ParserAdapterTestAccess::abandonUncertainStateForTest(*retained);
-	delete api;
-	retained.reset();
-	mgr.release();
-	EXPECT_FALSE(mgr.hasRetainedAdapters());
-	EXPECT_EQ(mgr.size(), 0u);
+	// Sticky uncertainty: another shutdown pass neither retries nor clears.
+	mgr->release();
+	EXPECT_TRUE(mgr->hasRetainedAdapters());
+	EXPECT_EQ(mgr->size(), 1u);
+	EXPECT_EQ(destroyApiCalls(), 1u);
+	context->release();
 }
 
 // ---------------------------------------------------------------------------

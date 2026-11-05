@@ -1,0 +1,14 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before-round2/src/TestUnits/coverage/t_TraderMocker/r214_mocker_branch_test.cpp	2026-10-30 20:16:18
++++ src/TestUnits/coverage/t_TraderMocker/r214_mocker_branch_test.cpp	2026-11-04 20:11:34
+@@ -98,6 +98,11 @@
+ 		}
+ 	}
+ 	EXPECT_DOUBLE_EQ(5.0, registered_trade_volume);
++
++	/* s5：未登记进 BdMgr 的合约/品种由本用例创建、本用例释放（订单只持非拥有指针，
++	 * 撮合线程与 io worker 已在上方 release() 中 join），避免 LSan 报告测试侧泄漏。 */
++	zz_ct->getCommInfo()->release();
++	zz_ct->release();
+ }
+ 
+ TEST_F(R214MockerBranches, SameRawCodeOrdersAreIsolatedByExchange)

@@ -1,0 +1,38 @@
+exit=-6
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==32908==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x000102fc1330 bp 0x00016cf2edc0 sp 0x00016cf2ed40 T1)
+==32908==The signal is caused by a READ memory access.
+==32908==Hint: address points to the zero page.
+    #0 0x000102fc1330 in std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<_StateInfo>>*> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<_StateInfo>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<_StateInfo>>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_find<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) unordered_dense.h:1067
+    #1 0x000102fc1258 in std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<_StateInfo>> const*> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<_StateInfo>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<_StateInfo>>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_find<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) const unordered_dense.h:1097
+    #2 0x000102fc1154 in ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<_StateInfo>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<_StateInfo>>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::find(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&) const unordered_dense.h:1676
+    #3 0x000102fbb324 in StateMonitor::isInState(char const*, tagSimpleState) const StateMonitor.h:216
+    #4 0x000102fb8ac0 in main::$_3::operator()() const probe.cpp:84
+    #5 0x000102fb8ac0 in std::__1::__invoke_result_impl<void, main::$_3>::type std::__1::__invoke[abi:nqe220108]<main::$_3>(main::$_3&&) invoke.h:90
+    #6 0x000102fb8ac0 in void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_3, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_3>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161
+    #7 0x000102fb8ac0 in void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_3>>(void*) thread.h:169
+    #8 0x000103d856d4 in asan_thread_start(void*)+0x48 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x516d4)
+    #9 0x0001883cdc54 in _pthread_start+0x84 (libsystem_pthread.dylib:arm64e+0x6c54)
+    #10 0x0001883c8c18 in thread_start+0x4 (libsystem_pthread.dylib:arm64e+0x1c18)
+
+==32908==Register values:
+ x[0] = 0x0000000000000000   x[1] = 0x0000000000000000   x[2] = 0x0000000000000004   x[3] = 0x000000016cf2ee74  
+ x[4] = 0x0000000063000000   x[5] = 0x0000000000000000   x[6] = 0x0000000000000054   x[7] = 0x0000000000000000  
+ x[8] = 0x0000000000000115   x[9] = 0x0000000000000000  x[10] = 0x00000001030f8000  x[11] = 0x0000000000000000  
+x[12] = 0x9e3779b97f4a7c15  x[13] = 0x0000000000000000  x[14] = 0x0000000000000000  x[15] = 0x0000000000000000  
+x[16] = 0x0000000102fc17c8  x[17] = 0x00000001f5b89d98  x[18] = 0x0000000000000000  x[19] = 0x000000016cf2ef00  
+x[20] = 0x00000c0600000394  x[21] = 0x000000016cf2eee0  x[22] = 0x0000603000001ca0  x[23] = 0x00000001030ceea0  
+x[24] = 0x000000016cf2eec0  x[25] = 0x000000802da05dd8  x[26] = 0x0000008000020000  x[27] = 0x0000000000000bb8  
+x[28] = 0x00000001030fd000     fp = 0x000000016cf2edc0     lr = 0x0000000102fc1324     sp = 0x000000016cf2ed40  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV unordered_dense.h:1067 in std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<_StateInfo>>*> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<_StateInfo>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<_StateInfo>>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_find<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)
+Thread T1 created by T0 here:
+    #0 0x000103d7f7bc in pthread_create+0x58 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x4b7bc)
+    #1 0x000102faf9f4 in std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182
+    #2 0x000102faf9f4 in std::__1::thread::thread[abi:nqe220108]<main::$_3, 0>(main::$_3&&) thread.h:218
+    #3 0x000102faf9f4 in std::__1::thread::thread[abi:nqe220108]<main::$_3, 0>(main::$_3&&) thread.h:209
+    #4 0x000102faf9f4 in main probe.cpp:84
+    #5 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+==32908==ABORTING

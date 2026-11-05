@@ -1,0 +1,73 @@
+src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:187:4: warning: initializer order does not match the declaration order [-Wreorder-ctor]
+  187 |         , _ordref(makeRefID())
+      |           ^~~~~~~~~~~~~~~~~~~~
+      |           _positions(NULL)
+  188 |         , _reqid(1)
+      |           ~~~~~~~~~
+      |           _trades(NULL)
+  189 |         , _orders(NULL)
+  190 |         , _trades(NULL)
+      |           ~~~~~~~~~~~~~
+      |           _bd_mgr(NULL)
+  191 |         , _positions(NULL)
+      |           ~~~~~~~~~~~~~~~~
+      |           _inited(false)
+  192 |         , _bd_mgr(NULL)
+      |           ~~~~~~~~~~~~~
+      |           _tradingday(0)
+  193 |         , _tradingday(0)
+      |           ~~~~~~~~~~~~~~
+      |           _reqid(1)
+  194 |         , _inited(false)
+      |           ~~~~~~~~~~~~~~
+      |           _ordref(makeRefID())
+src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:187:4: note: field '_ordref' will be initialized after field '_reqid'
+  187 |         , _ordref(makeRefID())
+      |           ^~~~~~~~~~~~~~~~~~~~
+src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:188:4: note: field '_reqid' will be initialized after field '_orders'
+  188 |         , _reqid(1)
+      |           ^~~~~~~~~
+src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:189:4: note: field '_orders' will be initialized after field '_trades'
+  189 |         , _orders(NULL)
+      |           ^~~~~~~~~~~~~
+src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:190:4: note: field '_trades' will be initialized after field '_positions'
+  190 |         , _trades(NULL)
+      |           ^~~~~~~~~~~~~
+src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:193:4: note: field '_tradingday' will be initialized after field '_inited'
+  193 |         , _tradingday(0)
+      |           ^~~~~~~~~~~~~~
+src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:241:14: warning: unused variable 'm_strategy_type' [-Wunused-variable]
+  241 |         uint16_t                                m_strategy_type;                ///< 策略类型
+      |                                                 ^~~~~~~~~~~~~~~
+src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:242:23: warning: unused variable 'm_strategy_state' [-Wunused-variable]
+  242 |         XTPStrategyStateType    m_strategy_state;               ///< 策略状态
+      |                                 ^~~~~~~~~~~~~~~~
+src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:243:14: warning: unused variable 'm_client_strategy_id' [-Wunused-variable]
+  243 |         uint64_t                                m_client_strategy_id;   ///< 客户策略id
+      |                                                 ^~~~~~~~~~~~~~~~~~~~
+src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:244:14: warning: unused variable 'm_xtp_strategy_id' [-Wunused-variable]
+  244 |         uint64_t                                m_xtp_strategy_id;              ///< xtp策略id
+      |                                                 ^~~~~~~~~~~~~~~~~
+In file included from src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:30:
+In file included from src/TraderXTPXAlgo/../Share/fmtlib.h:7:
+In file included from /opt/homebrew/include/fmt/format.h:41:
+/opt/homebrew/include/fmt/base.h:2262:45: error: implicit instantiation of undefined template 'fmt::detail::type_is_unformattable_for<XTP_POSITION_DIRECTION_TYPE, char>'
+ 2262 |     type_is_unformattable_for<T, char_type> _;
+      |                                             ^
+/opt/homebrew/include/fmt/base.h:2235:44: note: in instantiation of function template specialization 'fmt::detail::value<fmt::context>::value<XTP_POSITION_DIRECTION_TYPE, 0>' requested here
+ 2235 |   FMT_CONSTEXPR20 FMT_INLINE value(T& x) : value(x, custom_tag()) {}
+      |                                            ^
+/opt/homebrew/include/fmt/format.h:4200:40: note: in instantiation of function template specialization 'fmt::detail::value<fmt::context>::value<XTP_POSITION_DIRECTION_TYPE, 0>' requested here
+ 4200 |   return vformat(fmt.str, vargs<T...>{{args...}});
+      |                                        ^
+src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:553:27: note: in instantiation of function template specialization 'fmt::format<const char *, XTP_POSITION_DIRECTION_TYPE &>' requested here
+  553 |                         std::string key = fmt::format("{}-{}", code.c_str(), position->position_direction);
+      |                                                ^
+/opt/homebrew/include/fmt/base.h:2102:45: note: template is declared here
+ 2102 | template <typename T, typename Char> struct type_is_unformattable_for;
+      |                                             ^
+In file included from src/TraderXTPXAlgo/TraderXTPXAlgo.cpp:10:
+src/TraderXTPXAlgo/TraderXTPXAlgo.h:223:9: warning: private field '_algo_client' is not used [-Wunused-private-field]
+  223 |         int                             _algo_client;  // 算法对应的client
+      |                                         ^
+6 warnings and 1 error generated.

@@ -1,0 +1,42 @@
+#pragma once
+// BUG-L01-014 (card 6): helpers for trader providers that cannot convert an SDK report
+// into a WTS object. The raw event is preserved exactly as a hex dump of the SDK struct
+// (independent of the vendor's field layout) and handed to a host that declared
+// WT_TRADER_SPI_FEATURE_RAW_UNRESOLVED through setTraderSpiFeatures; an older host only
+// gets a log line, as before.
+#include <cstddef>
+#include <cstdint>
+#include <string>
+
+#include "../Includes/ITraderApi.h"
+
+namespace wt_provider_raw
+{
+	template <typename T>
+	inline std::string hexOf(const char* typeName, const T* value)
+	{
+		static const char digits[] = "0123456789abcdef";
+		std::string out = std::string("struct=") + (typeName ? typeName : "") + ";size=" + std::to_string(sizeof(T)) + ";hex=";
+		if (value == nullptr)
+			return out;
+		const unsigned char* bytes = reinterpret_cast<const unsigned char*>(value);
+		out.reserve(out.size() + sizeof(T) * 2);
+		for (std::size_t i = 0; i < sizeof(T); ++i)
+		{
+			out.push_back(digits[bytes[i] >> 4]);
+			out.push_back(digits[bytes[i] & 0x0F]);
+		}
+		return out;
+	}
+
+	inline void report(wtp::ITraderSpi* sink, uint64_t features, const char* provider, const char* kind,
+		const char* reason, const std::string& raw)
+	{
+		if (sink == nullptr)
+			return;
+		if (features & WT_TRADER_SPI_FEATURE_RAW_UNRESOLVED)
+			sink->onUnresolvedProviderReport(kind, reason, raw.c_str());
+		else
+			sink->handleTraderLog(wtp::LL_ERROR, (std::string("[") + provider + "] " + kind + " dropped: " + reason).c_str());
+	}
+}

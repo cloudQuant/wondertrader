@@ -84,6 +84,12 @@ namespace t27
 		StdThreadPtr _thrd_worker;
 		std::shared_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> _worker;
 		std::atomic<bool> _worker_stopping;
+
+		/* ParserXTP.h 末尾追加的卡9 生命周期状态（同序同型） */
+		wt_vendor_md_v2::Lifecycle _lc;
+		std::mutex _sdk_mutex;
+		std::recursive_mutex _data_mutex;
+		bool _init_done;
 	};
 
 	static_assert(sizeof(ParserXTPMirror) == sizeof(ParserXTP),

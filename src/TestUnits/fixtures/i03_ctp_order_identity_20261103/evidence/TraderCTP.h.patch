@@ -1,0 +1,67 @@
+--- src/TestUnits/fixtures/i03_ctp_order_identity_20261103/baseline/TraderCTP.h	2026-11-03 17:47:18
++++ src/TraderCTP/TraderCTP.h	2026-11-03 18:18:01
+@@ -13,6 +13,8 @@
+ #include <queue>
+ #include <stdint.h>
+ #include <atomic>
++#include <mutex>
++#include <unordered_map>
+ 
+ #include "../Includes/WTSTypes.h"
+ #include "../Includes/ITraderApi.h"
+@@ -55,9 +57,9 @@
+ 
+ 	int queryConfirm();
+ 
+-	int authenticate();
++	int authenticate(uint64_t attempt);
+ 
+-	int doLogin();
++	int doLogin(uint64_t attempt);
+ 
+ 	//////////////////////////////////////////////////////////////////////////
+ 	//ITraderApi接口
+@@ -148,6 +150,21 @@
+ 
+ 	void			generateEntrustID(char* buffer, uint32_t frontid, uint32_t sessionid, uint32_t orderRef);
+ 	bool			extractEntrustID(const char* entrustid, uint32_t &frontid, uint32_t &sessionid, uint32_t &orderRef);
++	struct OrderIdentity
++	{
++		uint64_t epoch = 0;
++		uint32_t front = 0;
++		uint32_t session = 0;
++		bool submitted = false;
++		std::string canonical;
++		std::string tag;
++		std::string broker;
++		std::string investor;
++		uint32_t tradingDate = 0;
++		std::string exchange;
++		std::string instrument;
++	};
++	bool reserveIdentityLocked(uint32_t& orderRef, std::string& canonical, size_t capacity);
+ 
+ 	uint32_t		genRequestID();
+ 
+@@ -179,8 +196,20 @@
+ 	uint32_t					m_frontID;		//前置编号
+ 	uint32_t					m_sessionID;	//会话编号
+ 	std::atomic<uint32_t>		m_orderRef;		//报单引用
++	mutable std::mutex			m_identityMutex;
++	mutable std::mutex			m_cacheMutex;
++	std::unordered_map<uint32_t, OrderIdentity> m_identities;
++	std::unordered_map<std::string, std::string> m_orderSysTags;
++	uint64_t					m_identityEpoch = 0;
++	uint64_t				m_loginAttempt = 0;
++	uint32_t					m_loginRequestID = 0;
++	uint32_t					m_authRequestID = 0;
++	uint32_t					m_confirmQueryRequestID = 0;
++	uint32_t					m_confirmRequestID = 0;
++	uint32_t					m_inflightInserts = 0;
++	bool						m_identityReady = false;
+ 
+-	WrapperState				m_wrapperState;
++	std::atomic<WrapperState>		m_wrapperState;
+ 
+ 	CThostFtdcTraderApi*		m_pUserAPI;
+ 	std::atomic<uint32_t>		m_iRequestID;

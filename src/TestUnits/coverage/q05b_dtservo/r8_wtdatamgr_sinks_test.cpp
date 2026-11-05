@@ -183,15 +183,8 @@ TEST_F(R8WtDataManagerSinksTest, InitStoreWithEmptySectionIsNotEvenAttempted)
 	EXPECT_EQ(dm.get_basedata_mgr(), static_cast<IBaseDataMgr*>(&runner.getBaseDataMgr()));
 }
 
-/*!
- * 触发条件（启用即段错误，禁止在 CI 启用）：
- * data 段里有 "store":{} 空对象 -> initStore 的 cfg 非 NULL，module 为空时
- * 取默认名 "WtDataStorage"（WtDataManager.cpp:54-56），模块目录被钉在空目录，
- * load_library 失败（:81-85）后 _reader 仍为 NULL，:87 无条件 _reader->init 崩溃。
- * 与 q05_servo_wtdatamgr_test.cpp 的 DISABLED 用例同根因，本条补充的是
- * 「默认模块名」这一形态（见 bugs/R8_wtdtservo.md BUG-R8-003）。
- */
-TEST_F(R8WtDataManagerSinksTest, DISABLED_InitStoreWithDefaultModuleNameDerefsNullReader)
+/*! 迭代03 最终验收复核后启用（原禁用：BUG-R8-003 默认模块名形态）。 */
+TEST_F(R8WtDataManagerSinksTest, InitStoreWithDefaultModuleNameDerefsNullReader)
 {
 	WtDtRunner runner;
 	WtDataManager dm;
@@ -201,15 +194,8 @@ TEST_F(R8WtDataManagerSinksTest, DISABLED_InitStoreWithDefaultModuleNameDerefsNu
 	cfg->release();
 }
 
-/*!
- * 触发条件（启用即段错误，禁止在 CI 启用）：
- * 任何把请求交给 _reader 的公开入口，在 _reader==NULL 时都直接解引用：
- * get_tick_slice_by_date -> WtDataManager.cpp:121，
- * get_tick_slices_by_range -> :116，get_kline_slice_by_range(times==1) -> :203，
- * get_kline_slice_by_count(times==1) -> :341，subscribe_bar -> :516。
- * 这条用例证明「没有可注入的 IRdmDtReader 接缝」= 约 400 行不可达（见 manifest）。
- */
-TEST_F(R8WtDataManagerSinksTest, DISABLED_TickSliceDelegationWithoutReaderSegfaults)
+/*! 迭代03 最终验收复核后启用（原禁用：无 reader 时委托入口解引用）。 */
+TEST_F(R8WtDataManagerSinksTest, TickSliceDelegationWithoutReaderSegfaults)
 {
 	WtDtRunner runner;
 	WtDataManager dm;

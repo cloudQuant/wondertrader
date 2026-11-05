@@ -1321,6 +1321,12 @@ ZSTD_reset_matchState(ZSTD_matchState_t* ms,
     DEBUGLOG(4, "reset indices : %u", forceResetIndex == ZSTDirp_reset);
     if (forceResetIndex == ZSTDirp_reset) {
         memset(&ms->window, 0, sizeof(ms->window));
+        /* WonderTrader iteration 03 (R20_wtbtcore#1): base must not be NULL, since
+         * NULL + 1 is undefined behaviour (UBSan aborts here). Use a non-null empty
+         * base as upstream ZSTD_window_init() does in later releases; indices still
+         * start from 1, so compressed output is unchanged. */
+        ms->window.base = (BYTE const*)"";
+        ms->window.dictBase = (BYTE const*)"";
         ms->window.dictLimit = 1;    /* start from 1, so that 1st position is valid */
         ms->window.lowLimit = 1;     /* it ensures first and later CCtx usages compress the same */
         ms->window.nextSrc = ms->window.base + 1;   /* see issue #1241 */

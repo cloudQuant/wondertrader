@@ -87,6 +87,11 @@ static int g_apiReleases = 0;
 static int g_apiDestructions = 0;
 static int g_apiConnects = 0;
 
+// Card 9 (BUG-R78-001): only a provider confirmation authorizes destroying an
+// external API; without a remover the adapter quarantines it. These tests
+// release quiescent fakes, so they pass a remover confirming the destruction.
+void deleteU3ParserConfirmed(IParserApi*& api);
+
 //////////////////////////////////////////////////////////////////////////
 // 假行情接口: 记录注册/订阅/连接调用
 class U3ParserApi : public IParserApi
@@ -112,6 +117,13 @@ public:
 	uint32_t _subscribed = 999;
 	IParserSpi* _spi = nullptr;
 };
+
+void deleteU3ParserConfirmed(IParserApi*& api)
+{
+	IParserApi* original = api;
+	api = nullptr;
+	delete original;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // 假回调桩: 记录转发给策略的推送
@@ -419,7 +431,7 @@ TEST(n03_parser_adapter, init_ext_subscribes_and_pushes_quote)
 	U3ParserApi* api = new U3ParserApi();
 	api->_initRet = true;
 	ParserAdapter adapter;
-	ASSERT_TRUE(adapter.initExt("sse", api, &stub, &bdMgr));
+	ASSERT_TRUE(adapter.initExt("sse", api, &stub, &bdMgr, deleteU3ParserConfirmed));
 	EXPECT_TRUE(adapter.hasApi());
 	EXPECT_TRUE(adapter.isInitialized());
 	EXPECT_STREQ("sse", adapter.id());
@@ -464,8 +476,9 @@ TEST(n03_parser_adapter, init_ext_subscribes_and_pushes_quote)
 	adapter.handleParserLog(LL_INFO, "hello parser");
 
 	adapter.release();
-	EXPECT_EQ(1, g_apiReleases);
-	EXPECT_EQ(1, g_apiDestructions);
+	// 决策 K18=否（2026-11-04）：外部 API（含带 remover 的 initExt）不调用 release/remover、不删除，隔离到进程退出。
+	EXPECT_EQ(0, g_apiReleases);
+	EXPECT_EQ(0, g_apiDestructions);
 	// release 之后进入停止态, 任何推送都不再转发
 	adapter.handleParserLog(LL_INFO, "should be dropped");
 	WTSTickStruct t5 = u3Tick("SSE", "600000");
@@ -487,7 +500,7 @@ TEST(n03_parser_adapter, init_ext_failure_retains_api_and_borrowed_context)
 	api->_initRet = false;
 	ParserAdapter adapter;
 
-	EXPECT_FALSE(adapter.initExt("failed", api, &stub, &bdMgr));
+	EXPECT_FALSE(adapter.initExt("failed", api, &stub, &bdMgr, deleteU3ParserConfirmed));
 	EXPECT_TRUE(adapter.hasApi());
 	EXPECT_FALSE(adapter.isInitialized());
 	EXPECT_FALSE(adapter.run());
@@ -497,16 +510,17 @@ TEST(n03_parser_adapter, init_ext_failure_retains_api_and_borrowed_context)
 	EXPECT_EQ(0, g_apiDestructions);
 
 	// Repeating the same raw pointer must not create a second owner.
-	EXPECT_FALSE(adapter.initExt("failed-again", api, &stub, &bdMgr));
+	EXPECT_FALSE(adapter.initExt("failed-again", api, &stub, &bdMgr, deleteU3ParserConfirmed));
 	EXPECT_EQ(0, g_apiReleases);
 	EXPECT_EQ(0, g_apiDestructions);
 
 	// The fake provider has no asynchronous work, so the test can explicitly
 	// release it after checking that init failure itself retained ownership.
 	adapter.release();
-	EXPECT_FALSE(adapter.hasApi());
-	EXPECT_EQ(1, g_apiReleases);
-	EXPECT_EQ(1, g_apiDestructions);
+	// 决策 K18=否（2026-11-04）：外部 API（含带 remover 的 initExt）不调用 release/remover、不删除，隔离到进程退出。
+	EXPECT_TRUE(adapter.hasApi());
+	EXPECT_EQ(0, g_apiReleases);
+	EXPECT_EQ(0, g_apiDestructions);
 }
 
 TEST(n03_parser_adapter, init_ext_transfers_api_with_null_base_manager_and_when_busy)
@@ -519,7 +533,7 @@ TEST(n03_parser_adapter, init_ext_transfers_api_with_null_base_manager_and_when_
 	U3ParserApi* busyCandidate = new U3ParserApi();
 	ParserAdapter adapter;
 
-	EXPECT_FALSE(adapter.initExt("missing-bd", missingBaseData, &stub, nullptr));
+	EXPECT_FALSE(adapter.initExt("missing-bd", missingBaseData, &stub, nullptr, deleteU3ParserConfirmed));
 	EXPECT_TRUE(adapter.hasApi());
 	EXPECT_FALSE(adapter.isInitialized());
 	EXPECT_FALSE(adapter.run());
@@ -528,7 +542,7 @@ TEST(n03_parser_adapter, init_ext_transfers_api_with_null_base_manager_and_when_
 
 	// A distinct API passed to a busy adapter is also retained; the existing
 	// candidate and its borrowed context are not overwritten.
-	EXPECT_FALSE(adapter.initExt("busy", busyCandidate, &stub, &bdMgr));
+	EXPECT_FALSE(adapter.initExt("busy", busyCandidate, &stub, &bdMgr, deleteU3ParserConfirmed));
 	EXPECT_TRUE(adapter.hasApi());
 	EXPECT_FALSE(adapter.isInitialized());
 	EXPECT_STREQ("missing-bd", adapter.id());
@@ -538,9 +552,10 @@ TEST(n03_parser_adapter, init_ext_transfers_api_with_null_base_manager_and_when_
 
 	// Both fake providers are quiescent because neither one registered an SPI.
 	adapter.release();
-	EXPECT_FALSE(adapter.hasApi());
-	EXPECT_EQ(2, g_apiReleases);
-	EXPECT_EQ(2, g_apiDestructions);
+	// 决策 K18=否（2026-11-04）：外部 API（含带 remover 的 initExt）不调用 release/remover、不删除，隔离到进程退出。
+	EXPECT_TRUE(adapter.hasApi());
+	EXPECT_EQ(0, g_apiReleases);
+	EXPECT_EQ(0, g_apiDestructions);
 }
 
 TEST(n03_parser_adapter_mgr, add_get_release)
@@ -556,7 +571,7 @@ TEST(n03_parser_adapter_mgr, add_get_release)
 	U3ParserStub stub;
 	U3ParserApi* api = new U3ParserApi();
 	api->_initRet = true;	// 初始化成功，覆盖管理器注册/run/release 流程
-	ASSERT_TRUE(first->initExt("lost", api, &stub, &bdMgr));
+	ASSERT_TRUE(first->initExt("lost", api, &stub, &bdMgr, deleteU3ParserConfirmed));
 
 	ASSERT_TRUE(mgr.addAdapter("lost", first));
 	EXPECT_EQ(first, mgr.getAdapter("lost"));

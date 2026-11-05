@@ -255,7 +255,7 @@ TEST_F(P09RdmCacheTest, index_bar_by_range_trims_window)
 {
 	const std::string key = "SSE.STK.600000#0";
 	WtRdmDtReader::BarsList& lst = _reader._bars_cache[key];
-	p09_fill_bars(lst._bars, 20200101, 10);
+	p09_fill_bars(lst._bars.mutate(), 20200101, 10);
 	lst._exchg = "SSE";
 	lst._code = "SSE.STK.600000";
 
@@ -296,7 +296,7 @@ TEST_F(P09RdmCacheTest, index_bar_by_count_clamps_and_walks_back)
 {
 	const std::string key = "SSE.STK.600001#0";
 	WtRdmDtReader::BarsList& lst = _reader._bars_cache[key];
-	p09_fill_bars(lst._bars, 20200201, 8);
+	p09_fill_bars(lst._bars.mutate(), 20200201, 8);
 
 	uint32_t count = 3;
 	WTSBarStruct* p = _reader.indexBarFromCacheByCount(key, 202002081500, count);
@@ -329,7 +329,7 @@ TEST_F(P09RdmCacheTest, read_bars_from_cache_by_range_copies_window)
 {
 	const std::string key = "SSE.STK.600002#0";
 	WtRdmDtReader::BarsList& lst = _reader._bars_cache[key];
-	p09_fill_bars(lst._bars, 20200301, 12);
+	p09_fill_bars(lst._bars.mutate(), 20200301, 12);
 
 	std::vector<WTSBarStruct> out;
 	uint32_t n = _reader.readBarsFromCacheByRange(key, 202003031500, 202003071500, out);
@@ -470,17 +470,12 @@ TEST_F(P09RdmCacheTest, get_adj_factor_by_date_stock_and_non_stock)
 	EXPECT_DOUBLE_EQ(_reader.getAdjFactorByDate("SSE.STK.600100", 19900101), 1.0);
 }
 
-// 崩溃/UB 类输入整类收进同一个 DISABLED_ 用例，常规用例零残留。
-// 复现（--gtest_also_run_disabled_tests）：
-//  1) indexBarFromCacheByRange / indexBarFromCacheByCount 的 eit-- 缺 eit==begin() 守卫
-//     （同文件 readBarsFromCacheByRange 有），etime 早于首条 bar 时回绕/越界；
-//  2) readBarsFromCacheByRange 缺 barsList._bars.empty() 守卫，未预热的 key 会算出
-//     eIdx = 0 - 1 = SIZE_MAX，随后 resize 出天文数字并 memcpy。
-TEST_F(P09RdmCacheTest, DISABLED_p09_underflow_inputs_from_range_indexers)
+// 迭代03 最终验收复核后启用（原禁用：range 索引器下溢，BUG-P09-005 / BUG-P05-007）。
+TEST_F(P09RdmCacheTest, p09_underflow_inputs_from_range_indexers)
 {
 	const std::string key = "SSE.STK.600999#0";
 	WtRdmDtReader::BarsList& lst = _reader._bars_cache[key];
-	p09_fill_bars(lst._bars, 20200101, 5);
+	p09_fill_bars(lst._bars.mutate(), 20200101, 5);
 
 	uint32_t count = 2;
 	// (1) etime 早于第一条 -> eit == begin() 且 eit->time > eBar.time -> eit--

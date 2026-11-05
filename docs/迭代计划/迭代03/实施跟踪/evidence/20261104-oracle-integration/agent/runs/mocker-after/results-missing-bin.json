@@ -1,0 +1,20 @@
+[
+ {
+  "id": "oracle-missing-bin",
+  "name": "probe",
+  "argv": [
+   "perl",
+   "-e",
+   "alarm 10; exec @ARGV or exit 127",
+   "--",
+   "/tmp/wt-i03-oracle-20261104/does-not-exist/tests",
+   "--gtest_filter=*",
+   "--gtest_output=xml:/tmp/wt-i03-oracle-20261104/leaks/run/oracle-missing-bin/probe/result.xml"
+  ],
+  "cwd": "/tmp/wt-i03-oracle-20261104/leaks/run/oracle-missing-bin/probe",
+  "exit": 127,
+  "env_overrides": {},
+  "bin_exists": false,
+  "xml": null
+ }
+]

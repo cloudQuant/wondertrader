@@ -81,14 +81,15 @@ TEST(WtCoreParserAdapterInitFailure, falseResultCannotRunApi)
 	EXPECT_EQ(0, released);
 	EXPECT_EQ(0, destroyed);
 
-	// The fake's explicit drain proof authorizes teardown; release() itself is
-	// deliberately not treated as that proof.
-	api->proveQuiescent();
+	// 卡9a=A+C 与 K15=A（2026-11-04 用户裁定）：initExt 注入的外部 API 归调用方所有、无版本化回调排空能力。
+	// 显式 release() 恰好通知其停止一次（调用 API 的 release），但不视为排空证明：宿主继续持有、从不销毁。
+	// fake 内部的 proveQuiescent 标志宿主不可见，不能作为排空证明（改前期望 destroyed=1、不再持有）。
+	adapter.release();
 	adapter.release();
 	EXPECT_EQ(1, released);
-	EXPECT_EQ(1, destroyed);
+	EXPECT_EQ(0, destroyed);
 	EXPECT_EQ(0, unsafe_destroy);
-	EXPECT_FALSE(adapter.hasApi());
+	EXPECT_TRUE(adapter.hasApi());
 }
 
 TEST(WtCoreParserAdapterInitFailure, exceptionCannotRunApi)
@@ -111,12 +112,15 @@ TEST(WtCoreParserAdapterInitFailure, exceptionCannotRunApi)
 	EXPECT_EQ(0, released);
 	EXPECT_EQ(0, destroyed);
 
-	api->proveQuiescent();
+	// 卡9a=A+C 与 K15=A（2026-11-04 用户裁定）：initExt 注入的外部 API 归调用方所有、无版本化回调排空能力。
+	// 显式 release() 恰好通知其停止一次（调用 API 的 release），但不视为排空证明：宿主继续持有、从不销毁。
+	// fake 内部的 proveQuiescent 标志宿主不可见，不能作为排空证明（改前期望 destroyed=1、不再持有）。
+	adapter.release();
 	adapter.release();
 	EXPECT_EQ(1, released);
-	EXPECT_EQ(1, destroyed);
+	EXPECT_EQ(0, destroyed);
 	EXPECT_EQ(0, unsafe_destroy);
-	EXPECT_FALSE(adapter.hasApi());
+	EXPECT_TRUE(adapter.hasApi());
 }
 
 TEST(WtCoreParserAdapterInitFailure, nullManagerRetainsTransferredApiWithoutCallingProvider)
@@ -139,14 +143,15 @@ TEST(WtCoreParserAdapterInitFailure, nullManagerRetainsTransferredApiWithoutCall
 	EXPECT_EQ(0, destroyed);
 	EXPECT_EQ(0, unsafe_destroy);
 
-	// initExt has transferred ownership. Only an explicit provider quiescence
-	// proof makes it safe for the adapter to release and destroy this candidate.
-	api->proveQuiescent();
+	// 卡9a=A+C 与 K15=A（2026-11-04 用户裁定）：initExt 注入的外部 API 归调用方所有、无版本化回调排空能力。
+	// 显式 release() 恰好通知其停止一次（调用 API 的 release），但不视为排空证明：宿主继续持有、从不销毁。
+	// fake 内部的 proveQuiescent 标志宿主不可见，不能作为排空证明（改前期望 destroyed=1、不再持有）。
 	adapter.release();
-	EXPECT_FALSE(adapter.hasApi());
+	adapter.release();
 	EXPECT_EQ(1, released);
-	EXPECT_EQ(1, destroyed);
+	EXPECT_EQ(0, destroyed);
 	EXPECT_EQ(0, unsafe_destroy);
+	EXPECT_TRUE(adapter.hasApi());
 }
 
 TEST(WtCoreParserAdapterInitFailure, missingModuleIsSafePreApiFailure)

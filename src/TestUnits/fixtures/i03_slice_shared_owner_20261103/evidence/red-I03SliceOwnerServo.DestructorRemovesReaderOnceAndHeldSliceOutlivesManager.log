@@ -1,0 +1,122 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03SliceOwnerServo.DestructorRemovesReaderOnceAndHeldSliceOutlivesManager
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03SliceOwnerServo
+[ RUN      ] I03SliceOwnerServo.DestructorRemovesReaderOnceAndHeldSliceOutlivesManager
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_slice_shared_owner_20261103/servo_owner_test.cpp:157: Failure
+Expected equality of these values:
+  g_removed
+    Which is: 0
+  1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_slice_shared_owner_20261103/servo_owner_test.cpp:158: Failure
+Expected equality of these values:
+  g_reader_alive
+    Which is: 1
+  0
+
+=================================================================
+==65025==ERROR: AddressSanitizer: heap-use-after-free on address 0x60f000000158 at pc 0x00010105e7f8 bp 0x00016eeea410 sp 0x00016eeea408
+READ of size 8 at 0x60f000000158 thread T0
+    #0 0x00010105e7f4 in I03SliceOwnerServo_DestructorRemovesReaderOnceAndHeldSliceOutlivesManager_Test::TestBody()+0x900 (i03_slice_servo:arm64+0x10014a7f4)
+    #1 0x000101150a5c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_servo:arm64+0x10023ca5c)
+    #2 0x0001011509a4 in testing::Test::Run()+0xcc (i03_slice_servo:arm64+0x10023c9a4)
+    #3 0x000101151584 in testing::TestInfo::Run()+0xd0 (i03_slice_servo:arm64+0x10023d584)
+    #4 0x000101152008 in testing::TestSuite::Run()+0x1c4 (i03_slice_servo:arm64+0x10023e008)
+    #5 0x00010115d430 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_servo:arm64+0x100249430)
+    #6 0x00010115cddc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_servo:arm64+0x100248ddc)
+    #7 0x00010115cd40 in testing::UnitTest::Run()+0x78 (i03_slice_servo:arm64+0x100248d40)
+    #8 0x00010113e078 in main+0x40 (i03_slice_servo:arm64+0x10022a078)
+    #9 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x60f000000158 is located 40 bytes inside of 176-byte region [0x60f000000130,0x60f0000001e0)
+freed by thread T0 here:
+    #0 0x000101e054d0 in _ZdlPv+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x654d0)
+    #1 0x000100fbd2d4 in void std::__1::__libcpp_deallocate[abi:nqe220108]<wtp::WTSBarStruct>(std::__1::__type_identity<wtp::WTSBarStruct>::type*, std::__1::__element_count, unsigned long)+0x5c (i03_slice_servo:arm64+0x1000a92d4)
+    #2 0x000100fbd260 in std::__1::allocator<wtp::WTSBarStruct>::deallocate[abi:nqe220108](wtp::WTSBarStruct*, unsigned long)+0x44 (i03_slice_servo:arm64+0x1000a9260)
+    #3 0x000100fbcb34 in std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>::deallocate[abi:nqe220108](std::__1::allocator<wtp::WTSBarStruct>&, wtp::WTSBarStruct*, unsigned long)+0x24 (i03_slice_servo:arm64+0x1000a8b34)
+    #4 0x000100fbc7c8 in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::__destroy_vector::operator()[abi:nqe220108]()+0x2b8 (i03_slice_servo:arm64+0x1000a87c8)
+    #5 0x000100fbc414 in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::~vector[abi:nqe220108]()+0x164 (i03_slice_servo:arm64+0x1000a8414)
+    #6 0x000100fbc29c in std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::~vector[abi:nqe220108]()+0x34 (i03_slice_servo:arm64+0x1000a829c)
+    #7 0x000100fbc24c in wtp::WTSKlineData::~WTSKlineData()+0x80 (i03_slice_servo:arm64+0x1000a824c)
+    #8 0x000100fbc008 in wtp::WTSKlineData::~WTSKlineData()+0x34 (i03_slice_servo:arm64+0x1000a8008)
+    #9 0x000100fbc050 in wtp::WTSKlineData::~WTSKlineData()+0x34 (i03_slice_servo:arm64+0x1000a8050)
+    #10 0x000100fb16c4 in wtp::WTSObject::release()+0x150 (i03_slice_servo:arm64+0x10009d6c4)
+    #11 0x000100fbc0e0 in wtp::WTSKlineData::release()+0x74 (i03_slice_servo:arm64+0x1000a80e0)
+    #12 0x000100f1ba74 in wtp::WtDataManager::~WtDataManager()+0x3c0 (i03_slice_servo:arm64+0x100007a74)
+    #13 0x000100f1bf90 in wtp::WtDataManager::~WtDataManager()+0x34 (i03_slice_servo:arm64+0x100007f90)
+    #14 0x0001010764b8 in std::__1::default_delete<wtp::WtDataManager>::operator()[abi:nqe220108](wtp::WtDataManager*) const+0x64 (i03_slice_servo:arm64+0x1001624b8)
+    #15 0x00010105ec60 in std::__1::unique_ptr<wtp::WtDataManager, std::__1::default_delete<wtp::WtDataManager>>::reset[abi:nqe220108](wtp::WtDataManager*)+0x118 (i03_slice_servo:arm64+0x10014ac60)
+    #16 0x00010105e3d8 in I03SliceOwnerServo_DestructorRemovesReaderOnceAndHeldSliceOutlivesManager_Test::TestBody()+0x4e4 (i03_slice_servo:arm64+0x10014a3d8)
+    #17 0x000101150a5c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_servo:arm64+0x10023ca5c)
+    #18 0x0001011509a4 in testing::Test::Run()+0xcc (i03_slice_servo:arm64+0x10023c9a4)
+    #19 0x000101151584 in testing::TestInfo::Run()+0xd0 (i03_slice_servo:arm64+0x10023d584)
+    #20 0x000101152008 in testing::TestSuite::Run()+0x1c4 (i03_slice_servo:arm64+0x10023e008)
+    #21 0x00010115d430 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_servo:arm64+0x100249430)
+    #22 0x00010115cddc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_servo:arm64+0x100248ddc)
+    #23 0x00010115cd40 in testing::UnitTest::Run()+0x78 (i03_slice_servo:arm64+0x100248d40)
+    #24 0x00010113e078 in main+0x40 (i03_slice_servo:arm64+0x10022a078)
+    #25 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+previously allocated by thread T0 here:
+    #0 0x000101e050e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100fbf8d4 in wtp::WTSBarStruct* std::__1::__libcpp_allocate[abi:nqe220108]<wtp::WTSBarStruct>(std::__1::__element_count, unsigned long)+0x54 (i03_slice_servo:arm64+0x1000ab8d4)
+    #2 0x000100fbf810 in std::__1::allocator<wtp::WTSBarStruct>::allocate[abi:nqe220108](unsigned long)+0x9c (i03_slice_servo:arm64+0x1000ab810)
+    #3 0x000100fbf308 in std::__1::__allocation_result<std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>::pointer, std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>::size_type> std::__1::__allocate_at_least[abi:nqe220108]<std::__1::allocator<wtp::WTSBarStruct>, std::__1::allocator_traits<std::__1::allocator<wtp::WTSBarStruct>>>(std::__1::allocator<wtp::WTSBarStruct>&, unsigned long)+0x114 (i03_slice_servo:arm64+0x1000ab308)
+    #4 0x000100fbefcc in std::__1::__split_buffer<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<wtp::WTSBarStruct>&)+0xc4 (i03_slice_servo:arm64+0x1000aafcc)
+    #5 0x000100fbdab0 in std::__1::__split_buffer<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<wtp::WTSBarStruct>&)+0x4c (i03_slice_servo:arm64+0x1000a9ab0)
+    #6 0x000100fc1a94 in wtp::WTSBarStruct* std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::__emplace_back_slow_path<wtp::WTSBarStruct const&>(wtp::WTSBarStruct const&)+0x1b0 (i03_slice_servo:arm64+0x1000ada94)
+    #7 0x000100fc13d0 in wtp::WTSBarStruct& std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::emplace_back<wtp::WTSBarStruct const&>(wtp::WTSBarStruct const&)::'lambda0'()::operator()() const+0xc8 (i03_slice_servo:arm64+0x1000ad3d0)
+    #8 0x000100fc111c in void std::__1::__if_likely_else[abi:nqe220108]<wtp::WTSBarStruct& std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::emplace_back<wtp::WTSBarStruct const&>(wtp::WTSBarStruct const&)::'lambda'(), wtp::WTSBarStruct& std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::emplace_back<wtp::WTSBarStruct const&>(wtp::WTSBarStruct const&)::'lambda0'()>(bool, wtp::WTSBarStruct& std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::emplace_back<wtp::WTSBarStruct const&>(wtp::WTSBarStruct const&)::'lambda'(), wtp::WTSBarStruct& std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::emplace_back<wtp::WTSBarStruct const&>(wtp::WTSBarStruct const&)::'lambda0'())+0xc0 (i03_slice_servo:arm64+0x1000ad11c)
+    #9 0x000100fc0ea4 in wtp::WTSBarStruct& std::__1::vector<wtp::WTSBarStruct, std::__1::allocator<wtp::WTSBarStruct>>::emplace_back<wtp::WTSBarStruct const&>(wtp::WTSBarStruct const&)+0x300 (i03_slice_servo:arm64+0x1000acea4)
+    #10 0x000100f2fdc4 in wtp::WTSKlineData::appendBar(wtp::WTSBarStruct const&)+0x2f8 (i03_slice_servo:arm64+0x10001bdc4)
+    #11 0x00010109d1d4 in WTSDataFactory::extractMin1Data(wtp::WTSKlineSlice*, unsigned int, wtp::WTSSessionInfo*, bool, bool, std::__1::vector<std::__1::pair<unsigned int, unsigned int>, std::__1::allocator<std::__1::pair<unsigned int, unsigned int>>>*)+0x5e4 (i03_slice_servo:arm64+0x1001891d4)
+    #12 0x00010109c36c in WTSDataFactory::extractMin1Data(wtp::WTSKlineSlice*, unsigned int, wtp::WTSSessionInfo*, bool, bool)+0x48 (i03_slice_servo:arm64+0x10018836c)
+    #13 0x00010109c218 in WTSDataFactory::extractKlineData(wtp::WTSKlineSlice*, wtp::tagKlinePeriod, unsigned int, wtp::WTSSessionInfo*, bool, bool)+0xd8 (i03_slice_servo:arm64+0x100188218)
+    #14 0x000100f249d4 in wtp::WtDataManager::get_kline_slice_by_range(char const*, wtp::tagKlinePeriod, unsigned int, unsigned long long, unsigned long long)+0x768 (i03_slice_servo:arm64+0x1000109d4)
+    #15 0x00010105afc0 in (anonymous namespace)::I03SliceOwnerServo::query()+0xa4 (i03_slice_servo:arm64+0x100146fc0)
+    #16 0x00010105e148 in I03SliceOwnerServo_DestructorRemovesReaderOnceAndHeldSliceOutlivesManager_Test::TestBody()+0x254 (i03_slice_servo:arm64+0x10014a148)
+    #17 0x000101150a5c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_servo:arm64+0x10023ca5c)
+    #18 0x0001011509a4 in testing::Test::Run()+0xcc (i03_slice_servo:arm64+0x10023c9a4)
+    #19 0x000101151584 in testing::TestInfo::Run()+0xd0 (i03_slice_servo:arm64+0x10023d584)
+    #20 0x000101152008 in testing::TestSuite::Run()+0x1c4 (i03_slice_servo:arm64+0x10023e008)
+    #21 0x00010115d430 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_servo:arm64+0x100249430)
+    #22 0x00010115cddc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_servo:arm64+0x100248ddc)
+    #23 0x00010115cd40 in testing::UnitTest::Run()+0x78 (i03_slice_servo:arm64+0x100248d40)
+    #24 0x00010113e078 in main+0x40 (i03_slice_servo:arm64+0x10022a078)
+    #25 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: heap-use-after-free (i03_slice_servo:arm64+0x10014a7f4) in I03SliceOwnerServo_DestructorRemovesReaderOnceAndHeldSliceOutlivesManager_Test::TestBody()+0x900
+Shadow bytes around the buggy address:
+  0x60effffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x60efffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x60efffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x60f000000000: fa fa fa fa fa fa fa fa fd fd fd fd fd fd fd fd
+  0x60f000000080: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fa fa
+=>0x60f000000100: fa fa fa fa fa fa fd fd fd fd fd[fd]fd fd fd fd
+  0x60f000000180: fd fd fd fd fd fd fd fd fd fd fd fd fa fa fa fa
+  0x60f000000200: fa fa fa fa 00 00 00 00 00 00 00 00 00 00 00 00
+  0x60f000000280: 00 00 00 00 00 00 00 00 00 00 fa fa fa fa fa fa
+  0x60f000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x60f000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==65025==ABORTING

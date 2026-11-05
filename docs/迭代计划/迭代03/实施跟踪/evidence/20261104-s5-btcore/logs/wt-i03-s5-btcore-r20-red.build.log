@@ -1,0 +1,33 @@
+ninja: Entering directory `/tmp/wt-i03-s5-btcore-r20-red'
+[1/16] Building CXX object CMakeFiles/fake_missing_create.dir/fake_mq.cpp.o
+[2/16] Building CXX object CMakeFiles/fake_missing_destroy.dir/fake_mq.cpp.o
+[3/16] Building CXX object CMakeFiles/fake_full.dir/fake_mq.cpp.o
+[4/16] Building CXX object CMakeFiles/fake_missing_register.dir/fake_mq.cpp.o
+[5/16] Linking CXX shared library plugins/full/libWtMsgQue.dylib
+[6/16] Linking CXX shared library plugins/missing_create/libWtMsgQue.dylib
+[7/16] Building CXX object CMakeFiles/fake_missing_publish.dir/fake_mq.cpp.o
+[8/16] Building CXX object CMakeFiles/fake_zero.dir/fake_mq.cpp.o
+[9/16] Linking CXX shared library plugins/missing_destroy/libWtMsgQue.dylib
+[10/16] Linking CXX shared library plugins/missing_register/libWtMsgQue.dylib
+[11/16] Linking CXX shared library plugins/missing_publish/libWtMsgQue.dylib
+[12/16] Linking CXX shared library plugins/zero/libWtMsgQue.dylib
+[13/16] Building CXX object CMakeFiles/notifier_check.dir/tmp/wt-i03-s5-btcore-redsrc/src/WtBtCore/WtHelper.cpp.o
+[14/16] Building CXX object CMakeFiles/notifier_check.dir/notifier_check.cpp.o
+FAILED: [code=1] CMakeFiles/notifier_check.dir/notifier_check.cpp.o 
+/usr/bin/c++ -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/tmp/wt-i03-s5-btcore-redsrc/src -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/include -g -std=gnu++17 -arch arm64 -include /tmp/wt-i03-s5-btcore-redsrc/src/Share/fmt_enum_compat.h -MD -MT CMakeFiles/notifier_check.dir/notifier_check.cpp.o -MF CMakeFiles/notifier_check.dir/notifier_check.cpp.o.d -o CMakeFiles/notifier_check.dir/notifier_check.cpp.o -c /tmp/wt-i03-s5-btcore-redsrc/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/notifier_check.cpp
+/tmp/wt-i03-s5-btcore-redsrc/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/notifier_check.cpp:53:22: error: no member named 'release' in 'wtp::EventNotifier'
+   53 |             notifier.release();
+      |             ~~~~~~~~ ^
+/tmp/wt-i03-s5-btcore-redsrc/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/notifier_check.cpp:56:22: error: no member named 'release' in 'wtp::EventNotifier'
+   56 |             notifier.release();
+      |             ~~~~~~~~ ^
+/tmp/wt-i03-s5-btcore-redsrc/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/notifier_check.cpp:61:22: error: no member named 'release' in 'wtp::EventNotifier'
+   61 |             notifier.release();
+      |             ~~~~~~~~ ^
+/tmp/wt-i03-s5-btcore-redsrc/src/TestUnits/coverage/p08_btcore_mockers3/r20_mq_fixture/notifier_check.cpp:81:22: error: no member named 'release' in 'wtp::EventNotifier'
+   81 |             notifier.release();
+      |             ~~~~~~~~ ^
+4 errors generated.
+[15/16] Building CXX object CMakeFiles/notifier_check.dir/tmp/wt-i03-s5-btcore-redsrc/src/WtBtCore/EventNotifier.cpp.o
+ninja: build stopped: cannot make progress due to previous errors.
+build-exit=1

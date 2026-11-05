@@ -1,0 +1,40 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/WtUftRunner/WtUftRunner.cpp	2026-11-02 17:54:02
++++ src/WtUftRunner/WtUftRunner.cpp	2026-11-04 21:18:34
+@@ -56,7 +56,12 @@
+ {
+ 	if (!shutdown())
+ 	{
+-		WTSLogger::error("UFT runner cannot be destroyed before callback owners are quiescent");
++		// Destroying members while a parser/trader owner may still call back would be
++		// use-after-free. Parser owners merely retained for lack of drain proof are kept
++		// alive by the process entry (main.cpp never destroys such a runner); reaching
++		// here is an unrecoverable teardown failure (I03-NEW-058).
++		WTSLogger::error("UFT runner cannot be destroyed before callback owners are quiescent (parser owners retained: {})",
++			parserOwnersRetained());
+ 		std::terminate();
+ 	}
+ }
+@@ -74,6 +79,7 @@
+ 		~ShutdownFlagGuard() { flag.clear(std::memory_order_release); }
+ 	} guard{ _shutdown_running };
+ 
++	_parser_owners_retained.store(false, std::memory_order_release);
+ 	_shutdown_requested.store(true, std::memory_order_release);
+ 	_to_exit.store(true, std::memory_order_release);
+ 	if (_config_in_progress.load(std::memory_order_acquire))
+@@ -105,6 +111,7 @@
+ 
+ 	if (_parser_quarantine_pending.load(std::memory_order_acquire))
+ 	{
++		_parser_owners_retained.store(true, std::memory_order_release);
+ 		WTSLogger::error("UFT runner shutdown cannot release a failed parser while callback quiescence is unproven; keep the runner alive");
+ 		return false;
+ 	}
+@@ -115,6 +122,7 @@
+ 		_parsers.release();
+ 		if (_parsers.hasRetainedAdapters())
+ 		{
++			_parser_owners_retained.store(true, std::memory_order_release);
+ 			WTSLogger::error("UFT parser teardown remains pending; retain the runner graph and retry shutdown after provider quiescence");
+ 			return false;
+ 		}

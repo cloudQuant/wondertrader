@@ -1,0 +1,507 @@
++ CXX=/private/tmp/wt-i03-hft-factory/clang-asan
++ boost=/opt/homebrew/Cellar/boost/1.88.0/include
++ fmt=/opt/homebrew/Cellar/fmt/11.2.0/include
++ spdlog=/opt/homebrew/Cellar/spdlog/1.15.3/include
++ case $(uname -s) in
+++ uname -s
++ ext=dylib
++ shared_flag=-dynamiclib
++ dl_lib=
++ mkdir -p /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/no-creator /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/no-remover /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs
++ shasum -a 256 /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/SelStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/SelStrategyMgr.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/WTSTools/WTSLogger.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmtlib.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/factory.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/no_creator.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/check.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/run.sh
++ /private/tmp/wt-i03-hft-factory/clang-asan -std=c++17 -pthread -fPIC -dynamiclib /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/factory.cpp -o /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib
++ cp /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ segment=abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
++ deep_folder=deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
++ mkdir -p /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
++ cp /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/fixture.dylib
++ /private/tmp/wt-i03-hft-factory/clang-asan -std=c++17 -pthread -fPIC -dynamiclib /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/no_creator.cpp -o /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/no-creator/fixture.dylib
++ /private/tmp/wt-i03-hft-factory/clang-asan -std=c++17 -pthread -fPIC -dynamiclib -DOMIT_REMOVER /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/factory.cpp -o /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/no-remover/fixture.dylib
++ /private/tmp/wt-i03-hft-factory/clang-asan -std=c++17 -g -O0 -pthread -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/SelStrategyMgr.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/logger_stub.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/check.cpp -o /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ '[' -n /private/tmp/wt-i03-sel-owner-baseline ']'
++ cp /private/tmp/wt-i03-sel-owner-baseline/SelStrategyMgr.cpp /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/owner-baseline.cpp
++ cp /private/tmp/wt-i03-sel-owner-baseline/SelStrategyMgr.h /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/SelStrategyMgr.h
++ sed 's!../../../WtCore/SelStrategyMgr.h!SelStrategyMgr.h!' /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/check.cpp
++ shasum -a 256 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/owner-baseline.cpp /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/SelStrategyMgr.h
++ /private/tmp/wt-i03-hft-factory/clang-asan -std=c++17 -g -O0 -pthread -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4 -I/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/owner-baseline.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/logger_stub.cpp /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/owner-check.cpp -o /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/owner-baseline
++ '[' -n /private/tmp/wt-sel-quarantine/baseline ']'
++ mkdir -p /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/initial-baseline
++ cp /private/tmp/wt-sel-quarantine/baseline/SelStrategyMgr.cpp /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/initial-baseline/baseline.cpp
++ cp /private/tmp/wt-sel-quarantine/baseline/SelStrategyMgr.h /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/initial-baseline/SelStrategyMgr.h
++ sed 's!../../../WtCore/SelStrategyMgr.h!SelStrategyMgr.h!' /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/check.cpp
++ shasum -a 256 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/initial-baseline/baseline.cpp /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/initial-baseline/SelStrategyMgr.h
++ /private/tmp/wt-i03-hft-factory/clang-asan -std=c++17 -g -O0 -pthread -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/initial-baseline -I/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/initial-baseline/baseline.cpp /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/sel_factory_quarantine/logger_stub.cpp /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/initial-baseline/check.cpp -o /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline
++ ulimit -c 0
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name long-directory
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current creator-throw creator-throw current-creator-throw
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=creator-throw
++ env_mode=creator-throw
++ prefix=current-creator-throw
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=creator-throw
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-creator-throw.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-creator-throw.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current creator-throw /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-creator-throw 0
+current-creator-throw exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name long-directory
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current name-throw name-throw current-name-throw
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=name-throw
++ env_mode=name-throw
++ prefix=current-name-throw
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=name-throw
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-name-throw.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-name-throw.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current name-throw /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-name-throw 0
+current-name-throw exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name long-directory
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current empty empty current-empty
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=empty
++ env_mode=empty
++ prefix=current-empty
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=empty
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-empty.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-empty.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current empty /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-empty 0
+current-empty exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name long-directory
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current null null current-null
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=null
++ env_mode=null
++ prefix=current-null
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=null
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-null.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-null.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current null /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-null 0
+current-null exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name long-directory
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current duplicate duplicate current-duplicate
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=duplicate
++ env_mode=duplicate
++ prefix=current-duplicate
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=duplicate
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-duplicate.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-duplicate.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current duplicate /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-duplicate 0
+current-duplicate exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name long-directory
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current concurrent concurrent current-concurrent
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=concurrent
++ env_mode=concurrent
++ prefix=current-concurrent
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=concurrent
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-concurrent.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-concurrent.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current concurrent /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-concurrent 0
+current-concurrent exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name long-directory
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current reentrant reentrant current-reentrant
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=reentrant
++ env_mode=reentrant
++ prefix=current-reentrant
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=reentrant
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-reentrant.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-reentrant.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current reentrant /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-reentrant 0
+current-reentrant exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name long-directory
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current single-name single-name current-single-name
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=single-name
++ env_mode=single-name
++ prefix=current-single-name
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=single-name
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-single-name.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-single-name.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current single-name /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-single-name 0
+current-single-name exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name long-directory
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current duplicate-different duplicate-different current-duplicate-different
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=duplicate-different
++ env_mode=duplicate-different
++ prefix=current-duplicate-different
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=duplicate-different
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-duplicate-different.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-duplicate-different.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current duplicate-different /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-duplicate-different 0
+current-duplicate-different exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name long-directory
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current idempotent-cross-manager idempotent-cross-manager current-idempotent-cross-manager
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=idempotent-cross-manager
++ env_mode=idempotent-cross-manager
++ prefix=current-idempotent-cross-manager
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=idempotent-cross-manager
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-idempotent-cross-manager.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-idempotent-cross-manager.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current idempotent-cross-manager /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-idempotent-cross-manager 0
+current-idempotent-cross-manager exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name long-directory
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current long-name long-name current-long-name
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=long-name
++ env_mode=long-name
++ prefix=current-long-name
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=long-name
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-long-name.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-long-name.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current long-name /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-long-name 0
+current-long-name exit=0
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate concurrent reentrant single-name duplicate-different idempotent-cross-manager long-name long-directory
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current long-directory long-directory current-long-directory
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=long-directory
++ env_mode=long-directory
++ prefix=current-long-directory
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=long-directory
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-long-directory.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-long-directory.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current long-directory /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-long-directory 0
+current-long-directory exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current same-manager-concurrent concurrent current-same-manager-concurrent
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=same-manager-concurrent
++ env_mode=concurrent
++ prefix=current-same-manager-concurrent
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=concurrent
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-same-manager-concurrent.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-same-manager-concurrent.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current same-manager-concurrent /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-same-manager-concurrent 0
+current-same-manager-concurrent exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current missing-creator missing-creator current-missing-creator no-creator
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=missing-creator
++ env_mode=missing-creator
++ prefix=current-missing-creator
++ folder=no-creator
++ set +e
++ WT_SEL_FACTORY_MODE=missing-creator
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-missing-creator.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-missing-creator.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current missing-creator /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/no-creator /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/no-creator/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-missing-creator 0
+current-missing-creator exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current missing-remover missing-remover current-missing-remover no-remover
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=missing-remover
++ env_mode=missing-remover
++ prefix=current-missing-remover
++ folder=no-remover
++ set +e
++ WT_SEL_FACTORY_MODE=missing-remover
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-missing-remover.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-missing-remover.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current missing-remover /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/no-remover /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/no-remover/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-missing-remover 0
+current-missing-remover exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current exception-recovery name-throw current-exception-recovery
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=exception-recovery
++ env_mode=name-throw
++ prefix=current-exception-recovery
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=name-throw
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-exception-recovery.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-exception-recovery.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current exception-recovery /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-exception-recovery 0
+current-exception-recovery exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current long-valid-path good current-long-valid-path deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=long-valid-path
++ env_mode=good
++ prefix=current-long-valid-path
++ folder=deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789
++ set +e
++ WT_SEL_FACTORY_MODE=good
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-long-valid-path.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-long-valid-path.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current long-valid-path /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/deep/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-long-valid-path 0
+current-long-valid-path exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current owner-no-preload owner-no-preload current-owner-no-preload
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=owner-no-preload
++ env_mode=owner-no-preload
++ prefix=current-owner-no-preload
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=owner-no-preload
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-owner-no-preload.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-owner-no-preload.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current owner-no-preload /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-owner-no-preload 0
+current-owner-no-preload exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current allocation-wrapper-failure allocation-wrapper-failure current-allocation-wrapper-failure
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=allocation-wrapper-failure
++ env_mode=allocation-wrapper-failure
++ prefix=current-allocation-wrapper-failure
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=allocation-wrapper-failure
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-allocation-wrapper-failure.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-allocation-wrapper-failure.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current allocation-wrapper-failure /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-allocation-wrapper-failure 0
+current-allocation-wrapper-failure exit=0
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current allocation-control-failure allocation-control-failure current-allocation-control-failure
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current
++ mode=allocation-control-failure
++ env_mode=allocation-control-failure
++ prefix=current-allocation-control-failure
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=allocation-control-failure
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-allocation-control-failure.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/current-allocation-control-failure.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/current allocation-control-failure /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' current-allocation-control-failure 0
+current-allocation-control-failure exit=0
++ case "$prefix:$rc" in
++ '[' -n /private/tmp/wt-i03-sel-owner-baseline ']'
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/owner-baseline owner-no-preload owner-no-preload previous-red-owner-no-preload
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/owner-baseline
++ mode=owner-no-preload
++ env_mode=owner-no-preload
++ prefix=previous-red-owner-no-preload
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=owner-no-preload
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/previous-red-owner-no-preload.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/previous-red-owner-no-preload.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/owner-baseline owner-no-preload /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=1
++ set -e
++ printf '%s exit=%s\n' previous-red-owner-no-preload 1
+previous-red-owner-no-preload exit=1
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/owner-baseline single-name single-name baseline-positive
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/owner-baseline
++ mode=single-name
++ env_mode=single-name
++ prefix=baseline-positive
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=single-name
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-positive.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-positive.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/owner-baseline single-name /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=0
++ set -e
++ printf '%s exit=%s\n' baseline-positive 0
+baseline-positive exit=0
++ case "$prefix:$rc" in
++ '[' -n /private/tmp/wt-sel-quarantine/baseline ']'
++ for mode in creator-throw name-throw empty null duplicate
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline creator-throw creator-throw baseline-red-creator-throw
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline
++ mode=creator-throw
++ env_mode=creator-throw
++ prefix=baseline-red-creator-throw
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=creator-throw
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-red-creator-throw.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-red-creator-throw.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline creator-throw /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
+src/TestUnits/fixtures/sel_factory_quarantine/run.sh: line 56: 23094 Abort trap: 6           WT_SEL_FACTORY_MODE="$env_mode" WT_SEL_MARKER="$run_dir/logs/$prefix.marker" WT_SEL_LOG_MARKER="$run_dir/logs/$prefix.formatted" perl -e 'alarm 20; exec @ARGV' -- "$binary" "$mode" "$run_dir/$folder" "$run_dir/$folder/fixture.$ext" "$run_dir/plugins2" "$run_dir/plugins2/fixture.$ext" > "$run_dir/logs/$prefix.log" 2>&1
++ rc=134
++ set -e
++ printf '%s exit=%s\n' baseline-red-creator-throw 134
+baseline-red-creator-throw exit=134
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline name-throw name-throw baseline-red-name-throw
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline
++ mode=name-throw
++ env_mode=name-throw
++ prefix=baseline-red-name-throw
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=name-throw
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-red-name-throw.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-red-name-throw.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline name-throw /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
+src/TestUnits/fixtures/sel_factory_quarantine/run.sh: line 56: 23095 Abort trap: 6           WT_SEL_FACTORY_MODE="$env_mode" WT_SEL_MARKER="$run_dir/logs/$prefix.marker" WT_SEL_LOG_MARKER="$run_dir/logs/$prefix.formatted" perl -e 'alarm 20; exec @ARGV' -- "$binary" "$mode" "$run_dir/$folder" "$run_dir/$folder/fixture.$ext" "$run_dir/plugins2" "$run_dir/plugins2/fixture.$ext" > "$run_dir/logs/$prefix.log" 2>&1
++ rc=134
++ set -e
++ printf '%s exit=%s\n' baseline-red-name-throw 134
+baseline-red-name-throw exit=134
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline empty empty baseline-red-empty
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline
++ mode=empty
++ env_mode=empty
++ prefix=baseline-red-empty
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=empty
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-red-empty.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-red-empty.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline empty /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=1
++ set -e
++ printf '%s exit=%s\n' baseline-red-empty 1
+baseline-red-empty exit=1
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline null null baseline-red-null
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline
++ mode=null
++ env_mode=null
++ prefix=baseline-red-null
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=null
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-red-null.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-red-null.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline null /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=1
++ set -e
++ printf '%s exit=%s\n' baseline-red-null 1
+baseline-red-null exit=1
++ case "$prefix:$rc" in
++ for mode in creator-throw name-throw empty null duplicate
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline duplicate duplicate baseline-red-duplicate
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline
++ mode=duplicate
++ env_mode=duplicate
++ prefix=baseline-red-duplicate
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=duplicate
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-red-duplicate.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-red-duplicate.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline duplicate /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=1
++ set -e
++ printf '%s exit=%s\n' baseline-red-duplicate 1
+baseline-red-duplicate exit=1
++ case "$prefix:$rc" in
++ run_case /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline old-positive good baseline-positive
++ binary=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline
++ mode=old-positive
++ env_mode=good
++ prefix=baseline-positive
++ folder=plugins
++ set +e
++ WT_SEL_FACTORY_MODE=good
++ WT_SEL_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-positive.marker
++ WT_SEL_LOG_MARKER=/private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-positive.formatted
++ perl -e 'alarm 20; exec @ARGV' -- /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/baseline old-positive /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins/fixture.dylib /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2 /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/plugins2/fixture.dylib
++ rc=1
++ set -e
++ printf '%s exit=%s\n' baseline-positive 1
+baseline-positive exit=1
++ case "$prefix:$rc" in
++ cat /private/tmp/wt-i03-sel-owner-final4-20261102/run.JDolq4s4/logs/baseline-positive.log
+FAIL module remains loaded after manager destruction
+old-positive: FAIL
++ return 1

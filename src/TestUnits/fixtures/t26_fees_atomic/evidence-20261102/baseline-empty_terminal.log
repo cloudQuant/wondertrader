@@ -1,0 +1,10 @@
+--->>> Name confirmed automatically: SHFE.rb2510
+--->>> warning: No session configured for SHFE.rb
+--->>> Name confirmed automatically: SHFE.au2512
+--->>> warning: No session configured for SHFE.au
+/tmp/wt-i03-t26-fees-units-r5/baseline/CTPLoader/TraderSpi.cpp:788:55: runtime error: member access within null pointer of type 'CThostFtdcInstrumentMarginRateField'
+    #0 0x000100d2e7c8 in CTraderSpi::OnRspQryInstrumentMarginRate(CThostFtdcInstrumentMarginRateField*, CThostFtdcRspInfoField*, int, bool) TraderSpi.cpp:788
+    #1 0x000100d05ec8 in main fee_probe.cpp
+    #2 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-t26-fees-units-r5/baseline/CTPLoader/TraderSpi.cpp:788:55 

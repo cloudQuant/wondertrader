@@ -1,0 +1,46 @@
+# suite: i03_wp1_identity_gate_20261104
+# cwd: /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104
+# env overrides: {}
+# command: /bin/bash /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/run.sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/_deps/plain /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/baseline2-asan baseline2-asan
+
+[       OK ] Wp1Test.AuditedManualResumeContract (474 ms)
+[ RUN      ] Wp1Test.ResumeAcknowledgesUnresolvedJournal
+[       OK ] Wp1Test.ResumeAcknowledgesUnresolvedJournal (618 ms)
+[ RUN      ] Wp1Test.IdentityJournalReservesMonotonicIdsAndVerifiedCancel
+[       OK ] Wp1Test.IdentityJournalReservesMonotonicIdsAndVerifiedCancel (572 ms)
+[ RUN      ] Wp1Test.IdentityJournalWithoutFloorFailsClosed
+[       OK ] Wp1Test.IdentityJournalWithoutFloorFailsClosed (664 ms)
+[ RUN      ] Wp1Test.ChildScenario
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:535: Skipped
+only runs as a spawned child
+
+[  SKIPPED ] Wp1Test.ChildScenario (436 ms)
+[ RUN      ] Wp1Test.CrashDuringSendIsNeverResentAndPausesAccount
+Note: Google Test filter = Wp1Test.ChildScenario
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Wp1Test
+[ RUN      ] Wp1Test.ChildScenario
+[       OK ] Wp1Test.CrashDuringSendIsNeverResentAndPausesAccount (1216 ms)
+[ RUN      ] Wp1Test.CrashAfterSendIsRecoveredFromSnapshot
+Note: Google Test filter = Wp1Test.ChildScenario
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Wp1Test
+[ RUN      ] Wp1Test.ChildScenario
+[       OK ] Wp1Test.CrashAfterSendIsRecoveredFromSnapshot (1892 ms)
+[ RUN      ] Wp1Test.ConcurrentEntryReportsSnapshotsAndGate
+[       OK ] Wp1Test.ConcurrentEntryReportsSnapshotsAndGate (425 ms)
+[----------] 20 tests from Wp1Test (14655 ms total)
+
+[----------] Global test environment tear-down
+[==========] 20 tests from 1 test suite ran. (14655 ms total)
+[  PASSED  ] 17 tests.
+[  SKIPPED ] 1 test, listed below:
+[  SKIPPED ] Wp1Test.ChildScenario
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] Wp1Test.PausedAccountCancelsOnlyVerifiedIdentities
+[  FAILED  ] Wp1Test.StalePositionSnapshotRowDoesNotOverwriteNewerTrade
+
+ 2 FAILED TESTS
+exit=1

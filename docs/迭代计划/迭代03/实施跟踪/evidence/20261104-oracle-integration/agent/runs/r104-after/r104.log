@@ -1,0 +1,70 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r104_wtrunner_config.*
+[==========] Running 7 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 7 tests from r104_wtrunner_config
+[ RUN      ] r104_wtrunner_config.all_three_executer_kinds_without_external_modules
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:357: Failure
+Value of: runner->config(fixture("all_children.yaml"))
+  Actual: false
+Expected: true
+
+[  FAILED  ] r104_wtrunner_config.all_three_executer_kinds_without_external_modules (6 ms)
+[ RUN      ] r104_wtrunner_config.active_trader_mocker_initializes_and_is_registered
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:377: Failure
+Value of: runner.config(fixture("trader_success.yaml"))
+  Actual: false
+Expected: true
+TraderMocker artifact: /private/tmp/wt-i03-oracle-20261104/cov/build_x64/Debug/bin/libTraderMocker.dylib
+
+[  FAILED  ] r104_wtrunner_config.active_trader_mocker_initializes_and_is_registered (23 ms)
+[ RUN      ] r104_wtrunner_config.active_trader_missing_module_fails_without_registration
+[       OK ] r104_wtrunner_config.active_trader_missing_module_fails_without_registration (11 ms)
+[ RUN      ] r104_wtrunner_config.inactive_missing_trader_module_is_skipped
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:435: Failure
+Value of: runner.config(fixture("trader_inactive.yaml"))
+  Actual: false
+Expected: true
+
+[  FAILED  ] r104_wtrunner_config.inactive_missing_trader_module_is_skipped (35 ms)
+[ RUN      ] r104_wtrunner_config.later_trader_failure_removes_prior_adapter_from_registry
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:459: Failure
+Value of: runner_fs::exists(runner_fs::path(fixtureEnv.temp_path()) / "mocker_104103")
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:461: Failure
+Expected: (nullptr) != (first), actual: (nullptr) vs (nullptr)
+
+[  FAILED  ] r104_wtrunner_config.later_trader_failure_removes_prior_adapter_from_registry (16 ms)
+[ RUN      ] r104_wtrunner_config.executer_name_defaults_to_local_and_missing_trader_paths
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:492: Failure
+Value of: runner->config(fixture("default_exec.yaml"))
+  Actual: false
+Expected: true
+
+[  FAILED  ] r104_wtrunner_config.executer_name_defaults_to_local_and_missing_trader_paths (2 ms)
+[ RUN      ] r104_wtrunner_config.executers_side_file_string_branch_reaches_init_executers
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:513: Failure
+Value of: runner->config(fixture("exec_side_cfg.yaml"))
+  Actual: false
+Expected: true
+
+[  FAILED  ] r104_wtrunner_config.executers_side_file_string_branch_reaches_init_executers (1 ms)
+[ DISABLED ] r104_wtrunner_config.DISABLED_run_starts_parsers_traders_engine_and_polls_forever
+[----------] 7 tests from r104_wtrunner_config (97 ms total)
+
+[----------] Global test environment tear-down
+[==========] 7 tests from 1 test suite ran. (97 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 6 tests, listed below:
+[  FAILED  ] r104_wtrunner_config.all_three_executer_kinds_without_external_modules
+[  FAILED  ] r104_wtrunner_config.active_trader_mocker_initializes_and_is_registered
+[  FAILED  ] r104_wtrunner_config.inactive_missing_trader_module_is_skipped
+[  FAILED  ] r104_wtrunner_config.later_trader_failure_removes_prior_adapter_from_registry
+[  FAILED  ] r104_wtrunner_config.executer_name_defaults_to_local_and_missing_trader_paths
+[  FAILED  ] r104_wtrunner_config.executers_side_file_string_branch_reaches_init_executers
+
+ 6 FAILED TESTS
+  YOU HAVE 1 DISABLED TEST
+

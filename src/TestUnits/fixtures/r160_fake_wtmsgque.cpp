@@ -1,9 +1,11 @@
 #include "WtMsgQue/WtMsgQue.h"
 
 #include <atomic>
+#include <chrono>
 #include <cstring>
 #include <mutex>
 #include <string>
+#include <thread>
 
 namespace
 {
@@ -22,6 +24,12 @@ std::atomic<bool> g_confirm{ true };
 std::string g_url;
 std::string g_topic;
 FuncLogCallback g_log_callback = nullptr;
+// BUG-R41-003 / K24=E1: opt-in blocking publisher. While enabled, publish_message
+// stays inside the module until the test releases it (bounded by 30 s so a broken
+// test cannot hang the process forever). Off by default: other users unaffected.
+std::atomic<bool> g_block_publish{ false };
+std::atomic<bool> g_release_publish{ false };
+std::atomic<uint32_t> g_in_publish{ 0 };
 }
 
 extern "C"
@@ -44,6 +52,9 @@ extern "C"
 		g_data_len.store(0);
 		g_data_size.store(0);
 		g_confirm.store(true);
+		g_block_publish.store(false);
+		g_release_publish.store(false);
+		g_in_publish.store(0);
 	}
 
 	EXPORT_FLAG void regiter_callbacks(FuncLogCallback cbLog)
@@ -73,6 +84,14 @@ extern "C"
 
 	EXPORT_FLAG void publish_message(WtUInt32 id, const char* topic, const char* data, WtUInt32 dataLen)
 	{
+		if (g_block_publish.load())
+		{
+			++g_in_publish;
+			const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+			while (!g_release_publish.load() && std::chrono::steady_clock::now() < deadline)
+				std::this_thread::sleep_for(std::chrono::milliseconds(2));
+			--g_in_publish;
+		}
 		{
 			std::lock_guard<std::mutex> lock(g_mutex);
 			g_topic = topic == nullptr ? "" : topic;
@@ -83,6 +102,9 @@ extern "C"
 		++g_publish_count;
 	}
 
+	EXPORT_FLAG void r160_fake_set_block_publish(bool block) { g_release_publish.store(false); g_block_publish.store(block); }
+	EXPORT_FLAG void r160_fake_release_publish() { g_release_publish.store(true); }
+	EXPORT_FLAG uint32_t r160_fake_in_publish() { return g_in_publish.load(); }
 	EXPORT_FLAG uint32_t r160_fake_create_count() { return g_create_count.load(); }
 	EXPORT_FLAG uint32_t r160_fake_destroy_count() { return g_destroy_count.load(); }
 	EXPORT_FLAG uint32_t r160_fake_publish_count() { return g_publish_count.load(); }

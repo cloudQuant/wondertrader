@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <atomic>
@@ -35,7 +36,7 @@ namespace
 			static std::atomic<uint64_t> counter(0);
 			const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
 			path = fs::temp_directory_path() /
-				("wt_t1_xtp_loader_" + std::to_string(stamp) + "_" + std::to_string(counter++));
+				("wt_t1_xtp_loader_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(stamp) + "_" + std::to_string(counter++));
 			fs::create_directories(path);
 		}
 

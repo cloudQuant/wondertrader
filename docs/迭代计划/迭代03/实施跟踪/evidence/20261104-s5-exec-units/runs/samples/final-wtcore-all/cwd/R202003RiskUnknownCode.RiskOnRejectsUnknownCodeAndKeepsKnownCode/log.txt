@@ -1,0 +1,30 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R202003RiskUnknownCode.RiskOnRejectsUnknownCodeAndKeepsKnownCode
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R202003RiskUnknownCode
+[ RUN      ] R202003RiskUnknownCode.RiskOnRejectsUnknownCodeAndKeepsKnownCode
+/tmp/wt-i03-s5-exec-units-snap-green/src/TestUnits/coverage/n01_wtcore_tradepaths/r202_003_risk_unknown_code_test.cpp:97: Failure
+Expected equality of these values:
+  !riskActive
+    Which is: false
+  adapter.isTradeEnabled("SHFE.xx.9999")
+    Which is: true
+
+/tmp/wt-i03-s5-exec-units-snap-green/src/TestUnits/coverage/n01_wtcore_tradepaths/r202_003_risk_unknown_code_test.cpp:98: Failure
+Expected equality of these values:
+  !riskActive
+    Which is: false
+  adapter.checkOrderLimits("SHFE.xx.9999")
+    Which is: true
+
+[  FAILED  ] R202003RiskUnknownCode.RiskOnRejectsUnknownCodeAndKeepsKnownCode (356 ms)
+[----------] 1 test from R202003RiskUnknownCode (356 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (357 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R202003RiskUnknownCode.RiskOnRejectsUnknownCodeAndKeepsKnownCode
+
+ 1 FAILED TEST

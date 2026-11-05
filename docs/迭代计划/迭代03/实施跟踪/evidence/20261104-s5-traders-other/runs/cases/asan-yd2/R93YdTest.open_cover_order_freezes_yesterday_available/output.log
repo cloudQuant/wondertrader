@@ -1,0 +1,182 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R93YdTest.open_cover_order_freezes_yesterday_available
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R93YdTest
+[ RUN      ] R93YdTest.open_cover_order_freezes_yesterday_available
+dlopen(/private/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/yd_r60_missing_library_fixture.dylib, 0x0002): tried: '/private/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/yd_r60_missing_library_fixture.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/yd_r60_missing_library_fixture.dylib' (no such file), '/private/tmp/wt-i03-s5-traders-other-san/manual/yd-fix-asan/yd_r60_missing_library_fixture.dylib' (no such file)
+[       OK ] R93YdTest.open_cover_order_freezes_yesterday_available (4 ms)
+[----------] 1 test from R93YdTest (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (4 ms total)
+[  PASSED  ] 1 test.
+
+=================================================================
+==47335==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 72 byte(s) in 1 object(s) allocated from:
+    #0 0x0001016950e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100d036a8 in TraderYD::notifyOrder(YDOrder const*, YDInstrument const*, YDAccount const*)+0x23c (tests:arm64+0x10000f6a8)
+    #2 0x000100dae63c in (anonymous namespace)::R93YdTest_open_cover_order_freezes_yesterday_available_Test::TestBody()+0x284 (tests:arm64+0x1000ba63c)
+    #3 0x000100e0c180 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (tests:arm64+0x100118180)
+    #4 0x000100e0c0c8 in testing::Test::Run()+0xcc (tests:arm64+0x1001180c8)
+    #5 0x000100e0cca8 in testing::TestInfo::Run()+0xd0 (tests:arm64+0x100118ca8)
+    #6 0x000100e0d72c in testing::TestSuite::Run()+0x1c4 (tests:arm64+0x10011972c)
+    #7 0x000100e18b50 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (tests:arm64+0x100124b50)
+    #8 0x000100e184fc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (tests:arm64+0x1001244fc)
+    #9 0x000100e18460 in testing::UnitTest::Run()+0x78 (tests:arm64+0x100124460)
+    #10 0x000100df97dc in main+0x40 (tests:arm64+0x1001057dc)
+    #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x6070000013d0 (72 bytes)
+
+Direct leak of 72 byte(s) in 1 object(s) allocated from:
+    #0 0x0001016950e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100d01e18 in TraderYD::notifyFinishInit()+0x4ac (tests:arm64+0x10000de18)
+    #2 0x000100d9927c in (anonymous namespace)::R93YdTest::login_and_finish()+0x6c0 (tests:arm64+0x1000a527c)
+    #3 0x000100dae5e4 in (anonymous namespace)::R93YdTest_open_cover_order_freezes_yesterday_available_Test::TestBody()+0x22c (tests:arm64+0x1000ba5e4)
+    #4 0x000100e0c180 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (tests:arm64+0x100118180)
+    #5 0x000100e0c0c8 in testing::Test::Run()+0xcc (tests:arm64+0x1001180c8)
+    #6 0x000100e0cca8 in testing::TestInfo::Run()+0xd0 (tests:arm64+0x100118ca8)
+    #7 0x000100e0d72c in testing::TestSuite::Run()+0x1c4 (tests:arm64+0x10011972c)
+    #8 0x000100e18b50 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (tests:arm64+0x100124b50)
+    #9 0x000100e184fc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (tests:arm64+0x1001244fc)
+    #10 0x000100e18460 in testing::UnitTest::Run()+0x78 (tests:arm64+0x100124460)
+    #11 0x000100df97dc in main+0x40 (tests:arm64+0x1001057dc)
+    #12 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x607000001360 (72 bytes)
+
+Direct leak of 48 byte(s) in 1 object(s) allocated from:
+    #0 0x0001016950e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100d01c6c in TraderYD::notifyFinishInit()+0x300 (tests:arm64+0x10000dc6c)
+    #2 0x000100d9927c in (anonymous namespace)::R93YdTest::login_and_finish()+0x6c0 (tests:arm64+0x1000a527c)
+    #3 0x000100dae5e4 in (anonymous namespace)::R93YdTest_open_cover_order_freezes_yesterday_available_Test::TestBody()+0x22c (tests:arm64+0x1000ba5e4)
+    #4 0x000100e0c180 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (tests:arm64+0x100118180)
+    #5 0x000100e0c0c8 in testing::Test::Run()+0xcc (tests:arm64+0x1001180c8)
+    #6 0x000100e0cca8 in testing::TestInfo::Run()+0xd0 (tests:arm64+0x100118ca8)
+    #7 0x000100e0d72c in testing::TestSuite::Run()+0x1c4 (tests:arm64+0x10011972c)
+    #8 0x000100e18b50 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (tests:arm64+0x100124b50)
+    #9 0x000100e184fc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (tests:arm64+0x1001244fc)
+    #10 0x000100e18460 in testing::UnitTest::Run()+0x78 (tests:arm64+0x100124460)
+    #11 0x000100df97dc in main+0x40 (tests:arm64+0x1001057dc)
+    #12 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x604000001e90 (48 bytes)
+
+Indirect leak of 128 byte(s) in 1 object(s) allocated from:
+    #0 0x0001016950e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100d51bec in ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::allocate_buckets_from_shift()+0x84 (tests:arm64+0x10005dbec)
+    #2 0x000100d53cd4 in ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::increase_size()+0xbc (tests:arm64+0x10005fcd4)
+    #3 0x000100d53ac4 in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_try_emplace<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)+0x3e4 (tests:arm64+0x10005fac4)
+    #4 0x000100d03354 in wtp::WTSHashMap<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::add(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, wtp::WTSObject*, bool)+0xc4 (tests:arm64+0x10000f354)
+    #5 0x000100d02338 in TraderYD::notifyFinishInit()+0x9cc (tests:arm64+0x10000e338)
+    #6 0x000100d9927c in (anonymous namespace)::R93YdTest::login_and_finish()+0x6c0 (tests:arm64+0x1000a527c)
+    #7 0x000100dae5e4 in (anonymous namespace)::R93YdTest_open_cover_order_freezes_yesterday_available_Test::TestBody()+0x22c (tests:arm64+0x1000ba5e4)
+    #8 0x000100e0c180 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (tests:arm64+0x100118180)
+    #9 0x000100e0c0c8 in testing::Test::Run()+0xcc (tests:arm64+0x1001180c8)
+    #10 0x000100e0cca8 in testing::TestInfo::Run()+0xd0 (tests:arm64+0x100118ca8)
+    #11 0x000100e0d72c in testing::TestSuite::Run()+0x1c4 (tests:arm64+0x10011972c)
+    #12 0x000100e18b50 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (tests:arm64+0x100124b50)
+    #13 0x000100e184fc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (tests:arm64+0x1001244fc)
+    #14 0x000100e18460 in testing::UnitTest::Run()+0x78 (tests:arm64+0x100124460)
+    #15 0x000100df97dc in main+0x40 (tests:arm64+0x1001057dc)
+    #16 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x60c000000ac0 (128 bytes)
+
+Indirect leak of 128 byte(s) in 1 object(s) allocated from:
+    #0 0x0001016950e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100d51bec in ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::allocate_buckets_from_shift()+0x84 (tests:arm64+0x10005dbec)
+    #2 0x000100d53cd4 in ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::increase_size()+0xbc (tests:arm64+0x10005fcd4)
+    #3 0x000100d53ac4 in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_try_emplace<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)+0x3e4 (tests:arm64+0x10005fac4)
+    #4 0x000100d03354 in wtp::WTSHashMap<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::add(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, wtp::WTSObject*, bool)+0xc4 (tests:arm64+0x10000f354)
+    #5 0x000100d0402c in TraderYD::notifyOrder(YDOrder const*, YDInstrument const*, YDAccount const*)+0xbc0 (tests:arm64+0x10001002c)
+    #6 0x000100dae63c in (anonymous namespace)::R93YdTest_open_cover_order_freezes_yesterday_available_Test::TestBody()+0x284 (tests:arm64+0x1000ba63c)
+    #7 0x000100e0c180 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (tests:arm64+0x100118180)
+    #8 0x000100e0c0c8 in testing::Test::Run()+0xcc (tests:arm64+0x1001180c8)
+    #9 0x000100e0cca8 in testing::TestInfo::Run()+0xd0 (tests:arm64+0x100118ca8)
+    #10 0x000100e0d72c in testing::TestSuite::Run()+0x1c4 (tests:arm64+0x10011972c)
+    #11 0x000100e18b50 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (tests:arm64+0x100124b50)
+    #12 0x000100e184fc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (tests:arm64+0x1001244fc)
+    #13 0x000100e18460 in testing::UnitTest::Run()+0x78 (tests:arm64+0x100124460)
+    #14 0x000100df97dc in main+0x40 (tests:arm64+0x1001057dc)
+    #15 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x60c000000b80 (128 bytes)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x0001016950e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100d52160 in std::__1::__split_buffer<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>&)+0x4c (tests:arm64+0x10005e160)
+    #2 0x000100d547bc in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>* std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>>::__emplace_back_slow_path<std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>, std::__1::tuple<>>(std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>&&, std::__1::tuple<>&&)+0x130 (tests:arm64+0x1000607bc)
+    #3 0x000100d542d0 in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>>::emplace_back<std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>, std::__1::tuple<>>(std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>&&, std::__1::tuple<>&&)::'lambda0'()::operator()() const+0x64 (tests:arm64+0x1000602d0)
+    #4 0x000100d53f20 in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_place_element<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>(unsigned int, unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)+0x1ec (tests:arm64+0x10005ff20)
+    #5 0x000100d53a6c in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_try_emplace<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)+0x38c (tests:arm64+0x10005fa6c)
+    #6 0x000100d03354 in wtp::WTSHashMap<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::add(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, wtp::WTSObject*, bool)+0xc4 (tests:arm64+0x10000f354)
+    #7 0x000100d0402c in TraderYD::notifyOrder(YDOrder const*, YDInstrument const*, YDAccount const*)+0xbc0 (tests:arm64+0x10001002c)
+    #8 0x000100dae63c in (anonymous namespace)::R93YdTest_open_cover_order_freezes_yesterday_available_Test::TestBody()+0x284 (tests:arm64+0x1000ba63c)
+    #9 0x000100e0c180 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (tests:arm64+0x100118180)
+    #10 0x000100e0c0c8 in testing::Test::Run()+0xcc (tests:arm64+0x1001180c8)
+    #11 0x000100e0cca8 in testing::TestInfo::Run()+0xd0 (tests:arm64+0x100118ca8)
+    #12 0x000100e0d72c in testing::TestSuite::Run()+0x1c4 (tests:arm64+0x10011972c)
+    #13 0x000100e18b50 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (tests:arm64+0x100124b50)
+    #14 0x000100e184fc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (tests:arm64+0x1001244fc)
+    #15 0x000100e18460 in testing::UnitTest::Run()+0x78 (tests:arm64+0x100124460)
+    #16 0x000100df97dc in main+0x40 (tests:arm64+0x1001057dc)
+    #17 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x603000002e30 (32 bytes)
+
+Indirect leak of 32 byte(s) in 1 object(s) allocated from:
+    #0 0x0001016950e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100d52160 in std::__1::__split_buffer<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>&)+0x4c (tests:arm64+0x10005e160)
+    #2 0x000100d547bc in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>* std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>>::__emplace_back_slow_path<std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>, std::__1::tuple<>>(std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>&&, std::__1::tuple<>&&)+0x130 (tests:arm64+0x1000607bc)
+    #3 0x000100d542d0 in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>& std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>>::emplace_back<std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>, std::__1::tuple<>>(std::__1::piecewise_construct_t const&, std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>&&, std::__1::tuple<>&&)::'lambda0'()::operator()() const+0x64 (tests:arm64+0x1000602d0)
+    #4 0x000100d53f20 in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_place_element<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>(unsigned int, unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)+0x1ec (tests:arm64+0x10005ff20)
+    #5 0x000100d53a6c in std::__1::pair<std::__1::__wrap_iter<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>*>, bool> ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, wtp::WTSObject*>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_try_emplace<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)+0x38c (tests:arm64+0x10005fa6c)
+    #6 0x000100d03354 in wtp::WTSHashMap<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>::add(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, wtp::WTSObject*, bool)+0xc4 (tests:arm64+0x10000f354)
+    #7 0x000100d02338 in TraderYD::notifyFinishInit()+0x9cc (tests:arm64+0x10000e338)
+    #8 0x000100d9927c in (anonymous namespace)::R93YdTest::login_and_finish()+0x6c0 (tests:arm64+0x1000a527c)
+    #9 0x000100dae5e4 in (anonymous namespace)::R93YdTest_open_cover_order_freezes_yesterday_available_Test::TestBody()+0x22c (tests:arm64+0x1000ba5e4)
+    #10 0x000100e0c180 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (tests:arm64+0x100118180)
+    #11 0x000100e0c0c8 in testing::Test::Run()+0xcc (tests:arm64+0x1001180c8)
+    #12 0x000100e0cca8 in testing::TestInfo::Run()+0xd0 (tests:arm64+0x100118ca8)
+    #13 0x000100e0d72c in testing::TestSuite::Run()+0x1c4 (tests:arm64+0x10011972c)
+    #14 0x000100e18b50 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (tests:arm64+0x100124b50)
+    #15 0x000100e184fc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (tests:arm64+0x1001244fc)
+    #16 0x000100e18460 in testing::UnitTest::Run()+0x78 (tests:arm64+0x100124460)
+    #17 0x000100df97dc in main+0x40 (tests:arm64+0x1001057dc)
+    #18 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x603000002c80 (32 bytes)
+
+Indirect leak of 8 byte(s) in 1 object(s) allocated from:
+    #0 0x0001016950e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000100d1bfc8 in std::__1::__split_buffer<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<wtp::WTSObject*>&)+0x4c (tests:arm64+0x100027fc8)
+    #2 0x000100d1ba70 in wtp::WTSObject** std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::__emplace_back_slow_path<wtp::WTSObject*&>(wtp::WTSObject*&)+0x130 (tests:arm64+0x100027a70)
+    #3 0x000100d1b648 in void std::__1::__if_likely_else[abi:nqe220108]<wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda'(), wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda0'()>(bool, wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda'(), wtp::WTSObject*& std::__1::vector<wtp::WTSObject*, std::__1::allocator<wtp::WTSObject*>>::emplace_back<wtp::WTSObject*&>(wtp::WTSObject*&)::'lambda0'())+0xe0 (tests:arm64+0x100027648)
+    #4 0x000100d01da8 in TraderYD::notifyFinishInit()+0x43c (tests:arm64+0x10000dda8)
+    #5 0x000100d9927c in (anonymous namespace)::R93YdTest::login_and_finish()+0x6c0 (tests:arm64+0x1000a527c)
+    #6 0x000100dae5e4 in (anonymous namespace)::R93YdTest_open_cover_order_freezes_yesterday_available_Test::TestBody()+0x22c (tests:arm64+0x1000ba5e4)
+    #7 0x000100e0c180 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (tests:arm64+0x100118180)
+    #8 0x000100e0c0c8 in testing::Test::Run()+0xcc (tests:arm64+0x1001180c8)
+    #9 0x000100e0cca8 in testing::TestInfo::Run()+0xd0 (tests:arm64+0x100118ca8)
+    #10 0x000100e0d72c in testing::TestSuite::Run()+0x1c4 (tests:arm64+0x10011972c)
+    #11 0x000100e18b50 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (tests:arm64+0x100124b50)
+    #12 0x000100e184fc in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (tests:arm64+0x1001244fc)
+    #13 0x000100e18460 in testing::UnitTest::Run()+0x78 (tests:arm64+0x100124460)
+    #14 0x000100df97dc in main+0x40 (tests:arm64+0x1001057dc)
+    #15 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Objects leaked above:
+0x602000000d30 (8 bytes)
+
+SUMMARY: AddressSanitizer: 520 byte(s) leaked in 8 allocation(s).

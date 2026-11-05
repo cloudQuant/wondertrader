@@ -1,0 +1,98 @@
+src/TraderHuaX/TraderHuaX.cpp:75:4: warning: initializer order does not match the declaration order [-Wreorder-ctor]
+   75 |         , _ordref(makeRefID())
+      |           ^~~~~~~~~~~~~~~~~~~~
+      |           _positions(NULL)
+   76 |         , _reqid(1)
+      |           ~~~~~~~~~
+      |           _trades(NULL)
+   77 |         , _accounts(NULL)
+      |           ~~~~~~~~~~~~~~~
+      |           _orders(NULL)
+   78 |         , _orders(NULL)
+      |           ~~~~~~~~~~~~~
+      |           _accounts(NULL)
+   79 |         , _trades(NULL)
+      |           ~~~~~~~~~~~~~
+      |           _bd_mgr(NULL)
+   80 |         , _positions(NULL)
+      |           ~~~~~~~~~~~~~~~~
+      |           _flowdir("HuaXTDFlow")
+   81 |         , _bd_mgr(NULL)
+      |           ~~~~~~~~~~~~~
+      |           _encrypt(false)
+   82 |         , _tradingday(0)
+      |           ~~~~~~~~~~~~~~
+      |           _terminal("PC")
+   83 |         , _inited(false)
+   84 |         ,_terminal("PC")
+      |          ~~~~~~~~~~~~~~~
+      |          _tradingday(0)
+   85 |         , _encrypt(false)
+      |           ~~~~~~~~~~~~~~~
+      |           _reqid(1)
+   86 |         , _flowdir("HuaXTDFlow")
+      |           ~~~~~~~~~~~~~~~~~~~~~~
+      |           _ordref(makeRefID())
+src/TraderHuaX/TraderHuaX.cpp:75:4: note: field '_ordref' will be initialized after field '_reqid'
+   75 |         , _ordref(makeRefID())
+      |           ^~~~~~~~~~~~~~~~~~~~
+src/TraderHuaX/TraderHuaX.cpp:76:4: note: field '_reqid' will be initialized after field '_accounts'
+   76 |         , _reqid(1)
+      |           ^~~~~~~~~
+src/TraderHuaX/TraderHuaX.cpp:77:4: note: field '_accounts' will be initialized after field '_orders'
+   77 |         , _accounts(NULL)
+      |           ^~~~~~~~~~~~~~~
+src/TraderHuaX/TraderHuaX.cpp:78:4: note: field '_orders' will be initialized after field '_trades'
+   78 |         , _orders(NULL)
+      |           ^~~~~~~~~~~~~
+src/TraderHuaX/TraderHuaX.cpp:79:4: note: field '_trades' will be initialized after field '_positions'
+   79 |         , _trades(NULL)
+      |           ^~~~~~~~~~~~~
+src/TraderHuaX/TraderHuaX.cpp:82:4: note: field '_tradingday' will be initialized after field '_inited'
+   82 |         , _tradingday(0)
+      |           ^~~~~~~~~~~~~~
+src/TraderHuaX/TraderHuaX.cpp:83:4: note: field '_inited' will be initialized after field '_terminal'
+   83 |         , _inited(false)
+      |           ^~~~~~~~~~~~~~
+src/TraderHuaX/TraderHuaX.cpp:84:3: note: field '_terminal' will be initialized after field '_encrypt'
+   84 |         ,_terminal("PC")
+      |          ^~~~~~~~~~~~~~~
+src/TraderHuaX/TraderHuaX.cpp:85:4: note: field '_encrypt' will be initialized after field '_flowdir'
+   85 |         , _encrypt(false)
+      |           ^~~~~~~~~~~~~~~
+src/TraderHuaX/TraderHuaX.cpp:851:2: error: use of undeclared identifier 'strcpy_s'; did you mean 'strcpy'?
+  851 |         strcpy_s(field.LogInAccount, _user.c_str());
+      |         ^~~~~~~~
+      |         strcpy
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_string.h:92:3: note: 'strcpy' declared here
+   92 |                 strcpy(char *_LIBC_UNSAFE_INDEXABLE __dst, const char *__src)
+      |                 ^
+src/TraderHuaX/TraderHuaX.cpp:853:2: error: use of undeclared identifier 'strcpy_s'; did you mean 'strcpy'?
+  853 |         strcpy_s(field.Password, _pass.c_str());
+      |         ^~~~~~~~
+      |         strcpy
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_string.h:92:3: note: 'strcpy' declared here
+   92 |                 strcpy(char *_LIBC_UNSAFE_INDEXABLE __dst, const char *__src)
+      |                 ^
+src/TraderHuaX/TraderHuaX.cpp:855:2: error: use of undeclared identifier 'strcpy_s'; did you mean 'strcpy'?
+  855 |         strcpy_s(field.UserProductInfo, _productInfo.c_str());
+      |         ^~~~~~~~
+      |         strcpy
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_string.h:92:3: note: 'strcpy' declared here
+   92 |                 strcpy(char *_LIBC_UNSAFE_INDEXABLE __dst, const char *__src)
+      |                 ^
+src/TraderHuaX/TraderHuaX.cpp:858:2: error: use of undeclared identifier 'strcpy_s'; did you mean 'strcpy'?
+  858 |         strcpy_s(field.TerminalInfo, terminalInfo);
+      |         ^~~~~~~~
+      |         strcpy
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_string.h:92:3: note: 'strcpy' declared here
+   92 |                 strcpy(char *_LIBC_UNSAFE_INDEXABLE __dst, const char *__src)
+      |                 ^
+src/TraderHuaX/TraderHuaX.cpp:893:2: error: use of undeclared identifier 'strcpy_s'; did you mean 'strcpy'?
+  893 |         strcpy_s(field.UserID, _user.c_str());
+      |         ^~~~~~~~
+      |         strcpy
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_string.h:92:3: note: 'strcpy' declared here
+   92 |                 strcpy(char *_LIBC_UNSAFE_INDEXABLE __dst, const char *__src)
+      |                 ^
+1 warning and 5 errors generated.

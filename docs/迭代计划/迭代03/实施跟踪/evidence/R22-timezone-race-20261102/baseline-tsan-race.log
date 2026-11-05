@@ -1,0 +1,54 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=35940)
+  Write of size 4 at 0x000102f44008 by thread T23:
+    #0 TimeUtils::getTZOffset() TimeUtils.hpp:77 (baseline-tsan:arm64+0x1000014bc)
+    #1 main::$_0::operator()() const timezone_probe.cpp:89 (baseline-tsan:arm64+0x100001acc)
+    #2 std::__1::__invoke_result_impl<void, main::$_0>::type std::__1::__invoke[abi:nqe220108]<main::$_0>(main::$_0&&) invoke.h:90 (baseline-tsan:arm64+0x100001acc)
+    #3 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (baseline-tsan:arm64+0x100001acc)
+    #4 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>>(void*) thread.h:169 (baseline-tsan:arm64+0x100001acc)
+
+  Previous read of size 4 at 0x000102f44008 by thread T15:
+    #0 TimeUtils::getTZOffset() TimeUtils.hpp:67 (baseline-tsan:arm64+0x100001338)
+    #1 main::$_0::operator()() const timezone_probe.cpp:89 (baseline-tsan:arm64+0x100001acc)
+    #2 std::__1::__invoke_result_impl<void, main::$_0>::type std::__1::__invoke[abi:nqe220108]<main::$_0>(main::$_0&&) invoke.h:90 (baseline-tsan:arm64+0x100001acc)
+    #3 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (baseline-tsan:arm64+0x100001acc)
+    #4 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>>(void*) thread.h:169 (baseline-tsan:arm64+0x100001acc)
+
+  As if synchronized via sleep:
+    #0 nanosleep <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x301f4)
+    #1 std::__1::this_thread::sleep_for(std::__1::chrono::duration<long long, std::__1::ratio<1l, 1000000000l>> const&) <null> (libc++.1.dylib:arm64e+0x8f10)
+    #2 main::$_0::operator()() const timezone_probe.cpp:89 (baseline-tsan:arm64+0x100001acc)
+    #3 std::__1::__invoke_result_impl<void, main::$_0>::type std::__1::__invoke[abi:nqe220108]<main::$_0>(main::$_0&&) invoke.h:90 (baseline-tsan:arm64+0x100001acc)
+    #4 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (baseline-tsan:arm64+0x100001acc)
+    #5 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>>(void*) thread.h:169 (baseline-tsan:arm64+0x100001acc)
+
+  Location is global 'TimeUtils::getTZOffset()::offset' at 0x000102f44008 (baseline-tsan+0x100008008)
+
+  Thread T23 (tid=1007963, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (baseline-tsan:arm64+0x1000019a8)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_0, 0>(main::$_0&&) thread.h:218 (baseline-tsan:arm64+0x1000019a8)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_0, 0>(main::$_0&&) thread.h:209 (baseline-tsan:arm64+0x1000019a8)
+    #4 void std::__1::allocator<std::__1::thread>::construct[abi:nqe220108]<std::__1::thread, main::$_0>(std::__1::thread*, main::$_0&&) allocator.h:141 (baseline-tsan:arm64+0x1000019a8)
+    #5 void std::__1::allocator_traits<std::__1::allocator<std::__1::thread>>::construct[abi:nqe220108]<std::__1::thread, main::$_0, 0>(std::__1::allocator<std::__1::thread>&, std::__1::thread*, main::$_0&&) allocator_traits.h:296 (baseline-tsan:arm64+0x1000019a8)
+    #6 void std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::__emplace_back_assume_capacity[abi:nqe220108]<main::$_0>(main::$_0&&) vector.h:481 (baseline-tsan:arm64+0x100000a6c)
+    #7 std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_0>(main::$_0&&)::'lambda'()::operator()() const vector.h:1160 (baseline-tsan:arm64+0x100000a6c)
+    #8 void std::__1::__if_likely_else[abi:nqe220108]<std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_0>(main::$_0&&)::'lambda'(), std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_0>(main::$_0&&)::'lambda0'()>(bool, std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_0>(main::$_0&&)::'lambda'(), std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_0>(main::$_0&&)::'lambda0'()) vector.h:1141 (baseline-tsan:arm64+0x100000a6c)
+    #9 std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_0>(main::$_0&&) vector.h:1157 (baseline-tsan:arm64+0x100000a6c)
+    #10 main timezone_probe.cpp:86 (baseline-tsan:arm64+0x100000a6c)
+
+  Thread T15 (tid=1007955, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (baseline-tsan:arm64+0x1000019a8)
+    #2 std::__1::thread::thread[abi:nqe220108]<main::$_0, 0>(main::$_0&&) thread.h:218 (baseline-tsan:arm64+0x1000019a8)
+    #3 std::__1::thread::thread[abi:nqe220108]<main::$_0, 0>(main::$_0&&) thread.h:209 (baseline-tsan:arm64+0x1000019a8)
+    #4 void std::__1::allocator<std::__1::thread>::construct[abi:nqe220108]<std::__1::thread, main::$_0>(std::__1::thread*, main::$_0&&) allocator.h:141 (baseline-tsan:arm64+0x1000019a8)
+    #5 void std::__1::allocator_traits<std::__1::allocator<std::__1::thread>>::construct[abi:nqe220108]<std::__1::thread, main::$_0, 0>(std::__1::allocator<std::__1::thread>&, std::__1::thread*, main::$_0&&) allocator_traits.h:296 (baseline-tsan:arm64+0x1000019a8)
+    #6 void std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::__emplace_back_assume_capacity[abi:nqe220108]<main::$_0>(main::$_0&&) vector.h:481 (baseline-tsan:arm64+0x100000a6c)
+    #7 std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_0>(main::$_0&&)::'lambda'()::operator()() const vector.h:1160 (baseline-tsan:arm64+0x100000a6c)
+    #8 void std::__1::__if_likely_else[abi:nqe220108]<std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_0>(main::$_0&&)::'lambda'(), std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_0>(main::$_0&&)::'lambda0'()>(bool, std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_0>(main::$_0&&)::'lambda'(), std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_0>(main::$_0&&)::'lambda0'()) vector.h:1141 (baseline-tsan:arm64+0x100000a6c)
+    #9 std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread>>::emplace_back<main::$_0>(main::$_0&&) vector.h:1157 (baseline-tsan:arm64+0x100000a6c)
+    #10 main timezone_probe.cpp:86 (baseline-tsan:arm64+0x100000a6c)
+
+SUMMARY: ThreadSanitizer: data race TimeUtils.hpp:77 in TimeUtils::getTZOffset()
+==================

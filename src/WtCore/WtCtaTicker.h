@@ -17,6 +17,7 @@
 
 #include "../Includes/WTSMarcos.h"
 #include "../Share/StdUtils.hpp"
+#include "TickerDayBoundary.h"
 
 NS_WTP_BEGIN
 class WTSSessionInfo;
@@ -53,7 +54,7 @@ public:
 	 * @brief 析构函数
 	 * @details 清理定时器对象的资源
 	 */
-	~WtCtaRtTicker(){}
+	~WtCtaRtTicker(){ stop(); }
 
 public:
 	/**
@@ -79,7 +80,8 @@ public:
 	 * @brief 启动定时器
 	 * @details 启动定时器线程，开始定时触发策略计算
 	 */
-	void	run();
+	// I03-NEW-075: false when the ticker cannot start (e.g. no trading session).
+	bool	run();
 	
 	/**
 	 * @brief 停止定时器
@@ -114,21 +116,34 @@ private:
 	 */
 	void	trigger_price(WTSTickData* curTick);
 
+	/**
+	 * @brief 处理一笔行情（调用方必须是 _strand 的 owner）
+	 */
+	void	handle_tick(WTSTickData* curTick);
+
+	/**
+	 * @brief worker 的一轮检查（调用方必须是 _strand 的 owner）
+	 * @return 是否处于需要短间隔轮询的状态
+	 */
+	bool	worker_pass();
+
 private:
 	WTSSessionInfo*	_s_info;    ///< 交易时间段信息对象
 	WtCtaEngine*	_engine;    ///< CTA策略引擎指针
 	IDataReader*	_store;     ///< 数据读取器指针
 
-	uint32_t	_date;      ///< 当前日期，格式为YYYYMMDD
-	uint32_t	_time;      ///< 当前时间，格式为HHMMSS
+	std::atomic<uint32_t>	_date;      ///< 当前日期，格式为YYYYMMDD
+	std::atomic<uint32_t>	_time;      ///< 当前时间，格式为HHMMSSmmm
 
 	uint32_t	_cur_pos;   ///< 当前定时器位置
 
-	StdUniqueMutex	_mtx;       ///< 互斥锁，用于线程同步
+	wt_ticker::EventStrand	_strand;	///< 卡9 9d=A：on_tick 与 worker 的串行化/重入排队
 	std::atomic<uint64_t>	_next_check_time;  ///< 下次检查时间，原子变量
 	std::atomic<uint32_t>	_last_emit_pos;    ///< 上次发布位置，原子变量
 
-	bool			_stopped;   ///< 停止标志，用于控制定时器线程
+	std::atomic<bool>	_stopped;   ///< 停止标志，用于控制定时器线程
+	std::atomic<bool>	_running{ false };	///< worker 已启动
+	StdUniqueMutex	_stop_mtx;	///< 串行化 stop 的 join
 	StdThreadPtr	_thrd;      ///< 定时器线程指针
 
 };

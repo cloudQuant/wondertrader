@@ -1,0 +1,35 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before-r2/src/WtDataStorage/WtBtDtReader.cpp	2026-10-27 12:14:47
++++ src/WtDataStorage/WtBtDtReader.cpp	2026-11-04 21:20:41
+@@ -34,9 +34,30 @@
+ 	if (sink == NULL)
+ 		return;
+ 
++	// I03-NEW-038: messages can carry caller-supplied codes and configured
++	// paths; bound the formatter writes to the per-thread buffer.
+ 	static thread_local char buffer[512] = { 0 };
+-	memset(buffer, 0, 512);
+-	fmt::format_to(buffer, format, args...);
++	try
++	{
++		const std::size_t max_output_size = sizeof(buffer) - 1;
++		const auto formatted = fmt::format_to_n(buffer, max_output_size, format, args...);
++		if (formatted.size > max_output_size)
++		{
++			constexpr char truncation_marker[] = "...[truncated]";
++			constexpr std::size_t marker_size = sizeof(truncation_marker) - 1;
++			std::memcpy(buffer + max_output_size - marker_size, truncation_marker, marker_size);
++			buffer[max_output_size] = '\0';
++		}
++		else
++		{
++			buffer[formatted.size] = '\0';
++		}
++	}
++	catch (...)
++	{
++		constexpr char fallback[] = "WtBtDtReader log formatting failed";
++		std::memcpy(buffer, fallback, sizeof(fallback));
++	}
+ 
+ 	sink->reader_log(ll, buffer);
+ }

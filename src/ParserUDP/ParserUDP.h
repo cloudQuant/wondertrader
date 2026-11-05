@@ -9,10 +9,12 @@
  */
 #pragma once
 #include "../Includes/IParserApi.h"
+#include "../Includes/IParserLifecycleV2.h"
 #include "../Share/StdUtils.hpp"
 
 #include <queue>
 #include <atomic>
+#include <future>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -45,6 +47,10 @@ public:
 	// called from an io/SPI callback thread; the owner must retain this parser
 	// and retry from another thread before destroying it.
 	bool shutdown();
+	WtParserLifecycleV2Status requestStopV2() noexcept;
+	WtParserLifecycleV2Status canWaitV2() const noexcept;
+	WtParserLifecycleV2Status waitDrainedV2(uint32_t timeoutMs) noexcept;
+	bool prepareDestroyV2() noexcept;
 
 	virtual bool connect() override;
 
@@ -66,6 +72,27 @@ private:
 		ParserUDP* parser;
 		CallbackFrame* previous;
 	};
+	struct ApiFrame { ParserUDP* parser; ApiFrame* previous; };
+	class ApiGuard
+	{
+	public:
+		explicit ApiGuard(ParserUDP* parser, bool allowClosed = false) noexcept;
+		~ApiGuard();
+		explicit operator bool() const noexcept { return _entered; }
+	private:
+		ParserUDP* _parser;
+		ApiFrame _frame;
+		bool _entered;
+	};
+	struct WorkerExitProof
+	{
+		std::promise<bool> promise;
+		std::shared_future<bool> exited;
+		WorkerExitProof() : exited(promise.get_future().share()) {}
+	};
+	bool is_api_thread() const noexcept;
+	void armStopTimer();
+	void stopOnWorkerV2();
 
 	template<typename Fn>
 	void with_spi(Fn&& fn)
@@ -108,6 +135,15 @@ private:
 	void	close_sockets();
 	// Caller may already hold _mtx_io; only the first close path reports WPE_Close.
 	void	emit_close_once();
+	// Card 14a=C event contract, all guarded by _mtx_io:
+	// WPE_Connect = transport established for a channel-pair epoch (both
+	// sockets open, receive armed, subscription dispatched); WPE_Login =
+	// confirmed by the first valid protocol message received in that epoch
+	// (fail-closed: never inferred from a local send completing).
+	void	begin_event_epoch();
+	void	emit_connect_event(uint64_t epoch);
+	void	emit_login_event(uint64_t epoch);
+	void	emit_queued_close(uint64_t epoch);
 	void	recover_from_transport_failure(uint32_t& attempts, const char* channel, uint64_t failed_epoch);
 	bool	is_worker_thread() const;
 	bool	is_callback_thread() const;
@@ -116,7 +152,7 @@ private:
 
 	void	subscribe();
 
-	void	extract_buffer(uint32_t length, bool isBroad, const char* buffer_data);
+	void	extract_buffer(uint32_t length, bool isBroad, const char* buffer_data, uint64_t login_epoch = 0);
 
 private:
 	void	doOnConnected();
@@ -133,6 +169,7 @@ private:
 	ip::udp::endpoint	_broad_ep;
 	ip::udp::endpoint	_server_ep;
 	io_context			_io_service;
+	boost::asio::steady_timer _stop_timer;
 
 	boost::asio::strand<boost::asio::io_context::executor_type>	_strand;
 
@@ -148,6 +185,9 @@ private:
 	uint64_t			_connection_epoch;
 	// Guarded by _mtx_io; reset for each successful connect.
 	bool					_close_event_emitted;
+	// Highest epochs for which WPE_Connect / WPE_Login were emitted.
+	uint64_t				_connect_event_epoch = 0;
+	uint64_t				_login_event_epoch = 0;
 	inline static constexpr uint32_t MAX_AUTO_RECOVERY_ATTEMPTS = 3;
 	uint32_t				_send_recovery_attempts = 0;
 	uint32_t				_broadcast_recovery_attempts = 0;
@@ -156,9 +196,24 @@ private:
 	std::atomic<bool>	_stop_requested;
 	// True only while the io_context worker is expected to process completions.
 	std::atomic<bool>	_worker_running{ false };
+	static constexpr uint64_t API_CLOSED = UINT64_C(1) << 63;
+	static constexpr uint64_t API_V2_STOP = UINT64_C(1) << 62;
+	static constexpr uint64_t API_COUNT_MASK = API_V2_STOP - 1;
+	std::atomic<uint64_t> _api_state{0};
+	std::atomic<bool> _v2_stop{false};
+	std::atomic<bool> _v2_drained{false};
+	std::atomic<bool> _v2_joined{false};
+	std::atomic<bool> _worker_created{false};
+	std::atomic<bool> _stop_post_failed{false};
+	std::atomic<bool> _stop_completed{false};
+	bool _initialized_once = false;
+	WorkerExitProof _worker_exit;
+	using WorkGuard = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
+	std::unique_ptr<WorkGuard> _work_guard;
 	std::recursive_mutex _mtx_io;
 	std::mutex			_mtx_lifecycle;
 	inline static thread_local CallbackFrame* _callback_stack_top = nullptr;
+	inline static thread_local ApiFrame* _api_stack_top = nullptr;
 
 	CodeSet					_set_subs;
 

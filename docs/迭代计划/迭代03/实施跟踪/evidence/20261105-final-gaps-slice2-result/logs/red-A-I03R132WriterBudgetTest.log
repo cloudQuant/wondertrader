@@ -1,0 +1,56 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03R132WriterBudgetTest.*
+[==========] Running 3 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 3 tests from I03R132WriterBudgetTest
+[ RUN      ] I03R132WriterBudgetTest.ConfiguredBudgetReachesTheWriterModule
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:45: Failure
+Expected equality of these values:
+  8192u
+    Which is: 8192
+  WTSCmpHelper::uncompress_max_bytes()
+    Which is: 1073741824
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:46: Failure
+Expected equality of these values:
+  7u
+    Which is: 7
+  WTSCmpHelper::uncompress_max_ratio()
+    Which is: 1000
+
+[  FAILED  ] I03R132WriterBudgetTest.ConfiguredBudgetReachesTheWriterModule (14 ms)
+[ RUN      ] I03R132WriterBudgetTest.InvalidBudgetFailsInitialization
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:54: Failure
+Value of: init_with("\"uncompress_max_ratio\":-3", w)
+  Actual: true
+Expected: false
+an invalid uncompress budget must not be silently ignored
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:56: Failure
+Value of: _sink->has_log("uncompress_max_ratio", LL_ERROR)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:57: Failure
+Value of: _sink->has_log("WtDataWriter initialized", LL_INFO)
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r23_storage4/i03_r132_writer_budget_test.cpp:58: Failure
+Value of: WTSCmpHelper::uncompress_refused()
+  Actual: false
+Expected: true
+
+[  FAILED  ] I03R132WriterBudgetTest.InvalidBudgetFailsInitialization (2 ms)
+[ RUN      ] I03R132WriterBudgetTest.AbsentBudgetKeepsDefaults
+[       OK ] I03R132WriterBudgetTest.AbsentBudgetKeepsDefaults (1 ms)
+[----------] 3 tests from I03R132WriterBudgetTest (19 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 1 test suite ran. (19 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] I03R132WriterBudgetTest.ConfiguredBudgetReachesTheWriterModule
+[  FAILED  ] I03R132WriterBudgetTest.InvalidBudgetFailsInitialization
+
+ 2 FAILED TESTS

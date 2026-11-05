@@ -1,0 +1,25 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5DumperLifecycle.*:I03S5DumperExitRetention.*
+[==========] Running 6 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 4 tests from I03S5DumperLifecycle
+[ RUN      ] I03S5DumperLifecycle.RepeatedRunIsRejectedAndRepeatedReleaseIsIdempotent
+[       OK ] I03S5DumperLifecycle.RepeatedRunIsRejectedAndRepeatedReleaseIsIdempotent (2 ms)
+[ RUN      ] I03S5DumperLifecycle.ReleaseOnWorkerThreadIsDeferredThenCompleted
+[       OK ] I03S5DumperLifecycle.ReleaseOnWorkerThreadIsDeferredThenCompleted (5 ms)
+[ RUN      ] I03S5DumperLifecycle.ReleaseInsideUserCallbackCutsOffLaterCallbacks
+[       OK ] I03S5DumperLifecycle.ReleaseInsideUserCallbackCutsOffLaterCallbacks (1 ms)
+[ RUN      ] I03S5DumperLifecycle.RunOnceReturnsPromptlyAfterRelease
+[       OK ] I03S5DumperLifecycle.RunOnceReturnsPromptlyAfterRelease (302 ms)
+[----------] 4 tests from I03S5DumperLifecycle (312 ms total)
+
+[----------] 2 tests from I03S5DumperExitRetention
+[ RUN      ] I03S5DumperExitRetention.AdapterManagerHasNoExitTimeDestructor
+[       OK ] I03S5DumperExitRetention.AdapterManagerHasNoExitTimeDestructor (0 ms)
+[ RUN      ] I03S5DumperExitRetention.ProviderCallbackAfterExitTimeDestructionStillSeesManagerState
+[       OK ] I03S5DumperExitRetention.ProviderCallbackAfterExitTimeDestructionStillSeesManagerState (15 ms)
+[----------] 2 tests from I03S5DumperExitRetention (15 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 2 test suites ran. (327 ms total)
+[  PASSED  ] 6 tests.

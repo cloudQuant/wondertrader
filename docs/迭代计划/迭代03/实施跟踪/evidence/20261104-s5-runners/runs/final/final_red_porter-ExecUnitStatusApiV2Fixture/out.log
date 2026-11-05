@@ -1,0 +1,80 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = ExecUnitStatusApiV2Fixture.*
+[==========] Running 20 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 20 tests from ExecUnitStatusApiV2Fixture
+[ RUN      ] ExecUnitStatusApiV2Fixture.HftQueryIsUnsupportedAndKeepsInitStateSeparate
+[       OK ] ExecUnitStatusApiV2Fixture.HftQueryIsUnsupportedAndKeepsInitStateSeparate (6 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.OutputPointerValidationInitializesAvailableOutput
+[       OK ] ExecUnitStatusApiV2Fixture.OutputPointerValidationInitializesAvailableOutput (1 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.QueryBeforeConfigurationReturnsNotReady
+[       OK ] ExecUnitStatusApiV2Fixture.QueryBeforeConfigurationReturnsNotReady (1 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.CtaReadyFailureAndClearTraverseCAbiRunnerManagerAndProvider
+[       OK ] ExecUnitStatusApiV2Fixture.CtaReadyFailureAndClearTraverseCAbiRunnerManagerAndProvider (3 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.SelReadyFailureAndClearTraverseCAbiRunnerManagerAndProvider
+[       OK ] ExecUnitStatusApiV2Fixture.SelReadyFailureAndClearTraverseCAbiRunnerManagerAndProvider (1 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.RetryBlockedClearHasNewCStatusWithoutChangingExistingValues
+[       OK ] ExecUnitStatusApiV2Fixture.RetryBlockedClearHasNewCStatusWithoutChangingExistingValues (2 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.RunIsSynchronizedAndRejectsRuntimeReconfiguration
+[       OK ] ExecUnitStatusApiV2Fixture.RunIsSynchronizedAndRejectsRuntimeReconfiguration (4 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.SynchronousRunExitsOnSigterm
+[       OK ] ExecUnitStatusApiV2Fixture.SynchronousRunExitsOnSigterm (67 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.SynchronousRunExitsOnSigint
+[       OK ] ExecUnitStatusApiV2Fixture.SynchronousRunExitsOnSigint (36 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.SynchronousRunFailsFastOnSynchronousSegmentationFault
+[       OK ] ExecUnitStatusApiV2Fixture.SynchronousRunFailsFastOnSynchronousSegmentationFault (14 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.ReleaseDuringStartupIsDeferredAndWakesSynchronousRun
+[       OK ] ExecUnitStatusApiV2Fixture.ReleaseDuringStartupIsDeferredAndWakesSynchronousRun (3 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.StartupCallbackCanJoinChildThreadRequestingRelease
+[       OK ] ExecUnitStatusApiV2Fixture.StartupCallbackCanJoinChildThreadRequestingRelease (5 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.ConcurrentReleaseCallsShareOneTeardown
+[       OK ] ExecUnitStatusApiV2Fixture.ConcurrentReleaseCallsShareOneTeardown (22 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.ParserReleaseCallbackCannotReenterRunnerTeardown
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/v2_exec_status_api_test.cpp:1134: Failure
+Value of: g_parser_release_callback_called.load(std::memory_order_acquire)
+  Actual: false
+Expected: true
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/v2_exec_status_api_test.cpp:1135: Failure
+Value of: g_parser_release_reentry_returned.load(std::memory_order_acquire)
+  Actual: false
+Expected: true
+
+[  FAILED  ] ExecUnitStatusApiV2Fixture.ParserReleaseCallbackCannotReenterRunnerTeardown (2 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.ParserReleaseCallbackCanJoinChildReleaseWithoutDeadlock
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/v2_exec_status_api_test.cpp:1150: Failure
+Value of: g_parser_child_release_returned_in_callback.load(std::memory_order_acquire)
+  Actual: false
+Expected: true
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/v2_exec_status_api_test.cpp:1151: Failure
+Value of: g_parser_child_release_returned.load(std::memory_order_acquire)
+  Actual: false
+Expected: true
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/v2_exec_status_api_test.cpp:1152: Failure
+Value of: g_parser_child_release_saw_stopping.load(std::memory_order_acquire)
+  Actual: false
+Expected: true
+
+[  FAILED  ] ExecUnitStatusApiV2Fixture.ParserReleaseCallbackCanJoinChildReleaseWithoutDeadlock (2 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.StartupReentryScopeIsBoundToRunnerInstance
+[       OK ] ExecUnitStatusApiV2Fixture.StartupReentryScopeIsBoundToRunnerInstance (3 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.ProviderReentryIsRejectedAndExternalCloseCompletes
+[       OK ] ExecUnitStatusApiV2Fixture.ProviderReentryIsRejectedAndExternalCloseCompletes (2 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.ExternalReleaseDoesNotWaitForInFlightProviderSnapshot
+[       OK ] ExecUnitStatusApiV2Fixture.ExternalReleaseDoesNotWaitForInFlightProviderSnapshot (2 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.ProviderSnapshotAlonePinsExecutorAndModuleDuringCallback
+[       OK ] ExecUnitStatusApiV2Fixture.ProviderSnapshotAlonePinsExecutorAndModuleDuringCallback (1 ms)
+[ RUN      ] ExecUnitStatusApiV2Fixture.ProviderCanJoinSameRunnerReleaseFromAnotherThread
+[       OK ] ExecUnitStatusApiV2Fixture.ProviderCanJoinSameRunnerReleaseFromAnotherThread (2 ms)
+[----------] 20 tests from ExecUnitStatusApiV2Fixture (189 ms total)
+
+[----------] Global test environment tear-down
+[==========] 20 tests from 1 test suite ran. (189 ms total)
+[  PASSED  ] 18 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] ExecUnitStatusApiV2Fixture.ParserReleaseCallbackCannotReenterRunnerTeardown
+[  FAILED  ] ExecUnitStatusApiV2Fixture.ParserReleaseCallbackCanJoinChildReleaseWithoutDeadlock
+
+ 2 FAILED TESTS

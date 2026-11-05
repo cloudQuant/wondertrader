@@ -10,6 +10,7 @@
  */
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <condition_variable>
 #include <cstring>
@@ -438,29 +439,25 @@ namespace r113m
 		void send_tick(double price, double askPrice, double askQty, double bidPrice, double bidQty,
 			const char* code = "ag2512", const char* exchg = "SHFE")
 		{
-#pragma pack(push, 1)
-			struct TickPacket
-			{
-				uint32_t		type;
-				WTSTickStruct	data;
-			};
-#pragma pack(pop)
+			WTSTickStruct tick{};
+			strncpy(tick.exchg, exchg, sizeof(tick.exchg) - 1);
+			strncpy(tick.code, code, sizeof(tick.code) - 1);
+			tick.price = price;
+			tick.action_date = 20200102u;
+			tick.trading_date = 20200102u;
+			tick.action_time = 100000000u;
+			tick.ask_prices[0] = askPrice;
+			tick.ask_qty[0] = askQty;
+			tick.bid_prices[0] = bidPrice;
+			tick.bid_qty[0] = bidQty;
 
-			TickPacket packet;
-			memset(&packet, 0, sizeof(packet));
-			packet.type = 0x200u;
-			strncpy(packet.data.exchg, exchg, sizeof(packet.data.exchg) - 1);
-			strncpy(packet.data.code, code, sizeof(packet.data.code) - 1);
-			packet.data.price = price;
-			packet.data.action_date = 20200102u;
-			packet.data.trading_date = 20200102u;
-			packet.data.action_time = 100000000u;
-			packet.data.ask_prices[0] = askPrice;
-			packet.data.ask_qty[0] = askQty;
-			packet.data.bid_prices[0] = bidPrice;
-			packet.data.bid_qty[0] = bidQty;
-
-			ASSERT_TRUE(r103m::send_udp((uint16_t)udp_port_, &packet, sizeof(packet)));
+			// The UDP wire format has a four-byte header followed immediately by
+			// the tick bytes. Construct the tick aligned, then serialize it.
+			const uint32_t type = 0x200u;
+			std::array<unsigned char, sizeof(type) + sizeof(tick)> packet{};
+			std::memcpy(packet.data(), &type, sizeof(type));
+			std::memcpy(packet.data() + sizeof(type), &tick, sizeof(tick));
+			ASSERT_TRUE(r103m::send_udp((uint16_t)udp_port_, packet.data(), packet.size()));
 		}
 
 		void set_udp_port(int port) { udp_port_ = port; }

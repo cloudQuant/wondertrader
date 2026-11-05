@@ -221,7 +221,7 @@ size_t ZSTD_compressBlock_fast_dictMatchState_generic(
     const BYTE* const dictStart    = dictBase + dictStartIndex;
     const BYTE* const dictEnd      = dms->window.nextSrc;
     const U32 dictIndexDelta       = prefixStartIndex - (U32)(dictEnd - dictBase);
-    const U32 dictAndPrefixLength  = (U32)(ip - prefixStart + dictEnd - dictStart);
+    const U32 dictAndPrefixLength  = (U32)((ip - prefixStart) + (dictEnd - dictStart));	/* R20_wtbtcore#1: no NULL arithmetic without a dict (as upstream) */
     const U32 dictHLog             = dictCParams->hashLog;
 
     /* if a dictionary is still attached, it necessarily means that

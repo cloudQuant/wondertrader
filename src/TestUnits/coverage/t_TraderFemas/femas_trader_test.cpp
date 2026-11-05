@@ -75,6 +75,13 @@ public:
 	std::vector<LoginResult> logins;
 
 	std::vector<std::string> logs;
+	// BUG-L01-014
+	std::vector<std::string> unresolvedRaw;
+	void onUnresolvedProviderReport(const char* kind, const char* reason, const char* raw) override
+	{
+		(void)reason;
+		unresolvedRaw.emplace_back(std::string(kind ? kind : "") + "|" + (raw ? raw : ""));
+	}
 	std::vector<WTSLogLevel> logLevels;
 
 	struct EntrustRsp { std::string code; double vol; double price; int32_t errCode; std::string errMsg; };
@@ -315,6 +322,14 @@ protected:
 	{
 		probe.setStrand(&strand);
 		probe.registerSpi(&sink);
+	}
+
+	// BUG-T4-003 (card 9b): the destructor now completes release(), which calls
+	// RegisterSpi(NULL)/Release() on the API. Several cases inject the non-
+	// dereferenceable kApiSentinel; clear it so teardown never calls into it.
+	void TearDown() override
+	{
+		probe.setApi(nullptr);
 	}
 
 	boost::asio::io_context ioc;
@@ -665,7 +680,7 @@ TEST_F(FemasContractFixture, make_order_info_maps_vendor_order_fields)
 	EXPECT_EQ(info->getOrderFlag(), WOF_NOR);
 	// "09:30:15" 去掉冒号 -> 93015，再 *1000 交给 makeTime
 	EXPECT_EQ(info->getOrderDate(), 20240105u);
-	EXPECT_EQ(info->getOrderTime(), TimeUtils::makeTime(20240105, 93015000));
+	EXPECT_EQ(info->getOrderTime(), static_cast<uint64_t>(TimeUtils::makeTime(20240105, 93015000)));
 	// Generated/user-tag IDs may have a session prefix; preserve the whole ID.
 	EXPECT_STREQ(info->getEntrustID(), "A1000000000002");
 	EXPECT_STREQ(info->getUserTag(), "A1000000000002");
@@ -705,7 +720,7 @@ TEST_F(FemasContractFixture, make_order_info_falls_back_to_local_id_and_maps_fok
 	EXPECT_EQ(info->getOrderFlag(), WOF_FOK);
 	EXPECT_EQ(info->getDirection(), WDT_LONG);		// 卖平今在多头上 = LONG
 	EXPECT_EQ(info->getOffsetType(), WOT_CLOSETODAY);
-	EXPECT_EQ(info->getOrderTime(), TimeUtils::makeTime(20240105, 134530000));
+	EXPECT_EQ(info->getOrderTime(), static_cast<uint64_t>(TimeUtils::makeTime(20240105, 134530000)));
 	info->release();
 
 	const char* zeroUserOrderLocalIDs[] = {"", "0000"};
@@ -786,7 +801,7 @@ TEST_F(FemasContractFixture, make_trade_record_scales_amount_by_contract_volume_
 	// amount = volScale(10) * 2 * 3550.0
 	EXPECT_DOUBLE_EQ(trade->getAmount(), 71000.0);
 	EXPECT_EQ(trade->getTradeDate(), 20240105u);
-	EXPECT_EQ(trade->getTradeTime(), TimeUtils::makeTime(20240105, 140509000));
+	EXPECT_EQ(trade->getTradeTime(), static_cast<uint64_t>(TimeUtils::makeTime(20240105, 140509000)));
 	EXPECT_EQ(trade->getDirection(), WDT_LONG);
 	EXPECT_EQ(trade->getTradeType(), WTT_Common);
 	trade->release();
@@ -1244,4 +1259,179 @@ TEST(TraderFemasDisabled, DISABLED_init_dlopens_vendor_module)
 	ASSERT_NE(cfg, nullptr);
 	EXPECT_TRUE(probe.init(cfg));
 	cfg->release();
+}
+
+/*
+ * I03-NEW-016（BUG-I02-NEW-019 / BUG-T4-002）：查询容器 m_ayOrders/m_ayTrades/
+ * m_ayPosition/m_ayPosDetail 由回调惰性创建、归实例所有。release() 可能在 worker
+ * 上执行且无法证明厂商回调已静止（卡9a），只做 clear()；析构（工厂 remover
+ * deleteTrader）必须恰好归还一次所有权。用 sink 额外 retain 所见容器，观察析构
+ * 前后的引用计数：2 -> 1 表示析构恰好 release 一次（重复 release 会降到 0 并在
+ * 测试 release 时触发 ASan use-after-free）；未结束的持仓分帧容器由 LSan 判定。
+ */
+// 工厂 remover 定义于同目标编入的 TraderFemas.cpp。
+extern "C" void deleteTrader(ITraderApi*& trader);
+
+namespace {
+class RetainingFemasSpi : public FakeTraderSpi
+{
+public:
+	void onRspOrders(const WTSArray* ayOrders) override
+	{
+		FakeTraderSpi::onRspOrders(ayOrders);
+		if (ayOrders != nullptr && heldOrders == nullptr)
+		{
+			heldOrders = const_cast<WTSArray*>(ayOrders);
+			heldOrders->retain();
+		}
+	}
+
+	void onRspTrades(const WTSArray* ayTrades) override
+	{
+		FakeTraderSpi::onRspTrades(ayTrades);
+		if (ayTrades != nullptr && heldTrades == nullptr)
+		{
+			heldTrades = const_cast<WTSArray*>(ayTrades);
+			heldTrades->retain();
+		}
+	}
+
+	WTSArray* heldOrders = nullptr;
+	WTSArray* heldTrades = nullptr;
+};
+}	// namespace
+
+TEST_F(FemasContractFixture, i03_new016_destructor_returns_query_container_ownership_once)
+{
+	RetainingFemasSpi held;
+	held.m_mgr.m_contract = contract;
+	held.m_mgr.m_comm = comm;
+
+	FemasProbe* trader = new FemasProbe();
+	trader->setStrand(&strand);
+	trader->registerSpi(&held);
+
+	CUstpFtdcOrderField ord;
+	memset(&ord, 0, sizeof(ord));
+	strncpy(ord.InstrumentID, "rb2401", sizeof(ord.InstrumentID) - 1);
+	strncpy(ord.ExchangeID, "SHFE", sizeof(ord.ExchangeID) - 1);
+	strncpy(ord.TradingDay, "20240105", sizeof(ord.TradingDay) - 1);
+	strncpy(ord.InsertTime, "09:15:00", sizeof(ord.InsertTime) - 1);
+	strncpy(ord.UserOrderLocalID, "A1000000000021", sizeof(ord.UserOrderLocalID) - 1);
+	strncpy(ord.OrderSysID, "OS-21", sizeof(ord.OrderSysID) - 1);
+	ord.Volume = 1;
+	ord.VolumeRemain = 1;
+	ord.LimitPrice = 3500.0;
+
+	CUstpFtdcTradeField td;
+	memset(&td, 0, sizeof(td));
+	strncpy(td.InstrumentID, "rb2401", sizeof(td.InstrumentID) - 1);
+	strncpy(td.ExchangeID, "SHFE", sizeof(td.ExchangeID) - 1);
+	strncpy(td.TradingDay, "20240105", sizeof(td.TradingDay) - 1);
+	strncpy(td.TradeTime, "09:16:00", sizeof(td.TradeTime) - 1);
+	strncpy(td.TradeID, "T-21", sizeof(td.TradeID) - 1);
+	td.TradeVolume = 1;
+	td.TradePrice = 3500.0;
+
+	CUstpFtdcRspInvestorPositionField pos;
+	memset(&pos, 0, sizeof(pos));
+	strncpy(pos.InstrumentID, "rb2401", sizeof(pos.InstrumentID) - 1);
+	strncpy(pos.ExchangeID, "SHFE", sizeof(pos.ExchangeID) - 1);
+	pos.Position = 2;
+
+	CUstpFtdcRspInfoField ok = makeRsp(0, "");
+	trader->OnRspQryOrder(&ord, &ok, 1, true);
+	trader->OnRspQryTrade(&td, &ok, 2, true);
+	// 未结束的持仓分帧：容器在途，只能由析构归还。
+	trader->OnRspQryInvestorPosition(&pos, &ok, 3, false);
+
+	ASSERT_NE(held.heldOrders, nullptr);
+	ASSERT_NE(held.heldTrades, nullptr);
+	EXPECT_EQ(held.heldOrders->retainCount(), 2u);
+	EXPECT_EQ(held.heldTrades->retainCount(), 2u);
+
+	// release() 可重复调用，只清空、不释放所有权。
+	trader->release();
+	trader->release();
+	EXPECT_EQ(held.heldOrders->retainCount(), 2u);
+	EXPECT_EQ(held.heldTrades->retainCount(), 2u);
+	EXPECT_EQ(held.heldOrders->size(), 0u);
+
+	ITraderApi* api = trader;
+	deleteTrader(api);
+	EXPECT_EQ(api, nullptr);
+	EXPECT_EQ(held.heldOrders->retainCount(), 1u);
+	EXPECT_EQ(held.heldTrades->retainCount(), 1u);
+
+	held.heldOrders->release();
+	held.heldTrades->release();
+	held.m_mgr.m_contract = nullptr;
+	held.m_mgr.m_comm = nullptr;
+}
+
+// 迭代03 第五会话主线程：BUG-L01-014——Femas 推送回报无法转换时，宿主声明能力则上送原始结构（十六进制），否则仅记日志。
+TEST_F(FemasContractFixture, l01014_unconvertible_trade_is_forwarded_raw_when_host_supports_it)
+{
+	CUstpFtdcTradeField td;
+	memset(&td, 0, sizeof(td));
+	strncpy(td.InstrumentID, "zz9999", sizeof(td.InstrumentID) - 1);	// not in the base data
+	strncpy(td.ExchangeID, "SHFE", sizeof(td.ExchangeID) - 1);
+	strncpy(td.TradeID, "T-99", sizeof(td.TradeID) - 1);
+	td.TradeVolume = 2;
+	td.TradePrice = 3512.0;
+	WTSContractInfo* known = sink.m_mgr.m_contract;
+	sink.m_mgr.m_contract = nullptr;	// the fake base data resolves any code; make this one unknown
+
+	const size_t logsBefore = sink.logs.size();
+	probe.OnRtnTrade(&td);
+	EXPECT_TRUE(sink.unresolvedRaw.empty());
+	ASSERT_GT(sink.logs.size(), logsBefore);
+	EXPECT_NE(sink.logs.back().find("dropped"), std::string::npos) << sink.logs.back();
+
+	probe.setSpiFeatures(WT_TRADER_SPI_FEATURE_RAW_UNRESOLVED);
+	probe.OnRtnTrade(&td);
+	ASSERT_EQ(sink.unresolvedRaw.size(), 1u);
+	EXPECT_EQ(sink.unresolvedRaw[0].rfind("trade|struct=CUstpFtdcTradeField;size=", 0), 0u) << sink.unresolvedRaw[0];
+	EXPECT_TRUE(sink.pushedTrades.empty());
+	sink.m_mgr.m_contract = known;
+}
+
+
+// 卡6：Femas 持仓/成交/委托查询中无法转换的行，宿主声明能力后逐行上送原始结构；最终数组照常回调。
+TEST_F(FemasContractFixture, l01014_unconvertible_query_rows_are_forwarded_raw_when_host_supports_it)
+{
+	WTSContractInfo* known = sink.m_mgr.m_contract;
+	sink.m_mgr.m_contract = nullptr;
+	probe.setSpiFeatures(WT_TRADER_SPI_FEATURE_RAW_UNRESOLVED);
+	CUstpFtdcRspInfoField ok = makeRsp(0, "");
+
+	CUstpFtdcRspInvestorPositionField pos;
+	memset(&pos, 0, sizeof(pos));
+	strncpy(pos.InstrumentID, "missing", sizeof(pos.InstrumentID) - 1);
+	strncpy(pos.ExchangeID, "SHFE", sizeof(pos.ExchangeID) - 1);
+	pos.Position = 5;
+	probe.OnRspQryInvestorPosition(&pos, &ok, 1, true);
+
+	CUstpFtdcTradeField td;
+	memset(&td, 0, sizeof(td));
+	strncpy(td.InstrumentID, "missing", sizeof(td.InstrumentID) - 1);
+	strncpy(td.ExchangeID, "SHFE", sizeof(td.ExchangeID) - 1);
+	strncpy(td.TradeID, "TQ-1", sizeof(td.TradeID) - 1);
+	td.TradeVolume = 1;
+	probe.OnRspQryTrade(&td, &ok, 2, true);
+
+	CUstpFtdcOrderField ord;
+	memset(&ord, 0, sizeof(ord));
+	strncpy(ord.InstrumentID, "missing", sizeof(ord.InstrumentID) - 1);
+	strncpy(ord.ExchangeID, "SHFE", sizeof(ord.ExchangeID) - 1);
+	ord.Volume = 1;
+	probe.OnRspQryOrder(&ord, &ok, 3, true);
+
+	ASSERT_EQ(sink.unresolvedRaw.size(), 3u);
+	EXPECT_EQ(sink.unresolvedRaw[0].rfind("position|struct=CUstpFtdcRspInvestorPositionField;size=", 0), 0u) << sink.unresolvedRaw[0];
+	EXPECT_EQ(sink.unresolvedRaw[1].rfind("trade|struct=CUstpFtdcTradeField;size=", 0), 0u) << sink.unresolvedRaw[1];
+	EXPECT_EQ(sink.unresolvedRaw[2].rfind("order|struct=CUstpFtdcOrderField;size=", 0), 0u) << sink.unresolvedRaw[2];
+	ASSERT_EQ(sink.positions.size(), 1u);
+	EXPECT_TRUE(sink.positions[0].items.empty());
+	sink.m_mgr.m_contract = known;
 }

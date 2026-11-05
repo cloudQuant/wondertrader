@@ -1,0 +1,28 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.SynchronousBarDirectoryFailureReturnsFalseAndCanContinue
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.SynchronousBarDirectoryFailureReturnsFalseAndCanContinue
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r4_ad_init_retry_isolation_test.cpp:119: Failure
+Expected: accepted = _writer->writeTick(input, 0) doesn't throw an exception.
+  Actual: it throws boost::filesystem::filesystem_error with description "boost::filesystem::create_directories: File exists [system:17]: "/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r4_wad_91918_0/min1/FAIL/", "/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r4_wad_91918_0/min1/FAIL"".
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r4_ad_init_retry_isolation_test.cpp:120: Failure
+Value of: accepted
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/r4_ad_init_retry_isolation_test.cpp:122: Failure
+Expected: (_sink->count_containing("Synchronous writer task failed")) > (0u), actual: 0 vs 0
+
+[  FAILED  ] R4WriterADTest.SynchronousBarDirectoryFailureReturnsFalseAndCanContinue (9 ms)
+[----------] 1 test from R4WriterADTest (9 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (10 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R4WriterADTest.SynchronousBarDirectoryFailureReturnsFalseAndCanContinue
+
+ 1 FAILED TEST

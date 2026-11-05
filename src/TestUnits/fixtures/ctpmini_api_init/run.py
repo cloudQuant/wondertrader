@@ -35,4 +35,8 @@ for mode in ('missing-library','missing-symbol','null-api','null-config','succes
  expected = (10,) if unload_baseline and mode in ('missing-symbol','null-api') else (16,) if (connect_baseline or unload_baseline) and mode in ('missing-library','missing-symbol','null-api','null-config') else (25,) if (connect_baseline or unload_baseline) and mode in ('success','success-one') else (-11, -10) if baseline and not unload_baseline and not connect_baseline and mode in ('missing-library','missing-symbol','null-api','null-config') else (21,) if baseline and not unload_baseline and not connect_baseline and mode == 'success' else (0,)
  if status not in expected: bad.append(mode)
 (out/'inputs.sha256').write_text('\n'.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+str(p) for p in (source,fixture/'init_check.cpp',root/'src/Share/ModuleHelper.hpp'))+'\n')
+# K16=A (I03-NEW-003): cross-instance retry of the same failed module is allowed and isolated again.
+if not baseline:
+ wd=out/'cross-instance';wd.mkdir();env=os.environ.copy();env['LLVM_PROFILE_FILE']=str(wd/'profile.profraw')
+ if run('cross-instance',[str(out/'focused'),'cross-instance'],wd,env)!=0: bad.append('cross-instance')
 if bad: raise SystemExit('Unexpected test outcome: '+', '.join(bad))

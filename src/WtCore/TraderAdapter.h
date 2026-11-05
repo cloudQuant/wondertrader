@@ -19,11 +19,15 @@
 #include "../Share/BoostFile.hpp"
 #include "../Share/StdUtils.hpp"
 #include "../Share/SpinMutex.hpp"
+#include "../Share/FrequencyWindow.hpp"
+#include "AccountTradingGate.h"
 
+#include <atomic>
 #include <condition_variable>
 #include <cstdint>
 #include <deque>
 #include <functional>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -39,6 +43,8 @@ class WTSContractInfo;
 class WTSCommodityInfo;
 class WtLocalExecuter;
 class EventNotifier;
+class UnresolvedReportJournal;
+class DiffOrderOwnershipJournalV1;
 
 class ITrdNotifySink;
 
@@ -63,6 +69,156 @@ class TraderAdapter : public ITraderSpi
 {
 public:
 	friend struct N01TraderAdapterRiskTestAccess;
+
+	// Monotonic millisecond clock for order/cancel frequency windows (card 7c).
+	// Wall-clock time is only used by the logger.
+	typedef uint64_t (*RateClock)();
+
+	// A versioned WTS-visible snapshot, not a provider SDK payload.
+	struct UnresolvedTradeReport
+	{
+		std::string payload;
+		std::string diagnostic;
+		uint64_t journal_sequence = 0;
+		bool persisted = false;
+	};
+	// True while the account gate this adapter is bound to is paused. The
+	// gate is shared by every adapter configured with the same account_id
+	// (and so by every executer trading through them).
+	bool isUnresolvedReportPaused() const noexcept;
+	std::vector<UnresolvedTradeReport> unresolvedTradeReports() const;
+	std::string unresolvedReportDiagnostic() const;
+
+	//////////////////////////////////////////////////////////////////////////
+	// Account gate (decision card 6a/6b) and order identity (card 5a/5d).
+	/**
+	 * Bind this adapter to a configured account key. Must be called before
+	 * run() (init() calls it for the account_id / account_audit_log config).
+	 * A pause on the previous binding is carried to the new gate. An audit log
+	 * conflict or open failure pauses the account (fail closed) and returns false.
+	 */
+	bool bindAccount(const std::string& account_id, const std::string& audit_log,
+		std::string* error = nullptr);
+	std::shared_ptr<AccountTradingGate> accountGate() const { return _account_gate; }
+	// I03-NEW-006 (slice1 final gaps): checked clock used for the local order id
+	// when no identity journal is configured; a failed snapshot rejects the entry
+	// before the provider call. Test seam: NULL restores the default clock.
+	typedef bool (*OrderClock)(uint32_t& date, uint32_t& time, uint64_t& epochMillis);
+	void setOrderClockForTest(OrderClock clock);
+	/// K43：本适配器是否由模块工厂创建过 provider（释放后对象与模块常驻到进程退出）
+	bool hasModuleProvider() const { return _module_provider && _spi_ever_registered; }
+	uint64_t accountPauseGeneration() const;
+	/** Explicit manual resume; audited, generation-checked, never automatic. */
+	AccountTradingGate::ResumeStatus resumeAccountTrading(
+		const AccountTradingGate::ResumeRequest& request, std::string* diagnostic = nullptr);
+	/** Admission closed: account paused or startup identity recovery not finished. */
+	bool isTradingAdmissionClosed() const noexcept;
+	bool isIdentityRecoveryPending() const noexcept;
+
+	/**
+	 * Versioned, non-reusable order identity. intent_id is unique per adapter
+	 * boot (and durable when an identity journal is configured); localid alone
+	 * may be reused across restarts without a journal and is never sufficient.
+	 */
+	struct OrderIdentityToken
+	{
+		std::string account;
+		std::string intent_id;
+		uint32_t localid = 0;
+		bool valid() const noexcept { return localid != 0 && localid != UINT32_MAX && !intent_id.empty(); }
+	};
+	bool orderIdentity(uint32_t localid, OrderIdentityToken& token) const;
+	/**
+	 * Cancel only if localid still names the exact live order of token.
+	 * Allowed while the account is paused (user decision 2026-11-04): only
+	 * cancels of live orders whose identity is verified pass the paused gate.
+	 */
+	bool cancelVerified(const OrderIdentityToken& token);
+
+	//////////////////////////////////////////////////////////////////////////
+	// Owner routing (cards 5b/5c, NEW-008/N05-003)
+	/**
+	 * RAII order-entry owner for the current thread. Orders entered on this
+	 * adapter inside the scope belong to owner. shared_capable says the owner's
+	 * execution unit supports host-verified identity; the account claim is
+	 * shared only when it is shared_capable and owner routing is enabled,
+	 * otherwise the owner must exclusively own the contract (non-shared mode).
+	 */
+	class OwnerScope
+	{
+	public:
+		OwnerScope(TraderAdapter* adapter, const std::string& owner, bool shared_capable);
+		~OwnerScope();
+		OwnerScope(const OwnerScope&) = delete;
+		OwnerScope& operator=(const OwnerScope&) = delete;
+		struct Frame
+		{
+			const TraderAdapter* adapter = nullptr;
+			std::string owner;
+			bool shared_capable = false;
+			Frame* previous = nullptr;
+		};
+	private:
+		Frame _frame;
+	};
+	/**
+	 * RAII order-entry observer for the current thread (R15-001). For every
+	 * entry made on this adapter inside the scope, observer(localid) runs after
+	 * the local order id is reserved and before the provider call, so per-order
+	 * data can be registered before any synchronous report. It also runs for
+	 * reservations that later fail; buy()/sell() return only accepted ids.
+	 * Neither owner scopes nor observers apply inside sink callbacks: an entry
+	 * made re-entrantly from a callback belongs to its own caller.
+	 */
+	class EntrustObserverScope
+	{
+	public:
+		EntrustObserverScope(TraderAdapter* adapter, const std::function<void(uint32_t)>& observer);
+		~EntrustObserverScope();
+		EntrustObserverScope(const EntrustObserverScope&) = delete;
+		EntrustObserverScope& operator=(const EntrustObserverScope&) = delete;
+		struct Frame
+		{
+			const TraderAdapter* adapter = nullptr;
+			std::function<void(uint32_t)> observer;
+			Frame* previous = nullptr;
+		};
+	private:
+		Frame _frame;
+	};
+	OrderIDs buyAsOwner(const std::string& owner, bool shared_capable, const char* stdCode,
+		double price, double qty, int flag, bool bForceClose);
+	OrderIDs sellAsOwner(const std::string& owner, bool shared_capable, const char* stdCode,
+		double price, double qty, int flag, bool bForceClose);
+	/** Owner-verified cancel; never touches another owner's or an unverifiable order. */
+	bool cancelForOwner(uint32_t localid, const std::string& owner);
+	OrderIDs cancelForOwner(const char* stdCode, bool isBuy, double qty, const std::string& owner);
+	double getUndoneQtyForOwner(const char* stdCode, const std::string& owner) const;
+	OrderMap* getOrdersForOwner(const char* stdCode, const std::string& owner);
+	bool isOwnerRoutingEnabled() const;
+	/**
+	 * Declare that sink acts for owner. If owner routing is enabled the owner
+	 * registration is made atomically inside addSink(), before READY can be
+	 * delivered to that sink; if the sink is already added it registers now.
+	 */
+	bool declareOwnerSink(ITrdNotifySink* sink, const std::string& owner);
+	void releaseOwner(const std::string& owner);
+
+	/** Per-order ledger view (tests/diagnostics). */
+	enum class OrderLedgerState { Submitting, Live, Terminal, Absent };
+	struct OrderLedgerView
+	{
+		bool found = false;
+		OrderLedgerState state = OrderLedgerState::Submitting;
+		double accounted = 0;	///< quantity currently counted in undone qty
+		uint64_t last_version = 0;
+		std::string std_code;
+		std::string intent_id;
+		std::string owner_id;
+		bool verified = false;
+	};
+	OrderLedgerView orderLedger(uint32_t localid) const;
+	uint64_t ordersSnapshotVersion() const;
 
 	/*!
 	 * \brief 构造函数
@@ -184,6 +340,10 @@ public:
 
 	/*!
 	 * \brief 使用外部API初始化交易适配器
+	 * \details 登录责任（决策卡 10 = A）：外部 API 自行认证并登录，适配器不持有
+	 *          其凭据；WTE_Connect 只报告连接状态，不调用 login()，登录结果经
+	 *          外部 API 的 onLoginResult() 回调推进状态。init() 配置路径不变，
+	 *          仍在 WTE_Connect(0) 时用配置中的 user/pass 登录。
 	 * \param id 适配器ID
 	 * \param api 外部交易API接口
 	 * \param bdMgr 基础数据管理器
@@ -354,14 +514,22 @@ private:
 	void setState(AdapterState state);
 	bool transitionState(AdapterState expected, AdapterState next);
 	void forEachSink(const std::function<void(ITrdNotifySink*)>& callback);
-	// Routes only to the registered sink for owner_id. Unknown or disabled owner
-	// routing fails closed without notifying ordinary sinks.
+	// Returns true only when the owner callback is invoked and returns normally;
+	// false means no callback was invoked. Callback exceptions propagate.
+	// This does not establish downstream processing or durable event storage.
 	bool forEachSinkForOwner(const std::string& owner_id,
 		const std::function<void(ITrdNotifySink*)>& callback);
 	void invokeSink(const SinkRegistrationPtr& registration,
 		const std::function<void(ITrdNotifySink*)>& callback);
-	void invokeOwnerSink(const SinkRegistrationPtr& registration, const std::string& owner_id,
+	bool invokeOwnerSink(const SinkRegistrationPtr& registration, const std::string& owner_id,
 		uint64_t generation, const std::function<void(ITrdNotifySink*)>& callback);
+	void forEachNonOwnerSink(const std::function<void(ITrdNotifySink*)>& callback);
+	// Without owner routing every event keeps the legacy broadcast. With owner
+	// routing, owned events go to the owner sink plus non-owner observers and
+	// unowned events go to non-owner observers only.
+	void dispatchOrderEvent(const std::string& owner, const std::function<void(ITrdNotifySink*)>& callback);
+	bool registerOwnerSinkLocked(const std::string& stable_owner_id, ITrdNotifySink* sink,
+		OwnerSinkRegistrationToken& token);
 	void finishSinkBroadcast();
 	void finishSinkCallback(const SinkRegistrationPtr& registration, bool owner_callback = false);
 	bool queueChannelNotificationLocked(bool ready,
@@ -371,8 +539,48 @@ private:
 	static bool isInAnySinkCallback();
 	bool sinkCallbacksDrainedLocked() const;
 
+	// NEW-052 (card 9a, host side): provider SPI ingress. release() closes it
+	// (callbacks arriving later are dropped without touching adapter state);
+	// the destructor also waits for SPI callbacks already running inside this
+	// adapter before releasing adapter-owned state. ITraderApi has no versioned quiescence capability, so a
+	// callback after the adapter object itself is destroyed stays the
+	// provider's contract (external).
+	class SpiIngress
+	{
+	public:
+		explicit SpiIngress(TraderAdapter* adapter);
+		~SpiIngress();
+		explicit operator bool() const noexcept { return _entered; }
+		SpiIngress(const SpiIngress&) = delete;
+		SpiIngress& operator=(const SpiIngress&) = delete;
+	private:
+		friend class TraderAdapter;
+		TraderAdapter* _adapter;
+		bool _entered;
+		const SpiIngress* _previous;
+	};
+	static thread_local const SpiIngress* s_spi_ingress;	///< SPI callbacks running on this thread
+	// Closes the ingress; with wait, also waits for running callbacks. Returns
+	// true only after such a wait (false when not waiting or when called from
+	// an SPI callback of this adapter, which cannot wait for itself).
+	bool closeSpiIngress(bool wait);
+	void reopenSpiIngress();
+
+	void configureUnresolvedJournal(const std::string& path);
+	void quarantineTrade(const WTSTradeInfo* trade, const char* reason);
+
 	uint32_t doEntrust(WTSEntrust* entrust);
 	bool	doCancel(WTSOrderInfo* ordInfo);
+
+	// Undone quantity is owned by the per-order ledger created in doEntrust
+	// before the provider call; submitSplit only records the result.
+	bool submitSplit(OrderIDs& ids, const char* stdCode, bool isBuy, double qty,
+		const std::function<uint32_t()>& submit);
+	// ORs report flags into an in-flight submission; returns the previous
+	// flags, or 0x80 when localid is not being submitted.
+	uint8_t noteInflightReport(uint32_t localid, uint8_t bits);
+	uint64_t rateNow() const { return _rate_clock(); }
+	bool frequencyAvailable(bool isOrder, const char* stdCode, const RiskParams* riskPara) const;
 
 	inline void	printPosition(const char* stdCode, const PosItem& pItem);
 
@@ -389,6 +597,57 @@ private:
 	void	saveData(WTSArray* ayFunds = NULL);
 
 	inline void updateUndone(const char* stdCode, double qty, bool bOuput = true);
+
+	struct OrderLedgerEntry
+	{
+		std::string std_code;
+		std::string intent_id;
+		double sign = 1.0;
+		double accounted = 0;
+		uint64_t created_version = 0;
+		uint64_t last_version = 0;
+		OrderLedgerState state = OrderLedgerState::Submitting;
+		bool journal_terminal = false;
+		bool cancel_claimed = false;
+		bool verified = false;			///< identity created/recovered by this adapter boot
+		std::string owner_id;
+		std::unordered_set<std::string> trade_ids;	///< trade ids already applied to accounted qty
+		// I03-NEW-057: order reports and trade reports carry the same fills
+		// through two streams; accounted = min(order_left, volume - trade_filled).
+		double volume = 0;			///< order volume (provider report, else entrust qty)
+		double order_left = -1;		///< smallest volLeft of order reports (<0: none yet)
+		double trade_filled = 0;	///< sum of distinct trade reports
+		// Decision K03 (I03-NEW-005): closed after a synchronous provider failure.
+		bool not_sent = false;
+		bool not_sent_evidence = false;	///< a later live/traded report was seen (account paused once)
+	};
+	// Applies one order report to the ledger. Returns true if the entry made
+	// its first transition to Terminal (for one-shot notifications).
+	// Decision K03 (I03-NEW-005): live or traded evidence for an order recorded as NOT_SENT
+	// pauses the account (the submission outcome is unknown).
+	void checkNotSentEvidence(uint32_t localid, const char* what);
+	bool ledgerApplyOrderLocked(uint32_t localid, const std::string& stdCode, bool isBuy,
+		bool alive, double volume, double volLeft, uint64_t version);
+	// May prune old tombstones: erasing from the dense ledger moves another
+	// entry, so callers must not use any _ledger reference or iterator after it.
+	void ledgerTombstoneLocked(uint32_t localid, OrderLedgerEntry& entry, OrderLedgerState state);
+	void ledgerRecomputeLocked(OrderLedgerEntry& entry);
+	void ledgerSetAccountedLocked(OrderLedgerEntry& entry, double accounted);
+	// Pause-aware, owner-aware cancel admission; owner == nullptr is a bare call.
+	bool cancelAdmissibleLocked(uint32_t localid, const std::string* owner, bool paused) const;
+	bool cancelClaimed(uint32_t localid, const std::string* owner);
+	void cancelUnclaim(uint32_t localid);
+	bool cancelOne(uint32_t localid, const std::string* owner);
+	OrderIDs cancelByCode(const char* stdCode, bool isBuy, double qty, const std::string* owner);
+	void ledgerPruneLocked();
+	uint64_t nextEventVersion();
+	void pauseAccount(const char* source, const std::string& reason);
+	void retainUnresolvedPayload(const std::string& payload, const char* kind);
+	void quarantineOrder(const WTSOrderInfo* order, const char* reason);
+	void configureIdentityJournal(const std::string& path, uint32_t floor, const std::string& floorEvidence, bool hasFloor);
+	void journalTerminal(uint32_t localid, const std::string& intent, uint32_t status, double filled);
+	bool identityResumeParticipant(const AccountTradingGate::ResumeRequest& request, std::string& diagnostic);
+	void reconcileIdentityRecovery(const std::vector<std::pair<uint32_t, const WTSOrderInfo*>>& seen);
 
 public:
 		/*!
@@ -413,6 +672,7 @@ public:
 	 */
 	double getUndoneQty(const char* stdCode)
 	{
+		std::lock_guard<std::mutex> lock(_ledger_mutex);
 		auto it = _undone_qty.find(stdCode);
 		if (it != _undone_qty.end())
 			return it->second;
@@ -604,6 +864,11 @@ public:
 	 * \param ayOrders 订单信息数组
 	 */
 	virtual void onRspOrders(const WTSArray* ayOrders) override;
+	// K42: versioned order-query result (COMPLETE / PARTIAL / FAILED).
+	virtual void onRspOrdersWithStatus(const WTSArray* ayOrders, uint32_t status) override;
+	// L01-014: raw provider report that could not be converted (kept, account paused).
+	virtual void onUnresolvedProviderReport(const char* kind, const char* reason, const char* raw) override;
+	void reconcileOrders(const WTSArray* ayOrders, uint32_t queryStatus);
 
 	/*!
 	 * \brief 成交响应回调
@@ -654,6 +919,8 @@ private:
 	FuncDeleteTrader	_remover;				///< 交易实例删除器
 	DllHandle			_dll_handle;			///< 创建交易API的动态库句柄
 	bool				_owns_trader_api;	///< 是否由插件工厂创建
+	bool				_module_provider = false;	///< K43：init 曾由模块工厂创建 provider
+	bool				_spi_ever_registered = false;	///< K43：provider 曾获得回调通道
 	bool				_spi_registered;		///< 是否已向API注册SPI
 	bool				_api_released;			///< 是否已释放API
 	AdapterState		_state;				///< 适配器状态
@@ -680,6 +947,48 @@ private:
 	bool	_sink_notifications_stopping = false;
 	std::condition_variable	_sink_notifications_idle;
 
+	std::atomic<bool> _spi_closed{false};
+	std::atomic<uint32_t> _spi_inflight{0};
+	std::mutex _spi_mutex;
+	std::condition_variable _spi_idle;
+
+	std::atomic<bool> _unresolved_report_paused{false};	///< legacy flag, mirrors pauses of this adapter
+	std::shared_ptr<AccountTradingGate> _account_gate;
+	std::string _account_id;
+	std::atomic<bool> _identity_recovery_pending{false};
+	std::shared_ptr<DiffOrderOwnershipJournalV1> _identity_journal;
+	std::string _identity_owner;
+	std::unordered_map<ITrdNotifySink*, std::string> _declared_owner_sinks;	///< guarded by _sink_mutex
+	std::unordered_map<std::string, OwnerSinkRegistrationToken> _declared_owner_tokens;	///< guarded by _sink_mutex
+	// owner -> stdCode -> signed accounted undone qty (guarded by _ledger_mutex)
+	std::unordered_map<std::string, std::unordered_map<std::string, double>> _owner_undone;
+	std::string _boot_nonce;
+	std::atomic<uint64_t> _intent_sequence{0};
+	// localid -> intent of nonterminal journal intents found at startup.
+	mutable std::mutex _identity_mutex;	///< guards _recovery_intents/_unrecoverable_intents; never held while calling the gate
+	std::map<uint32_t, std::string> _recovery_intents;
+	std::vector<std::string> _unrecoverable_intents;
+
+	mutable std::mutex _ledger_mutex;	///< guards _ledger, _undone_qty and versions; never held across provider calls
+	wt_hashmap<uint32_t, OrderLedgerEntry> _ledger;
+	std::deque<uint32_t> _ledger_tombstones;
+	uint64_t _event_version = 0;
+	uint64_t _orders_query_version = 0;
+	uint64_t _orders_snapshot_version = 0;
+	uint64_t _positions_query_version = 0;
+	std::unordered_map<std::string, uint64_t> _position_event_version;	///< stdCode -> last realtime trade version
+	std::unordered_set<std::string> _position_baseline;	///< stdCodes whose position was set by a snapshot row
+	// NEW-154: trade reports identified by exchange|trade id|order ref|direction.
+	// _pushed_trades: realtime effects applied once; _counted_trades: statistics
+	// counted once across push and query. Cleared when the trading day changes.
+	std::unordered_set<std::string> _pushed_trades;
+	std::unordered_set<std::string> _counted_trades;
+	uint32_t _trade_dedupe_day = 0;
+	mutable std::mutex _unresolved_report_mutex;
+	std::shared_ptr<UnresolvedReportJournal> _unresolved_journal;
+	std::vector<UnresolvedTradeReport> _unresolved_reports;
+	std::string _unresolved_diagnostic{"journal not configured"};
+
 	IBaseDataMgr*		_bd_mgr;				///< 基础数据管理器
 	ActionPolicyMgr*	_policy_mgr;			///< 动作策略管理器
 
@@ -702,12 +1011,31 @@ private:
 
 		typedef WTSHashMap<std::string>	TradeStatMap;
 	TradeStatMap*	_stat_map;	///< 统计数据
+	// I03-NEW-138: guards _stat_map (lookup, insert, iteration) and every
+	// WTSTradeStateInfo counter. Leaf lock: nothing else is locked and no
+	// external code is called while it is held.
+	mutable SpinMutex	_mtx_stat;
 
 		//这两个缓存时间内的容器,主要是为了控制电光流量而设置的
 	typedef std::vector<uint64_t> TimeCacheList;
 	typedef wt_hashmap<std::string, TimeCacheList> CodeTimeCacheMap;
-	CodeTimeCacheMap	_order_time_cache;	///< 下单时间缓存
-	CodeTimeCacheMap	_cancel_time_cache;	///< 撤单时间缓存
+	// Sliding windows ending at "now": N requests (including pending ones)
+	// are admitted, N+1 is rejected before the API, and quota recovers when
+	// recorded requests expire. There is no permanent frequency exclusion.
+	mutable FrequencyWindow<CodeTimeCacheMap> _order_frequency;
+	mutable FrequencyWindow<CodeTimeCacheMap> _cancel_frequency;
+	RateClock _rate_clock = &FrequencyWindow<CodeTimeCacheMap>::now;
+	OrderClock _order_clock = &TraderAdapter::defaultOrderClock;
+	static bool defaultOrderClock(uint32_t& date, uint32_t& time, uint64_t& epochMillis);
+
+	// Submissions currently inside orderInsert, keyed by local order id, so a
+	// synchronous (re-entrant) provider report can be reconciled with the
+	// return value. Bits: 1 = rejection/cancel observed, 2 = acceptance observed.
+	std::mutex _inflight_mutex;
+	wt_hashmap<uint32_t, uint8_t> _inflight_entrusts;
+	CodeTimeCacheMap& _order_time_cache = _order_frequency.cache;
+	CodeTimeCacheMap& _cancel_time_cache = _cancel_frequency.cache;
+	mutable std::mutex _risk_exclude_mutex;
 
 		//如果被风控了,就会进入到排除队列
 	wt_hashset<std::string>	_exclude_codes;	///< 被风控排除的合约代码集合
@@ -798,6 +1126,16 @@ public:
 	 * \brief 刷新资金信息
 	 */
 	void	refresh_funds();
+
+	/*!
+	 * \brief Explicit audited account resume command (card 6b) for the account
+	 *        gate bound to adapter tname. Returns NotPaused/InvalidRequest when
+	 *        the adapter is unknown (diagnostic says which).
+	 */
+	AccountTradingGate::ResumeStatus resumeAccountTrading(const char* tname,
+		const AccountTradingGate::ResumeRequest& request, std::string* diagnostic = nullptr);
+	/*! \brief Current pause generation of the account gate of tname (0 if unknown). */
+	uint64_t accountPauseGeneration(const char* tname);
 
 private:
 	TraderAdapterMap	_adapters;			///< 适配器映射表

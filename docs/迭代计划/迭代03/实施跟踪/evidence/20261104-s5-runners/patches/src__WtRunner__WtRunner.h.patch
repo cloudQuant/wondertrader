@@ -1,0 +1,34 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/WtRunner/WtRunner.h	2026-11-03 21:34:20
++++ src/WtRunner/WtRunner.h	2026-11-04 21:19:15
+@@ -48,7 +48,7 @@
+  * @brief WonderTrader运行器类
+  * @details 负责管理交易引擎的初始化、配置和运行，包括CTA策略、HFT策略和选股策略的管理
+  */
+-class WtRunner : public ILogHandler
++class WtRunner final : public ILogHandler // final: owned/deleted by main (I03-NEW-045)
+ {
+ public:
+ 	/**
+@@ -104,6 +104,14 @@
+ 	 */
+ 	bool shutdown();
+ 
++	/**
++	 * @brief I03-NEW-045 / card 9a: whether shutdown is blocked only by parser owners
++	 *        that lack callback-drain proof and are therefore retained (quarantined)
++	 *        until process exit. Such a runner must not be destroyed; the process
++	 *        entry keeps it alive (deliberately leaked) instead of aborting.
++	 */
++	bool parserOwnersRetained() const;
++
+ private:
+ 	/**
+ 	 * @brief 初始化交易适配器
+@@ -232,6 +240,7 @@
+ 	std::atomic<bool> _runtime_started;	//!< Runtime config is frozen after run begins.
+ 	std::atomic<bool> _parser_commands_submitted{false}; //!< Command submission, not provider readiness.
+ 	std::atomic<bool> _run_succeeded{false}; //!< Normal completion of the accepted run invocation.
++	std::atomic<bool> _parser_owners_retained{false}; //!< I03-NEW-045: last shutdown blocked only by undrained parser owners.
+ 	std::atomic<bool> _shutdown_requested;	//!< Reject config after any shutdown attempt.
+ 	std::vector<ParserAdapterPtr> _failed_parser_owners; //!< Retain partial parser initializations fail-closed.
+ };

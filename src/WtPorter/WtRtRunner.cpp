@@ -8,12 +8,15 @@
  * \brief 
  */
 #include "WtRtRunner.h"
+#include "../Includes/SelScheduleRules.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <csignal>
 #include <cstdlib>
 #include <exception>
 #include <mutex>
+#include <set>
 #include <utility>
 #include <vector>
 #include "ExpCtaContext.h"
@@ -185,13 +188,182 @@ namespace
 		return complete;
 	}
 
+	// Card 8b=A (BUG-R134-003/WSN06-001): pure validation of a complete executer
+	// list, mirroring WtRunner's runner-level preflight plus this runner's arbi
+	// kind. It only reads the variant tree, so a bad entry anywhere in the list
+	// is rejected before any factory is loaded or any executer is constructed.
+	bool validate_rt_executer_entries(WTSVariant* list, std::string& error)
+	{
+		if (list == NULL || list->type() != WTSVariant::VT_Array)
+		{
+			error = "executers must be an array";
+			return false;
+		}
+		std::set<std::string> ids;
+		for (uint32_t idx = 0; idx < list->size(); idx++)
+		{
+			WTSVariant* item = list->get(idx);
+			const std::string where = "executers[" + std::to_string(idx) + "]";
+			if (item == NULL || item->type() != WTSVariant::VT_Object)
+			{
+				error = where + " must be an object";
+				return false;
+			}
+			if (!item->getBoolean("active"))
+				continue;
+			const std::string id = item->getCString("id");
+			if (id.empty())
+			{
+				error = where + ".id must not be empty";
+				return false;
+			}
+			if (!ids.insert(id).second)
+			{
+				error = where + ": duplicate executer id " + id;
+				return false;
+			}
+			std::string kind = item->getCString("name");
+			if (kind.empty())
+				kind = "local";
+			std::string itemError;
+			bool valid = true;
+			if (kind == "local")
+				valid = WtLocalExecuter::validateConfig(item, itemError);
+			else if (kind == "diff")
+				valid = WtDiffExecuter::validateConfig(item, itemError);
+			else if (kind == "arbi")
+				valid = WtArbiExecuter::validateConfig(item, itemError);
+			else if (kind != "dist")
+			{
+				error = where + " (" + id + "): unknown executer kind " + kind;
+				return false;
+			}
+			if (!valid)
+			{
+				error = where + " (" + id + "): " + itemError;
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// Same period vocabulary as WtRunner, HisDataReplayer and createSelContext.
+	bool parse_rt_sel_period(const char* period, TaskPeriodType& out)
+	{
+		if (period == NULL)
+			return false;
+		if (wt_stricmp(period, "d") == 0)
+			out = TPT_Daily;
+		else if (wt_stricmp(period, "w") == 0)
+			out = TPT_Weekly;
+		else if (wt_stricmp(period, "m") == 0)
+			out = TPT_Monthly;
+		else if (wt_stricmp(period, "y") == 0)
+			out = TPT_Yearly;
+		else if (wt_stricmp(period, "min") == 0)
+			out = TPT_Minute;
+		else
+			return false;
+		return true;
+	}
+
+	// Pure validation of strategies.sel, matching WtRunner. Factory resolution
+	// and strategy init happen later but still before any context is published.
+	bool validate_rt_sel_strategy_entries(WTSVariant* config, std::string& error)
+	{
+		WTSVariant* strategies = config == NULL ? NULL : config->get("strategies");
+		if (strategies == NULL)
+			return true;
+		if (strategies->type() != WTSVariant::VT_Object)
+		{
+			error = "strategies must be an object";
+			return false;
+		}
+		WTSVariant* list = strategies->get("sel");
+		if (list == NULL)
+			return true;
+		if (list->type() != WTSVariant::VT_Array)
+		{
+			error = "strategies.sel must be an array";
+			return false;
+		}
+		std::set<std::string> ids;
+		for (uint32_t idx = 0; idx < list->size(); idx++)
+		{
+			WTSVariant* item = list->get(idx);
+			const std::string where = "strategies.sel[" + std::to_string(idx) + "]";
+			if (item == NULL || item->type() != WTSVariant::VT_Object)
+			{
+				error = where + " must be an object";
+				return false;
+			}
+			if (!item->getBoolean("active"))
+				continue;
+			const std::string id = item->getCString("id");
+			const std::string name = item->getCString("name");
+			if (id.empty() || name.empty())
+			{
+				error = where + ": strategy id and name are required";
+				return false;
+			}
+			if (!ids.insert(id).second)
+			{
+				error = where + ": duplicate SEL strategy id " + id;
+				return false;
+			}
+			TaskPeriodType period = TPT_None;
+			WTSVariant* periodVar = item->get("period");
+			if (periodVar == NULL || periodVar->type() != WTSVariant::VT_String ||
+				!parse_rt_sel_period(periodVar->asCString(), period))
+			{
+				error = where + " (" + id + "): period must be one of d/w/m/y/min";
+				return false;
+			}
+			if (const char* why = wt_sel_schedule::invalidReason(static_cast<uint32_t>(period),
+				item->getUInt32("date"), item->getUInt32("time")))
+			{
+				error = where + " (" + id + "): " + why;
+				return false;
+			}
+			WTSVariant* params = item->get("params");
+			if (params != NULL && params->type() != WTSVariant::VT_Object)
+			{
+				error = where + " (" + id + "): params must be an object";
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// I03-NEW-045 / card 9a: a parser owner without callback-drain proof is
+	// quarantined until process exit. Retained owners are moved here and never
+	// destroyed, so a late provider callback cannot reach a freed adapter; a
+	// stopped adapter drops callbacks before touching its borrowed stub.
+	void retain_parser_owners_until_process_exit(std::vector<ParserAdapterPtr>& owners)
+	{
+		static std::mutex* retainedMutex = new std::mutex();
+		static std::vector<ParserAdapterPtr>* retained = new std::vector<ParserAdapterPtr>();
+		std::lock_guard<std::mutex> lock(*retainedMutex);
+		for (ParserAdapterPtr& owner : owners)
+		{
+			if (owner)
+				retained->push_back(owner);
+		}
+		owners.clear();
+	}
+
 	thread_local RunnerScopeNode* g_exec_status_call_scope = NULL;
 	thread_local RunnerScopeNode* g_runner_startup_scope = NULL;
 	thread_local RunnerScopeNode* g_runner_teardown_scope = NULL;
 	thread_local RunnerScopeNode* g_runner_callback_scope = NULL;
-	volatile std::sig_atomic_t g_runner_signal_run_active = 0;
-	volatile std::sig_atomic_t g_runner_signal_exit_requested = 0;
-	volatile std::sig_atomic_t g_runner_signal_log_requested = 0;
+	// I03-NEW-122: a signal handler runs on whichever thread receives the signal
+	// (for a synchronous fault: the faulting thread), while the synchronous run
+	// thread polls these flags. volatile sig_atomic_t is only safe within one
+	// thread; lock-free atomics are both async-signal-safe and race-free.
+	static_assert(std::atomic<int>::is_always_lock_free, "signal flags must be lock-free atomics");
+	std::atomic<int> g_runner_signal_run_active(0);
+	std::atomic<int> g_runner_signal_exit_requested(0);
+	std::atomic<int> g_runner_signal_log_requested(0);
 
 	bool is_synchronous_fatal_signal(int signum)
 	{
@@ -394,9 +566,36 @@ WtRtRunner::~WtRtRunner()
 	if (!hasResources)
 		return;
 
+	// I03-NEW-046: destroying the runner (the porter singleton at process exit,
+	// when the host interpreter may already be finalized) must not call back into
+	// the host. Explicit release_porter() keeps callbacks for orderly teardown.
+	_host_callbacks_closed.store(true, std::memory_order_release);
 	release();
-	std::lock_guard<std::mutex> lock(_status_config_mutex);
-	if (_lifecycle_state != LifecycleState::RELEASED)
+	auto isReleased = [this]() {
+		std::lock_guard<std::mutex> lock(_status_config_mutex);
+		return _lifecycle_state == LifecycleState::RELEASED;
+	};
+	if (!isReleased())
+	{
+		// I03-NEW-045 / card 9a: failed parser candidates that still own an API
+		// without drain proof are a contract result, not an unrecoverable teardown
+		// failure. Retain them until process exit and finish the remaining teardown.
+		std::vector<ParserAdapterPtr> retained;
+		{
+			std::lock_guard<std::mutex> parserRegistryLock(_parser_registry_mutex);
+			if (std::any_of(_quarantined_parser_owners.begin(), _quarantined_parser_owners.end(),
+				[](const ParserAdapterPtr& owner) { return owner != NULL && owner->hasApi(); }))
+				retained.swap(_quarantined_parser_owners);
+		}
+		if (!retained.empty())
+		{
+			try { WTSLogger::warn("{} failed parser owner(s) without callback-drain proof are retained until process exit", retained.size()); }
+			catch (...) { }
+			retain_parser_owners_until_process_exit(retained);
+			release();
+		}
+	}
+	if (!isReleased())
 		std::terminate(); // A runner cannot be destroyed while deferred sink teardown still owns its sinks.
 }
 
@@ -572,6 +771,20 @@ bool WtRtRunner::loadAdjFactors(void* obj, const char* stdCode, FuncReadFactors 
 
 void WtRtRunner::feedAdjFactors(const char* stdCode, uint32_t* dates, double* factors, uint32_t count)
 {
+	// I03-NEW-129: same guards as feedRawBars(). The factor feeder is installed
+	// only by loadAdjFactors()/loadAllAdjFactors(); without one there is
+	// nothing to call.
+	if (_ext_adj_fct_loader == NULL)
+	{
+		WTSLogger::error("Cannot feed adjusting factors because no extended adjusting factor loader is registered.");
+		return;
+	}
+	if (_feeder_fcts == NULL)
+	{
+		WTSLogger::error("Cannot feed adjusting factors because no adjusting factor feeder is loaded.");
+		return;
+	}
+
 	_feeder_fcts(_feed_obj, stdCode, dates, factors, count);
 }
 
@@ -595,6 +808,8 @@ void WtRtRunner::feedRawBars(WTSBarStruct* bars, uint32_t count)
 void WtRtRunner::handle_push_quote(WTSTickData* curTick)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_engine != NULL)
 		_engine->handle_push_quote(curTick);
 }
@@ -602,6 +817,8 @@ void WtRtRunner::handle_push_quote(WTSTickData* curTick)
 void WtRtRunner::handle_push_order_detail(WTSOrdDtlData* curOrdDtl)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_engine != NULL)
 		_engine->handle_push_order_detail(curOrdDtl);
 }
@@ -609,6 +826,8 @@ void WtRtRunner::handle_push_order_detail(WTSOrdDtlData* curOrdDtl)
 void WtRtRunner::handle_push_order_queue(WTSOrdQueData* curOrdQue)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_engine != NULL)
 		_engine->handle_push_order_queue(curOrdQue);
 }
@@ -616,6 +835,8 @@ void WtRtRunner::handle_push_order_queue(WTSOrdQueData* curOrdQue)
 void WtRtRunner::handle_push_transaction(WTSTransData* curTrans)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_engine != NULL)
 		_engine->handle_push_transaction(curTrans);
 }
@@ -794,15 +1015,32 @@ bool WtRtRunner::createExtParser(const char* id)
 
 bool WtRtRunner::createExtExecuter(const char* id)
 {
+	if (id == NULL || id[0] == '\0' || _cta_engine.findExecuter(id) != NULL || _sel_engine.findExecuter(id) != NULL)
+	{
+		WTSLogger::error("Extended executer id is empty or already registered: {}", id == NULL ? "" : id);
+		return false;
+	}
 	ExpExecuter* executer = new ExpExecuter(id);
 	executer->init();
-	_cta_engine.addExecuter(ExecCmdPtr(executer));
+	// BUG-R134-003: in SEL mode targets are dispatched by the SEL engine.
+	ExecCmdPtr owner(executer);
+	if (_is_sel)
+		_sel_engine.addExecuter(owner);
+	else
+		_cta_engine.addExecuter(owner);
 	WTSLogger::info("Extended Executer created");
 	return true;
 }
 
 uint32_t WtRtRunner::createCtaContext(const char* name, int32_t slippage /* = 0 */)
 {
+	// I03-NEW-064: a context is only valid on the engine this runner configured;
+	// a sibling engine was never initialized (null base data, no ticker).
+	if (_engine == NULL || _engine != &_cta_engine)
+	{
+		WTSLogger::error("Creating CTA context {} rejected: runner is not configured with the CTA engine", name ? name : "");
+		return 0;
+	}
 	ExpCtaContext* ctx = new ExpCtaContext(&_cta_engine, name, slippage);
 	_cta_engine.addContext(CtaContextPtr(ctx));
 	return ctx->id();
@@ -810,36 +1048,50 @@ uint32_t WtRtRunner::createCtaContext(const char* name, int32_t slippage /* = 0 
 
 uint32_t WtRtRunner::createHftContext(const char* name, const char* trader, bool bAgent, int32_t slippage /* = 0 */)
 {
+	// I03-NEW-064: only on the configured HFT engine (see createCtaContext).
+	if (_engine == NULL || _engine != &_hft_engine)
+	{
+		WTSLogger::error("Creating HFT context {} rejected: runner is not configured with the HFT engine", name ? name : "");
+		return 0;
+	}
+	TraderAdapterPtr trdPtr = (trader && trader[0]) ? _traders.getAdapter(trader) : TraderAdapterPtr();
+	if (!trdPtr)
+	{
+		WTSLogger::error("Trader {} not exists, Binding trader to HFT strategy failed", trader ? trader : "");
+		return 0;
+	}
 	ExpHftContext* ctx = new ExpHftContext(&_hft_engine, name, bAgent, slippage);
+	ctx->setTrader(trdPtr.get());
 	_hft_engine.addContext(HftContextPtr(ctx));
-	TraderAdapterPtr trdPtr = _traders.getAdapter(trader);
-	if(trdPtr)
-	{
-		ctx->setTrader(trdPtr.get());
-		trdPtr->addSink(ctx);
-	}
-	else
-	{
-		WTSLogger::error("Trader {} not exists, Binding trader to HFT strategy failed", trader);
-	}
+	trdPtr->addSink(ctx);
 	return ctx->id();
 }
 
 uint32_t WtRtRunner::createSelContext(const char* name, uint32_t date, uint32_t time, const char* period, int32_t slippage, const char* trdtpl /* = "CHINA" */, const char* session/* ="TRADING" */)
 {
-	TaskPeriodType ptype;
-	if (wt_stricmp(period, "d") == 0)
-		ptype = TPT_Daily;
-	else if (wt_stricmp(period, "w") == 0)
-		ptype = TPT_Weekly;
-	else if (wt_stricmp(period, "m") == 0)
-		ptype = TPT_Monthly;
-	else if (wt_stricmp(period, "y") == 0)
-		ptype = TPT_Yearly;
-	else if (wt_stricmp(period, "min") == 0)
-		ptype = TPT_Minute;
-	else
-		ptype = TPT_None;
+	if (period == NULL || name == NULL || name[0] == '\0' || trdtpl == NULL || session == NULL)
+		return 0;
+	// I03-NEW-064: only on the configured SEL engine (see createCtaContext).
+	if (_engine == NULL || _engine != &_sel_engine)
+	{
+		WTSLogger::error("Creating SEL context {} rejected: runner is not configured with the SEL engine", name);
+		return 0;
+	}
+
+	// BUG-R13-004 / decision K27=A: only the shared period vocabulary and
+	// schedules that can actually fire (HHMM time, min interval 1..1440, valid
+	// w/m/y date) are accepted; aliases such as d1/w1/m1 are rejected.
+	TaskPeriodType ptype = TPT_None;
+	if (!parse_rt_sel_period(period, ptype))
+	{
+		WTSLogger::error("Creating SEL context {} rejected: period {} must be one of d/w/m/y/min", name, period);
+		return 0;
+	}
+	if (const char* why = wt_sel_schedule::invalidReason(static_cast<uint32_t>(ptype), date, time))
+	{
+		WTSLogger::error("Creating SEL context {} rejected: {} (date {}, time {})", name, why, date, time);
+		return 0;
+	}
 
 	ExpSelContext* ctx = new ExpSelContext(&_sel_engine, name, slippage);
 
@@ -851,6 +1103,15 @@ uint32_t WtRtRunner::createSelContext(const char* name, uint32_t date, uint32_t 
 const char* WtRtRunner::get_raw_stdcode(const char* stdCode)
 {
 	static thread_local std::string s;
+	// I03-NEW-128 (card 4a): before config() there is no engine; report
+	// "not ready" with an empty code instead of dereferencing NULL.
+	if (_engine == NULL)
+	{
+		WTSLogger::error("get_raw_stdcode({}) called before the engine is configured; not ready, returning an empty code",
+			stdCode == NULL ? "" : stdCode);
+		s.clear();
+		return s.c_str();
+	}
 	s = _engine->get_rawcode(stdCode);
 	return s.c_str();
 }
@@ -874,6 +1135,8 @@ SelContextPtr WtRtRunner::getSelContext(uint32_t id)
 void WtRtRunner::on_initialize_event()
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_evt)
 		_cb_evt(EVENT_ENGINE_INIT, 0, 0);
 }
@@ -881,6 +1144,8 @@ void WtRtRunner::on_initialize_event()
 void WtRtRunner::on_schedule_event(uint32_t uDate, uint32_t uTime)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_evt)
 		_cb_evt(EVENT_ENGINE_SCHDL, uDate, uTime);
 }
@@ -888,6 +1153,8 @@ void WtRtRunner::on_schedule_event(uint32_t uDate, uint32_t uTime)
 void WtRtRunner::on_session_event(uint32_t uDate, bool isBegin)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_evt)
 		_cb_evt(isBegin ? EVENT_SESSION_BEGIN : EVENT_SESSION_END, uDate, 0);
 }
@@ -895,6 +1162,8 @@ void WtRtRunner::on_session_event(uint32_t uDate, bool isBegin)
 void WtRtRunner::ctx_on_bar(uint32_t id, const char* stdCode, const char* period, WTSBarStruct* newBar, EngineType eType /* = ET_CTA */)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	switch (eType)
 	{
 	case ET_CTA: if (_cb_cta_bar) _cb_cta_bar(id, stdCode, period, newBar); break;
@@ -908,6 +1177,8 @@ void WtRtRunner::ctx_on_bar(uint32_t id, const char* stdCode, const char* period
 void WtRtRunner::ctx_on_calc(uint32_t id, uint32_t curDate, uint32_t curTime, EngineType eType /* = ET_CTA */)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	switch (eType)
 	{
 	case ET_CTA: if (_cb_cta_calc) _cb_cta_calc(id, curDate, curTime); break;
@@ -920,6 +1191,8 @@ void WtRtRunner::ctx_on_calc(uint32_t id, uint32_t curDate, uint32_t curTime, En
 void WtRtRunner::ctx_on_cond_triggered(uint32_t id, const char* stdCode, double target, double price, const char* usertag, EngineType eType /* = ET_CTA */)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	switch (eType)
 	{
 	case ET_CTA: if (_cb_cta_cond_trigger) _cb_cta_cond_trigger(id, stdCode, target, price, usertag); break;
@@ -931,6 +1204,8 @@ void WtRtRunner::ctx_on_cond_triggered(uint32_t id, const char* stdCode, double 
 void WtRtRunner::ctx_on_init(uint32_t id, EngineType eType/* = ET_CTA*/)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	switch (eType)
 	{
 	case ET_CTA: if (_cb_cta_init) _cb_cta_init(id); break;
@@ -944,6 +1219,8 @@ void WtRtRunner::ctx_on_init(uint32_t id, EngineType eType/* = ET_CTA*/)
 void WtRtRunner::ctx_on_session_event(uint32_t id, uint32_t curTDate, bool isBegin /* = true */, EngineType eType /* = ET_CTA */)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	switch (eType)
 	{
 	case ET_CTA: if (_cb_cta_sessevt) _cb_cta_sessevt(id, curTDate, isBegin); break;
@@ -957,6 +1234,8 @@ void WtRtRunner::ctx_on_session_event(uint32_t id, uint32_t curTDate, bool isBeg
 void WtRtRunner::ctx_on_tick(uint32_t id, const char* stdCode, WTSTickData* newTick, EngineType eType /* = ET_CTA */)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	switch (eType)
 	{
 	case ET_CTA: if (_cb_cta_tick) _cb_cta_tick(id, stdCode, &newTick->getTickStruct()); break;
@@ -970,6 +1249,8 @@ void WtRtRunner::ctx_on_tick(uint32_t id, const char* stdCode, WTSTickData* newT
 void WtRtRunner::hft_on_channel_lost(uint32_t cHandle, const char* trader)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_hft_chnl)
 		_cb_hft_chnl(cHandle, trader, CHNL_EVENT_LOST);
 }
@@ -977,6 +1258,8 @@ void WtRtRunner::hft_on_channel_lost(uint32_t cHandle, const char* trader)
 void WtRtRunner::hft_on_channel_ready(uint32_t cHandle, const char* trader)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_hft_chnl)
 		_cb_hft_chnl(cHandle, trader, CHNL_EVENT_READY);
 }
@@ -984,6 +1267,8 @@ void WtRtRunner::hft_on_channel_ready(uint32_t cHandle, const char* trader)
 void WtRtRunner::hft_on_entrust(uint32_t cHandle, WtUInt32 localid, const char* stdCode, bool bSuccess, const char* message, const char* userTag)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_hft_entrust)
 		_cb_hft_entrust(cHandle, localid, stdCode, bSuccess, message, userTag);
 }
@@ -991,6 +1276,8 @@ void WtRtRunner::hft_on_entrust(uint32_t cHandle, WtUInt32 localid, const char* 
 void WtRtRunner::hft_on_order(uint32_t cHandle, WtUInt32 localid, const char* stdCode, bool isBuy, double totalQty, double leftQty, double price, bool isCanceled, const char* userTag)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_hft_ord)
 		_cb_hft_ord(cHandle, localid, stdCode, isBuy, totalQty, leftQty, price, isCanceled, userTag);
 }
@@ -998,6 +1285,8 @@ void WtRtRunner::hft_on_order(uint32_t cHandle, WtUInt32 localid, const char* st
 void WtRtRunner::hft_on_trade(uint32_t cHandle, WtUInt32 localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_hft_trd)
 		_cb_hft_trd(cHandle, localid, stdCode, isBuy, vol, price, userTag);
 }
@@ -1005,6 +1294,8 @@ void WtRtRunner::hft_on_trade(uint32_t cHandle, WtUInt32 localid, const char* st
 void WtRtRunner::hft_on_position(uint32_t cHandle, const char* stdCode, bool isLong, double prevol, double preavail, double newvol, double newavail)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_hft_position)
 		_cb_hft_position(cHandle, stdCode, isLong, prevol, preavail, newvol, newavail);
 }
@@ -1097,6 +1388,60 @@ bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
 		_config = NULL;
 		return false;
 	}
+
+	// Card 8b=A (BUG-R134-003/WSN06-001): pure preflight of the executer table
+	// and, in SEL mode, of strategies.sel before any manager is mutated. A
+	// rejection here has no side effects, so the parsed config is dropped and
+	// config() stays retryable. A sidecar executer file is read exactly once and
+	// the validated variant is the one used below.
+	WTSVariant* execSidecar = NULL;
+	ScopeExit releaseExecSidecar([&execSidecar]() {
+		if (execSidecar != NULL)
+			execSidecar->release();
+	});
+	{
+		auto rejectPreflight = [this](const std::string& message) {
+			WTSLogger::error("Runner configuration rejected before initialization: {}", message);
+			_config->release();
+			_config = NULL;
+			return false;
+		};
+		WTSVariant* cfgEnv = _config->get("env");
+		const char* engineName = (cfgEnv != NULL && cfgEnv->type() == WTSVariant::VT_Object) ?
+			cfgEnv->getCString("name") : "";
+		const bool hftMode = engineName != NULL && engineName[0] != '\0' &&
+			wt_stricmp(engineName, "cta") != 0 && wt_stricmp(engineName, "sel") != 0;
+		const bool selMode = engineName != NULL && wt_stricmp(engineName, "sel") == 0;
+		if (!hftMode)
+		{
+			WTSVariant* cfgExec = _config->get("executers");
+			WTSVariant* execList = NULL;
+			if (cfgExec != NULL && cfgExec->type() == WTSVariant::VT_String)
+			{
+				const char* filename = cfgExec->asCString();
+				if (filename == NULL || filename[0] == '\0' || !StdFile::exists(filename))
+					return rejectPreflight(std::string("executer configuration file not exists: ") + (filename ? filename : ""));
+				execSidecar = WTSCfgLoader::load_from_file(filename);
+				if (execSidecar == NULL)
+					return rejectPreflight(std::string("loading executer configuration failed: ") + filename);
+				execList = execSidecar->get("executers");
+				if (execList == NULL)
+					return rejectPreflight(std::string("executer configuration has no executers array: ") + filename);
+			}
+			else if (cfgExec != NULL)
+				execList = cfgExec;
+			std::string execError;
+			if (execList != NULL && !validate_rt_executer_entries(execList, execError))
+				return rejectPreflight("invalid executer configuration: " + execError);
+		}
+		if (selMode)
+		{
+			std::string selError;
+			if (!validate_rt_sel_strategy_entries(_config, selError))
+				return rejectPreflight("invalid SEL strategy configuration: " + selError);
+		}
+	}
+
 	if (cfgBF->get("session"))
 	{
 		_bd_mgr.loadSessions(cfgBF->getCString("session"));
@@ -1302,65 +1647,51 @@ bool WtRtRunner::config(const char* cfgFile, bool isFile /* = true */)
 	initEvtNotifier();
 
 	//如果不是高频引擎,则需要配置执行模块
+	// BUG-R134-003/WSN06-001: executers and router rules belong to the engine
+	// that drives them (SEL or CTA). Every failure fails config(); executers
+	// already published to a manager stay owned there and are quiesced by
+	// release(), so a failed batch never leaks or destroys a live host.
 	if (!_is_hft)
 	{
+		auto loadRouters = [this](WTSVariant* rules) {
+			return rules == NULL || (_is_sel ?
+				_sel_engine.getExecuterMgr().load_router_rules(rules) : _cta_engine.loadRouterRules(rules));
+		};
 		WTSVariant* cfgExec = _config->get("executers");
-		if(cfgExec != NULL)
+		if (cfgExec != NULL)
 		{
-			if(cfgExec->type() == WTSVariant::VT_String)
+			// The preflight above already validated this exact list (inline or
+			// the sidecar variant it loaded once).
+			WTSVariant* execList = execSidecar != NULL ? execSidecar->get("executers") : cfgExec;
+			if (!initExecuters(execList))
 			{
-				const char* filename = cfgExec->asCString();
-				if (StdFile::exists(filename))
-				{
-					WTSLogger::info("Reading executer config from {}...", filename);
-					WTSVariant* var = WTSCfgLoader::load_from_file(filename);
-					if (var)
-					{
-						if (!initExecuters(var->get("executers")))
-							WTSLogger::error("Loading executers failed");
-
-						WTSVariant* c = var->get("routers");
-						if (c != NULL)
-							_cta_engine.loadRouterRules(c);
-
-						var->release();
-					}
-					else
-					{
-						WTSLogger::error("Loading executer config {} failed", filename);
-					}
-				}
-				else
-				{
-					WTSLogger::error("Trader configuration {} not exists", filename);
-				}
+				WTSLogger::error("Loading executers failed");
+				return false;
 			}
-			else if(cfgExec->type() == WTSVariant::VT_Array)
+			if (execSidecar != NULL && !loadRouters(execSidecar->get("routers")))
 			{
-				initExecuters(cfgExec);
+				WTSLogger::error("Loading router rules from executer configuration {} failed", cfgExec->asCString());
+				return false;
 			}
 		}
 
-		WTSVariant* cfgRouter = _config->get("routers");
-		if (cfgRouter != NULL)
-			_cta_engine.loadRouterRules(cfgRouter);
-		
-	}
-
-	if (_is_hft)
-	{
-		if (!initHftStrategies())
+		if (!loadRouters(_config->get("routers")))
 		{
-			WTSLogger::error("Initializing configured HFT strategies failed");
+			WTSLogger::error("Loading router rules failed");
 			return false;
 		}
 	}
-	else if (!initCtaStrategies())
+
+	// Route strategy loading by engine: SEL reads strategies.sel only and never
+	// strategies.cta (BUG-R134-003).
+	const bool strategiesReady = _is_hft ? initHftStrategies() :
+		(_is_sel ? initSelStrategies() : initCtaStrategies());
+	if (!strategiesReady)
 	{
-		WTSLogger::error("Initializing configured CTA strategies failed");
+		WTSLogger::error("Initializing configured {} strategies failed", _is_hft ? "HFT" : (_is_sel ? "SEL" : "CTA"));
 		return false;
 	}
-	
+
 	bool releaseRequestedDuringConfig = false;
 	{
 		std::lock_guard<std::mutex> configLock(_status_config_mutex);
@@ -1596,11 +1927,28 @@ bool WtRtRunner::initCtaStrategies()
 		pending.push_back({ cfgItem, id, name, slippage, stra });
 	}
 
-	// Keep init/context publication in the original per-strategy order. The
-	// preflight above only moves factory resolution before context installation.
+	// BUG-WSN06-001/002: initialize every strategy before publishing any
+	// context. init(false) or an exception fails the whole batch; side effects a
+	// strategy's own init already performed cannot be rolled back generically.
 	for (const PendingCtaStrategy& item : pending)
 	{
-		item.strategy->self()->init(item.config->get("params"));
+		try
+		{
+			if (!item.strategy->self()->init(item.config->get("params")))
+			{
+				WTSLogger::error("Initializing CTA strategy {} ({}) failed", item.name, item.id);
+				return false;
+			}
+		}
+		catch (...)
+		{
+			WTSLogger::error("Initializing CTA strategy {} ({}) threw an exception", item.name, item.id);
+			return false;
+		}
+	}
+
+	for (const PendingCtaStrategy& item : pending)
+	{
 		CtaStraContext* ctx = new CtaStraContext(&_cta_engine, item.id, item.slippage);
 		ctx->set_strategy(item.strategy->self());
 		_cta_engine.addContext(CtaContextPtr(ctx));
@@ -1611,60 +1959,89 @@ bool WtRtRunner::initCtaStrategies()
 
 bool WtRtRunner::initSelStrategies()
 {
-	WTSVariant* cfg = _config->get("strategies");
+	// BUG-R134-003/WSN06-001/NEW-025: read strategies.sel (never strategies.cta)
+	// with the same three phases as WtRunner: resolve every factory, initialize
+	// every strategy, then publish contexts. Any failure publishes nothing.
+	// Re-run the pure validation for direct callers; config() already ran it.
+	std::string error;
+	if (!validate_rt_sel_strategy_entries(_config, error))
+	{
+		WTSLogger::error("Invalid SEL strategy configuration: {}", error);
+		return false;
+	}
+	WTSVariant* cfg = _config == NULL ? NULL : _config->get("strategies");
+	cfg = cfg == NULL ? NULL : cfg->get("sel");
 	if (cfg == NULL)
 		return true;
-	if (cfg->type() != WTSVariant::VT_Object)
-		return false;
 
-	cfg = cfg->get("cta");
-	if (cfg == NULL)
-		return true;
-	if (cfg->type() != WTSVariant::VT_Array)
-		return false;
+	struct PendingSelStrategy
+	{
+		WTSVariant* config;
+		const char* id;
+		const char* name;
+		int32_t slippage;
+		uint32_t date;
+		uint32_t time;
+		TaskPeriodType period;
+		SelStrategyPtr strategy;
+	};
+	std::vector<PendingSelStrategy> pending;
+	pending.reserve(cfg->size());
 
+	// Phase 1: resolve every active factory. An unknown or unavailable factory
+	// returns a null strategy and fails the batch before any init or context.
 	for (uint32_t idx = 0; idx < cfg->size(); idx++)
 	{
 		WTSVariant* cfgItem = cfg->get(idx);
 		if (!cfgItem->getBoolean("active"))
 			continue;
-
-		const char* id = cfgItem->getCString("id");
-		const char* name = cfgItem->getCString("name");
-		int32_t slippage = cfgItem->getInt32("slippage");
-
-		uint32_t date = cfgItem->getUInt32("date");
-		uint32_t time = cfgItem->getUInt32("time");
-		const char* period = cfgItem->getCString("period");
-		if (name == NULL || name[0] == '\0')
+		PendingSelStrategy item = { cfgItem, cfgItem->getCString("id"), cfgItem->getCString("name"),
+			cfgItem->getInt32("slippage"), cfgItem->getUInt32("date"), cfgItem->getUInt32("time"),
+			TPT_None, SelStrategyPtr() };
+		if (!parse_rt_sel_period(cfgItem->getCString("period"), item.period))
+			return false;
+		try { item.strategy = _sel_mgr.createStrategy(item.name, item.id); }
+		catch (...)
 		{
-			WTSLogger::error("Creating SEL strategy {} failed: strategy name is required", id);
+			WTSLogger::error("Creating SEL strategy {} ({}) threw an exception", item.name, item.id);
 			return false;
 		}
-
-		TaskPeriodType ptype;
-		if (wt_stricmp(period, "d") == 0)
-			ptype = TPT_Daily;
-		else if (wt_stricmp(period, "w") == 0)
-			ptype = TPT_Weekly;
-		else if (wt_stricmp(period, "m") == 0)
-			ptype = TPT_Monthly;
-		else if (wt_stricmp(period, "y") == 0)
-			ptype = TPT_Yearly;
-		else
-			ptype = TPT_None;
-
-		SelStrategyPtr stra = _sel_mgr.createStrategy(name, id);
-		SelStrategy* strategy = stra == NULL ? NULL : stra->self();
-		if (strategy == NULL)
+		if (item.strategy == NULL || item.strategy->self() == NULL)
 		{
-			WTSLogger::error("Creating SEL strategy {} ({}) failed", name, id);
+			WTSLogger::error("Creating SEL strategy {} ({}) failed", item.name, item.id);
 			return false;
 		}
-		strategy->init(cfgItem->get("params"));
-		SelStraContext* ctx = new SelStraContext(&_sel_engine, id, slippage);
-		ctx->set_strategy(strategy);
-		_sel_engine.addContext(SelContextPtr(ctx), date, time, ptype);
+		pending.push_back(item);
+	}
+
+	// Phase 2: init(false) or an exception fails the whole batch before any
+	// context is created. Strategies already created stay cached by
+	// SelStrategyMgr until the runner is destroyed (no removal interface), and
+	// side effects of a strategy's own init cannot be rolled back generically.
+	for (const PendingSelStrategy& item : pending)
+	{
+		try
+		{
+			if (!item.strategy->self()->init(item.config->get("params")))
+			{
+				WTSLogger::error("Initializing SEL strategy {} ({}) failed", item.name, item.id);
+				return false;
+			}
+		}
+		catch (...)
+		{
+			WTSLogger::error("Initializing SEL strategy {} ({}) threw an exception", item.name, item.id);
+			return false;
+		}
+	}
+
+	// Phase 3: publish. Context on_init runs later from WtSelEngine::on_init
+	// when the engine starts, never for a batch that failed above.
+	for (const PendingSelStrategy& item : pending)
+	{
+		SelStraContext* ctx = new SelStraContext(&_sel_engine, item.id, item.slippage);
+		ctx->set_strategy(item.strategy->self());
+		_sel_engine.addContext(SelContextPtr(ctx), item.date, item.time, item.period);
 	}
 
 	return true;
@@ -1692,6 +2069,7 @@ bool WtRtRunner::initHftStrategies()
 		bool agent;
 		int32_t slippage;
 		HftStrategyPtr strategy;
+		TraderAdapterPtr trader;
 	};
 	std::vector<PendingHftStrategy> pending;
 	pending.reserve(cfg->size());
@@ -1719,46 +2097,66 @@ bool WtRtRunner::initHftStrategies()
 			return false;
 		}
 
+		const char* traderid = cfgItem->getCString("trader");
+		TraderAdapterPtr trader = (traderid && traderid[0]) ? _traders.getAdapter(traderid) : TraderAdapterPtr();
+		if (!trader)
+		{
+			WTSLogger::error("Trader {} not exists, Binding trader to HFT strategy failed", traderid ? traderid : "");
+			return false;
+		}
+		pending.push_back({ cfgItem, id, name, bAgent, slippage, HftStrategyPtr(), trader });
+	}
+
+	for (PendingHftStrategy& item : pending)
+	{
 		HftStrategyPtr stra;
 		try
 		{
-			stra = _hft_mgr.createStrategy(name, id);
+			stra = _hft_mgr.createStrategy(item.name, item.id);
 		}
 		catch (...)
 		{
-			WTSLogger::error("Creating HFT strategy {} ({}) threw an exception", name, id);
+			WTSLogger::error("Creating HFT strategy {} ({}) threw an exception", item.name, item.id);
 			return false;
 		}
 		HftStrategy* strategy = stra == NULL ? NULL : stra->self();
 		if (strategy == NULL)
 		{
-			WTSLogger::error("Creating HFT strategy {} ({}) failed", name, id);
+			WTSLogger::error("Creating HFT strategy {} ({}) failed", item.name, item.id);
 			return false;
 		}
+		item.strategy = stra;
+	}
 
-		pending.push_back({ cfgItem, id, name, bAgent, slippage, stra });
+	// BUG-WSN06-002: every HFT strategy must initialize before any context or
+	// trader sink is published; init(false) or an exception fails the batch.
+	for (const PendingHftStrategy& item : pending)
+	{
+		try
+		{
+			if (!item.strategy->self()->init(item.config->get("params")))
+			{
+				WTSLogger::error("Initializing HFT strategy {} ({}) failed", item.name, item.id);
+				return false;
+			}
+		}
+		catch (...)
+		{
+			WTSLogger::error("Initializing HFT strategy {} ({}) threw an exception", item.name, item.id);
+			return false;
+		}
 	}
 
 	for (const PendingHftStrategy& item : pending)
 	{
-		item.strategy->self()->init(item.config->get("params"));
 		HftStraContext* ctx = new HftStraContext(&_hft_engine, item.id, item.agent, item.slippage);
 		ctx->set_strategy(item.strategy->self());
+		ctx->setTrader(item.trader.get());
 		// Publish the context before addSink: addSink may synchronously deliver
 		// the initial READY event when the adapter is already connected.
 		_hft_engine.addContext(HftContextPtr(ctx));
 
-		const char* traderid = item.config->getCString("trader");
-		TraderAdapterPtr trader = _traders.getAdapter(traderid);
-		if (trader)
-		{
-			ctx->setTrader(trader.get());
-			trader->addSink(ctx);
-		}
-		else
-		{
-			WTSLogger::error("Trader {} not exists, Binding trader to HFT strategy failed", traderid);
-		}
+		item.trader->addSink(ctx);
 	}
 
 	return true;
@@ -1823,6 +2221,8 @@ bool WtRtRunner::initDataMgr()
 		return true;
 
 	_data_mgr.regsiter_loader(this);
+	// K31=A: the runner owns the concrete base data manager; its V1 table is injected into the reader.
+	_data_mgr.set_date_mapping(_bd_mgr.getDateMappingV1());
 
 	const bool initialized = _data_mgr.init(cfg, _engine, true);
 	if (!initialized && cfg->get("store") != NULL)
@@ -1860,7 +2260,22 @@ bool WtRtRunner::initParsers(WTSVariant* cfgParsers)
 			return false;
 		}
 
+		// Decision K13=B (BUG-R104-002 / I03-NEW-003): `required` defaults to true and a
+		// failure fails the configuration; an optional parser that fails is reported and
+		// skipped. Either way the failed candidate stays quarantined outside the runnable
+		// manager, exactly as before K13 (it may still own an API registered to this SPI).
+		const bool required = !cfgItem->has("required") || cfgItem->getBoolean("required");
 		ParserAdapterPtr adapter(new ParserAdapter);
+		// K31=A: a module parser gets the runner's DateMappingV1 table when it exports the binder.
+		adapter->setDateMapping(_bd_mgr.getDateMappingV1());
+		auto failCandidate = [&](const char* what) {
+			_quarantined_parser_owners.emplace_back(adapter);
+			if (required)
+				WTSLogger::error("Parser {} {}; required parser fails the configuration", realid, what);
+			else
+				WTSLogger::warn("Optional parser {} {}; the runner continues without it", realid, what);
+			return !required;
+		};
 		bool initialized = false;
 		try
 		{
@@ -1869,22 +2284,24 @@ bool WtRtRunner::initParsers(WTSVariant* cfgParsers)
 		}
 		catch (...)
 		{
-			_quarantined_parser_owners.emplace_back(adapter);
-			WTSLogger::error("Parser {} initialization threw", realid);
+			// Failed init can still leave an API registered to this SPI. Preserve
+			// it without making ParserAdapterMgr::run() treat it as runnable.
+			if (failCandidate("initialization threw"))
+				continue;
 			return false;
 		}
 		if (!initialized)
 		{
-			// Failed init can still leave an API registered to this SPI. Preserve
-			// it without making ParserAdapterMgr::run() treat it as runnable.
-			_quarantined_parser_owners.emplace_back(adapter);
+			if (failCandidate("initialization failed"))
+				continue;
 			return false;
 		}
 		if (!_parsers.addAdapter(realid.c_str(), adapter))
 		{
 			// Preserve an initialized candidate if concurrent registration made
 			// the final map insertion fail.
-			_quarantined_parser_owners.emplace_back(adapter);
+			if (failCandidate("registration failed"))
+				continue;
 			return false;
 		}
 
@@ -1901,9 +2318,66 @@ bool WtRtRunner::initExecuters(WTSVariant* cfgExecuter)
 	if (cfgExecuter == NULL || cfgExecuter->type() != WTSVariant::VT_Array)
 		return false;
 
+	// Card 8b=A (BUG-R134-003/WSN06-001): validate the complete list before
+	// loading factories or constructing any executer, so an invalid entry in the
+	// middle of the list cannot leave earlier entries registered.
+	std::string validationError;
+	if (!validate_rt_executer_entries(cfgExecuter, validationError))
+	{
+		WTSLogger::error("Invalid executer configuration: {}", validationError);
+		return false;
+	}
+	for (uint32_t idx = 0; idx < cfgExecuter->size(); idx++)
+	{
+		WTSVariant* cfgItem = cfgExecuter->get(idx);
+		if (!cfgItem->getBoolean("active"))
+			continue;
+		const char* id = cfgItem->getCString("id");
+		if (_cta_engine.findExecuter(id) != NULL || _sel_engine.findExecuter(id) != NULL)
+		{
+			WTSLogger::error("Executor id is already registered: {}", id);
+			return false;
+		}
+	}
+
+	// Executers belong to the engine that drives them. Publish before init so a
+	// failed or partially initialized host is owned by the manager and covered
+	// by release()'s fail-closed quiesce; a host may not be destroyed unquiesced.
+	auto registerExecuter = [this](ExecCmdPtr owner) {
+		if (_is_sel)
+			_sel_engine.addExecuter(owner);
+		else
+			_cta_engine.addExecuter(owner);
+	};
+
 	//先加载自带的执行器工厂
 	std::string path = WtHelper::getInstDir() + "executer//";
 	_exe_factory.loadFactories(path.c_str());
+
+	struct PendingTraderBinding
+	{
+		TraderAdapterPtr trader;
+		ExecCmdPtr owner; // keeps the sink alive until deferred registration
+		ITrdNotifySink* sink;
+	};
+	std::vector<PendingTraderBinding> pendingTraderBindings;
+	auto bindTrader = [this, &pendingTraderBindings](WTSVariant* cfgItem, const char* id,
+		ExecCmdPtr owner, ITrdNotifySink* sink, auto setTrader) {
+		const char* tid = cfgItem->getCString("trader");
+		if (tid == NULL || tid[0] == '\0')
+		{
+			WTSLogger::error("No Trader configured for Executer {}", id);
+			return;
+		}
+		TraderAdapterPtr trader = _traders.getAdapter(tid);
+		if (!trader)
+		{
+			WTSLogger::error("Trader {} not exists, cannot configured for executer {}", tid, id);
+			return;
+		}
+		setTrader(trader.get());
+		pendingTraderBindings.push_back({ trader, owner, sink });
+	};
 
 	uint32_t count = 0;
 	for (uint32_t idx = 0; idx < cfgExecuter->size(); idx++)
@@ -1913,106 +2387,82 @@ bool WtRtRunner::initExecuters(WTSVariant* cfgExecuter)
 			continue;
 
 		const char* id = cfgItem->getCString("id");
-		std::string name = cfgItem->getCString("name");	//local,diff,dist
+		std::string name = cfgItem->getCString("name");	//local,diff,arbi,dist
 		if (name.empty())
 			name = "local";
 
-		if(name == "local")
+		try
 		{
-			WtLocalExecuter* executer = new WtLocalExecuter(&_exe_factory, id, &_data_mgr);
-			if (!executer->init(cfgItem))
-				return false;
-			// addSink can synchronously deliver READY. Keep the executor owned by
-			// the engine before exposing its raw sink pointer to the adapter.
-			_cta_engine.addExecuter(ExecCmdPtr(executer));
-
-			const char* tid = cfgItem->getCString("trader");
-			if(strlen(tid) == 0)
+			if (name == "local")
 			{
-				WTSLogger::error("No Trader configured for Executer {}", id);
+				std::shared_ptr<WtLocalExecuter> executer(new WtLocalExecuter(&_exe_factory, id, &_data_mgr));
+				registerExecuter(executer);
+				if (!executer->init(cfgItem))
+				{
+					WTSLogger::error("Initializing local executor {} failed", id);
+					return false;
+				}
+				bindTrader(cfgItem, id, executer, executer.get(),
+					[&executer](TraderAdapter* trader) { executer->setTrader(trader); });
+			}
+			else if (name == "diff")
+			{
+				std::shared_ptr<WtDiffExecuter> executer(new WtDiffExecuter(&_exe_factory, id, &_data_mgr, &_bd_mgr));
+				registerExecuter(executer);
+				if (!executer->init(cfgItem))
+				{
+					WTSLogger::error("Initializing diff executor {} failed", id);
+					return false;
+				}
+				bindTrader(cfgItem, id, executer, executer.get(),
+					[&executer](TraderAdapter* trader) { executer->setTrader(trader); });
+			}
+			else if (name == "arbi")
+			{
+				std::shared_ptr<WtArbiExecuter> executer(new WtArbiExecuter(&_exe_factory, id, &_data_mgr));
+				registerExecuter(executer);
+				if (!executer->init(cfgItem))
+				{
+					WTSLogger::error("Initializing arbi executor {} failed", id);
+					return false;
+				}
+				bindTrader(cfgItem, id, executer, executer.get(),
+					[&executer](TraderAdapter* trader) { executer->setTrader(trader); });
 			}
 			else
 			{
-				TraderAdapterPtr trader = _traders.getAdapter(tid);
-				if (trader)
+				// Only "dist" can reach here; the preflight rejects unknown kinds.
+				std::shared_ptr<WtDistExecuter> executer(new WtDistExecuter(id));
+				registerExecuter(executer);
+				if (!executer->init(cfgItem))
 				{
-					executer->setTrader(trader.get());
-					trader->addSink(executer);
-				}
-				else
-				{
-					WTSLogger::error("Trader {} not exists, cannot configured for executer {}", tid, id);
+					WTSLogger::error("Initializing distributed executor {} failed", id);
+					return false;
 				}
 			}
 		}
-		else if (name == "diff")
+		catch (...)
 		{
-			WtDiffExecuter* executer = new WtDiffExecuter(&_exe_factory, id, &_data_mgr, &_bd_mgr);
-			if (!executer->init(cfgItem))
-				return false;
-			_cta_engine.addExecuter(ExecCmdPtr(executer));
-
-			const char* tid = cfgItem->getCString("trader");
-			if (strlen(tid) == 0)
-			{
-				WTSLogger::error("No Trader configured for Executer {}", id);
-			}
-			else
-			{
-				TraderAdapterPtr trader = _traders.getAdapter(tid);
-				if (trader)
-				{
-					executer->setTrader(trader.get());
-					trader->addSink(executer);
-				}
-				else
-				{
-					WTSLogger::error("Trader {} not exists, cannot configured for executer {}", tid, id);
-				}
-			}
+			WTSLogger::error("Initializing executor {} threw an exception; registered owners will be quiesced", id);
+			return false;
 		}
-		else if (name == "arbi")
-		{
-			WtArbiExecuter* executer = new WtArbiExecuter(&_exe_factory, id, &_data_mgr);
-			if (!executer->init(cfgItem))
-				return false;
-			_cta_engine.addExecuter(ExecCmdPtr(executer));
-
-			const char* tid = cfgItem->getCString("trader");
-			if (strlen(tid) == 0)
-			{
-				WTSLogger::error("No Trader configured for Executer {}", id);
-			}
-			else
-			{
-				TraderAdapterPtr trader = _traders.getAdapter(tid);
-				if (trader)
-				{
-					executer->setTrader(trader.get());
-					trader->addSink(executer);
-				}
-				else
-				{
-					WTSLogger::error("Trader {} not exists, cannot configured for executer {}", tid, id);
-				}
-			}
-		}
-		else
-		{
-			WtDistExecuter* executer = new WtDistExecuter(id);
-			if (!executer->init(cfgItem))
-				return false;
-
-			_cta_engine.addExecuter(ExecCmdPtr(executer));
-		}
-		
 		count++;
 	}
 
+	// Every executor, its stub and its manager entry must exist before an
+	// already-ready adapter can synchronously replay initial readiness.
+	try
+	{
+		for (const PendingTraderBinding& binding : pendingTraderBindings)
+			binding.trader->addSink(binding.sink);
+	}
+	catch (...)
+	{
+		WTSLogger::error("Registering executor trader sinks failed; registered owners will be quiesced");
+		return false;
+	}
+
 	WTSLogger::info("{} executers loaded", count);
-
-
-
 	return true;
 }
 
@@ -2118,7 +2568,7 @@ void WtRtRunner::run(bool bAsync /* = false */)
 				g_runner_signal_run_active = 1;
 				// SignalHook is process-global and cannot be safely unregistered by
 				// one runner. These callbacks avoid runner captures and only set
-				// sig_atomic_t flags; the synchronous run thread does all work.
+				// lock-free atomic flags; the synchronous run thread does all work.
 				install_signal_hooks(&runner_signal_log_callback, &runner_signal_exit_callback);
 			}
 		}
@@ -2155,6 +2605,15 @@ void WtRtRunner::run(bool bAsync /* = false */)
 			_config_failed = true;
 		}
 		completeRelease();
+	}
+	else if (startupFailed)
+	{
+		// BUG-WSN06-001: an exception escaping startup (for example a strategy
+		// on_init) leaves a partially started runtime. Fail closed instead of
+		// reporting RUNNING: tear the runtime down on this control thread.
+		WTSLogger::error("Runner startup threw; releasing the partially started runtime");
+		release();
+		return;
 	}
 
 	if (!bAsync && !startupFailed)
@@ -2287,6 +2746,12 @@ void WtRtRunner::release()
 				if (inProducerCallback)
 				{
 					WTSLogger::warn("Runner release reentered from a producer callback; active teardown will finish after the callback returns");
+					return;
+				}
+				if (_parser_stop_notifications_active)
+				{
+					// Decision K15=A: a parser stop callback may be waiting on this thread.
+					WTSLogger::warn("Runner release during parser stop notification returns immediately; the active teardown continues");
 					return;
 				}
 				++_release_waiters;
@@ -2543,8 +3008,45 @@ void WtRtRunner::completeRelease()
 		// STOPPING rejects new quote admissions, and the admitted quote and
 		// creation counters were drained above. No reader can race this map clear;
 		// do not hold _parser_registry_mutex across provider release callbacks.
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_parser_stop_notifications_active = true;
+		}
 		try { _parsers.release(); }
 		catch (...) { WTSLogger::error("Parser release threw while stopping the runner"); parsersStopped = false; }
+		{
+			std::lock_guard<std::mutex> configLock(_status_config_mutex);
+			_parser_stop_notifications_active = false;
+		}
+		_lifecycle_changed.notify_all();
+		if (parsersStopped)
+		{
+			// I03-NEW-045 / card 9a: an adapter that still owns its API after the
+			// stop/drain protocol has no drain proof. Keep it alive until process
+			// exit instead of destroying it with the manager map.
+			std::vector<ParserAdapterPtr> retained;
+			try
+			{
+				for (auto it = _parsers._adapters.begin(); it != _parsers._adapters.end();)
+				{
+					if (it->second && it->second->hasApi())
+					{
+						retained.push_back(it->second);
+						it = _parsers._adapters.erase(it);
+					}
+					else
+						++it;
+				}
+				if (!retained.empty())
+					WTSLogger::warn("{} parser owner(s) without callback-drain proof are retained until process exit", retained.size());
+				retain_parser_owners_until_process_exit(retained);
+			}
+			catch (...)
+			{
+				// Losing a retained owner could free an adapter a provider still calls.
+				std::terminate();
+			}
+		}
 		if (parsersStopped)
 		{
 			std::lock_guard<std::mutex> configLock(_status_config_mutex);
@@ -2692,6 +3194,8 @@ bool WtRtRunner::addHftFactories(const char* folder)
 void WtRtRunner::hft_on_order_queue(uint32_t id, const char* stdCode, WTSOrdQueData* newOrdQue)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_hft_ordque)
 		_cb_hft_ordque(id, stdCode, &newOrdQue->getOrdQueStruct());
 }
@@ -2699,6 +3203,8 @@ void WtRtRunner::hft_on_order_queue(uint32_t id, const char* stdCode, WTSOrdQueD
 void WtRtRunner::hft_on_order_detail(uint32_t id, const char* stdCode, WTSOrdDtlData* newOrdDtl)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_hft_orddtl)
 		_cb_hft_orddtl(id, stdCode, &newOrdDtl->getOrdDtlStruct());
 }
@@ -2706,6 +3212,8 @@ void WtRtRunner::hft_on_order_detail(uint32_t id, const char* stdCode, WTSOrdDtl
 void WtRtRunner::hft_on_transaction(uint32_t id, const char* stdCode, WTSTransData* newTrans)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_hft_trans)
 		_cb_hft_trans(id, stdCode, &newTrans->getTransStruct());
 }
@@ -2714,6 +3222,8 @@ void WtRtRunner::hft_on_transaction(uint32_t id, const char* stdCode, WTSTransDa
 void WtRtRunner::parser_init(const char* id)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_parser_evt)
 		_cb_parser_evt(EVENT_PARSER_INIT, id);
 }
@@ -2721,6 +3231,8 @@ void WtRtRunner::parser_init(const char* id)
 void WtRtRunner::parser_connect(const char* id)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_parser_evt)
 		_cb_parser_evt(EVENT_PARSER_CONNECT, id);
 }
@@ -2728,6 +3240,8 @@ void WtRtRunner::parser_connect(const char* id)
 void WtRtRunner::parser_disconnect(const char* id)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_parser_evt)
 		_cb_parser_evt(EVENT_PARSER_DISCONNECT, id);
 }
@@ -2735,6 +3249,8 @@ void WtRtRunner::parser_disconnect(const char* id)
 void WtRtRunner::parser_release(const char* id)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_parser_evt)
 		_cb_parser_evt(EVENT_PARSER_RELEASE, id);
 }
@@ -2742,6 +3258,8 @@ void WtRtRunner::parser_release(const char* id)
 void WtRtRunner::parser_subscribe(const char* id, const char* code)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_parser_sub)
 		_cb_parser_sub(id, code, true);
 }
@@ -2749,6 +3267,8 @@ void WtRtRunner::parser_subscribe(const char* id, const char* code)
 void WtRtRunner::parser_unsubscribe(const char* id, const char* code)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_parser_sub)
 		_cb_parser_sub(id, code, false);
 }
@@ -2782,6 +3302,8 @@ void WtRtRunner::on_ext_parser_quote(const char* id, WTSTickStruct* curTick, uin
 		_lifecycle_changed.notify_all();
 	});
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 
 	// Copy the strong owner while holding the registry lock, then release it
 	// before any parser or engine callback can reenter the runner.
@@ -2808,6 +3330,8 @@ void WtRtRunner::on_ext_parser_quote(const char* id, WTSTickStruct* curTick, uin
 void WtRtRunner::executer_init(const char* id)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_exec_init)
 		_cb_exec_init(id);
 }
@@ -2815,7 +3339,33 @@ void WtRtRunner::executer_init(const char* id)
 void WtRtRunner::executer_set_position(const char* id, const char* stdCode, double target)
 {
 	RunnerCallbackScope callbackScope(this);
+	if (_host_callbacks_closed.load(std::memory_order_acquire))
+		return; // I03-NEW-046: no host (Python) callbacks once process-exit teardown began
 	if (_cb_exec_cmd)
 		_cb_exec_cmd(id, stdCode, target);
 }
 #pragma endregion
+
+int32_t WtRtRunner::resumeAccountTrading(const char* traderId, const char* operatorId, const char* reason,
+	uint64_t expectedGeneration, const char* reference)
+{
+	AccountTradingGate::ResumeRequest request;
+	request.operator_id = operatorId ? operatorId : "";
+	request.reason = reason ? reason : "";
+	request.expected_generation = expectedGeneration;
+	request.reconciliation_reference = reference ? reference : "";
+	std::string diagnostic;
+	const AccountTradingGate::ResumeStatus status = _traders.resumeAccountTrading(traderId, request, &diagnostic);
+	if (status == AccountTradingGate::ResumeStatus::Ok)
+		WTSLogger::warn("Account resume of trader {} by {}: status {}, {}", traderId ? traderId : "",
+			request.operator_id.c_str(), (int)status, diagnostic.c_str());
+	else
+		WTSLogger::error("Account resume of trader {} by {}: status {}, {}", traderId ? traderId : "",
+			request.operator_id.c_str(), (int)status, diagnostic.c_str());
+	return (int32_t)status;
+}
+
+uint64_t WtRtRunner::getAccountPauseGeneration(const char* traderId)
+{
+	return _traders.accountPauseGeneration(traderId);
+}

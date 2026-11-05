@@ -1,0 +1,45 @@
+--- src/WtDataStorage/WtDataReader.cpp	2026-11-02 09:43:05
++++ /tmp/wt-i03-r132-20261102/source/src/WtDataStorage/WtDataReader.cpp	2026-11-02 09:44:27
+@@ -148,18 +148,6 @@
+ 	sink->reader_log(ll, buffer);
+ }
+ 
+-static void report_historical_slice_exception(IDataReaderSink* sink, const char* kind, const char* stdCode) noexcept
+-{
+-	try
+-	{
+-		pipe_reader_log(sink, LL_ERROR, "Unexpected failure reading historical {} slice for {}", kind, stdCode ? stdCode : "<null>");
+-	}
+-	catch (...)
+-	{
+-		// A failing log sink must not turn a guarded read into an escaping exception.
+-	}
+-}
+-
+ extern "C"
+ {
+ 	EXPORT_FLAG IDataReader* createDataReader()
+@@ -910,7 +898,6 @@
+ 		}
+ 		catch (...)
+ 		{
+-			report_historical_slice_exception(_sink, "queue", stdCode);
+ 			return NULL;
+ 		}
+ 	}
+@@ -1119,7 +1106,6 @@
+ 		}
+ 		catch (...)
+ 		{
+-			report_historical_slice_exception(_sink, "detail", stdCode);
+ 			return NULL;
+ 		}
+ 	}
+@@ -1328,7 +1314,6 @@
+ 		}
+ 		catch (...)
+ 		{
+-			report_historical_slice_exception(_sink, "transaction", stdCode);
+ 			return NULL;
+ 		}
+ 	}

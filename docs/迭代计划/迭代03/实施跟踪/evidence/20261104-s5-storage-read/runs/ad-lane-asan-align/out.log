@@ -1,0 +1,63 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 274 tests from 30 test suites.
+[----------] Global test environment set-up.
+[----------] 54 tests from R4WriterADTest
+[ RUN      ] R4WriterADTest.L03AlignedBarCachesFirstWriteAndSameMinuteUpdate
+[       OK ] R4WriterADTest.L03AlignedBarCachesFirstWriteAndSameMinuteUpdate (45 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars
+[       OK ] R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars (27 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCacheRejectsTruncatedFileWithoutMutation
+[       OK ] R4WriterADTest.L03AlignedBarCacheRejectsTruncatedFileWithoutMutation (13 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCacheRejectsMalformedIdentityAndRetries
+[       OK ] R4WriterADTest.L03AlignedBarCacheRejectsMalformedIdentityAndRetries (26 ms)
+[ RUN      ] R4WriterADTest.L03AlignedBarCacheRejectsSizeBeyondCapacity
+[       OK ] R4WriterADTest.L03AlignedBarCacheRejectsSizeBeyondCapacity (1 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheFirstWriteAndRawDiskLayout
+[       OK ] R4WriterADTest.L03AlignedTickCacheFirstWriteAndRawDiskLayout (5 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRecoveryAndSecondRecordUpdate
+[       OK ] R4WriterADTest.L03AlignedTickCacheRecoveryAndSecondRecordUpdate (5 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRejectsTruncatedRecordWithoutMutation
+[       OK ] R4WriterADTest.L03AlignedTickCacheRejectsTruncatedRecordWithoutMutation (3 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRejectsUnterminatedIdentityAndRetries
+[       OK ] R4WriterADTest.L03AlignedTickCacheRejectsUnterminatedIdentityAndRetries (15 ms)
+[ RUN      ] R4WriterADTest.L03AlignedTickCacheRejectsSizeBeyondCapacity
+[       OK ] R4WriterADTest.L03AlignedTickCacheRejectsSizeBeyondCapacity (3 ms)
+[ RUN      ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects
+[       OK ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects (10 ms)
+[ RUN      ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeAsyncAdmission
+[       OK ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeAsyncAdmission (32 ms)
+[ RUN      ] R4WriterADTest.L03MissingOrInvalidActionDateIsRejected
+[       OK ] R4WriterADTest.L03MissingOrInvalidActionDateIsRejected (28 ms)
+[ RUN      ] R4WriterADTest.L03MissingSessionIsRejected
+[       OK ] R4WriterADTest.L03MissingSessionIsRejected (8 ms)
+[ RUN      ] R4WriterADTest.L03QueuedTickIsRecheckedBeforeProcessing
+[       OK ] R4WriterADTest.L03QueuedTickIsRecheckedBeforeProcessing (17 ms)
+[ RUN      ] R4WriterADTest.FailedInitThenDifferentRootUsesOnlyNewRoot
+[       OK ] R4WriterADTest.FailedInitThenDifferentRootUsesOnlyNewRoot (10 ms)
+[ RUN      ] R4WriterADTest.FailedReinitDoesNotDiscardPreviouslyMappedCache
+[       OK ] R4WriterADTest.FailedReinitDoesNotDiscardPreviouslyMappedCache (6 ms)
+[ RUN      ] R4WriterADTest.FreshInitBuildsFourBlockFilesWithValidADHeader
+[       OK ] R4WriterADTest.FreshInitBuildsFourBlockFilesWithValidADHeader (2 ms)
+[ RUN      ] R4WriterADTest.DisableFlagsKeepTickCacheButTouchNothingElse
+[       OK ] R4WriterADTest.DisableFlagsKeepTickCacheButTouchNothingElse (6 ms)
+[ RUN      ] R4WriterADTest.ReloadExistingCacheRebuildsIndex
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtDataStorageAD/../Includes/WTSStruct.h:197:2: runtime error: constructor call on misaligned address 0x00016fb592c4 for type 'wtp::WTSTickStruct *', which requires 8 byte alignment
+0x00016fb592c4: note: pointer points here
+  01 00 00 00 00 00 00 00  e0 a9 b5 6f 01 00 00 00  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00
+              ^ 
+    #0 0x0001003da968 in wtp::WTSTickStruct::WTSTickStruct()+0x40 (s5_ad_lane:arm64+0x100136968)
+    #1 0x000100a160c8 in _TickCacheItem::_TickCacheItem()+0x38 (s5_ad_lane:arm64+0x1007720c8)
+    #2 0x000100a1607c in _TickCacheItem::_TickCacheItem()+0x34 (s5_ad_lane:arm64+0x10077207c)
+    #3 0x000100a0fc6c in r4fx::make_tick_item(char const*, char const*, unsigned int, double)+0x14c (s5_ad_lane:arm64+0x10076bc6c)
+    #4 0x000100a0d184 in (anonymous namespace)::R4WriterADTest_ReloadExistingCacheRebuildsIndex_Test::TestBody()+0x644 (s5_ad_lane:arm64+0x100769184)
+    #5 0x000100b4966c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (s5_ad_lane:arm64+0x1008a566c)
+    #6 0x000100b495b4 in testing::Test::Run()+0xcc (s5_ad_lane:arm64+0x1008a55b4)
+    #7 0x000100b4a194 in testing::TestInfo::Run()+0xd0 (s5_ad_lane:arm64+0x1008a6194)
+    #8 0x000100b4ac18 in testing::TestSuite::Run()+0x1c4 (s5_ad_lane:arm64+0x1008a6c18)
+    #9 0x000100b56040 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (s5_ad_lane:arm64+0x1008b2040)
+    #10 0x000100b559ec in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (s5_ad_lane:arm64+0x1008b19ec)
+    #11 0x000100b55950 in testing::UnitTest::Run()+0x78 (s5_ad_lane:arm64+0x1008b1950)
+    #12 0x000100b36d58 in main+0x40 (s5_ad_lane:arm64+0x100892d58)
+    #13 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtDataStorageAD/../Includes/WTSStruct.h:197:2 

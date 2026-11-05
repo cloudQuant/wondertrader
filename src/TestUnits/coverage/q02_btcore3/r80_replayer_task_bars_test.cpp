@@ -79,7 +79,7 @@ TEST_F(R80TaskBars, MinuteTaskReplaysSubscribedBars)
 
 	ASSERT_TRUE(rp.prepare());
 	ASSERT_NE(nullptr, sink.slice);
-	ASSERT_EQ(1u, sink.slice->size());
+	ASSERT_EQ(1, sink.slice->size());
 	EXPECT_EQ(930u, (uint32_t)(sink.slice->at(0)->time % 10000u));
 
 	rp.run(false);

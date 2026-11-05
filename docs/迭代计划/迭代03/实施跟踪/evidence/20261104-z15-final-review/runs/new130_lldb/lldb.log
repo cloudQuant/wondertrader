@@ -1,0 +1,25 @@
+(lldb) target create "/tmp/wt-i03-zreview-20261104/build/build_x64/Debug/bin/TestUnits/CoverageTests_porter"
+Current executable set to '/tmp/wt-i03-zreview-20261104/build/build_x64/Debug/bin/TestUnits/CoverageTests_porter' (arm64).
+(lldb) settings set target.disable-aslr true
+(lldb) process launch -X false -- --gtest_filter=R82PorterCapiReal.*
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[0;33mNote: Google Test filter = R82PorterCapiReal.*
+[m[0;32m[==========] [mRunning 4 tests from 1 test suite.
+[0;32m[----------] [mGlobal test environment set-up.
+[0;32m[----------] [m4 tests from R82PorterCapiReal
+[0;32m[ RUN      ] [mR82PorterCapiReal.CtaEntriesAndSliceMisses
+[0;32m[       OK ] [mR82PorterCapiReal.CtaEntriesAndSliceMisses (8 ms)
+[0;32m[ RUN      ] [mR82PorterCapiReal.SelEntriesAndSliceMisses
+Process 97046 launched: '/tmp/wt-i03-zreview-20261104/build/build_x64/Debug/bin/TestUnits/CoverageTests_porter' (arm64)
+Process 97046 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = EXC_BAD_ACCESS (code=1, address=0x0)
+    frame #0: 0x0000000108079d54 libWtPorter.dylib`wtp::WtEngine::get_commodity_info(this=0x00000001004baec0, stdCode="SHFE.au.2406") at WtEngine.cpp:132:25
+   129 	WTSCommodityInfo* WtEngine::get_commodity_info(const char* stdCode)
+   130 	{
+   131 		CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+-> 132 		return _base_data_mgr->getCommodity(codeInfo._exchg, codeInfo._product);
+    		                       ^
+   133 	}
+   134 	
+   135 	WTSContractInfo* WtEngine::get_contract_info(const char* stdCode)
+Target 0: (CoverageTests_porter) stopped.

@@ -592,7 +592,10 @@ TEST_F(P09DataReaderTest, get_adj_factor_by_date_branches)
 	lst.push_back(WtDataReader::AdjFactor{ 20210601, 0.5 });
 	// getAdjFactorByDate 会按 isExright() 裁掉 stdCode 末位，两种 key 都灌上，
 	// 这样断言只依赖本文件的日期分支逻辑，不依赖 CodeHelper 的复权判定。
-	reader._adj_factors["SSE.STK.60010"] = lst;
+	// I03-NEW-110：先拷贝再插入。_adj_factors 的值存放在连续 vector 中，插入新 key
+	// 可能重新分配，使引用 lst 悬空（ASan heap-use-after-free）。
+	const WtDataReader::AdjFactorList lstCopy = lst;
+	reader._adj_factors["SSE.STK.60010"] = lstCopy;
 
 	// 非股票 -> 1.0
 	EXPECT_DOUBLE_EQ(reader.getAdjFactorByDate("SHFE.rb0", 20210101), 1.0);

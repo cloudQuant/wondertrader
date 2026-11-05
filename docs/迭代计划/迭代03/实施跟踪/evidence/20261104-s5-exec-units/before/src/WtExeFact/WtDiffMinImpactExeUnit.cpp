@@ -1,0 +1,618 @@
+/*!
+ * \file WtDiffMinImpactExeUnit.cpp
+ *
+ * \author Wesley
+ * \date 2020/03/30
+ *
+ * \brief 差量最小冲击执行单元的实现
+ * \details 本文件实现了WonderTrader的差量最小冲击执行单元类，
+ *          该执行单元基于差量交易策略，通过控制委托价格、交易时机和交易量，
+ *          实现对市场影响最小化的执行策略，适用于大单交易场景
+ */
+#include "WtDiffMinImpactExeUnit.h"
+#include "../Includes/IExecPluginV2.h"
+
+#include "../Includes/WTSVariant.hpp"
+#include "../Includes/WTSContractInfo.hpp"
+#include "../Includes/WTSSessionInfo.hpp"
+#include "../Share/decimal.h"
+#include "../Share/StrUtil.hpp"
+#include "../Share/fmtlib.h"
+
+#include <memory>
+
+namespace
+{
+template <typename T>
+struct ReleaseRetainedWTSObject
+{
+	void operator()(T* obj) const
+	{
+		if (obj)
+			obj->release();
+	}
+};
+}
+
+extern const char* FACT_NAME;
+
+extern const char* PriceModeNames[4];
+
+/**
+ * @brief 构造函数
+ * @details 初始化差量最小冲击执行单元的成员变量，将指针设置为空，数值设置为初始值
+ */
+WtDiffMinImpactExeUnit::WtDiffMinImpactExeUnit()
+	: _last_tick(NULL)
+	, _left_diff(0)
+	, _comm_info(NULL)
+	, _sess_info(NULL)
+	, _price_offset(0)
+	, _expire_secs(0)
+	, _price_mode(0)
+	, _price_mode_valid(false)
+	, _initialization_succeeded(false)
+	, _cancel_cnt(0)
+	, _cancel_times(0)
+	, _last_place_time(0)
+	, _last_tick_time(0)
+	, _in_calc(false)
+{
+}
+
+
+/**
+ * @brief 析构函数
+ * @details 清理差量最小冲击执行单元的资源，释放行情和商品信息所占用的内存
+ */
+WtDiffMinImpactExeUnit::~WtDiffMinImpactExeUnit()
+{
+	if (_last_tick)
+		_last_tick->release();
+
+	if (_comm_info)
+		_comm_info->release();
+
+	if (_sess_info)
+		_sess_info->release();
+}
+
+/**
+ * @brief 获取所属执行器工厂名称
+ * @return 执行器工厂名称
+ */
+const char* WtDiffMinImpactExeUnit::getFactName()
+{
+	return FACT_NAME;
+}
+
+/**
+ * @brief 获取执行单元名称
+ * @return 执行单元名称
+ */
+const char* WtDiffMinImpactExeUnit::getName()
+{
+	return "WtDiffMinImpactExeUnit";
+}
+
+/**
+ * @brief 初始化执行单元
+ * @details 根据给定的配置初始化差量最小冲击执行单元的各项参数
+ * @param ctx 执行单元运行环境
+ * @param stdCode 管理的合约代码
+ * @param cfg 执行单元配置
+ */
+void WtDiffMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg)
+{
+	// Reserved host key (IExecPluginV2.h): automatic timeout cancels only with host-verified identity.
+	_host_order_identity = cfg != NULL && cfg->getUInt32(WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY) == 1;
+	if (_ctx != NULL)
+	{
+		if (ctx)
+			ctx->writeLog("DiffMinImpact initialization failed: init may only run once");
+		return;
+	}
+
+	_initialization_succeeded = false;
+	_price_mode_valid = false;
+	if (ctx == NULL || stdCode == NULL || stdCode[0] == '\0' || cfg == NULL)
+	{
+		if (ctx)
+			ctx->writeLog("DiffMinImpact initialization failed: context, non-empty code, and configuration are required");
+		return;
+	}
+
+	WTSCommodityInfo* commInfo = ctx->getCommodityInfo(stdCode);
+	if (commInfo)
+		commInfo->retain();
+	std::unique_ptr<WTSCommodityInfo, ReleaseRetainedWTSObject<WTSCommodityInfo>> commInfoOwner(commInfo);
+
+	WTSSessionInfo* sessInfo = ctx->getSessionInfo(stdCode);
+	if (sessInfo)
+		sessInfo->retain();
+	std::unique_ptr<WTSSessionInfo, ReleaseRetainedWTSObject<WTSSessionInfo>> sessInfoOwner(sessInfo);
+	if (!commInfoOwner || !sessInfoOwner || sessInfoOwner->getSectionCount() == 0)
+	{
+		ctx->writeLog(fmtutil::format("DiffMinImpact initialization failed for {}: commodity and non-empty session are required", stdCode));
+		return;
+	}
+
+	ExecuteUnit::init(ctx, stdCode, cfg);
+
+	_price_offset = cfg->getInt32("offset");	//价格偏移跳数，一般和订单同方向
+	_expire_secs = cfg->getUInt32("expire");	//订单超时秒数
+	_price_mode = cfg->getInt32("pricemode");	//价格类型,0-最新价,-1-最优价,1-对手价,2-自动,默认为0
+	_price_mode_valid = (_price_mode >= -1 && _price_mode <= 2);
+	const char* priceModeName = "INVALID";
+	if (_price_mode_valid)
+		priceModeName = PriceModeNames[_price_mode + 1];
+	else
+	{
+		ctx->writeLog(fmtutil::format("Invalid pricemode {} for {}, execution disabled; valid range is [-1, 2]", _price_mode, stdCode));
+	}
+	_entrust_span = cfg->getUInt32("span");		//发单时间间隔，单位毫秒
+	_by_rate = cfg->getBoolean("byrate");		//是否按照对手的挂单数的比例下单，如果是true，则rate字段生效，如果是false则lots字段生效
+	_order_lots = cfg->getDouble("lots");		//单次发单手数
+	_qty_rate = cfg->getDouble("rate");			//下单手数比例
+
+	ctx->writeLog(fmtutil::format("DiffMiniImpactExecUnit {} inited, order price: {} ± {} ticks, order expired: {} secs, order timespan:{} millisec, order qty: {} @ {:.2f}",
+		stdCode, priceModeName, _price_offset, _expire_secs, _entrust_span, _by_rate ? "byrate" : "byvol", _by_rate ? _qty_rate : _order_lots));
+	_comm_info = commInfoOwner.release();
+	_sess_info = sessInfoOwner.release();
+	_initialization_succeeded = _price_mode_valid;
+}
+
+/**
+ * @brief 订单回报处理
+ * @details 处理交易所返回的订单状态变化，包括订单成交和撤单情况
+ * @param localid 本地订单号
+ * @param stdCode 合约代码
+ * @param isBuy 是否买入
+ * @param leftover 剩余未成交数量
+ * @param price 委托价格
+ * @param isCanceled 是否已撤销
+ */
+void WtDiffMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, bool /*isBuy*/, double leftover, double /*price*/, bool isCanceled)
+{
+	if (!_initialization_succeeded)
+		return;
+	{
+		if (!_orders_mon.has_order(localid))
+			return;
+
+		if (isCanceled || leftover == 0)
+		{	
+			// Keep the local-id association for a possibly late trade report, but
+			// remove this terminal order from future expiry scans.
+			_orders_mon.mark_order_terminal(localid);
+			if (_cancel_cnt > 0)
+			{
+				_cancel_cnt--;
+				_ctx->writeLog(fmtutil::format("[{}@{}] Order of {} cancelling done, cancelcnt -> {}", __FILE__, __LINE__, _code.c_str(), _cancel_cnt));
+			}
+		}
+
+		if (leftover == 0 && !isCanceled)
+			_cancel_times = 0;
+	}
+
+	//如果有撤单,也触发重新计算
+	if (isCanceled)
+	{
+		_ctx->writeLog(fmtutil::format("Order {} of {} canceled, recalc will be done", localid, stdCode));
+		_cancel_times++;
+		do_calc();
+	}
+}
+
+/**
+ * @brief 交易通道就绪回调
+ * @details 当交易通道连接就绪时触发，检查未完成订单并重新计算交易策略
+ *          处理三种情况：
+ *          1. 存在未完成单但本地没有监控，则撤销全部
+ *          2. 本地有监控的订单但交易所无订单，则清理本地订单
+ *          3. 其他未识别情况记录日志
+ */
+void WtDiffMinImpactExeUnit::on_channel_ready()
+{
+	if (!_initialization_succeeded)
+		return;
+
+	double undone = _ctx->getUndoneQty(_code.c_str());
+
+	if(!decimal::eq(undone, 0) && !_orders_mon.has_order())
+	{
+		if (!wtRunIfNoUnverifiedTimeout(_orders_mon, [this, undone]() {
+		/*
+		 *	如果未完成单不为0，而OMS没有订单
+		 *	这说明有未完成单不在监控之中,全部撤销掉
+		 *	因为这些订单没有本地订单号，无法直接进行管理
+		 *	这种情况，就是刚启动的时候，上次的未完成单或者外部的挂单
+		 */
+		_ctx->writeLog(fmtutil::format("Unmanaged live orders with qty {} of {} found, cancel all", undone, _code.c_str()));
+
+		bool isBuy = (undone > 0);
+		OrderIDs ids = _ctx->cancel(_code.c_str(), isBuy);
+		_orders_mon.push_order(ids.data(), ids.size(), _ctx->getCurTime());
+		_cancel_cnt += ids.size();
+
+		_ctx->writeLog(fmtutil::format("[{}@{}]cancelcnt -> {}", __FILE__, __LINE__, _cancel_cnt));
+		}))
+			_ctx->writeLog(fmtutil::format("Unmanaged-order cancellation for {} suppressed after an unverified timeout", _code.c_str()));
+	}
+	else if (decimal::eq(undone, 0) && _orders_mon.has_order())
+	{
+		/*
+		 *	By Wesey @ 2021.12.13
+		 *	如果未完成单为0，但是OMS中是有订单的
+		 *	说明OMS中是错单，需要清理掉，不然超时撤单就会出错
+		 *	这种情况，一般是断线重连以后，之前下出去的订单，并没有真正发送到柜台
+		 *	所以这里需要清理掉本地订单
+		 */
+		_ctx->writeLog(fmtutil::format("Local orders of {} not confirmed in trading channel, clear all", _code.c_str()));
+		_orders_mon.clear_orders();
+	}
+	else
+	{
+		_ctx->writeLog(fmtutil::format("Unrecognized condition while channle ready, {:.2f} live orders of {} exists, local orders {}exist",
+			undone, _code.c_str(), _orders_mon.has_order() ? "" : "not "));
+	}
+
+
+	do_calc();
+}
+
+/**
+ * @brief 交易通道丢失回调
+ * @details 当交易通道断开连接时触发，当前版本未实现具体处理逻辑
+ */
+void WtDiffMinImpactExeUnit::on_channel_lost()
+{
+	
+}
+
+/**
+ * @brief 处理行情数据
+ * @details 处理新到的行情数据，更新内部状态，判断是否撤销过期订单，并触发交易计算
+ * @param newTick 最新的市场行情数据
+ */
+void WtDiffMinImpactExeUnit::on_tick(WTSTickData* newTick)
+{
+	if (!_initialization_succeeded)
+		return;
+
+	if (newTick == NULL || _code.compare(newTick->code()) != 0)
+		return;
+
+	//如果原来的tick不为空,则要释放掉
+	if (_last_tick)
+	{
+		_last_tick->release();
+	}
+	else
+	{
+		//如果行情时间不在交易时间,这种情况一般是集合竞价的行情进来,下单会失败,所以直接过滤掉这笔行情
+		if (_sess_info != NULL && !_sess_info->isInTradingTime(newTick->actiontime() / 100000))
+			return;
+	}
+
+	//新的tick数据,要保留
+	_last_tick = newTick;
+	_last_tick->retain();
+
+	/*
+	 *	这里可以考虑一下
+	 *	如果写的上一次丢出去的单子不够达到目标仓位
+	 *	那么在新的行情数据进来的时候可以再次触发核心逻辑
+	 */
+
+	if(_expire_secs != 0 && _orders_mon.has_order() && _cancel_cnt==0)
+	{
+		uint64_t now = _ctx->getCurTime();
+		_orders_mon.check_orders_with_generation(_expire_secs, now, [this, now](uint32_t localid, uint64_t generation) {
+			if (_host_order_identity)
+			{
+				// 迭代03 卡5 / N05-003：宿主按 owner 与不可复用身份核验后才撤单；核验失败即隔离，不回退裸 ID。
+				const int verified = _orders_mon.cancel_timeout_verified(localid, generation, _expire_secs, now,
+					[this](uint32_t id) { return _ctx->cancel(id); });
+				if (verified > 0)
+				{
+				_cancel_cnt++;
+					_ctx->writeLog((std::string("Expired order ") + std::to_string(localid) + " of " + _code + " canceled with host-verified identity").c_str());
+				}
+				else if (verified < 0)
+					_ctx->writeLog((std::string("Expired order ") + std::to_string(localid) + " of " + _code + " cannot be auto-canceled: host could not verify its identity; order remains monitored").c_str());
+				return;
+			}
+			if (!_orders_mon.mark_unverified_timeout(localid, generation, _expire_secs, now))
+				return; // 终态或 localid 已复用；不得复活旧快照
+			_ctx->writeLog(fmtutil::format("Expired order {} of {} cannot be auto-canceled: legacy localid is unverified; order remains monitored",
+				localid, _code.c_str()));
+		});
+	}
+	if (_orders_mon.has_unverified_timeout())
+		return;
+	do_calc();
+}
+
+/**
+ * @brief 成交回报处理
+ * @details 处理订单成交信息，更新差量仓位信息
+ * @param localid 本地订单号
+ * @param stdCode 合约代码
+ * @param isBuy 买卖方向，true表示买入，false表示卖出
+ * @param vol 成交数量
+ * @param price 成交价格
+ */
+void WtDiffMinImpactExeUnit::on_trade(uint32_t localid, const char* /*stdCode*/, bool isBuy, double vol, double /*price*/)
+{
+	if (!_initialization_succeeded)
+		return;
+	//如果是本地订单，则更新差量
+	if (!_orders_mon.has_order(localid))
+		return;
+
+	_left_diff -= vol * (isBuy ? 1 : -1);
+
+	_ctx->writeLog(fmtutil::format("Left diff of {} updated to {}", _code.c_str(), _left_diff));
+}
+
+/**
+ * @brief 委托回报处理
+ * @details 处理委托单的下单结果回报，当下单失败时清空监控结构并重新计算
+ * @param localid 本地订单号
+ * @param stdCode 合约代码
+ * @param bSuccess 是否下单成功
+ * @param message 错误消息，当bSuccess为false时有效
+ */
+void WtDiffMinImpactExeUnit::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* /*message*/)
+{
+	if (!_initialization_succeeded)
+		return;
+	if (!bSuccess)
+	{
+		//如果不是我发出去的订单,我就不管了
+		if (!_orders_mon.has_order(localid))
+			return;
+
+		_orders_mon.erase_order(localid);
+
+		do_calc();
+	}
+}
+
+/**
+ * @brief 执行差量交易的核心计算逻辑
+ * @details 根据差量、市场状态和配置参数计算并发出订单。具体流程包括：
+ *          1. 使用互斥锁和原子布尔变量防止重复计算
+ *          2. 检查是否有未成交订单或正在撤销的订单
+ *          3. 根据价格模式计算委托价格
+ *          4. 根据下单方式(固定手数或比例)、差仓量和当前持仓计算交易数量
+ *          5. 检查并调整涨跌停价格
+ *          6. 发送买卖订单
+ */
+void WtDiffMinImpactExeUnit::do_calc()
+{
+	if (_orders_mon.has_unverified_timeout())
+		return;
+	if (!_initialization_succeeded)
+		return;
+
+	CalcFlag flag(&_in_calc);
+	if (flag)
+	{
+		_ctx->writeLog(fmtutil::format("Duplicated calculating, DiffMinImpactExeUnit of {}", _code));
+		return;
+	}
+
+	if (_cancel_cnt != 0)
+	{
+		_ctx->writeLog(fmtutil::format("In Cancelling, DiffMinImpactExeUnit of {}", _code));
+		return;
+	}
+
+	//这里加一个锁，主要原因是实盘过程中发现
+	//在修改目标仓位的时候，会触发一次do_calc
+	//而ontick也会触发一次do_calc，两次调用是从两个线程分别触发的，所以会出现同时触发的情况
+	//如果不加锁，就会引起问题
+	//这种情况在原来的SimpleExecUnit没有出现，因为SimpleExecUnit只在set_position的时候触发
+	StdUniqueLock lock(_mtx_calc);
+
+	const char* stdCode = _code.c_str();
+
+	double undone = _ctx->getUndoneQty(stdCode);
+	double diffPos = _left_diff;
+
+	//因为是逐笔发单，所以如果有不需要撤销的未完成单，则暂不发单
+	if (!decimal::eq(undone, 0))
+	{
+		_ctx->writeLog(fmtutil::format("Live orders exist, DiffMinImpactExeUnit of {}", _code));
+		return;
+	}
+
+	if (decimal::eq(diffPos, 0))
+		return;
+
+	if (_last_tick == NULL)
+	{
+		_ctx->writeLog(fmtutil::format("No lastest tick data of {}, execute later", _code.c_str()));
+		return;
+	}
+
+	//检查下单时间间隔
+	uint64_t now = TimeUtils::makeTime(_last_tick->actiondate(), _last_tick->actiontime());
+	if (now - _last_place_time < _entrust_span)
+		return;
+
+	bool isBuy = decimal::gt(diffPos, 0);
+
+	//如果相比上次没有更新的tick进来，则先不下单，防止开盘前集中下单导致通道被封
+	uint64_t curTickTime = (uint64_t)_last_tick->actiondate() * 1000000000 + _last_tick->actiontime();
+	if (curTickTime <= _last_tick_time)
+	{
+		_ctx->writeLog(fmtutil::format("No tick of {} updated, {} <= {}, execute later",
+			_code, curTickTime, _last_tick_time));
+		return;
+	}
+
+	_last_tick_time = curTickTime;
+
+	double this_qty = _order_lots;
+	if (_by_rate)
+	{
+		this_qty = isBuy ? _last_tick->askqty(0) : _last_tick->bidqty(0);
+		this_qty = round(this_qty*_qty_rate);
+		if (decimal::lt(this_qty, 1))
+			this_qty = 1;
+	}
+
+	//By Wesley @ 2022.09.13
+	//这里要对下单数量做一个修正
+	this_qty = min(this_qty, abs(diffPos));
+
+	//如果买入且有空头持仓，或者卖出且有多头持仓
+	//对单次下单做一个修正，保证平仓和开仓不会同时下单
+	double curPos = _ctx->getPosition(stdCode);
+	if((isBuy && decimal::lt(curPos, 0)) || (!isBuy && decimal::gt(curPos, 0)))
+	{
+		this_qty = min(this_qty, abs(curPos));
+	}
+
+	double buyPx = 0.0, sellPx = 0.0;
+	if (_price_mode == 2)
+	{
+		double mp = (_last_tick->bidqty(0) - _last_tick->askqty(0))*1.0 / (_last_tick->bidqty(0) + _last_tick->askqty(0));
+		bool isUp = (mp > 0);
+		if (isUp)
+		{
+			buyPx = _last_tick->askprice(0);
+			sellPx = _last_tick->askprice(0);
+		}
+		else
+		{
+			buyPx = _last_tick->bidprice(0);
+			sellPx = _last_tick->bidprice(0);
+		}
+
+		/*
+		 *	By Wesley @ 2022.03.07
+		 *	如果最后价格为0，再做一个修正
+		 */
+		if (decimal::eq(buyPx, 0.0))
+			buyPx = decimal::eq(_last_tick->price(), 0.0) ? _last_tick->preclose() : _last_tick->price();
+
+		if (decimal::eq(sellPx, 0.0))
+			sellPx = decimal::eq(_last_tick->price(), 0.0) ? _last_tick->preclose() : _last_tick->price();
+
+		buyPx += _comm_info->getPriceTick() * _cancel_times;
+		sellPx -= _comm_info->getPriceTick() * _cancel_times;
+	}
+	else
+	{
+		if (_price_mode == -1)
+		{
+			buyPx = _last_tick->bidprice(0);
+			sellPx = _last_tick->askprice(0);
+		}
+		else if (_price_mode == 0)
+		{
+			buyPx = _last_tick->price();
+			sellPx = _last_tick->price();
+		}
+		else if (_price_mode == 1)
+		{
+			buyPx = _last_tick->askprice(0);
+			sellPx = _last_tick->bidprice(0);
+		}
+
+		/*
+		 *	By Wesley @ 2022.03.07
+		 *	如果最后价格为0，再做一个修正
+		 */
+		if (decimal::eq(buyPx, 0.0))
+			buyPx = decimal::eq(_last_tick->price(), 0.0)? _last_tick->preclose(): _last_tick->price();
+
+		if (decimal::eq(sellPx, 0.0))
+			sellPx = decimal::eq(_last_tick->price(), 0.0) ? _last_tick->preclose() : _last_tick->price();
+
+		buyPx += _comm_info->getPriceTick() * _price_offset;
+		sellPx -= _comm_info->getPriceTick() * _price_offset;
+	}
+	
+
+	//检查涨跌停价
+	bool isCanCancel = true;
+	if (!decimal::eq(_last_tick->upperlimit(), 0) && decimal::gt(buyPx, _last_tick->upperlimit()))
+	{
+		_ctx->writeLog(fmtutil::format("Buy price {} of {} modified to upper limit price", buyPx, _code.c_str(), _last_tick->upperlimit()));
+		buyPx = _last_tick->upperlimit();
+		isCanCancel = false;	//如果价格被修正为涨跌停价，订单不可撤销
+	}
+	
+	if (!decimal::eq(_last_tick->lowerlimit(), 0) && decimal::lt(sellPx, _last_tick->lowerlimit()))
+	{
+		_ctx->writeLog(fmtutil::format("Sell price {} of {} modified to lower limit price", sellPx, _code.c_str(), _last_tick->lowerlimit()));
+		sellPx = _last_tick->lowerlimit();
+		isCanCancel = false;	//如果价格被修正为涨跌停价，订单不可撤销
+	}
+
+	if (_orders_mon.has_unverified_timeout())
+		return;
+	if (isBuy)
+	{
+		OrderIDs ids = _ctx->buy(stdCode, buyPx, this_qty, false);
+		_orders_mon.push_order(ids.data(), ids.size(), _ctx->getCurTime(), isCanCancel);
+	}
+	else
+	{
+		OrderIDs ids  = _ctx->sell(stdCode, sellPx, this_qty, false);
+		_orders_mon.push_order(ids.data(), ids.size(), _ctx->getCurTime(), isCanCancel);
+	}
+
+	_last_place_time = now;
+}
+
+/**
+ * @brief 设置新的目标仓位差量
+ * @details 更新差量最小冲击执行单元的目标仓位差量，并在差量发生变化时触发交易计算
+ *          注意该执行单元不支持清仓命令（newDiff = DBL_MAX）
+ * @param stdCode 合约代码
+ * @param newDiff 新的目标仓位差量
+ */
+void WtDiffMinImpactExeUnit::set_position(const char* stdCode, double newDiff)
+{
+	if (!_initialization_succeeded || stdCode == NULL)
+		return;
+	if (_code.compare(stdCode) != 0)
+		return;
+
+	if (newDiff == DBL_MAX)
+	{
+		_ctx->writeLog("Diff execute unit do not support clear command");
+		return;
+	}
+
+	//这里就是最新的差量
+
+	if(_left_diff != newDiff)
+	{
+		_left_diff = newDiff;
+
+		_ctx->writeLog(fmtutil::format("Diff of {} updated to {}", stdCode, _left_diff));
+
+		do_calc();
+	}
+}
+
+/**
+ * @brief 清空所有持仓
+ * @details 清空合约的全部持仓。差量最小冲击执行单元不支持此操作，只会记录日志而不进行任何操作
+ * @param stdCode 合约代码
+ */
+void WtDiffMinImpactExeUnit::clear_all_position(const char* /*stdCode*/)
+{
+	if (!_initialization_succeeded)
+		return;
+	_ctx->writeLog("Diff execute unit do not support clear command");
+	return;
+}

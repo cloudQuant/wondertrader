@@ -32,19 +32,8 @@ namespace t26_test::load_json_test_hook
 }
 #endif
 
-struct CTraderSpiQueueTestAccess
-{
-	static void load_from_json(CTraderSpi& spi)
-	{
-		spi.LoadFromJson();
-	}
-
-	static bool wait_until_stopped(CTraderSpi& spi, std::chrono::milliseconds timeout)
-	{
-		std::unique_lock<std::mutex> lock(spi._mtx);
-		return spi._query_ready.wait_for(lock, timeout, [&spi]() { return spi._stopped; });
-	}
-};
+// CTraderSpiQueueTestAccess 移至共享头（dump/flow 同一二进制，ODR 只能一份定义）。
+#include "t26_spi_access.hpp"
 
 namespace
 {
@@ -71,12 +60,13 @@ namespace
 	}
 
 	// 用一条可控的 SHFE 期货合约把 _contracts 填上（bIsLast=false，不触 exit、不落队列）
-	void seed_shfe_future(CTraderSpi& spi, const std::string& inst, const std::string& product)
+	// 卡14 14a（I03-NEW-093）：QRYFEES 下合约回报必须带本批次已登记的请求号；非费率模式沿用固定号 20。
+	void seed_shfe_future(CTraderSpi& spi, const std::string& inst, const std::string& product, int requestId = 20)
 	{
 		auto f = t26::make_instrument("SHFE", inst, product, THOST_FTDC_PC_Futures);
 		t26::set_fixed(f.InstrumentName, sizeof(f.InstrumentName), "seed");
 		auto ok = t26::ok_rsp();
-		spi.OnRspQryInstrument(&f, &ok, 20, false);
+		spi.OnRspQryInstrument(&f, &ok, requestId, false);
 	}
 
 	class ReentrantQueueApiStub : public T26CtpApiStub
@@ -89,13 +79,15 @@ namespace
 			int result = T26CtpApiStub::ReqQryInstrument(field, requestID);
 			if (_spi != NULL)
 			{
+				// 卡14 14a：合约行与终帧必须带本次登记的请求号（改前用 101..103 等未登记号各发一次终帧）。
+				emit_instrument_row(requestID);
 				// Exercise a synchronous callback reentering AppendQuery while the
 				// worker is still inside the API call.
-				emit_instrument_last();
+				emit_instrument_last(requestID);
 
-				// Exercise multiple callback producers adding to the same queue.
-				std::thread first([this]() { emit_instrument_last(); });
-				std::thread second([this]() { emit_instrument_last(); });
+				// Concurrent duplicate final frames for the same request are ignored once it is terminal.
+				std::thread first([this, requestID]() { emit_instrument_last(requestID); });
+				std::thread second([this, requestID]() { emit_instrument_last(requestID); });
 				first.join();
 				second.join();
 			}
@@ -130,19 +122,27 @@ namespace
 		{
 			std::unique_lock<std::mutex> lock(_mutex);
 			return _ready.wait_for(lock, timeout, [this]() {
-				return _commission_count == 3 && _margin_count == 3;
+				// 卡14 14a：同一批次只接受一次合约终帧，rb2510 恰好一条佣金、一条保证金查询（改前 3/3）。
+				return _commission_count == 1 && _margin_count == 1;
 			});
 		}
 
 	private:
-		void emit_instrument_last()
+		void emit_instrument_row(int requestID)
+		{
+			auto f = t26::make_instrument("SHFE", "rb2510", "rb", THOST_FTDC_PC_Futures);
+			t26::set_fixed(f.InstrumentName, sizeof(f.InstrumentName), "seed");
+			auto ok = t26::ok_rsp();
+			_spi->OnRspQryInstrument(&f, &ok, requestID, false);
+		}
+
+		void emit_instrument_last(int requestID)
 		{
 			auto ok = t26::ok_rsp();
-			_spi->OnRspQryInstrument(NULL, &ok, ++_callback_id, true);
+			_spi->OnRspQryInstrument(NULL, &ok, requestID, true);
 		}
 
 		CTraderSpi* _spi = NULL;
-		std::atomic<int> _callback_id{ 100 };
 		std::mutex _mutex;
 		std::condition_variable _ready;
 		unsigned int _commission_count = 0;
@@ -526,19 +526,21 @@ TEST(t26_ctploader_flow, last_instrument_response_with_fees_switch_queues_both_r
 
 	CTraderSpi* spi = leaked_spi();
 	t26::FdRedirectGuard worker_noise(SAVEPATH + "worker_noise.log");
-	seed_shfe_future(*spi, "rb2510", "rb");
+	const int instId = CTraderSpiQueueTestAccess::begin_instrument_query(*spi);	// 卡14 14a：登记合约查询
+	ASSERT_NE(0, instId);
+	seed_shfe_future(*spi, "rb2510", "rb", instId);
 	ASSERT_EQ(1u, _contracts.count("rb2510"));
 
 	{
 		auto ok = t26::ok_rsp();
 		// L527-541：QRYFEES=true 的 bIsLast 不 exit，而是逐合约入列 commission+margin
 		// （本次 AppendQuery 会创建 worker —— 所以外层从一开始就用 fd 重定向）
-		spi->OnRspQryInstrument(NULL, &ok, 21, true);
+		spi->OnRspQryInstrument(NULL, &ok, instId, true);
 	}
 
 	// 队列限速 ~1010ms/条：两条都要等 worker 消费完
 	ASSERT_TRUE(t26::wait_for([&stub]() {
-		return !stub.comm_reqs_.empty() && !stub.margin_reqs_.empty();
+		return stub.n_comm_ >= 1u && stub.n_margin_ >= 1u;	// I03-NEW-139: poll atomic counters
 	}));
 
 	const CThostFtdcQryInstrumentCommissionRateField& cq = stub.comm_reqs_[0];
@@ -567,13 +569,15 @@ TEST(t26_ctploader_flow, rate_requests_use_loaded_altcode_when_present)
 
 	CTraderSpi* spi = leaked_spi();
 	t26::FdRedirectGuard worker_noise(SAVEPATH + "worker_noise.log");
-	seed_shfe_future(*spi, "rb2510", "rb");
+	const int instId = CTraderSpiQueueTestAccess::begin_instrument_query(*spi);	// 卡14 14a：登记合约查询
+	ASSERT_NE(0, instId);
+	seed_shfe_future(*spi, "rb2510", "rb", instId);
 	_contracts["rb2510"].m_strAltCode = "rb510";
 
 	auto ok = t26::ok_rsp();
-	spi->OnRspQryInstrument(NULL, &ok, 22, true);
+	spi->OnRspQryInstrument(NULL, &ok, instId, true);
 	ASSERT_TRUE(t26::wait_for([&stub]() {
-		return !stub.comm_reqs_.empty() && !stub.margin_reqs_.empty();
+		return stub.n_comm_ >= 1u && stub.n_margin_ >= 1u;	// I03-NEW-139: poll atomic counters
 	}));
 
 	ASSERT_EQ(1u, stub.comm_reqs_.size());
@@ -596,15 +600,17 @@ TEST(t26_ctploader_flow, fee_filter_only_queues_contracts_matching_code_or_produ
 
 	CTraderSpi* spi = leaked_spi();
 	t26::FdRedirectGuard worker_noise(SAVEPATH + "worker_noise.log");
-	seed_shfe_future(*spi, "rb2510", "rb");
-	seed_shfe_future(*spi, "au2512", "au");
+	const int instId = CTraderSpiQueueTestAccess::begin_instrument_query(*spi);	// 卡14 14a：登记合约查询
+	ASSERT_NE(0, instId);
+	seed_shfe_future(*spi, "rb2510", "rb", instId);
+	seed_shfe_future(*spi, "au2512", "au", instId);
 	ASSERT_EQ(2u, _contracts.size());
 
 	auto ok = t26::ok_rsp();
-	spi->OnRspQryInstrument(NULL, &ok, 22, true);
+	spi->OnRspQryInstrument(NULL, &ok, instId, true);
 
 	// au 的两条请求先后被限速隔开；rb 被 L534-536 过滤掉
-	ASSERT_TRUE(t26::wait_for([&stub]() { return !stub.margin_reqs_.empty(); }));
+	ASSERT_TRUE(t26::wait_for([&stub]() { return stub.n_margin_ >= 1u; }));
 	// 若过滤失效，rb 的两条会在再下一个 1010ms 窗口出现；多等一拍把它证伪
 	std::this_thread::sleep_for(std::chrono::milliseconds(1400));
 	EXPECT_EQ(1u, stub.comm_reqs_.size());
@@ -669,9 +675,9 @@ TEST(t26_ctploader_flow, commission_response_switches_between_volume_and_money_m
 		auto ok = t26::ok_rsp();
 		spi.OnRspQryInstrumentCommissionRate(&f, &ok, 32, true);
 	}
-	ASSERT_EQ(1u, _fees.count("m2509"));
-	EXPECT_TRUE(_fees["m2509"]._byvol);
-	EXPECT_NEAR(9.0, _fees["m2509"]._open, 1e-9);
+	// T26-007（2026-11-03 实施记录）：按额非零又同时给出按量值是旧格式无法表达的混合单位，拒绝且不落表
+	// （改前期望：按 eps 判 0 后取按量值记入 _fees）。
+	EXPECT_EQ(0u, _fees.count("m2509"));
 }
 
 TEST(t26_ctploader_flow, margin_response_records_long_short_money_ratios)
@@ -680,6 +686,7 @@ TEST(t26_ctploader_flow, margin_response_records_long_short_money_ratios)
 	QRYFEES = false;
 	CTraderSpi spi;
 
+	// T26-007：导出格式只有单一保证金比例，多空不等的回报无法表达，拒绝且不落表（改前期望记录 0.07/0.09）。
 	CThostFtdcInstrumentMarginRateField f;
 	std::memset(&f, 0, sizeof(f));
 	t26::set_fixed(f.InstrumentID, sizeof(f.InstrumentID), "rb2510");
@@ -687,10 +694,18 @@ TEST(t26_ctploader_flow, margin_response_records_long_short_money_ratios)
 	f.ShortMarginRatioByMoney = 0.09;
 	auto ok = t26::ok_rsp();
 	spi.OnRspQryInstrumentMarginRate(&f, &ok, 40, true);
+	EXPECT_EQ(0u, _margins.count("rb2510"));
 
+	// 多空相等时按额比例照常记录
+	CThostFtdcInstrumentMarginRateField g;
+	std::memset(&g, 0, sizeof(g));
+	t26::set_fixed(g.InstrumentID, sizeof(g.InstrumentID), "rb2510");
+	g.LongMarginRatioByMoney = 0.08;
+	g.ShortMarginRatioByMoney = 0.08;
+	spi.OnRspQryInstrumentMarginRate(&g, &ok, 41, true);
 	ASSERT_EQ(1u, _margins.count("rb2510"));
-	EXPECT_NEAR(0.07, _margins["rb2510"]._long, 1e-9);
-	EXPECT_NEAR(0.09, _margins["rb2510"]._short, 1e-9);
+	EXPECT_NEAR(0.08, _margins["rb2510"]._long, 1e-9);
+	EXPECT_NEAR(0.08, _margins["rb2510"]._short, 1e-9);
 }
 
 TEST(t26_ctploader_flow, gbk_error_message_is_transcoded_to_utf8_before_report)
@@ -729,7 +744,7 @@ TEST(t26_ctploader_flow, concurrent_callbacks_reenter_queue_and_worker_stops_aft
 		t26::FdRedirectGuard worker_noise(SAVEPATH + "worker_noise.log");
 		std::unique_ptr<CTraderSpi> spi(new CTraderSpi());
 		stub.set_spi(spi.get());
-		seed_shfe_future(*spi, "rb2510", "rb");
+		// 合约行改由 stub 在已登记的合约查询内回报（见 ReentrantQueueApiStub）。
 
 		auto rsp = make_login_rsp(3, 4, "5");
 		auto ok = t26::ok_rsp();

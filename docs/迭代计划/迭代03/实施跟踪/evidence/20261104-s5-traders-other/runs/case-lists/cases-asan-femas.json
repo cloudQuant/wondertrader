@@ -1,0 +1,206 @@
+[
+ {
+  "id": "asan-femas",
+  "name": "T4003FemasLifecycle.release_joins_worker_and_delete_does_not_terminate",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "T4003FemasLifecycle.release_joins_worker_and_delete_does_not_terminate",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "T4003FemasLifecycle.idle_worker_still_executes_later_query",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "T4003FemasLifecycle.idle_worker_still_executes_later_query",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "T4003FemasLifecycle.release_waits_for_inflight_request_before_api_release",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "T4003FemasLifecycle.release_waits_for_inflight_request_before_api_release",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "T4003FemasLifecycle.release_waits_for_inflight_order_insert_before_api_release",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "T4003FemasLifecycle.release_waits_for_inflight_order_insert_before_api_release",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "T4003FemasLifecycle.release_from_callback_defers_and_external_release_completes",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "T4003FemasLifecycle.release_from_callback_defers_and_external_release_completes",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "T4003FemasLifecycle.delete_trader_from_callback_quarantines",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "T4003FemasLifecycle.delete_trader_from_callback_quarantines",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "T4003FemasLifecycle.admission_closed_after_release_and_repeated_connect_rejected",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "T4003FemasLifecycle.admission_closed_after_release_and_repeated_connect_rejected",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "T4003FemasLifecycle.late_callback_after_release_is_not_delivered",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "T4003FemasLifecycle.late_callback_after_release_is_not_delivered",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "T4003FemasLifecycle.callback_drain_timeout_reports_unquiesced_and_remover_quarantines",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "T4003FemasLifecycle.callback_drain_timeout_reports_unquiesced_and_remover_quarantines",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "FemasContractFixture.position_query_response_appends_the_reported_item",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "FemasContractFixture.position_query_response_appends_the_reported_item",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "FemasContractFixture.position_query_unknown_contract_returns_empty_final_array",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "FemasContractFixture.position_query_unknown_contract_returns_empty_final_array",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "FemasContractFixture.make_order_info_maps_vendor_order_fields",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "FemasContractFixture.make_order_info_maps_vendor_order_fields",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "FemasContractFixture.make_order_info_falls_back_to_local_id_and_maps_fok",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "FemasContractFixture.make_order_info_falls_back_to_local_id_and_maps_fok",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "FemasContractFixture.order_query_and_push_callbacks",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "FemasContractFixture.order_query_and_push_callbacks",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "FemasContractFixture.trade_query_response_reports_appended_records",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "FemasContractFixture.trade_query_response_reports_appended_records",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "FemasContractFixture.i03_new016_destructor_returns_query_container_ownership_once",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "FemasContractFixture.i03_new016_destructor_returns_query_container_ownership_once",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 180
+ },
+ {
+  "id": "asan-femas",
+  "name": "ALL",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/femas-fix-asan/tests",
+  "filter": "*",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 900
+ }
+]

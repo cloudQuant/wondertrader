@@ -1,0 +1,50 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r17_order_identity.duplicate_cancel_ack_with_two_pending_cancels_is_applied_once
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from r17_order_identity
+[ RUN      ] r17_order_identity.duplicate_cancel_ack_with_two_pending_cancels_is_applied_once
+/tmp/wt-i03-s5-exec-units-snap-green/src/TestUnits/coverage/r7_exefact/r17_order_identity_lifecycle_test.cpp:165: Failure
+Expected equality of these values:
+  unit._cancel_cnt
+    Which is: 0
+  1u
+    Which is: 1
+a repeated terminal report must not release order 502's pending cancel
+
+/tmp/wt-i03-s5-exec-units-snap-green/src/TestUnits/coverage/r7_exefact/r17_order_identity_lifecycle_test.cpp:166: Failure
+Expected equality of these values:
+  unit._cancel_times
+    Which is: 2
+  1u
+    Which is: 1
+a repeated terminal report must not re-price twice
+
+/tmp/wt-i03-s5-exec-units-snap-green/src/TestUnits/coverage/r7_exefact/r17_order_identity_lifecycle_test.cpp:167: Failure
+Value of: ctx.hasLog("Duplicate terminal report of order 501")
+  Actual: false
+Expected: true
+
+/tmp/wt-i03-s5-exec-units-snap-green/src/TestUnits/coverage/r7_exefact/r17_order_identity_lifecycle_test.cpp:171: Failure
+Value of: ctx.buys.empty()
+  Actual: false
+Expected: true
+no new order while a cancellation is still pending
+
+/tmp/wt-i03-s5-exec-units-snap-green/src/TestUnits/coverage/r7_exefact/r17_order_identity_lifecycle_test.cpp:175: Failure
+Expected equality of these values:
+  unit._cancel_times
+    Which is: 3
+  2u
+    Which is: 2
+
+[  FAILED  ] r17_order_identity.duplicate_cancel_ack_with_two_pending_cancels_is_applied_once (4 ms)
+[----------] 1 test from r17_order_identity (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (5 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] r17_order_identity.duplicate_cancel_ack_with_two_pending_cancels_is_applied_once
+
+ 1 FAILED TEST

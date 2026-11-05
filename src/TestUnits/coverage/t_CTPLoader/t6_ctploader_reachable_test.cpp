@@ -21,6 +21,8 @@
  */
 #include <gtest/gtest.h>
 
+#include <cstdlib>
+
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -30,6 +32,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <unistd.h>
 
 #include "CTPLoader/TraderSpi.h"
 #include "Includes/WTSVariant.hpp"
@@ -86,7 +89,9 @@ namespace
 	public:
 		TempCfgFile(const char* name, const std::string& content)
 		{
-			_path = std::filesystem::temp_directory_path() / std::filesystem::path(name);
+			// K48=A：文件名前加进程号（保留扩展名，加载器按扩展名选择格式）。
+			_path = std::filesystem::temp_directory_path() /
+				std::filesystem::path(std::to_string(static_cast<long>(::getpid())) + "_" + name);
 			_cstr = _path.string();
 			std::ofstream ofs(_cstr);
 			ofs << content;
@@ -184,7 +189,9 @@ namespace
 		const ConfigState before;
 		int result = -1;
 		EXPECT_NO_THROW(result = run(cfgfile, false, isFile));
-		EXPECT_EQ(0, result);
+		// I03-NEW-091 / K02=B: Loader run() returns a result code in every mode; a
+		// configuration error is a failure (non-zero), not a silent 0 (was EXPECT_EQ(0, result)).
+		EXPECT_EQ(EXIT_FAILURE, result);
 		expect_config_state_unchanged(before);
 	}
 

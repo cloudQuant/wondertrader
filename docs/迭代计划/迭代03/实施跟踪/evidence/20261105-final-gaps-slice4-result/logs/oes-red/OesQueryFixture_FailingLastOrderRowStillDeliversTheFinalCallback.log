@@ -1,0 +1,31 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = OesQueryFixture.FailingLastOrderRowStillDeliversTheFinalCallback
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from OesQueryFixture
+[ RUN      ] OesQueryFixture.FailingLastOrderRowStillDeliversTheFinalCallback
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_trader_oes_query_s4/oes_query_test.cpp:186: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  sink.legacy_orders
+    Which is: 0
+the final array callback must not be lost
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_trader_oes_query_s4/oes_query_test.cpp:187: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  sink.last_orders_size
+    Which is: 0
+
+[  FAILED  ] OesQueryFixture.FailingLastOrderRowStillDeliversTheFinalCallback (0 ms)
+[----------] 1 test from OesQueryFixture (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] OesQueryFixture.FailingLastOrderRowStillDeliversTheFinalCallback
+
+ 1 FAILED TEST

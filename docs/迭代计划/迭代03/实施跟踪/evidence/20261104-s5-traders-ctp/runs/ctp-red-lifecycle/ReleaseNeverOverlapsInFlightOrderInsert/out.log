@@ -1,0 +1,28 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5TraderCTPLifecycle.ReleaseNeverOverlapsInFlightOrderInsert
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03S5TraderCTPLifecycle
+[ RUN      ] I03S5TraderCTPLifecycle.ReleaseNeverOverlapsInFlightOrderInsert
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/i03s5_traderctp_lifecycle_test.cpp:538: Failure
+Value of: api_.release_overlapped.load()
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/i03s5_traderctp_lifecycle_test.cpp:539: Failure
+Expected equality of these values:
+  kReleased
+    Which is: 2
+  trader_.stopState()
+    Which is: -1
+
+[  FAILED  ] I03S5TraderCTPLifecycle.ReleaseNeverOverlapsInFlightOrderInsert (216 ms)
+[----------] 1 test from I03S5TraderCTPLifecycle (216 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (216 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] I03S5TraderCTPLifecycle.ReleaseNeverOverlapsInFlightOrderInsert
+
+ 1 FAILED TEST

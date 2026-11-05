@@ -1,0 +1,61 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R103LastTickBoundaryTest.FilteredTickIsNotVisibleDuringOtherStreamCallback
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R103LastTickBoundaryTest
+[ RUN      ] R103LastTickBoundaryTest.FilteredTickIsNotVisibleDuringOtherStreamCallback
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r103_replayer_last_tick_boundary_test.cpp:257: Failure
+Value of: sink.gotTick
+  Actual: true
+Expected: false
+
+[  FAILED  ] R103LastTickBoundaryTest.FilteredTickIsNotVisibleDuringOtherStreamCallback (36 ms)
+[----------] 1 test from R103LastTickBoundaryTest (36 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (36 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R103LastTickBoundaryTest.FilteredTickIsNotVisibleDuringOtherStreamCallback
+
+ 1 FAILED TEST
+
+=================================================================
+==54246==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 40 byte(s) in 1 object(s) allocated from:
+    #0 0x000105a850e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x00010ccc5fd0 in createBtDtReader WtBtDtReader.cpp:64
+    #2 0x000104894f4c in HisDataMgr::init(wtp::WTSVariant*)+0x2a4 (prog-final:arm64+0x100490f4c)
+    #3 0x0001044c1130 in HisDataReplayer::init(wtp::WTSVariant*, wtp::EventNotifier*, IBtDataLoader*)+0xcb4 (prog-final:arm64+0x1000bd130)
+    #4 0x000104417370 in R103LastTickBoundaryTest_FilteredTickIsNotVisibleDuringOtherStreamCallback_Test::TestBody()+0xde0 (prog-final:arm64+0x100013370)
+    #5 0x000104a3f3c8 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (prog-final:arm64+0x10063b3c8)
+    #6 0x000104a3f310 in testing::Test::Run()+0xcc (prog-final:arm64+0x10063b310)
+    #7 0x000104a3fef0 in testing::TestInfo::Run()+0xd0 (prog-final:arm64+0x10063bef0)
+    #8 0x000104a40974 in testing::TestSuite::Run()+0x1c4 (prog-final:arm64+0x10063c974)
+    #9 0x000104a4bd9c in testing::internal::UnitTestImpl::RunAllTests()+0x52c (prog-final:arm64+0x100647d9c)
+    #10 0x000104a4b748 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (prog-final:arm64+0x100647748)
+    #11 0x000104a4b6ac in testing::UnitTest::Run()+0x78 (prog-final:arm64+0x1006476ac)
+    #12 0x000104a2c9e4 in main+0x40 (prog-final:arm64+0x1006289e4)
+    #13 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Indirect leak of 88 byte(s) in 1 object(s) allocated from:
+    #0 0x000105a850e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x0001882f83bc in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__init_copy_ctor_external(char const*, unsigned long)+0x64 (libc++.1.dylib:arm64e+0x1b3bc)
+    #2 0x0001882dfd9c in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::basic_string(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&)+0x3c (libc++.1.dylib:arm64e+0x2d9c)
+    #3 0x00010ccc6430 in StrUtil::standardisePath(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, bool) StrUtil.hpp:308
+    #4 0x00010ccc62ec in wtp::WtBtDtReader::init(wtp::WTSVariant*, wtp::IBtDtReaderSink*) WtBtDtReader.cpp:123
+    #5 0x000104894fe4 in HisDataMgr::init(wtp::WTSVariant*)+0x33c (prog-final:arm64+0x100490fe4)
+    #6 0x0001044c1130 in HisDataReplayer::init(wtp::WTSVariant*, wtp::EventNotifier*, IBtDataLoader*)+0xcb4 (prog-final:arm64+0x1000bd130)
+    #7 0x000104417370 in R103LastTickBoundaryTest_FilteredTickIsNotVisibleDuringOtherStreamCallback_Test::TestBody()+0xde0 (prog-final:arm64+0x100013370)
+    #8 0x000104a3f3c8 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (prog-final:arm64+0x10063b3c8)
+    #9 0x000104a3f310 in testing::Test::Run()+0xcc (prog-final:arm64+0x10063b310)
+    #10 0x000104a3fef0 in testing::TestInfo::Run()+0xd0 (prog-final:arm64+0x10063bef0)
+    #11 0x000104a40974 in testing::TestSuite::Run()+0x1c4 (prog-final:arm64+0x10063c974)
+    #12 0x000104a4bd9c in testing::internal::UnitTestImpl::RunAllTests()+0x52c (prog-final:arm64+0x100647d9c)
+    #13 0x000104a4b748 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (prog-final:arm64+0x100647748)
+    #14 0x000104a4b6ac in testing::UnitTest::Run()+0x78 (prog-final:arm64+0x1006476ac)
+    #15 0x000104a2c9e4 in main+0x40 (prog-final:arm64+0x1006289e4)
+    #16 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: 128 byte(s) leaked in 2 allocation(s).

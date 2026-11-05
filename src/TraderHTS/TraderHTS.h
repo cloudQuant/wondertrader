@@ -9,6 +9,7 @@
  */
 #pragma once
 
+#include <atomic>
 #include <string>
 #include <queue>
 #include <unordered_set>
@@ -40,6 +41,10 @@ class TraderHTS : public ITraderApi
 	//friend void callback_rtn1(const char* pTime, const char* pMsg, int nType);
 
 public:
+	// BUG-L01-014: host features declared through setTraderSpiFeatures.
+	void setSpiFeatures(uint64_t features) { m_spiFeatures.store(features); }
+	std::atomic<uint64_t>	m_spiFeatures{ 0 };
+
 	TraderHTS();
 	virtual ~TraderHTS();
 

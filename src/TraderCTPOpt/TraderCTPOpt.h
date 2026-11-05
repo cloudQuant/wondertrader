@@ -13,6 +13,8 @@
 #include <queue>
 #include <stdint.h>
 #include <atomic>
+#include <mutex>
+#include <unordered_set>
 
 #include "../Includes/WTSTypes.h"
 #include "../Includes/ITraderApi.h"
@@ -23,6 +25,7 @@
 #include "../Share/IniHelper.hpp"
 #include "../Share/StdUtils.hpp"
 #include "../Share/DLLHelper.hpp"
+#include "../TraderCTP/VendorTdLifecycle.hpp"
 
 USING_NS_WTP;
 
@@ -159,6 +162,22 @@ public:
 
 	virtual void OnRspQryExecOrder(CThostFtdcExecOrderField *pExecOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) override;
 
+	//////////////////////////////////////////////////////////////////////////
+	//卡9 生命周期（T1-CTPOpt-01/02）：void release()/disconnect() 的可观察结果
+public:
+	wt_vendor_td::StopState lifecycleState() const { return m_lifecycle.stopState(); }
+	// 仅当本实例从未创建 SDK 对象、当前线程不在本实例回调/调用/worker 内且无在途准入时，
+	// 工厂 remover 才可删除；否则须隔离到进程退出（卡9a/9b）。
+	bool removableByFactory() const;
+	bool onProviderThread() const { return wt_vendor_td::Lifecycle::reentered(this); }
+
+private:
+	void			shutdown(const char* reason);
+	ITraderSpi*		currentSink() const { return m_bscSink.load(std::memory_order_acquire); }
+	IOptTraderSpi*	currentOptSink() const { return m_optSink.load(std::memory_order_acquire); }
+	// T2-CTP-08 / 卡6d：为报单分配或保留唯一 OrderRef，并建立 tag 关联。
+	bool			assignOrderIdentity(WTSEntrust* entrust, uint32_t& orderRef, std::string& tag);
+
 protected:
 	/*
 	*	检查错误信息
@@ -180,6 +199,9 @@ protected:
 	//uint64_t		calcMargin(uint32_t qty, uint32_t price, WTSDirectionType direct, WTSContractInfo* ct);
 
 	uint32_t		genRequestID();
+
+	// 丢弃当前未完成的持仓聚合，不发布部分快照。
+	void			discardPositionBatch();
 
 	//void			triggerQuery();
 
@@ -203,9 +225,13 @@ protected:
 	std::string		m_strUserName;
 
 	std::string		m_strSettleInfo;
+	// I03-NEW-133: date of the latest cached settlement row, and the date of the
+	// outstanding settlement request (0 when none). Both are reset when a query ends.
+	uint32_t		m_uSettleDate = 0;
+	uint32_t		m_uSettleQryDate = 0;
 
-	ITraderSpi*		m_bscSink;
-	IOptTraderSpi*	m_optSink;
+	std::atomic<ITraderSpi*>	m_bscSink;
+	std::atomic<IOptTraderSpi*>	m_optSink;
 	uint64_t		m_uLastQryTime;
 
 	uint32_t					m_lDate;
@@ -213,7 +239,7 @@ protected:
 	TThostFtdcSessionIDType		m_sessionID;	//会话编号
 	std::atomic<uint32_t>		m_orderRef;		//报单引用
 
-	WrapperState				m_wrapperState;
+	std::atomic<WrapperState>	m_wrapperState;
 
 	CThostFtdcTraderApi*		m_pUserAPI;
 	std::atomic<uint32_t>		m_iRequestID;
@@ -221,8 +247,21 @@ protected:
 	typedef WTSHashMap<std::string> PositionMap;
 	PositionMap*				m_mapPosition;
 	bool					m_bPositionQueryIncomplete;
+	// BUG-R65-002 / 迭代03 卡14：持仓查询在途请求号，0 表示无在途请求。
+	// SDK 同步返回 0 只表示"已发送"；只有该请求号的末帧才是"已确认"。
+	std::atomic<int>			m_iPosQryReqID;
+	// 当前聚合持仓所属请求号，仅在 SPI 回调线程读写。
+	int						m_iPosAggReqID;
 	WTSArray*					m_ayTrades;
 	WTSArray*					m_ayOrders;
+public:
+	// BUG-L01-014: host features declared through setTraderSpiFeatures.
+	void setSpiFeatures(uint64_t features) { m_spiFeatures.store(features); }
+	std::atomic<uint64_t>		m_spiFeatures{ 0 };
+protected:
+	// K42 / BUG-I02-NEW-154: state of the order query in flight (SPI callback thread only).
+	bool						m_qryOrdersFailed = false;
+	bool						m_qryOrdersDropped = false;
 	WTSArray*					m_ayExecOrds;
 	WTSArray*					m_ayPosDetail;
 
@@ -230,7 +269,7 @@ protected:
 
 	typedef std::queue<CommonExecuter>	QueryQue;
 	QueryQue				m_queQuery;
-	bool					m_bInQuery;
+	std::atomic<bool>		m_bInQuery;
 	StdUniqueMutex			m_mtxQuery;
 	uint64_t				m_lastQryTime;
 
@@ -243,5 +282,16 @@ protected:
 	CTPCreator		m_funcCreator;
 
 	IniHelper		m_iniHelper;
+
+	//卡9：接口/回调准入、worker 标记与停止结果
+	wt_vendor_td::Lifecycle	m_lifecycle;
+	uint32_t				m_stopBoundMs = wt_vendor_td::DEFAULT_STOP_BOUND_MS;
+
+	//T2-CTP-08：本会话已提交的 OrderRef（不回收、不重复），按前置/会话区分
+	std::mutex					m_identityMutex;
+	//entrusts/orders 标记缓存的读写互斥（下单线程与 SDK 回调线程并发访问）
+	std::mutex					m_iniMutex;
+	std::unordered_set<uint32_t>	m_submittedRefs;
+	uint64_t					m_identitySession = 0;
 };
 

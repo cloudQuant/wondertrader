@@ -1,0 +1,15 @@
+--- src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/baseline/lanes/t_ParserCTPOpt/r105_parserctpopt_api_test.cpp	2026-11-04 08:47:58
++++ src/TestUnits/coverage/t_ParserCTPOpt/r105_parserctpopt_api_test.cpp	2026-11-04 09:11:13
+@@ -551,8 +551,10 @@
+ 
+ 	parser.release();
+ 	EXPECT_FALSE(parser.isConnected());
+-	EXPECT_EQ((DllHandle)NULL, parser.m_hInstCTP);
+-	EXPECT_EQ(nullptr, parser.m_funcCreator);
++	// 迭代03 卡9 9a：本实例曾创建 SDK 对象，厂商头文件无回调线程退出/排空声明，
++	// 因此 release 后厂商库保留到进程退出，不再卸载（原断言为 release 后句柄置空）。
++	EXPECT_NE((DllHandle)NULL, parser.m_hInstCTP);
++	EXPECT_NE(nullptr, parser.m_funcCreator);
+ 	cfg->release();
+ }
+ 

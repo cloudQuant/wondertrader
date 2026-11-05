@@ -1,0 +1,32 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = N04ExecMocker.SuccessfulRunnerReplayCallsPluginAndClosesSafely
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from N04ExecMocker
+[ RUN      ] N04ExecMocker.SuccessfulRunnerReplayCallsPluginAndClosesSafely
+/tmp/wt-i03-r20-20261102/snapshot/src/WTSUtils/zstdlib/zstd_compress.c:1326:46: runtime error: applying non-zero offset 1 to null pointer
+    #0 0x00010dcff270 in ZSTD_reset_matchState zstd_compress.c:1326
+    #1 0x00010dcfca44 in ZSTD_resetCCtx_internal zstd_compress.c:1527
+    #2 0x00010dcea880 in ZSTD_compressBegin_internal zstd_compress.c:2946
+    #3 0x00010dced170 in ZSTD_compress_advanced_internal zstd_compress.c:3120
+    #4 0x00010dced4c8 in ZSTD_compress_usingDict zstd_compress.c:3135
+    #5 0x00010dced608 in ZSTD_compressCCtx zstd_compress.c:3145
+    #6 0x00010dced7f4 in ZSTD_compress zstd_compress.c:3155
+    #7 0x00010d3556d8 in WTSCmpHelper::compress_data(void const*, unsigned long, unsigned int) WTSCmpHelper.hpp:44
+    #8 0x00010d331ce4 in HisDataReplayer::cacheRawBarsFromCSV(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const&, char const*, wtp::tagKlinePeriod, bool) HisDataReplayer.cpp:5922
+    #9 0x00010d31de34 in HisDataReplayer::get_kline_slice(char const*, char const*, unsigned int, unsigned int, bool) HisDataReplayer.cpp:4075
+    #10 0x00010d09d908 in ExecMocker::handle_init() ExecMocker.cpp:802
+    #11 0x00010d2b1f90 in HisDataReplayer::prepare() HisDataReplayer.cpp:1018
+    #12 0x0001010bb0d8 in WtBtRunner::run(bool, bool) WtBtRunner.cpp:744
+    #13 0x000100f6ebec in N04ExecMocker_SuccessfulRunnerReplayCallsPluginAndClosesSafely_Test::TestBody() r222_bt_runner_shutdown_test.cpp:496
+    #14 0x0001014786e0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (CoverageTests_btporter:arm64+0x1005246e0)
+    #15 0x000101478628 in testing::Test::Run()+0xcc (CoverageTests_btporter:arm64+0x100524628)
+    #16 0x000101479208 in testing::TestInfo::Run()+0xd0 (CoverageTests_btporter:arm64+0x100525208)
+    #17 0x000101479c8c in testing::TestSuite::Run()+0x1c4 (CoverageTests_btporter:arm64+0x100525c8c)
+    #18 0x0001014850b4 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (CoverageTests_btporter:arm64+0x1005310b4)
+    #19 0x000101484a60 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (CoverageTests_btporter:arm64+0x100530a60)
+    #20 0x0001014849c4 in testing::UnitTest::Run()+0x78 (CoverageTests_btporter:arm64+0x1005309c4)
+    #21 0x0001011268f0 in main+0x40 (CoverageTests_btporter:arm64+0x1001d28f0)
+    #22 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-r20-20261102/snapshot/src/WTSUtils/zstdlib/zstd_compress.c:1326:46 

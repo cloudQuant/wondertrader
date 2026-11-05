@@ -1,0 +1,55 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 23 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 23 tests from FeeCommit
+[ RUN      ] FeeCommit.HftOpenCloseTodayReverseAndPhysicalZero
+[       OK ] FeeCommit.HftOpenCloseTodayReverseAndPhysicalZero (2 ms)
+[ RUN      ] FeeCommit.UftOpenCloseTodayAndPhysicalZero
+[       OK ] FeeCommit.UftOpenCloseTodayAndPhysicalZero (1 ms)
+[ RUN      ] FeeCommit.MissingFeesDoNotCommitOrNotify
+[       OK ] FeeCommit.MissingFeesDoNotCommitOrNotify (1 ms)
+[ RUN      ] FeeCommit.UftOverflowAndMissingDoNotCommitOrNotify
+[       OK ] FeeCommit.UftOverflowAndMissingDoNotCommitOrNotify (1 ms)
+[ RUN      ] FeeCommit.HftOverrideWithoutCommitIsRejected
+[       OK ] FeeCommit.HftOverrideWithoutCommitIsRejected (0 ms)
+[ RUN      ] FeeCommit.UftOverrideWithoutCommitIsRejected
+[       OK ] FeeCommit.UftOverrideWithoutCommitIsRejected (0 ms)
+[ RUN      ] FeeCommit.SameMockerReentryStopsAfterCommittedFill
+[       OK ] FeeCommit.SameMockerReentryStopsAfterCommittedFill (0 ms)
+[ RUN      ] FeeCommit.CloseYesterdayUsesCloseRate
+[       OK ] FeeCommit.CloseYesterdayUsesCloseRate (1 ms)
+[ RUN      ] FeeCommit.LaterSplitFeeOverflowPreventsEntireRoundForBothMockers
+[       OK ] FeeCommit.LaterSplitFeeOverflowPreventsEntireRoundForBothMockers (1 ms)
+[ RUN      ] FeeCommit.SplitPlanKeepsOriginalTickContractDespiteCallbackTickChange
+[       OK ] FeeCommit.SplitPlanKeepsOriginalTickContractDespiteCallbackTickChange (1 ms)
+[ RUN      ] FeeCommit.UftReentryStopsAfterCommittedFill
+[       OK ] FeeCommit.UftReentryStopsAfterCommittedFill (1 ms)
+[ RUN      ] FeeCommit.CallbackExceptionsRespectHftReceipt
+[       OK ] FeeCommit.CallbackExceptionsRespectHftReceipt (3 ms)
+[ RUN      ] FeeCommit.CallbackExceptionsRespectUftReceipt
+[       OK ] FeeCommit.CallbackExceptionsRespectUftReceipt (1 ms)
+[ RUN      ] FeeCommit.ExpHftNotifiesOnlyCommittedTrade
+[       OK ] FeeCommit.ExpHftNotifiesOnlyCommittedTrade (0 ms)
+[ RUN      ] FeeCommit.UftMissingAndHftOverflowDoNotCommit
+[       OK ] FeeCommit.UftMissingAndHftOverflowDoNotCommit (1 ms)
+[ RUN      ] FeeCommit.PrecommitStateChangeInvalidatesPlan
+[       OK ] FeeCommit.PrecommitStateChangeInvalidatesPlan (1 ms)
+[ RUN      ] FeeCommit.OtherMockerNestedDirectTradeKeepsOuterReceipt
+[       OK ] FeeCommit.OtherMockerNestedDirectTradeKeepsOuterReceipt (1 ms)
+[ RUN      ] FeeCommit.ZeroLiquidityDoesNotCreateTradeOrFeeError
+[       OK ] FeeCommit.ZeroLiquidityDoesNotCreateTradeOrFeeError (0 ms)
+[ RUN      ] FeeCommit.MissingEventPhysicalIdentityFailsClosed
+[       OK ] FeeCommit.MissingEventPhysicalIdentityFailsClosed (1 ms)
+[ RUN      ] FeeCommit.PostcommitStateChangeStopsRemainingSplit
+[       OK ] FeeCommit.PostcommitStateChangeStopsRemainingSplit (1 ms)
+[ RUN      ] FeeCommit.ChangedOrderRemainingInvalidatesReceipt
+[       OK ] FeeCommit.ChangedOrderRemainingInvalidatesReceipt (1 ms)
+[ RUN      ] FeeCommit.OrderCallbackChangeStopsRemainingSplits
+[       OK ] FeeCommit.OrderCallbackChangeStopsRemainingSplits (1 ms)
+[ RUN      ] FeeCommit.NonFiniteRemainingQuantityFailsWithoutCommit
+[       OK ] FeeCommit.NonFiniteRemainingQuantityFailsWithoutCommit (1 ms)
+[----------] 23 tests from FeeCommit (30 ms total)
+
+[----------] Global test environment tear-down
+[==========] 23 tests from 1 test suite ran. (30 ms total)
+[  PASSED  ] 23 tests.

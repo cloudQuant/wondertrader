@@ -11,6 +11,8 @@
 #pragma once
 
 #include "ITrdNotifySink.h"
+#include "ExecOwnerModes.h"
+#include "OwnerClaimLease.h"
 #include "IExecCommand.h"
 #include "ExecCommandQuiesce.h"
 #include "ExecUnitInitStatus.h"
@@ -18,6 +20,7 @@
 #include "../Includes/ExecuteDefs.h"
 #include <Share/threadpool.hpp>
 #include "../Share/SpinMutex.hpp"
+#include "AccountNetPositionLimits.h"
 #include <atomic>
 #include <cstddef>
 #include <condition_variable>
@@ -25,6 +28,7 @@
 #include <functional>
 #include <map>
 #include <mutex>
+#include <set>
 #include <thread>
 #include <vector>
 
@@ -72,6 +76,14 @@ public:
 	 * \return 是否初始化成功
 	 */
 	bool init(WTSVariant* params);
+
+	/*!
+	 * \brief Pure eager validation of a complete executer configuration.
+	 * \details Reads only; never retains, allocates runtime state, loads modules or
+	 * creates units. init() runs the same check before any side effect, and runners
+	 * call it for every active entry before constructing any executer (card 8b=A).
+	 */
+	static bool validateConfig(WTSVariant* params, std::string& error);
 
 	/*!
 	 * \brief 设置交易适配器
@@ -153,17 +165,34 @@ private:
 		uint64_t init_generation = 0;
 		uint32_t waiting_callers = 0;
 		std::string init_error;
+		// I03-NEW-072 (card 9d=A): adapter callbacks that arrived while this
+		// generation was being created and before its unit was registered. They
+		// are queued behind the unit's own registration callbacks in arrival
+		// order, or dropped with a warning when the creation fails.
+		std::deque<std::function<void(const ExecuteUnitPtr&)>> deferred_events;
 	};
 	void drainUnitChannelEvents(const ExecuteUnitPtr& unit,
 		const std::shared_ptr<UnitLifecycleState>& state, bool reserved = false);
 	bool enqueueUnitCallback(const std::shared_ptr<UnitLifecycleState>& state,
 		std::function<void()> callback);
+	bool deferPendingUnitCallback(const std::string& code,
+		std::function<void(const ExecuteUnitPtr&)> callback);
 	void scheduleUnitCallbackDrain(const ExecuteUnitPtr& unit,
 		const std::shared_ptr<UnitLifecycleState>& state, bool schedule);
 	void markUnitFailed(const std::string& code,
 		const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason);
 	void markUnitFailedLocked(const std::string& code,
 		const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason);
+	void markUnitFailedInMemoryLocked(const std::string& code,
+		const std::shared_ptr<UnitLifecycleState>& state, const std::string& reason);
+	struct BatchRegistration
+	{
+		explicit BatchRegistration(WtDiffExecuter* value) : owner(value) {}
+		~BatchRegistration();
+		WtDiffExecuter* owner;
+		uint64_t ticket = 0;
+	};
+	void submitPositionTargets(const wt_hashmap<std::string, double>& targets, bool incremental);
 	std::shared_ptr<UnitLifecycleState> getUnitState(const char* stdCode,
 		const ExecuteUnitPtr& unit) const;
 	bool ownsCode(const std::string& code);
@@ -171,6 +200,8 @@ private:
 	bool isRetryBlockedUnit(const std::string& code) const;
 	bool isCurrentUnit(const std::string& code, const ExecuteUnitPtr& unit,
 		const std::shared_ptr<UnitLifecycleState>& state) const;
+	bool registerCreatedUnit(const std::string& code, const ExecuteUnitPtr& unit,
+		const std::shared_ptr<UnitLifecycleState>& state);
 	void recoverUnitPosition(const std::string& code, const ExecuteUnitPtr& unit,
 		const std::shared_ptr<UnitLifecycleState>& state, uint64_t channelEpoch,
 		double diff, bool hasDiff);
@@ -184,7 +215,8 @@ private:
 	 * \param bAutoCreate 是否自动创建，默认为true
 	 * \return 执行单元指针
 	 */
-	ExecuteUnitPtr	getUnit(const char* code, bool bAutoCreate = true);
+	ExecuteUnitPtr	getUnit(const char* code, bool bAutoCreate = true,
+		bool waitForCreation = true, bool* creationPending = NULL);
 
 	/*!
 	 * \brief 保存数据
@@ -440,6 +472,10 @@ private:
 	std::atomic<uint64_t> _quiesce_owner_generation{ 0 };
 	//! 交易适配器指针，用于执行交易操作
 	TraderAdapter*		_trader;
+	ExecOwnerModes		_owner_modes;	///< per-contract shared/non-shared owner mode (cards 5b/5c)
+	/// I03-NEW-089: the contract claims this executer holds on the bound trader's account
+	/// gate are returned when it is destroyed or rebound to another trader.
+	OwnerClaimLease		_owner_claims;
 	//! 执行器工厂指针，用于创建执行单元
 	WtExecuterFactory*	_factory;
 	//! 数据管理器指针，用于获取市场数据
@@ -451,6 +487,8 @@ private:
 
 	//! 仓位放大倍数，用于调整实际交易数量
 	double				_scale;
+	// Card 8 (2026-11-03): per-contract account net-position limit declaration.
+	account_net_limits::Limits _account_limits;
 	//! 交易通道是否就绪
 	std::atomic<bool>	_channel_ready;
 
@@ -469,6 +507,12 @@ private:
 	std::mutex _position_update_mutex;
 	uint64_t _position_revision = 1;
 	uint64_t _position_batch_generation = 0;
+	uint64_t _next_batch_ticket = 1;
+	uint64_t _last_committed_batch_ticket = 0;
+	uint64_t _incremental_generation = 0;
+	std::map<std::string, uint64_t> _incremental_versions;
+	std::map<uint64_t, std::set<std::string>> _active_batch_targets;
+	std::set<std::string> _pending_target_notification;
 	// Protected by _position_mutex. Omitted-code cleanup may only reset a
 	// target whose version still matches the snapshot taken for that batch.
 	std::map<std::string, uint64_t> _target_versions;
@@ -484,7 +528,9 @@ private:
 	static int (*_save_close_test_hook)(void*);
 	std::function<void()> _failure_mutation_test_hook;
 	std::function<void(const std::string&)> _omitted_sweep_test_hook;
+	std::function<void(uint64_t)> _batch_preflight_test_hook;
 	std::function<void(const std::string&)> _unit_lookup_test_hook;
+	std::function<void(const std::string&)> _target_lookup_test_hook;
 
 	// Quiescence closes ingress, tracks accepted callers and callback drains, and
 	// never owns or waits for plugin-created threads.
@@ -492,6 +538,17 @@ private:
 	std::condition_variable _quiesce_condition;
 	std::atomic<bool> _quiesce_requested{ false };
 	std::atomic<bool> _quiesce_incomplete{ false };
+	// Decision K06=B (2026-11-04): codes whose latest creation failed without any possible
+	// plugin side effect (automatic retry allowed) and that no later generation has created
+	// successfully yet. Coordinated quiesce completes only when this set is empty and no
+	// permanent failure was recorded in _quiesce_incomplete.
+	mutable std::mutex _clean_failure_mutex;
+	std::set<std::string> _clean_failure_codes;
+	bool quiesceIncomplete() const;
+	// I03-NEW-070: set when a first init() rejected the configuration or the
+	// persisted snapshot. Such an executor is never registered; it must neither
+	// accept targets nor overwrite the rejected snapshot kept for manual review.
+	std::atomic<bool> _init_failed{ false };
 	size_t _quiesce_active_ingress = 0;
 	size_t _quiesce_active_drains = 0;
 	bool _quiesce_wait_in_progress = false;

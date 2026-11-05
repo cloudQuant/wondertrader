@@ -1,0 +1,39 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp	2026-11-02 21:52:08
++++ src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp	2026-11-04 20:05:36
+@@ -605,7 +605,7 @@
+ {
+ 	return std::string("env:\n")
+ 		+ "    name: " + engineName + "\n"
+-		+ "    fees: " + fixture_path("absent_fees.json") + "\n"
++		+ "    fees: " + fixture_path("fees.json") + "\n"
+ 		+ "    filters: " + fixture_path("absent_filters.yaml") + "\n"
+ 		+ "    poolsize: 0\n";
+ }
+@@ -626,6 +626,9 @@
+ 	write_fixture("hots.json", kHots);
+ 	write_fixture("logcfg.yaml", kLogCfg);
+ 	write_fixture("actpolicy.yaml", kActPolicyDefault);
++	// 迭代03（I03-NEW-008 / 卡13d 费用门禁）：配置了的费用模板路径必须存在；这些用例验证
++	// 路由/执行器配置，改用有效空模板（原指向不存在的 absent_fees.json，与 r104 同样处理）。
++	write_fixture("fees.json", "{}");
+ }
+ 
+ class CtaFactoryCwdFixture
+@@ -961,7 +964,7 @@
+ 		+ "\"contract\": \"" + fixture_path("contracts.json") + "\","
+ 		+ "\"holiday\": \"" + fixture_path("holidays.json") + "\","
+ 		+ "\"hot\": \"" + fixture_path("hots.json") + "\"},\n"
+-		+ "  \"env\": {\"name\": \"cta\", \"fees\": \"" + fixture_path("absent_fees.json")
++		+ "  \"env\": {\"name\": \"cta\", \"fees\": \"" + fixture_path("fees.json")
+ 		+ "\", \"filters\": \"" + fixture_path("absent_filters.yaml") + "\", \"poolsize\": 0},\n"
+ 		+ "  \"data\": {\"store\": {\"module\": \"WtDataStorage\", \"path\": \""
+ 		+ fixture_path("data/") + "\"}},\n"
+@@ -1672,7 +1675,7 @@
+ 		+ "    \"holiday\": \"" + fixture_path("holidays.json") + "\",\n"
+ 		+ "    \"hot\": \"" + fixture_path("hots.json") + "\"\n"
+ 		+ "  },\n"
+-		+ "  \"env\": {\"name\": \"cta\", \"fees\": \"" + fixture_path("absent_fees.json")
++		+ "  \"env\": {\"name\": \"cta\", \"fees\": \"" + fixture_path("fees.json")
+ 		+ "\", \"filters\": \"" + fixture_path("absent_filters.yaml") + "\", \"poolsize\": 0},\n"
+ 		+ "  \"data\": {\"store\": {\"path\": \"" + fixture_path("data/") + "\"}},\n"
+ 		+ "  \"bspolicy\": \"" + fixture_path("actpolicy.yaml") + "\",\n"

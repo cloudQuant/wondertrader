@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="11" failures="11" disabled="0" errors="0" time="0.896" timestamp="2026-11-04T19:07:49.498" name="AllTests">
+  <testsuite name="V2Adapter" tests="2" failures="2" disabled="0" skipped="0" errors="0" time="0.87" timestamp="2026-11-04T19:07:49.499">
+    <testcase name="A_FailedInitBeforeSdkDrainsAndReleasesOwner" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp" line="80" status="run" result="completed" time="0.869" timestamp="2026-11-04T19:07:49.499" classname="V2Adapter">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:92&#x0A;Value of: adapter-&gt;hasApi()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;failed candidate is retained until drained&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:92
+Value of: adapter->hasApi()
+  Actual: false
+Expected: true
+failed candidate is retained until drained
+]]></failure>
+      <properties>
+        <property name="module_loaded_before" value="0"/>
+        <property name="module_still_mapped_after_release" value="1"/>
+      </properties>
+    </testcase>
+    <testcase name="B_RealParserAdapterQuarantinesSdkParser" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp" line="266" status="run" result="completed" time="0." timestamp="2026-11-04T19:07:50.368" classname="V2Adapter">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:276&#x0A;Value of: adapter-&gt;init(kName, cfg, nullptr, bd)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;V2 table must be accepted by the real adapter&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:276
+Value of: adapter->init(kName, cfg, nullptr, bd)
+  Actual: false
+Expected: true
+V2 table must be accepted by the real adapter
+]]></failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="V2" tests="9" failures="9" disabled="0" skipped="0" errors="0" time="0.025" timestamp="2026-11-04T19:07:50.369">
+    <testcase name="TableShape" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp" line="107" status="run" result="completed" time="0." timestamp="2026-11-04T19:07:50.369" classname="V2">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37&#x0A;Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL&#x0A;no getParserLifecycleApiV2 export&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+]]></failure>
+    </testcase>
+    <testcase name="NeverInitializedDrainsAndDestroys" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp" line="122" status="run" result="completed" time="0." timestamp="2026-11-04T19:07:50.370" classname="V2">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37&#x0A;Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL&#x0A;no getParserLifecycleApiV2 export&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+]]></failure>
+    </testcase>
+    <testcase name="FailedInitBeforeSdkDrainsAndDestroys" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp" line="139" status="run" result="completed" time="0.013" timestamp="2026-11-04T19:07:50.370" classname="V2">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37&#x0A;Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL&#x0A;no getParserLifecycleApiV2 export&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+]]></failure>
+    </testcase>
+    <testcase name="SdkCreatedIsReportedUncertainAndQuarantined" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp" line="152" status="run" result="completed" time="0.009" timestamp="2026-11-04T19:07:50.384" classname="V2">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37&#x0A;Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL&#x0A;no getParserLifecycleApiV2 export&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+]]></failure>
+    </testcase>
+    <testcase name="StopInsideSdkCallbackIsNonBlockingAndWaitIsUnsafe" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp" line="174" status="run" result="completed" time="0." timestamp="2026-11-04T19:07:50.394" classname="V2">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37&#x0A;Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL&#x0A;no getParserLifecycleApiV2 export&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+]]></failure>
+    </testcase>
+    <testcase name="PendingWhileCallbackInFlight" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp" line="196" status="run" result="completed" time="0." timestamp="2026-11-04T19:07:50.394" classname="V2">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37&#x0A;Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL&#x0A;no getParserLifecycleApiV2 export&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+]]></failure>
+    </testcase>
+    <testcase name="PendingWhileHostApiCallInFlight" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp" line="213" status="run" result="completed" time="0." timestamp="2026-11-04T19:07:50.394" classname="V2">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37&#x0A;Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL&#x0A;no getParserLifecycleApiV2 export&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+]]></failure>
+    </testcase>
+    <testcase name="LegacyReleaseThenV2StaysQuarantined" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp" line="234" status="run" result="completed" time="0." timestamp="2026-11-04T19:07:50.394" classname="V2">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37&#x0A;Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL&#x0A;no getParserLifecycleApiV2 export&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+]]></failure>
+    </testcase>
+    <testcase name="IndependentInstances" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp" line="248" status="run" result="completed" time="0." timestamp="2026-11-04T19:07:50.395" classname="V2">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37&#x0A;Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL&#x0A;no getParserLifecycleApiV2 export&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/v2_check.cpp:37
+Expected: (nullptr) != (module.table), actual: (nullptr) vs NULL
+no getParserLifecycleApiV2 export
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

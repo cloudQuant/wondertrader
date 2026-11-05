@@ -1,0 +1,37 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q06PorterRunnerCtxTable.*
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q06PorterRunnerCtxTable
+[ RUN      ] Q06PorterRunnerCtxTable.CreatedContextsAreFindableAndUnknownIdsMiss
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/q06_porter_runner_test.cpp:743: Failure
+Expected equality of these values:
+  0U
+    Which is: 0
+  r.createCtaContext("q06_cta_unconfigured", 2)
+    Which is: 1
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/q06_porter_runner_test.cpp:744: Failure
+Expected equality of these values:
+  0U
+    Which is: 0
+  r.createSelContext("q06_sel_unconfigured", 20240601, 153000, "d", 0)
+    Which is: 3000
+
+/tmp/wt-i03-s5-runners-snap/src/TestUnits/coverage/q06_porter/q06_porter_runner_test.cpp:768: Failure
+Expected equality of these values:
+  0U
+    Which is: 0
+  r.createHftContext("q06_hft_unconfigured", "q06_test_trader", false, 1)
+    Which is: 6000
+
+[  FAILED  ] Q06PorterRunnerCtxTable.CreatedContextsAreFindableAndUnknownIdsMiss (95 ms)
+[----------] 1 test from Q06PorterRunnerCtxTable (95 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (95 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Q06PorterRunnerCtxTable.CreatedContextsAreFindableAndUnknownIdsMiss
+
+ 1 FAILED TEST

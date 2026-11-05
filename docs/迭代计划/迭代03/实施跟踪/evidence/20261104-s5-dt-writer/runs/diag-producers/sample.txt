@@ -1,0 +1,548 @@
+Analysis of sampling s5_lifecycle_tests (pid 80759) every 1 millisecond
+Process:         s5_lifecycle_tests [80759]
+Path:            /private/tmp/*/s5_lifecycle_tests
+Load Address:    0x100f04000
+Identifier:      s5_lifecycle_tests
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  zsh [80750]
+Target Type:     live task
+
+Date/Time:       2026-11-04 18:27:41.681 +0800
+Launch Time:     2026-11-04 18:27:28.760 +0800
+OS Version:      macOS 26.5.1 (25F80)
+Report Version:  7
+Analysis Tool:   /usr/bin/sample
+
+Physical footprint:         149.6M
+Physical footprint (peak):  150.9M
+Idle exit:                  untracked
+----
+
+Call graph:
+    2046 Thread_6415254   DispatchQueue_1: com.apple.main-thread  (serial)
+    + 2046 start  (in dyld) + 6992  [0x18800fe00]
+    +   2046 main  (in s5_lifecycle_tests) + 68  [0x101000f78]
+    +     2046 testing::UnitTest::Run()  (in s5_lifecycle_tests) + 124  [0x10101fec0]
+    +       2046 testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)  (in s5_lifecycle_tests) + 104  [0x10101ff5c]
+    +         2046 testing::internal::UnitTestImpl::RunAllTests()  (in s5_lifecycle_tests) + 1328  [0x1010205b0]
+    +           2046 testing::TestSuite::Run()  (in s5_lifecycle_tests) + 456  [0x101015188]
+    +             2046 testing::TestInfo::Run()  (in s5_lifecycle_tests) + 212  [0x101014704]
+    +               2046 testing::Test::Run()  (in s5_lifecycle_tests) + 208  [0x101013b24]
+    +                 2046 testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)  (in s5_lifecycle_tests) + 104  [0x101013bdc]
+    +                   2046 (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()  (in s5_lifecycle_tests) + 692  [0x100f11e08]  lifecycle_test.cpp:339
+    +                     2046 DataManager::release()  (in s5_lifecycle_tests) + 48  [0x100f1d160]  DataManager.cpp:839
+    +                       2046 DataManager::WriterHost::requestRelease(bool)  (in s5_lifecycle_tests) + 252  [0x100f1b534]  DataManager.cpp:314
+    +                         2046 DataManager::WriterHost::finalize()  (in s5_lifecycle_tests) + 408  [0x100f1cc48]  DataManager.cpp:376
+    +                           2046 (anonymous namespace)::lifecycleWaitDrained(void*, unsigned int)  (in libWtDataStorage.dylib) + 32  [0x1022ee040]  WtDataWriter.cpp:189
+    +                             2046 WtDataWriter::waitDrained(unsigned int)  (in libWtDataStorage.dylib) + 508  [0x1022d1a14]  WtDataWriter.cpp:503
+    +                               2046 std::condition_variable_any::wait_until<std::unique_lock<std::mutex>, std::chrono::steady_clock, std::chrono::duration<long long, std::ratio<1l, 1000000000l>>>(std::unique_lock<std::mutex>&, std::chrono::time_point<std::chrono::steady_clock, std::chrono::duration<long long, std::ratio<1l, 1000000000l>>> const&)  (in libWtDataStorage.dylib) + 124  [0x1022fa788]  condition_variable:243
+    +                                 2046 std::condition_variable::wait_until<std::chrono::steady_clock, std::chrono::duration<long long, std::ratio<1l, 1000000000l>>>(std::unique_lock<std::mutex>&, std::chrono::time_point<std::chrono::steady_clock, std::chrono::duration<long long, std::ratio<1l, 1000000000l>>> const&)  (in libWtDataStorage.dylib) + 168  [0x1022fa968]  condition_variable.h:161
+    +                                   2046 std::condition_variable::__do_timed_wait(std::unique_lock<std::mutex>&, std::chrono::time_point<std::chrono::system_clock, std::chrono::duration<long long, std::ratio<1l, 1000000000l>>>)  (in libc++.1.dylib) + 104  [0x1882e38f0]
+    +                                     2045 _pthread_cond_wait  (in libsystem_pthread.dylib) + 980  [0x1883ce128]
+    +                                     ! 2045 __psynch_cvwait  (in libsystem_kernel.dylib) + 8  [0x18838d50c]
+    +                                     1 _pthread_cond_wait  (in libsystem_pthread.dylib) + 340  [0x1883cdea8]
+    +                                       1 __gettimeofday  (in libsystem_kernel.dylib) + 12  [0x18838db60]
+    2046 Thread_6415258
+    + 2046 thread_start  (in libsystem_pthread.dylib) + 8  [0x1883c8c1c]
+    +   2046 _pthread_start  (in libsystem_pthread.dylib) + 136  [0x1883cdc58]
+    +     1415 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 392  [0x100f12910]  thread.h:214
+    +     ! 1328 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 40  [0x100f1d1d0]  DataManager.cpp:851
+    +     ! : 702 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 132  [0x100f20a68]  DataManager.cpp:188
+    +     ! : | 679 std::mutex::lock()  (in libc++.1.dylib) + 16  [0x1882e0010]
+    +     ! : | + 584 _pthread_mutex_firstfit_lock_slow  (in libsystem_pthread.dylib) + 216  [0x1883c88e0]
+    +     ! : | + ! 584 _pthread_mutex_firstfit_lock_wait  (in libsystem_pthread.dylib) + 84  [0x1883cae9c]
+    +     ! : | + !   584 __psynch_mutexwait  (in libsystem_kernel.dylib) + 8  [0x18838c9dc]
+    +     ! : | + 57 pthread_mutex_lock  (in libsystem_pthread.dylib) + 124,32,...  [0x1883c8478,0x1883c841c,...]
+    +     ! : | + 37 DYLD-STUB$$pthread_mutex_lock  (in libc++.1.dylib) + 0,8  [0x1883428f8,0x188342900]
+    +     ! : | + 1 _pthread_mutex_firstfit_lock_slow  (in libsystem_pthread.dylib) + 120  [0x1883c8880]
+    +     ! : | 16 std::mutex::lock()  (in libc++.1.dylib) + 0  [0x1882e0000]
+    +     ! : | 7 pthread_mutex_lock  (in libsystem_pthread.dylib) + 136  [0x1883c8484]
+    +     ! : 183 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 204  [0x100f20ab0]  DataManager.cpp:192
+    +     ! : | 89 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 108,92,...  [0x100f1c9c8,0x100f1c9b8,...]  DataManager.cpp:66
+    +     ! : | 47 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 188  [0x100f1ca18]  DataManager.cpp:70
+    +     ! : | 15 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 72  [0x100f1c9a4]  DataManager.cpp:66
+    +     ! : | + 15 _tlv_get_addr  (in libdyld.dylib) + 12  [0x187fd8394]
+    +     ! : | 10 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 100  [0x100f1c9c0]  DataManager.cpp:66
+    +     ! : | + 10 _tlv_get_addr  (in libdyld.dylib) + 20  [0x187fd839c]
+    +     ! : | 10 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 180  [0x100f1ca10]  DataManager.cpp:70
+    +     ! : | + 10 _tlv_get_addr  (in libdyld.dylib) + 0,20  [0x187fd8388,0x187fd839c]
+    +     ! : | 7 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 48  [0x100f1c98c]  DataManager.cpp:66
+    +     ! : | + 7 _tlv_get_addr  (in libdyld.dylib) + 16  [0x187fd8398]
+    +     ! : | 5 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 140  [0x100f1c9e8]  DataManager.cpp:68
+    +     ! : 102 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 120  [0x100f20a5c]  DataManager.cpp:187
+    +     ! : | 102 std::vector<(anonymous namespace)::HostFrame>::push_back[abi:ne200100]((anonymous namespace)::HostFrame&&)  (in s5_lifecycle_tests) + 28,16,...  [0x100f1c880,0x100f1c874,...]  vector.h:454
+    +     ! : 59 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 192  [0x100f20aa4]  DataManager.cpp:191
+    +     ! : | 58 std::mutex::unlock()  (in libc++.1.dylib) + 16  [0x1882e0038]
+    +     ! : | + 35 pthread_mutex_unlock  (in libsystem_pthread.dylib) + 12,32,...  [0x1883c8950,0x1883c8964,...]
+    +     ! : | + 21 _pthread_mutex_firstfit_unlock_slow  (in libsystem_pthread.dylib) + 220  [0x1883c8b94]
+    +     ! : | + ! 21 _pthread_mutex_firstfit_wake  (in libsystem_pthread.dylib) + 28  [0x1883caf0c]
+    +     ! : | + !   21 __psynch_mutexdrop  (in libsystem_kernel.dylib) + 8  [0x18838cba8]
+    +     ! : | + 2 DYLD-STUB$$pthread_mutex_unlock  (in libc++.1.dylib) + 0  [0x188342918]
+    +     ! : | 1 std::mutex::unlock()  (in libc++.1.dylib) + 16  [0x1882e0038]
+    +     ! : 58 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 44  [0x100f20a10]  DataManager.cpp:212
+    +     ! : 45 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 32,20,...  [0x100f20a04,0x100f209f8,...]  DataManager.cpp:183
+    +     ! : 43 std::vector<(anonymous namespace)::HostFrame>::push_back[abi:ne200100]((anonymous namespace)::HostFrame&&)  (in s5_lifecycle_tests) + 232,220  [0x100f1c94c,0x100f1c940]  vector.h:454
+    +     ! : 41 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 120  [0x100f20a5c]  DataManager.cpp:188
+    +     ! : 33 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 48  [0x100f20a14]  DataManager.cpp:185
+    +     ! : 26 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 132  [0x100f20a68]  DataManager.cpp:189
+    +     ! : 21 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 56  [0x100f20a1c]  DataManager.cpp:187
+    +     ! : 13 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 208  [0x100f20ab4]  DataManager.cpp:197
+    +     ! : 1 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 72  [0x100f20a2c]  DataManager.cpp:187
+    +     ! : | 1 _tlv_get_addr  (in libdyld.dylib) + 20  [0x187fd839c]
+    +     ! : 1 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 96  [0x100f20a44]  DataManager.cpp:187
+    +     ! :   1 _tlv_get_addr  (in libdyld.dylib) + 12  [0x187fd8394]
+    +     ! 64 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 148,172,...  [0x100f1d23c,0x100f1d254,...]  DataManager.cpp:856
+    +     ! 20 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 36  [0x100f1d1cc]  DataManager.cpp:851
+    +     ! 3 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 8  [0x100f1d1b0]  DataManager.cpp:850
+    +     349 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 424  [0x100f12930]  thread.h:214
+    +     ! 326 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 424  [0x100f12930]  thread.h:214
+    +     ! : 302 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 60,64,...  [0x100f0eef4,0x100f0eef8,...]  WTSObject.hpp:107
+    +     ! : 24 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 88  [0x100f0ef10]  WTSObject.hpp:108
+    +     ! 14 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 92  [0x100f0ef14]  WTSObject.hpp:108
+    +     ! : 14 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 92  [0x100f0ef14]  WTSObject.hpp:108
+    +     ! 6 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 28  [0x100f0eed4]  WTSObject.hpp:100
+    +     ! 2 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 0  [0x100f0eeb8]  WTSObject.hpp:94
+    +     ! 1 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 116  [0x100f0ef2c]  WTSObject.hpp:109
+    +     180 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 236  [0x100f12874]  thread.h:214
+    +     ! 104 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 52,60,...  [0x100f0ebd8,0x100f0ebe0,...]  WTSObject.hpp:83
+    +     ! 46 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 140  [0x100f0ec30]  WTSObject.hpp:84
+    +     ! : 34 _platform_memset  (in libsystem_platform.dylib) + 140,132,...  [0x1883d711c,0x1883d7114,...]
+    +     ! : 12 __bzero  (in libsystem_platform.dylib) + 0  [0x1883d7030]
+    +     ! 15 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 88,124,...  [0x100f0ebfc,0x100f0ec20,...]  WTSObject.hpp:84
+    +     ! 8 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 28,24  [0x100f0ebc0,0x100f0ebbc]  WTSObject.hpp:80
+    +     ! 7 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 152  [0x100f0ec3c]  WTSObject.hpp:88
+    +     68 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 360,156,...  [0x100f128f0,0x100f12824,...]  thread.h:214
+    +     33 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 160  [0x100f0ec44]  WTSObject.hpp:88
+    +     1 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 156  [0x100f1d244]  DataManager.cpp:856
+    2046 Thread_6415259
+    + 2046 thread_start  (in libsystem_pthread.dylib) + 8  [0x1883c8c1c]
+    +   2046 _pthread_start  (in libsystem_pthread.dylib) + 136  [0x1883cdc58]
+    +     1245 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 392  [0x100f12910]  thread.h:214
+    +     ! 1159 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 40  [0x100f1d1d0]  DataManager.cpp:851
+    +     ! : 719 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 132  [0x100f20a68]  DataManager.cpp:188
+    +     ! : | 719 std::mutex::lock()  (in libc++.1.dylib) + 16  [0x1882e0010]
+    +     ! : |   679 _pthread_mutex_firstfit_lock_slow  (in libsystem_pthread.dylib) + 216  [0x1883c88e0]
+    +     ! : |   + 679 _pthread_mutex_firstfit_lock_wait  (in libsystem_pthread.dylib) + 84  [0x1883cae9c]
+    +     ! : |   +   679 __psynch_mutexwait  (in libsystem_kernel.dylib) + 8  [0x18838c9dc]
+    +     ! : |   39 pthread_mutex_lock  (in libsystem_pthread.dylib) + 124,140,...  [0x1883c8478,0x1883c8488,...]
+    +     ! : |   1 DYLD-STUB$$pthread_mutex_lock  (in libc++.1.dylib) + 8  [0x188342900]
+    +     ! : 104 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 204  [0x100f20ab0]  DataManager.cpp:192
+    +     ! : | 74 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 64,56,...  [0x100f1c99c,0x100f1c994,...]  DataManager.cpp:66
+    +     ! : | 13 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 180  [0x100f1ca10]  DataManager.cpp:70
+    +     ! : | + 13 _tlv_get_addr  (in libdyld.dylib) + 20,12  [0x187fd839c,0x187fd8394]
+    +     ! : | 11 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 48  [0x100f1c98c]  DataManager.cpp:66
+    +     ! : | + 11 _tlv_get_addr  (in libdyld.dylib) + 12,0  [0x187fd8394,0x187fd8388]
+    +     ! : | 6 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 188  [0x100f1ca18]  DataManager.cpp:70
+    +     ! : 93 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 40,24,...  [0x100f20a0c,0x100f209fc,...]  DataManager.cpp:183
+    +     ! : 73 std::vector<(anonymous namespace)::HostFrame>::push_back[abi:ne200100]((anonymous namespace)::HostFrame&&)  (in s5_lifecycle_tests) + 228,224,...  [0x100f1c948,0x100f1c944,...]  vector.h:454
+    +     ! : 66 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 192  [0x100f20aa4]  DataManager.cpp:191
+    +     ! : | 57 std::mutex::unlock()  (in libc++.1.dylib) + 16  [0x1882e0038]
+    +     ! : | + 39 pthread_mutex_unlock  (in libsystem_pthread.dylib) + 92,32,...  [0x1883c89a0,0x1883c8964,...]
+    +     ! : | + 18 _pthread_mutex_firstfit_unlock_slow  (in libsystem_pthread.dylib) + 220  [0x1883c8b94]
+    +     ! : | +   18 _pthread_mutex_firstfit_wake  (in libsystem_pthread.dylib) + 28  [0x1883caf0c]
+    +     ! : | +     18 __psynch_mutexdrop  (in libsystem_kernel.dylib) + 8  [0x18838cba8]
+    +     ! : | 8 DYLD-STUB$$std::mutex::unlock()  (in s5_lifecycle_tests) + 4  [0x1010343a4]
+    +     ! : | 1 std::mutex::unlock()  (in libc++.1.dylib) + 8  [0x1882e0030]
+    +     ! : 33 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 120  [0x100f20a5c]  DataManager.cpp:187
+    +     ! : | 33 std::vector<(anonymous namespace)::HostFrame>::push_back[abi:ne200100]((anonymous namespace)::HostFrame&&)  (in s5_lifecycle_tests) + 16,28,...  [0x100f1c874,0x100f1c880,...]  vector.h:454
+    +     ! : 31 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 56,72,...  [0x100f20a1c,0x100f20a2c,...]  DataManager.cpp:187
+    +     ! : 25 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 132  [0x100f20a68]  DataManager.cpp:189
+    +     ! : 8 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 96  [0x100f20a44]  DataManager.cpp:187
+    +     ! : | 8 _tlv_get_addr  (in libdyld.dylib) + 8,12  [0x187fd8390,0x187fd8394]
+    +     ! : 5 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 48  [0x100f20a14]  DataManager.cpp:185
+    +     ! : 2 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 44  [0x100f20a10]  DataManager.cpp:212
+    +     ! 56 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 120,148,...  [0x100f1d220,0x100f1d23c,...]  DataManager.cpp:856
+    +     ! 17 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 40  [0x100f1d1d0]  DataManager.cpp:852
+    +     ! 6 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 8,0  [0x100f1d1b0,0x100f1d1a8]  DataManager.cpp:850
+    +     ! 5 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 36  [0x100f1d1cc]  DataManager.cpp:851
+    +     ! 2 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 212  [0x100f20ab8]  DataManager.cpp:197
+    +     443 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 424  [0x100f12930]  thread.h:214
+    +     ! 440 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 424  [0x100f12930]  thread.h:214
+    +     ! : 440 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 64,60,...  [0x100f0eef8,0x100f0eef4,...]  WTSObject.hpp:107
+    +     ! 3 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 0  [0x100f0eeb8]  WTSObject.hpp:94
+    +     175 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 360,344,...  [0x100f128f0,0x100f128e0,...]  thread.h:214
+    +     163 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 236  [0x100f12874]  thread.h:214
+    +     ! 76 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 52  [0x100f0ebd8]  WTSObject.hpp:83
+    +     ! 24 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 140  [0x100f0ec30]  WTSObject.hpp:84
+    +     ! : 24 _platform_memset  (in libsystem_platform.dylib) + 132,168,...  [0x1883d7114,0x1883d7138,...]
+    +     ! 23 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 152  [0x100f0ec3c]  WTSObject.hpp:88
+    +     ! 15 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 28,24  [0x100f0ebc0,0x100f0ebbc]  WTSObject.hpp:80
+    +     ! 14 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 80  [0x100f0ebf4]  WTSObject.hpp:84
+    +     ! 11 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 4  [0x100f0eba8]  WTSObject.hpp:70
+    +     20 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 156,160  [0x100f0ec40,0x100f0ec44]  WTSObject.hpp:88
+    2046 Thread_6415260
+    + 2046 thread_start  (in libsystem_pthread.dylib) + 8  [0x1883c8c1c]
+    +   2046 _pthread_start  (in libsystem_pthread.dylib) + 136  [0x1883cdc58]
+    +     1180 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 392  [0x100f12910]  thread.h:214
+    +     ! 1149 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 40  [0x100f1d1d0]  DataManager.cpp:851
+    +     ! : 614 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 132  [0x100f20a68]  DataManager.cpp:188
+    +     ! : | 570 std::mutex::lock()  (in libc++.1.dylib) + 16  [0x1882e0010]
+    +     ! : | + 514 _pthread_mutex_firstfit_lock_slow  (in libsystem_pthread.dylib) + 216  [0x1883c88e0]
+    +     ! : | + ! 514 _pthread_mutex_firstfit_lock_wait  (in libsystem_pthread.dylib) + 84  [0x1883cae9c]
+    +     ! : | + !   514 __psynch_mutexwait  (in libsystem_kernel.dylib) + 8  [0x18838c9dc]
+    +     ! : | + 47 pthread_mutex_lock  (in libsystem_pthread.dylib) + 80,32,...  [0x1883c844c,0x1883c841c,...]
+    +     ! : | + 9 DYLD-STUB$$pthread_mutex_lock  (in libc++.1.dylib) + 8  [0x188342900]
+    +     ! : | 44 std::mutex::lock()  (in libc++.1.dylib) + 20,0  [0x1882e0014,0x1882e0000]
+    +     ! : 127 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 192  [0x100f20aa4]  DataManager.cpp:191
+    +     ! : | 85 std::mutex::unlock()  (in libc++.1.dylib) + 16  [0x1882e0038]
+    +     ! : | + 85 pthread_mutex_unlock  (in libsystem_pthread.dylib) + 12,92,...  [0x1883c8950,0x1883c89a0,...]
+    +     ! : | 42 std::mutex::unlock()  (in libc++.1.dylib) + 16  [0x1882e0038]
+    +     ! : 87 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 204  [0x100f20ab0]  DataManager.cpp:192
+    +     ! : | 31 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 180  [0x100f1ca10]  DataManager.cpp:70
+    +     ! : | + 31 _tlv_get_addr  (in libdyld.dylib) + 20  [0x187fd839c]
+    +     ! : | 30 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 64,92,...  [0x100f1c99c,0x100f1c9b8,...]  DataManager.cpp:66
+    +     ! : | 22 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 48  [0x100f1c98c]  DataManager.cpp:66
+    +     ! : | + 22 _tlv_get_addr  (in libdyld.dylib) + 0  [0x187fd8388]
+    +     ! : | 4 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 180,188  [0x100f1ca10,0x100f1ca18]  DataManager.cpp:70
+    +     ! : 78 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 136,132  [0x100f20a6c,0x100f20a68]  DataManager.cpp:189
+    +     ! : 69 std::vector<(anonymous namespace)::HostFrame>::push_back[abi:ne200100]((anonymous namespace)::HostFrame&&)  (in s5_lifecycle_tests) + 232,224,...  [0x100f1c94c,0x100f1c944,...]  vector.h:454
+    +     ! : 55 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 20,32,...  [0x100f209f8,0x100f20a04,...]  DataManager.cpp:183
+    +     ! : 30 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 72  [0x100f20a2c]  DataManager.cpp:187
+    +     ! : | 30 _tlv_get_addr  (in libdyld.dylib) + 12,20,...  [0x187fd8394,0x187fd839c,...]
+    +     ! : 30 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 120  [0x100f20a5c]  DataManager.cpp:187
+    +     ! : | 30 std::vector<(anonymous namespace)::HostFrame>::push_back[abi:ne200100]((anonymous namespace)::HostFrame&&)  (in s5_lifecycle_tests) + 16,28  [0x100f1c874,0x100f1c880]  vector.h:454
+    +     ! : 21 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 48  [0x100f20a14]  DataManager.cpp:185
+    +     ! : 11 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 184  [0x100f20a9c]  DataManager.cpp:188
+    +     ! : 10 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 96  [0x100f20a44]  DataManager.cpp:187
+    +     ! : | 10 _tlv_get_addr  (in libdyld.dylib) + 0  [0x187fd8388]
+    +     ! : 9 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 56,80  [0x100f20a1c,0x100f20a34]  DataManager.cpp:187
+    +     ! : 6 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 44  [0x100f20a10]  DataManager.cpp:212
+    +     ! : 1 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 240  [0x100f1ca4c]  DataManager.cpp:74
+    +     ! : 1 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 208  [0x100f20ab4]  DataManager.cpp:197
+    +     ! 29 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 148,100  [0x100f1d23c,0x100f1d20c]  DataManager.cpp:856
+    +     ! 2 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 40  [0x100f1d1d0]  DataManager.cpp:852
+    +     595 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 424  [0x100f12930]  thread.h:214
+    +     ! 534 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 424  [0x100f12930]  thread.h:214
+    +     ! : 533 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 60,64,...  [0x100f0eef4,0x100f0eef8,...]  WTSObject.hpp:107
+    +     ! : 1 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 88  [0x100f0ef10]  WTSObject.hpp:108
+    +     ! 30 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 92  [0x100f0ef14]  WTSObject.hpp:108
+    +     ! : 30 wtp::WTSTickData::~WTSTickData()  (in s5_lifecycle_tests) + 0  [0x100f0eeb0]  WTSDataDef.hpp:1216
+    +     ! 19 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 8,0  [0x100f0eec0,0x100f0eeb8]  WTSObject.hpp:94
+    +     ! 12 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 28,20  [0x100f0eed4,0x100f0eecc]  WTSObject.hpp:100
+    +     178 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 236  [0x100f12874]  thread.h:214
+    +     ! 81 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 140  [0x100f0ec30]  WTSObject.hpp:84
+    +     ! : 70 _platform_memset  (in libsystem_platform.dylib) + 140,116,...  [0x1883d711c,0x1883d7104,...]
+    +     ! : 10 __bzero  (in libsystem_platform.dylib) + 0  [0x1883d7030]
+    +     ! : 1 DYLD-STUB$$bzero  (in s5_lifecycle_tests) + 4  [0x1010352f8]
+    +     ! 43 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 52,32  [0x100f0ebd8,0x100f0ebc4]  WTSObject.hpp:83
+    +     ! 27 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 152  [0x100f0ec3c]  WTSObject.hpp:88
+    +     ! 16 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 140  [0x100f0ec30]  WTSObject.hpp:85
+    +     ! 10 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 24  [0x100f0ebbc]  WTSObject.hpp:80
+    +     ! 1 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 88  [0x100f0ebfc]  WTSObject.hpp:84
+    +     92 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 392,204,...  [0x100f12910,0x100f12854,...]  thread.h:214
+    +     1 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 160  [0x100f0ec44]  WTSObject.hpp:88
+    2046 Thread_6415261
+    + 2046 thread_start  (in libsystem_pthread.dylib) + 8  [0x1883c8c1c]
+    +   2046 _pthread_start  (in libsystem_pthread.dylib) + 136  [0x1883cdc58]
+    +     1311 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 392  [0x100f12910]  thread.h:214
+    +     ! 1274 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 40  [0x100f1d1d0]  DataManager.cpp:851
+    +     ! : 694 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 132  [0x100f20a68]  DataManager.cpp:188
+    +     ! : | 692 std::mutex::lock()  (in libc++.1.dylib) + 16  [0x1882e0010]
+    +     ! : | + 629 _pthread_mutex_firstfit_lock_slow  (in libsystem_pthread.dylib) + 216  [0x1883c88e0]
+    +     ! : | + ! 629 _pthread_mutex_firstfit_lock_wait  (in libsystem_pthread.dylib) + 84  [0x1883cae9c]
+    +     ! : | + !   629 __psynch_mutexwait  (in libsystem_kernel.dylib) + 8  [0x18838c9dc]
+    +     ! : | + 41 pthread_mutex_lock  (in libsystem_pthread.dylib) + 32,12,...  [0x1883c841c,0x1883c8408,...]
+    +     ! : | + 22 _pthread_mutex_firstfit_lock_slow  (in libsystem_pthread.dylib) + 120,224  [0x1883c8880,0x1883c88e8]
+    +     ! : | 1 pthread_mutex_lock  (in libsystem_pthread.dylib) + 136  [0x1883c8484]
+    +     ! : | 1 std::mutex::lock()  (in libc++.1.dylib) + 20  [0x1882e0014]
+    +     ! : 212 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 192  [0x100f20aa4]  DataManager.cpp:191
+    +     ! : | 198 std::mutex::unlock()  (in libc++.1.dylib) + 16  [0x1882e0038]
+    +     ! : | + 106 pthread_mutex_unlock  (in libsystem_pthread.dylib) + 12,104,...  [0x1883c8950,0x1883c89ac,...]
+    +     ! : | + 85 _pthread_mutex_firstfit_unlock_slow  (in libsystem_pthread.dylib) + 220  [0x1883c8b94]
+    +     ! : | + ! 85 _pthread_mutex_firstfit_wake  (in libsystem_pthread.dylib) + 28  [0x1883caf0c]
+    +     ! : | + !   85 __psynch_mutexdrop  (in libsystem_kernel.dylib) + 8  [0x18838cba8]
+    +     ! : | + 7 DYLD-STUB$$pthread_mutex_unlock  (in libc++.1.dylib) + 0,8  [0x188342918,0x188342920]
+    +     ! : | 12 DYLD-STUB$$std::mutex::unlock()  (in s5_lifecycle_tests) + 4  [0x1010343a4]
+    +     ! : | 2 std::mutex::unlock()  (in libc++.1.dylib) + 16  [0x1882e0038]
+    +     ! : 60 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 40,24,...  [0x100f20a0c,0x100f209fc,...]  DataManager.cpp:183
+    +     ! : 60 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 96  [0x100f20a44]  DataManager.cpp:187
+    +     ! : | 60 _tlv_get_addr  (in libdyld.dylib) + 8  [0x187fd8390]
+    +     ! : 60 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 204  [0x100f20ab0]  DataManager.cpp:192
+    +     ! : | 22 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 36,56,...  [0x100f1c980,0x100f1c994,...]  DataManager.cpp:66
+    +     ! : | 11 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 100  [0x100f1c9c0]  DataManager.cpp:66
+    +     ! : | + 11 _tlv_get_addr  (in libdyld.dylib) + 12  [0x187fd8394]
+    +     ! : | 10 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 48  [0x100f1c98c]  DataManager.cpp:66
+    +     ! : | + 10 _tlv_get_addr  (in libdyld.dylib) + 12,20  [0x187fd8394,0x187fd839c]
+    +     ! : | 9 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 180  [0x100f1ca10]  DataManager.cpp:70
+    +     ! : | + 9 _tlv_get_addr  (in libdyld.dylib) + 0,12,...  [0x187fd8388,0x187fd8394,...]
+    +     ! : | 6 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 152  [0x100f1c9f4]  DataManager.cpp:68
+    +     ! : | 2 (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests) + 72  [0x100f1c9a4]  DataManager.cpp:66
+    +     ! : |   2 _tlv_get_addr  (in libdyld.dylib) + 12  [0x187fd8394]
+    +     ! : 57 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 132  [0x100f20a68]  DataManager.cpp:189
+    +     ! : 46 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 120  [0x100f20a5c]  DataManager.cpp:187
+    +     ! : | 46 std::vector<(anonymous namespace)::HostFrame>::push_back[abi:ne200100]((anonymous namespace)::HostFrame&&)  (in s5_lifecycle_tests) + 28,16,...  [0x100f1c880,0x100f1c874,...]  vector.h:454
+    +     ! : 20 std::vector<(anonymous namespace)::HostFrame>::push_back[abi:ne200100]((anonymous namespace)::HostFrame&&)  (in s5_lifecycle_tests) + 220,232,...  [0x100f1c940,0x100f1c94c,...]  vector.h:454
+    +     ! : 19 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 44  [0x100f20a10]  DataManager.cpp:212
+    +     ! : 18 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 72  [0x100f20a2c]  DataManager.cpp:187
+    +     ! : | 18 _tlv_get_addr  (in libdyld.dylib) + 20  [0x187fd839c]
+    +     ! : 16 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 56  [0x100f20a1c]  DataManager.cpp:187
+    +     ! : 12 DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests) + 48  [0x100f20a14]  DataManager.cpp:185
+    +     ! 28 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 116,100,...  [0x100f1d21c,0x100f1d20c,...]  DataManager.cpp:856
+    +     ! 9 DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 44  [0x100f1d1d4]  DataManager.cpp:852
+    +     413 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 424  [0x100f12930]  thread.h:214
+    +     ! 374 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 424  [0x100f12930]  thread.h:214
+    +     ! : 374 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 64,60,...  [0x100f0eef8,0x100f0eef4,...]  WTSObject.hpp:107
+    +     ! 33 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 16  [0x100f0eec8]  WTSObject.hpp:99
+    +     ! 6 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 0,8  [0x100f0eeb8,0x100f0eec0]  WTSObject.hpp:94
+    +     201 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 236  [0x100f12874]  thread.h:214
+    +     ! 132 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 52,60,...  [0x100f0ebd8,0x100f0ebe0,...]  WTSObject.hpp:83
+    +     ! 54 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 140  [0x100f0ec30]  WTSObject.hpp:84
+    +     ! : 54 _platform_memset  (in libsystem_platform.dylib) + 140,144,...  [0x1883d711c,0x1883d7120,...]
+    +     ! 6 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 152  [0x100f0ec3c]  WTSObject.hpp:88
+    +     ! 5 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 24,28  [0x100f0ebbc,0x100f0ebc0]  WTSObject.hpp:80
+    +     ! 2 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 4  [0x100f0eba8]  WTSObject.hpp:70
+    +     ! 2 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 140  [0x100f0ec30]  WTSObject.hpp:85
+    +     116 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 156,236,...  [0x100f12824,0x100f12874,...]  thread.h:214
+    +     5 wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 156  [0x100f0ec40]  WTSObject.hpp:88
+    2046 Thread_6415262
+      2046 thread_start  (in libsystem_pthread.dylib) + 8  [0x1883c8c1c]
+        2046 _pthread_start  (in libsystem_pthread.dylib) + 136  [0x1883cdc58]
+          2046 std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, void (WtDataWriter::*)(), WtDataWriter*>>(void*)  (in libWtDataStorage.dylib) + 76  [0x1023012f8]  thread.h:214
+            1548 WtDataWriter::task_loop()  (in libWtDataStorage.dylib) + 196  [0x1022dc468]  WtDataWriter.cpp:1577
+            ! 353 WtDataWriter::procTick(wtp::WTSTickData*, unsigned int)  (in libWtDataStorage.dylib) + 572  [0x1022d6ff8]  WtDataWriter.cpp:1373
+            ! : 352 DataManager::WriterHost::fanout<wtp::WTSTickData>(wtp::WTSTickData*, char const*)  (in s5_lifecycle_tests) + 52  [0x100f21ec4]  DataManager.cpp:218
+            ! : | 349 DataManager::WriterHost::Inbound::Inbound(DataManager::WriterHost&)  (in s5_lifecycle_tests) + 112  [0x100f21aac]  DataManager.cpp:142
+            ! : | + 349 std::mutex::lock()  (in libc++.1.dylib) + 16  [0x1882e0010]
+            ! : | +   349 _pthread_mutex_firstfit_lock_slow  (in libsystem_pthread.dylib) + 216  [0x1883c88e0]
+            ! : | +     349 _pthread_mutex_firstfit_lock_wait  (in libsystem_pthread.dylib) + 84  [0x1883cae9c]
+            ! : | +       349 __psynch_mutexwait  (in libsystem_kernel.dylib) + 8  [0x18838c9dc]
+            ! : | 3 DataManager::WriterHost::Inbound::Inbound(DataManager::WriterHost&)  (in s5_lifecycle_tests) + 0  [0x100f21a3c]  DataManager.cpp:140
+            ! : 1 DataManager::WriterHost::fanout<wtp::WTSTickData>(wtp::WTSTickData*, char const*)  (in s5_lifecycle_tests) + 232  [0x100f21f78]  DataManager.cpp:239
+            ! :   1 DataManager::WriterHost::Inbound::~Inbound()  (in s5_lifecycle_tests) + 56  [0x100f21e0c]  DataManager.cpp:161
+            ! :     1 std::mutex::lock()  (in libc++.1.dylib) + 16  [0x1882e0010]
+            ! :       1 _pthread_mutex_firstfit_lock_slow  (in libsystem_pthread.dylib) + 216  [0x1883c88e0]
+            ! :         1 _pthread_mutex_firstfit_lock_wait  (in libsystem_pthread.dylib) + 84  [0x1883cae9c]
+            ! :           1 __psynch_mutexwait  (in libsystem_kernel.dylib) + 8  [0x18838c9dc]
+            ! 344 WtDataWriter::procTick(wtp::WTSTickData*, unsigned int)  (in libWtDataStorage.dylib) + 552  [0x1022d6fe4]  WtDataWriter.cpp:1371
+            ! : 245 WtDataWriter::pipeToKlines(wtp::WTSContractInfo*, wtp::WTSTickData*)  (in libWtDataStorage.dylib) + 404  [0x1022d8304]  WtDataWriter.cpp:2211
+            ! : | 237 WtDataWriter::preparePublished<_RTKlineBlock, wtp::WTSBarStruct, WtDataWriter::_KBlockPair>(WtDataWriter::_KBlockPair&, wt_rtpub::PublishLock&, char const*, char const*)  (in libWtDataStorage.dylib) + 232  [0x1022e1b4c]  WtDataWriter.cpp:1240
+            ! : | + 216 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 276  [0x1022d52fc]  RTBlockPublish.hpp:162
+            ! : | + ! 203 open  (in libsystem_kernel.dylib) + 64  [0x1883958f0]
+            ! : | + ! : 203 __open  (in libsystem_kernel.dylib) + 8  [0x18838a694]
+            ! : | + ! 13 open  (in libsystem_kernel.dylib) + 180  [0x188395964]
+            ! : | + 15 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 1404  [0x1022d5764]  RTBlockPublish.hpp:217
+            ! : | + ! 15 _xzm_xzone_madvise_freelist_chunk  (in libsystem_malloc.dylib) + 92  [0x1881f38d4]
+            ! : | + !   15 <deduplicated_symbol>  (in libsystem_malloc.dylib) + 16  [0x1881ddb7c]
+            ! : | + !     15 madvise  (in libsystem_kernel.dylib) + 8  [0x18838c9b0]
+            ! : | + 6 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 752  [0x1022d54d8]  RTBlockPublish.hpp:182
+            ! : | +   6 pread  (in libsystem_kernel.dylib) + 8  [0x18838b650]
+            ! : | 8 WtDataWriter::preparePublished<_RTKlineBlock, wtp::WTSBarStruct, WtDataWriter::_KBlockPair>(WtDataWriter::_KBlockPair&, wt_rtpub::PublishLock&, char const*, char const*)  (in libWtDataStorage.dylib) + 440  [0x1022e1c1c]  WtDataWriter.cpp:1254
+            ! : |   8 WtDataWriter::syncPublishedMapping<_RTKlineBlock, wtp::WTSBarStruct>(std::shared_ptr<BoostMappingFile>&)  (in libWtDataStorage.dylib) + 0  [0x102304a80]  WtDataWriter.cpp:1169
+            ! : 84 WtDataWriter::pipeToKlines(wtp::WTSContractInfo*, wtp::WTSTickData*)  (in libWtDataStorage.dylib) + 844  [0x1022d84bc]  WtDataWriter.cpp:2323
+            ! : | 70 WtDataWriter::preparePublished<_RTKlineBlock, wtp::WTSBarStruct, WtDataWriter::_KBlockPair>(WtDataWriter::_KBlockPair&, wt_rtpub::PublishLock&, char const*, char const*)  (in libWtDataStorage.dylib) + 232  [0x1022e1b4c]  WtDataWriter.cpp:1240
+            ! : | + 67 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 276  [0x1022d52fc]  RTBlockPublish.hpp:162
+            ! : | + ! 67 open  (in libsystem_kernel.dylib) + 64  [0x1883958f0]
+            ! : | + !   67 __open  (in libsystem_kernel.dylib) + 8  [0x18838a694]
+            ! : | + 3 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 752  [0x1022d54d8]  RTBlockPublish.hpp:182
+            ! : | +   3 pread  (in libsystem_kernel.dylib) + 8  [0x18838b650]
+            ! : | 8 WtDataWriter::preparePublished<_RTKlineBlock, wtp::WTSBarStruct, WtDataWriter::_KBlockPair>(WtDataWriter::_KBlockPair&, wt_rtpub::PublishLock&, char const*, char const*)  (in libWtDataStorage.dylib) + 848  [0x1022e1db4]  WtDataWriter.cpp:1290
+            ! : | + 8 _xzm_xzone_madvise_freelist_chunk  (in libsystem_malloc.dylib) + 92  [0x1881f38d4]
+            ! : | +   8 <deduplicated_symbol>  (in libsystem_malloc.dylib) + 16  [0x1881ddb7c]
+            ! : | +     8 madvise  (in libsystem_kernel.dylib) + 8  [0x18838c9b0]
+            ! : | 6 WtDataWriter::preparePublished<_RTKlineBlock, wtp::WTSBarStruct, WtDataWriter::_KBlockPair>(WtDataWriter::_KBlockPair&, wt_rtpub::PublishLock&, char const*, char const*)  (in libWtDataStorage.dylib) + 180  [0x1022e1b18]  WtDataWriter.cpp:1239
+            ! : |   6 operator new(unsigned long)  (in libc++abi.dylib) + 52  [0x1883847e8]
+            ! : |     6 _xzm_xzone_malloc_freelist_outlined  (in libsystem_malloc.dylib) + 756  [0x1881f192c]
+            ! : 9 WtDataWriter::pipeToKlines(wtp::WTSContractInfo*, wtp::WTSTickData*)  (in libWtDataStorage.dylib) + 1136  [0x1022d85e0]  WtDataWriter.cpp:2423
+            ! : | 9 close  (in libsystem_kernel.dylib) + 8  [0x18838a8f0]
+            ! : 4 WtDataWriter::pipeToKlines(wtp::WTSContractInfo*, wtp::WTSTickData*)  (in libWtDataStorage.dylib) + 1316  [0x1022d8694]  WtDataWriter.cpp:0
+            ! : | 4 WtDataWriter::BlockLease<WtDataWriter::_KBlockPair>::~BlockLease()  (in libWtDataStorage.dylib) + 104  [0x102304588]  WtDataWriter.h:451
+            ! : 2 WtDataWriter::pipeToKlines(wtp::WTSContractInfo*, wtp::WTSTickData*)  (in libWtDataStorage.dylib) + 760  [0x1022d8468]  WtDataWriter.cpp:2318
+            ! :   1 WtDataWriter::getKlineBlock(wtp::WTSContractInfo*, wtp::tagKlinePeriod, bool)  (in libWtDataStorage.dylib) + 428  [0x1022e1008]  WtDataWriter.cpp:2467
+            ! :   + 1 std::mutex::lock()  (in libc++.1.dylib) + 0  [0x1882e0000]
+            ! :   1 WtDataWriter::getKlineBlock(wtp::WTSContractInfo*, wtp::tagKlinePeriod, bool)  (in libWtDataStorage.dylib) + 516  [0x1022e1060]  WtDataWriter.cpp:2468
+            ! :     1 ankerl::unordered_dense::v4_0_4::detail::table<std::basic_string<char>, std::shared_ptr<WtDataWriter::_KBlockPair>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::do_find<std::basic_string<char>>(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 240  [0x102305a28]  unordered_dense.h:1067
+            ! :       1 _platform_memcmp  (in libsystem_platform.dylib) + 144  [0x1883d4fa0]
+            ! 319 WtDataWriter::procTick(wtp::WTSTickData*, unsigned int)  (in libWtDataStorage.dylib) + 168  [0x1022d6e64]  WtDataWriter.cpp:1352
+            ! : 207 DataManager::WriterHost::canSessionReceive(char const*)  (in s5_lifecycle_tests) + 32  [0x100f1d768]  DataManager.cpp:98
+            ! : | 204 DataManager::WriterHost::Inbound::Inbound(DataManager::WriterHost&)  (in s5_lifecycle_tests) + 112  [0x100f21aac]  DataManager.cpp:142
+            ! : | + 204 std::mutex::lock()  (in libc++.1.dylib) + 16  [0x1882e0010]
+            ! : | +   195 _pthread_mutex_firstfit_lock_slow  (in libsystem_pthread.dylib) + 216  [0x1883c88e0]
+            ! : | +   ! 195 _pthread_mutex_firstfit_lock_wait  (in libsystem_pthread.dylib) + 84  [0x1883cae9c]
+            ! : | +   !   195 __psynch_mutexwait  (in libsystem_kernel.dylib) + 8  [0x18838c9dc]
+            ! : | +   9 pthread_mutex_lock  (in libsystem_pthread.dylib) + 72  [0x1883c8444]
+            ! : | 3 DataManager::WriterHost::Inbound::Inbound(DataManager::WriterHost&)  (in s5_lifecycle_tests) + 256  [0x100f21b3c]  DataManager.cpp:154
+            ! : |   3 std::mutex::unlock()  (in libc++.1.dylib) + 16  [0x1882e0038]
+            ! : |     3 _pthread_mutex_firstfit_unlock_slow  (in libsystem_pthread.dylib) + 220  [0x1883c8b94]
+            ! : |       3 _pthread_mutex_firstfit_wake  (in libsystem_pthread.dylib) + 28  [0x1883caf0c]
+            ! : |         3 __psynch_mutexdrop  (in libsystem_kernel.dylib) + 8  [0x18838cba8]
+            ! : 112 DataManager::WriterHost::canSessionReceive(char const*)  (in s5_lifecycle_tests) + 88  [0x100f1d7a0]  DataManager.cpp:106
+            ! :   112 DataManager::WriterHost::Inbound::~Inbound()  (in s5_lifecycle_tests) + 56  [0x100f21e0c]  DataManager.cpp:161
+            ! :     112 std::mutex::lock()  (in libc++.1.dylib) + 16  [0x1882e0010]
+            ! :       112 _pthread_mutex_firstfit_lock_slow  (in libsystem_pthread.dylib) + 216  [0x1883c88e0]
+            ! :         112 _pthread_mutex_firstfit_lock_wait  (in libsystem_pthread.dylib) + 84  [0x1883cae9c]
+            ! :           112 __psynch_mutexwait  (in libsystem_kernel.dylib) + 8  [0x18838c9dc]
+            ! 274 WtDataWriter::procTick(wtp::WTSTickData*, unsigned int)  (in libWtDataStorage.dylib) + 496  [0x1022d6fac]  WtDataWriter.cpp:1363
+            ! : 200 WtDataWriter::updateCache(wtp::WTSContractInfo*, wtp::WTSTickData*, unsigned int)  (in libWtDataStorage.dylib) + 752  [0x1022d7330]  WtDataWriter.cpp:2691
+            ! : | 122 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 276  [0x1022d52fc]  RTBlockPublish.hpp:162
+            ! : | + 122 open  (in libsystem_kernel.dylib) + 64  [0x1883958f0]
+            ! : | +   122 __open  (in libsystem_kernel.dylib) + 8  [0x18838a694]
+            ! : | 34 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 296  [0x1022d5310]  RTBlockPublish.hpp:169
+            ! : | + 21 flock  (in libsystem_kernel.dylib) + 8  [0x18838dcd8]
+            ! : | + 13 DYLD-STUB$$flock  (in libWtDataStorage.dylib) + 0  [0x1024355e4]
+            ! : | 30 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 752  [0x1022d54d8]  RTBlockPublish.hpp:182
+            ! : | + 30 pread  (in libsystem_kernel.dylib) + 8  [0x18838b650]
+            ! : | 14 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 1404  [0x1022d5764]  RTBlockPublish.hpp:217
+            ! : |   7 _xzm_free  (in libsystem_malloc.dylib) + 136,212  [0x1881eb0f4,0x1881eb140]
+            ! : |   7 free  (in libsystem_malloc.dylib) + 0  [0x1881c16b8]
+            ! : 57 WtDataWriter::updateCache(wtp::WTSContractInfo*, wtp::WTSTickData*, unsigned int)  (in libWtDataStorage.dylib) + 2612  [0x1022d7a74]  WtDataWriter.cpp:2854
+            ! : | 57 close  (in libsystem_kernel.dylib) + 8  [0x18838a8f0]
+            ! : 15 WtDataWriter::updateCache(wtp::WTSContractInfo*, wtp::WTSTickData*, unsigned int)  (in libWtDataStorage.dylib) + 700  [0x1022d72fc]  WtDataWriter.cpp:2691
+            ! : | 15 operator new(unsigned long)  (in libc++abi.dylib) + 52  [0x1883847e8]
+            ! : |   14 _xzm_xzone_malloc_freelist_outlined  (in libsystem_malloc.dylib) + 756  [0x1881f192c]
+            ! : |   1 <deduplicated_symbol>  (in libsystem_malloc.dylib) + 188  [0x1881ea190]
+            ! : 1 WtDataWriter::updateCache(wtp::WTSContractInfo*, wtp::WTSTickData*, unsigned int)  (in libWtDataStorage.dylib) + 776  [0x1022d7348]  WtDataWriter.cpp:2691
+            ! : | 1 _xzm_xzone_madvise_freelist_chunk  (in libsystem_malloc.dylib) + 92  [0x1881f38d4]
+            ! : |   1 <deduplicated_symbol>  (in libsystem_malloc.dylib) + 16  [0x1881ddb7c]
+            ! : |     1 madvise  (in libsystem_kernel.dylib) + 8  [0x18838c9b0]
+            ! : 1 WtDataWriter::updateCache(wtp::WTSContractInfo*, wtp::WTSTickData*, unsigned int)  (in libWtDataStorage.dylib) + 2836  [0x1022d7b54]  WtDataWriter.cpp:2825
+            ! 255 WtDataWriter::procTick(wtp::WTSTickData*, unsigned int)  (in libWtDataStorage.dylib) + 528  [0x1022d6fcc]  WtDataWriter.cpp:1368
+            ! : 239 WtDataWriter::pipeToTicks(wtp::WTSContractInfo*, wtp::WTSTickData*)  (in libWtDataStorage.dylib) + 116  [0x1022d7dc8]  WtDataWriter.cpp:1606
+            ! : | 234 WtDataWriter::appendPublished<_RTDayBlockHeader, wtp::WTSTickStruct, WtDataWriter::_TickBlockPair>(WtDataWriter::_TickBlockPair&, wtp::WTSTickStruct const&, char const*, char const*)  (in libWtDataStorage.dylib) + 76  [0x1022dd5b4]  WtDataWriter.cpp:1296
+            ! : | + 197 WtDataWriter::preparePublished<_RTDayBlockHeader, wtp::WTSTickStruct, WtDataWriter::_TickBlockPair>(WtDataWriter::_TickBlockPair&, wt_rtpub::PublishLock&, char const*, char const*)  (in libWtDataStorage.dylib) + 232  [0x1023015f0]  WtDataWriter.cpp:1240
+            ! : | + ! 154 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 276  [0x1022d52fc]  RTBlockPublish.hpp:162
+            ! : | + ! : 154 open  (in libsystem_kernel.dylib) + 64  [0x1883958f0]
+            ! : | + ! :   154 __open  (in libsystem_kernel.dylib) + 8  [0x18838a694]
+            ! : | + ! 27 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 752  [0x1022d54d8]  RTBlockPublish.hpp:182
+            ! : | + ! : 27 pread  (in libsystem_kernel.dylib) + 8  [0x18838b650]
+            ! : | + ! 12 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 296  [0x1022d5310]  RTBlockPublish.hpp:169
+            ! : | + ! : 12 flock  (in libsystem_kernel.dylib) + 0,8  [0x18838dcd0,0x18838dcd8]
+            ! : | + ! 4 wt_rtpub::PublishLock::acquire(std::basic_string<char> const&)  (in libWtDataStorage.dylib) + 1404  [0x1022d5764]  RTBlockPublish.hpp:217
+            ! : | + !   4 _xzm_free  (in libsystem_malloc.dylib) + 352  [0x1881eb1cc]
+            ! : | + !     4 __bzero  (in libsystem_platform.dylib) + 24  [0x1883d7048]
+            ! : | + 15 WtDataWriter::preparePublished<_RTDayBlockHeader, wtp::WTSTickStruct, WtDataWriter::_TickBlockPair>(WtDataWriter::_TickBlockPair&, wt_rtpub::PublishLock&, char const*, char const*)  (in libWtDataStorage.dylib) + 848  [0x102301858]  WtDataWriter.cpp:1290
+            ! : | + ! 15 _xzm_xzone_madvise_freelist_chunk  (in libsystem_malloc.dylib) + 92  [0x1881f38d4]
+            ! : | + !   15 <deduplicated_symbol>  (in libsystem_malloc.dylib) + 16  [0x1881ddb7c]
+            ! : | + !     15 madvise  (in libsystem_kernel.dylib) + 8  [0x18838c9b0]
+            ! : | + 11 WtDataWriter::preparePublished<_RTDayBlockHeader, wtp::WTSTickStruct, WtDataWriter::_TickBlockPair>(WtDataWriter::_TickBlockPair&, wt_rtpub::PublishLock&, char const*, char const*)  (in libWtDataStorage.dylib) + 180  [0x1023015bc]  WtDataWriter.cpp:1239
+            ! : | + ! 11 operator new(unsigned long)  (in libc++abi.dylib) + 52  [0x1883847e8]
+            ! : | + !   6 _xzm_xzone_malloc_freelist_outlined  (in libsystem_malloc.dylib) + 324  [0x1881f177c]
+            ! : | + !   : 6 _xzm_xzone_find_and_malloc_from_freelist_chunk  (in libsystem_malloc.dylib) + 28  [0x1881f1f30]
+            ! : | + !   3 _xzm_xzone_malloc_tiny  (in libsystem_malloc.dylib) + 312  [0x1881f000c]
+            ! : | + !   2 _xzm_xzone_malloc_freelist_outlined  (in libsystem_malloc.dylib) + 756  [0x1881f192c]
+            ! : | + 11 WtDataWriter::preparePublished<_RTDayBlockHeader, wtp::WTSTickStruct, WtDataWriter::_TickBlockPair>(WtDataWriter::_TickBlockPair&, wt_rtpub::PublishLock&, char const*, char const*)  (in libWtDataStorage.dylib) + 440  [0x1023016c0]  WtDataWriter.cpp:1254
+            ! : | +   6 WtDataWriter::syncPublishedMapping<_RTDayBlockHeader, wtp::WTSTickStruct>(std::shared_ptr<BoostMappingFile>&)  (in libWtDataStorage.dylib) + 136  [0x102301e48]  WtDataWriter.cpp:1174
+            ! : | +   5 WtDataWriter::syncPublishedMapping<_RTDayBlockHeader, wtp::WTSTickStruct>(std::shared_ptr<BoostMappingFile>&)  (in libWtDataStorage.dylib) + 0  [0x102301dc0]  WtDataWriter.cpp:1169
+            ! : | 5 WtDataWriter::appendPublished<_RTDayBlockHeader, wtp::WTSTickStruct, WtDataWriter::_TickBlockPair>(WtDataWriter::_TickBlockPair&, wtp::WTSTickStruct const&, char const*, char const*)  (in libWtDataStorage.dylib) + 132  [0x1022dd5ec]  WtDataWriter.cpp:1306
+            ! : |   5 close  (in libsystem_kernel.dylib) + 8  [0x18838a8f0]
+            ! : 12 WtDataWriter::pipeToTicks(wtp::WTSContractInfo*, wtp::WTSTickData*)  (in libWtDataStorage.dylib) + 872  [0x1022d80bc]  WtDataWriter.cpp:1624
+            ! : 4 WtDataWriter::pipeToTicks(wtp::WTSContractInfo*, wtp::WTSTickData*)  (in libWtDataStorage.dylib) + 68  [0x1022d7d98]  WtDataWriter.cpp:1595
+            ! :   4 WtDataWriter::getTickBlock(wtp::WTSContractInfo*, unsigned int, bool)  (in libWtDataStorage.dylib) + 468  [0x1022dc878]  WtDataWriter.cpp:2170
+            ! :     4 clock_gettime  (in libsystem_c.dylib) + 392  [0x18826aeac]
+            ! 2 WtDataWriter::procTick(wtp::WTSTickData*, unsigned int)  (in libWtDataStorage.dylib) + 496  [0x1022d6fac]  WtDataWriter.cpp:1363
+            ! 1 wtp::WTSSessionInfo::tryGetOffsetDate(unsigned int, unsigned int, unsigned int&) const  (in libWtDataStorage.dylib) + 976  [0x1022f5380]  WTSSessionInfo.hpp:247
+            497 WtDataWriter::task_loop()  (in libWtDataStorage.dylib) + 256  [0x1022dc4a4]  WtDataWriter.cpp:1584
+            ! 491 WtDataWriter::task_loop()  (in libWtDataStorage.dylib) + 256  [0x1022dc4a4]  WtDataWriter.cpp:1584
+            ! : 491 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 64,60  [0x100f0eef8,0x100f0eef4]  WTSObject.hpp:107
+            ! 6 wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 0  [0x100f0eeb8]  WTSObject.hpp:94
+            1 WtDataWriter::task_loop()  (in libWtDataStorage.dylib) + 256  [0x1022dc4a4]  WtDataWriter.cpp:1584
+
+Total number in stack (recursive counted multiple, when >=5):
+        19       _tlv_get_addr  (in libdyld.dylib) + 0  [0x187fd8388]
+        8       __psynch_mutexwait  (in libsystem_kernel.dylib) + 0  [0x18838c9d4]
+        8       _pthread_mutex_firstfit_lock_slow  (in libsystem_pthread.dylib) + 216  [0x1883c88e0]
+        8       _pthread_mutex_firstfit_lock_wait  (in libsystem_pthread.dylib) + 84  [0x1883cae9c]
+        8       std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests) + 424  [0x100f12930]  thread.h:214
+        8       std::mutex::lock()  (in libc++.1.dylib) + 16  [0x1882e0010]
+        8       std::vector<(anonymous namespace)::HostFrame>::push_back[abi:ne200100]((anonymous namespace)::HostFrame&&)  (in s5_lifecycle_tests) + 0  [0x100f1c864]  vector.h:454
+        8       wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests) + 0  [0x100f0eba4]  WTSObject.hpp:88
+        7       pthread_mutex_lock  (in libsystem_pthread.dylib) + 0  [0x1883c83fc]
+        5       DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests) + 0  [0x100f1d1a8]  DataManager.cpp:856
+        5       _pthread_start  (in libsystem_pthread.dylib) + 136  [0x1883cdc58]
+        5       std::mutex::unlock()  (in libc++.1.dylib) + 16  [0x1882e0038]
+        5       thread_start  (in libsystem_pthread.dylib) + 8  [0x1883c8c1c]
+        5       wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 0  [0x100f0eeb8]  WTSObject.hpp:107
+        5       wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests) + 0  [0x100f0eeb8]  WTSObject.hpp:94
+
+Sort by top of stack, same collapsed (when >= 5):
+        __psynch_mutexwait  (in libsystem_kernel.dylib)        3063
+        wtp::WTSPoolObject<wtp::WTSTickData>::release()  (in s5_lifecycle_tests)        2267
+        __psynch_cvwait  (in libsystem_kernel.dylib)        2045
+        DataManager::WriterHost::Outbound::Outbound(std::shared_ptr<DataManager::WriterHost> const&)  (in s5_lifecycle_tests)        740
+        wtp::WTSPoolObject<wtp::WTSTickData>::allocate()  (in s5_lifecycle_tests)        576
+        __open  (in libsystem_kernel.dylib)        546
+        std::__thread_proxy[abi:ne200100]<std::tuple<std::unique_ptr<std::__thread_struct>, (anonymous namespace)::Lifecycle_RealAsyncWriterConcurrentProducersDuringRelease_Test::TestBody()::$_0>>(void*)  (in s5_lifecycle_tests)        451
+        std::vector<(anonymous namespace)::HostFrame>::push_back[abi:ne200100]((anonymous namespace)::HostFrame&&)  (in s5_lifecycle_tests)        416
+        (anonymous namespace)::popFrame(void const*, int)  (in s5_lifecycle_tests)        284
+        _tlv_get_addr  (in libdyld.dylib)        279
+        pthread_mutex_unlock  (in libsystem_pthread.dylib)        265
+        DataManager::writeTick(wtp::WTSTickData*, unsigned int)  (in s5_lifecycle_tests)        240
+        pthread_mutex_lock  (in libsystem_pthread.dylib)        201
+        _platform_memset  (in libsystem_platform.dylib)        182
+        __psynch_mutexdrop  (in libsystem_kernel.dylib)        127
+        close  (in libsystem_kernel.dylib)        71
+        pread  (in libsystem_kernel.dylib)        66
+        std::mutex::lock()  (in libc++.1.dylib)        62
+        DYLD-STUB$$pthread_mutex_lock  (in libc++.1.dylib)        47
+        std::mutex::unlock()  (in libc++.1.dylib)        46
+        madvise  (in libsystem_kernel.dylib)        39
+        flock  (in libsystem_kernel.dylib)        33
+        wtp::WTSTickData::~WTSTickData()  (in s5_lifecycle_tests)        30
+        __bzero  (in libsystem_platform.dylib)        26
+        _pthread_mutex_firstfit_lock_slow  (in libsystem_pthread.dylib)        23
+        _xzm_xzone_malloc_freelist_outlined  (in libsystem_malloc.dylib)        22
+        DYLD-STUB$$std::mutex::unlock()  (in s5_lifecycle_tests)        20
+        DYLD-STUB$$flock  (in libWtDataStorage.dylib)        13
+        open  (in libsystem_kernel.dylib)        13
+        WtDataWriter::pipeToTicks(wtp::WTSContractInfo*, wtp::WTSTickData*)  (in libWtDataStorage.dylib)        12
+        WtDataWriter::syncPublishedMapping<_RTDayBlockHeader, wtp::WTSTickStruct>(std::shared_ptr<BoostMappingFile>&)  (in libWtDataStorage.dylib)        11
+        DYLD-STUB$$pthread_mutex_unlock  (in libc++.1.dylib)        9
+        WtDataWriter::syncPublishedMapping<_RTKlineBlock, wtp::WTSBarStruct>(std::shared_ptr<BoostMappingFile>&)  (in libWtDataStorage.dylib)        8
+        _xzm_free  (in libsystem_malloc.dylib)        7
+        free  (in libsystem_malloc.dylib)        7
+        _xzm_xzone_find_and_malloc_from_freelist_chunk  (in libsystem_malloc.dylib)        6
+
+Binary Images:
+       0x100f04000 -        0x10105980b +s5_lifecycle_tests (0) <D36ACF80-8E8A-37FC-A565-6A64E2A13706> /tmp/*/s5_lifecycle_tests
+       0x101300000 -        0x101303fff +libboost_system.dylib (0) <615537C5-B430-307B-89D9-F41C23DAB9A8> /opt/homebrew/*/libboost_system.dylib
+       0x10130c000 -        0x10130fff7 +libboost_atomic.dylib (0) <F5AEE07E-306D-3AD6-99FE-591A4BF86C0F> /opt/homebrew/*/libboost_atomic.dylib
+       0x101328000 -        0x10133ffff +libboost_filesystem.dylib (0) <FF65F466-1EC4-3CA9-955A-68CDAE034100> /opt/homebrew/*/libboost_filesystem.dylib
+       0x10135c000 -        0x101367ff3 +libboost_thread.dylib (0) <16E8098C-1D3D-333C-B0A8-29912E834272> /opt/homebrew/*/libboost_thread.dylib
+       0x101480000 -        0x10155ffff +libiconv.2.dylib (0) <44E04980-5750-34F4-99AE-EC7E3CA77B91> /usr/local/lib/libiconv.2.dylib
+       0x1022a0000 -        0x1024512a3 +libWtDataStorage.dylib (0) <10B0D9F6-EF22-313E-8C8F-E3B9FE9EABA0> /tmp/*/libWtDataStorage.dylib
+       0x187f68000 -        0x187fbab4b  libobjc.A.dylib (951.7) <FF1D8AE4-ABEF-35F1-A30A-1183B9CB414F> /usr/lib/libobjc.A.dylib
+       0x187fbb000 -        0x187fefd07  libdyld.dylib (1378) <B147D877-D0C2-388F-B38D-D3132E39905F> /usr/lib/system/libdyld.dylib
+       0x187ff0000 -        0x188096217  dyld (1.0.0 - 1378) <A237EF81-B68B-37BA-A165-92C965529534> /usr/lib/dyld
+       0x188097000 -        0x18809a228  libsystem_blocks.dylib (96) <CC947089-488D-316B-A9C7-46DEC0F73145> /usr/lib/system/libsystem_blocks.dylib
+       0x18809b000 -        0x1880ef55f  libxpc.dylib (3102.120.13) <C40FCAE8-7A17-3D82-87CB-3DA4802ADEF1> /usr/lib/system/libxpc.dylib
+       0x1880f0000 -        0x1881109ff  libsystem_trace.dylib (1861.120.4) <D0FABAB3-5AE7-3F10-8C62-60CBF5D70850> /usr/lib/system/libsystem_trace.dylib
+       0x188111000 -        0x1881bf5f7  libcorecrypto.dylib (1922.121.1) <A01A158D-6FE7-3B1C-A2C4-6BCB90D7314A> /usr/lib/system/libcorecrypto.dylib
+       0x1881c0000 -        0x1882101d7  libsystem_malloc.dylib (812.100.31) <5FAE4807-4D2B-3A95-A63A-DD96D3DA11B4> /usr/lib/system/libsystem_malloc.dylib
+       0x188211000 -        0x18825823f  libdispatch.dylib (1542.100.32) <F071EFE4-299F-3089-ACC4-0025B8FFB52A> /usr/lib/system/libdispatch.dylib
+       0x188259000 -        0x18825bffb  libsystem_featureflags.dylib (103) <71FCFFBD-85F8-3365-AFE0-BECEA4369122> /usr/lib/system/libsystem_featureflags.dylib
+       0x18825c000 -        0x1882dcd9f  libsystem_c.dylib (1752.120.2) <694B7881-1BF3-3D0F-8F19-B50AE4E8EF8A> /usr/lib/system/libsystem_c.dylib
+       0x1882dd000 -        0x18836dae7  libc++.1.dylib (2100.43) <5013C0F8-84A9-3B56-9FEB-C353816A750F> /usr/lib/libc++.1.dylib
+       0x18836e000 -        0x18838875f  libc++abi.dylib (2100.43) <E482D257-E5A0-3816-BD97-7B39342958DA> /usr/lib/libc++abi.dylib
+       0x188389000 -        0x1883c62af  libsystem_kernel.dylib (12377.121.6) <CC1CF985-BC65-3725-809F-4C1E36B8F4BA> /usr/lib/system/libsystem_kernel.dylib
+       0x1883c7000 -        0x1883d3b3b  libsystem_pthread.dylib (539.100.4) <4F33683C-18C8-39A1-800B-2E3BD43BCC13> /usr/lib/system/libsystem_pthread.dylib
+       0x1883d4000 -        0x1883dc963  libsystem_platform.dylib (375.120.2) <160FD864-8D15-36FC-9E97-9725388CFAFE> /usr/lib/system/libsystem_platform.dylib
+       0x1883dd000 -        0x18840c6eb  libsystem_info.dylib (600) <3D62F2D9-F516-31BF-83C7-E203D872300B> /usr/lib/system/libsystem_info.dylib
+       0x18c3a4000 -        0x18c3ade5f  libsystem_darwin.dylib (1752.120.2) <8858F025-745A-388E-9544-080781CC9A69> /usr/lib/system/libsystem_darwin.dylib
+       0x18c80f000 -        0x18c8211b6  libsystem_notify.dylib (348.120.4) <64D76451-1E0C-369B-A631-54DA3140E083> /usr/lib/system/libsystem_notify.dylib
+       0x18eadc000 -        0x18eaf6f7b  libsystem_networkextension.dylib (2226.121.1) <0331EE20-A1FB-3C0D-990A-F65939CFF505> /usr/lib/system/libsystem_networkextension.dylib
+       0x18eb79000 -        0x18eb90fdf  libsystem_asl.dylib (406) <F40838DF-2F15-3F62-970F-DEE25706BF1B> /usr/lib/system/libsystem_asl.dylib
+       0x190737000 -        0x19073f387  libsystem_symptoms.dylib (2169.120.7) <F5029F5C-1BF3-31C7-892E-BC8606AC829E> /usr/lib/system/libsystem_symptoms.dylib
+       0x1949db000 -        0x194a13257  libsystem_containermanager.dylib (725.120.2) <518BE44D-AA31-31E6-B44B-A37AD5E47040> /usr/lib/system/libsystem_containermanager.dylib
+       0x195dec000 -        0x195df05d7  libsystem_configuration.dylib (1405.120.5) <0F7BBC1C-3D50-3E59-A31F-E4672A80BCEB> /usr/lib/system/libsystem_configuration.dylib
+       0x195df1000 -        0x195df78cf  libsystem_sandbox.dylib (2680.120.12) <EC3A75EA-44C0-3A0B-9BF7-71C117B0A9C6> /usr/lib/system/libsystem_sandbox.dylib
+       0x19744b000 -        0x19744e1fb  libquarantine.dylib (196.120.2) <5849009B-ACA3-3796-94C4-BBDF8D300EBA> /usr/lib/system/libquarantine.dylib
+       0x197bea000 -        0x197bf0d03  libsystem_coreservices.dylib (191.4.5) <9576143B-C303-35A3-BA63-1FD06EDA2BB1> /usr/lib/system/libsystem_coreservices.dylib
+       0x198175000 -        0x1981b2a77  libsystem_m.dylib (3312.100.1) <A7E0863C-101A-31A0-922B-ED9B02626151> /usr/lib/system/libsystem_m.dylib
+       0x1981b4000 -        0x1981b7527  libmacho.dylib (1378) <755441B4-C034-3E3A-8E3C-F424FBB28261> /usr/lib/system/libmacho.dylib
+       0x1981d1000 -        0x1981de3a7  libcommonCrypto.dylib (600035) <CE357BB1-2D49-37CC-9FFE-D093936B1475> /usr/lib/system/libcommonCrypto.dylib
+       0x1981df000 -        0x1981e8ca3  libunwind.dylib (2100.2) <FC8F0C4E-6FB0-3E27-ABEF-B0FA720CD5E4> /usr/lib/system/libunwind.dylib
+       0x1981f1000 -        0x1981fb7ff  libcopyfile.dylib (240) <8ACFAC7A-88E9-3EF4-853F-A9140FF110E5> /usr/lib/system/libcopyfile.dylib
+       0x1981fc000 -        0x1981ff987  libcompiler_rt.dylib (103.3) <AA79151F-C19D-3C7C-92F8-B10F04D82C1C> /usr/lib/system/libcompiler_rt.dylib
+       0x198200000 -        0x19820478b  libsystem_collections.dylib (1752.120.2) <72DB5BE7-EF78-37D0-8AAD-53E37CFE4287> /usr/lib/system/libsystem_collections.dylib
+       0x198205000 -        0x1982084cf  libsystem_secinit.dylib (168.100.7) <E525C566-CDA4-3D99-B12B-1615FD54A1F3> /usr/lib/system/libsystem_secinit.dylib
+       0x198209000 -        0x19820bbf7  libremovefile.dylib (85.100.6) <635E661D-80A7-340D-A165-3F7D318FDFC9> /usr/lib/system/libremovefile.dylib
+       0x19820c000 -        0x19820cf27  libkeymgr.dylib (31) <8C08891A-DF1C-3DCC-AB64-4742FD6BE9BA> /usr/lib/system/libkeymgr.dylib
+       0x19820d000 -        0x198215e37  libsystem_dnssd.dylib (2881.120.11) <6F45DF3F-233B-3BC3-BA8C-B43E7DA884BF> /usr/lib/system/libsystem_dnssd.dylib
+       0x198216000 -        0x19821b09b  libcache.dylib (95) <189B576E-6176-3F82-8FA4-5914B0BEAEE7> /usr/lib/system/libcache.dylib
+       0x19821c000 -        0x19821dce3  libSystem.B.dylib (1356) <D65E4112-C151-3FF8-BEB7-4841436012D6> /usr/lib/libSystem.B.dylib
+       0x28b453000 -        0x28b45a349  libRosetta.dylib (367.9) <8651ED4F-6506-3788-B56B-32EE414A85CA> /usr/lib/libRosetta.dylib
+       0x28d070000 -        0x28d073a4b  libsystem_darwindirectory.dylib (122) <CF277A2C-C818-3F16-8B3F-3C7B39FCD164> /usr/lib/system/libsystem_darwindirectory.dylib
+       0x28d074000 -        0x28d07d5d3  libsystem_eligibility.dylib (319.121.1) <DDAC0531-0262-3DDC-8EC8-80EB9438847A> /usr/lib/system/libsystem_eligibility.dylib
+       0x28d07e000 -        0x28d08588b  libsystem_sanitizers.dylib (26.1) <44C4234F-8B2D-38D3-A774-B4B3C75AF3A7> /usr/lib/system/libsystem_sanitizers.dylib
+       0x28d086000 -        0x28d086bb7  libsystem_trial.dylib (474.2.18.2) <68C583BA-AFF5-3916-86AE-6E38BFEF98D6> /usr/lib/system/libsystem_trial.dylib

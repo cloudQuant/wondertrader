@@ -1,0 +1,93 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before/src/TraderYD/TraderYD.cpp	2026-10-31 12:04:28
++++ src/TraderYD/TraderYD.cpp	2026-11-04 17:59:56
+@@ -456,23 +456,27 @@
+ 					double availNew = pos->getAvailNewPos();
+ 
+ 					WTSCommodityInfo* commInfo = orderInfo->getContractInfo()->getCommInfo();
++					FrozenSources frozen = { 0.0, 0.0 };
+ 					if (commInfo->getCoverMode() == CM_CoverToday)
+ 					{
+ 						if (orderInfo->getOffsetType() == WOT_CLOSETODAY)
+-							availNew -= orderInfo->getVolume();
++							frozen._new = orderInfo->getVolume();
+ 						else
+-							availPre -= orderInfo->getVolume();
++							frozen._pre = orderInfo->getVolume();
+ 					}
+ 					else
+ 					{
+ 						//不区分平昨平今，则先冻结昨仓，再冻结今仓
+-						double maxQty = std::min(availPre, orderInfo->getVolume());
+-						availPre -= maxQty;
+-						if (decimal::lt(orderInfo->getVolume(), maxQty))
+-						{
+-							availNew -= orderInfo->getVolume() - maxQty;
+-						}
++						// BUG-R93-006: the remainder beyond the available yesterday
++						// quantity is frozen from today (the comparison was inverted,
++						// so it was never frozen). Never freeze a negative amount.
++						frozen._pre = std::max(0.0, std::min(availPre, orderInfo->getVolume()));
++						if (decimal::lt(frozen._pre, orderInfo->getVolume()))
++							frozen._new = orderInfo->getVolume() - frozen._pre;
+ 					}
++					availPre -= frozen._pre;
++					availNew -= frozen._new;
++					m_mapFrozen[oid] = frozen;
+ 
+ 					pos->setAvailPrePos(availPre);
+ 					pos->setAvailNewPos(availNew);
+@@ -487,30 +491,26 @@
+ 				{
+ 					std::string key = fmtutil::format("{}-{}", orderInfo->getCode(), orderInfo->getDirection());
+ 					WTSPositionItem* pos = (WTSPositionItem*)m_mapPosition->get(key);
+-					[[maybe_unused]] double preQty = pos->getPrePosition();
+-					double newQty = pos->getNewPosition();
+ 					double availPre = pos->getAvailPrePos();
+ 					double availNew = pos->getAvailNewPos();
+ 
+-					double untrade = orderInfo->getVolume() - orderInfo->getVolTraded();
++					double untrade = std::max(0.0, orderInfo->getVolume() - orderInfo->getVolTraded());
+ 
+-					WTSCommodityInfo* commInfo = orderInfo->getContractInfo()->getCommInfo();
+-					if (commInfo->getCoverMode() == CM_CoverToday)
++					// BUG-R93-006: restore the untraded part to the sources this
++					// order froze when it was first seen. Fills consume yesterday
++					// first (see notifyTrade), so the untraded remainder is returned
++					// to today first, then to yesterday, never beyond what this
++					// order froze. Partial-fill/TradeVolume vendor semantics remain
++					// unverified (external evidence required).
++					auto fit = m_mapFrozen.find(oid);
++					if (fit != m_mapFrozen.end())
+ 					{
+-						if (orderInfo->getOffsetType() == WOT_CLOSETODAY)
+-							availNew += untrade;
+-						else
+-							availPre += untrade;
+-					}
+-					else
+-					{
+-						//不区分平昨平今，则先释放今仓，再释放昨仓
+-						double maxQty = std::min(newQty - availNew, untrade);
+-						availNew += maxQty;
+-						if (decimal::lt(untrade, maxQty))
+-						{
+-							availPre += orderInfo->getVolume() - maxQty;
+-						}
++						const FrozenSources& frozen = fit->second;
++						const double restoreNew = std::min(frozen._new, untrade);
++						const double restorePre = std::min(frozen._pre, untrade - restoreNew);
++						availNew += restoreNew;
++						availPre += restorePre;
++						m_mapFrozen.erase(fit);
+ 					}
+ 
+ 					pos->setAvailPrePos(availPre);
+@@ -688,6 +688,8 @@
+ 
+ 	if (m_mapOrders)
+ 		m_mapOrders->clear();
++
++	m_mapFrozen.clear();
+ 
+ 	if (m_mapPosition)
+ 		m_mapPosition->clear();

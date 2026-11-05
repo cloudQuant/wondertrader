@@ -1,0 +1,77 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 29 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from S5LmdbKeyBounds
+[ RUN      ] S5LmdbKeyBounds.LegalMaximumIdentityKeepsLayout
+[       OK ] S5LmdbKeyBounds.LegalMaximumIdentityKeepsLayout (3 ms)
+[ RUN      ] S5LmdbKeyBounds.OverlongNullAndUnterminatedIdentityAreRejected
+[       OK ] S5LmdbKeyBounds.OverlongNullAndUnterminatedIdentityAreRejected (32 ms)
+[ RUN      ] S5LmdbKeyBounds.EmptyFieldsFitTheKeyButAreNotAStorageIdentity
+[       OK ] S5LmdbKeyBounds.EmptyFieldsFitTheKeyButAreNotAStorageIdentity (11 ms)
+[----------] 3 tests from S5LmdbKeyBounds (51 ms total)
+
+[----------] 12 tests from S5ReaderADTest
+[ RUN      ] S5ReaderADTest.OverlongExchangeIsRejectedBeforeAnyStorageSideEffect
+[       OK ] S5ReaderADTest.OverlongExchangeIsRejectedBeforeAnyStorageSideEffect (3 ms)
+[ RUN      ] S5ReaderADTest.BtReaderRejectsOverlongCodeBeforeOpeningDatabases
+[       OK ] S5ReaderADTest.BtReaderRejectsOverlongCodeBeforeOpeningDatabases (1 ms)
+[ RUN      ] S5ReaderADTest.LongConfiguredPathLogIsBoundedToTheMessageBuffer
+[       OK ] S5ReaderADTest.LongConfiguredPathLogIsBoundedToTheMessageBuffer (5 ms)
+[ RUN      ] S5ReaderADTest.MinuteCutoffBeyondUint32KeyIsRefusedNotWrapped
+[       OK ] S5ReaderADTest.MinuteCutoffBeyondUint32KeyIsRefusedNotWrapped (30 ms)
+[ RUN      ] S5ReaderADTest.MinuteEndBeyondUint32KeyDoesNotWrapOrSignalAllUpdated
+[       OK ] S5ReaderADTest.MinuteEndBeyondUint32KeyDoesNotWrapOrSignalAllUpdated (11 ms)
+[ RUN      ] S5ReaderADTest.DayBarsIn2033UseDateKeysAndRemainReadable
+[       OK ] S5ReaderADTest.DayBarsIn2033UseDateKeysAndRemainReadable (12 ms)
+[ RUN      ] S5ReaderADTest.IncrementalTickStagingIsBoundedByCacheCapacity
+[       OK ] S5ReaderADTest.IncrementalTickStagingIsBoundedByCacheCapacity (156 ms)
+[ RUN      ] S5ReaderADTest.ForwardBarUpdateIsChunkBoundedAndCallsBackEachBarOnce
+[       OK ] S5ReaderADTest.ForwardBarUpdateIsChunkBoundedAndCallsBackEachBarOnce (3 ms)
+[ RUN      ] S5ReaderADTest.MalformedRecordInLongForwardRangeCommitsAndCallsBackNothing
+[       OK ] S5ReaderADTest.MalformedRecordInLongForwardRangeCommitsAndCallsBackNothing (25 ms)
+[ RUN      ] S5ReaderADTest.ConcurrentRewriteDuringChunkedApplyStopsAtAppliedBarsWithoutDuplicates
+[       OK ] S5ReaderADTest.ConcurrentRewriteDuringChunkedApplyStopsAtAppliedBarsWithoutDuplicates (15 ms)
+[ RUN      ] S5ReaderADTest.ReadOnlyRootWithMissingDatabaseFailsClosedAndRecovers
+[       OK ] S5ReaderADTest.ReadOnlyRootWithMissingDatabaseFailsClosedAndRecovers (12 ms)
+[ RUN      ] S5ReaderADTest.ReadOnlyExchangeDirectoryWithoutDataFileFailsClosed
+[       OK ] S5ReaderADTest.ReadOnlyExchangeDirectoryWithoutDataFileFailsClosed (51 ms)
+[----------] 12 tests from S5ReaderADTest (339 ms total)
+
+[----------] 14 tests from R21ReaderADTest
+[ RUN      ] R21ReaderADTest.DayKlineFirstReadLoadsAllBarsAndClipsToRequestedWindow
+[       OK ] R21ReaderADTest.DayKlineFirstReadLoadsAllBarsAndClipsToRequestedWindow (16 ms)
+[ RUN      ] R21ReaderADTest.DayKlineWindowBeforeFirstBarReturnsWholeLoadedRange
+[       OK ] R21ReaderADTest.DayKlineWindowBeforeFirstBarReturnsWholeLoadedRange (26 ms)
+[ RUN      ] R21ReaderADTest.RepeatedKlineLookupOfSameExchangeReturnsCachedBars
+[       OK ] R21ReaderADTest.RepeatedKlineLookupOfSameExchangeReturnsCachedBars (11 ms)
+[ RUN      ] R21ReaderADTest.ThirdCodeOfSameExchangeReturnsItsBars
+[       OK ] R21ReaderADTest.ThirdCodeOfSameExchangeReturnsItsBars (3 ms)
+[ RUN      ] R21ReaderADTest.Min1KlineKeysByBarTimeAndSlicesTwoBars
+[       OK ] R21ReaderADTest.Min1KlineKeysByBarTimeAndSlicesTwoBars (3 ms)
+[ RUN      ] R21ReaderADTest.ThreePeriodMapsAreIndependentSoEachFirstLookupOpensOnce
+[       OK ] R21ReaderADTest.ThreePeriodMapsAreIndependentSoEachFirstLookupOpensOnce (59 ms)
+[ RUN      ] R21ReaderADTest.HourPeriodHasNoRoutedDbAndKlineReadReturnsNull
+[       OK ] R21ReaderADTest.HourPeriodHasNoRoutedDbAndKlineReadReturnsNull (0 ms)
+[ RUN      ] R21ReaderADTest.RepeatKlineReadReloadsWholeRangeBecauseLastBarTimeIsNeverUpdated
+[       OK ] R21ReaderADTest.RepeatKlineReadReloadsWholeRangeBecauseLastBarTimeIsNeverUpdated (45 ms)
+[ RUN      ] R21ReaderADTest.BarCacheIsKeyedByStdCodeAndPeriodSoCodesDoNotMix
+[       OK ] R21ReaderADTest.BarCacheIsKeyedByStdCodeAndPeriodSoCodesDoNotMix (20 ms)
+[ DISABLED ] R21ReaderADTest.DISABLED_KlineReadWithoutAnyBarCrashesOnEmptyVectorSubscript
+[ RUN      ] R21ReaderADTest.KlineDbPathOccupiedByRegularFileReturnsNullAndAllowsRetry
+[       OK ] R21ReaderADTest.KlineDbPathOccupiedByRegularFileReturnsNullAndAllowsRetry (25 ms)
+[ RUN      ] R21ReaderADTest.S5SameWindowWithoutCommitReusesSnapshot
+[       OK ] R21ReaderADTest.S5SameWindowWithoutCommitReusesSnapshot (10 ms)
+[ RUN      ] R21ReaderADTest.S5CommitAfterSnapshotKeepsFullRescanAndRevisionVisibility
+[       OK ] R21ReaderADTest.S5CommitAfterSnapshotKeepsFullRescanAndRevisionVisibility (18 ms)
+[ RUN      ] R21ReaderADTest.S5MinuteRangeEndingIn2033DoesNotWrap
+[       OK ] R21ReaderADTest.S5MinuteRangeEndingIn2033DoesNotWrap (54 ms)
+[ RUN      ] R21ReaderADTest.S5OverlongIdentityRejectedBeforeOpeningDatabases
+[       OK ] R21ReaderADTest.S5OverlongIdentityRejectedBeforeOpeningDatabases (0 ms)
+[----------] 14 tests from R21ReaderADTest (308 ms total)
+
+[----------] Global test environment tear-down
+[==========] 29 tests from 3 test suites ran. (699 ms total)
+[  PASSED  ] 29 tests.
+
+  YOU HAVE 1 DISABLED TEST
+

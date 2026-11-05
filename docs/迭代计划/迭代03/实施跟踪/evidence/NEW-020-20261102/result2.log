@@ -1,0 +1,29 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R113MockerPartialCancel.R113Mocker_PartialFillThenCancelPushesCanceled
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R113MockerPartialCancel
+[ RUN      ] R113MockerPartialCancel.R113Mocker_PartialFillThenCancelPushesCanceled
+/tmp/wt-i03-new020-20261102/src/TraderMocker/../Includes/WTSStruct.h:197:2: runtime error: constructor call on misaligned address 0x00016f0d7be4 for type 'wtp::WTSTickStruct *', which requires 8 byte alignment
+0x00016f0d7be4: note: pointer points here
+  20 7c 0d 6f 01 00 00 00  20 7c 0d 6f 01 00 00 00  30 7d 0d 6f 01 00 00 00  98 7e 0d 6f 01 00 00 00
+              ^ 
+    #0 0x000100e74060 in wtp::WTSTickStruct::WTSTickStruct() WTSStruct.h
+    #1 0x000100f67590 in r113m::MockerTest::send_tick(double, double, double, double, double, char const*, char const*)::TickPacket::TickPacket() r113_mocker_common.h:442
+    #2 0x000100f67200 in r113m::MockerTest::send_tick(double, double, double, double, double, char const*, char const*)::TickPacket::TickPacket() r113_mocker_common.h:442
+    #3 0x000100f0d1f4 in r113m::MockerTest::send_tick(double, double, double, double, double, char const*, char const*) r113_mocker_common.h:449
+    #4 0x000100f06990 in R113MockerPartialCancel_R113Mocker_PartialFillThenCancelPushesCanceled_Test::TestBody() r113_mocker_partial_cancel_test.cpp:55
+    #5 0x000101c75ca0 in void testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2664
+    #6 0x000101b89280 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) gtest.cc:2700
+    #7 0x000101b88f78 in testing::Test::Run() gtest.cc:2739
+    #8 0x000101b8c590 in testing::TestInfo::Run() gtest.cc:2885
+    #9 0x000101b90b30 in testing::TestSuite::Run() gtest.cc:3063
+    #10 0x000101bc2f9c in testing::internal::UnitTestImpl::RunAllTests() gtest.cc:6054
+    #11 0x000101ca31d8 in bool testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2664
+    #12 0x000101bc1478 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) gtest.cc:2700
+    #13 0x000101bc0fc0 in testing::UnitTest::Run() gtest.cc:5594
+    #14 0x000101cca4d8 in RUN_ALL_TESTS() gtest.h:2334
+    #15 0x000101cca3fc in main gtest_main.cc:64
+    #16 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-new020-20261102/src/TraderMocker/../Includes/WTSStruct.h:197:2 

@@ -115,8 +115,9 @@ TEST_F(P11PushNotify, push_order_first_time_and_repeat)
     EXPECT_DOUBLE_EQ(8.0, sink_.orders_[0].totalQty);
     EXPECT_DOUBLE_EQ(8.0, sink_.orders_[0].leftQty);
     EXPECT_FALSE(sink_.orders_[0].canceled);
-    // 挂单推送不动未完成量, 只有撤销回报才回补
-    EXPECT_DOUBLE_EQ(0.0, trader.getUndoneQty(kStdCode));
+    // 迭代03 WP1（卡5 / BUG-R3-008）：本适配器标签的存活单进入逐单账本，按剩余量计入
+    // 未完成量（平多为卖动作 => -8）。旧语义是推送不预占、撤销时回补，导致账本漂移。
+    EXPECT_DOUBLE_EQ(-8.0, trader.getUndoneQty(kStdCode));
 
     OrderMap* all = trader.getOrders("");
     ASSERT_NE(nullptr, all);
@@ -128,6 +129,7 @@ TEST_F(P11PushNotify, push_order_first_time_and_repeat)
         8, 0, "PO1", kTag1001));
     EXPECT_DOUBLE_EQ(6.0, trader.getPosition(kStdCode, true, 1));
     EXPECT_EQ(2u, sink_.orders_.size());
+    EXPECT_DOUBLE_EQ(-8.0, trader.getUndoneQty(kStdCode));          // 重复推送不重复计入
 
     // 部分成交: 仍存活, 替换订单表里的同一 localid
     trader.onPushOrder(makePushOrder(ct_, WDT_LONG, WOT_CLOSE, WOS_PartTraded_Queuing,
@@ -136,12 +138,13 @@ TEST_F(P11PushNotify, push_order_first_time_and_repeat)
     EXPECT_EQ(3u, sink_.orders_.size());
     EXPECT_DOUBLE_EQ(5.0, sink_.orders_[2].leftQty);
     EXPECT_FALSE(sink_.orders_[2].canceled);
+    EXPECT_DOUBLE_EQ(-5.0, trader.getUndoneQty(kStdCode));          // 余量只减不增: 8 -> 5
 
     // 撤销: 按 8-3=5 回补可平量, 同时回补未完成量
     trader.onPushOrder(makePushOrder(ct_, WDT_LONG, WOT_CLOSE, WOS_Canceled,
         8, 3, "PO1", kTag1001));
     EXPECT_DOUBLE_EQ(11.0, trader.getPosition(kStdCode, true, 1));   // 6 + 5, 未超昨仓总量
-    EXPECT_DOUBLE_EQ(5.0, trader.getUndoneQty(kStdCode));            // 卖单撤销 => +5
+    EXPECT_DOUBLE_EQ(0.0, trader.getUndoneQty(kStdCode));            // 撤销后该单余量 5 全部释放 => 0
     ASSERT_EQ(4u, sink_.orders_.size());
     EXPECT_TRUE(sink_.orders_[3].canceled);
     EXPECT_DOUBLE_EQ(5.0, sink_.orders_[3].leftQty);
@@ -152,11 +155,11 @@ TEST_F(P11PushNotify, push_order_first_time_and_repeat)
     EXPECT_EQ(0u, after->size());
     after->release();
 
-    // 迟到的「全部成交」推送: 订单号已知, 既不重复预占也不回补
+    // 迟到的「全部成交」推送: 订单号已知, 既不重复预占也不回补（终态 tombstone）
     trader.onPushOrder(makePushOrder(ct_, WDT_LONG, WOT_CLOSE, WOS_AllTraded,
         8, 8, "PO1", kTag1001));
     EXPECT_DOUBLE_EQ(11.0, trader.getPosition(kStdCode, true, 1));
-    EXPECT_DOUBLE_EQ(5.0, trader.getUndoneQty(kStdCode));
+    EXPECT_DOUBLE_EQ(0.0, trader.getUndoneQty(kStdCode));
     EXPECT_EQ(5u, sink_.orders_.size());
     EXPECT_EQ(1001u, sink_.orders_[4].localid);
 }
@@ -301,12 +304,13 @@ TEST_F(P11PushNotify, push_trade_updates_position_and_undone)
     trader.onPushTrade(makePushTrade(ct_, WDT_SHORT, WOT_CLOSE, 5, 7080, "PT5", "O5", kTag1003));
     EXPECT_DOUBLE_EQ(0.0, trader.getPosition(kStdCode, false, 2));
 
-    // 未完成量: -4 +3 +2 +3 -5 = -1
-    EXPECT_DOUBLE_EQ(-1.0, trader.getUndoneQty(kStdCode));
+    // 迭代03 WP1（卡5 / BUG-R3-008）：成交只扣减本适配器逐单账本内订单的余量。1001-1003
+    // 未经本适配器下单也无订单回报，没有账本记录，不改未完成量（旧聚合语义漂移为 -1）。
+    EXPECT_DOUBLE_EQ(0.0, trader.getUndoneQty(kStdCode));
 
     // 外部成交(usertag 为空)不改未完成量, 但仍然分发 (localid=0)
     trader.onPushTrade(makePushTrade(ct_, WDT_LONG, WOT_OPEN, 1, 7000, "PT6", "O6", ""));
-    EXPECT_DOUBLE_EQ(-1.0, trader.getUndoneQty(kStdCode));
+    EXPECT_DOUBLE_EQ(0.0, trader.getUndoneQty(kStdCode));
     ASSERT_EQ(6u, sink_.trades_.size());
     EXPECT_EQ(0u, sink_.trades_[5].localid);
     EXPECT_EQ(6u, api_.n_qaccount_);
@@ -338,8 +342,8 @@ TEST_F(P11PushNotify, push_trade_net_mode)
     EXPECT_TRUE(t2->isNet());
     EXPECT_TRUE(t2->isNetBuy());
 
-    // 未完成量: +1 - 6 = -5
-    EXPECT_DOUBLE_EQ(-5.0, trader.getUndoneQty(kStdCode));
+    // 迭代03 WP1：无账本记录的标签成交不改未完成量（旧聚合语义为 +1 - 6 = -5）
+    EXPECT_DOUBLE_EQ(0.0, trader.getUndoneQty(kStdCode));
     EXPECT_EQ(2u, sink_.trades_.size());
     EXPECT_TRUE(sink_.trades_[1].isBuy);
 }
@@ -363,8 +367,12 @@ TEST_F(P11PushNotify, self_match_via_push_trade)
 
     // 其他合约不受影响
     EXPECT_FALSE(trader.isSelfMatched(kStdAu));
-    EXPECT_EQ(3u, sink_.trades_.size());
-    EXPECT_EQ(3u, api_.n_qaccount_);
+    // 迭代03 s5（NEW-154/卡5d、R3-008 重复回报幂等）：同成交号、同关联订单、同方向的
+    // 重复推送只生效一次（不再二次记持仓/统计、不再投递 sink、不再触发资金查询）；
+    // 自成交另一侧（同成交号、不同关联订单）照常处理。原断言为 3/3。
+    EXPECT_EQ(2u, sink_.trades_.size());
+    EXPECT_EQ(2u, api_.n_qaccount_);
+    EXPECT_DOUBLE_EQ(1.0, trader.getPosition(kStdCode, false, 1)) << "duplicate push does not double the long position";
 }
 
 TEST_F(P11PushNotify, entrust_error_updates_undone_once)
@@ -419,16 +427,21 @@ TEST_F(P11PushNotify, entrust_error_updates_undone_once)
     ASSERT_EQ(2u, sink_.entrusts_.size());
     EXPECT_EQ(1002u, sink_.entrusts_[1].localid);
 
-    // 外部委托(usertag 为空)只回落未完成量, 不通知订阅者
+    // 外部或无效标签不能改变本适配器的未完成量，也不能触发本地委托回调。
     trader.onRspOrders(makeArray({
         makePushOrder(ct_, WDT_LONG, WOT_OPEN, WOS_Submitting, 2, 0, "PE3", kTag1003) }));
     EXPECT_DOUBLE_EQ(2.0, trader.getUndoneQty(kStdCode));
     WTSEntrust* ent3 = WTSEntrust::create(kStdCode, 2, 7100.0);
     ent3->setContractInfo(ct_);
     ent3->setUserTag("");
-    trader.onRspEntrust(ent3, err);
-    EXPECT_DOUBLE_EQ(0.0, trader.getUndoneQty(kStdCode));
-    EXPECT_EQ(2u, sink_.entrusts_.size());
+    for (const char* external : {"", "ctp-auto:012345#0000000067#001001", "otp.other.1003",
+                                 "otp.p11a.", "otp.p11a.0", "otp.p11a.1003x", "otp.p11a.4294967296"})
+    {
+        ent3->setUserTag(external);
+        trader.onRspEntrust(ent3, err);
+        EXPECT_DOUBLE_EQ(2.0, trader.getUndoneQty(kStdCode)) << external;
+        EXPECT_EQ(2u, sink_.entrusts_.size()) << external;
+    }
 }
 
 } // namespace

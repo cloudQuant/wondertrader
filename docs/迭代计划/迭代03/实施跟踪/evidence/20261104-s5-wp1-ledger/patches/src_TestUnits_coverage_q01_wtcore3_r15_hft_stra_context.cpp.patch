@@ -1,0 +1,323 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-wp1-ledger/before/src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp	2026-11-01 23:00:45
++++ src/TestUnits/coverage/q01_wtcore3/r15_hft_stra_context.cpp	2026-11-04 22:11:12
+@@ -45,6 +45,7 @@
+         set_date_time(20250110, 931, 45, 931);
+         set_trading_date(20250110);
+     }
++    void loadFeesForTest(const char* path) { load_fees(path); }
+ };
+ 
+ /** 被测上下文的测试派生：只为把 protected 的 inline 标签链与订阅集合拿出来白盒驱动 */
+@@ -58,6 +59,9 @@
+     using HftStraBaseCtx::getOrderTag;
+     using HftStraBaseCtx::eraseOrderTag;
+     using HftStraBaseCtx::get_inner_code;
++#ifndef R15_S5_BASELINE
++    using HftStraBaseCtx::kRetiredOrderTagLimit;
++#endif
+ 
+     void sub_tick_direct(const char* stdCode) { _tick_subs.insert(stdCode); }
+     // The fixture has no trader; keep position-detail and close logs active
+@@ -989,4 +993,302 @@
+     EXPECT_STREQ(ctx.get_inner_code("SHFE.ag.2512"), "SHFE.ag.CUSTOM");
+     _comm->setTradingMode(TM_Both);
+     _eng.attach(&_bdm, &_hot, &_dtmgr);
++}
++
++/* ---------------------------------------------------------------------------
++ * 迭代03 s5：BUG-R15-001 / I03-NEW-002（标签按 localid 同步存储、发送前登记、
++ * 终态有界退役、回调指针不悬空；未绑定查询不解引用空 trader）。
++ * 本地 fake provider，不连接柜台。
++ * ------------------------------------------------------------------------- */
++#include <WtCore/ActionPolicyMgr.h>
++#include <WtCore/WtHelper.h>
++#include <Includes/WTSSessionInfo.hpp>
++#include <atomic>
++#include <functional>
++#include <thread>
++
++namespace {
++
++/** Provider fake: optional synchronous report from inside orderInsert. */
++class R15SyncApi : public p11fix::FakeTraderApi
++{
++public:
++    std::function<void(WTSEntrust*)> onInsert;
++    std::vector<std::string> tags;
++    int reject = 0;
++    int orderInsert(WTSEntrust* entrust) override
++    {
++        tags.push_back(entrust->getUserTag());
++        if (reject < 0)
++        {
++            ++n_insert_;
++            return reject;
++        }
++        const int ret = p11fix::FakeTraderApi::orderInsert(entrust);
++        if (onInsert)
++            onInsert(entrust);
++        return ret;
++    }
++};
++
++uint32_t r15LocalId(const std::string& tag)
++{
++    const size_t dot = tag.rfind('.');
++    return dot == std::string::npos ? 0u : (uint32_t)std::strtoul(tag.c_str() + dot + 1, nullptr, 10);
++}
++
++/** Strategy whose callbacks may mutate the tag of the localid being delivered. */
++class R15MutatingStra : public R15SpyStra
++{
++public:
++    std::function<void(uint32_t)> mutate;
++    std::string seenAfterMutation;
++    void on_order(IHftStraCtx* ctx, uint32_t localid, const char* code, bool isBuy,
++        double totalQty, double leftQty, double price, bool isCanceled, const char* userTag) override
++    {
++        if (mutate)
++            mutate(localid);
++        seenAfterMutation = userTag ? userTag : "";	// must still be readable (ASan: no UAF)
++        R15SpyStra::on_order(ctx, localid, code, isBuy, totalQty, leftQty, price, isCanceled, userTag);
++    }
++};
++
++class R15BoundFixture
++{
++public:
++    R15SyncApi api;
++    ActionPolicyMgr pm;
++    TraderAdapter trader;
++    std::string id;
++    bool ready = false;
++
++    R15BoundFixture(BaseDataMgr& bdm, WTSCommodityInfo* comm, WTSContractInfo* ct, const char* name)
++    {
++        id = std::string(name) + std::to_string(static_cast<long>(::getpid()));
++        WTSSessionInfo* sess = WTSSessionInfo::create("R15DAY", "r15_day", 0);
++        sess->addTradingSection(900, 1500);
++        comm->setSessionInfo(sess);
++        sess->release();
++        ct->setAltCode(ct->getCode());
++        WtHelper::setTime(20250110, 1000, 0);
++        const std::filesystem::path policy = std::filesystem::path(WtHelper::getBaseDir()) / (id + "_policy.json");
++        {
++            std::ofstream out(policy);
++            out << R"json({"default":{"order":[{"action":"open"}]}})json";
++        }
++        ready = pm.init(policy.string().c_str()) && trader.initExt(id.c_str(), &api, &bdm, &pm) && trader.run();
++        trader.onLoginResult(true, "r15", 20250110);
++    }
++    ~R15BoundFixture()
++    {
++        std::error_code ec;
++        std::filesystem::remove_all(std::filesystem::path(WtHelper::getBaseDir()) / "traders" / id, ec);
++    }
++};
++
++} // namespace
++
++TEST_F(R15CtxTest, synchronous_report_sees_tag_registered_before_provider_call)
++{
++    R15BoundFixture fx(_bdm, _comm, _ct, "r15sync");
++    ASSERT_TRUE(fx.ready);
++    R15HftCtx ctx(&_eng, "c15_sync_tag", false, 0);
++    R15SpyStra stra;
++    ctx.set_strategy(&stra);
++    ctx.on_init();
++    ctx.setTrader(&fx.trader);
++    fx.trader.addSink(&ctx);
++    fx.api.onInsert = [&](WTSEntrust* e) {
++        // The provider reports a fill before orderInsert returns.
++        WTSTradeInfo* t = WTSTradeInfo::create(_ct->getCode(), _ct->getExchg());
++        t->setContractInfo(_ct);
++        t->setDirection(WDT_LONG);
++        t->setOffsetType(WOT_OPEN);
++        t->setVolume(1);
++        t->setPrice(7100);
++        t->setTradeID("R15SYNC1");
++        t->setRefOrder("R15ORD1");
++        t->setUserTag(e->getUserTag());
++        fx.trader.onPushTrade(t);
++        t->release();
++    };
++    OrderIDs ids = ctx.stra_buy(kAg, 7100.0, 1.0, "sync-tag");
++    ASSERT_EQ(1u, ids.size());
++    EXPECT_EQ(1u, stra.n_trade);
++    EXPECT_EQ(ids[0], stra.last_localid);
++    EXPECT_STREQ("sync-tag", stra.last_tag.c_str()) << "tag must be registered before the provider call";
++    EXPECT_STREQ("sync-tag", ctx.getOrderTag(ids[0]));
++    fx.trader.removeSink(&ctx);
++}
++
++TEST_F(R15CtxTest, rejected_reservation_does_not_keep_a_tag)
++{
++    R15BoundFixture fx(_bdm, _comm, _ct, "r15rej");
++    ASSERT_TRUE(fx.ready);
++    R15HftCtx ctx(&_eng, "c15_rej_tag", false, 0);
++    ctx.setTrader(&fx.trader);
++    fx.api.reject = -1;	// synchronous provider failure
++    EXPECT_TRUE(ctx.stra_buy(kAg, 7100.0, 1.0, "rejected-tag").empty());
++    ASSERT_EQ(1u, fx.api.tags.size());
++    const uint32_t reserved = r15LocalId(fx.api.tags[0]);
++    ASSERT_NE(0u, reserved);
++    EXPECT_STREQ("", ctx.getOrderTag(reserved)) << "a reservation that was not accepted keeps no tag";
++    fx.api.reject = 0;
++    OrderIDs ok = ctx.stra_sell(kAg, 7100.0, 1.0, "sell-tag");
++    ASSERT_EQ(1u, ok.size());
++    EXPECT_STREQ("sell-tag", ctx.getOrderTag(ok[0]));
++}
++
++TEST_F(R15CtxTest, terminal_tags_retire_in_a_bounded_window_and_live_tags_never_evict)
++{
++    R15HftCtx ctx(&_eng, "c15_retire", false, 0);
++    R15SpyStra stra;
++    ctx.set_strategy(&stra);
++    ctx.on_init();
++    ctx.setUserTag(1, "live");
++    const uint32_t first = 1000;
++    const uint32_t window = 16384;	// documented bounded retirement window
++#ifndef R15_S5_BASELINE
++    ASSERT_EQ((size_t)window, R15HftCtx::kRetiredOrderTagLimit);
++#endif
++    const uint32_t count = window + 10;
++    for (uint32_t i = 0; i < count; ++i)
++    {
++        ctx.setUserTag(first + i, "done");
++        ctx.on_order(first + i, kAg, true, 1, 0, 7100.0, true);	// terminal
++    }
++    EXPECT_STREQ("live", ctx.getOrderTag(1)) << "a live order's tag is never evicted";
++    EXPECT_STREQ("", ctx.getOrderTag(first)) << "oldest retired tag is evicted beyond the window";
++    EXPECT_STREQ("", ctx.getOrderTag(first + 9));
++    EXPECT_STREQ("done", ctx.getOrderTag(first + 10)) << "inside the window";
++    ctx.on_trade(first + count - 1, kAg, true, 1, 7100.0);	// late trade after terminal
++    EXPECT_STREQ("done", stra.last_tag.c_str());
++    // Re-registering a retired id makes it live again; an old retirement entry
++    // of the same id must not evict the new registration.
++    ctx.setUserTag(first + count - 1, "reused");
++    for (uint32_t i = 0; i < count; ++i)
++    {
++        ctx.setUserTag(500000 + i, "x");
++        ctx.on_order(500000 + i, kAg, true, 1, 0, 7100.0, true);
++    }
++    EXPECT_STREQ("reused", ctx.getOrderTag(first + count - 1));
++    ctx.on_entrust(42, kAg, false, "rejected");	// unknown id: no effect
++    ctx.setUserTag(43, "entrust-fail");
++    ctx.on_entrust(43, kAg, false, "rejected");
++    EXPECT_STREQ("entrust-fail", ctx.getOrderTag(43)) << "retired, still inside the window";
+ }
++
++TEST_F(R15CtxTest, tag_pointer_survives_reentrant_erase_and_replacement)
++{
++    R15HftCtx ctx(&_eng, "c15_reentrant", false, 0);
++    R15MutatingStra stra;
++    ctx.set_strategy(&stra);
++    ctx.on_init();
++    const std::string original(64, 'O');
++    ctx.setUserTag(17, original.c_str());
++    stra.mutate = [&](uint32_t id) { ctx.eraseOrderTag(id); };
++    ctx.on_order(17, kAg, true, 2, 1, 7100.0, false);
++    EXPECT_EQ(original, stra.seenAfterMutation);
++    ctx.setUserTag(18, original.c_str());
++    stra.mutate = [&](uint32_t id) { ctx.setUserTag(id, std::string(256, 'R').c_str()); };
++    ctx.on_order(18, kAg, true, 2, 1, 7100.0, false);
++    EXPECT_EQ(original, stra.seenAfterMutation);
++    EXPECT_EQ(std::string(256, 'R'), ctx.getOrderTag(18));
++}
++
++TEST_F(R15CtxTest, concurrent_tag_writes_and_reads_are_synchronized)
++{
++    R15HftCtx ctx(&_eng, "c15_concurrent", false, 0);
++    const std::string a(40, 'a'), b(40, 'b');
++    std::atomic<bool> stop{false};
++    std::atomic<unsigned> bad{0};
++    std::thread writer([&]() {
++        for (int i = 0; i < 20000; ++i)
++        {
++            ctx.setUserTag(17, (i % 2 ? a : b).c_str());
++            if (i % 3 == 0)
++                ctx.eraseOrderTag(17);
++            ctx.setUserTag(1000 + (uint32_t)i, "other");
++        }
++        stop = true;
++    });
++    while (!stop)
++    {
++        const std::string value = ctx.getOrderTag(17);
++        if (!(value.empty() || value == a || value == b))
++            ++bad;
++    }
++    writer.join();
++    EXPECT_EQ(0u, bad.load());
++}
++
++TEST_F(R15CtxTest, unbound_queries_return_zero_with_diagnostic_instead_of_dereferencing)
++{
++    R15UnboundTraderCtx ctx(&_eng);
++    ctx.force_unbound_for_test();
++    EXPECT_DOUBLE_EQ(0.0, ctx.stra_get_position(kAg));
++    EXPECT_DOUBLE_EQ(0.0, ctx.stra_get_undone(kAg));
++    EXPECT_EQ(2u, ctx.errors);
++    EXPECT_NE(std::string::npos, ctx.last_error.find("not bound"));
++}
++
++/* ---------------------------------------------------------------------------
++ * 迭代03 s5：I03-NEW-008（卡13d）HFT 实盘费用改用引擎版本化费用表
++ * （合约优先、品种回退；缺费可观察且成交保留）。
++ * ------------------------------------------------------------------------- */
++namespace {
++std::string r15WriteFees(const char* name, const std::string& json)
++{
++    const std::filesystem::path path = std::filesystem::path(WtHelper::getBaseDir()) / name;
++    std::ofstream out(path);
++    out << json;
++    return path.string();
++}
++}
++
++TEST_F(R15CtxTest, live_fees_come_from_the_engine_fee_schedule)
++{
++    // Contract-level rate first (card 13d): the product rate must not be used.
++    const std::string fees = r15WriteFees("r15_fees_v2.json",
++        R"json({"version": 2, "contracts": {"SHFE.ag2512": {"open": 1.5, "close": 1.0, "closetoday": 2.0, "byvolume": true}}, "products": {"SHFE.ag": {"open": 9.0, "close": 9.0, "closetoday": 9.0, "byvolume": true}}})json");
++    _eng.loadFeesForTest(fees.c_str());
++    ASSERT_TRUE(_eng.fee_config_valid());
++    const uint64_t errorsBefore = _eng.fee_error_count();
++    const std::string name = "c15_fee_schedule";
++    {
++        R15HftCtx ctx(&_eng, name.c_str(), true, 0);
++        R15SpyStra stra;
++        ctx.set_strategy(&stra);
++        ctx.on_init();
++        ctx.disable_signal_log_for_test();
++        ctx.on_trade(10, kAg, true, 2, 7100.0);		// open 2 lots: 2 x 1.5
++        ctx.on_trade(11, kAg, false, 1, 7110.0);	// close today 1 lot: 1 x 2.0
++    }
++    const std::string trades = slurp(outDir(name.c_str()) + "/trades.csv");
++    EXPECT_NE(std::string::npos, trades.find(",LONG,OPEN,7100,2,,3.00\n")) << trades;
++    EXPECT_NE(std::string::npos, trades.find(",LONG,CLOSE,7110,1,,2.00\n")) << trades;
++    EXPECT_EQ(errorsBefore, _eng.fee_error_count());
++}
++
++TEST_F(R15CtxTest, missing_live_fee_is_observable_and_the_fill_is_kept)
++{
++    const std::string fees = r15WriteFees("r15_fees_missing.json",
++        R"json({"version": 2, "contracts": {}, "products": {"SHFE.rb": {"open": 1.0, "close": 1.0, "closetoday": 1.0, "byvolume": true}}})json");
++    _eng.loadFeesForTest(fees.c_str());
++    ASSERT_TRUE(_eng.fee_config_valid());
++    const uint64_t errorsBefore = _eng.fee_error_count();
++    const std::string name = "c15_fee_missing";
++    {
++        R15HftCtx ctx(&_eng, name.c_str(), true, 0);
++        R15SpyStra stra;
++        ctx.set_strategy(&stra);
++        ctx.on_init();
++        ctx.disable_signal_log_for_test();
++        ctx.on_trade(10, kAg, true, 2, 7100.0);
++        EXPECT_EQ(1u, stra.n_trade);
++    }
++    const std::string trades = slurp(outDir(name.c_str()) + "/trades.csv");
++    EXPECT_NE(std::string::npos, trades.find(",LONG,OPEN,7100,2,,0.00\n")) << "the fill is kept: " << trades;
++    EXPECT_GT(_eng.fee_error_count(), errorsBefore) << "a missing fee is an observable error";
++    EXPECT_FALSE(_eng.last_fee_error().empty());
++}

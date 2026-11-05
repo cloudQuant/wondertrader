@@ -201,11 +201,8 @@ protected:
 };
 
 // WtDataReaderAD.cpp:444-456
-// 产品缺陷（BUG-R212-001）：RT 缓存 bar 晚于 etime 时，444-455 会第二次调用
-// update_cache_from_lmdb -> get_k_db。WtDataReaderAD::get_k_db 在缓存命中分支
-// `return std::move(it->second)` 把 map 里的 shared_ptr 掏空，第二次命中返回空指针，
-// update_cache_from_lmdb 随即 *db 解引用崩溃。故本用例保持 DISABLED_，不得以放宽断言换绿。
-TEST_F(R212AdReaderTest, DISABLED_R212AdReaderRtBarAheadOfEtimeRefreshesLmdbOnly)
+// 迭代03 最终验收复核后启用（原禁用：BUG-R212-001）。
+TEST_F(R212AdReaderTest, R212AdReaderRtBarAheadOfEtimeRefreshesLmdbOnly)
 {
 	seed_bars("rb2301", {
 		{min_bar_time(kDate, 931), make_min_bar(931, 3900.0)},

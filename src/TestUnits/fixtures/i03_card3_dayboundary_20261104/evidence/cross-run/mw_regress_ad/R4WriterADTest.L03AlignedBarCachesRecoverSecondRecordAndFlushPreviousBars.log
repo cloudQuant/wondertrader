@@ -1,0 +1,34 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/l03_ad_bar_alignment_test.cpp:87: Failure
+Expected equality of these values:
+  std::memcmp(&firstAfter, &first, sizeof(first))
+    Which is: -98
+  0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/l03_ad_bar_alignment_test.cpp:91: Failure
+Expected equality of these values:
+  std::memcmp(&dumper.values[entry.second][0], &second, sizeof(second))
+    Which is: -98
+  0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p05_datastorage2/l03_ad_bar_alignment_test.cpp:104: Failure
+Expected equality of these values:
+  std::memcmp(value.data(), &second, sizeof(second))
+    Which is: -98
+  0
+
+[  FAILED  ] R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars (4 ms)
+[----------] 1 test from R4WriterADTest (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (4 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R4WriterADTest.L03AlignedBarCachesRecoverSecondRecordAndFlushPreviousBars
+
+ 1 FAILED TEST

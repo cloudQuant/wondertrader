@@ -1,0 +1,67 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 8 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 5 tests from Q03RdmClearLifetime
+[ RUN      ] Q03RdmClearLifetime.HistoricalTickSurvivesClearAndReloads
+/tmp/wt-i03-slice-20261103/baseline/src/TestUnits/coverage/q03_storage3/q03_rdm_clear_lifetime_test.cpp:29: Failure
+Expected equality of these values:
+  fresh->at(0)->price
+    Which is: 31
+  next.price
+    Which is: 38
+
+[  FAILED  ] Q03RdmClearLifetime.HistoricalTickSurvivesClearAndReloads (3 ms)
+[ RUN      ] Q03RdmClearLifetime.HistoricalQueueSurvivesClearAndReloads
+/tmp/wt-i03-slice-20261103/baseline/src/TestUnits/coverage/q03_storage3/q03_rdm_clear_lifetime_test.cpp:43: Failure
+Expected equality of these values:
+  fresh->at(0)->price
+    Which is: 51
+  next.price
+    Which is: 58
+
+[  FAILED  ] Q03RdmClearLifetime.HistoricalQueueSurvivesClearAndReloads (2 ms)
+[ RUN      ] Q03RdmClearLifetime.HistoricalDetailSurvivesClearAndReloads
+/tmp/wt-i03-slice-20261103/baseline/src/TestUnits/coverage/q03_storage3/q03_rdm_clear_lifetime_test.cpp:57: Failure
+Expected equality of these values:
+  fresh->at(0)->price
+    Which is: 52
+  next.price
+    Which is: 59
+
+[  FAILED  ] Q03RdmClearLifetime.HistoricalDetailSurvivesClearAndReloads (1 ms)
+[ RUN      ] Q03RdmClearLifetime.HistoricalTransSurvivesClearAndReloads
+/tmp/wt-i03-slice-20261103/baseline/src/TestUnits/coverage/q03_storage3/q03_rdm_clear_lifetime_test.cpp:71: Failure
+Expected equality of these values:
+  fresh->at(0)->price
+    Which is: 53
+  next.price
+    Which is: 60
+
+[  FAILED  ] Q03RdmClearLifetime.HistoricalTransSurvivesClearAndReloads (1 ms)
+[ RUN      ] Q03RdmClearLifetime.RealtimeTickSurvivesClear
+ThreadSanitizer:DEADLYSIGNAL
+==88179==ERROR: ThreadSanitizer: SEGV on unknown address 0x0001012dc048 (pc 0x000100c0668c bp 0x00016f32e900 sp 0x00016f32e2b0 T4725708)
+==88179==The signal is caused by a READ memory access.
+    #0 q03::Q03RdmClearLifetime_RealtimeTickSurvivesClear_Test::TestBody() <null> (i03_slice_rdm:arm64+0x10013668c)
+    #1 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (i03_slice_rdm:arm64+0x100282674)
+    #2 testing::Test::Run() <null> (i03_slice_rdm:arm64+0x1002825bc)
+    #3 testing::TestInfo::Run() <null> (i03_slice_rdm:arm64+0x10028319c)
+    #4 testing::TestSuite::Run() <null> (i03_slice_rdm:arm64+0x100283c20)
+    #5 testing::internal::UnitTestImpl::RunAllTests() <null> (i03_slice_rdm:arm64+0x10028f048)
+    #6 bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) <null> (i03_slice_rdm:arm64+0x10028e9f4)
+    #7 testing::UnitTest::Run() <null> (i03_slice_rdm:arm64+0x10028e958)
+    #8 main <null> (i03_slice_rdm:arm64+0x10026fc90)
+    #9 start <null> (dyld:arm64e+0x1fdfc)
+
+==88179==Register values:
+ x[0] = 0x0000000102c86040   x[1] = 0x00001002025b8090   x[2] = 0x00000000505f00ff   x[3] = 0x000000010a2014a0  
+ x[4] = 0x0000000000000001   x[5] = 0x0000000000000000   x[6] = 0x403f000000000000   x[7] = 0x0000000109d01280  
+ x[8] = 0x00000001012dc018   x[9] = 0x00000000000000ff  x[10] = 0x0000000000000001  x[11] = 0x0000000000000000  
+x[12] = 0x00001002025b8094  x[13] = 0x0000000000000000  x[14] = 0x000000000000000f  x[15] = 0x0000000000000000  
+x[16] = 0x00000001883c8c8c  x[17] = 0x634f000109d012e0  x[18] = 0x0000000000000000  x[19] = 0x0000000100d925b6  
+x[20] = 0x0000000000000001  x[21] = 0x000000010ab03b80  x[22] = 0x000000010ab03b80  x[23] = 0x0000000000000004  
+x[24] = 0x0000000100e1a000  x[25] = 0x0000000000000000  x[26] = 0x0000000000000000  x[27] = 0x000000016f32eac0  
+x[28] = 0x0000000000000001     fp = 0x000000016f32e900     lr = 0x0000000100c06688     sp = 0x000000016f32e2b0  
+ThreadSanitizer can not provide additional info.
+SUMMARY: ThreadSanitizer: SEGV (i03_slice_rdm:arm64+0x10013668c) in q03::Q03RdmClearLifetime_RealtimeTickSurvivesClear_Test::TestBody()+0x6e4
+==88179==ABORTING

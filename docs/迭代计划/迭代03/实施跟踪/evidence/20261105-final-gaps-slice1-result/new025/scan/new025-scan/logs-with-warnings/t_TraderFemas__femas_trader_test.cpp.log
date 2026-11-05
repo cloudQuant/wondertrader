@@ -1,0 +1,14 @@
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp:15:
+/opt/homebrew/include/gtest/gtest.h:1394:11: warning: comparison of integers of different signs: 'const unsigned long long' and 'const long long' [-Wsign-compare]
+ 1394 |   if (lhs == rhs) {
+      |       ~~~ ^  ~~~
+/opt/homebrew/include/gtest/gtest.h:1413:12: note: in instantiation of function template specialization 'testing::internal::CmpHelperEQ<unsigned long long, long long>' requested here
+ 1413 |     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
+      |            ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp:683:2: note: in instantiation of function template specialization 'testing::internal::EqHelper::Compare<unsigned long long, long long, nullptr>' requested here
+  683 |         EXPECT_EQ(info->getOrderTime(), TimeUtils::makeTime(20240105, 93015000));
+      |         ^
+/opt/homebrew/include/gtest/gtest.h:1885:54: note: expanded from macro 'EXPECT_EQ'
+ 1885 |   EXPECT_PRED_FORMAT2(::testing::internal::EqHelper::Compare, val1, val2)
+      |                                                      ^
+1 warning generated.

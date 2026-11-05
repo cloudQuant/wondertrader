@@ -1,0 +1,78 @@
+[
+ {
+  "suite": "i03_wp1_identity_gate_20261104",
+  "class": "STALE_FIXTURE",
+  "root_cause": "F3 current-asan/current-tsan 各 1 例失败均为 Wp1Test.OwnerScopeDoesNotLeakIntoSinkCallbacks（wp1_test.cpp:961，回调内同合约裸 buy() 返回空）。不是产品回归：K44（2026-11-04 用户裁定）要求 owner 路由开启时 HFT/人工裸 API 订单以账户 manual owner 独占参与合约归属；TraderAdapter::doEntrust 的 claimContract(riskCode, \"manual\", exclusive) 因该合约已被 exec:a 认领而拒绝（manual entrust rejected）。夹具期望早于 K44。佐证：改写后同一回调内另一合约的裸单被接受且 owner 为空，说明不是一般性的重入拒绝。",
+  "change": "src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp：该例改为 K44 口径——同合约裸单必须被拒绝（若继承 exec:a 会以 exec:a 被接受），另一合约 SHFE.au.2212 裸单必须被接受、账本 owner 为空、不计入 exec:a 在途；其余用例不变。README.md 记录更新原因。run.sh 未改（git rev-parse 与 docs s5before 依赖仍由运行器镜像处理，baseline3 红控 not-applicable）。",
+  "final_verdict": "pass：current-asan 41 例 0 失败（39 过、2 个按设计 SKIP 的子进程辅助例），current-tsan 41 例 0 失败；baseline-asan 11/11 红、baseline2-asan 20 例中 2 红（与 F3 相同，按预期）。改写用例在 baseline/baseline2 构建中不编译，无改前红控（期望更新，改前产品不在套件内）。",
+  "superseded_by": [],
+  "items": [
+   "BUG-I02-NEW-008",
+   "BUG-I02-NEW-154",
+   "BUG-L01-014",
+   "BUG-L01-016",
+   "BUG-N05-003",
+   "BUG-R3-008",
+   "BUG-R54-001"
+  ]
+ },
+ {
+  "suite": "t26_fees_atomic",
+  "class": "STALE_FIXTURE",
+  "root_cause": "探针 exit 97 / “0 sent, 1 confirmed”：K02=B（Loader 所有模式 run() 返回结果码、插件内不再 exit）后 CTraderSpi::Finish() 只经 loader_completion::finish() 发布终局结果并返回，fee_probe 依赖回调内 exit() 结束进程，回调序列走完后落到 return 97。文件已正确发布、结果码为 0。“0 sent”是卡14 14a 的诊断计数（探针用 arm() 直接登记请求、不经 FinishFeeSubmission），不作为成功依据。不是产品回归。",
+  "change": "src/TestUnits/fixtures/t26_fees_atomic/fee_probe.cpp：仅在当前代码构建（WT_T26_PROBE_ARM_REQUESTS，normal/asan）中把两处 return 97 改为 probeResult()，有已发布终局结果时以该结果码退出（首个结果生效，与原首次 exit() 一致），否则仍 97；baseline/unit-baseline 流程不变。README.md 记录原因。run.sh、run_tests.py、consumer_key_probe.cpp 未改。",
+  "final_verdict": "pass：run.sh exit 0；普通 75/75、ASan/UBSan 75/75；results.txt 与 evidence-20261104/results.txt 逐字节相同（含 18 项单位红控与 5 项基线红控退出码）。",
+  "superseded_by": [],
+  "items": [
+   "BUG-T26-007"
+  ]
+ },
+ {
+  "suite": "t26_request_completion",
+  "class": "STALE_FIXTURE",
+  "root_cause": "run.sh 把 baseline-cpp.patch 反向应用到移动中的工作区 TraderSpi.cpp，T26-011 之后又经卡14、K02=B 修改，12/19 hunk 失败、set -e 中止；另外 adapt_fee_probe.py 的文本锚点已不存在于更新后的 fee_probe.cpp，query_probe.cpp（11-04 已按 K02=B 改）在早于 K02=B 的基线上无法编译，TSan 下以 std::_Exit 跳过拆除会报告加载器线程未 join。均为夹具问题。",
+  "change": "src/TestUnits/fixtures/t26_request_completion/baseline/CTPLoader/TraderSpi.{cpp,h}（新增，T26-011 改前固定副本 065f27b0…/903cea67…，= ccaad010 + T26-007 补丁；正向应用本目录补丁得 2026-11-02 候选 dd4640b5…/aff40149…，与 evidence-20261102/source-before.sha256 一致）；run.sh 改为复制并校验哈希；query_probe.cpp 基线以空 loader_completion 垫片编译、当前构建退出前有界 WaitWorkersStopped/join watchdog；adapt_fee_probe.py 改为在 fee_probe.cpp 前定义 WT_T26_PROBE_ARM_REQUESTS；README.md 记录。run_queries.py 与期望未改。",
+  "final_verdict": "pass：run.sh exit 0；fee 150 PASS（normal/asan 各 75），query 60 PASS（normal/asan/tsan 各 20），baseline delayed exit=1、sync exit=91 两项 known-red；fee-results.txt 与 evidence-20261102 逐字节相同，query-results.txt 除耗时外相同。",
+  "superseded_by": [],
+  "items": [
+   "BUG-T4-015",
+   "BUG-T6-002"
+  ]
+ },
+ {
+  "suite": "i03_sdk_events_20261103",
+  "class": "STALE_FIXTURE",
+  "root_cause": "run.sh 把卡14 补丁反向应用到移动中的工作区 TraderSpi.cpp（4/13 hunk 失败）；探针依赖回调内 exit()（K02=B 后不再退出）；回归脚本 TSan 报 CTraderSpi::AppendQuery 线程 thread leak，该线程由 ~CTraderSpi/WaitWorkersStopped 回收，探针以 std::_Exit 结束跳过了宿主拆除——探针问题，不是产品泄漏。",
+  "change": "src/TestUnits/fixtures/i03_sdk_events_20261103/baseline/CTPLoader/TraderSpi.{cpp,h}（新增，卡14 改前固定副本 dd4640b5…/aff40149…；正向应用本目录补丁得 2026-11-03 状态 85bc0dbb…/7b434cc9…）；run.sh 改为复制并校验哈希、基线加 -DWT_T26_TEST_BASELINE；ctploader_events_probe.cpp 当前构建在原 exit() 会结束进程的位置读取 loader_completion 结果退出、退出前有界停止并 join 加载器线程，基线以垫片编译、流程不变；README.md 记录。run_probe.py 场景/期望未改。run_t26_regression.sh 复用已修的 query_probe.cpp。",
+  "final_verdict": "pass：normal/asan/tsan 各 11 场景全部 PASS（non-baseline failures 0）；baseline 11 场景全部 RED；run_t26_regression.sh exit 0（60 PASS，含 TSan 20/20，无 thread leak）。",
+  "superseded_by": [],
+  "items": [
+   "BUG-R65-002",
+   "BUG-T26-011",
+   "T1-CTPOpt-07",
+   "T2-OPT-04"
+  ]
+ },
+ {
+  "suite": "ctpopt_time_snapshot",
+  "class": "STALE_FIXTURE",
+  "root_cause": "build.py 私有快照复制清单过期：当前 TraderCTPOpt.h 新增 #include \"../TraderCTP/VendorTdLifecycle.hpp\"（卡9 厂商生命周期辅助），快照缺该头，产品 TU 编译失败，探针未运行。",
+  "change": "src/TestUnits/fixtures/ctpopt_time_snapshot/build.py：额外复制 src/TraderCTP/VendorTdLifecycle.hpp（仅该头）；新增 README.md（用法、red 变体依赖 docs 证据基线、本次更新）。run.py、confirm_snapshot.cpp 未改。",
+  "final_verdict": "pass：green 27 个模式全部 exit 0；red 变体需 docs/…/I03-NEW-006-ctpopt/baseline（不在套件内），not-applicable。",
+  "superseded_by": [],
+  "items": [
+   "I03-NEW-006"
+  ]
+ },
+ {
+  "suite": "cta_factory_quarantine",
+  "class": "STALE_FIXTURE",
+  "root_cause": "run.sh 以浮动的 git HEAD 构建历史红控；冻结 HEAD ccaad010 已含修复，head-red 第一例 exit 0 被判 unexpected historical control result。current 17 例本就通过。",
+  "change": "src/TestUnits/fixtures/cta_factory_quarantine/run.sh：历史红控固定为编写夹具时的 HEAD 9094fd8e（CtaStrategyMgr.cpp 自 325a4d5f 未变），并校验 sha256 1d1c42ca…（与 evidence/NEW-033/cta/pathfix2 记录一致），head-commit.txt 仍记录当前 HEAD；README.md 记录。另：SCRATCH/fixtures/run_fixtures.py 的 cta 处理器中 'git show HEAD:…' 改写项最小改为可选（min_count 0），否则运行器因找不到旧文本报错。",
+  "final_verdict": "pass：current 17/17 exit 0；head-red 6 例全部非零（134/1）；head-positive exit 0；基线哈希校验 OK。",
+  "superseded_by": [],
+  "items": [
+   "BUG-I02-NEW-033"
+  ]
+ }
+]

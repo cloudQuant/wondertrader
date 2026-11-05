@@ -1,0 +1,102 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before/src/TestUnits/coverage/t_TraderYD/r93_traderYD_api_test.cpp	2026-10-31 12:04:41
++++ src/TestUnits/coverage/t_TraderYD/r93_traderYD_api_test.cpp	2026-11-04 17:57:13
+@@ -764,5 +764,99 @@
+ 		ASSERT_TRUE(sink_.orderArrays[0].valid);
+ 		EXPECT_EQ("6101", sink_.orderArrays[0].orderID);
+ 		EXPECT_EQ((int)WOS_Canceled, sink_.orderArrays[0].state);
++	}
++	/* ------------------------------------------------------------------ */
++	/* BUG-R93-006：逐单冻结来源（迭代03 s5）                               */
++	/* ------------------------------------------------------------------ */
++
++	/// 混合昨/今：昨 2、今 3（经 fake 开仓成交），卖平 4 按昨仓优先冻结昨 2、今 2
++	/// （可用 0/1）；零成交撤单恢复本单冻结来源（可用 2/3）。只依赖本地冻结算式，
++	/// 不涉及 TradeVolume 累计语义（零成交）或厂商回报时序（单笔排队→撤单）。
++	/// 来源：evidence/R93-006-20261102/mixed-test.patch（迭代03 定向反例）。
++	TEST_F(R93YdTest, r93_mixed_yesterday_today_zero_fill_cancel_restores_origin)
++	{
++		comm_->setCoverMode(CM_OpenCover);
++		add_pre_position(YD_PD_Long, 2, 7000.0);
++		login_and_finish();
++		YDTrade open{};
++		open.Direction = YD_D_Buy;
++		open.OffsetFlag = YD_OF_Open;
++		open.Price = 7000.0;
++		open.Volume = 3;
++		open.TradeID = 7201;
++		open.OrderSysID = 7202;
++		api_.notifyTrade(&open, &stub_.instrument_, nullptr);
++		ASSERT_EQ(0, api_.queryPositions());
++		ASSERT_TRUE(api_.runNextQuery());
++		ASSERT_EQ(1u, sink_.positions.size());
++		ASSERT_DOUBLE_EQ(2.0, sink_.positions.back().pre);
++		ASSERT_DOUBLE_EQ(3.0, sink_.positions.back().newPos);
++		ASSERT_DOUBLE_EQ(2.0, sink_.positions.back().availPre);
++		ASSERT_DOUBLE_EQ(3.0, sink_.positions.back().availNew);
++		YDOrder pending = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 4,
++			YD_OS_Queuing, 7203, 7204);
++		api_.notifyOrder(&pending, &stub_.instrument_, nullptr);
++		ASSERT_EQ(0, api_.queryPositions());
++		ASSERT_TRUE(api_.runNextQuery());
++		ASSERT_EQ(2u, sink_.positions.size());
++		EXPECT_DOUBLE_EQ(0.0, sink_.positions.back().availPre);
++		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().availNew);
++		YDOrder canceled = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 4,
++			YD_OS_Canceled, 7203, 7204);
++		canceled.TradeVolume = 0;
++		api_.notifyOrder(&canceled, &stub_.instrument_, nullptr);
++		ASSERT_EQ(0, api_.queryPositions());
++		ASSERT_TRUE(api_.runNextQuery());
++		ASSERT_EQ(3u, sink_.positions.size());
++		EXPECT_DOUBLE_EQ(2.0, sink_.positions.back().availPre);
++		EXPECT_DOUBLE_EQ(3.0, sink_.positions.back().availNew);
++	}
++
++	/// 两笔平仓单各自冻结不同来源：A 平 1（昨 1）、B 平 3（昨 1 今 2）；先撤 A 只恢复
++	/// A 的昨 1（可用 1/1），再撤 B 恢复昨 1 今 2（可用 2/3）。按持仓总量反推来源的
++	/// 旧算式会把 A 的撤单错记到今仓。均为零成交撤单，不依赖 TradeVolume 语义。
++	TEST_F(R93YdTest, r93_two_orders_zero_fill_cancels_restore_their_own_sources)
++	{
++		comm_->setCoverMode(CM_OpenCover);
++		add_pre_position(YD_PD_Long, 2, 7000.0);
++		login_and_finish();
++		YDTrade open{};
++		open.Direction = YD_D_Buy;
++		open.OffsetFlag = YD_OF_Open;
++		open.Price = 7000.0;
++		open.Volume = 3;
++		open.TradeID = 7301;
++		open.OrderSysID = 7302;
++		api_.notifyTrade(&open, &stub_.instrument_, nullptr);
++
++		YDOrder a = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 1, YD_OS_Queuing, 7303, 7304);
++		YDOrder b = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 3, YD_OS_Queuing, 7305, 7306);
++		api_.notifyOrder(&a, &stub_.instrument_, nullptr);
++		api_.notifyOrder(&b, &stub_.instrument_, nullptr);
++		ASSERT_EQ(0, api_.queryPositions());
++		ASSERT_TRUE(api_.runNextQuery());
++		ASSERT_EQ(1u, sink_.positions.size());
++		EXPECT_DOUBLE_EQ(0.0, sink_.positions.back().availPre);
++		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().availNew);
++
++		YDOrder aCanceled = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 1, YD_OS_Canceled, 7303, 7304);
++		aCanceled.TradeVolume = 0;
++		api_.notifyOrder(&aCanceled, &stub_.instrument_, nullptr);
++		ASSERT_EQ(0, api_.queryPositions());
++		ASSERT_TRUE(api_.runNextQuery());
++		ASSERT_EQ(2u, sink_.positions.size());
++		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().availPre);
++		EXPECT_DOUBLE_EQ(1.0, sink_.positions.back().availNew);
++
++		// A duplicate cancel report of A restores nothing more.
++		api_.notifyOrder(&aCanceled, &stub_.instrument_, nullptr);
++		YDOrder bCanceled = make_order(YD_D_Sell, YD_OF_Close, YD_ODT_Limit, 7050.0, 3, YD_OS_Canceled, 7305, 7306);
++		bCanceled.TradeVolume = 0;
++		api_.notifyOrder(&bCanceled, &stub_.instrument_, nullptr);
++		ASSERT_EQ(0, api_.queryPositions());
++		ASSERT_TRUE(api_.runNextQuery());
++		ASSERT_EQ(3u, sink_.positions.size());
++		EXPECT_DOUBLE_EQ(2.0, sink_.positions.back().availPre);
++		EXPECT_DOUBLE_EQ(3.0, sink_.positions.back().availNew);
+ 	}
+ } // namespace

@@ -1,0 +1,33 @@
+--- tree/src/TestUnits/fixtures/t26_request_completion/run.sh
++++ mirror/src/TestUnits/fixtures/t26_request_completion/run.sh
+@@ -28,7 +28,7 @@
+  src/TestUnits/fixtures/t26_fees_atomic/fee_probe.cpp src/TestUnits/fixtures/t26_fees_atomic/run_tests.py
+  src/TestUnits/fixtures/t26_fees_atomic/consumer_key_probe.cpp src/TestUnits/coverage/t_CTPLoader/t26_ctp_api_stub.hpp)
+ shasum -a 256 "${sources[@]}" > "$out/source-before.sha256"
+-/Users/yunjinqi/opt/anaconda3/bin/conda run --no-capture-output -n base python src/TestUnits/fixtures/t26_request_completion/adapt_fee_probe.py "$out/fee_probe_adapted.cpp" "$out/fee_tests_adapted.py"
++/usr/bin/python3 -I src/TestUnits/fixtures/t26_request_completion/adapt_fee_probe.py "$out/fee_probe_adapted.cpp" "$out/fee_tests_adapted.py"
+ compiler=/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++
+ for variant in baseline normal asan tsan; do
+  snap="$out/current"; flags=(-DWT_T26_FEES_TEST_HOOKS -DWT_T26_QUERY_TIMEOUT_MS=3500)
+@@ -55,8 +55,8 @@
+  -I"$out/current" -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include \
+  -I/opt/homebrew/Cellar/spdlog/1.15.3/include -isystem /usr/local/include \
+  src/TestUnits/fixtures/t26_fees_atomic/consumer_key_probe.cpp -o "$out/consumer-key-probe" > "$out/consumer-key-build.log" 2>&1
+-/Users/yunjinqi/opt/anaconda3/bin/conda run --no-capture-output -n base python "$out/fee_tests_adapted.py" "$out" | tee "$out/fee-results.txt"
+-/Users/yunjinqi/opt/anaconda3/bin/conda run --no-capture-output -n base python src/TestUnits/fixtures/t26_request_completion/run_queries.py "$out" | tee "$out/query-results.txt"
++/usr/bin/python3 -I "$out/fee_tests_adapted.py" "$out" | tee "$out/fee-results.txt"
++/usr/bin/python3 -I src/TestUnits/fixtures/t26_request_completion/run_queries.py "$out" | tee "$out/query-results.txt"
+ shasum -a 256 "${sources[@]}" > "$out/source-after.sha256"
+ cmp "$out/source-before.sha256" "$out/source-after.sha256"
+ find "$out" -type l -print > "$out/symlinks.txt"
+--- tree/src/TestUnits/fixtures/t26_request_completion/run.sh
++++ mirror/src/TestUnits/fixtures/t26_request_completion/run.sh
+@@ -39,7 +39,7 @@
+   -include "$snap/Share/fmt_enum_compat.h" -I"$snap" -Isrc/TestUnits/coverage/t_CTPLoader
+   -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include
+   -I/opt/homebrew/Cellar/spdlog/1.15.3/include -isystem /usr/local/include)
+- libs=(/tmp/wt-i03-r41-drain/libs/libWTSUtils.a /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.a
++ libs=(/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build/build_x64/Debug/libs/libWTSUtils.a /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.a
+   /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_thread.a /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_system.a
+   /opt/homebrew/Cellar/libiconv/1.18/lib/libiconv.a -fprofile-instr-generate -lpthread)
+  (

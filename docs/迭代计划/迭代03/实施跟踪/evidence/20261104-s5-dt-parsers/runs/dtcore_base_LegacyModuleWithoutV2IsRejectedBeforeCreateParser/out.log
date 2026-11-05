@@ -1,0 +1,56 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = DtCoreHost.LegacyModuleWithoutV2IsRejectedBeforeCreateParser
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from DtCoreHost
+[ RUN      ] DtCoreHost.LegacyModuleWithoutV2IsRejectedBeforeCreateParser
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:86: Failure
+Value of: pa.init("legacy", cfg)
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:87: Failure
+Expected equality of these values:
+  _legacy[C_CREATE]
+    Which is: 1
+  0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:88: Failure
+Expected equality of these values:
+  _legacy[C_REGISTER]
+    Which is: 1
+  0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:89: Failure
+Expected equality of these values:
+  _legacy[C_INIT]
+    Which is: 1
+  0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:90: Failure
+Value of: pa.hasApi()
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:91: Failure
+Expected equality of these values:
+  cfg->retainCount()
+    Which is: 2
+  1u
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:92: Failure
+Value of: pa.run()
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:93: Failure
+Expected equality of these values:
+  _legacy[C_CONNECT]
+    Which is: 1
+  0
+
+[  FAILED  ] DtCoreHost.LegacyModuleWithoutV2IsRejectedBeforeCreateParser (25 ms)
+[----------] 1 test from DtCoreHost (25 ms total)
+
+[----------] Global test environment tear-down

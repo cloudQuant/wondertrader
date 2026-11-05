@@ -1,0 +1,33 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03FeeEngineGate.*:R130EngineFee.*
+[==========] Running 10 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 6 tests from R130EngineFee
+[ RUN      ] R130EngineFee.ByVolumeOffsetsAndRounding
+[       OK ] R130EngineFee.ByVolumeOffsetsAndRounding (11 ms)
+[ RUN      ] R130EngineFee.ByAmountOffsetsUseVolumeScale
+[       OK ] R130EngineFee.ByAmountOffsetsUseVolumeScale (1 ms)
+[ RUN      ] R130EngineFee.LoadFeesMakesTemplateAvailableForEngineCalculation
+[       OK ] R130EngineFee.LoadFeesMakesTemplateAvailableForEngineCalculation (5 ms)
+[ RUN      ] R130EngineFee.MalformedKeysRejectInitializationWithoutApplyingValidPrefix
+[       OK ] R130EngineFee.MalformedKeysRejectInitializationWithoutApplyingValidPrefix (1 ms)
+[ RUN      ] R130EngineFee.ByAmountFeesLoadThroughInitAndMatchCommodityCalculation
+[       OK ] R130EngineFee.ByAmountFeesLoadThroughInitAndMatchCommodityCalculation (1 ms)
+[ RUN      ] R130EngineFee.YAMLFeeTemplatePreservesNumericAndBooleanScalarCompatibility
+[       OK ] R130EngineFee.YAMLFeeTemplatePreservesNumericAndBooleanScalarCompatibility (2 ms)
+[----------] 6 tests from R130EngineFee (23 ms total)
+
+[----------] 4 tests from I03FeeEngineGate
+[ RUN      ] I03FeeEngineGate.RejectsUnsupportedEnvelopeWithoutChangingFees
+[       OK ] I03FeeEngineGate.RejectsUnsupportedEnvelopeWithoutChangingFees (1 ms)
+[ RUN      ] I03FeeEngineGate.ConfiguredUnreadableOrInvalidFilesRejectStartup
+[       OK ] I03FeeEngineGate.ConfiguredUnreadableOrInvalidFilesRejectStartup (2 ms)
+[ RUN      ] I03FeeEngineGate.InvalidFileAtInitIsRejectedByCtaRun
+[       OK ] I03FeeEngineGate.InvalidFileAtInitIsRejectedByCtaRun (1 ms)
+[ RUN      ] I03FeeEngineGate.NullFilenameMeansNoConfiguredTemplate
+[       OK ] I03FeeEngineGate.NullFilenameMeansNoConfiguredTemplate (0 ms)
+[----------] 4 tests from I03FeeEngineGate (6 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 2 test suites ran. (30 ms total)
+[  PASSED  ] 10 tests.

@@ -121,6 +121,15 @@ public:
 	std::shared_ptr<ParserTeardownStats> _stats;
 };
 
+// Card 9 (BUG-R78-001): an external parser API is destroyed only with a
+// provider confirmation; these quiescent fakes confirm through this remover.
+void confirmedParserRemover(IParserApi*& api)
+{
+	IParserApi* original = api;
+	api = nullptr;
+	delete original;
+}
+
 void retryableParserRemover(IParserApi*& api)
 {
 	if (api == nullptr)
@@ -185,7 +194,7 @@ int runParserCallbackShutdownScenario()
 		tick->release();
 	});
 	ParserAdapterPtr adapter(new ParserAdapter());
-	if (!adapter->initExt("cross_thread_callback", api, &stub, &baseData))
+	if (!adapter->initExt("cross_thread_callback", api, &stub, &baseData, confirmedParserRemover))
 		return 1;
 	if (!runner._parsers.addAdapter("cross_thread_callback", adapter))
 		return 2;
@@ -224,8 +233,9 @@ int runParserCallbackShutdownScenario()
 		return 5;
 	if (!runner.shutdown())
 		return 6;
-	if (stats->_release_count.load(std::memory_order_acquire) != 1u ||
-		stats->_destroy_count.load(std::memory_order_acquire) != 1u)
+	// 决策 K18=否（2026-11-04）：带 remover 的外部 parser 同无 remover：不调用 release/remover、不删除，隔离到进程退出；管理器将其作为常驻对象移出，关停可完成。
+	if (stats->_release_count.load(std::memory_order_acquire) != 0u ||
+		stats->_destroy_count.load(std::memory_order_acquire) != 0u)
 		return 7;
 	return 0;
 }
@@ -368,7 +378,7 @@ TEST(WtUftRunnerParserOwnership, duplicateRegistrationKeepsInitializedCandidateQ
 	auto stats = std::make_shared<ParserStartStats>();
 	UftRunnerBlockingParserApi* api = new UftRunnerBlockingParserApi(stats);
 	ParserAdapterPtr candidate(new ParserAdapter());
-	ASSERT_TRUE(candidate->initExt("duplicate", api, nullptr, &baseData));
+	ASSERT_TRUE(candidate->initExt("duplicate", api, nullptr, &baseData, confirmedParserRemover));
 	runner._quarantined_parsers.push_back(candidate);
 
 	EXPECT_FALSE(runner.registerParserCandidate("duplicate", candidate));
@@ -384,8 +394,9 @@ TEST(WtUftRunnerParserOwnership, duplicateRegistrationKeepsInitializedCandidateQ
 	candidate->release();
 	runner._quarantined_parsers.clear();
 	runner._parser_quarantine_pending.store(false, std::memory_order_release);
-	EXPECT_EQ(stats->_release_count.load(std::memory_order_acquire), 1u);
-	EXPECT_EQ(stats->_destroy_count.load(std::memory_order_acquire), 1u);
+	// 决策 K18=否（2026-11-04）：带 remover 的外部 parser 同无 remover：不调用 release/remover、不删除，隔离到进程退出；管理器将其作为常驻对象移出，关停可完成。
+	EXPECT_EQ(stats->_release_count.load(std::memory_order_acquire), 0u);
+	EXPECT_EQ(stats->_destroy_count.load(std::memory_order_acquire), 0u);
 	EXPECT_TRUE(runner.shutdown());
 }
 
@@ -416,7 +427,7 @@ TEST(WtUftRunnerParserStart, shutdownWaitsForParserStartAndDoesNotHoldGateLockIn
 	auto stats = std::make_shared<ParserStartStats>();
 	UftRunnerBlockingParserApi* api = new UftRunnerBlockingParserApi(stats);
 	ParserAdapterPtr adapter(new ParserAdapter());
-	ASSERT_TRUE(adapter->initExt("blocking", api, nullptr, &baseData));
+	ASSERT_TRUE(adapter->initExt("blocking", api, nullptr, &baseData, confirmedParserRemover));
 	ASSERT_TRUE(runner._parsers.addAdapter("blocking", adapter));
 
 	std::atomic<bool> start_result{false};
@@ -468,8 +479,9 @@ TEST(WtUftRunnerParserStart, shutdownWaitsForParserStartAndDoesNotHoldGateLockIn
 	EXPECT_TRUE(start_result.load(std::memory_order_acquire));
 	EXPECT_TRUE(shutdown_done.load(std::memory_order_acquire));
 	EXPECT_TRUE(shutdown_result.load(std::memory_order_acquire));
-	EXPECT_EQ(stats->_release_count.load(std::memory_order_acquire), 1u);
-	EXPECT_EQ(stats->_destroy_count.load(std::memory_order_acquire), 1u);
+	// 决策 K18=否（2026-11-04）：带 remover 的外部 parser 同无 remover：不调用 release/remover、不删除，隔离到进程退出；管理器将其作为常驻对象移出，关停可完成。
+	EXPECT_EQ(stats->_release_count.load(std::memory_order_acquire), 0u);
+	EXPECT_EQ(stats->_destroy_count.load(std::memory_order_acquire), 0u);
 }
 
 TEST(WtUftRunnerParserStart, sameThreadShutdownReentryDoesNotWaitOnItself)
@@ -480,7 +492,7 @@ TEST(WtUftRunnerParserStart, sameThreadShutdownReentryDoesNotWaitOnItself)
 	UftRunnerBlockingParserApi* api = new UftRunnerBlockingParserApi(stats);
 	api->allowConnectToReturn();
 	ParserAdapterPtr adapter(new ParserAdapter());
-	ASSERT_TRUE(adapter->initExt("reentrant", api, nullptr, &baseData));
+	ASSERT_TRUE(adapter->initExt("reentrant", api, nullptr, &baseData, confirmedParserRemover));
 	ASSERT_TRUE(runner._parsers.addAdapter("reentrant", adapter));
 
 	bool reentrant_shutdown_result = true;
@@ -489,8 +501,9 @@ TEST(WtUftRunnerParserStart, sameThreadShutdownReentryDoesNotWaitOnItself)
 	EXPECT_FALSE(reentrant_shutdown_result);
 	EXPECT_EQ(stats->_release_count.load(std::memory_order_acquire), 0u);
 	EXPECT_TRUE(runner.shutdown());
-	EXPECT_EQ(stats->_release_count.load(std::memory_order_acquire), 1u);
-	EXPECT_EQ(stats->_destroy_count.load(std::memory_order_acquire), 1u);
+	// 决策 K18=否（2026-11-04）：带 remover 的外部 parser 同无 remover：不调用 release/remover、不删除，隔离到进程退出；管理器将其作为常驻对象移出，关停可完成。
+	EXPECT_EQ(stats->_release_count.load(std::memory_order_acquire), 0u);
+	EXPECT_EQ(stats->_destroy_count.load(std::memory_order_acquire), 0u);
 }
 
 TEST(WtUftRunnerParserStart, parserCallbackShutdownDoesNotWaitForConnectThread)
@@ -539,8 +552,10 @@ TEST(WtUftRunnerParserStart, parserCallbackShutdownDoesNotWaitForConnectThread)
 #endif
 }
 
-TEST(WtUftRunnerParserShutdown, retainedManagerAdapterBlocksCompletionAndCanRetry)
+// 原用例 retainedManagerAdapterBlocksCompletionAndCanRetry（remover 未确认则关停未完成、可重试）按 K18 改写。
+TEST(WtUftRunnerParserShutdown, externalParserWithRemoverIsResidentAndShutdownCompletes)
 {
+	// 决策 K18=否（2026-11-04）：带 remover 的外部 parser 同无 remover：不调用 release/remover、不删除，隔离到进程退出；管理器将其作为常驻对象移出，关停可完成。
 	q04::FakeBaseDataMgr baseData;
 	WtUftRunner runner;
 	auto stats = std::make_shared<ParserTeardownStats>();
@@ -549,23 +564,15 @@ TEST(WtUftRunnerParserShutdown, retainedManagerAdapterBlocksCompletionAndCanRetr
 	ASSERT_TRUE(adapter->initExt("retryable_teardown", api, nullptr, &baseData, retryableParserRemover));
 	ASSERT_TRUE(runner._parsers.addAdapter("retryable_teardown", adapter));
 
-	EXPECT_FALSE(runner.shutdown());
-	EXPECT_FALSE(runner._shutdown_complete.load(std::memory_order_acquire));
-	EXPECT_FALSE(runner._inputs_stopped.load(std::memory_order_acquire));
-	EXPECT_TRUE(runner._parsers.hasRetainedAdapters());
-	EXPECT_EQ(adapter->getBaseDataMgr(), &baseData);
-	EXPECT_EQ(stats->_release_count.load(std::memory_order_acquire), 1u);
-	EXPECT_EQ(stats->_remover_count.load(std::memory_order_acquire), 1u);
-	EXPECT_EQ(stats->_destroy_count.load(std::memory_order_acquire), 0u);
-
-	// The fake provider gives an explicit barrier only now. release() itself did
-	// not establish quiescence; the second shutdown retries the pending remover.
-	stats->_provider_quiesced.store(true, std::memory_order_release);
 	EXPECT_TRUE(runner.shutdown());
 	EXPECT_TRUE(runner._shutdown_complete.load(std::memory_order_acquire));
 	EXPECT_TRUE(runner._inputs_stopped.load(std::memory_order_acquire));
 	EXPECT_FALSE(runner._parsers.hasRetainedAdapters());
-	EXPECT_EQ(stats->_release_count.load(std::memory_order_acquire), 1u);
-	EXPECT_EQ(stats->_remover_count.load(std::memory_order_acquire), 2u);
-	EXPECT_EQ(stats->_destroy_count.load(std::memory_order_acquire), 1u);
+	EXPECT_TRUE(adapter->hasApi());
+#ifdef WT_UFT_PARSER_K18_RESIDENT
+	EXPECT_TRUE(adapter->isResidentQuarantined());
+#endif
+	EXPECT_EQ(stats->_release_count.load(std::memory_order_acquire), 0u);
+	EXPECT_EQ(stats->_remover_count.load(std::memory_order_acquire), 0u);
+	EXPECT_EQ(stats->_destroy_count.load(std::memory_order_acquire), 0u);
 }

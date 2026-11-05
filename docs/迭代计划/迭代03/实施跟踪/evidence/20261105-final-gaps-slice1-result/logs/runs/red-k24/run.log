@@ -1,0 +1,27 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S1K24NotifierStop.*
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from S1K24NotifierStop
+[ RUN      ] S1K24NotifierStop.BlockedPublisherIsDetachedAfterBoundedWait
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s1_k24_notifier_bounded_stop_test.cpp:105: Failure
+Value of: returnedInTime
+  Actual: false
+Expected: true
+destruction waited for the blocked publisher
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s1_k24_notifier_bounded_stop_test.cpp:106: Failure
+Expected: (elapsed) < (std::chrono::seconds(3)), actual: 8-byte object <1E-76 E0-B2 00-00 00-00> vs 8-byte object <03-00 00-00 00-00 00-00>
+
+[  FAILED  ] S1K24NotifierStop.BlockedPublisherIsDetachedAfterBoundedWait (3084 ms)
+[ RUN      ] S1K24NotifierStop.IdleNotifierDrainsAndDestroysServerOnce
+[       OK ] S1K24NotifierStop.IdleNotifierDrainsAndDestroysServerOnce (0 ms)
+[----------] 2 tests from S1K24NotifierStop (3085 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (3085 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S1K24NotifierStop.BlockedPublisherIsDetachedAfterBoundedWait
+
+ 1 FAILED TEST

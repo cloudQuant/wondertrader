@@ -1,0 +1,124 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = UftConcurrency.ContextLocalStateAcrossDaySwitches
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from UftConcurrency
+[ RUN      ] UftConcurrency.ContextLocalStateAcrossDaySwitches
+=================================================================
+==70892==ERROR: AddressSanitizer: heap-use-after-free on address 0x6150000105a0 at pc 0x000102c327c8 bp 0x00016d7123b0 sp 0x00016d7123a8
+READ of size 8 at 0x6150000105a0 thread T4
+    #0 0x000102c327c4 in wtp::UftStraContext::on_tick(char const*, wtp::WTSTickData*)+0xa2c (uft_cc_base:arm64+0x10031a7c4)
+    #1 0x00010299cc54 in UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_2::operator()() const+0x3c4 (uft_cc_base:arm64+0x100084c54)
+    #2 0x00010299c7bc in std::__1::__invoke_result_impl<void, UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_2>::type std::__1::__invoke[abi:nqe220108]<UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_2>(UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_2&&)+0x48 (uft_cc_base:arm64+0x1000847bc)
+    #3 0x00010299c75c in void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_2, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_2>&, std::__1::__integer_sequence<unsigned long, 0ul>)+0x80 (uft_cc_base:arm64+0x10008475c)
+    #4 0x00010299bed4 in void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_2>>(void*)+0x218 (uft_cc_base:arm64+0x100083ed4)
+    #5 0x000103f296d4 in asan_thread_start(void*)+0x48 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x516d4)
+    #6 0x0001883cdc54 in _pthread_start+0x84 (libsystem_pthread.dylib:arm64e+0x6c54)
+    #7 0x0001883c8c18 in thread_start+0x4 (libsystem_pthread.dylib:arm64e+0x1c18)
+
+0x6150000105a0 is located 288 bytes inside of 512-byte region [0x615000010480,0x615000010680)
+freed by thread T3 here:
+    #0 0x000103f3d4d0 in _ZdlPv+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x654d0)
+    #1 0x000102c5a564 in void std::__1::__libcpp_deallocate[abi:nqe220108]<uft::_DetailStruct*>(std::__1::__type_identity<uft::_DetailStruct*>::type*, std::__1::__element_count, unsigned long)+0x58 (uft_cc_base:arm64+0x100342564)
+    #2 0x000102c5a4f4 in std::__1::allocator<uft::_DetailStruct*>::deallocate[abi:nqe220108](uft::_DetailStruct**, unsigned long)+0x44 (uft_cc_base:arm64+0x1003424f4)
+    #3 0x000102c59d2c in std::__1::allocator_traits<std::__1::allocator<uft::_DetailStruct*>>::deallocate[abi:nqe220108](std::__1::allocator<uft::_DetailStruct*>&, uft::_DetailStruct**, unsigned long)+0x24 (uft_cc_base:arm64+0x100341d2c)
+    #4 0x000102c7bd8c in std::__1::__split_buffer<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>, std::__1::__split_buffer_pointer_layout>::~__split_buffer()+0x124 (uft_cc_base:arm64+0x100363d8c)
+    #5 0x000102c7a0e8 in std::__1::__split_buffer<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>, std::__1::__split_buffer_pointer_layout>::~__split_buffer()+0x48 (uft_cc_base:arm64+0x1003620e8)
+    #6 0x000102c795ac in uft::_DetailStruct** std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::__emplace_back_slow_path<uft::_DetailStruct*>(uft::_DetailStruct*&&)+0x320 (uft_cc_base:arm64+0x1003615ac)
+    #7 0x000102c782a0 in uft::_DetailStruct*& std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::emplace_back<uft::_DetailStruct*>(uft::_DetailStruct*&&)::'lambda0'()::operator()() const+0xf8 (uft_cc_base:arm64+0x1003602a0)
+    #8 0x000102c77f8c in void std::__1::__if_likely_else[abi:nqe220108]<uft::_DetailStruct*& std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::emplace_back<uft::_DetailStruct*>(uft::_DetailStruct*&&)::'lambda'(), uft::_DetailStruct*& std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::emplace_back<uft::_DetailStruct*>(uft::_DetailStruct*&&)::'lambda0'()>(bool, uft::_DetailStruct*& std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::emplace_back<uft::_DetailStruct*>(uft::_DetailStruct*&&)::'lambda'(), uft::_DetailStruct*& std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::emplace_back<uft::_DetailStruct*>(uft::_DetailStruct*&&)::'lambda0'())+0xe8 (uft_cc_base:arm64+0x10035ff8c)
+    #9 0x000102c3d140 in uft::_DetailStruct*& std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::emplace_back<uft::_DetailStruct*>(uft::_DetailStruct*&&)+0x360 (uft_cc_base:arm64+0x100325140)
+    #10 0x000102c378f4 in wtp::UftStraContext::on_trade(unsigned int, char const*, bool, unsigned int, double, double)+0x38f0 (uft_cc_base:arm64+0x10031f8f4)
+    #11 0x00010299a5d0 in UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1::operator()() const+0x594 (uft_cc_base:arm64+0x1000825d0)
+    #12 0x000102999f68 in std::__1::__invoke_result_impl<void, UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1>::type std::__1::__invoke[abi:nqe220108]<UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1>(UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1&&)+0x48 (uft_cc_base:arm64+0x100081f68)
+    #13 0x000102999f08 in void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1>&, std::__1::__integer_sequence<unsigned long, 0ul>)+0x80 (uft_cc_base:arm64+0x100081f08)
+    #14 0x000102999680 in void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1>>(void*)+0x218 (uft_cc_base:arm64+0x100081680)
+    #15 0x000103f296d4 in asan_thread_start(void*)+0x48 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x516d4)
+    #16 0x0001883cdc54 in _pthread_start+0x84 (libsystem_pthread.dylib:arm64e+0x6c54)
+    #17 0x0001883c8c18 in thread_start+0x4 (libsystem_pthread.dylib:arm64e+0x1c18)
+
+previously allocated by thread T3 here:
+    #0 0x000103f3d0e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x000102c7b1d0 in uft::_DetailStruct** std::__1::__libcpp_allocate[abi:nqe220108]<uft::_DetailStruct*>(std::__1::__element_count, unsigned long)+0x88 (uft_cc_base:arm64+0x1003631d0)
+    #2 0x000102c7b0c4 in std::__1::allocator<uft::_DetailStruct*>::allocate[abi:nqe220108](unsigned long)+0x9c (uft_cc_base:arm64+0x1003630c4)
+    #3 0x000102c7ab24 in std::__1::__allocation_result<std::__1::allocator_traits<std::__1::allocator<uft::_DetailStruct*>>::pointer, std::__1::allocator_traits<std::__1::allocator<uft::_DetailStruct*>>::size_type> std::__1::__allocate_at_least[abi:nqe220108]<std::__1::allocator<uft::_DetailStruct*>, std::__1::allocator_traits<std::__1::allocator<uft::_DetailStruct*>>>(std::__1::allocator<uft::_DetailStruct*>&, unsigned long)+0x114 (uft_cc_base:arm64+0x100362b24)
+    #4 0x000102c7a698 in std::__1::__split_buffer<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<uft::_DetailStruct*>&)+0x208 (uft_cc_base:arm64+0x100362698)
+    #5 0x000102c79ab0 in std::__1::__split_buffer<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>, std::__1::__split_buffer_pointer_layout>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<uft::_DetailStruct*>&)+0x60 (uft_cc_base:arm64+0x100361ab0)
+    #6 0x000102c79458 in uft::_DetailStruct** std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::__emplace_back_slow_path<uft::_DetailStruct*>(uft::_DetailStruct*&&)+0x1cc (uft_cc_base:arm64+0x100361458)
+    #7 0x000102c782a0 in uft::_DetailStruct*& std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::emplace_back<uft::_DetailStruct*>(uft::_DetailStruct*&&)::'lambda0'()::operator()() const+0xf8 (uft_cc_base:arm64+0x1003602a0)
+    #8 0x000102c77f8c in void std::__1::__if_likely_else[abi:nqe220108]<uft::_DetailStruct*& std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::emplace_back<uft::_DetailStruct*>(uft::_DetailStruct*&&)::'lambda'(), uft::_DetailStruct*& std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::emplace_back<uft::_DetailStruct*>(uft::_DetailStruct*&&)::'lambda0'()>(bool, uft::_DetailStruct*& std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::emplace_back<uft::_DetailStruct*>(uft::_DetailStruct*&&)::'lambda'(), uft::_DetailStruct*& std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::emplace_back<uft::_DetailStruct*>(uft::_DetailStruct*&&)::'lambda0'())+0xe8 (uft_cc_base:arm64+0x10035ff8c)
+    #9 0x000102c3d140 in uft::_DetailStruct*& std::__1::vector<uft::_DetailStruct*, std::__1::allocator<uft::_DetailStruct*>>::emplace_back<uft::_DetailStruct*>(uft::_DetailStruct*&&)+0x360 (uft_cc_base:arm64+0x100325140)
+    #10 0x000102c378f4 in wtp::UftStraContext::on_trade(unsigned int, char const*, bool, unsigned int, double, double)+0x38f0 (uft_cc_base:arm64+0x10031f8f4)
+    #11 0x00010299a5d0 in UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1::operator()() const+0x594 (uft_cc_base:arm64+0x1000825d0)
+    #12 0x000102999f68 in std::__1::__invoke_result_impl<void, UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1>::type std::__1::__invoke[abi:nqe220108]<UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1>(UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1&&)+0x48 (uft_cc_base:arm64+0x100081f68)
+    #13 0x000102999f08 in void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1>&, std::__1::__integer_sequence<unsigned long, 0ul>)+0x80 (uft_cc_base:arm64+0x100081f08)
+    #14 0x000102999680 in void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1>>(void*)+0x218 (uft_cc_base:arm64+0x100081680)
+    #15 0x000103f296d4 in asan_thread_start(void*)+0x48 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x516d4)
+    #16 0x0001883cdc54 in _pthread_start+0x84 (libsystem_pthread.dylib:arm64e+0x6c54)
+    #17 0x0001883c8c18 in thread_start+0x4 (libsystem_pthread.dylib:arm64e+0x1c18)
+
+Thread T4 created by T0 here:
+    #0 0x000103f237bc in pthread_create+0x58 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x4b7bc)
+    #1 0x000102962514 in std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*)+0x28 (uft_cc_base:arm64+0x10004a514)
+    #2 0x00010299b9d0 in std::__1::thread::thread[abi:nqe220108]<UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_2, 0>(UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_2&&)+0x274 (uft_cc_base:arm64+0x1000839d0)
+    #3 0x000102927038 in std::__1::thread::thread[abi:nqe220108]<UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_2, 0>(UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_2&&)+0x50 (uft_cc_base:arm64+0x10000f038)
+    #4 0x000102926060 in UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()+0x13b4 (uft_cc_base:arm64+0x10000e060)
+    #5 0x000102ddada8 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (uft_cc_base:arm64+0x1004c2da8)
+    #6 0x000102ddacf0 in testing::Test::Run()+0xcc (uft_cc_base:arm64+0x1004c2cf0)
+    #7 0x000102ddb8d0 in testing::TestInfo::Run()+0xd0 (uft_cc_base:arm64+0x1004c38d0)
+    #8 0x000102ddc354 in testing::TestSuite::Run()+0x1c4 (uft_cc_base:arm64+0x1004c4354)
+    #9 0x000102de777c in testing::internal::UnitTestImpl::RunAllTests()+0x52c (uft_cc_base:arm64+0x1004cf77c)
+    #10 0x000102de7128 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (uft_cc_base:arm64+0x1004cf128)
+    #11 0x000102de708c in testing::UnitTest::Run()+0x78 (uft_cc_base:arm64+0x1004cf08c)
+    #12 0x000102dc83c4 in main+0x40 (uft_cc_base:arm64+0x1004b03c4)
+    #13 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+Thread T3 created by T0 here:
+    #0 0x000103f237bc in pthread_create+0x58 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x4b7bc)
+    #1 0x000102962514 in std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*)+0x28 (uft_cc_base:arm64+0x10004a514)
+    #2 0x00010299917c in std::__1::thread::thread[abi:nqe220108]<UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1, 0>(UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1&&)+0x274 (uft_cc_base:arm64+0x10008117c)
+    #3 0x000102926fd4 in std::__1::thread::thread[abi:nqe220108]<UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1, 0>(UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()::$_1&&)+0x50 (uft_cc_base:arm64+0x10000efd4)
+    #4 0x000102925f8c in UftConcurrency_ContextLocalStateAcrossDaySwitches_Test::TestBody()+0x12e0 (uft_cc_base:arm64+0x10000df8c)
+    #5 0x000102ddada8 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (uft_cc_base:arm64+0x1004c2da8)
+    #6 0x000102ddacf0 in testing::Test::Run()+0xcc (uft_cc_base:arm64+0x1004c2cf0)
+    #7 0x000102ddb8d0 in testing::TestInfo::Run()+0xd0 (uft_cc_base:arm64+0x1004c38d0)
+    #8 0x000102ddc354 in testing::TestSuite::Run()+0x1c4 (uft_cc_base:arm64+0x1004c4354)
+    #9 0x000102de777c in testing::internal::UnitTestImpl::RunAllTests()+0x52c (uft_cc_base:arm64+0x1004cf77c)
+    #10 0x000102de7128 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (uft_cc_base:arm64+0x1004cf128)
+    #11 0x000102de708c in testing::UnitTest::Run()+0x78 (uft_cc_base:arm64+0x1004cf08c)
+    #12 0x000102dc83c4 in main+0x40 (uft_cc_base:arm64+0x1004b03c4)
+    #13 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: heap-use-after-free (uft_cc_base:arm64+0x10031a7c4) in wtp::UftStraContext::on_tick(char const*, wtp::WTSTickData*)+0xa2c
+Shadow bytes around the buggy address:
+  0x615000010300: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x615000010380: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x615000010400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x615000010480: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x615000010500: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+=>0x615000010580: fd fd fd fd[fd]fd fd fd fd fd fd fd fd fd fd fd
+  0x615000010600: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x615000010680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x615000010700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x615000010780: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x615000010800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==70892==ABORTING

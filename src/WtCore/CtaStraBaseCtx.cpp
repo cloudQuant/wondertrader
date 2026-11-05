@@ -28,6 +28,7 @@ namespace rj = rapidjson;
 #include "../WTSTools/WTSLogger.h"
 
 #include <boost/filesystem.hpp>
+#include <initializer_list>
 namespace fs = boost::filesystem;
 
 const char* CMP_ALG_NAMES[] =
@@ -91,8 +92,26 @@ bool validateCtaSnapshot(const rj::Value& root, std::string& invalidPath, size_t
 			value.GetStringLength() < limit && strlen(value.GetString()) == value.GetStringLength()
 			? true : fail(path);
 	};
+	// Decision K45 (2026-11-04): only the current shape (plus the known optional fields
+	// above) is accepted; a member the writer never produces is an unknown shape and
+	// rejects the whole file.
+	auto known = [&fail](const rj::Value& object, std::initializer_list<const char*> names,
+		const std::string& path) {
+		for (const auto& member : object.GetObject())
+		{
+			const std::string name(member.name.GetString(), member.name.GetStringLength());
+			bool listed = false;
+			for (const char* allowed : names)
+				listed = listed || name == allowed;
+			if (!listed)
+				return fail(path + ".<unknown:" + name.substr(0, 64) + ">");
+		}
+		return true;
+	};
 	if (!root.IsObject())
 		return fail("$");
+	if (!known(root, { "positions", "conditions", "fund", "signals", "utils" }, "$"))
+		return false;
 	if (!root.HasMember("positions") || (!root["positions"].IsArray() && !root["positions"].IsNull()))
 		return fail("$.positions");
 	if (!root.HasMember("conditions") || (!root["conditions"].IsObject() && !root["conditions"].IsNull()))
@@ -102,6 +121,7 @@ bool validateCtaSnapshot(const rj::Value& root, std::string& invalidPath, size_t
 	{
 		const rj::Value& fund = root["fund"];
 		if (!fund.IsObject()) return fail("$.fund");
+		if (!known(fund, { "total_profit", "total_dynprofit", "total_fees", "tdate" }, "$.fund")) return false;
 		if (!field(fund, "total_profit", CtaSnapshotField::Number, true, "$.fund") ||
 			!field(fund, "total_dynprofit", CtaSnapshotField::Number, true, "$.fund") ||
 			!field(fund, "total_fees", CtaSnapshotField::Number, true, "$.fund") ||
@@ -116,6 +136,8 @@ bool validateCtaSnapshot(const rj::Value& root, std::string& invalidPath, size_t
 			const rj::Value& position = positions[i];
 			const std::string path = "$.positions[" + std::to_string(i) + "]";
 			if (!position.IsObject()) return fail(path);
+			if (!known(position, { "code", "volume", "closeprofit", "dynprofit", "lastentertime",
+				"lastexittime", "frozen", "frozendate", "details" }, path)) return false;
 			if (!field(position, "code", CtaSnapshotField::String, true, path) ||
 				!code(position["code"], path + ".code", static_cast<size_t>(-1)) ||
 				!field(position, "volume", CtaSnapshotField::Number, true, path) ||
@@ -134,6 +156,8 @@ bool validateCtaSnapshot(const rj::Value& root, std::string& invalidPath, size_t
 				const rj::Value& detail = details[j];
 				const std::string item = path + ".details[" + std::to_string(j) + "]";
 				if (!detail.IsObject()) return fail(item);
+				if (!known(detail, { "long", "price", "maxprice", "minprice", "volume", "opentime",
+					"opentdate", "profit", "maxprofit", "maxloss", "opentag", "openbarno" }, item)) return false;
 				if (!field(detail, "volume", CtaSnapshotField::Number, true, item)) return false;
 				// The legacy reader intentionally skips zero-volume details before
 				// accessing the remaining fields. They may be absent there, but
@@ -159,6 +183,7 @@ bool validateCtaSnapshot(const rj::Value& root, std::string& invalidPath, size_t
 	if (root["conditions"].IsObject())
 	{
 		const rj::Value& conditions = root["conditions"];
+		if (!known(conditions, { "settime", "items" }, "$.conditions")) return false;
 		if (!field(conditions, "settime", CtaSnapshotField::Uint64, true, "$.conditions")) return false;
 		if (!conditions.HasMember("items") || !conditions["items"].IsObject()) return fail("$.conditions.items");
 		for (const auto& member : conditions["items"].GetObject())
@@ -173,6 +198,7 @@ bool validateCtaSnapshot(const rj::Value& root, std::string& invalidPath, size_t
 				const rj::Value& item = items[i];
 				const std::string itemPath = path + ".<code>[" + std::to_string(i) + "]";
 				if (!item.IsObject()) return fail(itemPath);
+				if (!known(item, { "code", "usertag", "field", "alg", "target", "qty", "action" }, itemPath)) return false;
 				if (!field(item, "usertag", CtaSnapshotField::String, true, itemPath) ||
 					!field(item, "field", CtaSnapshotField::Uint, true, itemPath) ||
 					!field(item, "alg", CtaSnapshotField::Uint, true, itemPath) ||
@@ -203,6 +229,7 @@ bool validateCtaSnapshot(const rj::Value& root, std::string& invalidPath, size_t
 			if (member.name.GetStringLength() > 64) shortCode += "...";
 			const std::string path = "$.signals[" + shortCode + "]";
 			if (!member.value.IsObject()) return fail(path);
+			if (!known(member.value, { "usertag", "volume", "sigprice", "gentime" }, path)) return false;
 			if (!field(member.value, "usertag", CtaSnapshotField::String, true, path) ||
 				!field(member.value, "volume", CtaSnapshotField::Number, true, path) ||
 				!field(member.value, "sigprice", CtaSnapshotField::Number, true, path) ||
@@ -216,6 +243,7 @@ bool validateCtaSnapshot(const rj::Value& root, std::string& invalidPath, size_t
 	if (root.HasMember("utils") && !root["utils"].IsNull())
 	{
 		if (!root["utils"].IsObject()) return fail("$.utils");
+		if (!known(root["utils"], { "lastbarno" }, "$.utils")) return false;
 		if (!field(root["utils"], "lastbarno", CtaSnapshotField::Uint, true, "$.utils")) return false;
 	}
 	return true;
@@ -908,8 +936,8 @@ void CtaStraBaseCtx::on_bar(const char* stdCode, const char* period, uint32_t ti
 	thread_local static char realPeriod[8] = { 0 };
 	fmtutil::format_to(realPeriod, "{}{}", period, times);
 
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", stdCode, realPeriod);
+	// I03-NEW-039: caller stdCode is unbounded; no fixed 64-byte key buffer
+	std::string key = fmt::format("{}#{}", stdCode, realPeriod);
 
 	KlineTag& tag = _kline_tags[key];
 	tag._closed = true;
@@ -1742,7 +1770,7 @@ void CtaStraBaseCtx::do_set_position(const char* stdCode, double qty, const char
 		pInfo._last_entertime = curTm;
 
 		//double fee = _engine->calc_fee(stdCode, trdPx, abs(diff), 0);
-		double fee = commInfo->calcFee(trdPx, abs(diff), 0);
+		double fee = _engine->calc_fee(stdCode, trdPx, abs(diff), 0);
 		_fund_info._total_fees += fee;
 		log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(diff), userTag, fee, _last_barno);
 	}
@@ -1789,7 +1817,7 @@ void CtaStraBaseCtx::do_set_position(const char* stdCode, double qty, const char
 
 			//计算手续费
 			//double fee = _engine->calc_fee(stdCode, trdPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
-			double fee = commInfo->calcFee(trdPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
+			double fee = _engine->calc_fee(stdCode, trdPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
 			_fund_info._total_fees += fee;
 
 			//这里写平仓记录
@@ -1837,7 +1865,7 @@ void CtaStraBaseCtx::do_set_position(const char* stdCode, double qty, const char
 			pInfo._last_entertime = curTm;
 
 			//这里还需要写一笔成交记录
-			double fee = commInfo->calcFee(trdPx, abs(left), 0);
+			double fee = _engine->calc_fee(stdCode, trdPx, abs(left), 0);
 			_fund_info._total_fees += fee;
 			log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(left), userTag, fee, _last_barno);
 		}
@@ -1855,8 +1883,8 @@ void CtaStraBaseCtx::do_set_position(const char* stdCode, double qty, const char
 
 WTSKlineSlice* CtaStraBaseCtx::stra_get_bars(const char* stdCode, const char* period, uint32_t count, bool isMain /* = false */)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", stdCode, period);
+	// I03-NEW-039: caller stdCode is unbounded; no fixed 64-byte key buffer
+	std::string key = fmt::format("{}#{}", stdCode, period);
 
 	if (isMain)
 	{
@@ -1953,8 +1981,8 @@ void CtaStraBaseCtx::stra_sub_ticks(const char* code)
 
 void CtaStraBaseCtx::stra_sub_bar_events(const char* stdCode, const char* period)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", stdCode, period);
+	// I03-NEW-039: caller stdCode is unbounded; no fixed 64-byte key buffer
+	std::string key = fmt::format("{}#{}", stdCode, period);
 
 	KlineTag& tag = _kline_tags[key];
 	tag._notify = true;

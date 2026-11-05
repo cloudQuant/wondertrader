@@ -104,6 +104,9 @@ TEST_F(R59Sell, open_caps_quantity_by_remaining_short_and_total_limits)
     ASSERT_EQ(1u, ids.size());
     ASSERT_EQ(1u, api2_.vols_.size());
     EXPECT_DOUBLE_EQ(3.0, api2_.vols_[0]);
+    // The fake accepted only three units; the historical trade report
+    // carry no local user tag and do not contribute to this adapter's ledger.
+    EXPECT_DOUBLE_EQ(-3.0, t1.getUndoneQty(kStdCode));
 
     ActionPolicyMgr pm2;
     ASSERT_TRUE(loadPolicy(pm2, "r59_sell_cap_total.json",
@@ -118,6 +121,7 @@ TEST_F(R59Sell, open_caps_quantity_by_remaining_short_and_total_limits)
     ASSERT_EQ(1u, ids.size());
     ASSERT_EQ(1u, api2_.vols_.size());
     EXPECT_DOUBLE_EQ(7.0, api2_.vols_[0]);
+    EXPECT_DOUBLE_EQ(-7.0, t2.getUndoneQty(kStdCode));
 }
 
 // TraderAdapter.cpp:1055-1102（AT_CloseToday：CM_CoverToday/CM_OpenCover + pure 保护）

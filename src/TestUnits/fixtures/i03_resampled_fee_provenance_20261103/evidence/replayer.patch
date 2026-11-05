@@ -1,0 +1,71 @@
+--- /tmp/i03-resampled-provenance-baseline-20261103/HisDataReplayer.cpp	2026-11-03 17:28:48
++++ src/WtBtCore/HisDataReplayer.cpp	2026-11-03 17:30:19
+@@ -1,4 +1,4 @@
+-/*!
++﻿/*!
+  * \file HisDataReplayer.cpp
+  * \project	WonderTrader
+  *
+@@ -4329,7 +4329,8 @@
+ 	if (realTimes != 1 && !bHasCache)
+ 	{	
+ 		std::string rawKey = fmtutil::format<64>("{}#{}#{}", stdCode, period, baseTimes);
+-		BarsListPtr& rawBars = _bars_cache[rawKey];
++		auto rawIt = _bars_cache.find(rawKey);
++		BarsListPtr rawBars = rawIt == _bars_cache.end() ? BarsListPtr() : rawIt->second;
+ 		if (rawBars == NULL || rawBars->_bars.empty())
+ 		{
+ 			WTSLogger::warn("No raw bars cached for resampling {}({})", stdCode, period);
+@@ -4345,20 +4346,47 @@
+ 			return NULL;
+ 		rawKline->setCode(stdCode);
+ 
++		WTSReleaseGuard<WTSKlineSlice> rawGuard(rawKline);
+ 		static WTSDataFactory dataFact;
+-		WTSKlineData* kData = dataFact.extractKlineData(rawKline, kp, realTimes, sInfo, true, _align_by_section);
+-		rawKline->release();
++		std::vector<WTSDataFactory::BarIndexRange> ranges;
++		WTSKlineData* kData = dataFact.extractKlineDataWithRanges(rawKline, kp, realTimes, sInfo, ranges, true, _align_by_section);
++		WTSReleaseGuard<WTSKlineData> resultGuard(kData);
+ 
+ 		if(kData)
+ 		{
+-			_bars_cache[key].reset(new BarsList());
+-			BarsListPtr barsList = _bars_cache[key];
++			BarsListPtr barsList(new BarsList());
+ 			barsList->_code = stdCode;
+ 			barsList->_period = kp;
+ 			barsList->_times = realTimes;
+ 			barsList->_count = kData->size();
+ 			barsList->_bars.swap(kData->getDataRef());
+-			kData->release();
++			// Ranges are half-open indices into the exact raw snapshot used above.
++			// Any inconsistency makes all results unknown; each valid range still
++			// requires one registered physical identity for every constituent.
++			bool validRanges = ranges.size() == barsList->_bars.size() &&
++				rawBars->_physical_sources.size() == rawBars->_bars.size();
++			std::size_t next = 0;
++			for (const auto& range : ranges)
++			{
++				if (range.first != next || range.first >= range.second || range.second > rawBars->_bars.size())
++				{ validRanges = false; break; }
++				next = range.second;
++			}
++			validRanges = validRanges && next == rawBars->_bars.size();
++			if (validRanges)
++			{
++				CodeHelper::CodeInfo info = CodeHelper::extractStdCode(stdCode, &_hot_mgr);
++				barsList->_physical_sources.reserve(ranges.size());
++				for (const auto& range : ranges)
++				{
++					const std::string& source = rawBars->_physical_sources[range.first];
++					bool known = !source.empty() && resolve_fee_contract(stdCode, source.c_str(), info._exchg, 0);
++					for (std::size_t i = range.first + 1; known && i < range.second; ++i)
++						known = rawBars->_physical_sources[i] == source;
++					barsList->_physical_sources.emplace_back(known ? source : std::string());
++				}
++			}
++			_bars_cache[key] = barsList;
+ 			WTSLogger::info("{} resampled {}{} back kline of {} ready", barsList->_bars.size(), period, times, stdCode);
+ 		}
+ 		else

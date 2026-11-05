@@ -1,0 +1,43 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R21ReaderADTest.K35*:R21ReaderADTest.S5*:P05RdmReaderADTest.KlineRange*
+[==========] Running 15 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 5 tests from P05RdmReaderADTest
+[ RUN      ] P05RdmReaderADTest.KlineRangeRejectsMismatchedCheckedRangeResultsWithoutPartialPublish
+[       OK ] P05RdmReaderADTest.KlineRangeRejectsMismatchedCheckedRangeResultsWithoutPartialPublish (2 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeRejectsShortAndLongLmdbValues
+[       OK ] P05RdmReaderADTest.KlineRangeRejectsShortAndLongLmdbValues (1 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeKeepsExistingCacheWhenReloadFindsMalformedValue
+[       OK ] P05RdmReaderADTest.KlineRangeKeepsExistingCacheWhenReloadFindsMalformedValue (1 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeKeepsExistingCacheWhenCheckedQueryFails
+[       OK ] P05RdmReaderADTest.KlineRangeKeepsExistingCacheWhenCheckedQueryFails (1 ms)
+[ RUN      ] P05RdmReaderADTest.KlineRangeRejectsShortAndLongLmdbKeys
+[       OK ] P05RdmReaderADTest.KlineRangeRejectsShortAndLongLmdbKeys (2 ms)
+[----------] 5 tests from P05RdmReaderADTest (8 ms total)
+
+[----------] 10 tests from R21ReaderADTest
+[ RUN      ] R21ReaderADTest.K35AppendAndLastBarRevisionAreReadFromTheCursor
+[       OK ] R21ReaderADTest.K35AppendAndLastBarRevisionAreReadFromTheCursor (1 ms)
+[ RUN      ] R21ReaderADTest.K35OlderRevisionBecomesVisibleAfterTheIncrementBound
+[       OK ] R21ReaderADTest.K35OlderRevisionBecomesVisibleAfterTheIncrementBound (1 ms)
+[ RUN      ] R21ReaderADTest.K35OlderRevisionBecomesVisibleAfterTheTimeBound
+[       OK ] R21ReaderADTest.K35OlderRevisionBecomesVisibleAfterTheTimeBound (1110 ms)
+[ RUN      ] R21ReaderADTest.K35MinuteBarsMergeFromTheCursor
+[       OK ] R21ReaderADTest.K35MinuteBarsMergeFromTheCursor (2 ms)
+[ RUN      ] R21ReaderADTest.S5SameWindowWithoutCommitReusesSnapshot
+[       OK ] R21ReaderADTest.S5SameWindowWithoutCommitReusesSnapshot (2 ms)
+[ RUN      ] R21ReaderADTest.S5CommitAfterSnapshotReadsFromCursorAndBoundsRevisionStaleness
+[       OK ] R21ReaderADTest.S5CommitAfterSnapshotReadsFromCursorAndBoundsRevisionStaleness (2 ms)
+[ RUN      ] R21ReaderADTest.S5MinuteRangeEndingIn2033DoesNotWrap
+[       OK ] R21ReaderADTest.S5MinuteRangeEndingIn2033DoesNotWrap (1 ms)
+[ RUN      ] R21ReaderADTest.S5OverlongIdentityRejectedBeforeOpeningDatabases
+[       OK ] R21ReaderADTest.S5OverlongIdentityRejectedBeforeOpeningDatabases (0 ms)
+[ RUN      ] R21ReaderADTest.S5NightSessionTickRangeUsesNaturalTimeForTradingDate
+[       OK ] R21ReaderADTest.S5NightSessionTickRangeUsesNaturalTimeForTradingDate (2 ms)
+[ RUN      ] R21ReaderADTest.S5UnknownCommodityTickRangeIsRefusedWithoutDereference
+[       OK ] R21ReaderADTest.S5UnknownCommodityTickRangeIsRefusedWithoutDereference (0 ms)
+[----------] 10 tests from R21ReaderADTest (1125 ms total)
+
+[----------] Global test environment tear-down
+[==========] 15 tests from 2 test suites ran. (1134 ms total)
+[  PASSED  ] 15 tests.

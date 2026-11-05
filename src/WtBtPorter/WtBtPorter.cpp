@@ -265,6 +265,22 @@ void run_backtest(bool bNeedDump, bool bAsync)
 	getRunner().run(bNeedDump, bAsync);
 }
 
+int32_t get_backtest_status_v1(WtReplayStatusV1* status)
+{
+	if (status == nullptr || status->struct_size < sizeof(WtReplayStatusV1) || status->abi_version != 1)
+		return -1;
+	try
+	{
+		const WtReplayStatusV1 snapshot = getRunner().replay_status();
+		std::memcpy(status, &snapshot, sizeof(snapshot));
+		return 0;
+	}
+	catch (...)
+	{
+		return -2;
+	}
+}
+
 /**
  * @brief 停止回测
  * @details 停止正在运行的回测过程，主要用于异步模式下的回测控制

@@ -67,6 +67,7 @@ namespace
 		cfg->append("fees", "");
 		WTSVariant* basefiles = WTSVariant::createObject();
 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
+		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());	// 卡1 A+C：prepare 起点 checked 映射需日历（同 I03-NEW-018）
 		if (includeFutures)
 		{
 			WTSVariant* commodities = WTSVariant::createArray();

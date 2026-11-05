@@ -325,6 +325,31 @@ struct R4BlkHead
 	return (bool)fin;
 }
 
+// I03-NEW-049: naturally aligned view of one packed TickCacheItem. Declaring a
+// TickCacheItem object runs WTSTickStruct() on a 4-byte-offset member and its
+// fields cannot be accessed without misaligned member access; tests read into
+// this view instead (same member names, values copied byte for byte).
+struct R4TickItemView
+{
+	uint32_t		_date = 0;
+	WTSTickStruct	_tick;
+};
+
+[[maybe_unused]] static bool read_tick_item(const std::string& path, uint32_t idx, R4TickItemView& out)
+{
+	R4BlkHead head = read_head(path);
+	if (idx >= head._capacity) return false;
+	std::ifstream fin(path, std::ios::binary);
+	if (!fin) return false;
+	fin.seekg((std::streampos)(sizeof(RTTickCache) + (std::size_t)idx * sizeof(TickCacheItem)), std::ios::beg);
+	char bytes[sizeof(TickCacheItem)];
+	fin.read(bytes, sizeof(bytes));
+	if (!fin) return false;
+	memcpy(&out._date, bytes + offsetof(TickCacheItem, _date), sizeof(out._date));
+	memcpy(static_cast<void*>(&out._tick), bytes + offsetof(TickCacheItem, _tick), sizeof(out._tick));
+	return true;
+}
+
 // 手写一个缓存块文件（用来构造"已有缓存"和"容量已满"两种前置状态）
 [[maybe_unused]] static void write_block_file(const std::string& path, const char* flag,
 	uint16_t type, uint16_t version, uint32_t size, uint32_t capacity,
@@ -383,12 +408,16 @@ struct R4BlkHead
 [[maybe_unused]] static TickCacheItem make_tick_item(const char* exchg, const char* code,
 	uint32_t date, double px)
 {
-	TickCacheItem item;
-	memset(&item, 0, sizeof(item));
-	item._date = date;
-	WTSTickStruct tick = make_tick(exchg, code, date, date, 93000000, px, 1, 1, 0, 0);
-	item._tick = tick;
-	return item;
+	// I03-NEW-049: TickCacheItem is pack(1) and its WTSTickStruct member sits at a
+	// 4-byte offset, so default-constructing or assigning the member runs on a
+	// misaligned address. Lay the bytes out from an aligned tick instead and
+	// return them through the trivial copy constructor.
+	const WTSTickStruct tick = make_tick(exchg, code, date, date, 93000000, px, 1, 1, 0, 0);
+	unsigned char bytes[sizeof(TickCacheItem)] = {};
+	memcpy(bytes + offsetof(TickCacheItem, _date), &date, sizeof(date));
+	memcpy(bytes + offsetof(TickCacheItem, _tick), &tick, sizeof(tick));
+	static_assert(alignof(TickCacheItem) == 1, "TickCacheItem is expected to be packed");
+	return *reinterpret_cast<const TickCacheItem*>(bytes);
 }
 
 //////////////////////////////////////////////////////////////////////////

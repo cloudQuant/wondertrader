@@ -1,0 +1,345 @@
+--- /tmp/i03_quarantine_baseline_20261103/TraderAdapter.cpp	2026-11-03 16:53:03
++++ src/WtCore/TraderAdapter.cpp	2026-11-03 17:07:00
+@@ -10,6 +10,7 @@
+ #include "EventNotifier.h"
+ #include "WtLocalExecuter.h"
+ #include "TraderAdapter.h"
++#include "UnresolvedReportJournal.h"
+ #include "ActionPolicyMgr.h"
+ #include "WtHelper.h"
+ #include "ITrdNotifySink.h"
+@@ -36,6 +37,9 @@
+ #include "../Share/Converter.hpp"
+ 
+ #include <exception>
++#include <iomanip>
++#include <locale>
++#include <sstream>
+ #ifdef WT_OWNER_ROUTING_TEST_HOOKS
+ // Test-only barrier after route lookup, before the per-registration lease.
+ extern void wtOwnerRoutingTestAfterLookup();
+@@ -43,6 +47,7 @@
+ 
+ #include <rapidjson/document.h>
+ #include <rapidjson/prettywriter.h>
++#include <rapidjson/writer.h>
+ 
+ #include <boost/filesystem.hpp>
+ namespace fs = boost::filesystem;
+@@ -734,6 +739,17 @@
+ 
+ 	_cfg = params;
+ 	_cfg->retain();
++	WTSVariant* journalConfig = _cfg->get("unresolved_report_journal");
++	if (journalConfig != NULL && (journalConfig->type() != WTSVariant::VT_String ||
++		_cfg->getString("unresolved_report_journal").empty()))
++	{
++		_unresolved_report_paused.store(true, std::memory_order_release);
++		std::lock_guard<std::mutex> lock(_unresolved_report_mutex);
++		_unresolved_journal.reset();
++		_unresolved_diagnostic = "unresolved_report_journal must be a nonempty string";
++	}
++	else
++		configureUnresolvedJournal(_cfg->getString("unresolved_report_journal"));
+ 
+ 	_ignore_sefmatch = _cfg->getBoolean("ignore_selfmatch");
+ 	_save_data = _cfg->getBoolean("savedata");
+@@ -855,6 +871,8 @@
+ 		return false;
+ 	if (_trader_api != NULL || _cfg != NULL)
+ 		return false;
++
++	configureUnresolvedJournal("");
+ 
+ 	_policy_mgr = policyMgr;
+ 	_bd_mgr = bdMgr;
+@@ -1208,10 +1226,167 @@
+ 			ret->add(localid, ordInfo);
+ 	}
+ 	return ret;
++}
++
++bool TraderAdapter::isUnresolvedReportPaused() const noexcept
++{
++	return _unresolved_report_paused.load(std::memory_order_acquire);
++}
++
++std::vector<TraderAdapter::UnresolvedTradeReport> TraderAdapter::unresolvedTradeReports() const
++{
++	std::lock_guard<std::mutex> lock(_unresolved_report_mutex);
++	return _unresolved_reports;
+ }
+ 
++std::string TraderAdapter::unresolvedReportDiagnostic() const
++{
++	std::lock_guard<std::mutex> lock(_unresolved_report_mutex);
++	return _unresolved_diagnostic;
++}
++
++void TraderAdapter::configureUnresolvedJournal(const std::string& path)
++{
++	if (path.empty())
++	{
++		std::lock_guard<std::mutex> lock(_unresolved_report_mutex);
++		_unresolved_journal.reset();
++		_unresolved_diagnostic = "journal not configured";
++		return;
++	}
++	// The journal requires reconciliation on every startup, even if empty.
++	_unresolved_report_paused.store(true, std::memory_order_release);
++	{
++		std::lock_guard<std::mutex> lock(_unresolved_report_mutex);
++		_unresolved_journal.reset();
++		_unresolved_diagnostic = "journal opening; reconciliation required";
++	}
++	try
++	{
++		std::shared_ptr<UnresolvedReportJournal> journal = std::make_shared<UnresolvedReportJournal>();
++		std::string error;
++		auto status = journal->open(path, &error);
++		std::string diagnostic;
++		if (status != UnresolvedReportJournal::Status::Ok)
++			diagnostic = "journal open failed: " + error;
++		else
++		{
++			std::vector<UnresolvedReportJournal::Report> pending;
++			auto pendingStatus = journal->pending(pending);
++			if (pendingStatus != UnresolvedReportJournal::Status::Ok)
++				diagnostic = "journal pending query failed: " + journal->lastError();
++			else if (!pending.empty())
++				diagnostic = "journal contains unresolved reports; reconciliation required";
++			else
++				diagnostic = "journal opened; startup reconciliation required";
++		}
++		std::lock_guard<std::mutex> lock(_unresolved_report_mutex);
++		_unresolved_diagnostic = diagnostic;
++		_unresolved_journal = std::move(journal);
++	}
++	catch (const std::exception& e)
++	{
++		std::lock_guard<std::mutex> lock(_unresolved_report_mutex);
++		_unresolved_diagnostic = std::string("journal open exception: ") + e.what();
++	}
++	catch (...)
++	{
++		std::lock_guard<std::mutex> lock(_unresolved_report_mutex);
++		_unresolved_diagnostic = "journal open exception";
++	}
++}
++
++void TraderAdapter::quarantineTrade(const WTSTradeInfo* trade, const char* reason)
++{
++	// Linearization point for new admissions. No gate lock spans provider calls.
++	_unresolved_report_paused.store(true, std::memory_order_release);
++	try
++	{
++		rj::StringBuffer buffer;
++		rj::Writer<rj::StringBuffer> writer(buffer);
++		auto str = [&writer](const char* key, const char* value) {
++			writer.Key(key); writer.String(value ? value : "");
++		};
++		auto real = [&writer](const char* key, double value) {
++			// Hexadecimal strings preserve the visible binary floating value and
++			// also allow non-finite values without producing invalid JSON.
++			std::ostringstream out; out.imbue(std::locale::classic());
++			out << std::hexfloat << value;
++			writer.Key(key); writer.String(out.str().c_str());
++		};
++		writer.StartObject();
++		writer.Key("schema_version"); writer.Uint(1);
++		str("record_type", "wts_trade_visible_snapshot");
++		writer.Key("provider_field_completeness_verified"); writer.Bool(false);
++		str("adapter_id", _id.c_str());
++		str("reason", reason);
++		str("exchange", trade->getExchg());
++		str("code", trade->getCode());
++		str("trade_id", trade->getTradeID());
++		str("ref_order", trade->getRefOrder());
++		str("user_tag", trade->getUserTag());
++		writer.Key("trade_date"); writer.Uint(trade->getTradeDate());
++		writer.Key("trade_time"); writer.Uint64(trade->getTradeTime());
++		writer.Key("direction"); writer.Int(static_cast<int>(trade->getDirection()));
++		writer.Key("offset_type"); writer.Int(static_cast<int>(trade->getOffsetType()));
++		writer.Key("order_type"); writer.Int(static_cast<int>(trade->getOrderType()));
++		writer.Key("trade_type"); writer.Int(static_cast<int>(trade->getTradeType()));
++		writer.Key("business_type"); writer.Int(static_cast<int>(trade->getBusinessType()));
++		writer.Key("is_net"); writer.Bool(trade->isNet());
++		writer.Key("is_net_buy"); writer.Bool(trade->isNetBuy());
++		real("price_hex", trade->getPrice());
++		real("volume_hex", trade->getVolume());
++		real("amount_hex", trade->getAmount());
++		writer.EndObject();
++
++		UnresolvedTradeReport record;
++		record.payload.assign(buffer.GetString(), buffer.GetSize());
++		record.diagnostic = "journal not configured; retained in memory only";
++		size_t index;
++		std::shared_ptr<UnresolvedReportJournal> journal;
++		{
++			std::lock_guard<std::mutex> lock(_unresolved_report_mutex);
++			index = _unresolved_reports.size();
++			_unresolved_reports.push_back(record);
++			journal = _unresolved_journal;
++			_unresolved_diagnostic = record.diagnostic;
++		}
++		if (journal != NULL)
++		{
++			uint64_t sequence = 0;
++			std::string diagnostic;
++			bool persisted = false;
++			try
++			{
++				auto status = journal->append(record.payload, sequence);
++				persisted = status == UnresolvedReportJournal::Status::Ok;
++				diagnostic = persisted ? "journal append succeeded; reconciliation required" :
++					"journal append failed: " + journal->lastError();
++			}
++			catch (const std::exception& e) { diagnostic = std::string("journal append exception: ") + e.what(); }
++			catch (...) { diagnostic = "journal append exception"; }
++			std::lock_guard<std::mutex> lock(_unresolved_report_mutex);
++			_unresolved_reports[index].persisted = persisted;
++			_unresolved_reports[index].journal_sequence = sequence;
++			_unresolved_reports[index].diagnostic = diagnostic;
++			_unresolved_diagnostic = diagnostic;
++		}
++	}
++	catch (...)
++	{
++		// Even when retaining the snapshot itself fails (e.g. allocation failure),
++		// never reopen the admission gate.
++		try {
++			std::lock_guard<std::mutex> lock(_unresolved_report_mutex);
++			_unresolved_diagnostic = "unable to retain WTS trade snapshot";
++		} catch (...) {}
++	}
++}
++
+ uint32_t TraderAdapter::doEntrust(WTSEntrust* entrust)
+ {
++	if (isUnresolvedReportPaused())
++		return UINT_MAX;
+ 	// Risk checks are performed with the caller's standardized code. Preserve
+ 	// that key before replacing the submitted code with the exchange alias.
+ 	const std::string riskCode = entrust->getCode();
+@@ -1225,6 +1400,8 @@
+ 	if (!reservation)
+ 		return UINT_MAX;
+ 
++	if (isUnresolvedReportPaused())
++		return UINT_MAX;
+ 	_trader_api->makeEntrustID(entrust->getEntrustID(), 64);
+ 
+ 	WTSContractInfo* cInfo = entrust->getContractInfo();
+@@ -1244,7 +1421,14 @@
+ 	usertag[_order_pattern.size()] =  '.';
+ 	fmtutil::format_to(usertag + _order_pattern.size() + 1, "{}", localid);
+ 	
++	if (isUnresolvedReportPaused())
++		return UINT_MAX;
+ 	reservation.beginSubmission();
++	if (isUnresolvedReportPaused())
++	{
++		reservation.rollback(); // provider has not been called
++		return UINT_MAX;
++	}
+ 	int32_t ret = _trader_api->orderInsert(entrust);
+ 	if(ret < 0)
+ 	{
+@@ -1334,6 +1518,8 @@
+ OrderIDs TraderAdapter::buy(const char* stdCode, double price, double qty, int flag, bool bForceClose, WTSContractInfo* cInfo /* = NULL */)
+ {
+ 	OrderIDs ret;
++	if (isUnresolvedReportPaused())
++		return ret;
+ 	if (qty == 0)
+ 		return ret;
+ 
+@@ -1627,6 +1813,8 @@
+ OrderIDs TraderAdapter::sell(const char* stdCode, double price, double qty, int flag, bool bForceClose, WTSContractInfo* cInfo /* = NULL */)
+ {
+ 	OrderIDs ret;
++	if (isUnresolvedReportPaused())
++		return ret;
+ 	if (qty == 0)
+ 		return ret;
+ 
+@@ -2015,6 +2203,8 @@
+ 
+ uint32_t TraderAdapter::openLong(const char* stdCode, double price, double qty, int flag, WTSContractInfo* cInfo /* = NULL */)
+ {
++	if (isUnresolvedReportPaused())
++		return UINT_MAX;
+ 	WTSEntrust* entrust = WTSEntrust::create(stdCode, qty, price);
+ 	entrust->setContractInfo(cInfo == NULL ? getContract(stdCode) : cInfo);
+ 	if(decimal::eq(price, 0.0))
+@@ -2033,6 +2223,8 @@
+ 
+ uint32_t TraderAdapter::openShort(const char* stdCode, double price, double qty, int flag, WTSContractInfo* cInfo /* = NULL */)
+ {
++	if (isUnresolvedReportPaused())
++		return UINT_MAX;
+ 	WTSEntrust* entrust = WTSEntrust::create(stdCode, qty, price);
+ 	entrust->setContractInfo(cInfo == NULL ? getContract(stdCode) : cInfo);
+ 	if (decimal::eq(price, 0.0))
+@@ -2051,6 +2243,8 @@
+ 
+ uint32_t TraderAdapter::closeLong(const char* stdCode, double price, double qty, bool isToday, int flag, WTSContractInfo* cInfo /* = NULL */)
+ {
++	if (isUnresolvedReportPaused())
++		return UINT_MAX;
+ 	WTSEntrust* entrust = WTSEntrust::create(stdCode, qty, price);
+ 	entrust->setContractInfo(cInfo == NULL ? getContract(stdCode) : cInfo);
+ 	if (decimal::eq(price, 0.0))
+@@ -2069,6 +2263,8 @@
+ 
+ uint32_t TraderAdapter::closeShort(const char* stdCode, double price, double qty, bool isToday, int flag, WTSContractInfo* cInfo /* = NULL */)
+ {
++	if (isUnresolvedReportPaused())
++		return UINT_MAX;
+ 	WTSEntrust* entrust = WTSEntrust::create(stdCode, qty, price);
+ 	entrust->setContractInfo(cInfo == NULL ? getContract(stdCode) : cInfo);
+ 	if (decimal::eq(price, 0.0))
+@@ -2855,15 +3051,28 @@
+ 
+ void TraderAdapter::onPushTrade(WTSTradeInfo* tradeRecord)
+ {
++	if (tradeRecord == NULL)
++		return;
+ 	WTSContractInfo* cInfo = tradeRecord->getContractInfo();
+ 	if (cInfo == NULL && _bd_mgr != NULL)
+ 		cInfo = _bd_mgr->getContract(tradeRecord->getCode(), tradeRecord->getExchg());
+ 	if (cInfo == NULL)
++	{
++		quarantineTrade(tradeRecord, "contract unavailable");
+ 		return;
++	}
+ 
+-	tradeRecord->setCode(cInfo->getCode());
+-
+ 	WTSCommodityInfo* commInfo = cInfo->getCommInfo();
++	if (commInfo == NULL)
++	{
++		quarantineTrade(tradeRecord, "commodity unavailable");
++		return;
++	}
++	if (cInfo->getCode()[0] == '\0' || cInfo->getExchg()[0] == '\0')
++	{
++		quarantineTrade(tradeRecord, "contract code unavailable");
++		return;
++	}
+ 	std::string stdCode;
+ 	if (commInfo->getCategoty() == CC_Future)
+ 		stdCode = CodeHelper::rawMonthCodeToStdCode(cInfo->getCode(), cInfo->getExchg());
+@@ -2874,6 +3083,12 @@
+ 	else
+ 		stdCode = CodeHelper::rawFlatCodeToStdCode(cInfo->getCode(), cInfo->getExchg(), commInfo->getProduct());
+ 
++	if (stdCode.empty())
++	{
++		quarantineTrade(tradeRecord, "standard code invalid");
++		return;
++	}
++	tradeRecord->setCode(cInfo->getCode());
+ 	WTSLogger::log_dyn("trader", _id.c_str(), LL_INFO, 
+ 		"[{}] Trade notified, instrument: {}, usertag: {}, trdqty: {}, trdprice: {}", 
+ 			_id.c_str(), stdCode.c_str(), tradeRecord->getUserTag(), tradeRecord->getVolume(), tradeRecord->getPrice());

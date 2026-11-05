@@ -35,6 +35,40 @@
  */
 #include <Share/cppcli.hpp>
 
+#include <chrono>
+#include <memory>
+#include <thread>
+
+namespace
+{
+/*
+ * I03-NEW-045 / 卡9a：在离开 main 之前于控制线程完成关闭。shutdown 只因缺少回调排空
+ * 证明的 parser owner 而无法完成时，这些 owner 与其借用的整个 runner 图按合同隔离到
+ * 进程退出：输出诊断并刻意不销毁 runner（不调用会 std::terminate 的析构），退出码不变。
+ * 其他无法完成的关闭仍经析构 fail-stop。可在有限时间内重试以等待 PENDING 的排空。
+ */
+int finish_runner(std::unique_ptr<WtRunner>& runner, int exitCode)
+{
+	for (int attempt = 0; attempt < 30; ++attempt)
+	{
+		if (runner->shutdown())
+		{
+			runner.reset();
+			return exitCode;
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
+	if (runner->parserOwnersRetained())
+	{
+		WTSLogger::error("WtRunner exit: parser owners without callback-drain proof are retained until process exit; runner intentionally not destroyed");
+		(void)runner.release(); // deliberate process-lifetime retention
+		return exitCode;
+	}
+	runner.reset(); // unrecoverable teardown failure: the destructor fails stop
+	return exitCode;
+}
+}
+
 /**
  * @brief 内存泄漏检测工具头文件（已注释）
  * @details Visual Leak Detector用于检测内存泄漏，开发调试时可以启用
@@ -97,13 +131,13 @@ int main(int argc, char* argv[])
 	 * @brief 创建WtRunner实例
 	 * @details WtRunner是WonderTrader的主要运行器，负责管理交易引擎的初始化、配置和运行
 	 */
-	WtRunner runner;
+	std::unique_ptr<WtRunner> runner(new WtRunner());
 	
 	/**
 	 * @brief 初始化日志系统
 	 * @details 根据日志配置文件初始化日志系统，设置日志级别、输出方式等
 	 */
-	runner.init(filename);
+	runner->init(filename);
 
 	// 处理交易引擎配置文件路径
 	if (cParam->exists())
@@ -115,15 +149,18 @@ int main(int argc, char* argv[])
 	 * @brief 配置交易引擎
 	 * @details 根据配置文件初始化交易引擎，加载基础数据、策略、执行器等
 	 */
-	if (!runner.config(filename))
-		return 1;
+	if (!runner->config(filename))
+		return finish_runner(runner, 1);
 
 	/**
 	 * @brief 运行交易引擎
 	 * @details 启动交易引擎，开始处理行情数据和执行交易策略
 	 * @param false 表示同步运行，程序会阻塞直到收到退出信号
 	 */
-	runner.run(false);
-	return 0;
+	runner->run(false);
+	// Report exceptions/early shutdown and failed parser command submission
+	// after run returns; parser submission does not imply provider readiness.
+	const int exitCode = runner->runSucceeded() && runner->parserCommandsSubmitted() ? 0 : 1;
+	return finish_runner(runner, exitCode);
 }
 

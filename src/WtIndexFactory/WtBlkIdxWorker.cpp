@@ -200,6 +200,22 @@ const char* WtBlkIdxWorker::get_fact_name()
 	return FACT_NAME;
 }
 
+WtBlkIdxWorker::~WtBlkIdxWorker()
+{
+	{
+		StdUniqueLock lck(_mtx_trigger);
+		_stopped = true;
+		_cond_trigger.notify_all();
+	}
+	if (_thrd_trigger && _thrd_trigger->joinable())
+	{
+		if (_thrd_trigger->get_id() == std::this_thread::get_id())
+			_thrd_trigger->detach();	// deleted from its own trigger callback
+		else
+			_thrd_trigger->join();
+	}
+}
+
 bool WtBlkIdxWorker::init(WTSVariant* config)
 {
 	if (config == NULL)
@@ -395,21 +411,25 @@ void WtBlkIdxWorker::handle_quote(WTSTickData* newTick)
 			_thrd_trigger.reset(new StdThread([this]() {
 				while(!_stopped)
 				{
-					while(!_process)
 					{
 						StdUniqueLock lck(_mtx_trigger);
-						_cond_trigger.wait(_mtx_trigger);
+						while(!_process && !_stopped)
+							_cond_trigger.wait(lck);
 					}
+					if (_stopped)
+						break;
 
 					//等待一段时间
 					do
 					{
 						uint64_t now = TimeUtils::getLocalTimeNow();
-						if(now >= _recalc_time)
+						if(now >= _recalc_time || _stopped)
 							break;
 
 						std::this_thread::sleep_for(std::chrono::milliseconds(5));
 					} while (true);
+					if (_stopped)
+						break;
 
 					//开始生成指数
 					generate_tick();
@@ -420,8 +440,9 @@ void WtBlkIdxWorker::handle_quote(WTSTickData* newTick)
 
 		if(!_process)
 		{
-			_process = true;
+			StdUniqueLock lck(_mtx_trigger);
 			_recalc_time = TimeUtils::getLocalTimeNow() + _timeout;
+			_process = true;
 			_cond_trigger.notify_all();
 		}
 	}

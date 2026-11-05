@@ -1,0 +1,68 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:17: Failure
+Value of: _writer->writeTick(tick, 1)
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:19: Failure
+Expected equality of these values:
+  tick->volume()
+    Which is: 7
+  bad.volume
+    Which is: 1
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:21: Failure
+Expected equality of these values:
+  _sink->bcast_tick()
+    Which is: 1
+  0u
+    Which is: 0
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:22: Failure
+Expected equality of these values:
+  read_head(path_of("cache_tick.dmb"))._size
+    Which is: 1
+  0u
+    Which is: 0
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:23: Failure
+Expected equality of these values:
+  read_head(path_of("cache_m1.dmb"))._size
+    Which is: 1
+  0u
+    Which is: 0
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:24: Failure
+Value of: std::filesystem::exists(_root / "ticks")
+  Actual: true
+Expected: false
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:25: Failure
+Expected equality of these values:
+  _writer->getCurTick("rb01", "L03")
+    Which is: 0x629000000200
+  nullptr
+    Which is: (nullptr)
+
+/tmp/wt-i03-l03-adwriter-20261102/src/TestUnits/coverage/p05_datastorage2/l03_ad_writer_date_test.cpp:33: Failure
+Expected equality of these values:
+  stored->price()
+    Which is: 100
+  good.price
+    Which is: 101
+
+[  FAILED  ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects (4 ms)
+[----------] 1 test from R4WriterADTest (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (4 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects
+
+ 1 FAILED TEST

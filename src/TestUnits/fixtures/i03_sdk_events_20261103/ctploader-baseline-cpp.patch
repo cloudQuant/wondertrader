@@ -1,0 +1,204 @@
+--- a/CTPLoader/TraderSpi.cpp
++++ b/CTPLoader/TraderSpi.cpp
+@@ -427,9 +427,18 @@
+ 		memset(&req, 0, sizeof(req));
+ 		const int requestId = QRYFEES ? BeginFeeQuery(FeeQueryKind::Instrument) : ++iRequestID;
+ 		if (requestId == 0) { FinishFeeBatchIfReady(); return false; }
++		// 卡14 14a：调用前登记请求号，同步回调也能匹配；返回 0 只表示"已发送"。
++		if (!QRYFEES) { _instrument_rows = 0; _instrument_failed = false; _instrument_request_id.store(requestId); }
+ 		int iResult = pUserApi->ReqQryInstrument(&req, requestId);
++		std::cerr << "--->>> Quering instruments: request " << requestId
++			<< ((iResult == 0) ? " sent, awaiting confirmation" : " send failed") << std::endl;
+ 		if (QRYFEES) FinishFeeSubmission(requestId, iResult);
+-		std::cerr << "--->>> Quering instruments: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
++		else if (iResult != 0)
++		{
++			// 头文件未声明非零返回后的回调合同：fail-closed，不落盘、不挂起。
++			std::cerr << "--->>> CTP instrument query send failed: " << iResult << ", no files published" << std::endl;
++			exit(EXIT_FAILURE);
++		}
+ 		return true;
+ 	});
+ }
+@@ -451,8 +460,9 @@
+ 		const int requestId = BeginFeeQuery(FeeQueryKind::Commission, &cInfo);
+ 		if (requestId == 0) { FinishFeeBatchIfReady(); return false; }
+ 		int iResult = pUserApi->ReqQryInstrumentCommissionRate(&req, requestId);
++		std::cerr << "--->>> Quering commission ratio: request " << requestId
++			<< ((iResult == 0) ? " sent, awaiting confirmation" : " send failed") << std::endl;
+ 		FinishFeeSubmission(requestId, iResult);
+-		std::cerr << "--->>> Quering commission ratio: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
+ 		return true;
+ 	});
+ }
+@@ -475,8 +485,9 @@
+ 		const int requestId = BeginFeeQuery(FeeQueryKind::Margin, &cInfo);
+ 		if (requestId == 0) { FinishFeeBatchIfReady(); return false; }
+ 		int iResult = pUserApi->ReqQryInstrumentMarginRate(&req, requestId);
++		std::cerr << "--->>> Quering margin ratio: request " << requestId
++			<< ((iResult == 0) ? " sent, awaiting confirmation" : " send failed") << std::endl;
+ 		FinishFeeSubmission(requestId, iResult);
+-		std::cerr << "--->>> Quering margin ratio: " << ((iResult == 0) ? "succeed" : "failed") << std::endl;
+ 		return true;
+ 	});
+ }
+@@ -538,8 +549,9 @@
+ #ifndef WT_T26_QUERY_TIMEOUT_MS
+ #define WT_T26_QUERY_TIMEOUT_MS 60000
+ #endif
+-	FeeQueryState state{kind, false, false,
+-		std::chrono::steady_clock::now() + std::chrono::milliseconds(WT_T26_QUERY_TIMEOUT_MS)};
++	FeeQueryState state{};
++	state.kind = kind;
++	state.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(WT_T26_QUERY_TIMEOUT_MS);
+ 	if (contract)
+ 	{
+ 		state.code = contract->m_strCode;
+@@ -582,12 +594,35 @@
+ 	return entry.second || entry.first->second == it->second.exchange;
+ }
+ 
++void CTraderSpi::NoteFeeRow(int requestId)
++{
++	std::lock_guard<std::mutex> lock(_mtx);
++	auto it = _fee_requests.find(requestId);
++	if (it != _fee_requests.end() && !it->second.terminal) ++it->second.rows;
++}
++
++bool CTraderSpi::FeeResponseEmpty(int requestId)
++{
++	std::lock_guard<std::mutex> lock(_mtx);
++	auto it = _fee_requests.find(requestId);
++	return it != _fee_requests.end() && it->second.rows == 0;
++}
++
+ void CTraderSpi::FinishFeeCallback(int requestId, bool last)
+ {
+ 	if (!last) return;
+ 	std::lock_guard<std::mutex> lock(_mtx);
+ 	auto it = _fee_requests.find(requestId);
+-	if (it != _fee_requests.end()) it->second.terminal = true;
++	if (it == _fee_requests.end() || it->second.terminal) return;
++	it->second.terminal = true;
++	++_fee_confirmed;
++	if (it->second.rows == 0)
++	{
++		// 卡14 14c：SDK 头文件未声明"无记录"终帧的契约，空响应按失败处理，不发布任何文件。
++		_fee_response_failed.store(true, std::memory_order_release);
++		std::cerr << "--->>> Empty response for request " << requestId
++			<< " without SDK contract, failing closed" << std::endl;
++	}
+ }
+ 
+ void CTraderSpi::FinishFeeSubmission(int requestId, int result)
+@@ -597,6 +632,7 @@
+ 		auto it = _fee_requests.find(requestId);
+ 		if (it == _fee_requests.end()) return;
+ 		it->second.callReturned = true;
++		if (result == 0) ++_fee_sent;
+ 		if (result != 0)
+ 		{
+ 			_fee_response_failed.store(true, std::memory_order_release);
+@@ -653,7 +689,12 @@
+ 	// other owned threads; that worker cannot join itself and exits the process.
+ 	if (watchdog && watchdog->joinable() && watchdog->get_id() != boost::this_thread::get_id()) watchdog->join();
+ 	if (worker && worker->joinable() && worker->get_id() != boost::this_thread::get_id()) worker->join();
+-	if (_fee_response_failed.load(std::memory_order_acquire)) exit(EXIT_FAILURE);
++	std::cerr << "--->>> CTP fee batch closed: " << _fee_sent << " sent, " << _fee_confirmed << " confirmed" << std::endl;
++	if (_fee_response_failed.load(std::memory_order_acquire))
++	{
++		std::cerr << "--->>> CTP fee batch failed, no files published" << std::endl;
++		exit(EXIT_FAILURE);
++	}
+ 	DumpToJson();
+ 	exit(DumpFees() ? EXIT_SUCCESS : EXIT_FAILURE);
+ }
+@@ -841,9 +882,22 @@
+ 	{
+ 		feeCallback.lock();
+ 		if (!AcceptFeeCallback(nRequestID, FeeQueryKind::Instrument, pRspInfo && pRspInfo->ErrorID != 0)) return;
++		if (pInstrument) NoteFeeRow(nRequestID);
++	}
++	else
++	{
++		// 非费率模式：本实例发出请求后，只接受该请求号的回报（迟到/未知请求号忽略）。
++		const int issued = _instrument_request_id.load();
++		if (issued != 0 && nRequestID != issued)
++		{
++			std::cerr << "--->>> Ignored instrument response for request " << nRequestID << " not in flight" << std::endl;
++			return;
++		}
++		if (pInstrument) ++_instrument_rows;
+ 	}
+ 	const bool responseError = IsErrorRspInfo(pRspInfo);
+ 	if (QRYFEES && responseError) _fee_response_failed.store(true, std::memory_order_release);
++	if (!QRYFEES && responseError) _instrument_failed = true;
+ 	if (!responseError)
+ 	{
+ 		if (pInstrument)
+@@ -1064,6 +1118,12 @@
+ 	{
+ 		if(QRYFEES)
+ 		{
++			if (FeeResponseEmpty(nRequestID))
++			{
++				// 卡14 14c：合约查询无任何记录即空响应，费率批次失败且不排队费率请求。
++				_fee_response_failed.store(true, std::memory_order_release);
++				std::cerr << "--->>> Empty instrument response without SDK contract, failing closed" << std::endl;
++			}
+ 			if (!_fee_response_failed.load(std::memory_order_acquire)) for (auto& v : _contracts)
+ 			{
+ 				const Contract& cInfo = v.second;
+@@ -1084,6 +1144,16 @@
+ 		}
+ 		else
+ 		{
++			// 卡14 14a/14c：错误终态或（已发出请求的）空响应都不是业务成功，不落盘。
++			const bool tracked = _instrument_request_id.load() != 0;
++			if (_instrument_failed || (tracked && _instrument_rows == 0))
++			{
++				std::cerr << "--->>> Instrument query " << nRequestID
++					<< (_instrument_failed ? " failed" : " returned an empty response without SDK contract")
++					<< ", no files published" << std::endl;
++				exit(EXIT_FAILURE);
++			}
++			std::cerr << "--->>> Instrument query " << nRequestID << " confirmed with " << _instrument_rows << " rows" << std::endl;
+ 			DumpToJson();
+ 			exit(0);
+ 		}		
+@@ -1094,6 +1164,7 @@
+ {
+ 	std::unique_lock<std::mutex> feeCallback(_fee_callback_mutex);
+ 	if (QRYFEES && !AcceptFeeCallback(nRequestID, FeeQueryKind::Commission, pRspInfo && pRspInfo->ErrorID != 0)) return;
++	if (QRYFEES && pInstrumentCommissionRate != NULL) NoteFeeRow(nRequestID);
+ 	const bool responseError = IsErrorRspInfo(pRspInfo);
+ 	if (responseError) _fee_response_failed.store(true, std::memory_order_release);
+ 	bool identityValid = true;
+@@ -1149,6 +1220,7 @@
+ {
+ 	std::unique_lock<std::mutex> feeCallback(_fee_callback_mutex);
+ 	if (QRYFEES && !AcceptFeeCallback(nRequestID, FeeQueryKind::Margin, pRspInfo && pRspInfo->ErrorID != 0)) return;
++	if (QRYFEES && pInstrumentMarginRate != NULL) NoteFeeRow(nRequestID);
+ 	const bool responseError = IsErrorRspInfo(pRspInfo);
+ 	if (responseError) _fee_response_failed.store(true, std::memory_order_release);
+ 	bool identityValid = true;
+@@ -1576,8 +1648,18 @@
+ {
+ 	std::cerr << "--->>> " << "OnRspError" << std::endl;
+ 	IsErrorRspInfo(pRspInfo);
+-	if (!QRYFEES) return;
++	if (!QRYFEES)
+ 	{
++		// 非费率模式：已发出合约查询的错误应答是失败终态，不落盘、不挂起。
++		const int issued = _instrument_request_id.load();
++		if (issued != 0 && nRequestID == issued)
++		{
++			std::cerr << "--->>> Instrument query " << nRequestID << " failed by error response, no files published" << std::endl;
++			exit(EXIT_FAILURE);
++		}
++		return;
++	}
++	{
+ 		std::lock_guard<std::mutex> callbackLock(_fee_callback_mutex);
+ 		std::lock_guard<std::mutex> lock(_mtx);
+ 		auto it = _fee_requests.find(nRequestID);

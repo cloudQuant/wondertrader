@@ -1,0 +1,97 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.ManualDumperRetainsBorrowedBarAfterReturn
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.ManualDumperRetainsBorrowedBarAfterReturn
+=================================================================
+==91612==ERROR: AddressSanitizer: stack-use-after-return on address 0x0001058a2aa8 at pc 0x000102e52cac bp 0x00016de7ad60 sp 0x00016de7ad58
+READ of size 8 at 0x0001058a2aa8 thread T1
+    #0 0x000102e52ca8 in (anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()::$_0::operator()() const+0x194 (bar-failure:arm64+0x100e46ca8)
+    #1 0x000102e52a34 in std::__1::__invoke_result_impl<void, (anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()::$_0>::type std::__1::__invoke[abi:nqe220108]<(anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()::$_0>((anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()::$_0&&)+0x4c (bar-failure:arm64+0x100e46a34)
+    #2 0x000102e529d0 in void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, (anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, (anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>)+0x88 (bar-failure:arm64+0x100e469d0)
+    #3 0x000102e520d0 in void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, (anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()::$_0>>(void*)+0x228 (bar-failure:arm64+0x100e460d0)
+    #4 0x0001040e56d4 in asan_thread_start(void*)+0x48 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x516d4)
+    #5 0x0001883cdc54 in _pthread_start+0x84 (libsystem_pthread.dylib:arm64e+0x6c54)
+    #6 0x0001883c8c18 in thread_start+0x4 (libsystem_pthread.dylib:arm64e+0x1c18)
+
+Address 0x0001058a2aa8 is located in stack of thread T0 at offset 680 in frame
+    #0 0x000102030e9c in WtDataWriterAD::updateBarCache(wtp::WTSContractInfo*, wtp::WTSTickData*)+0xc (bar-failure:arm64+0x100024e9c)
+
+  This frame has 22 object(s):
+    [32, 56) 'key' (line 1076)
+    [96, 104) 'ref.tmp' (line 1076)
+    [128, 136) 'ref.tmp' (line 1076)
+    [160, 176) 'prepareBarCacheItem' (line 1077)
+    [192, 208) 'lock' (line 1129)
+    [224, 228) 'idx' (line 1130)
+    [240, 241) 'bNewCode' (line 1131)
+    [256, 392) 'item' (line 1138)
+    [464, 472) 'ref.tmp' (line 1192)
+    [496, 504) 'ref.tmp' (line 1195)
+    [528, 544) 'lock' (line 1212)
+    [560, 564) 'idx' (line 1213)
+    [576, 577) 'bNewCode' (line 1214)
+    [592, 728) 'item' (line 1221) <== Memory access at offset 680 is inside this variable
+    [800, 808) 'ref.tmp' (line 1291)
+    [832, 840) 'ref.tmp' (line 1294)
+    [864, 880) 'lock' (line 1311)
+    [896, 900) 'idx' (line 1312)
+    [912, 913) 'bNewCode' (line 1313)
+    [928, 1064) 'item' (line 1320)
+    [1136, 1144) 'ref.tmp' (line 1369)
+    [1168, 1176) 'ref.tmp' (line 1370)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-use-after-return (bar-failure:arm64+0x100e46ca8) in (anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()::$_0::operator()() const+0x194
+Shadow bytes around the buggy address:
+  0x0001058a2800: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0001058a2880: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0001058a2900: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0001058a2980: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0001058a2a00: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+=>0x0001058a2a80: f5 f5 f5 f5 f5[f5]f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0001058a2b00: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0001058a2b80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0001058a2c00: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0001058a2c80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x0001058a2d00: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+Thread T1 created by T0 here:
+    #0 0x0001040df7bc in pthread_create+0x58 (libclang_rt.asan_osx_dynamic.dylib:arm64+0x4b7bc)
+    #1 0x0001021200d8 in std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*)+0x28 (bar-failure:arm64+0x1001140d8)
+    #2 0x000102e51ba4 in std::__1::thread::thread[abi:nqe220108]<(anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()::$_0, 0>((anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()::$_0&&)+0x288 (bar-failure:arm64+0x100e45ba4)
+    #3 0x000102e505a4 in std::__1::thread::thread[abi:nqe220108]<(anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()::$_0, 0>((anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()::$_0&&)+0x58 (bar-failure:arm64+0x100e445a4)
+    #4 0x000102e4fff4 in (anonymous namespace)::R4WriterADTest_ManualDumperRetainsBorrowedBarAfterReturn_Test::TestBody()+0xc10 (bar-failure:arm64+0x100e43ff4)
+    #5 0x000102df676c in void testing::internal::HandleSehExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0xe8 (bar-failure:arm64+0x100dea76c)
+    #6 0x000102d18114 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x1d4 (bar-failure:arm64+0x100d0c114)
+    #7 0x000102d17e0c in testing::Test::Run()+0x2a8 (bar-failure:arm64+0x100d0be0c)
+    #8 0x000102d1b424 in testing::TestInfo::Run()+0x6e4 (bar-failure:arm64+0x100d0f424)
+    #9 0x000102d1f9c4 in testing::TestSuite::Run()+0x798 (bar-failure:arm64+0x100d139c4)
+    #10 0x000102d51d88 in testing::internal::UnitTestImpl::RunAllTests()+0x164c (bar-failure:arm64+0x100d45d88)
+    #11 0x000102e23c48 in bool testing::internal::HandleSehExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0xe8 (bar-failure:arm64+0x100e17c48)
+    #12 0x000102d50264 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x1d4 (bar-failure:arm64+0x100d44264)
+    #13 0x000102d4fdac in testing::UnitTest::Run()+0x2f8 (bar-failure:arm64+0x100d43dac)
+    #14 0x000102e4af48 in RUN_ALL_TESTS()+0x48 (bar-failure:arm64+0x100e3ef48)
+    #15 0x000102e4ae6c in main+0x14c (bar-failure:arm64+0x100e3ee6c)
+    #16 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+==91612==ABORTING

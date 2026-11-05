@@ -14,6 +14,7 @@
  * 边界：StateMonitor 线程由产品自身创建，观察后立即 stop（总生命周期约 1.2s）；
  * 不建 socket、不连柜台、不读写 shm，临时目录仅系统临时目录并清理。
  */
+// 迭代03 第五会话（I03-NEW-053/卡2）：品种须带 pricetick/volscale 才能整批发布；起止相同的非 0–0 时段（旧夹具 1–1）被拒，改为 1–2。仅改测试输入。
 #include <gtest/gtest.h>
 
 #include <chrono>
@@ -90,7 +91,7 @@ TEST(R194StateMonitor, HolidayCommodityStaysHolidayOnSecondRound)
 		})JSON");
 	write_file(dir / "commodities.json",
 		R"JSON({
-			"R194": {"HLC": {"name": "节假日品种", "session": "HLM", "holiday": "R194_HOL"}}
+			"R194": {"HLC": {"name": "节假日品种", "session": "HLM", "holiday": "R194_HOL", "pricetick": 1, "volscale": 1}}
 		})JSON");
 	write_file(dir / "holidays.json", std::string("{\"R194_HOL\":") + today_window() + "}");
 

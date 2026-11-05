@@ -1,0 +1,34 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=34381)
+  Write of size 8 at 0x000104890a68 by thread T2:
+    #0 StateMonitor::run()::$_0::operator()() const StateMonitor.cpp:581 (red-tsan:arm64+0x100015b00)
+    #1 std::__1::__invoke_result_impl<void, StateMonitor::run()::$_0>::type std::__1::__invoke[abi:nqe220108]<StateMonitor::run()::$_0>(StateMonitor::run()::$_0&&) invoke.h:90 (red-tsan:arm64+0x100015b00)
+    #2 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (red-tsan:arm64+0x100015b00)
+    #3 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>>(void*) thread.h:169 (red-tsan:arm64+0x100015b00)
+
+  Previous write of size 8 at 0x000104890a68 by thread T1:
+    #0 StateMonitor::run()::$_0::operator()() const StateMonitor.cpp:581 (red-tsan:arm64+0x100015b00)
+    #1 std::__1::__invoke_result_impl<void, StateMonitor::run()::$_0>::type std::__1::__invoke[abi:nqe220108]<StateMonitor::run()::$_0>(StateMonitor::run()::$_0&&) invoke.h:90 (red-tsan:arm64+0x100015b00)
+    #2 void std::__1::__thread_execute[abi:nqe220108]<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0, 0ul>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>&, std::__1::__integer_sequence<unsigned long, 0ul>) thread.h:161 (red-tsan:arm64+0x100015b00)
+    #3 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, StateMonitor::run()::$_0>>(void*) thread.h:169 (red-tsan:arm64+0x100015b00)
+
+  Location is global 'StateMonitor::run()::$_0::operator()() const::lastTime' at 0x000104890a68 (red-tsan+0x1001a0a68)
+
+  Thread T2 (tid=999041, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (red-tsan:arm64+0x100006908)
+    #2 std::__1::thread::thread[abi:nqe220108]<StateMonitor::run()::$_0, 0>(StateMonitor::run()::$_0&&) thread.h:218 (red-tsan:arm64+0x100006908)
+    #3 std::__1::thread::thread[abi:nqe220108]<StateMonitor::run()::$_0, 0>(StateMonitor::run()::$_0&&) thread.h:209 (red-tsan:arm64+0x100006908)
+    #4 StateMonitor::run() StateMonitor.cpp:550 (red-tsan:arm64+0x100006908)
+    #5 main probe.cpp:68 (red-tsan:arm64+0x1000167e4)
+
+  Thread T1 (tid=999040, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::__libcpp_thread_create[abi:nqe220108](_opaque_pthread_t**, void* (*)(void*), void*) pthread.h:182 (red-tsan:arm64+0x100006908)
+    #2 std::__1::thread::thread[abi:nqe220108]<StateMonitor::run()::$_0, 0>(StateMonitor::run()::$_0&&) thread.h:218 (red-tsan:arm64+0x100006908)
+    #3 std::__1::thread::thread[abi:nqe220108]<StateMonitor::run()::$_0, 0>(StateMonitor::run()::$_0&&) thread.h:209 (red-tsan:arm64+0x100006908)
+    #4 StateMonitor::run() StateMonitor.cpp:550 (red-tsan:arm64+0x100006908)
+    #5 main probe.cpp:68 (red-tsan:arm64+0x1000167dc)
+
+SUMMARY: ThreadSanitizer: data race StateMonitor.cpp:581 in StateMonitor::run()::$_0::operator()() const
+==================

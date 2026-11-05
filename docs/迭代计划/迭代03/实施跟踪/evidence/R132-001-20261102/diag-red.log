@@ -1,0 +1,37 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R132ReaderHisTest.R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R132ReaderHisTest
+[ RUN      ] R132ReaderHisTest.R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape
+/tmp/wt-i03-r132-20261102/source/src/TestUnits/coverage/q03_storage3/r132_reader_his_test.cpp:432: Failure
+Value of: _sink.has_log_containing("Unexpected failure reading historical queue slice for SSE.STK.610220")
+  Actual: false
+Expected: true
+
+/tmp/wt-i03-r132-20261102/source/src/TestUnits/coverage/q03_storage3/r132_reader_his_test.cpp:433: Failure
+Value of: _sink.has_log_containing("Unexpected failure reading historical detail slice for SSE.STK.610220")
+  Actual: false
+Expected: true
+
+/tmp/wt-i03-r132-20261102/source/src/TestUnits/coverage/q03_storage3/r132_reader_his_test.cpp:434: Failure
+Value of: _sink.has_log_containing("Unexpected failure reading historical transaction slice for SSE.STK.610220")
+  Actual: false
+Expected: true
+
+/tmp/wt-i03-r132-20261102/source/src/TestUnits/coverage/q03_storage3/r132_reader_his_test.cpp:466: Failure
+Expected equality of these values:
+  sink.attempts
+    Which is: 0
+  3
+
+[  FAILED  ] R132ReaderHisTest.R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape (4 ms)
+[----------] 1 test from R132ReaderHisTest (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (4 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R132ReaderHisTest.R132UnexpectedSliceFailureLogsAndLoggerFailureDoesNotEscape
+
+ 1 FAILED TEST

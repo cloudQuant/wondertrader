@@ -1,0 +1,320 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R60SessionIsolation.disconnect_ends_session_like_release_and_does_not_grow_fds
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R60SessionIsolation
+[ RUN      ] R60SessionIsolation.disconnect_ends_session_like_release_and_does_not_grow_fds
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:309: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnect did not close the UDP socket in cycle 0
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:311: Failure
+Expected: (api.queryAccount()) < (0), actual: 0 vs 0
+cycle 0
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:312: Failure
+Expected: (api.queryOrders()) < (0), actual: 0 vs 0
+cycle 0
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:314: Failure
+Expected: (api.orderInsert(entrust)) < (0), actual: 0 vs 0
+cycle 0
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:315: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  entrust->retainCount()
+    Which is: 2
+cycle 0
+
+[TraderMocker] Already connected
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:319: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnected instance re-bound its port in cycle 0
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:320: Failure
+Value of: wait_until([&]() { return business(sink_) != after; }, 60)
+  Actual: true
+Expected: false
+disconnected instance delivered a callback in cycle 0
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:309: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnect did not close the UDP socket in cycle 1
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:311: Failure
+Expected: (api.queryAccount()) < (0), actual: 0 vs 0
+cycle 1
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:312: Failure
+Expected: (api.queryOrders()) < (0), actual: 0 vs 0
+cycle 1
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:314: Failure
+Expected: (api.orderInsert(entrust)) < (0), actual: 0 vs 0
+cycle 1
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:315: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  entrust->retainCount()
+    Which is: 2
+cycle 1
+
+[TraderMocker] Already connected
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:319: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnected instance re-bound its port in cycle 1
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:320: Failure
+Value of: wait_until([&]() { return business(sink_) != after; }, 60)
+  Actual: true
+Expected: false
+disconnected instance delivered a callback in cycle 1
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:309: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnect did not close the UDP socket in cycle 2
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:311: Failure
+Expected: (api.queryAccount()) < (0), actual: 0 vs 0
+cycle 2
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:312: Failure
+Expected: (api.queryOrders()) < (0), actual: 0 vs 0
+cycle 2
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:314: Failure
+Expected: (api.orderInsert(entrust)) < (0), actual: 0 vs 0
+cycle 2
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:315: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  entrust->retainCount()
+    Which is: 2
+cycle 2
+
+[TraderMocker] Already connected
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:319: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnected instance re-bound its port in cycle 2
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:320: Failure
+Value of: wait_until([&]() { return business(sink_) != after; }, 60)
+  Actual: true
+Expected: false
+disconnected instance delivered a callback in cycle 2
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:309: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnect did not close the UDP socket in cycle 3
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:311: Failure
+Expected: (api.queryAccount()) < (0), actual: 0 vs 0
+cycle 3
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:312: Failure
+Expected: (api.queryOrders()) < (0), actual: 0 vs 0
+cycle 3
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:314: Failure
+Expected: (api.orderInsert(entrust)) < (0), actual: 0 vs 0
+cycle 3
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:315: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  entrust->retainCount()
+    Which is: 2
+cycle 3
+
+[TraderMocker] Already connected
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:319: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnected instance re-bound its port in cycle 3
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:320: Failure
+Value of: wait_until([&]() { return business(sink_) != after; }, 60)
+  Actual: true
+Expected: false
+disconnected instance delivered a callback in cycle 3
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:309: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnect did not close the UDP socket in cycle 4
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:311: Failure
+Expected: (api.queryAccount()) < (0), actual: 0 vs 0
+cycle 4
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:312: Failure
+Expected: (api.queryOrders()) < (0), actual: 0 vs 0
+cycle 4
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:314: Failure
+Expected: (api.orderInsert(entrust)) < (0), actual: 0 vs 0
+cycle 4
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:315: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  entrust->retainCount()
+    Which is: 2
+cycle 4
+
+[TraderMocker] Already connected
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:319: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnected instance re-bound its port in cycle 4
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:320: Failure
+Value of: wait_until([&]() { return business(sink_) != after; }, 60)
+  Actual: true
+Expected: false
+disconnected instance delivered a callback in cycle 4
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:309: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnect did not close the UDP socket in cycle 5
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:311: Failure
+Expected: (api.queryAccount()) < (0), actual: 0 vs 0
+cycle 5
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:312: Failure
+Expected: (api.queryOrders()) < (0), actual: 0 vs 0
+cycle 5
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:314: Failure
+Expected: (api.orderInsert(entrust)) < (0), actual: 0 vs 0
+cycle 5
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:315: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  entrust->retainCount()
+    Which is: 2
+cycle 5
+
+[TraderMocker] Already connected
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:319: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnected instance re-bound its port in cycle 5
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:320: Failure
+Value of: wait_until([&]() { return business(sink_) != after; }, 60)
+  Actual: true
+Expected: false
+disconnected instance delivered a callback in cycle 5
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:309: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnect did not close the UDP socket in cycle 6
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:311: Failure
+Expected: (api.queryAccount()) < (0), actual: 0 vs 0
+cycle 6
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:312: Failure
+Expected: (api.queryOrders()) < (0), actual: 0 vs 0
+cycle 6
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:314: Failure
+Expected: (api.orderInsert(entrust)) < (0), actual: 0 vs 0
+cycle 6
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:315: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  entrust->retainCount()
+    Which is: 2
+cycle 6
+
+[TraderMocker] Already connected
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:319: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnected instance re-bound its port in cycle 6
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:320: Failure
+Value of: wait_until([&]() { return business(sink_) != after; }, 60)
+  Actual: true
+Expected: false
+disconnected instance delivered a callback in cycle 6
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:309: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnect did not close the UDP socket in cycle 7
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:311: Failure
+Expected: (api.queryAccount()) < (0), actual: 0 vs 0
+cycle 7
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:312: Failure
+Expected: (api.queryOrders()) < (0), actual: 0 vs 0
+cycle 7
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:314: Failure
+Expected: (api.orderInsert(entrust)) < (0), actual: 0 vs 0
+cycle 7
+
+[TraderMocker] Already connected
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:319: Failure
+Value of: udp_port_bindable(port)
+  Actual: false
+Expected: true
+disconnected instance re-bound its port in cycle 7
+
+/tmp/wt-i03-s5-traders-other-red/src/TestUnits/coverage/t_TraderMocker/r60_001_session_isolation_test.cpp:320: Failure
+Value of: wait_until([&]() { return business(sink_) != after; }, 60)
+  Actual: true
+Expected: false
+disconnected instance delivered a callback in cycle 7
+
+[  FAILED  ] R60SessionIsolation.disconnect_ends_session_like_release_and_does_not_grow_fds (952 ms)
+[----------] 1 test from R60SessionIsolation (952 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (952 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R60SessionIsolation.disconnect_ends_session_like_release_and_does_not_grow_fds
+
+ 1 FAILED TEST

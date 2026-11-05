@@ -1,0 +1,99 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R15CtxTest.tag_snapshot_survives_reentrant_erase_during_order_callback
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R15CtxTest
+[ RUN      ] R15CtxTest.tag_snapshot_survives_reentrant_erase_during_order_callback
+=================================================================
+==59780==ERROR: AddressSanitizer: heap-use-after-free on address 0x612000008d40 at pc 0x000101a2f004 bp 0x00016fbd6050 sp 0x00016fbd5820
+READ of size 3 at 0x612000008d40 thread T0
+    #0 0x000101a2f000 in strlen+0x26c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x17000)
+    #1 0x0001882fdb5c in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__assign_external(char const*)+0x1c (libc++.1.dylib:arm64e+0x20b5c)
+    #2 0x0001002d1b7c in (anonymous namespace)::ReentrantOrderStrategy::on_order(wtp::IHftStraCtx*, unsigned int, char const*, bool, double, double, double, bool, char const*) test.cpp:22
+    #3 0x000100434df4 in HftStraContext::on_order(unsigned int, char const*, bool, double, double, double, bool) HftStraContext.cpp:212
+    #4 0x00010025fce4 in R15CtxTest_tag_snapshot_survives_reentrant_erase_during_order_callback_Test::TestBody() test.cpp:48
+    #5 0x0001004fd058 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (tests:arm64+0x1002d5058)
+    #6 0x0001004fcfa0 in testing::Test::Run()+0xcc (tests:arm64+0x1002d4fa0)
+    #7 0x0001004fdb80 in testing::TestInfo::Run()+0xd0 (tests:arm64+0x1002d5b80)
+    #8 0x0001004fe604 in testing::TestSuite::Run()+0x1c4 (tests:arm64+0x1002d6604)
+    #9 0x000100509a2c in testing::internal::UnitTestImpl::RunAllTests()+0x52c (tests:arm64+0x1002e1a2c)
+    #10 0x0001005093d8 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (tests:arm64+0x1002e13d8)
+    #11 0x00010050933c in testing::UnitTest::Run()+0x78 (tests:arm64+0x1002e133c)
+    #12 0x0001004ea6b4 in main+0x40 (tests:arm64+0x1002c26b4)
+    #13 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x612000008d40 is located 0 bytes inside of 264-byte region [0x612000008d40,0x612000008e48)
+freed by thread T0 here:
+    #0 0x000101a7d4d0 in _ZdlPv+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x654d0)
+    #1 0x0001882e16ec in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::~basic_string()+0x28 (libc++.1.dylib:arm64e+0x46ec)
+    #2 0x0001002b2a04 in std::__1::pair<unsigned int const, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>::~pair() pair.h:63
+    #3 0x0001002b29a4 in std::__1::pair<unsigned int const, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>::~pair() pair.h:63
+    #4 0x0001002b294c in void std::__1::__destroy_at[abi:ne200100]<std::__1::pair<unsigned int const, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, 0>(std::__1::pair<unsigned int const, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>*) construct_at.h:66
+    #5 0x0001002b28b0 in void std::__1::allocator_traits<std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, void*>>>::destroy[abi:ne200100]<std::__1::pair<unsigned int const, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, void, 0>(std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, void*>>&, std::__1::pair<unsigned int const, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>*) allocator_traits.h:329
+    #6 0x0001002b50f0 in std::__1::__tree<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::__map_value_compare<unsigned int, std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::less<unsigned int>, true>, std::__1::allocator<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>>::erase(std::__1::__tree_const_iterator<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::__tree_node<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, void*>*, long>) __tree:2047
+    #7 0x0001002b4e1c in unsigned long std::__1::__tree<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::__map_value_compare<unsigned int, std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::less<unsigned int>, true>, std::__1::allocator<std::__1::__value_type<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>>::__erase_unique<unsigned int>(unsigned int const&) __tree:2067
+    #8 0x0001002b4bd0 in std::__1::map<unsigned int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::less<unsigned int>, std::__1::allocator<std::__1::pair<unsigned int const, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>>::erase[abi:ne200100](unsigned int const&) map:1320
+    #9 0x000100242780 in wtp::HftStraBaseCtx::eraseOrderTag(unsigned int) HftStraBaseCtx.h:653
+    #10 0x0001002d1998 in (anonymous namespace)::ReentrantOrderStrategy::on_order(wtp::IHftStraCtx*, unsigned int, char const*, bool, double, double, double, bool, char const*) test.cpp:16
+    #11 0x000100434df4 in HftStraContext::on_order(unsigned int, char const*, bool, double, double, double, bool) HftStraContext.cpp:212
+    #12 0x00010025fce4 in R15CtxTest_tag_snapshot_survives_reentrant_erase_during_order_callback_Test::TestBody() test.cpp:48
+    #13 0x0001004fd058 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (tests:arm64+0x1002d5058)
+    #14 0x0001004fcfa0 in testing::Test::Run()+0xcc (tests:arm64+0x1002d4fa0)
+    #15 0x0001004fdb80 in testing::TestInfo::Run()+0xd0 (tests:arm64+0x1002d5b80)
+    #16 0x0001004fe604 in testing::TestSuite::Run()+0x1c4 (tests:arm64+0x1002d6604)
+    #17 0x000100509a2c in testing::internal::UnitTestImpl::RunAllTests()+0x52c (tests:arm64+0x1002e1a2c)
+    #18 0x0001005093d8 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (tests:arm64+0x1002e13d8)
+    #19 0x00010050933c in testing::UnitTest::Run()+0x78 (tests:arm64+0x1002e133c)
+    #20 0x0001004ea6b4 in main+0x40 (tests:arm64+0x1002c26b4)
+    #21 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+previously allocated by thread T0 here:
+    #0 0x000101a7d0e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x0001882e1060 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__grow_by_and_replace(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, char const*)+0xb0 (libc++.1.dylib:arm64e+0x4060)
+    #2 0x0001882f64bc in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__assign_external(char const*, unsigned long)+0x68 (libc++.1.dylib:arm64e+0x194bc)
+    #3 0x00010028ff54 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::operator=[abi:ne200100](char const*) string:1270
+    #4 0x000100240f54 in wtp::HftStraBaseCtx::setUserTag(unsigned int, char const*) HftStraBaseCtx.h:643
+    #5 0x00010025fcb0 in R15CtxTest_tag_snapshot_survives_reentrant_erase_during_order_callback_Test::TestBody() test.cpp:47
+    #6 0x0001004fd058 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (tests:arm64+0x1002d5058)
+    #7 0x0001004fcfa0 in testing::Test::Run()+0xcc (tests:arm64+0x1002d4fa0)
+    #8 0x0001004fdb80 in testing::TestInfo::Run()+0xd0 (tests:arm64+0x1002d5b80)
+    #9 0x0001004fe604 in testing::TestSuite::Run()+0x1c4 (tests:arm64+0x1002d6604)
+    #10 0x000100509a2c in testing::internal::UnitTestImpl::RunAllTests()+0x52c (tests:arm64+0x1002e1a2c)
+    #11 0x0001005093d8 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (tests:arm64+0x1002e13d8)
+    #12 0x00010050933c in testing::UnitTest::Run()+0x78 (tests:arm64+0x1002e133c)
+    #13 0x0001004ea6b4 in main+0x40 (tests:arm64+0x1002c26b4)
+    #14 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: heap-use-after-free (libc++.1.dylib:arm64e+0x20b5c) in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::__assign_external(char const*)+0x1c
+Shadow bytes around the buggy address:
+  0x612000008a80: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x612000008b00: fd fd fd fd fd fd fd fd fd fd fd fa fa fa fa fa
+  0x612000008b80: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x612000008c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x612000008c80: 00 00 00 00 00 00 00 00 00 fa fa fa fa fa fa fa
+=>0x612000008d00: fa fa fa fa fa fa fa fa[fd]fd fd fd fd fd fd fd
+  0x612000008d80: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x612000008e00: fd fd fd fd fd fd fd fd fd fa fa fa fa fa fa fa
+  0x612000008e80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x612000008f00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x612000008f80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==59780==ABORTING

@@ -300,8 +300,10 @@ TEST_F(R21ReaderADTest, RepeatKlineReadReloadsWholeRangeBecauseLastBarTimeIsNeve
 	EXPECT_EQ(out[2].date, 20240104u);
 	second->release();
 
-	// 两次「Reading back」日志 = 两次全量 get_range；开环只有 1 次
-	EXPECT_EQ(sink()->count_containing("Reading back"), 2u);
+	// 迭代03 s5：本断言原为 2（记录 R21-BUG-07 缺陷：未变更环境也全量重扫）。按 R21-BUG-07
+	// 原验收条件「同窗口复读不扫全量」，LMDB 环境两次读取之间无新提交时复用快照、不再重扫；
+	// 有提交时仍全量重扫（修订可见性不变，见 s5_rdm_ad_snapshot_test.cpp）。原文件见证据 before/。
+	EXPECT_EQ(sink()->count_containing("Reading back"), 1u);
 	EXPECT_EQ(sink()->count_containing("day db of XEX opened"), 1u);
 }
 
@@ -347,14 +349,8 @@ TEST_F(R21ReaderADTest, BarCacheIsKeyedByStdCodeAndPeriodSoCodesDoNotMix)
 	sb->release();
 }
 
-// ---------------------------------------------------------------------------
-// 缺陷用例（禁用，见 bugs/R21_adstorage.md R21-BUG-06）：
-// 库里没有该合约的 bar 时 :296 载入 0 根，:353 仍对空 vector 取 &v[0] 并把
-// 上界写成 size()-1（0 → 下溢）→ 空指针解引用，崩在读路径上。
-// 触发条件：{base}day/{exchg}/ 存在且可读，但里面没有目标合约的任何键，
-//          然后 readKlineSliceByRange(该合约, KP_DAY, ...)。
-// ---------------------------------------------------------------------------
-TEST_F(R21ReaderADTest, DISABLED_KlineReadWithoutAnyBarCrashesOnEmptyVectorSubscript)
+// 迭代03 最终验收复核后启用（原禁用：R21-BUG-06 空库 K 线读取）。
+TEST_F(R21ReaderADTest, KlineReadWithoutAnyBarCrashesOnEmptyVectorSubscript)
 {
 	init_reader();
 

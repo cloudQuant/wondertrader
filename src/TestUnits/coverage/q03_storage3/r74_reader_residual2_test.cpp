@@ -277,11 +277,8 @@ TEST_F(R74ReaderResidualTest, R74ReaderKlineRtBackoffAndMinuteEnd)
 	EXPECT_EQ(_sink.bar_count(), 2u);
 }
 
-// ------------------------------------------------------------------ 缺陷复现（不进启用集）
-// BUG-R74-001：readOrdDtlSlice :690 与 readTransSlice :847 查的是 `_his_ordque_map`，
-//   但分别装载进 `_his_orddtl_map` / `_his_trans_map`。同一 stdCode+交易日只要先读过 queue，
-//   后续 dtl/trans 就会跳过装载并落到空 block → 文件存在也返回 NULL（顺序相关假空）。
-TEST_F(R74ReaderResidualTest, DISABLED_R74ReaderQueueCacheHidesSameDayDetailAndTrans)
+// 迭代03 最终验收复核后启用（原禁用：BUG-R74-001，主记录 BUG-R132-002）。
+TEST_F(R74ReaderResidualTest, R74ReaderQueueCacheHidesSameDayDetailAndTrans)
 {
 	init_reader_simple();
 

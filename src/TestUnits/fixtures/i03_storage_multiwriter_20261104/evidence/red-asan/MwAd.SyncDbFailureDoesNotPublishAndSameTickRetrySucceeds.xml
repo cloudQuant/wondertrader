@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="1" failures="1" disabled="0" errors="0" time="0.004" timestamp="2026-11-04T03:00:58.848" name="AllTests">
+  <testsuite name="MwAd" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="0.004" timestamp="2026-11-04T03:00:58.849">
+    <testcase name="SyncDbFailureDoesNotPublishAndSameTickRetrySucceeds" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp" line="96" status="run" result="completed" time="0.004" timestamp="2026-11-04T03:00:58.849" classname="MwAd">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:106&#x0A;Expected: ok = _writer-&gt;writeTick(t1, 0) doesn&apos;t throw an exception.&#x0A;  Actual: it throws boost::filesystem::filesystem_error with description &quot;boost::filesystem::create_directories: File exists [system:17]: &quot;/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r4_wad_1984_0/ticks/SHFE/rb2210&quot;, &quot;/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r4_wad_1984_0/ticks/SHFE/rb2210&quot;&quot;.&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:106
+Expected: ok = _writer->writeTick(t1, 0) doesn't throw an exception.
+  Actual: it throws boost::filesystem::filesystem_error with description "boost::filesystem::create_directories: File exists [system:17]: "/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r4_wad_1984_0/ticks/SHFE/rb2210", "/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r4_wad_1984_0/ticks/SHFE/rb2210"".
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:108&#x0A;Value of: ok&#x0A;  Actual: true&#x0A;Expected: false&#x0A;sync writeTick must report the persistence failure&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:108
+Value of: ok
+  Actual: true
+Expected: false
+sync writeTick must report the persistence failure
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:110&#x0A;Value of: cur == __null&#x0A;  Actual: false&#x0A;Expected: true&#x0A;cache advanced although the tick was not persisted&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:110
+Value of: cur == __null
+  Actual: false
+Expected: true
+cache advanced although the tick was not persisted
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:123&#x0A;Expected equality of these values:&#x0A;  cur-&gt;actiontime()&#x0A;    Which is: 93000200&#x0A;  93000000u&#x0A;    Which is: 93000000&#x0A;retry must not see a shifted duplicate&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:123
+Expected equality of these values:
+  cur->actiontime()
+    Which is: 93000200
+  93000000u
+    Which is: 93000000
+retry must not see a shifted duplicate
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:133&#x0A;Expected equality of these values:&#x0A;  stored.action_time&#x0A;    Which is: 93000200&#x0A;  93000000u&#x0A;    Which is: 93000000&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_storage_multiwriter_20261104/mw_ad_test.cpp:133
+Expected equality of these values:
+  stored.action_time
+    Which is: 93000200
+  93000000u
+    Which is: 93000000
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

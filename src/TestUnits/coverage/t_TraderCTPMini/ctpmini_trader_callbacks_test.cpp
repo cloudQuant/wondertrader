@@ -890,6 +890,9 @@ TEST(ctpmini, rsp_qry_orders_and_trades_forward_counts)
 	FakeTraderSink sink2;
 	api2.registerSpi(&sink2);
 	api2.setBdMgr(&fx.mgr);
+	/* 迭代03 s5 / T3-015：未经校验的登录交易日（0）不再以宿主当前日期合成成交日期，
+	 * 成交回报 fail-closed 丢弃；本用例只验证转发计数，补设合法交易日。原夹具见证据 before/。 */
+	api2.setTradeDate(20260105);
 	api2.OnRspQryTrade(&t, &rsp, 1, true);
 	EXPECT_EQ(1u, sink2.lastTradeCnt);
 

@@ -1,0 +1,102 @@
+[
+ {
+  "id": "mocker-fix-tsan",
+  "name": "T6009Mocker.PendingAndCanceledOrderRefsReturnedExactlyOnce",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-tsan/tests",
+  "filter": "T6009Mocker.PendingAndCanceledOrderRefsReturnedExactlyOnce",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "mocker-fix-tsan",
+  "name": "T6009Mocker.DestructorAloneReturnsPendingOrderRefs",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-tsan/tests",
+  "filter": "T6009Mocker.DestructorAloneReturnsPendingOrderRefs",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "mocker-fix-tsan",
+  "name": "T6009Mocker.ReleaseFromWorkerCallbackDefersJoin",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-tsan/tests",
+  "filter": "T6009Mocker.ReleaseFromWorkerCallbackDefersJoin",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "mocker-fix-tsan",
+  "name": "T6009Mocker.DeleteTraderFromWorkerCallbackQuarantines",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-tsan/tests",
+  "filter": "T6009Mocker.DeleteTraderFromWorkerCallbackQuarantines",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "mocker-fix-tsan",
+  "name": "T6009Mocker.RepeatedInitRejected",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-tsan/tests",
+  "filter": "T6009Mocker.RepeatedInitRejected",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "mocker-fix-tsan",
+  "name": "T6009Mocker.ConcurrentExternalReleaseAndRequests",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-tsan/tests",
+  "filter": "T6009Mocker.ConcurrentExternalReleaseAndRequests",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "mocker-fix-tsan",
+  "name": "R113MockerPartialCancel.R113Mocker_CancelCopiesOrderIdBeforeFinalActionRelease",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-tsan/tests",
+  "filter": "R113MockerPartialCancel.R113Mocker_CancelCopiesOrderIdBeforeFinalActionRelease",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "mocker-fix-tsan",
+  "name": "R113MockerPartialCancel.R113Mocker_PartialFillThenCancelPushesCanceled",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-tsan/tests",
+  "filter": "R113MockerPartialCancel.R113Mocker_PartialFillThenCancelPushesCanceled",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "mocker-fix-tsan",
+  "name": "NEW020UdpAlignment.CompleteTickAcceptedAndTruncatedOrWrongTypeIgnored",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-tsan/tests",
+  "filter": "NEW020UdpAlignment.CompleteTickAcceptedAndTruncatedOrWrongTypeIgnored",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 120
+ },
+ {
+  "id": "mocker-fix-tsan",
+  "name": "ALL",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/mocker-fix-tsan/tests",
+  "filter": "*",
+  "env": {
+   "TSAN_OPTIONS": "halt_on_error=1:exitcode=66:second_deadlock_stack=1"
+  },
+  "timeout": 600
+ }
+]

@@ -1,0 +1,22 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5DumperExitRetention.AdapterManagerHasNoExitTimeDestructor
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03S5DumperExitRetention
+[ RUN      ] I03S5DumperExitRetention.AdapterManagerHasNoExitTimeDestructor
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderDumper/i03s5_dumper_lifecycle_test.cpp:238: Failure
+Value of: std::is_trivially_destructible<wtp::TraderAdapterMgr>::value
+  Actual: false
+Expected: true
+g_adapterMgr would be destroyed during static cleanup while provider threads may still call back
+
+[  FAILED  ] I03S5DumperExitRetention.AdapterManagerHasNoExitTimeDestructor (0 ms)
+[----------] 1 test from I03S5DumperExitRetention (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (6 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] I03S5DumperExitRetention.AdapterManagerHasNoExitTimeDestructor
+
+ 1 FAILED TEST

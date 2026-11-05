@@ -1,0 +1,31 @@
+--- src/TestUnits/fixtures/i03_trader_ratelimit_20261103/oracle_before/r90_trader_risk_init_test.cpp	2026-11-04 02:24:05
++++ src/TestUnits/coverage/q01_wtcore3/r90_trader_risk_init_test.cpp	2026-11-04 02:24:09
+@@ -237,7 +237,9 @@
+ };
+ 
+ //////////////////////////////////////////////////////////////////
+-// 下单/撤单频率窗口：连续 3 次、边界 1 -> 第 3 次检查封禁
++// 下单/撤单频率窗口：边界 3、连续 3 次成功提交 -> 第 4 次预检查被拒
++// （迭代03 卡 7a：窗口内允许 N 次，第 N+1 次在到达 API 前拒绝；原用例以边界 1
++//  连续放行 3 次，编码的是已被否决的旧计数语义）
+ // src/WtCore/TraderAdapter.cpp:566-593, 631-658
+ //////////////////////////////////////////////////////////////////
+ TEST_F(R90TraderRisk, FrequencyWindowsRejectStandardCodeAfterRawCodeEvents)
+@@ -255,7 +257,7 @@
+         ASSERT_TRUE(mockerEnv.ok()) << mockerEnv.error();
+ 
+         std::unique_ptr<WTSVariant, R90VariantRelease> cfg(
+-            loadCfg("r90_order_freq.json", activeMockerRiskConfig(mockerId, 1, 9)));
++            loadCfg("r90_order_freq.json", activeMockerRiskConfig(mockerId, 3, 9)));
+         ASSERT_NE(nullptr, cfg.get());
+ 
+         R90RiskMockerSink sink;
+@@ -296,7 +298,7 @@
+         ASSERT_TRUE(mockerEnv.ok()) << mockerEnv.error();
+ 
+         std::unique_ptr<WTSVariant, R90VariantRelease> cfg(
+-            loadCfg("r90_cancel_freq.json", activeMockerRiskConfig(mockerId, 9, 1)));
++            loadCfg("r90_cancel_freq.json", activeMockerRiskConfig(mockerId, 9, 3)));
+         ASSERT_NE(nullptr, cfg.get());
+ 
+         R90RiskMockerSink sink;

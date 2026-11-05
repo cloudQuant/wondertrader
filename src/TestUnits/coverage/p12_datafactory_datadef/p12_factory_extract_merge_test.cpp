@@ -532,12 +532,8 @@ TEST_F(P12Extract, closed_extrema_ranges_reject_end_equal_size)
 	EXPECT_DOUBLE_EQ(data->minprice(-2, -1), 8.0);
 }
 
-// Remaining disabled scenarios depend on separate unresolved defects:
-// 1) extractKlineData(WTSTickSlice*, 0, ...) may divide by zero.
-// 2) updateMin1Data(tick) with an out-of-session tick and empty klineData may dereference NULL
-//    (see p12_factory_update_tick_test.cpp).
-// 详见 docs/迭代计划/迭代01/bugs/p12_datafactory_datadef.md（BUG-P12-001 ~ BUG-P12-004）。
-TEST_F(P12Extract, DISABLED_OutOfBoundsClass)
+// 迭代03 最终验收复核后启用（原禁用：extractKlineData seconds=0 除零，BUG-P12-002）。
+TEST_F(P12Extract, OutOfBoundsClass)
 {
 	std::vector<WTSTickStruct> ticks;
 	ticks.push_back(mkTickStruct(3500.0, 1.0, 90012500));

@@ -19,6 +19,8 @@
 #include <chrono>
 #include <thread>
 #include <cmath>
+#include <atomic>
+#include <mutex>
 
 #ifdef _MSC_VER
 #define CTIME_BUF_SIZE 64
@@ -63,21 +65,45 @@ namespace TimeUtils
 
 	static inline int32_t getTZOffset() noexcept
 	{
-		static int32_t offset = 99;
-		if (offset == 99)
-		{
-			time_t now = time(NULL);
-			[[maybe_unused]] tm tm_ltm = *localtime(&now);
-			tm tm_gtm = *gmtime(&now);
+		// Preserve the legacy per-translation-unit cache and its 99 sentinel.
+		// A failed conversion leaves the sentinel in place so a later call can
+		// retry; it must not silently substitute UTC.
+		static std::atomic<int32_t> offset{99};
+		static std::mutex offsetMutex;
+		int32_t cached = offset.load(std::memory_order_acquire);
+		if (cached != 99)
+			return cached;
+		std::lock_guard<std::mutex> lock(offsetMutex);
+		cached = offset.load(std::memory_order_relaxed);
+		if (cached != 99)
+			return cached;
 
-			time_t _gt = mktime(&tm_gtm);
-			tm _gtm2 = *localtime(&_gt);
-
-			offset = (uint32_t)(((now - _gt) + (_gtm2.tm_isdst ? 3600 : 0)) / 60);
-			offset /= 60;
-		}
-
-		return offset;
+		const time_t now = time(NULL);
+		if (now == static_cast<time_t>(-1))
+			return 99;
+		tm tm_gtm{};
+#ifdef _MSC_VER
+		if (gmtime_s(&tm_gtm, &now) != 0)
+			return 99;
+#else
+		if (gmtime_r(&now, &tm_gtm) == NULL)
+			return 99;
+#endif
+		const time_t gt = mktime(&tm_gtm);
+		if (gt == static_cast<time_t>(-1))
+			return 99;
+		tm gtm2{};
+#ifdef _MSC_VER
+		if (localtime_s(&gtm2, &gt) != 0)
+			return 99;
+#else
+		if (localtime_r(&gt, &gtm2) == NULL)
+			return 99;
+#endif
+		cached = (uint32_t)(((now - gt) + (gtm2.tm_isdst ? 3600 : 0)) / 60);
+		cached /= 60;
+		offset.store(cached, std::memory_order_release);
+		return cached;
 	}
 
 	constexpr static inline int fasttime(const time_t& unix_sec, struct tm* tm, int time_zone) noexcept
@@ -163,14 +189,123 @@ namespace TimeUtils
 #endif
 	}
 
+	// Legacy clock helpers below have no failure channel (I03-NEW-006). They read
+	// the clock with a checked call and never apply the getTZOffset() failure
+	// sentinel 99 as an hour offset: a failed cached lookup falls back to the
+	// platform local-time conversion, and if the clock or that conversion fails
+	// the published tm is all zero, i.e. the invalid date 19000100 and 00:00:00.
+	// Callers that must stop on failure use tryGetDateTime() instead.
+	static inline void legacyLocalNow(tm& out, uint32_t& millis) noexcept
+	{
+		out = tm{};
+		millis = 0;
+		int64_t now = 0;
+#ifdef _MSC_VER
+		now = getLocalTimeNow();
+#else
+		struct timespec spec{};
+		if (clock_gettime(CLOCK_REALTIME, &spec) != 0 || spec.tv_sec < 0 ||
+			spec.tv_nsec < 0 || spec.tv_nsec >= 1000000000L)
+			return;
+		now = static_cast<int64_t>(spec.tv_sec) * 1000 + spec.tv_nsec / 1000000;
+#endif
+		const time_t seconds = static_cast<time_t>(now / 1000);
+		const int32_t zone = getTZOffset();
+		if (zone != 99 && fasttime(seconds, &out, zone) == 0)
+		{
+			millis = static_cast<uint32_t>(now % 1000);
+			return;
+		}
+#ifdef _MSC_VER
+		if (localtime_s(&out, &seconds) == 0)
+#else
+		if (localtime_r(&seconds, &out) != NULL)
+#endif
+		{
+			millis = static_cast<uint32_t>(now % 1000);
+			return;
+		}
+		out = tm{};
+	}
+
+	// Obtain local date, HHMMSSsss, and Unix epoch milliseconds from one clock
+	// reading. Outputs are unchanged on failure, including overlapping outputs.
+	static inline bool tryGetDateTime(uint32_t& date, uint32_t& time, uint64_t& epochMillis) noexcept
+	{
+		const auto overlaps = [](const void* a, size_t aSize, const void* b, size_t bSize) noexcept {
+			const uintptr_t aPos = reinterpret_cast<uintptr_t>(a);
+			const uintptr_t bPos = reinterpret_cast<uintptr_t>(b);
+			return aPos <= bPos ? bPos - aPos < aSize : aPos - bPos < bSize;
+		};
+		if (overlaps(&date, sizeof(date), &time, sizeof(time)) ||
+			overlaps(&date, sizeof(date), &epochMillis, sizeof(epochMillis)) ||
+			overlaps(&time, sizeof(time), &epochMillis, sizeof(epochMillis)))
+			return false;
+		uint64_t seconds;
+		uint32_t millis;
+#ifdef _MSC_VER
+		LARGE_INTEGER systemTime;
+		do
+		{
+			systemTime.HighPart = SharedUserData->SystemTime.High1Time;
+			systemTime.LowPart = SharedUserData->SystemTime.LowPart;
+		} while (systemTime.HighPart != SharedUserData->SystemTime.High2Time);
+		constexpr uint64_t epochTicks = 116444736000000000ULL;
+		if (systemTime.QuadPart < 0 || static_cast<uint64_t>(systemTime.QuadPart) < epochTicks)
+			return false;
+		const uint64_t unixMillis = (static_cast<uint64_t>(systemTime.QuadPart) - epochTicks) / 10000;
+		seconds = unixMillis / 1000;
+		millis = static_cast<uint32_t>(unixMillis % 1000);
+#else
+		struct timespec now{};
+		if (clock_gettime(CLOCK_REALTIME, &now) != 0 || now.tv_sec < 0 ||
+			now.tv_nsec < 0 || now.tv_nsec >= 1000000000L)
+			return false;
+		seconds = static_cast<uint64_t>(now.tv_sec);
+		millis = static_cast<uint32_t>(now.tv_nsec / 1000000);
+#endif
+		if (seconds > (UINT64_MAX - millis) / 1000)
+			return false;
+		const uint64_t newEpochMillis = seconds * 1000 + millis;
+		const time_t clockSeconds = static_cast<time_t>(seconds);
+		if (clockSeconds < 0 || static_cast<uint64_t>(clockSeconds) != seconds)
+			return false;
+		tm snapshot{};
+		// The legacy getTZOffset() cache only stores integer hours and can become
+		// stale at DST transitions; it cannot safely represent this snapshot.
+#ifdef _MSC_VER
+		if (localtime_s(&snapshot, &clockSeconds) != 0)
+#else
+		if (localtime_r(&clockSeconds, &snapshot) == NULL)
+#endif
+			return false;
+		const int64_t year = static_cast<int64_t>(snapshot.tm_year) + 1900;
+		if (year < 1000 || year > 9999 || snapshot.tm_mon < 0 || snapshot.tm_mon > 11 ||
+			snapshot.tm_mday < 1 || snapshot.tm_mday > 31 || snapshot.tm_hour < 0 || snapshot.tm_hour > 23 ||
+			snapshot.tm_min < 0 || snapshot.tm_min > 59 || snapshot.tm_sec < 0 || snapshot.tm_sec > 60)
+			return false;
+		const uint32_t newDate = static_cast<uint32_t>(year * 10000 +
+			(snapshot.tm_mon + 1) * 100 + snapshot.tm_mday);
+		const uint32_t newTime = static_cast<uint32_t>(
+			(snapshot.tm_hour * 10000 + snapshot.tm_min * 100 + snapshot.tm_sec) * 1000) + millis;
+		date = newDate;
+		time = newTime;
+		epochMillis = newEpochMillis;
+		return true;
+	}
+
+	// Compatibility overload for callers that do not need the epoch value.
+	static inline bool tryGetDateTime(uint32_t& date, uint32_t& time) noexcept
+	{
+		uint64_t epochMillis;
+		return tryGetDateTime(date, time, epochMillis);
+	}
+
 	static inline std::string getLocalTime(bool bIncludeMilliSec = true) noexcept
 	{
-		uint64_t ltime = getLocalTimeNow();
-		time_t now = ltime / 1000;
-		uint32_t millitm = ltime % 1000;
-		
-		thread_local static tm tNow;
-		fasttime(now, &tNow, getTZOffset());
+		tm tNow{};
+		uint32_t millitm = 0;
+		legacyLocalNow(tNow, millitm);
 
 		char str[64] = {0};
 		if(bIncludeMilliSec)
@@ -182,11 +317,9 @@ namespace TimeUtils
 
 	static inline uint64_t getYYYYMMDDhhmmss() noexcept
 	{
-		uint64_t ltime = getLocalTimeNow();
-		time_t now = ltime / 1000;
-
-		thread_local static tm tNow;
-		fasttime(now, &tNow, getTZOffset());
+		tm tNow{};
+		uint32_t millitm = 0;
+		legacyLocalNow(tNow, millitm);
 
 		uint64_t date = (tNow.tm_year + 1900) * 10000 + (tNow.tm_mon + 1) * 100 + tNow.tm_mday;
 
@@ -201,12 +334,9 @@ namespace TimeUtils
      */
 	static inline void getDateTime(uint32_t &date, uint32_t &time) noexcept
 	{
-		uint64_t ltime = getLocalTimeNow();
-		time_t now = ltime / 1000;
-		uint32_t millitm = ltime % 1000;
-
-		thread_local static tm tNow;
-		fasttime(now, &tNow, getTZOffset());
+		tm tNow{};
+		uint32_t millitm = 0;
+		legacyLocalNow(tNow, millitm);
 
 		date = (tNow.tm_year+1900)*10000 + (tNow.tm_mon+1)*100 + tNow.tm_mday;
 		
@@ -217,11 +347,9 @@ namespace TimeUtils
 
 	static inline uint32_t getCurDate() noexcept
 	{
-		uint64_t ltime = getLocalTimeNow();
-		time_t now = ltime / 1000;
-
-		thread_local static tm tNow;
-		fasttime(now, &tNow, getTZOffset());
+		tm tNow{};
+		uint32_t millitm = 0;
+		legacyLocalNow(tNow, millitm);
 
 		uint32_t date = (tNow.tm_year+1900)*10000 + (tNow.tm_mon+1)*100 + tNow.tm_mday;
 
@@ -285,10 +413,9 @@ namespace TimeUtils
 
 	static inline uint32_t getCurMin() noexcept
 	{
-		uint64_t ltime = getLocalTimeNow();
-		time_t now = ltime / 1000;
-		thread_local static tm tNow;
-		fasttime(now, &tNow, getTZOffset());
+		tm tNow{};
+		uint32_t millitm = 0;
+		legacyLocalNow(tNow, millitm);
 		uint32_t time = tNow.tm_hour*10000 + tNow.tm_min*100 + tNow.tm_sec;
 
 		return time;
@@ -316,7 +443,13 @@ namespace TimeUtils
 		if (ts == -1) return 0;
 		//如果要转成UTC时间，则需要根据时区进行转换
 		if (isToUTC)
-			ts -= getTZOffset() * 3600;
+		{
+			// 99 is the failed-lookup sentinel, not an hour offset (I03-NEW-006).
+			const int32_t zone = getTZOffset();
+			if (zone == 99)
+				return 0;
+			ts -= zone * 3600;
+		}
 		return ts * 1000+ millisec;
 	}
 
@@ -343,8 +476,51 @@ namespace TimeUtils
 		return tm_buf;
 	};
 
+	// Checked proleptic Gregorian date arithmetic, independent of time zone and
+	// DST. Input and result must be valid YYYYMMDD dates with a four-digit year
+	// (1000..9999); result is unchanged on failure.
+	static inline bool tryGetNextDate(uint32_t curDate, int64_t days, uint32_t& result) noexcept
+	{
+		uint32_t weekDay = INVALID_WEEKDAY;
+		if (!tryGetWeekDay(curDate, weekDay))
+			return false;
+		const int64_t year = curDate / 10000;
+		const int64_t month = (curDate / 100) % 100;
+		const int64_t day = curDate % 100;
+		// Days from civil (H. Hinnant), shifted so March is the first month.
+		const int64_t y = year - (month <= 2 ? 1 : 0);
+		const int64_t era = (y >= 0 ? y : y - 399) / 400;
+		const int64_t yoe = y - era * 400;
+		const int64_t doy = (153 * (month + (month > 2 ? -3 : 9)) + 2) / 5 + day - 1;
+		const int64_t doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+		const int64_t base = era * 146097 + doe;
+		// Four-digit years span fewer than 3.3 million days; reject larger moves
+		// before adding so the sum cannot overflow.
+		if (days > 4000000 || days < -4000000)
+			return false;
+		const int64_t z = base + days;
+		const int64_t destEra = (z >= 0 ? z : z - 146096) / 146097;
+		const int64_t destDoe = z - destEra * 146097;
+		const int64_t destYoe = (destDoe - destDoe / 1460 + destDoe / 36524 - destDoe / 146096) / 365;
+		const int64_t destDoy = destDoe - (365 * destYoe + destYoe / 4 - destYoe / 100);
+		const int64_t mp = (5 * destDoy + 2) / 153;
+		const int64_t destDay = destDoy - (153 * mp + 2) / 5 + 1;
+		const int64_t destMonth = mp < 10 ? mp + 3 : mp - 9;
+		const int64_t destYear = destYoe + destEra * 400 + (destMonth <= 2 ? 1 : 0);
+		if (destYear < 1000 || destYear > 9999)
+			return false;
+		result = static_cast<uint32_t>(destYear * 10000 + destMonth * 100 + destDay);
+		return true;
+	}
+
 	[[maybe_unused]] static uint32_t getNextDate(uint32_t curDate, int days = 1) noexcept
 	{
+		// Valid dates use the checked calendar arithmetic, so a failed time zone
+		// lookup or a DST transition cannot move the result (I03-NEW-006). Other
+		// inputs keep the legacy mktime normalization below.
+		uint32_t checked = 0;
+		if (tryGetNextDate(curDate, days, checked))
+			return checked;
 		tm t;	
 		memset(&t,0,sizeof(tm));
 		t.tm_year = curDate/10000 - 1900;
@@ -354,8 +530,10 @@ namespace TimeUtils
 		time_t ts = mktime(&t);
 		ts += days*86400;
 
-		thread_local static tm newT;
-		fasttime(ts, &newT, getTZOffset());
+		tm newT{};
+		const int32_t zone = getTZOffset();
+		if (zone == 99 || fasttime(ts, &newT, zone) != 0)
+			newT = tm{};
 		return (newT.tm_year+1900)*10000 + (newT.tm_mon+1)*100 + newT.tm_mday;
 	}
 

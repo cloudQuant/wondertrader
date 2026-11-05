@@ -80,9 +80,15 @@ struct PushEnv
 		return ord;
 	}
 
-	void pushTrade(bool isLong, WTSOffsetType offset, double vol, double price, const char* usertag)
+	void pushTrade(bool isLong, WTSOffsetType offset, double vol, double price, const char* usertag,
+		const char* tradeId = NULL)
 	{
+		// 决策 K07 c（2026-11-04）：本通道订单的无成交号成交不记账；夹具按真实 provider 给每笔成交唯一成交号
+		// （改前不设成交号）。显式传入 "" 时用于验证拒绝记账。
+		static uint32_t s_tradeSeq = 0;
 		WTSTradeInfo* t = WTSTradeInfo::create("ag2406", "SHFE");
+		const std::string tid = tradeId != NULL ? std::string(tradeId) : ("Q04T" + std::to_string(++s_tradeSeq));
+		t->setTradeID(tid.c_str());
 		t->setDirection(isLong ? WDT_LONG : WDT_SHORT);
 		t->setOffsetType(offset);
 		t->setVolume(vol);
@@ -271,8 +277,9 @@ TEST(q04_trader_push, trade_push_updates_position_volumes_for_both_sides)
 	EXPECT_EQ(0u, env._sink._trades[0]._offset);	//WOT_OPEN -> 0
 	EXPECT_TRUE(env._sink._trades[0]._long);
 	EXPECT_DOUBLE_EQ(5000.0, env._sink._trades[0]._price);
-	//usertag 属于本通道, 但 111 不是本地单号 -> 只更新未完成量
-	EXPECT_DOUBLE_EQ(-4.0, env._adapter.getUndoneQty(kAg));
+	//usertag 属于本通道, 但 111 不是本通道账本中的本地单号:
+	//卡5(Q04-002)逐单账本下无法归属的成交不改变任何订单的未完成量(旧断言期望聚合量被扣成 -4)
+	EXPECT_DOUBLE_EQ(0.0, env._adapter.getUndoneQty(kAg));
 
 	//多头平今: 只减今仓
 	env.pushTrade(true, WOT_CLOSETODAY, 2, 5100.0, "other.1");
@@ -282,7 +289,7 @@ TEST(q04_trader_push, trade_push_updates_position_volumes_for_both_sides)
 	EXPECT_EQ(2u, env._sink._trades[1]._offset);
 	EXPECT_EQ(0u, env._sink._trades[1]._localid) << "非本通道 usertag 的成交 localid 必须是 0";
 	//外部成交不动未完成量
-	EXPECT_DOUBLE_EQ(-4.0, env._adapter.getUndoneQty(kAg));
+	EXPECT_DOUBLE_EQ(0.0, env._adapter.getUndoneQty(kAg));
 
 	//多头平仓: 先扣昨仓再扣今仓
 	env.pushTrade(true, WOT_CLOSE, 9, 5200.0, "other.2");
@@ -364,4 +371,17 @@ TEST(DISABLED_q04_trader_push, null_base_datamgr_and_no_statmap_class)
 	WTSTradeInfo* t2 = WTSTradeInfo::create("ag2406", "SHFE");
 	noBd.onPushTrade(t2);
 	t2->release();
+}
+
+TEST(q04_trader_push, k07c_own_trade_without_trade_id_is_not_booked)
+{
+	PushEnv env;
+	env.loadPosition(10, 10, 0, 0, 10, 10, 0, 0);
+	env.pushTrade(true, WOT_OPEN, 4, 5000.0, "wtp.uft1.111", "");
+	EXPECT_DOUBLE_EQ(10.0, env._adapter.getPosition(kAg, false, 1)) << "an own fill without a trade id must not be booked";
+	EXPECT_EQ(0u, env._sink._trades.size());
+
+	env.pushTrade(true, WOT_OPEN, 4, 5000.0, "wtp.uft1.111", "Q04-K07C-1");
+	EXPECT_DOUBLE_EQ(14.0, env._adapter.getPosition(kAg, false, 1));
+	EXPECT_EQ(1u, env._sink._trades.size());
 }

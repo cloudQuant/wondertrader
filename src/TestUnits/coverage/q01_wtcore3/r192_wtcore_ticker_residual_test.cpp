@@ -6,12 +6,17 @@
  *     :245-268（错过最后一分钟的强制收盘）
  *   - WtSelTicker.cpp:199-204（跨日 0 点）、:213-217（收盘分钟 + session_end）
  *   - WtHftTicker.cpp:195-200（跨日 0 点）、:219-241（强制收盘）
- * 以及一个 WtSelEngine 的公开面缺陷复现（DISABLED）。
+ * 以及一个 WtSelEngine 后复权标志位用例（迭代03 最终验收复核后启用）。
  *
  * 方法：ticker 只走公开 init/run/on_tick/stop。测试 stub 的 IDataReader
  * onMinuteEnd 在计数后短暂 sleep（100ms），主线程看到计数后立即 stop()：
  * 闭合分支已经在执行，线程随后检查 _stopped 退出，不会被 10 秒休市 sleep 拖住。
  * 不访问任何 private 成员，不启长线程，临时目录只用系统临时目录。
+ */
+/*
+ * 迭代03 卡3 3a=A（2026-11-04 用户裁定）：秒为 60 的 tick（如 23:59:60）是非法输入，ticker 拒绝且不推进状态。
+ * 本文件原用 HH:MM:60 把分钟位推到下一分钟；改用同一分钟桶内的合法时刻 HH:MM:59（tick 时间
+ * 235959000/235859000/235759000），分钟位与闭合行为不变。注释中的 “:60” 描述保留为历史说明。
  */
 #include <gtest/gtest.h>
 
@@ -158,9 +163,14 @@ inline WTSTickData* r192_make_tick(R192Market& mkt, uint32_t date, uint32_t atim
     return tick;
 }
 
-inline bool r192_wait_count(const R192Reader& reader, uint32_t n, int loops = 400)
+// 卡3 3a 夹具由 HH:MM:60 改为 HH:MM:59 后，ticker 在 tick 后约 1000ms（left_ticks）才闭合分钟；
+// 原 400×2ms 的计数等待与之竞态（并行/低负载下时过时不过）。改为 5 秒期限等待，只放宽等待上限，
+// 断言不变（I03-NEW-099）。
+inline bool r192_wait_count(const R192Reader& reader, uint32_t n,
+    std::chrono::milliseconds budget = std::chrono::milliseconds(5000))
 {
-    for (int i = 0; i < loops && reader.count.load() < n; ++i)
+    const auto deadline = std::chrono::steady_clock::now() + budget;
+    while (reader.count.load() < n && std::chrono::steady_clock::now() < deadline)
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     return reader.count.load() >= n;
 }
@@ -192,7 +202,7 @@ TEST(R192CtaTicker, RunRollsDateAtMidnight)
     ticker.run();
 
     const uint32_t tickDate = r192_next_date();
-    WTSTickData* tick = r192_make_tick(mkt, tickDate, 235960000);
+    WTSTickData* tick = r192_make_tick(mkt, tickDate, 235959000);
     ticker.on_tick(tick);
     tick->release();
 
@@ -203,9 +213,11 @@ TEST(R192CtaTicker, RunRollsDateAtMidnight)
     EXPECT_TRUE(closed) << "CTA ticker did not close the 00:00 minute";
     EXPECT_EQ(1u, reader.count.load());
     EXPECT_EQ(tickDate, reader.last_date.load());
-    EXPECT_EQ(0u, reader.last_time.load());
-    EXPECT_EQ(TimeUtils::getNextDate(tickDate, 1), engine.get_date());
-    EXPECT_EQ(0u, engine.get_min_time());
+    // 卡3 3a=A（2026-11-04 用户裁定）：午夜闭合保留 2400 标签、日期不规范化为次日 00:00
+    // （改前期望 last_time/min_time=0、日期 +1）。
+    EXPECT_EQ(2400u, reader.last_time.load());
+    EXPECT_EQ(tickDate, engine.get_date());
+    EXPECT_EQ(2400u, engine.get_min_time());
 }
 
 //////////////////////////////////////////////////////////////
@@ -238,7 +250,7 @@ TEST(R192CtaTicker, RunEndsSessionAtLastMinute)
     ticker.run();
 
     const uint32_t tickDate = r192_next_date();
-    WTSTickData* tick = r192_make_tick(mkt, tickDate, 235860000);
+    WTSTickData* tick = r192_make_tick(mkt, tickDate, 235859000);
     ticker.on_tick(tick);
     tick->release();
 
@@ -248,8 +260,9 @@ TEST(R192CtaTicker, RunEndsSessionAtLastMinute)
 
     EXPECT_TRUE(closed) << "CTA ticker did not close 23:59";
     EXPECT_EQ(2359u, reader.last_time.load());
-    EXPECT_EQ(20250110u, reader.last_end.load());
-    EXPECT_EQ(20250110u, engine.getTradingDate());
+    // 卡3 3a=A：首 tick 推进平台时间与交易日（改前期望保持 set_trading_date 设置的 20250110）。
+    EXPECT_EQ(tickDate, reader.last_end.load());
+    EXPECT_EQ(tickDate, engine.getTradingDate());
     EXPECT_EQ(2359u, engine.get_min_time());
     EXPECT_EQ(1u, engine.session_ends);
 }
@@ -285,7 +298,7 @@ TEST(R192CtaTicker, RunForcedCloseAfterMissedLastMinute)
     ticker.run();
 
     const uint32_t tickDate = r192_next_date();
-    WTSTickData* tickA = r192_make_tick(mkt, tickDate, 235760000);
+    WTSTickData* tickA = r192_make_tick(mkt, tickDate, 235759000);
     ticker.on_tick(tickA);
     tickA->release();
 
@@ -330,7 +343,7 @@ TEST(R192SelTicker, RunRollsDateAtMidnight)
     ticker.run();
 
     const uint32_t tickDate = r192_next_date();
-    WTSTickData* tick = r192_make_tick(mkt, tickDate, 235960000);
+    WTSTickData* tick = r192_make_tick(mkt, tickDate, 235959000);
     ticker.on_tick(tick);
     tick->release();
 
@@ -339,9 +352,11 @@ TEST(R192SelTicker, RunRollsDateAtMidnight)
 
     EXPECT_TRUE(closed) << "SEL ticker did not close the 00:00 minute";
     EXPECT_EQ(1u, reader.count.load());
-    EXPECT_EQ(0u, reader.last_time.load());
-    EXPECT_EQ(TimeUtils::getNextDate(tickDate, 1), engine.get_date());
-    EXPECT_EQ(0u, engine.get_min_time());
+    // 卡3 3a=A（2026-11-04 用户裁定）：午夜闭合保留 2400 标签、日期不规范化为次日 00:00
+    // （改前期望 last_time/min_time=0、日期 +1）。
+    EXPECT_EQ(2400u, reader.last_time.load());
+    EXPECT_EQ(tickDate, engine.get_date());
+    EXPECT_EQ(2400u, engine.get_min_time());
 }
 
 //////////////////////////////////////////////////////////////
@@ -368,7 +383,7 @@ TEST(R192SelTicker, RunEndsSessionAtLastMinute)
     ticker.run();
 
     const uint32_t tickDate = r192_next_date();
-    WTSTickData* tick = r192_make_tick(mkt, tickDate, 235860000);
+    WTSTickData* tick = r192_make_tick(mkt, tickDate, 235859000);
     ticker.on_tick(tick);
     tick->release();
 
@@ -403,7 +418,7 @@ TEST(R192HftTicker, RunRollsDateAtMidnight)
     ticker.run();
 
     const uint32_t tickDate = r192_next_date();
-    WTSTickData* tick = r192_make_tick(mkt, tickDate, 235960000);
+    WTSTickData* tick = r192_make_tick(mkt, tickDate, 235959000);
     ticker.on_tick(tick);
     tick->release();
 
@@ -412,9 +427,11 @@ TEST(R192HftTicker, RunRollsDateAtMidnight)
 
     EXPECT_TRUE(closed) << "HFT ticker did not close the 00:00 minute";
     EXPECT_EQ(1u, reader.count.load());
-    EXPECT_EQ(0u, reader.last_time.load());
-    EXPECT_EQ(TimeUtils::getNextDate(tickDate, 1), engine.get_date());
-    EXPECT_EQ(0u, engine.get_min_time());
+    // 卡3 3a=A（2026-11-04 用户裁定）：午夜闭合保留 2400 标签、日期不规范化为次日 00:00
+    // （改前期望 last_time/min_time=0、日期 +1）。
+    EXPECT_EQ(2400u, reader.last_time.load());
+    EXPECT_EQ(tickDate, engine.get_date());
+    EXPECT_EQ(2400u, engine.get_min_time());
 }
 
 //////////////////////////////////////////////////////////////
@@ -444,7 +461,7 @@ TEST(R192HftTicker, RunForcedCloseAfterMissedLastMinute)
     ticker.run();
 
     const uint32_t tickDate = r192_next_date();
-    WTSTickData* tickA = r192_make_tick(mkt, tickDate, 235760000);
+    WTSTickData* tickA = r192_make_tick(mkt, tickDate, 235759000);
     ticker.on_tick(tickA);
     tickA->release();
 
@@ -465,12 +482,9 @@ TEST(R192HftTicker, RunForcedCloseAfterMissedLastMinute)
 }
 
 //////////////////////////////////////////////////////////////////
-// 公开面缺陷复现（BUG-R192-001）：
-// WtEngine::get_adjusting_flag() 丢弃 _data_mgr->get_adjusting_flag() 的返回值，
-// 恒返回 0，后复权 tick 的量/额/持仓复权分支（WtSelEngine.cpp:189-206）不可达。
+// 迭代03 最终验收复核后启用（原禁用：BUG-R192-001，WtEngine::get_adjusting_flag 丢弃返回值）。
 // 期望：flag=7 时 total_volume/volume/open_interest 除以 factor，
 //       total_turnover/turn_over 乘以 factor。
-// 当前实际：量额持仓都不变，仅 OHLC 乘以 factor，故本用例 DISABLED。
 //////////////////////////////////////////////////////////////////
 class R192FlagDtMgr : public WtDtMgr
 {
@@ -517,7 +531,7 @@ public:
     void mark_ready() { _ready = true; }
 };
 
-TEST(R192SelEngine, DISABLED_HfqFlagBitsScaleVolumeTurnoverAndInterest)
+TEST(R192SelEngine, HfqFlagBitsScaleVolumeTurnoverAndInterest)
 {
     R192TempEnv tmp("sel_flag");
     R192Market mkt(0, 2359);

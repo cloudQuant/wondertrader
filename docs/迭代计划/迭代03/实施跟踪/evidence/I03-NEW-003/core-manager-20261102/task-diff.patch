@@ -1,0 +1,336 @@
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/I03-NEW-003/core-manager-20261102/baseline/ParserAdapter.cpp	2026-11-02 13:21:09
++++ /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/ParserAdapter.cpp	2026-11-02 13:21:23
+@@ -715,11 +715,23 @@
+ }
+ 
+ void ParserAdapterMgr::run()
++{
++	(void)runWithResult();
++}
++
++bool ParserAdapterMgr::runWithResult()
+ {
++	bool allSubmitted = true;
+ 	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
+ 	{
+-		it->second->run();
++		if (!it->second || !it->second->run())
++		{
++			allSubmitted = false;
++			WTSLogger::error("Parser '{}' connect command was not submitted", it->first.c_str());
++		}
+ 	}
+ 
+-	WTSLogger::info("{} parsers started", _adapters.size());
++	if (allSubmitted)
++		WTSLogger::info("Connect commands submitted for {} parsers", _adapters.size());
++	return allSubmitted;
+ }
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/I03-NEW-003/core-manager-20261102/baseline/ParserAdapter.h	2026-11-02 13:21:09
++++ /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/ParserAdapter.h	2026-11-02 13:21:23
+@@ -150,6 +150,9 @@
+ 	bool	hasQuarantinedAdapters() const noexcept;
+ 
+ 	void	run();
++	// True only if every connection command in this invocation was submitted.
++	// This does not indicate that any provider has connected or is ready.
++	bool	runWithResult();
+ 
+ 	ParserAdapterPtr getAdapter(const char* id);
+ 
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/I03-NEW-003/core-manager-20261102/baseline/WtRunner.cpp	2026-11-02 13:21:09
++++ /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtRunner/WtRunner.cpp	2026-11-02 13:21:23
+@@ -1308,11 +1308,15 @@
+ 		}
+ 
+ 		_runtime_started.store(true, std::memory_order_release);
++		_parser_commands_submitted.store(false, std::memory_order_release);
+ 		{
+ 			ScopedBoolReset startupGuard(_runtime_starting);
+ 			try
+ 			{
+-				_parsers.run();
++				const bool parserCommandsSubmitted = _parsers.runWithResult();
++				_parser_commands_submitted.store(parserCommandsSubmitted, std::memory_order_release);
++				if (!parserCommandsSubmitted)
++					WTSLogger::error("Not all parser connect commands were submitted; partial startup may have occurred");
+ 				if (!_shutdown_requested.load(std::memory_order_acquire))
+ 					_traders.run();
+ 				if (!_shutdown_requested.load(std::memory_order_acquire))
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/I03-NEW-003/core-manager-20261102/baseline/WtRunner.h	2026-11-02 13:21:09
++++ /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtRunner/WtRunner.h	2026-11-02 13:21:23
+@@ -85,6 +85,12 @@
+ 	 */
+ 	void run(bool bAsync = false);
+ 
++	/** Whether all parser connection commands in the latest start were submitted.
++	 * False includes not yet started, startup in progress, or a rejected command.
++	 * True does not indicate provider connection or readiness.
++	 */
++	bool parserCommandsSubmitted() const { return _parser_commands_submitted.load(); }
++
+ 	/**
+ 	 * @brief Stop this runner and quiesce every executor manager.
+ 	 * @details Call from a control thread. A false result leaves the runner and
+@@ -210,6 +216,7 @@
+ 	bool				_runtime_starting = false;
+ 	bool				_shutdown_in_progress = false;
+ 	std::atomic<bool> _runtime_started;	//!< Runtime config is frozen after run begins.
++	std::atomic<bool> _parser_commands_submitted{false}; //!< Command submission, not provider readiness.
+ 	std::atomic<bool> _shutdown_requested;	//!< Reject config after any shutdown attempt.
+ 	std::vector<ParserAdapterPtr> _failed_parser_owners; //!< Retain partial parser initializations fail-closed.
+ };
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/I03-NEW-003/core-manager-20261102/baseline/WtDtRunner.cpp	2026-11-02 13:25:07
++++ /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtDtPorter/WtDtRunner.cpp	2026-11-02 13:25:17
+@@ -228,6 +228,7 @@
+ 	std::vector<ParserAdapterPtr> parserSnapshot;
+ 	bool startupBlocked = false;
+ 	bool parserRegistryStopped = false;
++	bool initialSnapshot = false;
+ 	try
+ 	{
+ 		std::lock_guard<std::mutex> registryLock(g_parser_registry_mutex);
+@@ -239,6 +240,7 @@
+ 			for (const auto& entry : _parsers._adapters)
+ 				parserSnapshot.emplace_back(entry.second);
+ 			_parser_registry_started = true;
++			initialSnapshot = true;
+ 		}
+ 	}
+ 	catch (...)
+@@ -257,6 +259,7 @@
+ 		return;
+ 	}
+ 	// run() invokes provider connect callbacks and may re-enter the runner.
++	bool allSubmitted = true;
+ 	for (const ParserAdapterPtr& adapter : parserSnapshot)
+ 	{
+ 		if (adapter != NULL)
+@@ -264,14 +267,22 @@
+ 			try
+ 			{
+ 				if (!adapter->run())
+-					WTSLogger::error("Parser {} did not start", adapter->id());
++				{
++					allSubmitted = false;
++					WTSLogger::error("Parser {} connect command was not submitted", adapter->id());
++				}
+ 			}
+ 			catch (...)
+ 			{
++				allSubmitted = false;
+ 				WTSLogger::error("Parser {} connect threw during startup", adapter->id());
+ 			}
+ 		}
++		else
++			allSubmitted = false;
+ 	}
++	if (initialSnapshot)
++		_initial_parser_commands_submitted.store(allSubmitted);
+ 
+     if(!bAsync)
+     {
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/I03-NEW-003/core-manager-20261102/baseline/WtDtRunner.h	2026-11-02 13:25:07
++++ /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtDtPorter/WtDtRunner.h	2026-11-02 13:25:17
+@@ -39,6 +39,9 @@
+ 	void	initialize(const char* cfgFile, const char* logCfg, const char* modDir = "", bool bCfgFile = true, bool bLogCfgFile = true);
+ 	void	start(bool bAsync = false, bool bAlldayMode = false);
+ 	bool	isAlldayMode() const { return _allday_mode; }
++	// Status of the initial start snapshot only; excludes dynamically added parsers.
++	// True means commands were submitted, not that providers are connected.
++	bool initialParserCommandsSubmitted() const { return _initial_parser_commands_submitted.load(); }
+ 
+ 	bool	createExtParser(const char* id);
+ 
+@@ -115,5 +118,6 @@
+ 	bool _startup_blocked; // guarded by parser registry mutex; required init failed
+ 	bool _parser_registry_started; // guarded with ParserAdapterMgr by registry mutex
+ 	bool _parser_registry_stopped; // guarded with ParserAdapterMgr by registry mutex
++	std::atomic<bool> _initial_parser_commands_submitted{false};
+ };
+ 
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/I03-NEW-003/core-manager-20261102/baseline/WtDtPorter.cpp	2026-11-02 13:25:07
++++ /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtDtPorter/WtDtPorter.cpp	2026-11-02 13:25:17
+@@ -65,6 +65,11 @@
+ 	runner.start(bAsync, runner.isAlldayMode());
+ }
+ 
++bool initial_parser_connect_commands_submitted()
++{
++	return getRunner().initialParserCommandsSubmitted();
++}
++
+ const char* get_version()
+ {
+ 	static std::string _ver;
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/I03-NEW-003/core-manager-20261102/baseline/WtDtPorter.h	2026-11-02 13:25:07
++++ /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtDtPorter/WtDtPorter.h	2026-11-02 13:25:17
+@@ -35,6 +35,12 @@
+ 	 */
+ 	EXPORT_FLAG void		start(bool bAsync = false);
+ 
++	/** Initial snapshot only: true means all connect commands were submitted.
++	 * False includes not started or in progress; true does not mean connected.
++	 * Parsers added after the initial snapshot are not included.
++	 */
++	EXPORT_FLAG bool		initial_parser_connect_commands_submitted();
++
+ 	/**
+ 	 * @brief 获取模块版本信息
+ 	 * @details 返回包含平台名称、版本号和编译日期的字符串
+@@ -108,4 +114,4 @@
+ 
+ #ifdef __cplusplus
+ }
+-#endif
+\ No newline at end of file
++#endif
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/I03-NEW-003/core-manager-20261102/baseline/n01_parser_adapter_test.cpp	2026-11-02 13:21:09
++++ /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_parser_adapter_test.cpp	2026-11-02 13:21:52
+@@ -15,6 +15,7 @@
+ #include <algorithm>
+ #include <cstring>
+ #include <filesystem>
++#include <functional>
+ #include <fstream>
+ #include <unistd.h>
+ #include <memory>
+@@ -169,7 +170,7 @@
+ {
+ public:
+     bool init(WTSVariant*) override { return true; }
+-    bool connect() override { ++connect_calls; return connect_result; }
++    bool connect() override { ++connect_calls; if (on_connect) on_connect(); return connect_result; }
+     void registerSpi(IParserSpi* spi) override { _spi = spi; }
+     void subscribe(const CodeSet& contracts) override { subscribed_count = contracts.size(); }
+     void publishQuote(WTSTickData* quote)
+@@ -184,6 +185,7 @@
+     std::size_t subscribed_count = 0;
+     bool connect_result = false;
+     unsigned connect_calls = 0;
++    std::function<void()> on_connect;
+ };
+ 
+ /// 把 cfg 落到唯一临时目录并用 WTSCfgLoader 读回来，得到可用的 WTSVariant
+@@ -312,6 +314,36 @@
+     EXPECT_EQ(api->connect_calls, 2u);
+     adapter.release();
+     EXPECT_FALSE(adapter.run());
++}
++
++TEST(N01ParserAdapter, manager_reports_partial_submission_and_keeps_owners)
++{
++    RecordingStub stub;
++    FakeBaseDataMgr bd;
++    ParserAdapterMgr mgr;
++    auto failed = std::make_shared<ParserAdapter>();
++    auto good = std::make_shared<ParserAdapter>();
++    auto* failedApi = new RecordingParserApi();
++    auto* goodApi = new RecordingParserApi();
++    goodApi->connect_result = true;
++    ASSERT_TRUE(failed->initExt("failed", failedApi, &stub, &bd));
++    ASSERT_TRUE(good->initExt("good", goodApi, &stub, &bd));
++    ASSERT_TRUE(mgr.addAdapter("failed", failed));
++    ASSERT_TRUE(mgr.addAdapter("good", good));
++
++    EXPECT_FALSE(mgr.runWithResult());
++    EXPECT_EQ(failedApi->connect_calls, 1u);
++    EXPECT_EQ(goodApi->connect_calls, 1u);
++    EXPECT_EQ(mgr.getAdapter("failed"), failed);
++    EXPECT_EQ(mgr.getAdapter("good"), good);
++    failedApi->connect_result = true;
++    EXPECT_TRUE(mgr.runWithResult());
++    EXPECT_EQ(failedApi->connect_calls, 2u);
++    EXPECT_EQ(goodApi->connect_calls, 2u);
++    mgr.run(); // Existing void entry point still fans out.
++    EXPECT_EQ(failedApi->connect_calls, 3u);
++    EXPECT_EQ(goodApi->connect_calls, 3u);
++    mgr.release();
+ }
+ 
+ // init 在加载模块前就 return false，但 _stub/_bd_mgr/_id 已经写入
+--- /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/I03-NEW-003/core-manager-20261102/baseline/r28_runner_main_test.cpp	2026-11-02 13:22:01
++++ /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r28_runner_main_test.cpp	2026-11-02 13:23:08
+@@ -32,6 +32,7 @@
+ #include <atomic>
+ #include <filesystem>
+ #include <exception>
++#include <functional>
+ #include <memory>
+ #include <mutex>
+ #include <string>
+@@ -86,6 +87,74 @@
+ 
+ namespace {
+ 
++class R28ParserCommandApi : public IParserApi
++{
++public:
++	bool init(WTSVariant*) override { return true; }
++	bool connect() override { ++calls; if (onConnect) onConnect(); return result; }
++	void registerSpi(IParserSpi*) override {}
++	void subscribe(const CodeSet&) override {}
++	bool result = false;
++	int calls = 0;
++	std::function<void()> onConnect;
++};
++
++class R28ParserCommandEngine final : public WtEngine
++{
++public:
++	void run() override { ++calls; }
++	void on_bar(const char*, const char*, uint32_t, WTSBarStruct*) override {}
++	int calls = 0;
++};
++
++TEST(R28ParserCommands, runner_reports_partial_submission_without_releasing_owners)
++{
++	auto runner = std::make_unique<WtRunner>();
++	auto engine = std::make_unique<R28ParserCommandEngine>();
++	runner->_engine = engine.get();
++	auto failed = std::make_shared<ParserAdapter>();
++	auto good = std::make_shared<ParserAdapter>();
++	auto* failedApi = new R28ParserCommandApi();
++	auto* goodApi = new R28ParserCommandApi();
++	goodApi->result = true;
++	bool callbackSawSubmitted = true;
++	failedApi->onConnect = [&] { callbackSawSubmitted = runner->parserCommandsSubmitted(); };
++	ASSERT_TRUE(failed->initExt("failure", failedApi, engine.get(), &runner->_bd_mgr));
++	ASSERT_TRUE(good->initExt("success", goodApi, engine.get(), &runner->_bd_mgr));
++	ASSERT_TRUE(runner->_parsers.addAdapter("failure", failed));
++	ASSERT_TRUE(runner->_parsers.addAdapter("success", good));
++	EXPECT_FALSE(runner->parserCommandsSubmitted());
++	runner->run(true);
++	EXPECT_FALSE(callbackSawSubmitted);
++	EXPECT_FALSE(runner->parserCommandsSubmitted());
++	EXPECT_EQ(failedApi->calls, 1);
++	EXPECT_EQ(goodApi->calls, 1);
++	EXPECT_EQ(engine->calls, 1);
++	EXPECT_EQ(runner->_parsers.getAdapter("failure"), failed);
++	EXPECT_EQ(runner->_parsers.getAdapter("success"), good);
++	runner.reset();
++}
++
++TEST(R28ParserCommands, runner_reports_success_only_after_connect_returns)
++{
++	auto runner = std::make_unique<WtRunner>();
++	auto engine = std::make_unique<R28ParserCommandEngine>();
++	runner->_engine = engine.get();
++	auto parser = std::make_shared<ParserAdapter>();
++	auto* api = new R28ParserCommandApi();
++	api->result = true;
++	bool callbackSawSubmitted = true;
++	api->onConnect = [&] { callbackSawSubmitted = runner->parserCommandsSubmitted(); };
++	ASSERT_TRUE(parser->initExt("success", api, engine.get(), &runner->_bd_mgr));
++	ASSERT_TRUE(runner->_parsers.addAdapter("success", parser));
++	runner->run(true);
++	EXPECT_FALSE(callbackSawSubmitted);
++	EXPECT_TRUE(runner->parserCommandsSubmitted());
++	EXPECT_EQ(api->calls, 1);
++	EXPECT_EQ(engine->calls, 1);
++	runner.reset();
++}
++
+ /* 每条用例一个前缀，夹具与产物都在共享 cwd 下，必须互不同名 */
+ const char* kTag = "r28wt";
+ 

@@ -14,6 +14,10 @@
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <memory>
+#include <mutex>
+#include <vector>
+#include <cstdlib>
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -34,6 +38,26 @@ inline void write_log(ITraderSpi* sink, WTSLogLevel ll, const char* format, cons
 	sink->handleTraderLog(ll, buffer);
 }
 
+namespace
+{
+// BUG-T6-009: identifies the adapter whose io worker or matcher is running on
+// the current thread, so stop/join never self-joins (card 9d).
+thread_local const TraderMocker* t_mocker_owner = NULL;
+
+// Card 9a/9b: an instance that the factory remover cannot prove has stopped
+// (removal requested from one of its own callback threads) is retained until
+// process exit instead of being destroyed underneath the running thread. The
+// registry is intentionally never destroyed so the retained objects stay
+// reachable.
+void quarantine_mocker(ITraderApi* trader)
+{
+	static std::mutex* mtx = new std::mutex();
+	static std::vector<ITraderApi*>* retained = new std::vector<ITraderApi*>();
+	std::lock_guard<std::mutex> lock(*mtx);
+	retained->push_back(trader);
+}
+}
+
 extern "C"
 {
 	EXPORT_FLAG ITraderApi* createTrader()
@@ -46,6 +70,18 @@ extern "C"
 	{
 		if (NULL != trader)
 		{
+			TraderMocker* mocker = dynamic_cast<TraderMocker*>(trader);
+			if (mocker != NULL && mocker->is_callback_thread())
+			{
+				// Thread exit cannot be confirmed from the thread itself: close
+				// admission, request stop and keep the instance alive.
+				mocker->release();
+				mocker->detach_for_quarantine();
+				quarantine_mocker(trader);
+				std::fprintf(stderr, "[TraderMocker] deleteTrader called on a callback thread; instance quarantined until process exit\n");
+				trader = NULL;
+				return;
+			}
 			delete trader;
 			trader = NULL;
 		}
@@ -134,6 +170,14 @@ TraderMocker::TraderMocker()
 
 TraderMocker::~TraderMocker()
 {
+	if (on_own_thread())
+	{
+		// Destroying the object from its own io worker or matcher would leave that
+		// thread running on freed memory and cannot join it. Fail fast; the factory
+		// remover deleteTrader quarantines such a request instead.
+		std::fprintf(stderr, "[TraderMocker] Direct delete on a callback thread is unsupported; use deleteTrader\n");
+		std::abort();
+	}
 	release();
 
 	if (_orders)
@@ -185,7 +229,12 @@ int TraderMocker::orderInsert(WTSEntrust* entrust)
 	}
 
 	entrust->retain();
-	boost::asio::post(_io_service, [this, entrust](){
+	// A stopped io_context can destroy queued handlers without running them.
+	std::shared_ptr<WTSEntrust> retained(entrust, [](WTSEntrust* item) { item->release(); });
+	boost::asio::post(_io_service, [this, retained](){
+		WTSEntrust* entrust = retained.get();
+		// Lock order for state shared with the matcher: _mtx_awaits, then _mutex_api.
+		StdUniqueLock stateLock(_mtx_awaits);
 		StdUniqueLock lock(_mutex_api);
 
 		WTSContractInfo* ct = entrust->getContractInfo();
@@ -328,16 +377,16 @@ int TraderMocker::orderInsert(WTSEntrust* entrust)
 			ordInfo->setPriceType(entrust->getPriceType());
 			ordInfo->setOrderFlag(entrust->getOrderFlag());
 
-			ITraderSpi* listener = get_listener();
-			if (listener != NULL)
-			{
+			// BUG-R60-001: re-read the gated listener for every delivery; a
+			// release() issued from onRspEntrust must suppress onPushOrder.
+			if (ITraderSpi* listener = get_listener())
 				listener->onRspEntrust(entrust, NULL);
+			if (ITraderSpi* listener = get_listener())
 				listener->onPushOrder(ordInfo);
-			}
 
 			_codes.insert(ct->getFullCode());
 
-			write_log(listener, LL_INFO, "共有{}个品种有待撮合订单", _codes.size());
+			write_log(get_listener(), LL_INFO, "共有{}个品种有待撮合订单", _codes.size());
 
 			if (_orders == NULL)
 				_orders = WTSArray::create();
@@ -360,7 +409,6 @@ int TraderMocker::orderInsert(WTSEntrust* entrust)
 			}
 			err->release();
 		}
-		entrust->release();
 	});
 
 	return 0;
@@ -368,14 +416,19 @@ int TraderMocker::orderInsert(WTSEntrust* entrust)
 
 int32_t TraderMocker::match_once()
 {
+	// The io worker mutates _orders/_codes/_ticks/_trades/_positions/_awaits
+	// under the same state lock, so hold it for the whole matching pass.
+	StdUniqueLock stateLock(_mtx_awaits);
 	if (_terminated.load(std::memory_order_acquire) || _orders == NULL || _orders->size() == 0 || _ticks == NULL)
 		return 0;
 	
 	int32_t count = 0;
 	for (const std::string& fullcode : _codes)
 	{
+		// BUG-R60-001: leave the pass at a code boundary but still persist the
+		// fills already applied in it (see the tail below).
 		if (_terminated.load(std::memory_order_acquire))
-			return count;
+			break;
 
 		std::string code, exchg;
 		auto pos = fullcode.find(".");
@@ -391,7 +444,6 @@ int32_t TraderMocker::match_once()
 		WTSTickData* curTick = (WTSTickData*)_ticks->grab(fullcode);
 		if (curTick && strcmp(curTick->code(), ct->getCode())==0)
 		{
-			StdUniqueLock lock(_mtx_awaits);
 			[[maybe_unused]] uint64_t tickTime = (uint64_t)curTick->actiondate() * 1000000000 + curTick->actiontime();
 			if (decimal::gt(curTick->price(), 0) /*&& tickTime >= _last_match_time*/)
 			{
@@ -401,6 +453,10 @@ int32_t TraderMocker::match_once()
 
 				for (auto it = _awaits->begin(); it != _awaits->end(); it++)
 				{
+					// BUG-R60-001: a stop requested from a callback of this pass
+					// ends matching at the next order boundary.
+					if (_terminated.load(std::memory_order_acquire))
+						break;
 					WTSOrderInfo* ordInfo = (WTSOrderInfo*)it->second;
 					if (ordInfo->getVolLeft() == 0 ||
 						strcmp(ordInfo->getCode(), ct->getCode()) != 0 ||
@@ -445,6 +501,9 @@ int32_t TraderMocker::match_once()
 					std::vector<uint32_t> ayVol = split_volume((uint32_t)maxVolume, (uint32_t)_min_qty, (uint32_t)_max_qty);
 					for (uint32_t curVol : ayVol)
 					{
+						// BUG-R60-001: do not start another fill after a stop request.
+						if (_terminated.load(std::memory_order_acquire))
+							break;
 
 						WTSTradeInfo* trade = WTSTradeInfo::create(curTick->code(), curTick->exchg());
 						trade->setDirection(ordInfo->getDirection());
@@ -519,12 +578,14 @@ int32_t TraderMocker::match_once()
 						}
 						
 
-		ITraderSpi* listener = get_listener();
-		if (listener)
 						{
 							StdUniqueLock lock(_mutex_api);
-			listener->onPushOrder(ordInfo);
-			listener->onPushTrade(trade);
+							// BUG-R60-001: re-read the gated listener per delivery so a
+							// release() from onPushOrder suppresses onPushTrade.
+							if (ITraderSpi* listener = get_listener())
+								listener->onPushOrder(ordInfo);
+							if (ITraderSpi* listener = get_listener())
+								listener->onPushTrade(trade);
 						}
 
 						if (_trades == NULL)
@@ -567,6 +628,12 @@ bool TraderMocker::init(WTSVariant *params)
 		std::lock_guard<std::mutex> requestLock(_request_mutex);
 		if (_requests_closed)
 			return false;
+		// Card 9c: reject repeated initialization and keep the original instance.
+		if (_initialized)
+		{
+			std::fprintf(stderr, "[TraderMocker] Repeated init rejected\n");
+			return false;
+		}
 	}
 	if (params == NULL)
 		return false;
@@ -624,8 +691,9 @@ bool TraderMocker::init(WTSVariant *params)
 	// Never report a successful reinitialization after admission was closed.
 	{
 		std::lock_guard<std::mutex> requestLock(_request_mutex);
-		if (_requests_closed)
+		if (_requests_closed || _initialized)
 			return false;
+		_initialized = true;
 	}
 	return true;
 }
@@ -720,19 +788,83 @@ void TraderMocker::save_positions()
 	}
 }
 
-void TraderMocker::release()
+bool TraderMocker::on_own_thread() const
 {
+	return t_mocker_owner == this;
+}
+
+void TraderMocker::request_stop_from_callback()
+{
+	// Card 9d: a synchronous re-entry from a callback only closes admission and
+	// requests stop. The join is completed by a later release() or destructor on
+	// an external thread, or the instance is quarantined by deleteTrader.
 	{
 		std::lock_guard<std::mutex> requestLock(_request_mutex);
 		_requests_closed = true;
 	}
+	// BUG-R60-001: isolate every later callback of this instance from the host.
+	_delivery_closed.store(true, std::memory_order_release);
 	_terminated.store(true, std::memory_order_release);
+	_io_service.stop();
+}
 
-	if (_thrd_match && _thrd_match->joinable())
+void TraderMocker::join_matcher_locked()
+{
+	// Caller holds _release_mutex and is not the matcher thread.
+	StdThreadPtr matcher;
 	{
-		_thrd_match->join();
+		std::lock_guard<std::mutex> requestLock(_request_mutex);
+		matcher.swap(_thrd_match);
 	}
-	_thrd_match.reset();
+	if (matcher && matcher->joinable())
+		matcher->join();
+	_match_started.store(false, std::memory_order_release);
+}
+
+void TraderMocker::detach_for_quarantine()
+{
+	// Never block here: an external release() may hold the lock while joining
+	// this very thread, in which case that release() completes the join.
+	std::unique_lock<std::mutex> releaseLock(_release_mutex, std::try_to_lock);
+	if (!releaseLock.owns_lock())
+		return;
+	StdThreadPtr matcher;
+	{
+		std::lock_guard<std::mutex> requestLock(_request_mutex);
+		matcher.swap(_thrd_match);
+	}
+	if (matcher && matcher->joinable())
+		matcher->detach();
+	if (_thrd_worker && _thrd_worker->joinable())
+		_thrd_worker->detach();
+	_match_started.store(false, std::memory_order_release);
+}
+
+void TraderMocker::release()
+{
+	if (on_own_thread())
+	{
+		request_stop_from_callback();
+		return;
+	}
+
+	// Concurrent external release()/disconnect()/destructor calls are serialized;
+	// the first completes the stop/join, later ones are no-ops.
+	std::lock_guard<std::mutex> releaseLock(_release_mutex);
+	{
+		// Every admitted request retains and posts while holding this mutex, so
+		// once it is closed no new work can reach the io worker.
+		std::lock_guard<std::mutex> requestLock(_request_mutex);
+		_requests_closed = true;
+	}
+	// BUG-R60-001: no delivery starts after the stop request; deliveries already
+	// in progress finish before the joins below return.
+	_delivery_closed.store(true, std::memory_order_release);
+	_terminated.store(true, std::memory_order_release);
+	if (_released)
+		return;
+
+	join_matcher_locked();
 
 	if (_thrd_worker)
 	{
@@ -751,6 +883,22 @@ void TraderMocker::release()
 		delete _b_socket;
 		_b_socket = NULL;
 	}
+
+	// BUG-T6-009: both threads are joined, so no matcher pass or cancel handler
+	// can touch the await cache. Return its references to the still-pending
+	// orders exactly once; orders already matched or canceled were removed (and
+	// released) by match_once()/orderAction() and are no longer in the cache.
+	// The creation references remain owned by _orders and are released by the
+	// destructor.
+	{
+		StdUniqueLock lock(_mtx_awaits);
+		if (_awaits != NULL)
+		{
+			_awaits->release();
+			_awaits = NULL;
+		}
+	}
+	_released = true;
 }
 
 void TraderMocker::registerSpi(ITraderSpi *listener)
@@ -794,11 +942,22 @@ void TraderMocker::connect()
 		std::fprintf(stderr, "[TraderMocker] Cannot connect after release\n");
 		return;
 	}
+	if (_thrd_worker)
+	{
+		requestLock.unlock();
+		std::fprintf(stderr, "[TraderMocker] Already connected\n");
+		return;
+	}
 	reconn_udp();
 
-	_thrd_worker.reset(new StdThread(boost::bind(&boost::asio::io_context::run, &_io_service)));
+	_thrd_worker.reset(new StdThread([this]() {
+		t_mocker_owner = this;
+		_io_service.run();
+		t_mocker_owner = NULL;
+	}));
 
 	boost::asio::post(_io_service, [this](){
+		StdUniqueLock stateLock(_mtx_awaits);
 		StdUniqueLock lock(_mutex_api);
 
 		load_positions();
@@ -810,26 +969,29 @@ void TraderMocker::connect()
 
 void TraderMocker::disconnect()
 {
-	if (_terminated.load(std::memory_order_acquire))
-		return;
-
-	_terminated.store(true, std::memory_order_release);
-
-	if (_thrd_match && _thrd_match->joinable())
-	{
-		_thrd_match->join();
-	}
-	_thrd_match.reset();
+	// BUG-R60-001 (E contract): disconnect ends this session object exactly like
+	// release(): admission and delivery close, the matcher and io worker are
+	// joined (deferred to an external caller when invoked from a callback, card
+	// 9d) and the UDP socket is closed. A released or disconnected instance is
+	// terminal (card 9c); reconnecting uses a new TraderMocker instance, so no
+	// callback or queued request of the old session can reach the new one.
+	release();
 }
 
 bool TraderMocker::isConnected()
 {
-	return _thrd_match != NULL;
+	return _match_started.load(std::memory_order_acquire);
 }
 
 int TraderMocker::login(const char* /*user*/, const char* /*pass*/, const char* /*productInfo*/)
 {
+	// Do not start a matcher or queue a successful login after release has
+	// closed admission.  Replacing a live std::thread would terminate.
+	std::lock_guard<std::mutex> requestLock(_request_mutex);
+	if (_requests_closed || _terminated.load(std::memory_order_acquire) || _thrd_match)
+		return -1;
 	_thrd_match.reset(new StdThread([this]() {
+		t_mocker_owner = this;
 		while (!_terminated.load(std::memory_order_acquire))
 		{
 			match_once();
@@ -837,9 +999,13 @@ int TraderMocker::login(const char* /*user*/, const char* /*pass*/, const char* 
 			//等待5毫秒
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
+		t_mocker_owner = NULL;
 	}));
+	_match_started.store(true, std::memory_order_release);
 
 	boost::asio::post(_io_service, [this](){
+		// BUG-R60-001: serialized with the matcher like every other delivery.
+		StdUniqueLock stateLock(_mtx_awaits);
 		StdUniqueLock lock(_mutex_api);
 
 		if (ITraderSpi* listener = get_listener())
@@ -860,8 +1026,10 @@ int TraderMocker::orderAction(WTSEntrustAction* action)
 	if (_requests_closed)
 		return -1;
 	action->retain();
+	std::shared_ptr<WTSEntrustAction> retained(action, [](WTSEntrustAction* item) { item->release(); });
 	
-	boost::asio::post(_io_service, [this, action](){
+	boost::asio::post(_io_service, [this, retained](){
+		WTSEntrustAction* action = retained.get();
 		StdUniqueLock lck(_mtx_awaits);	//一定要把awaits锁起来,不然可能会导致一边撮合一边撤单
 		const std::string order_id = action->getOrderID();
 		WTSOrderInfo* ordInfo = _awaits == NULL ? NULL : (WTSOrderInfo*)_awaits->grab(order_id.c_str());
@@ -874,13 +1042,11 @@ int TraderMocker::orderAction(WTSEntrustAction* action)
 		 */
 		if(ordInfo == NULL)
 		{
-			ITraderSpi* listener = get_listener();
-			write_log(listener, LL_ERROR, "订单{}不存在或者已完成", order_id);
+			write_log(get_listener(), LL_ERROR, "订单{}不存在或者已完成", order_id);
 			WTSError* err = WTSError::create(WEC_ORDERCANCEL, "订单不存在或者处于不可撤销状态");
-			if (listener)
+			if (ITraderSpi* listener = get_listener())
 				listener->onTraderError(err);
 			err->release();
-			action->release();
 			return;
 		}
 
@@ -931,7 +1097,6 @@ int TraderMocker::orderAction(WTSEntrustAction* action)
 
 		ordInfo->release();
 		_awaits->remove(order_id.c_str());
-		action->release();
 
 		save_positions();
 	});
@@ -945,6 +1110,9 @@ int TraderMocker::queryAccount()
 	if (_requests_closed)
 		return -1;
 	boost::asio::post(_io_service, [this](){
+		// BUG-R60-001: every delivery is serialized with the matcher by the
+		// state lock (lock order _mtx_awaits, then _mutex_api).
+		StdUniqueLock stateLock(_mtx_awaits);
 		WTSArray* ay = WTSArray::create();
 		WTSAccountInfo* accountInfo = WTSAccountInfo::create();
 		accountInfo->setCurrency("CNY");
@@ -980,6 +1148,7 @@ int TraderMocker::queryPositions()
 	if (_requests_closed)
 		return -1;
 	boost::asio::post(_io_service, [this](){
+		StdUniqueLock stateLock(_mtx_awaits);
 		WTSArray* ayPos = WTSArray::create();
 
 		for(auto& v : _positions)
@@ -1032,6 +1201,7 @@ int TraderMocker::queryOrders()
 	if (_requests_closed)
 		return -1;
 	boost::asio::post(_io_service, [this](){
+		StdUniqueLock stateLock(_mtx_awaits);
 		StdUniqueLock lock(_mutex_api);
 
 		if (ITraderSpi* listener = get_listener())
@@ -1047,6 +1217,7 @@ int TraderMocker::queryTrades()
 	if (_requests_closed)
 		return -1;
 	boost::asio::post(_io_service, [this](){
+		StdUniqueLock stateLock(_mtx_awaits);
 		StdUniqueLock lock(_mutex_api);
 
 		if (ITraderSpi* listener = get_listener())
@@ -1123,15 +1294,18 @@ void TraderMocker::extract_buffer(uint32_t length, bool /*isBroad*/ /* = true */
 		if (length < sizeof(UDPTickPacket))
 			return;
 
-		UDPTickPacket packet;
-		memcpy(&packet, _b_buffer.data(), sizeof(packet));
+		// The packed wire payload starts four bytes after the header and is not
+		// necessarily aligned for WTSTickStruct. Copy into an aligned object.
+		WTSTickStruct tick;
+		memcpy(&tick, _b_buffer.data() + sizeof(UDPPacketHead), sizeof(tick));
 		thread_local static char fullcode[64] = { 0 };
-		fmtutil::format_to(fullcode, "{}.{}", packet._data.exchg, packet._data.code);
+		fmtutil::format_to(fullcode, "{}.{}", tick.exchg, tick.code);
+		StdUniqueLock stateLock(_mtx_awaits);
 		auto it = _codes.find(fullcode);
 		if (it == _codes.end())
 			return;
 
-		WTSTickData* curTick = WTSTickData::create(packet._data);
+		WTSTickData* curTick = WTSTickData::create(tick);
 		
 		if (_ticks == NULL)
 			_ticks = TickCache::create();

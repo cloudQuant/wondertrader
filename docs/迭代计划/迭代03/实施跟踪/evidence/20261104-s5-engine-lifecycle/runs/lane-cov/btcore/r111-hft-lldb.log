@@ -1,0 +1,53 @@
+(lldb) target create "/tmp/wt-i03-s5-engine-lifecycle-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btcore"
+Current executable set to '/tmp/wt-i03-s5-engine-lifecycle-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btcore' (arm64).
+(lldb) settings set -- target.run-args  "--gtest_filter=R111HftMocker.*"
+(lldb) process launch
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[0;33mNote: Google Test filter = R111HftMocker.*
+[m[0;32m[==========] [mRunning 1 test from 1 test suite.
+[0;32m[----------] [mGlobal test environment set-up.
+[0;32m[----------] [m1 test from R111HftMocker
+[0;32m[ RUN      ] [mR111HftMocker.CancelTaskAndProcOrderGuards
+CoverageTests_btcore(1780,0x1f454de80) malloc: *** error for object 0x7c70003ffff: pointer being freed was not allocated
+CoverageTests_btcore(1780,0x1f454de80) malloc: *** set a breakpoint in malloc_error_break to debug
+Process 1780 launched: '/tmp/wt-i03-s5-engine-lifecycle-cov/build_x64/Debug/bin/TestUnits/CoverageTests_btcore' (arm64)
+Process 1780 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGABRT
+    frame #0: 0x00000001883925e8 libsystem_kernel.dylib`__pthread_kill + 8
+libsystem_kernel.dylib`__pthread_kill:
+->  0x1883925e8 <+8>:  b.lo   0x188392608               ; <+40>
+    0x1883925ec <+12>: pacibsp 
+    0x1883925f0 <+16>: stp    x29, x30, [sp, #-0x10]!
+    0x1883925f4 <+20>: mov    x29, sp
+Target 0: (CoverageTests_btcore) stopped.
+(lldb) bt 30
+* thread #1, queue = 'com.apple.main-thread', stop reason = signal SIGABRT
+  * frame #0: 0x00000001883925e8 libsystem_kernel.dylib`__pthread_kill + 8
+    frame #1: 0x00000001883cd8d8 libsystem_pthread.dylib`pthread_kill + 296
+    frame #2: 0x00000001882d4644 libsystem_c.dylib`abort + 148
+    frame #3: 0x00000001881cda40 libsystem_malloc.dylib`malloc_vreport + 892
+    frame #4: 0x00000001881d128c libsystem_malloc.dylib`malloc_report + 64
+    frame #5: 0x00000001881d6648 libsystem_malloc.dylib`___BUG_IN_CLIENT_OF_LIBMALLOC_POINTER_BEING_FREED_WAS_NOT_ALLOCATED + 76
+    frame #6: 0x00000001882e16f0 libc++.1.dylib`std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>::~basic_string() + 44
+    frame #7: 0x0000000100660fb0 CoverageTests_btcore`HisDataReplayer::DispatchedTickSnapshot::~DispatchedTickSnapshot(this=0x000000010580c158) at HisDataReplayer.h:1316:9
+    frame #8: 0x000000010061dce4 CoverageTests_btcore`HisDataReplayer::DispatchedTickSnapshot::~DispatchedTickSnapshot(this=0x000000010580c158) at HisDataReplayer.h:1316:9
+    frame #9: 0x000000010063ae84 CoverageTests_btcore`std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::DispatchedTickSnapshot>::~pair(this=0x000000010580c140) at pair.h:63:29
+    frame #10: 0x000000010063ae54 CoverageTests_btcore`std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::DispatchedTickSnapshot>::~pair(this=0x000000010580c140) at pair.h:63:29
+    frame #11: 0x000000010063ae2c CoverageTests_btcore`std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::DispatchedTickSnapshot>>::destroy[abi:ne200100](this=0x0000000105829e28, __p=0x000000010580c140) at allocator.h:156:87
+    frame #12: 0x000000010063adf0 CoverageTests_btcore`void std::__1::allocator_traits<std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::DispatchedTickSnapshot>>>::destroy[abi:ne200100]<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::DispatchedTickSnapshot>, 0>(__a=0x0000000105829e28, __p=0x000000010580c140) at allocator_traits.h:324:9
+    frame #13: 0x000000010063ad98 CoverageTests_btcore`std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::DispatchedTickSnapshot>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::DispatchedTickSnapshot>>>::__base_destruct_at_end[abi:ne200100](this=0x0000000105829e18 size=error: Start of vector data begins after end pointer., __new_last=0x000000010582a690) at vector.h:749:7
+    frame #14: 0x000000010063ac88 CoverageTests_btcore`std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::DispatchedTickSnapshot>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::DispatchedTickSnapshot>>>::clear[abi:ne200100](this=0x0000000105829e18 size=error: Start of vector data begins after end pointer.) at vector.h:531:5
+    frame #15: 0x0000000100600b48 CoverageTests_btcore`ankerl::unordered_dense::v4_0_4::detail::table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::DispatchedTickSnapshot, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, HisDataReplayer::DispatchedTickSnapshot>>, ankerl::unordered_dense::v4_0_4::bucket_type::standard, false>::clear(this=0x0000000105829e18) at unordered_dense.h:1302:18
+    frame #16: 0x0000000100600db0 CoverageTests_btcore`HisDataReplayer::reset(this=0x0000000105829380) at HisDataReplayer.cpp:824:26
+    frame #17: 0x0000000100603a6c CoverageTests_btcore`HisDataReplayer::prepare(this=0x0000000105829380) at HisDataReplayer.cpp:1158:3
+    frame #18: 0x00000001003fd520 CoverageTests_btcore`R111HftMocker::SetUp(this=0x0000000105829370) at r111_hft_mocker_match_edge_test.cpp:72:3
+    frame #19: 0x000000010088cddc CoverageTests_btcore`void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) + 104
+    frame #20: 0x000000010088cccc CoverageTests_btcore`testing::Test::Run() + 120
+    frame #21: 0x000000010088d904 CoverageTests_btcore`testing::TestInfo::Run() + 212
+    frame #22: 0x000000010088e388 CoverageTests_btcore`testing::TestSuite::Run() + 456
+    frame #23: 0x00000001008997b0 CoverageTests_btcore`testing::internal::UnitTestImpl::RunAllTests() + 1328
+    frame #24: 0x000000010089915c CoverageTests_btcore`bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) + 104
+    frame #25: 0x00000001008990c0 CoverageTests_btcore`testing::UnitTest::Run() + 124
+    frame #26: 0x00000001006fac54 CoverageTests_btcore`main + 68
+    frame #27: 0x000000018800fe00 dyld`start + 6992
+(lldb) quit

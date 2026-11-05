@@ -1,0 +1,10 @@
+4c4
+< get_filename_component(REPO "${CMAKE_CURRENT_SOURCE_DIR}/../../../.." ABSOLUTE)
+---
+> set(REPO "/Users/yunjinqi/Documents/new_projects/wondertrader")
+8,9c8,9
+< set(COMMON_INCLUDES "${REPO}" "${REPO}/src" "${REPO}/src/WtDtHelper" /opt/homebrew/Cellar/boost/1.88.0/include /opt/homebrew/Cellar/zstd/1.5.7_1/include /opt/homebrew/Cellar/spdlog/1.15.3/include /opt/homebrew/Cellar/fmt/11.2.0/include /opt/homebrew/Cellar/googletest/1.17.0/include)
+< set(COMMON_LIBS /tmp/wt-i03-r41-drain/libs/libWTSTools.a /tmp/wt-i03-r41-drain/libs/libWTSUtils.a /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.dylib /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_thread.dylib /opt/homebrew/Cellar/zstd/1.5.7_1/lib/libzstd.1.5.7.dylib iconv dl pthread)
+---
+> set(COMMON_INCLUDES "${REPO}" "${REPO}/src" "${REPO}/src/WtDtHelper" /tmp/wt-i03-reverify-20261103/boost-include /opt/homebrew/Cellar/zstd/1.5.7_1/include /opt/homebrew/Cellar/spdlog/1.15.3/include /opt/homebrew/Cellar/fmt/11.2.0/include /opt/homebrew/Cellar/googletest/1.17.0/include)
+> set(COMMON_LIBS /tmp/wt-i03-reverify-20261103/build/build_x64/Debug/libs/libWTSTools.a /tmp/wt-i03-reverify-20261103/build/build_x64/Debug/libs/libWTSUtils.a /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.dylib /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_thread.dylib /opt/homebrew/Cellar/zstd/1.5.7_1/lib/libzstd.1.5.7.dylib iconv dl pthread)

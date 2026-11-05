@@ -1,0 +1,10 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/WtPorter/WtRtRunner.h	2026-11-04 09:20:41
++++ src/WtPorter/WtRtRunner.h	2026-11-04 20:30:09
+@@ -994,6 +994,7 @@
+ 	bool _manager_release_in_progress = false; // guarded by _status_config_mutex
+ 	uint32_t _release_waiters = 0; // guarded by _status_config_mutex
+ 	std::atomic<bool> _status_ready{ false };
++	std::atomic<bool> _host_callbacks_closed{ false }; // I03-NEW-046: set when the runner is destroyed
+ 	/**
+ 	 * @brief 是否退出
+ 	 */

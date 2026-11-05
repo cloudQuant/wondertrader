@@ -1,0 +1,15 @@
+--- src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/baseline/lanes/t_ParserXTP/t27_seam.hpp	2026-11-04 08:47:58
++++ src/TestUnits/coverage/t_ParserXTP/t27_seam.hpp	2026-11-04 09:06:28
+@@ -84,6 +84,12 @@
+ 		StdThreadPtr _thrd_worker;
+ 		std::shared_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type>> _worker;
+ 		std::atomic<bool> _worker_stopping;
++
++		/* ParserXTP.h 末尾追加的卡9 生命周期状态（同序同型） */
++		wt_vendor_md_v2::Lifecycle _lc;
++		std::mutex _sdk_mutex;
++		std::recursive_mutex _data_mutex;
++		bool _init_done;
+ 	};
+ 
+ 	static_assert(sizeof(ParserXTPMirror) == sizeof(ParserXTP),

@@ -46,12 +46,14 @@ using namespace wtp;
 /* 生产 TU（QuoteFactory/main.cpp:50）的自由函数，未在头文件里声明 */
 const char* getBinDir();
 /* main.cpp:70 */
-void initParsers(WTSVariant* cfg);
+bool initParsers(WTSVariant* cfg);
 /* main.cpp:96 and main.cpp:264 (renamed by the coverage target) */
 bool initialize(const std::string& filename);
 int wt_coverage_main_quotefactory(int argc, char* argv[]);
 /* main.cpp:27 —— 生产 TU 里的全局适配器表，用来给 initParsers() 的落表结果做可证伪断言 */
 extern ParserAdapterMgr g_parsers;
+/* main.cpp: failed active parsers that still own an API (none for a missing module) */
+extern std::vector<ParserAdapterPtr> g_failedParsers;
 
 /* clang 覆盖率运行时：显式落盘（子进程用 _exit 收尾时唯一可靠的写盘方式） */
 extern "C" int __llvm_profile_write_file(void);
@@ -204,8 +206,11 @@ parsers:
     module: R104NoSuchParserModule
 -   id: ""
     active: true
+    required: false
     module: R104NoSuchParserModule
 )YAML";
+// 决策 K13=B（2026-11-04）：parser 缺省 required=true，失败即启动失败；本夹具意在走到 initialize 末尾，
+// 故把失败的 active 项标为 required: false（改前无此字段，失败项被跳过后照常返回 true）。
 
 /* commodity/contract 走数组分支（:122~128、:138~144），parsers 走「侧文件可加载」（:224~235） */
 const char* kArrayCfg = R"YAML(basefiles:
@@ -390,7 +395,12 @@ TEST(r104_quote_initialize, unloadable_parser_side_file_logs_and_returns)
  * 二、initParsers()（main.cpp:70~94）直接驱动
  * ====================================================================== */
 
-TEST(r104_quote_initparsers, active_entries_with_and_without_id_land_in_manager)
+// BUG-R104-002 (iteration 03): the original acceptance requires that a missing
+// active module is neither counted as loaded nor registered as a runnable
+// parser. The previous oracle (both failed entries land in g_parsers) encoded
+// the defect; it now checks that nothing is registered and nothing is retained
+// (no API was created, so no quarantine owner is needed).
+TEST(r104_quote_initparsers, failed_active_entries_are_not_registered)
 {
 	const char* body = R"YAML(parsers:
 -   id: r104p_direct
@@ -416,11 +426,13 @@ TEST(r104_quote_initparsers, active_entries_with_and_without_id_land_in_manager)
 	 * :71~94 全长：:72 循环、:74~76 active:false continue、
 	 * :78~90 两条 active（第二条 id 为空 -> :81~86 自动 id）、:93 汇总日志
 	 */
-	initParsers(parsers);
+	// K13=B：两条 active 项缺省 required=true 且均失败 -> 返回 false
+	EXPECT_FALSE(initParsers(parsers));
 
-	EXPECT_EQ(g_parsers.size(), before + 2u);
-	EXPECT_NE(g_parsers.getAdapter("r104p_direct"), nullptr);
+	EXPECT_EQ(g_parsers.size(), before);
+	EXPECT_EQ(g_parsers.getAdapter("r104p_direct"), nullptr);
 	EXPECT_EQ(g_parsers.getAdapter("r104p_inactive"), nullptr);
+	EXPECT_TRUE(g_failedParsers.empty());
 
 	root->release();
 }
@@ -429,12 +441,10 @@ TEST(r104_quote_initparsers, active_entries_with_and_without_id_land_in_manager)
  * 三、DISABLED_：确认会崩 / 会挂的分支
  * ====================================================================== */
 
-TEST(r104_quote_initialize, DISABLED_config_without_basefiles_derefs_null)
+TEST(r104_quote_initialize, config_without_basefiles_derefs_null)
 {
 	/*
-	 * D1 main.cpp:108 `cfgBF = config->get("basefiles")` 没有判空，
-	 *    :109 直接 cfgBF->get("session") -> 空指针（同一份代码在 WtRunner.cpp:77~78 也是）。
-	 *    同族缺陷已登记为 BUG-R104-001；本迭代不改产品代码，这里只留记录。
+	 * 迭代03 最终验收复核后启用（原禁用：D1 缺 basefiles 空指针，BUG-R104-001）。
 	 */
 	write_fixture("nobase.yaml",
 		"allday: true\n"
@@ -452,4 +462,46 @@ TEST(r104_quote_initialize, DISABLED_state_monitor_branch_starts_threads)
 	 *    需要回收的行：:192~194 + :258~262（约 7 行）。
 	 */
 	SUCCEED() << "state monitor branch intentionally left disabled";
+}
+
+/* =========================================================================
+ * 迭代03 第五会话主线程：决策 K13=B / K14（parser 的 required 选项）
+ * ====================================================================== */
+
+TEST(r104_quote_initparsers, k13_optional_failed_parser_does_not_fail_startup)
+{
+	write_fixture("k13_optional.yaml", R"YAML(parsers:
+-   id: k13_optional
+    active: true
+    required: false
+    module: R104NoSuchParserModule
+)YAML");
+	WTSVariant* root = WTSCfgLoader::load_from_file(fixture("k13_optional.yaml").c_str());
+	ASSERT_NE(root, nullptr);
+	const uint32_t before = g_parsers.size();
+	EXPECT_TRUE(initParsers(root->get("parsers")));
+	EXPECT_EQ(g_parsers.size(), before);
+	EXPECT_EQ(g_parsers.getAdapter("k13_optional"), nullptr);
+	root->release();
+}
+
+TEST(r104_quote_initialize, k13_required_failed_parser_fails_startup)
+{
+	write_fixture("sessions.json", kSessions);
+	write_fixture("commodities.json", kCommodities);
+	write_fixture("contracts.json", kContracts);
+	write_fixture("holidays.json", kHolidays);
+	write_fixture("hot.json", kHotRules);
+	write_fixture("second.json", kHotRules);
+	write_fixture("rules.json", kHotRules);
+	std::string cfg = kFullCfg;
+	const std::string optional = "    required: false\n";
+	const std::size_t at = cfg.find(optional);
+	ASSERT_NE(at, std::string::npos);
+	cfg.erase(at, optional.size());	// 去掉 required: false -> 缺省 required=true
+	write_fixture("k13_required.yaml", cfg.c_str());
+
+	ChildOutcome r = initialize_in_child(fixture("k13_required.yaml"));
+	ASSERT_TRUE(r.exited) << "signal=" << r.signal;
+	EXPECT_NE(r.out.find("initialize=false"), std::string::npos) << r.out;
 }

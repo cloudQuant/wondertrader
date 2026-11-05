@@ -1,0 +1,72 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from I03S5TimeZoneFailure
+[ RUN      ] I03S5TimeZoneFailure.A_FailedLookupIsNotUsedAsAnHourOffset
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:57: Failure
+Value of: curDate == refDate || curDate == afterDate
+  Actual: false
+Expected: true
+20261108 vs 20261104
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:58: Failure
+Value of: date == refDate || date == afterDate
+  Actual: false
+Expected: true
+20261108
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:59: Failure
+Value of: stamp / 1000000 == refDate || stamp / 1000000 == afterDate
+  Actual: false
+Expected: true
+20261108145753
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:61: Failure
+Expected: (curMin / 10000) <= (afterTime / 1000 / 10000 + (afterDate != refDate ? 24 : 0)), actual: 14 vs 11
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:65: Failure
+Expected equality of these values:
+  20240301u
+    Which is: 20240301
+  TimeUtils::getNextDate(20240229, 1)
+    Which is: 19700101
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:66: Failure
+Expected equality of these values:
+  19691231u
+    Which is: 19691231
+  TimeUtils::getNextDate(19700101, -1)
+    Which is: 19691230
+
+[  FAILED  ] I03S5TimeZoneFailure.A_FailedLookupIsNotUsedAsAnHourOffset (54 ms)
+[ RUN      ] I03S5TimeZoneFailure.B_ClockFailurePublishesAnInvalidDate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:83: Failure
+Value of: TimeUtils::tryGetWeekDay(curDate, weekDay)
+  Actual: true
+Expected: false
+20261104
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:85: Failure
+Value of: TimeUtils::tryGetWeekDay(date, weekDay)
+  Actual: true
+Expected: false
+20261104
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_date_mapping_20261104s5/tz_test.cpp:86: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  time
+    Which is: 115753105
+
+[  FAILED  ] I03S5TimeZoneFailure.B_ClockFailurePublishesAnInvalidDate (0 ms)
+[----------] 2 tests from I03S5TimeZoneFailure (54 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (54 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] I03S5TimeZoneFailure.A_FailedLookupIsNotUsedAsAnHourOffset
+[  FAILED  ] I03S5TimeZoneFailure.B_ClockFailurePublishesAnInvalidDate
+
+ 2 FAILED TESTS

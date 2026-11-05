@@ -672,7 +672,7 @@ TEST_F(R22ExtPorterTest, CApiCreateExtParserAndPushQuoteReachTheRegisteredSlots)
 
 	WTSTickStruct tick = make_tick("SHFE", "rb2401", 0, 0);
 	parser_push_quote("r22_capi_p", &tick, 0);
-	EXPECT_EQ(0, tick.action_date);
+	EXPECT_EQ(0u, tick.action_date);
 	parser_push_quote("r22_capi_missing", &tick, 0);
 	EXPECT_EQ(1U, evt_hits().size());
 }

@@ -32,6 +32,7 @@
 #include <atomic>
 #include <filesystem>
 #include <exception>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -56,8 +57,11 @@
 #include "WtCore/WtDtMgr.h"
 #include "WtCore/ActionPolicyMgr.h"
 #include "WTSTools/WTSHotMgr.h"
+#include "WTSTools/WTSLogger.h"
+#include "WTSUtils/WTSCfgLoader.h"
 #include "WTSTools/WTSBaseDataMgr.h"
 #include "WtCore/CtaStraContext.h"
+#include "WtCore/HftStraContext.h"
 
 // Preinclude WtRunner.h's dependencies above so this access shim only changes
 // access on WtRunner itself; the macro is removed immediately after the include.
@@ -67,9 +71,81 @@
 #include "WtCore/WtHelper.h"
 #include "Includes/WTSVariant.hpp"
 #include "Share/StdUtils.hpp"
+#include "Share/charconv.hpp"
 
 static_assert(sizeof(WtRunner) <= 64 * 1024,
 	"WtRunner must remain small enough to exclude a giant stack frame");
+
+TEST(R42HftTraderBinding, LaterUnknownTraderDoesNotPublishEarlierContext)
+{
+	const char* pluginPath = std::getenv("R42_HFT_PLUGIN");
+	if (pluginPath == nullptr || pluginPath[0] == '\0')
+		GTEST_SKIP() << "R42_HFT_PLUGIN must name the independently built HFT factory";
+	const auto factoryDir = std::filesystem::path(WtHelper::getCWD()) / "hft";
+	std::filesystem::create_directories(factoryDir);
+	std::filesystem::copy_file(pluginPath, factoryDir / std::filesystem::path(pluginPath).filename(),
+		std::filesystem::copy_options::overwrite_existing);
+	auto* runner = new WtRunner();
+	TraderAdapterPtr trader(new TraderAdapter());
+	ASSERT_TRUE(runner->_traders.addAdapter("known", trader));
+	WTSVariant* config = WTSVariant::createObject();
+	WTSVariant* strategies = WTSVariant::createObject();
+	WTSVariant* hft = WTSVariant::createArray();
+	for (const auto& entry : {std::pair<const char*, const char*>("first", "known"),
+		std::pair<const char*, const char*>("second", "unknown")})
+	{
+		WTSVariant* unit = WTSVariant::createObject();
+		unit->append("active", true);
+		unit->append("id", entry.first);
+		unit->append("name", "WtHftStraFact.SimpleHft");
+		unit->append("trader", entry.second);
+		unit->append("params", WTSVariant::createObject(), false);
+		hft->append(unit, false);
+	}
+	strategies->append("hft", hft, false);
+	config->append("strategies", strategies, false);
+	runner->_config = config;
+	HftStraContext probe(nullptr, "r42_probe", false, 0);
+	const auto next = probe.id() + 1;
+	EXPECT_FALSE(runner->initHftStrategies());
+	EXPECT_EQ(nullptr, runner->_hft_engine.getContext(next).get());
+	EXPECT_EQ(nullptr, runner->_hft_stra_mgr.getStrategy("first").get());
+}
+
+TEST(R42HftTraderBinding, KnownTraderStillPublishesBoundContext)
+{
+	const char* pluginPath = std::getenv("R42_HFT_PLUGIN");
+	if (pluginPath == nullptr || pluginPath[0] == '\0')
+		GTEST_SKIP() << "R42_HFT_PLUGIN must name the independently built HFT factory";
+	const auto factoryDir = std::filesystem::path(WtHelper::getCWD()) / "hft";
+	std::filesystem::create_directories(factoryDir);
+	std::filesystem::copy_file(pluginPath, factoryDir / std::filesystem::path(pluginPath).filename(),
+		std::filesystem::copy_options::overwrite_existing);
+	auto* runner = new WtRunner();
+	TraderAdapterPtr trader(new TraderAdapter());
+	ASSERT_TRUE(runner->_traders.addAdapter("known", trader));
+	WTSVariant* config = WTSVariant::createObject();
+	WTSVariant* strategies = WTSVariant::createObject();
+	WTSVariant* hft = WTSVariant::createArray();
+	WTSVariant* unit = WTSVariant::createObject();
+	unit->append("active", true);
+	unit->append("id", "valid");
+	unit->append("name", "WtHftStraFact.SimpleHft");
+	unit->append("trader", "known");
+	// I03-NEW-103: SimpleHft validates its parameter schema (BUG-WSN06-002); `code` is required.
+	WTSVariant* params = WTSVariant::createObject();
+	params->append("code", "SHFE.rb.2510");
+	unit->append("params", params, false);
+	hft->append(unit, false);
+	strategies->append("hft", hft, false);
+	config->append("strategies", strategies, false);
+	runner->_config = config;
+	HftStraContext probe(nullptr, "r42_probe", false, 0);
+	const auto next = probe.id() + 1;
+	ASSERT_TRUE(runner->initHftStrategies());
+	EXPECT_NE(nullptr, runner->_hft_engine.getContext(next).get());
+	EXPECT_NE(nullptr, runner->_hft_stra_mgr.getStrategy("valid").get());
+}
 
 /* 生产 TU（src/WtRunner/main.cpp）经 -Dmain=wt_coverage_main_wtrunner 改名后的入口 */
 int wt_coverage_main_wtrunner(int argc, char* argv[]);
@@ -82,6 +158,164 @@ extern "C" void __llvm_profile_set_filename(const char*);
 const char* getBinDir();
 
 namespace {
+
+class R28ParserCommandApi : public IParserApi
+{
+public:
+	bool init(WTSVariant*) override { return true; }
+	bool connect() override { ++calls; if (onConnect) onConnect(); return result; }
+	void registerSpi(IParserSpi*) override {}
+	void subscribe(const CodeSet&) override {}
+	bool result = false;
+	int calls = 0;
+	std::function<void()> onConnect;
+};
+
+class R28ParserCommandEngine final : public WtEngine
+{
+public:
+	void run() override { ++calls; if (throwOnRun) throw std::runtime_error("engine start failure"); }
+	void on_bar(const char*, const char*, uint32_t, WTSBarStruct*) override {}
+	int calls = 0;
+	bool throwOnRun = false;
+};
+
+// I03-NEW-045 / 卡9a：经 initExt 注入的旧式 IParserApi 没有回调排空证明，runner 关闭时保留 parser owner，
+// 此时析构按设计 fail-closed（std::terminate，进程入口 main.cpp 从不销毁这种 runner）。用例沿用 n01 的做法：
+// 关闭成功则正常销毁；关闭失败时必须是“保留 parser owner”而非其他失败，并让 runner 与其 engine 存活到进程退出。
+std::vector<std::unique_ptr<WtRunner>>& r28_retained_runners()
+{
+	static auto* runners = new std::vector<std::unique_ptr<WtRunner>>();
+	return *runners;
+}
+std::vector<std::unique_ptr<R28ParserCommandEngine>>& r28_retained_engines()
+{
+	static auto* engines = new std::vector<std::unique_ptr<R28ParserCommandEngine>>();
+	return *engines;
+}
+void r28_finish_runner(std::unique_ptr<WtRunner>& runner, std::unique_ptr<R28ParserCommandEngine>& engine)
+{
+	if (runner->shutdown())
+	{
+		runner.reset();
+		return;
+	}
+	EXPECT_TRUE(runner->parserOwnersRetained()) << "shutdown failed for a reason other than retained parser owners";
+	r28_retained_runners().push_back(std::move(runner));
+	r28_retained_engines().push_back(std::move(engine));
+}
+
+TEST(R28ParserCommands, engine_exception_does_not_report_success_after_parser_submission)
+{
+	for (bool async : {false, true})
+	{
+		auto runner = std::make_unique<WtRunner>();
+		auto engine = std::make_unique<R28ParserCommandEngine>();
+		runner->_engine = engine.get();
+		engine->throwOnRun = true;
+		auto parser = std::make_shared<ParserAdapter>();
+		auto* api = new R28ParserCommandApi();
+		api->result = true;
+		ASSERT_TRUE(parser->initExt("throwing", api, engine.get(), &runner->_bd_mgr));
+		ASSERT_TRUE(runner->_parsers.addAdapter("throwing", parser));
+		runner->run(async);
+		EXPECT_TRUE(runner->parserCommandsSubmitted());
+		EXPECT_FALSE(runner->runSucceeded());
+		EXPECT_EQ(engine->calls, 1);
+		r28_finish_runner(runner, engine);
+	}
+}
+
+TEST(R28ParserCommands, shutdown_during_startup_does_not_report_success)
+{
+	auto runner = std::make_unique<WtRunner>();
+	auto engine = std::make_unique<R28ParserCommandEngine>();
+	runner->_engine = engine.get();
+	auto parser = std::make_shared<ParserAdapter>();
+	auto* api = new R28ParserCommandApi();
+	api->result = true;
+	api->onConnect = [&] { EXPECT_FALSE(runner->shutdown()); };
+	ASSERT_TRUE(parser->initExt("shutdown", api, engine.get(), &runner->_bd_mgr));
+	ASSERT_TRUE(runner->_parsers.addAdapter("shutdown", parser));
+	runner->run(true);
+	EXPECT_TRUE(runner->parserCommandsSubmitted());
+	EXPECT_FALSE(runner->runSucceeded());
+	EXPECT_EQ(engine->calls, 0);
+	r28_finish_runner(runner, engine);
+}
+
+TEST(R28ParserCommands, runner_reports_partial_submission_without_releasing_owners)
+{
+	auto runner = std::make_unique<WtRunner>();
+	auto engine = std::make_unique<R28ParserCommandEngine>();
+	runner->_engine = engine.get();
+	auto failed = std::make_shared<ParserAdapter>();
+	auto good = std::make_shared<ParserAdapter>();
+	auto* failedApi = new R28ParserCommandApi();
+	auto* goodApi = new R28ParserCommandApi();
+	goodApi->result = true;
+	bool callbackSawSubmitted = true;
+	failedApi->onConnect = [&] { callbackSawSubmitted = runner->parserCommandsSubmitted(); };
+	ASSERT_TRUE(failed->initExt("failure", failedApi, engine.get(), &runner->_bd_mgr));
+	ASSERT_TRUE(good->initExt("success", goodApi, engine.get(), &runner->_bd_mgr));
+	ASSERT_TRUE(runner->_parsers.addAdapter("failure", failed));
+	ASSERT_TRUE(runner->_parsers.addAdapter("success", good));
+	EXPECT_FALSE(runner->parserCommandsSubmitted());
+	EXPECT_FALSE(runner->runSucceeded());
+	runner->run(true);
+	EXPECT_FALSE(callbackSawSubmitted);
+	EXPECT_FALSE(runner->parserCommandsSubmitted());
+	EXPECT_TRUE(runner->runSucceeded());
+	EXPECT_EQ(failedApi->calls, 1);
+	EXPECT_EQ(goodApi->calls, 1);
+	EXPECT_EQ(engine->calls, 1);
+	EXPECT_EQ(runner->_parsers.getAdapter("failure"), failed);
+	EXPECT_EQ(runner->_parsers.getAdapter("success"), good);
+	r28_finish_runner(runner, engine);
+}
+
+TEST(R28ParserCommands, runner_reports_success_only_after_connect_returns)
+{
+	auto runner = std::make_unique<WtRunner>();
+	auto engine = std::make_unique<R28ParserCommandEngine>();
+	runner->_engine = engine.get();
+	auto parser = std::make_shared<ParserAdapter>();
+	auto* api = new R28ParserCommandApi();
+	api->result = true;
+	bool callbackSawSubmitted = true;
+	api->onConnect = [&] { callbackSawSubmitted = runner->parserCommandsSubmitted(); };
+	ASSERT_TRUE(parser->initExt("success", api, engine.get(), &runner->_bd_mgr));
+	ASSERT_TRUE(runner->_parsers.addAdapter("success", parser));
+	runner->run(true);
+	EXPECT_FALSE(callbackSawSubmitted);
+	EXPECT_TRUE(runner->parserCommandsSubmitted());
+	EXPECT_TRUE(runner->runSucceeded());
+	EXPECT_EQ(api->calls, 1);
+	EXPECT_EQ(engine->calls, 1);
+	r28_finish_runner(runner, engine);
+}
+
+TEST(R28ParserCommands, synchronous_run_reports_only_after_loop_returns)
+{
+	for (bool result : {false, true})
+	{
+		auto runner = std::make_unique<WtRunner>();
+		auto engine = std::make_unique<R28ParserCommandEngine>();
+		runner->_engine = engine.get();
+		auto parser = std::make_shared<ParserAdapter>();
+		auto* api = new R28ParserCommandApi();
+		api->result = result;
+		api->onConnect = [&] { runner->_to_exit.store(true); };
+		ASSERT_TRUE(parser->initExt("sync", api, engine.get(), &runner->_bd_mgr));
+		ASSERT_TRUE(runner->_parsers.addAdapter("sync", parser));
+		runner->run(false);
+		EXPECT_EQ(runner->parserCommandsSubmitted(), result);
+		EXPECT_TRUE(runner->runSucceeded());
+		EXPECT_EQ(api->calls, 1);
+		EXPECT_EQ(runner->_parsers.getAdapter("sync"), parser);
+		r28_finish_runner(runner, engine);
+	}
+}
 
 /* 每条用例一个前缀，夹具与产物都在共享 cwd 下，必须互不同名 */
 const char* kTag = "r28wt";
@@ -401,7 +635,7 @@ std::string env_block(const char* engineName)
 {
 	return std::string("env:\n")
 		+ "    name: " + engineName + "\n"
-		+ "    fees: " + fixture_path("absent_fees.json") + "\n"
+		+ "    fees: " + fixture_path("fees.json") + "\n"
 		+ "    filters: " + fixture_path("absent_filters.yaml") + "\n"
 		+ "    poolsize: 0\n";
 }
@@ -422,6 +656,9 @@ void prepare_base_fixtures()
 	write_fixture("hots.json", kHots);
 	write_fixture("logcfg.yaml", kLogCfg);
 	write_fixture("actpolicy.yaml", kActPolicyDefault);
+	// 迭代03（I03-NEW-008 / 卡13d 费用门禁）：配置了的费用模板路径必须存在；这些用例验证
+	// 路由/执行器配置，改用有效空模板（原指向不存在的 absent_fees.json，与 r104 同样处理）。
+	write_fixture("fees.json", "{}");
 }
 
 class CtaFactoryCwdFixture
@@ -757,7 +994,7 @@ TEST(r28_wtrunner_config, valid_json_config_succeeds)
 		+ "\"contract\": \"" + fixture_path("contracts.json") + "\","
 		+ "\"holiday\": \"" + fixture_path("holidays.json") + "\","
 		+ "\"hot\": \"" + fixture_path("hots.json") + "\"},\n"
-		+ "  \"env\": {\"name\": \"cta\", \"fees\": \"" + fixture_path("absent_fees.json")
+		+ "  \"env\": {\"name\": \"cta\", \"fees\": \"" + fixture_path("fees.json")
 		+ "\", \"filters\": \"" + fixture_path("absent_filters.yaml") + "\", \"poolsize\": 0},\n"
 		+ "  \"data\": {\"store\": {\"module\": \"WtDataStorage\", \"path\": \""
 		+ fixture_path("data/") + "\"}},\n"
@@ -1024,6 +1261,10 @@ TEST(r28_wtrunner_config, basefiles_session_key_absent_skips_load_sessions)
 	runner->init(fixture_path("logcfg.yaml"));
 
 	// config():78 `if(cfgBF->get("session"))` 假分支
+	// I03-NEW-053（整批校验后发布）：会话未加载时引用会话的品种文件整份被拒（记错误日志），合约随之被拒；
+	// Runner 配置本身不因此失败，仍走 session 键缺省分支。卡13d 后缺费用模板文件会使配置失败，
+	// 因此补一个有效空模板（与 prepare_base_fixtures 一致）。
+	write_fixture("fees.json", "{}");
 	std::string cfg = std::string("basefiles:\n")
 		+ "    commodity: " + fixture_path("commodities.json") + "\n"
 		+ "    contract: " + fixture_path("contracts.json") + "\n"
@@ -1468,7 +1709,7 @@ TEST(r28_wtrunner_config, router_rule_with_non_string_strategy_json_fails_config
 		+ "    \"holiday\": \"" + fixture_path("holidays.json") + "\",\n"
 		+ "    \"hot\": \"" + fixture_path("hots.json") + "\"\n"
 		+ "  },\n"
-		+ "  \"env\": {\"name\": \"cta\", \"fees\": \"" + fixture_path("absent_fees.json")
+		+ "  \"env\": {\"name\": \"cta\", \"fees\": \"" + fixture_path("fees.json")
 		+ "\", \"filters\": \"" + fixture_path("absent_filters.yaml") + "\", \"poolsize\": 0},\n"
 		+ "  \"data\": {\"store\": {\"path\": \"" + fixture_path("data/") + "\"}},\n"
 		+ "  \"bspolicy\": \"" + fixture_path("actpolicy.yaml") + "\",\n"
@@ -1580,15 +1821,15 @@ TEST(r28_wtrunner_entry, main_returns_nonzero_and_skips_run_when_hot_config_fail
 	EXPECT_EQ(result.code, 3) << "entry_in_child maps any nonzero main result to exit code 3";
 }
 
-TEST(r28_wtrunner_entry, DISABLED_unknown_long_option_segv)
+TEST(r28_wtrunner_entry, unknown_long_option_segv)
 {
-	// K2：实测 SIGSEGV(11)，不是返回非 0 错误码
+	// 迭代03 最终验收复核后启用（原禁用：K2 未知长选项 SIGSEGV）。
 	EXPECT_NE(call_entry({"wt_runner", "--r28-bogus-flag"}), 0);
 }
 
-TEST(r28_wtrunner_config, DISABLED_valid_config_without_basefiles_derefs_null_section)
+TEST(r28_wtrunner_config, valid_config_without_basefiles_derefs_null_section)
 {
-	// K3：WtRunner.cpp:77 cfgBF=NULL 后 :78 无条件 cfgBF->get("session")
+	// 迭代03 最终验收复核后启用（原禁用：K3 缺 basefiles 空指针）。
 	std::unique_ptr<WtRunner> runner = make_runner();
 	runner->init(fixture_path("logcfg.yaml"));
 	write_fixture("empty_obj_cfg.yaml", "{}\n");
@@ -1627,4 +1868,260 @@ TEST(r28_wtrunner_strategies, DISABLED_active_cta_entry_needs_real_factory_dir)
 		+ "        params:\n            code: SHFE.rb.2510\n";
 	write_fixture("ctaactive_cfg.yaml", cfg);
 	EXPECT_TRUE(runner->config(fixture_path("ctaactive_cfg.yaml")));
+}
+
+TEST(r28_wtrunner_config, router_null_preflight_rejects_inline_json_and_yaml_without_mutation)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+	WTSVariant* seed = WTSVariant::createArray();
+	WTSVariant* rule = WTSVariant::createObject();
+	rule->append("strategy", "seed");
+	rule->append("executer", "kept");
+	seed->append(rule, false);
+	ASSERT_TRUE(runner->_cta_engine.getExecuterMgr().load_router_rules(seed));
+	seed->release();
+	const std::string jsonPrefix = std::string("{\"basefiles\":{\"session\":\"") + fixture_path("sessions.json") + "\",\"commodity\":\"" + fixture_path("commodities.json") + "\",\"contract\":\"" + fixture_path("contracts.json") + "\",\"holiday\":\"" + fixture_path("holidays.json") + "\",\"hot\":\"" + fixture_path("hots.json") + "\"},\"env\":{\"name\":\"cta\"},\"data\":{\"store\":{\"path\":\"" + fixture_path("data/") + "\"}},\"bspolicy\":\"" + fixture_path("actpolicy.yaml") + "\",\"routers\":";
+	const std::string yamlPrefix = basefiles_block() + env_block("cta") + tail_block() + "routers: ";
+	struct Case { const char* suffix; const char* name; const char* routers; bool json; };
+	const Case cases[] = {
+		{"json", "rule_leading", "[null,{\"strategy\":\"fresh\",\"executer\":\"x\"}]", true},
+		{"json", "rule_trailing", "[{\"strategy\":\"fresh\",\"executer\":\"x\"},null]", true},
+		{"json", "nested", "[{\"strategy\":\"fresh\",\"executer\":[\"x\",null,\"y\"]}]", true},
+		{"yaml", "rule_leading", "[null, {strategy: fresh, executer: x}]", false},
+		{"yaml", "rule_trailing", "[{strategy: fresh, executer: x}, ~]", false},
+		{"yaml", "nested", "[{strategy: fresh, executer: [x, null, y]}]", false},
+		{"json", "top_nul_key", "[null]", true},
+		{"yaml", "top_nul_key", "[null]", false},
+		{"json", "nested_nul_key", "[{\"strategy\":\"fresh\",\"executer\\u0000alias\":[\"x\",null]}]", true},
+		{"yaml", "nested_nul_key", "[{strategy: fresh, \"executer\\0alias\": [x, null]}]", false},
+	};
+	for (const auto& c : cases)
+	{
+		const std::string name = std::string("router_null_inline_") + c.name + "." + c.suffix;
+		std::string prefix = c.json ? jsonPrefix : yamlPrefix;
+		if (std::string(c.name) == "top_nul_key")
+		{
+			const std::string key = c.json ? "\"routers\":" : "routers:";
+			const std::string alias = c.json ? "\"routers\\u0000alias\":" : "\"routers\\0alias\":";
+			prefix.replace(prefix.rfind(key), key.size(), alias);
+		}
+		write_fixture(name, prefix + c.routers + (c.json ? "}\n" : "\n"));
+		EXPECT_FALSE(runner->config(fixture_path(name))) << name;
+		const auto& kept = runner->_cta_engine.getExecuterMgr().get_route_by_strategy("seed");
+		EXPECT_EQ(1u, kept.size()) << name;
+		EXPECT_NE(kept.end(), kept.find("kept")) << name;
+		const auto& fresh = runner->_cta_engine.getExecuterMgr().get_route_by_strategy("fresh");
+		EXPECT_NE(fresh.end(), fresh.find("ALL")) << name;
+	}
+}
+
+TEST(r28_wtrunner_config, router_null_preflight_rejects_sidecar_json_and_yaml_without_mutation)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+	WTSVariant* seed = WTSVariant::createArray();
+	WTSVariant* rule = WTSVariant::createObject();
+	rule->append("strategy", "seed");
+	rule->append("executer", "kept");
+	seed->append(rule, false);
+	ASSERT_TRUE(runner->_cta_engine.getExecuterMgr().load_router_rules(seed));
+	seed->release();
+	struct Case { const char* suffix; const char* name; const char* content; };
+	const Case cases[] = {
+		{"json", "rule", "{\"executers\":[],\"routers\":[{\"strategy\":\"fresh\",\"executer\":\"x\"},null]}"},
+		{"json", "nested", "{\"executers\":[],\"routers\":[{\"strategy\":\"fresh\",\"executer\":[null,\"x\"]}]}"},
+		{"yaml", "rule", "executers: []\nrouters: [null, {strategy: fresh, executer: x}]\n"},
+		{"yaml", "nested", "executers: []\nrouters: [{strategy: fresh, executer: [x, ~]}]\n"},
+		{"json", "top_nul_key", "{\"executers\":[],\"routers\\u0000alias\":[null]}"},
+		{"json", "nested_nul_key", "{\"executers\":[],\"routers\":[{\"strategy\":\"fresh\",\"executer\\u0000alias\":[\"x\",null]}]}"},
+		{"yaml", "top_nul_key", "executers: []\n\"routers\\0alias\": [null]\n"},
+		{"yaml", "nested_nul_key", "executers: []\nrouters: [{strategy: fresh, \"executer\\0alias\": [x, null]}]\n"},
+	};
+	for (const auto& c : cases)
+	{
+		const std::string name = std::string("router_null_side_") + c.name + "." + c.suffix;
+		write_fixture(name, c.content);
+		const std::string cfg = basefiles_block() + env_block("cta") + tail_block() + "executers: " + fixture_path(name) + "\n";
+		const std::string mainName = std::string("router_null_side_main_") + c.name + "." + c.suffix + ".yaml";
+		write_fixture(mainName, cfg);
+		EXPECT_FALSE(runner->config(fixture_path(mainName))) << name;
+		const auto& kept = runner->_cta_engine.getExecuterMgr().get_route_by_strategy("seed");
+		EXPECT_EQ(1u, kept.size()) << name;
+		EXPECT_NE(kept.end(), kept.find("kept")) << name;
+		const auto& fresh = runner->_cta_engine.getExecuterMgr().get_route_by_strategy("fresh");
+		EXPECT_NE(fresh.end(), fresh.find("ALL")) << name;
+	}
+}
+
+TEST(r28_wtrunner_config, hft_ignores_unused_router_nulls)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+	const std::string cfg = basefiles_block() + env_block("hft") + tail_block() + "routers: [null]\n";
+	write_fixture("hft_null_router.yaml", cfg);
+	EXPECT_TRUE(runner->config(fixture_path("hft_null_router.yaml")));
+}
+
+TEST(r28_wtrunner_config, router_sidecar_uses_preflight_snapshot_after_file_removed)
+{
+	// I03-NEW-077: the observer needs the info-level "Data manager initialized" log,
+	// but WTSLogger::init only takes effect once per process and earlier cases in the
+	// same process initialise the logger at level error, which hid the log and made
+	// the case order dependent. The threadsafe death-test style re-executes the test
+	// binary, so this case runs in a fresh process whose own logcfg is the first one.
+	// The assertions are unchanged; the child exits 0 only when none of them failed.
+	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT({
+		{
+			prepare_base_fixtures();
+			std::string logConfig = kLogCfg;
+			logConfig.replace(logConfig.find("level: error"), std::strlen("level: error"), "level: info");
+			write_fixture("logcfg.yaml", logConfig);
+			const std::string side = fixture_path("router_snapshot_side.yaml");
+			write_fixture("router_snapshot_side.yaml", "executers: []\nrouters: [{strategy: snapshot, executer: kept}]\n");
+			const std::string cfg = basefiles_block() + env_block("cta") + tail_block() + "executers: " + side + "\n";
+			write_fixture("router_snapshot_main.yaml", cfg);
+			std::unique_ptr<WtRunner> runner = make_runner();
+			runner->init(fixture_path("logcfg.yaml"));
+			struct DeleteAfterPreflight : ILogHandler
+			{
+				explicit DeleteAfterPreflight(std::string file) : path(std::move(file)) {}
+				void handleLogAppend(WTSLogLevel, const char* message) override
+				{
+					if (!observed && std::string(message).find("Data manager initialized") != std::string::npos)
+					{
+						observed = true;
+						removed = std::remove(path.c_str()) == 0;
+					}
+				}
+				std::string path;
+				bool observed = false;
+				bool removed = false;
+			} observer(side);
+			struct ResetLogHandler { ~ResetLogHandler() { WTSLogger::registerHandler(nullptr); } } reset;
+			WTSLogger::registerHandler(&observer);
+			EXPECT_TRUE(runner->config(fixture_path("router_snapshot_main.yaml")));
+			EXPECT_TRUE(observer.observed);
+			EXPECT_TRUE(observer.removed);
+			const auto& route = runner->_cta_engine.getExecuterMgr().get_route_by_strategy("snapshot");
+			EXPECT_NE(route.end(), route.find("kept"));
+		}
+		std::exit(::testing::Test::HasFailure() ? 1 : 0);
+	}, ::testing::ExitedWithCode(0), "");
+	GTEST_FLAG_SET(death_test_style, oldStyle);
+}
+
+TEST(r28_wtrunner_config, router_nul_alias_with_valid_executer_keeps_legacy_key_semantics)
+{
+	prepare_base_fixtures();
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+	const std::string side = "{\"executers\":[],\"routers\\u0000alias\":[{\"strategy\":\"alias\",\"executer\\u0000alias\":[\"kept\"]}]}";
+	write_fixture("router_alias_valid.json", side);
+	const std::string cfg = basefiles_block() + env_block("cta") + tail_block() + "executers: " + fixture_path("router_alias_valid.json") + "\n";
+	write_fixture("router_alias_valid_main.yaml", cfg);
+	// 迭代03（20261103-fees-groups-review）：配置加载器拒绝原始或解码后含 NUL 的键/字符串，
+	// 含 "\u0000" 键的执行器侧车整体加载失败，Runner 配置 fail-closed、不登记任何路由
+	// （改前期望：按 NUL 前缀键生效并登记 alias→kept）。
+	EXPECT_FALSE(runner->config(fixture_path("router_alias_valid_main.yaml")));
+	const auto& route = runner->_cta_engine.getExecuterMgr().get_route_by_strategy("alias");
+	EXPECT_EQ(route.end(), route.find("kept"));
+}
+
+TEST(r28_wtrunner_config, normalized_loader_does_not_apply_content_encoding_fallback)
+{
+	// This byte string is invalid UTF-8 and GB2312; JSON's existing parser
+	// preserves the quoted raw byte. The normalized API must not transcode it.
+	std::string raw = "{\"note\":\"";
+	raw.push_back(static_cast<char>(0xff));
+	raw += "\"}";
+	WTSVariant* parsed = WTSCfgLoader::load_from_normalized_content(raw, false);
+	ASSERT_NE(nullptr, parsed);
+	const std::string value = parsed->getString("note");
+	ASSERT_EQ(1u, value.size());
+	EXPECT_EQ(0xffu, static_cast<unsigned char>(value[0]));
+	parsed->release();
+#ifndef _WIN32
+	// The content API intentionally keeps its own historic conversion rule.
+	WTSVariant* viaContent = WTSCfgLoader::load_from_content(raw, false);
+	EXPECT_EQ(nullptr, viaContent);
+	if (viaContent)
+		viaContent->release();
+#endif
+	EXPECT_EQ(nullptr, WTSCfgLoader::load_from_normalized_content("", false));
+}
+
+TEST(r28_wtrunner_config, encoded_files_preserve_legacy_loader_normalization)
+{
+	prepare_base_fixtures();
+	const std::string utf8("\xe4\xb8\xad\xe6\x96\x87", 6);
+	const std::string gb2312("\xd6\xd0\xce\xc4", 4);
+	struct Case { const char* name; std::string text; bool yaml; };
+	const Case cases[] = {{"utf8.json", utf8, false}, {"gb2312.json", gb2312, false},
+		{"utf8.yaml", utf8, true}, {"gb2312.yaml", gb2312, true}};
+	for (const auto& c : cases)
+	{
+		const std::string path = std::string("encoding_") + c.name;
+		const std::string cfg = c.yaml
+			? basefiles_block() + env_block("cta") + tail_block() + "note: \"" + c.text + "\"\nrouters: [{strategy: s, executer: x}]\n"
+			: std::string("{\"basefiles\":{\"session\":\"") + fixture_path("sessions.json") + "\",\"commodity\":\"" + fixture_path("commodities.json") + "\",\"contract\":\"" + fixture_path("contracts.json") + "\",\"holiday\":\"" + fixture_path("holidays.json") + "\",\"hot\":\"" + fixture_path("hots.json") + "\"},\"env\":{\"name\":\"cta\"},\"data\":{\"store\":{\"path\":\"" + fixture_path("data/") + "\"}},\"bspolicy\":\"" + fixture_path("actpolicy.yaml") + "\",\"note\":\"" + c.text + "\",\"routers\":[{\"strategy\":\"s\",\"executer\":\"x\"}]}";
+		write_fixture(path, cfg);
+		WTSVariant* legacy = WTSCfgLoader::load_from_file(fixture_path(path));
+		ASSERT_NE(nullptr, legacy) << path;
+		const std::string legacyValue = legacy->getString("note");
+		legacy->release();
+		std::unique_ptr<WtRunner> runner = make_runner();
+		runner->init(fixture_path("logcfg.yaml"));
+		ASSERT_TRUE(runner->config(fixture_path(path))) << path;
+		ASSERT_NE(nullptr, runner->_config);
+		EXPECT_EQ(legacyValue, runner->_config->getString("note")) << path;
+	}
+}
+
+TEST(r28_wtrunner_config, invalid_encoded_file_remains_rejected_by_legacy_and_runner)
+{
+	prepare_base_fixtures();
+	std::string invalid(1, static_cast<char>(0xff));
+	invalid += "{\"basefiles\":{},\"env\":{\"name\":\"cta\"},\"data\":{},\"routers\":[null]}";
+#ifndef _WIN32
+	ASSERT_FALSE(EncodingHelper::isUtf8((unsigned char*)invalid.data(), invalid.size()));
+	std::string normalized;
+	normalized = ChartoUTF8(invalid);
+	ASSERT_TRUE(normalized.empty());
+	EXPECT_EQ(nullptr, WTSCfgLoader::load_from_normalized_content(normalized, false));
+#endif
+	write_fixture("invalid_encoding.json", invalid);
+	WTSVariant* legacy = WTSCfgLoader::load_from_file(fixture_path("invalid_encoding.json"));
+	ASSERT_EQ(nullptr, legacy);
+	std::unique_ptr<WtRunner> runner = make_runner();
+	runner->init(fixture_path("logcfg.yaml"));
+	EXPECT_FALSE(runner->config(fixture_path("invalid_encoding.json")));
+}
+
+TEST(r28_wtrunner_config, embedded_nul_file_keeps_legacy_parser_prefix_semantics)
+{
+	prepare_base_fixtures();
+	const std::string yaml = basefiles_block() + env_block("cta") + tail_block();
+	const std::string json = std::string("{\"basefiles\":{\"session\":\"") + fixture_path("sessions.json") + "\",\"commodity\":\"" + fixture_path("commodities.json") + "\",\"contract\":\"" + fixture_path("contracts.json") + "\",\"holiday\":\"" + fixture_path("holidays.json") + "\",\"hot\":\"" + fixture_path("hots.json") + "\"},\"env\":{\"name\":\"cta\"},\"data\":{\"store\":{\"path\":\"" + fixture_path("data/") + "\"}},\"bspolicy\":\"" + fixture_path("actpolicy.yaml") + "\"}";
+	for (bool isYaml : { false, true })
+	{
+		const std::string name = isYaml ? "encoding_rawnul.yaml" : "encoding_rawnul.json";
+		const std::string prefix = isYaml ? yaml : json;
+		const std::string content = prefix + std::string(1, '\0') + (isYaml ? "routers: [null]\n" : "{invalid}");
+		write_fixture(name, content);
+		// 迭代03（20261103-fees-groups-review）：含原始 NUL 的配置文件整体拒绝，不再按 NUL 前的前缀解析
+		// （改前期望：加载成功且 Runner 配置成功）。
+		WTSVariant* legacy = WTSCfgLoader::load_from_file(fixture_path(name));
+		EXPECT_EQ(nullptr, legacy) << name;
+		if (legacy != nullptr)
+			legacy->release();
+		std::unique_ptr<WtRunner> runner = make_runner();
+		runner->init(fixture_path("logcfg.yaml"));
+		EXPECT_FALSE(runner->config(fixture_path(name))) << name;
+	}
 }

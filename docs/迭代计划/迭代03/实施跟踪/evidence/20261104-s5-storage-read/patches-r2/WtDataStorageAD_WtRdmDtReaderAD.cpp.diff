@@ -1,0 +1,63 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before-r2/src/WtDataStorageAD/WtRdmDtReaderAD.cpp	2026-11-04 18:12:41
++++ src/WtDataStorageAD/WtRdmDtReaderAD.cpp	2026-11-04 21:22:17
+@@ -566,25 +566,38 @@
+ 	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "readTickSliceByRange"))
+ 		return NULL;
+ 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
++	if (commInfo == NULL || commInfo->getSessionInfo() == NULL)
++	{
++		// I03-NEW-052: an unknown commodity (or one without a session) is reported
++		// before its session is dereferenced or any date is mapped.
++		pipe_rdmreader_log(_sink, LL_ERROR, "Commodity or session of {} not found, request refused", stdCode == NULL ? "" : stdCode);
++		return NULL;
++	}
+ 	WTSSessionInfo* sInfo = commInfo->getSessionInfo();
+ 	std::string stdPID = fmtutil::format<64>("{}.{}", cInfo._exchg, cInfo._product);
+ 
+ 	uint32_t rDate, rTime, rSecs;
+ 	//20190807124533900
+ 	rDate = (uint32_t)(etime / 1000000000);
+-	rTime = sInfo->offsetTime((uint32_t)(etime % 1000000000) / 100000, false);
++	const uint32_t rawRTime = (uint32_t)(etime % 1000000000) / 100000;
++	rTime = sInfo->offsetTime(rawRTime, false);
+ 	rSecs = (uint32_t)(etime % 100000);
+ 
+ 	uint32_t lDate, lTime, lSecs;
+ 	//20190807124533900
+ 	lDate = (uint32_t)(stime / 1000000000);
+-	lTime = sInfo->offsetTime((uint32_t)(stime % 1000000000) / 100000, true);
++	const uint32_t rawLTime = (uint32_t)(stime % 1000000000) / 100000;
++	lTime = sInfo->offsetTime(rawLTime, true);
+ 	lSecs = (uint32_t)(stime % 100000);
+ 
++	// I03-NEW-051: the trading-date mapping applies the session offset itself, so
++	// it takes the natural HHMM. Passing the already offset time shifted it twice
++	// (a +300 night session at 22:00 mapped to the natural date instead of the
++	// next trading date) and missed the writer's (trading date, offset time) keys.
+ 	wtp::DateMappingClient dateMapping(_base_data_mgr);
+ 	uint32_t endTDate = 0, beginTDate = 0;
+-	if (!ad_rdm_trading_date(_sink, dateMapping, stdPID.c_str(), rDate, rTime, endTDate) ||
+-		!ad_rdm_trading_date(_sink, dateMapping, stdPID.c_str(), lDate, lTime, beginTDate))
++	if (!ad_rdm_trading_date(_sink, dateMapping, stdPID.c_str(), rDate, rawRTime, endTDate) ||
++		!ad_rdm_trading_date(_sink, dateMapping, stdPID.c_str(), lDate, rawLTime, beginTDate))
+ 		return NULL;
+ 
+ 	std::string key = stdCode;
+@@ -780,7 +793,7 @@
+ 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+ 	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "readKlineSliceByCount"))
+ 		return NULL;
+-	const std::string key = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
++	const std::string key = fmt::format("{}#{}", stdCode, (uint32_t)period);
+ 	auto cacheIt = _bars_cache.find(key);
+ 	if (cacheIt == _bars_cache.end() || cacheIt->second._bars.empty())
+ 	{
+@@ -915,7 +928,7 @@
+ 	etime = isDay ? endTDate : (etime - 19000000);
+ 
+ 	//暂时不考虑HOT之类的，只针对7×24小时品种做一个实现
+-	std::string key = fmtutil::format<64>("{}#{}", stdCode, (uint32_t)period);
++	std::string key = fmt::format("{}#{}", stdCode, (uint32_t)period);
+ 	auto cacheIt = _bars_cache.find(key);
+ 	BarsList candidate;
+ 	if (cacheIt != _bars_cache.end())

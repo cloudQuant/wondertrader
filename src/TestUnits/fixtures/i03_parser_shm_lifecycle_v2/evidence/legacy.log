@@ -1,0 +1,60 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R76ParserShmTest.*:ParserShmTest.*:shm_queue_layout.*:ParserShmZeroGlobalSize.*:shm_plugin_factory.*-R76ParserShmTest.InitIsRepeatableAndNeverConnects:ParserShmTest.init_accepts_full_and_partial_config
+[==========] Running 17 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 6 tests from ParserShmTest
+[ RUN      ] ParserShmTest.connection_state_and_disconnect_idempotent
+[       OK ] ParserShmTest.connection_state_and_disconnect_idempotent (0 ms)
+[ RUN      ] ParserShmTest.register_spi_warns_only_on_replacement
+[       OK ] ParserShmTest.register_spi_warns_only_on_replacement (0 ms)
+[ RUN      ] ParserShmTest.subscribe_splits_std_code_into_raw_code_and_exchange
+[       OK ] ParserShmTest.subscribe_splits_std_code_into_raw_code_and_exchange (0 ms)
+[ RUN      ] ParserShmTest.subscribe_and_unsubscribe_preserve_multisegment_standard_code
+[       OK ] ParserShmTest.subscribe_and_unsubscribe_preserve_multisegment_standard_code (0 ms)
+[ RUN      ] ParserShmTest.unsubscribe_splits_the_same_way
+[       OK ] ParserShmTest.unsubscribe_splits_the_same_way (0 ms)
+[ RUN      ] ParserShmTest.subscribe_empty_set_touches_nothing
+[       OK ] ParserShmTest.subscribe_empty_set_touches_nothing (0 ms)
+[----------] 6 tests from ParserShmTest (0 ms total)
+
+[----------] 4 tests from shm_queue_layout
+[ RUN      ] shm_queue_layout.data_item_default_ctor_zeroes_whole_record
+[       OK ] shm_queue_layout.data_item_default_ctor_zeroes_whole_record (0 ms)
+[ RUN      ] shm_queue_layout.union_members_alias_at_same_address
+[       OK ] shm_queue_layout.union_members_alias_at_same_address (0 ms)
+[ RUN      ] shm_queue_layout.queue_header_fields_and_item_offset
+[       OK ] shm_queue_layout.queue_header_fields_and_item_offset (0 ms)
+[ RUN      ] shm_queue_layout.template_queue_honours_custom_capacity
+[       OK ] shm_queue_layout.template_queue_honours_custom_capacity (0 ms)
+[----------] 4 tests from shm_queue_layout (0 ms total)
+
+[----------] 1 test from ParserShmZeroGlobalSize
+[ RUN      ] ParserShmZeroGlobalSize.no_contract_lookup_skips_subscription_index
+[       OK ] ParserShmZeroGlobalSize.no_contract_lookup_skips_subscription_index (0 ms)
+[----------] 1 test from ParserShmZeroGlobalSize (0 ms total)
+
+[----------] 1 test from shm_plugin_factory
+[ RUN      ] shm_plugin_factory.create_and_delete_roundtrip_null_safe
+[       OK ] shm_plugin_factory.create_and_delete_roundtrip_null_safe (0 ms)
+[----------] 1 test from shm_plugin_factory (0 ms total)
+
+[----------] 5 tests from R76ParserShmTest
+[ RUN      ] R76ParserShmTest.RegisterSpiNullKeepsOldBaseDataMgrAndSilencesNextReplacement
+[       OK ] R76ParserShmTest.RegisterSpiNullKeepsOldBaseDataMgrAndSilencesNextReplacement (0 ms)
+[ RUN      ] R76ParserShmTest.SubscribeGrowsBitmapWhenBaseDataArrivesLate
+[       OK ] R76ParserShmTest.SubscribeGrowsBitmapWhenBaseDataArrivesLate (0 ms)
+[ RUN      ] R76ParserShmTest.SubscribeAndUnsubscribeSkipUnknownCodesAndEmptySets
+[       OK ] R76ParserShmTest.SubscribeAndUnsubscribeSkipUnknownCodesAndEmptySets (0 ms)
+[ RUN      ] R76ParserShmTest.DisconnectThenSubscribeStillResolvesCodes
+[       OK ] R76ParserShmTest.DisconnectThenSubscribeStillResolvesCodes (0 ms)
+[ RUN      ] R76ParserShmTest.FactoryDeleteWithRegisteredSinkIsSafe
+[       OK ] R76ParserShmTest.FactoryDeleteWithRegisteredSinkIsSafe (0 ms)
+[ DISABLED ] R76ParserShmTest.DISABLED_NullBaseDataMgrContractPending
+[----------] 5 tests from R76ParserShmTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 17 tests from 5 test suites ran. (1 ms total)
+[  PASSED  ] 17 tests.
+
+  YOU HAVE 1 DISABLED TEST
+

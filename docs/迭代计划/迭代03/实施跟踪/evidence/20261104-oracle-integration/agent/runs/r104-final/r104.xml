@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="8" failures="6" disabled="1" errors="0" time="0.133" timestamp="2026-11-04T08:55:07.020" name="AllTests">
+  <testsuite name="r104_wtrunner_config" tests="8" failures="6" disabled="1" skipped="0" errors="0" time="0.133" timestamp="2026-11-04T08:55:07.020">
+    <testcase name="all_three_executer_kinds_without_external_modules" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp" line="337" status="run" result="completed" time="0.008" timestamp="2026-11-04T08:55:07.020" classname="r104_wtrunner_config">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:357&#x0A;Value of: runner-&gt;config(fixture(&quot;all_children.yaml&quot;))&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:357
+Value of: runner->config(fixture("all_children.yaml"))
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="active_trader_mocker_initializes_and_is_registered" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp" line="364" status="run" result="completed" time="0.03" timestamp="2026-11-04T08:55:07.028" classname="r104_wtrunner_config">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:377&#x0A;Value of: runner.config(fixture(&quot;trader_success.yaml&quot;))&#x0A;  Actual: false&#x0A;Expected: true&#x0A;TraderMocker artifact: /private/tmp/wt-i03-oracle-20261104/cov/build_x64/Debug/bin/libTraderMocker.dylib&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:377
+Value of: runner.config(fixture("trader_success.yaml"))
+  Actual: false
+Expected: true
+TraderMocker artifact: /private/tmp/wt-i03-oracle-20261104/cov/build_x64/Debug/bin/libTraderMocker.dylib
+]]></failure>
+    </testcase>
+    <testcase name="active_trader_missing_module_fails_without_registration" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp" line="403" status="run" result="completed" time="0.012" timestamp="2026-11-04T08:55:07.059" classname="r104_wtrunner_config" />
+    <testcase name="inactive_missing_trader_module_is_skipped" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp" line="423" status="run" result="completed" time="0.009" timestamp="2026-11-04T08:55:07.072" classname="r104_wtrunner_config">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:435&#x0A;Value of: runner.config(fixture(&quot;trader_inactive.yaml&quot;))&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:435
+Value of: runner.config(fixture("trader_inactive.yaml"))
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="later_trader_failure_removes_prior_adapter_from_registry" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp" line="440" status="run" result="completed" time="0.016" timestamp="2026-11-04T08:55:07.082" classname="r104_wtrunner_config">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:459&#x0A;Value of: runner_fs::exists(runner_fs::path(fixtureEnv.temp_path()) / &quot;mocker_104103&quot;)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:459
+Value of: runner_fs::exists(runner_fs::path(fixtureEnv.temp_path()) / "mocker_104103")
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:461&#x0A;Expected: (nullptr) != (first), actual: (nullptr) vs (nullptr)&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:461
+Expected: (nullptr) != (first), actual: (nullptr) vs (nullptr)
+]]></failure>
+    </testcase>
+    <testcase name="executer_name_defaults_to_local_and_missing_trader_paths" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp" line="471" status="run" result="completed" time="0.051" timestamp="2026-11-04T08:55:07.099" classname="r104_wtrunner_config">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:492&#x0A;Value of: runner-&gt;config(fixture(&quot;default_exec.yaml&quot;))&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:492
+Value of: runner->config(fixture("default_exec.yaml"))
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="executers_side_file_string_branch_reaches_init_executers" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp" line="495" status="run" result="completed" time="0.003" timestamp="2026-11-04T08:55:07.150" classname="r104_wtrunner_config">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:513&#x0A;Value of: runner-&gt;config(fixture(&quot;exec_side_cfg.yaml&quot;))&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp:513
+Value of: runner->config(fixture("exec_side_cfg.yaml"))
+  Actual: false
+Expected: true
+]]></failure>
+    </testcase>
+    <testcase name="DISABLED_run_starts_parsers_traders_engine_and_polls_forever" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/m_WtRunner/r104_runner_executers_test.cpp" line="520" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T08:00:00.000" classname="r104_wtrunner_config" />
+  </testsuite>
+</testsuites>

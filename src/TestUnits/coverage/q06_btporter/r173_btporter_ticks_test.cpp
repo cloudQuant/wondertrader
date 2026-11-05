@@ -126,7 +126,8 @@ const char* kSessions =
 	"\"sections\":[{\"from\":0,\"to\":2359}]}}";
 
 const char* kCommodities =
-	"{\"SHFE\":{\"rb\":{\"name\":\"Rebar\",\"session\":\"TRADING\",\"pricetick\":1,"
+	// P04-011 起历史 tick 查询按品种交易日映射；卡1 要求品种具备交易日历（生产 commodities 均有 holiday）。
+	"{\"SHFE\":{\"rb\":{\"name\":\"Rebar\",\"session\":\"TRADING\",\"holiday\":\"CHINA\",\"pricetick\":1,"
 	"\"volscale\":10,\"covermode\":0,\"pricemode\":0,\"trademode\":0,\"category\":1}}}";
 
 const char* kContracts =
@@ -138,6 +139,7 @@ std::string make_cfg(const std::string& dir)
 		"\"stime\":20240103000000,\"etime\":20240104000000,\"tick\":true,"
 		"\"basefiles\":{"
 		"\"session\":\"" + dir + "/sessions.json\","
+		"\"holiday\":\"" + dir + "/holidays.json\","	// 卡1：日期映射须有交易日历（CHINA）
 		"\"commodity\":\"" + dir + "/commodities.json\","
 		"\"contract\":\"" + dir + "/contracts.json\"}},"
 		"\"env\":{\"mocker\":\"none\"}}";
@@ -154,6 +156,7 @@ struct TickFixture
 		if (dir.empty())
 			return false;
 		write_text(dir + "/sessions.json", kSessions);
+		write_text(dir + "/holidays.json", "{\"CHINA\":[]}");
 		write_text(dir + "/commodities.json", kCommodities);
 		write_text(dir + "/contracts.json", kContracts);
 

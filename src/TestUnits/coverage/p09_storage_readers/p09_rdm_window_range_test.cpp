@@ -74,7 +74,9 @@ public:
 	WTSSessionInfo* getSessionByCode(const char*, const char*) override { return _session; }
 	WTSArray* getAllSessions() override { return NULL; }
 	bool isHoliday(const char*, uint32_t, bool) override { return false; }
-	uint32_t calcTradingDate(const char*, uint32_t uDate, uint32_t, bool) override { return uDate; }
+	// I03-NEW-053（卡 1=A+C）：读端经 C 路径把 date=0 交给管理器取“当前交易日”，
+	// 并拒绝 0/非法日期结果；替身原来对 0 回吐 0，现返回固定的合法当前交易日。
+	uint32_t calcTradingDate(const char*, uint32_t uDate, uint32_t, bool) override { return uDate == 0 ? 20201231u : uDate; }
 	uint64_t getBoundaryTime(const char*, uint32_t tDate, bool, bool isStart) override
 	{
 		return isStart ? ((uint64_t)tDate) * 1000000000ull + 90000000ull
@@ -424,7 +426,7 @@ TEST_F(P09WindowTest, public_kline_slice_readers_keep_empty_and_nonempty_results
 
 	range = _reader.readKlineSliceByRange(code, KP_DAY, 202005021500, 202012311500);
 	ASSERT_NE(range, nullptr);
-	ASSERT_EQ(range->size(), 3u);
+	ASSERT_EQ(range->size(), 3);
 	ASSERT_NE(range->at(0), nullptr);
 	ASSERT_NE(range->at(-1), nullptr);
 	EXPECT_EQ(range->at(0)->date, 20200502u);
@@ -437,7 +439,7 @@ TEST_F(P09WindowTest, public_kline_slice_readers_keep_empty_and_nonempty_results
 
 	WTSKlineSlice* tail = _reader.readKlineSliceByCount(code, KP_DAY, 2, 202012311500);
 	ASSERT_NE(tail, nullptr);
-	ASSERT_EQ(tail->size(), 2u);
+	ASSERT_EQ(tail->size(), 2);
 	EXPECT_EQ(tail->at(0)->date, 20200503u);
 	EXPECT_EQ(tail->at(-1)->date, 20200504u);
 	tail->release();

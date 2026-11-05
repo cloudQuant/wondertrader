@@ -1,0 +1,120 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-ctp/before/src/TraderDumper/TraderAdapter.cpp	2026-10-30 18:51:49
++++ src/TraderDumper/TraderAdapter.cpp	2026-11-04 20:00:16
+@@ -12,6 +12,8 @@
+ #include "Dumper.h"
+ 
+ #include <atomic>
++#include <mutex>
++#include <vector>
+ 
+ #include "../WTSTools/WTSLogger.h"
+ 
+@@ -342,27 +344,43 @@
+ 
+ //////////////////////////////////////////////////////////////////////////
+ //TraderAdapterMgr
++TraderAdapterMgr::State* TraderAdapterMgr::retainState()
++{
++	// 卡9a：状态保活到进程退出；登记表本身也永不释放。
++	static std::mutex* registryMutex = new std::mutex();
++	static std::vector<State*>* registry = new std::vector<State*>();
++	State* state = new State();
++	std::lock_guard<std::mutex> lock(*registryMutex);
++	registry->push_back(state);
++	return state;
++}
++
++TraderAdapterMgr::TraderAdapterMgr()
++	: _st(retainState())
++{
++}
++
+ bool TraderAdapterMgr::addAdapter(const char* tname, TraderAdapterPtr& adapter)
+ {
+ 	if (adapter == NULL || strlen(tname) == 0)
+ 		return false;
+ 
+-	auto it = _adapters.find(tname);
+-	if(it != _adapters.end())
++	auto it = _st->adapters.find(tname);
++	if(it != _st->adapters.end())
+ 	{
+ 		WTSLogger::error("交易通道名称相同: {}", tname);
+ 		return false;
+ 	}
+ 
+-	_adapters[tname] = adapter;
++	_st->adapters[tname] = adapter;
+ 
+ 	return true;
+ }
+ 
+ TraderAdapterPtr TraderAdapterMgr::getAdapter(const char* tname)
+ {
+-	auto it = _adapters.find(tname);
+-	if (it != _adapters.end())
++	auto it = _st->adapters.find(tname);
++	if (it != _st->adapters.end())
+ 	{
+ 		return it->second;
+ 	}
+@@ -372,35 +390,35 @@
+ 
+ void TraderAdapterMgr::run()
+ {
+-	_live_cnt = _adapters.size();
+-	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
++	_st->live_cnt = _st->adapters.size();
++	for (auto it = _st->adapters.begin(); it != _st->adapters.end(); it++)
+ 	{
+ 		it->second->run();
+ 	}
+ 
+-	WTSLogger::info("{}个交易通道已启动", _adapters.size());
++	WTSLogger::info("{}个交易通道已启动", _st->adapters.size());
+ }
+ 
+ void TraderAdapterMgr::release()
+ {
+-	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
++	for (auto it = _st->adapters.begin(); it != _st->adapters.end(); it++)
+ 	{
+ 		it->second->release();
+ 	}
+ 
+-	_adapters.clear();
++	_st->adapters.clear();
+ }
+ 
+ void TraderAdapterMgr::decAlive()
+ {
+-	_mutex.lock();
+-	auto left = _live_cnt.fetch_sub(1);
+-	_mutex.unlock();
++	_st->mutex.lock();
++	auto left = _st->live_cnt.fetch_sub(1);
++	_st->mutex.unlock();
+ 	if (left > 0)
+ 		left--;
+ 	if(left <= 2 && left > 0)
+ 	{
+-		for (auto it = _adapters.begin(); it != _adapters.end(); it++)
++		for (auto it = _st->adapters.begin(); it != _st->adapters.end(); it++)
+ 		{
+ 			TraderAdapterPtr trader = it->second;
+ 			if (!trader->isDone())
+@@ -408,12 +426,12 @@
+ 		}
+ 	}
+ 
+-	WTSLogger::info("{}/{}", left, _adapters.size());
++	WTSLogger::info("{}/{}", left, _st->adapters.size());
+ }
+ 
+ void TraderAdapterMgr::refresh()
+ {
+-	for (auto it = _adapters.begin(); it != _adapters.end(); it++)
++	for (auto it = _st->adapters.begin(); it != _st->adapters.end(); it++)
+ 	{
+ 		TraderAdapterPtr trader = it->second;
+ 		if (!trader->isDone())

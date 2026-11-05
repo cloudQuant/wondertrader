@@ -376,14 +376,14 @@ TEST_F(R52RdmTest, R52ExrightRealtimeRangeBoundsBeforeHitAndAfterLast)
 	WTSKlineSlice* exactSingle = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
 		start, 202401100930ull);
 	ASSERT_NE(nullptr, exactSingle);
-	ASSERT_EQ(exactSingle->size(), 1u);
+	ASSERT_EQ(exactSingle->size(), 1);
 	EXPECT_EQ(exactSingle->at(0)->time, single[0].time);
 	exactSingle->release();
 
 	WTSKlineSlice* afterSingle = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
 		start, 202401100931ull);
 	ASSERT_NE(nullptr, afterSingle);
-	ASSERT_EQ(afterSingle->size(), 1u);
+	ASSERT_EQ(afterSingle->size(), 1);
 	EXPECT_EQ(afterSingle->at(0)->time, single[0].time);
 	afterSingle->release();
 
@@ -398,7 +398,7 @@ TEST_F(R52RdmTest, R52ExrightRealtimeRangeBoundsBeforeHitAndAfterLast)
 	WTSKlineSlice* exactMiddle = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
 		start, 202401100931ull);
 	ASSERT_NE(nullptr, exactMiddle);
-	ASSERT_EQ(exactMiddle->size(), 2u);
+	ASSERT_EQ(exactMiddle->size(), 2);
 	EXPECT_EQ(exactMiddle->at(0)->time, multiple[0].time);
 	EXPECT_EQ(exactMiddle->at(1)->time, multiple[1].time);
 	exactMiddle->release();
@@ -406,7 +406,7 @@ TEST_F(R52RdmTest, R52ExrightRealtimeRangeBoundsBeforeHitAndAfterLast)
 	WTSKlineSlice* afterMultiple = _reader.readKlineSliceByRange("SSE.STK.600000+", KP_Minute1,
 		start, 202401100933ull);
 	ASSERT_NE(nullptr, afterMultiple);
-	ASSERT_EQ(afterMultiple->size(), 3u);
+	ASSERT_EQ(afterMultiple->size(), 3);
 	EXPECT_EQ(afterMultiple->at(2)->time, multiple[2].time);
 	afterMultiple->release();
 }
@@ -431,14 +431,14 @@ TEST_F(R52RdmTest, R52ExrightRealtimeCountBoundsBeforeHitAndAfterLast)
 	WTSKlineSlice* exactSingle = _reader.readKlineSliceByCount("SSE.STK.600000+", KP_Minute1, 1,
 		202401100930ull);
 	ASSERT_NE(nullptr, exactSingle);
-	ASSERT_EQ(exactSingle->size(), 1u);
+	ASSERT_EQ(exactSingle->size(), 1);
 	EXPECT_EQ(exactSingle->at(0)->time, single[0].time);
 	exactSingle->release();
 
 	WTSKlineSlice* afterSingle = _reader.readKlineSliceByCount("SSE.STK.600000+", KP_Minute1, 1,
 		202401100931ull);
 	ASSERT_NE(nullptr, afterSingle);
-	ASSERT_EQ(afterSingle->size(), 1u);
+	ASSERT_EQ(afterSingle->size(), 1);
 	EXPECT_EQ(afterSingle->at(0)->time, single[0].time);
 	afterSingle->release();
 
@@ -453,7 +453,7 @@ TEST_F(R52RdmTest, R52ExrightRealtimeCountBoundsBeforeHitAndAfterLast)
 	WTSKlineSlice* exactMiddle = _reader.readKlineSliceByCount("SSE.STK.600000+", KP_Minute1, 3,
 		202401100931ull);
 	ASSERT_NE(nullptr, exactMiddle);
-	ASSERT_EQ(exactMiddle->size(), 2u);
+	ASSERT_EQ(exactMiddle->size(), 2);
 	EXPECT_EQ(exactMiddle->at(0)->time, multiple[0].time);
 	EXPECT_EQ(exactMiddle->at(1)->time, multiple[1].time);
 	exactMiddle->release();
@@ -461,7 +461,7 @@ TEST_F(R52RdmTest, R52ExrightRealtimeCountBoundsBeforeHitAndAfterLast)
 	WTSKlineSlice* afterMultiple = _reader.readKlineSliceByCount("SSE.STK.600000+", KP_Minute1, 3,
 		202401100933ull);
 	ASSERT_NE(nullptr, afterMultiple);
-	ASSERT_EQ(afterMultiple->size(), 3u);
+	ASSERT_EQ(afterMultiple->size(), 3);
 	EXPECT_EQ(afterMultiple->at(2)->time, multiple[2].time);
 	afterMultiple->release();
 }

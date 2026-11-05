@@ -4,6 +4,8 @@
  * 覆盖 p11 未触及的入口：
  *   initExt 空 API / 通道 init 失败、无 API 时 run() 早退（:209-235, :404-417）;
  *   init() 落地 _cfg 后 handleEvent(WTE_Connect, 0) 用配置里的账号登录（:1405-1417）;
+ *   决策卡 10 = A（BUG-I02-NEW-016）：initExt 外部 API 自认证，WTE_Connect 只报告
+ *   连接状态，adapter 不以任何凭据调用 login，登录结果来自外部 API 的回调;
  *   四个回报数组传 NULL 时状态机仍推进并广播 on_channel_ready（:1514-1543,
  *   :1545-1602, :1604-1730, :1739-1816 的空指针分支）;
  *   onPushTrade 无合约信息时直接忽略（:2148-2152）;
@@ -120,6 +122,10 @@ TEST_F(R59Misc, init_ext_guards_and_run_without_api)
 }
 
 // TraderAdapter.cpp:99-207, 1405-1417（成功加载 API 后 WTE_Connect 用配置账号登录）
+// 决策卡 10 = A 下本用例只覆盖 init() 配置路径。2f4631fd 的原始版本先 initExt 外部 API、
+// 再让 init(module="") 失败遗留 _cfg，并断言外部 API 收到 1 次 login——该 oracle 既依赖
+// 失败 init 的半初始化状态，又与“外部 API 自行登录”的裁定相反，已废弃；initExt 路径的
+// 正确 oracle（0 次 login）见下方 init_ext_connect_event_reports_state_without_login。
 TEST_F(R59Misc, connect_event_uses_cfg_credentials)
 {
 	const fs::path moduleRoot = tmp_ / "r59_credentials_module";
@@ -170,6 +176,49 @@ TEST_F(R59Misc, connect_event_uses_cfg_credentials)
 	EXPECT_EQ("r59_user\nr59_pass\n", unchanged.str());
 
 	trader.release();
+}
+
+// 决策卡 10 = A：成功 initExt 后 WTE_Connect 只报告连接状态，不调用 login；
+// 登录成功/失败均由外部 API 经 onLoginResult 推进状态。
+TEST_F(R59Misc, init_ext_connect_event_reports_state_without_login)
+{
+    {
+        p11fix::FakeTraderApi api;
+        TraderAdapter trader;
+        ASSERT_TRUE(trader.initExt(id_.c_str(), &api, &bd_, nullptr));
+        ASSERT_TRUE(trader.run());
+        EXPECT_EQ(1u, api.n_connect_);
+        EXPECT_EQ(TraderAdapter::AS_LOGINING, trader.state());
+
+        trader.handleEvent(WTE_Connect, 0);
+        trader.handleEvent(WTE_Connect, 0);
+        trader.handleEvent(WTE_Connect, -2);
+        EXPECT_EQ(0u, api.n_login_);
+        EXPECT_EQ(0u, api.n_qpositions_);
+        EXPECT_EQ(TraderAdapter::AS_LOGINING, trader.state());
+
+        trader.onLoginResult(true, "external", 20240510);
+        EXPECT_EQ(TraderAdapter::AS_LOGINED, trader.state());
+        EXPECT_EQ(1u, api.n_qpositions_);
+        EXPECT_EQ(0u, api.n_login_);
+
+        trader.release();
+        // A late connect notification after release() must not log in either.
+        trader.handleEvent(WTE_Connect, 0);
+        EXPECT_EQ(0u, api.n_login_);
+    }
+    {
+        p11fix::FakeTraderApi api;
+        TraderAdapter trader;
+        ASSERT_TRUE(trader.initExt(id_.c_str(), &api, &bd_, nullptr));
+        ASSERT_TRUE(trader.run());
+        trader.handleEvent(WTE_Connect, 0);
+        trader.onLoginResult(false, "external auth rejected", 0);
+        EXPECT_EQ(TraderAdapter::AS_LOGINFAILED, trader.state());
+        EXPECT_EQ(0u, api.n_login_);
+        EXPECT_EQ(0u, api.n_qpositions_);
+        trader.release();
+    }
 }
 
 // TraderAdapter.cpp:1514-1602, 1604-1730, 1739-1816（四个回报数组为 NULL 时的状态机推进）

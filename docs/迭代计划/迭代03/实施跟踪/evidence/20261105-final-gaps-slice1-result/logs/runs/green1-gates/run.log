@@ -1,0 +1,29 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S1TraderEntryGate.*:S5MainK05EntryLimit.*
+[==========] Running 8 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 6 tests from S1TraderEntryGate
+[ RUN      ] S1TraderEntryGate.K05SiblingAdaptersOfOneAccountShareInFlightQuantity
+[       OK ] S1TraderEntryGate.K05SiblingAdaptersOfOneAccountShareInFlightQuantity (9 ms)
+[ RUN      ] S1TraderEntryGate.K05ConcurrentEntriesCannotBothPassTheAccountCheck
+[       OK ] S1TraderEntryGate.K05ConcurrentEntriesCannotBothPassTheAccountCheck (4 ms)
+[ RUN      ] S1TraderEntryGate.K03LiveOrderReportAfterNotSentClosurePausesAccount
+[       OK ] S1TraderEntryGate.K03LiveOrderReportAfterNotSentClosurePausesAccount (1 ms)
+[ RUN      ] S1TraderEntryGate.K03TradeAfterNotSentClosurePausesAccount
+[       OK ] S1TraderEntryGate.K03TradeAfterNotSentClosurePausesAccount (2 ms)
+[ RUN      ] S1TraderEntryGate.K03NotSentWithoutLiveEvidenceKeepsTheAccountOpen
+[       OK ] S1TraderEntryGate.K03NotSentWithoutLiveEvidenceKeepsTheAccountOpen (0 ms)
+[ RUN      ] S1TraderEntryGate.New006ClockFailureRejectsEntryBeforeTheProvider
+[       OK ] S1TraderEntryGate.New006ClockFailureRejectsEntryBeforeTheProvider (0 ms)
+[----------] 6 tests from S1TraderEntryGate (20 ms total)
+
+[----------] 2 tests from S5MainK05EntryLimit
+[ RUN      ] S5MainK05EntryLimit.EntryAboveTheAccountLimitIsRejectedAndReductionsStayAllowed
+[       OK ] S5MainK05EntryLimit.EntryAboveTheAccountLimitIsRejectedAndReductionsStayAllowed (2 ms)
+[ RUN      ] S5MainK05EntryLimit.WithoutADeclaredLimitEntriesAreNotRestricted
+[       OK ] S5MainK05EntryLimit.WithoutADeclaredLimitEntriesAreNotRestricted (3 ms)
+[----------] 2 tests from S5MainK05EntryLimit (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 8 tests from 2 test suites ran. (30 ms total)
+[  PASSED  ] 8 tests.

@@ -1,0 +1,2542 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 1054 tests from 163 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from L00PublicHeaderTest
+[ RUN      ] L00PublicHeaderTest.ExecMgrHeaderIsSelfContained
+[       OK ] L00PublicHeaderTest.ExecMgrHeaderIsSelfContained (0 ms)
+[ RUN      ] L00PublicHeaderTest.ScopeGuardHeaderIsSelfContained
+[       OK ] L00PublicHeaderTest.ScopeGuardHeaderIsSelfContained (0 ms)
+[ RUN      ] L00PublicHeaderTest.TraderAdapterHeaderIsSelfContained
+[       OK ] L00PublicHeaderTest.TraderAdapterHeaderIsSelfContained (0 ms)
+[----------] 3 tests from L00PublicHeaderTest (0 ms total)
+
+[----------] 11 tests from N01ActionPolicy
+[ RUN      ] N01ActionPolicy.actionRule_defaults_are_zeroed
+[       OK ] N01ActionPolicy.actionRule_defaults_are_zeroed (0 ms)
+[ RUN      ] N01ActionPolicy.init_parses_default_group_and_maps_every_action
+[       OK ] N01ActionPolicy.init_parses_default_group_and_maps_every_action (1 ms)
+[ RUN      ] N01ActionPolicy.init_action_name_is_case_insensitive
+[       OK ] N01ActionPolicy.init_action_name_is_case_insensitive (0 ms)
+[ RUN      ] N01ActionPolicy.init_skips_unrecognized_action
+[       OK ] N01ActionPolicy.init_skips_unrecognized_action (0 ms)
+[ RUN      ] N01ActionPolicy.init_tolerates_missing_or_non_array_order
+[       OK ] N01ActionPolicy.init_tolerates_missing_or_non_array_order (0 ms)
+[ RUN      ] N01ActionPolicy.filters_route_commodity_to_named_group
+[       OK ] N01ActionPolicy.filters_route_commodity_to_named_group (1 ms)
+[ RUN      ] N01ActionPolicy.init_absent_limit_fields_become_zero
+[       OK ] N01ActionPolicy.init_absent_limit_fields_become_zero (0 ms)
+[ RUN      ] N01ActionPolicy.init_returns_false_on_missing_file
+[       OK ] N01ActionPolicy.init_returns_false_on_missing_file (0 ms)
+[ RUN      ] N01ActionPolicy.init_returns_false_on_broken_file
+[       OK ] N01ActionPolicy.init_returns_false_on_broken_file (0 ms)
+[ RUN      ] N01ActionPolicy.first_init_without_default_is_rejected_and_lookup_is_safe
+[       OK ] N01ActionPolicy.first_init_without_default_is_rejected_and_lookup_is_safe (0 ms)
+[ RUN      ] N01ActionPolicy.repeated_init_remains_additive_without_requiring_default_again
+[       OK ] N01ActionPolicy.repeated_init_remains_additive_without_requiring_default_again (1 ms)
+[----------] 11 tests from N01ActionPolicy (7 ms total)
+
+[----------] 14 tests from N01ParserAdapter
+[ RUN      ] N01ParserAdapter.default_constructed_has_no_wiring
+[       OK ] N01ParserAdapter.default_constructed_has_no_wiring (0 ms)
+[ RUN      ] N01ParserAdapter.init_rejects_null_cfg_and_null_api
+[       OK ] N01ParserAdapter.init_rejects_null_cfg_and_null_api (0 ms)
+[ RUN      ] N01ParserAdapter.init_ext_defaults_time_check_off_and_delivers_quote
+[       OK ] N01ParserAdapter.init_ext_defaults_time_check_off_and_delivers_quote (0 ms)
+[ RUN      ] N01ParserAdapter.run_reports_connection_command_submission
+[       OK ] N01ParserAdapter.run_reports_connection_command_submission (0 ms)
+[ RUN      ] N01ParserAdapter.manager_reports_partial_submission_and_keeps_owners
+[       OK ] N01ParserAdapter.manager_reports_partial_submission_and_keeps_owners (0 ms)
+[ RUN      ] N01ParserAdapter.init_without_module_still_wires_the_stub
+[       OK ] N01ParserAdapter.init_without_module_still_wires_the_stub (0 ms)
+[ RUN      ] N01ParserAdapter.init_with_check_time_drops_future_ticks
+[       OK ] N01ParserAdapter.init_with_check_time_drops_future_ticks (1 ms)
+[ RUN      ] N01ParserAdapter.handle_quote_guards_before_any_lookup
+[       OK ] N01ParserAdapter.handle_quote_guards_before_any_lookup (0 ms)
+[ RUN      ] N01ParserAdapter.handle_quote_drops_unknown_contract
+[       OK ] N01ParserAdapter.handle_quote_drops_unknown_contract (0 ms)
+[ RUN      ] N01ParserAdapter.handle_quote_uses_category_specific_stdcode
+[       OK ] N01ParserAdapter.handle_quote_uses_category_specific_stdcode (0 ms)
+[ RUN      ] N01ParserAdapter.level2_channels_bail_out_on_empty_dates
+[       OK ] N01ParserAdapter.level2_channels_bail_out_on_empty_dates (0 ms)
+[ RUN      ] N01ParserAdapter.handle_parser_log_is_safe_before_and_after_release
+[       OK ] N01ParserAdapter.handle_parser_log_is_safe_before_and_after_release (0 ms)
+[ RUN      ] N01ParserAdapter.mgr_rejects_null_and_duplicate_and_empty_id
+[       OK ] N01ParserAdapter.mgr_rejects_null_and_duplicate_and_empty_id (0 ms)
+[ RUN      ] N01ParserAdapter.mgr_run_and_release_drains_the_table
+[       OK ] N01ParserAdapter.mgr_run_and_release_drains_the_table (0 ms)
+[ DISABLED ] N01ParserAdapter.DISABLED_null_bd_mgr_level2_callback_crash
+[----------] 14 tests from N01ParserAdapter (4 ms total)
+
+[----------] 6 tests from N01StraRegistry
+[ RUN      ] N01StraRegistry.cta_mgr_empty_registry_lookups_miss
+[       OK ] N01StraRegistry.cta_mgr_empty_registry_lookups_miss (0 ms)
+[ RUN      ] N01StraRegistry.hft_mgr_empty_registry_lookups_miss
+[       OK ] N01StraRegistry.hft_mgr_empty_registry_lookups_miss (0 ms)
+[ RUN      ] N01StraRegistry.sel_mgr_empty_registry_lookups_miss
+[       OK ] N01StraRegistry.sel_mgr_empty_registry_lookups_miss (0 ms)
+[ RUN      ] N01StraRegistry.single_segment_name_never_reaches_the_factory_table
+[       OK ] N01StraRegistry.single_segment_name_never_reaches_the_factory_table (0 ms)
+[ RUN      ] N01StraRegistry.load_factories_tolerates_empty_and_missing_directories
+[       OK ] N01StraRegistry.load_factories_tolerates_empty_and_missing_directories (0 ms)
+[ RUN      ] N01StraRegistry.wrappers_expose_self_and_guard_null_strategy
+[       OK ] N01StraRegistry.wrappers_expose_self_and_guard_null_strategy (0 ms)
+[----------] 6 tests from N01StraRegistry (0 ms total)
+
+[----------] 2 tests from N01ExecCommand
+[ RUN      ] N01ExecCommand.name_and_stub_accessors
+[       OK ] N01ExecCommand.name_and_stub_accessors (0 ms)
+[ RUN      ] N01ExecCommand.default_hooks_are_callable_noops
+[       OK ] N01ExecCommand.default_hooks_are_callable_noops (0 ms)
+[----------] 2 tests from N01ExecCommand (0 ms total)
+
+[----------] 2 tests from N01TrdNotifySink
+[ RUN      ] N01TrdNotifySink.default_optional_callbacks_are_noops
+[       OK ] N01TrdNotifySink.default_optional_callbacks_are_noops (0 ms)
+[ RUN      ] N01TrdNotifySink.default_on_order_is_called_through_base_reference
+[       OK ] N01TrdNotifySink.default_on_order_is_called_through_base_reference (0 ms)
+[----------] 2 tests from N01TrdNotifySink (0 ms total)
+
+[----------] 13 tests from N01TraderAdapterSubscribe
+[ RUN      ] N01TraderAdapterSubscribe.ready_replay_is_idempotent_and_close_clears_ready
+[       OK ] N01TraderAdapterSubscribe.ready_replay_is_idempotent_and_close_clears_ready (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.subscribe_ready_and_close_race_keeps_fifo_order
+[       OK ] N01TraderAdapterSubscribe.subscribe_ready_and_close_race_keeps_fifo_order (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.callback_can_reenter_subscribe_and_close
+[       OK ] N01TraderAdapterSubscribe.callback_can_reenter_subscribe_and_close (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.callback_can_unregister_without_waiting_on_itself
+[       OK ] N01TraderAdapterSubscribe.callback_can_unregister_without_waiting_on_itself (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.reentrant_remove_of_idle_sink_allows_ready_resubscribe
+[       OK ] N01TraderAdapterSubscribe.reentrant_remove_of_idle_sink_allows_ready_resubscribe (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.remove_sink_waits_for_in_flight_broadcast
+[       OK ] N01TraderAdapterSubscribe.remove_sink_waits_for_in_flight_broadcast (83 ms)
+[ RUN      ] N01TraderAdapterSubscribe.concurrent_account_broadcasts_use_safe_sink_snapshots
+[       OK ] N01TraderAdapterSubscribe.concurrent_account_broadcasts_use_safe_sink_snapshots (3 ms)
+[ RUN      ] N01TraderAdapterSubscribe.request_stop_is_idempotent_and_waits_for_broadcast
+[       OK ] N01TraderAdapterSubscribe.request_stop_is_idempotent_and_waits_for_broadcast (59 ms)
+[ RUN      ] N01TraderAdapterSubscribe.request_stop_waits_for_channel_drain_and_drops_queued_events
+[       OK ] N01TraderAdapterSubscribe.request_stop_waits_for_channel_drain_and_drops_queued_events (58 ms)
+[ RUN      ] N01TraderAdapterSubscribe.wait_from_own_callback_requests_stop_and_returns_false
+[       OK ] N01TraderAdapterSubscribe.wait_from_own_callback_requests_stop_and_returns_false (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.manager_requests_all_before_waiting_for_all_adapters
+[       OK ] N01TraderAdapterSubscribe.manager_requests_all_before_waiting_for_all_adapters (116 ms)
+[ RUN      ] N01TraderAdapterSubscribe.manager_callback_wait_failure_preserves_all_adapters
+[       OK ] N01TraderAdapterSubscribe.manager_callback_wait_failure_preserves_all_adapters (0 ms)
+[ RUN      ] N01TraderAdapterSubscribe.manager_callback_query_is_thread_local_nonblocking_and_read_only
+[       OK ] N01TraderAdapterSubscribe.manager_callback_query_is_thread_local_nonblocking_and_read_only (0 ms)
+[----------] 13 tests from N01TraderAdapterSubscribe (324 ms total)
+
+[----------] 20 tests from N01TraderAdapter
+[ RUN      ] N01TraderAdapter.fresh_adapter_is_not_logged_in
+[       OK ] N01TraderAdapter.fresh_adapter_is_not_logged_in (0 ms)
+[ RUN      ] N01TraderAdapter.init_rejects_null_params_without_touching_state
+[       OK ] N01TraderAdapter.init_rejects_null_params_without_touching_state (0 ms)
+[ RUN      ] N01TraderAdapter.init_accepts_no_riskmon_inactive_riskmon_and_complete_active_policy
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp:208: Skipped
+libTraderMocker not found next to test binary
+
+[  SKIPPED ] N01TraderAdapter.init_accepts_no_riskmon_inactive_riskmon_and_complete_active_policy (0 ms)
+[ RUN      ] N01TraderAdapter.active_riskmon_without_default_rule_is_rejected_before_state_is_committed
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/n01_trader_adapter_test.cpp:264: Skipped
+libTraderMocker not found next to test binary
+
+[  SKIPPED ] N01TraderAdapter.active_riskmon_without_default_rule_is_rejected_before_state_is_committed (0 ms)
+[ RUN      ] N01TraderAdapter.active_riskmon_without_policy_is_rejected_before_state_is_committed
+[       OK ] N01TraderAdapter.active_riskmon_without_policy_is_rejected_before_state_is_committed (0 ms)
+[ RUN      ] N01TraderAdapter.active_riskmon_with_non_object_policy_is_rejected_before_state_is_committed
+[       OK ] N01TraderAdapter.active_riskmon_with_non_object_policy_is_rejected_before_state_is_committed (0 ms)
+[ RUN      ] N01TraderAdapter.init_ext_rejects_null_api
+[       OK ] N01TraderAdapter.init_ext_rejects_null_api (0 ms)
+[ RUN      ] N01TraderAdapter.init_ext_failure_releases_partial_api_state_once
+[       OK ] N01TraderAdapter.init_ext_failure_releases_partial_api_state_once (1 ms)
+[ RUN      ] N01TraderAdapter.release_unregisters_only_a_registered_spi_and_is_idempotent
+[       OK ] N01TraderAdapter.release_unregisters_only_a_registered_spi_and_is_idempotent (1 ms)
+[ RUN      ] N01TraderAdapter.missing_module_failure_releases_retained_config
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r160_missing_trader_module_54684_3/traders/libNoSuchTraderModule.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r160_missing_trader_module_54684_3/traders/libNoSuchTraderModule.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r160_missing_trader_module_54684_3/traders/libNoSuchTraderModule.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r160_missing_trader_module_54684_3/traders/libNoSuchTraderModule.dylib' (no such file)
+[       OK ] N01TraderAdapter.missing_module_failure_releases_retained_config (1 ms)
+[ RUN      ] N01TraderAdapter.run_and_release_and_queryfund_are_api_null_safe
+[       OK ] N01TraderAdapter.run_and_release_and_queryfund_are_api_null_safe (0 ms)
+[ RUN      ] N01TraderAdapter.empty_lookups_return_neutral_values
+[       OK ] N01TraderAdapter.empty_lookups_return_neutral_values (0 ms)
+[ RUN      ] N01TraderAdapter.risk_gates_pass_when_riskmon_disabled
+[       OK ] N01TraderAdapter.risk_gates_pass_when_riskmon_disabled (0 ms)
+[ RUN      ] N01TraderAdapter.null_payloads_on_response_callbacks_are_ignored
+[       OK ] N01TraderAdapter.null_payloads_on_response_callbacks_are_ignored (0 ms)
+[ RUN      ] N01TraderAdapter.add_sink_is_idempotent_set_membership
+[       OK ] N01TraderAdapter.add_sink_is_idempotent_set_membership (0 ms)
+[ RUN      ] N01TraderAdapter.local_order_id_concurrent_first_call_is_unique
+[       OK ] N01TraderAdapter.local_order_id_concurrent_first_call_is_unique (12 ms)
+[ RUN      ] N01TraderAdapter.local_order_id_is_monotonic
+[       OK ] N01TraderAdapter.local_order_id_is_monotonic (0 ms)
+[ RUN      ] N01TraderAdapter.mgr_rejects_null_and_empty_names
+[       OK ] N01TraderAdapter.mgr_rejects_null_and_empty_names (0 ms)
+[ RUN      ] N01TraderAdapter.mgr_registers_unique_names_and_rejects_duplicates
+[       OK ] N01TraderAdapter.mgr_registers_unique_names_and_rejects_duplicates (0 ms)
+[ RUN      ] N01TraderAdapter.mgr_run_release_and_refresh_funds_without_api
+[       OK ] N01TraderAdapter.mgr_run_release_and_refresh_funds_without_api (0 ms)
+[ DISABLED ] N01TraderAdapter.DISABLED_push_report_before_run_dereferences_null_stat_map
+[----------] 20 tests from N01TraderAdapter (17 ms total)
+
+[----------] 2 tests from RetryProofExecuterTest
+[ RUN      ] RetryProofExecuterTest.ArbiRetriesOnlyAfterProvenV2CleanupWithoutQueuedCallbacks
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r190_exec_unit_retry_proof_test.cpp:67: Failure
+Value of: plugin.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] RetryProofExecuterTest.ArbiRetriesOnlyAfterProvenV2CleanupWithoutQueuedCallbacks (2 ms)
+[ RUN      ] RetryProofExecuterTest.ArbiKeepsRetryBlockedWhenChannelCallbacksWereQueuedDuringFailure
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r190_exec_unit_retry_proof_test.cpp:67: Failure
+Value of: plugin.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] RetryProofExecuterTest.ArbiKeepsRetryBlockedWhenChannelCallbacksWereQueuedDuringFailure (0 ms)
+[----------] 2 tests from RetryProofExecuterTest (2 ms total)
+
+[----------] 30 tests from WtArbiExecuterSerialization
+[ RUN      ] WtArbiExecuterSerialization.SameCodePositionsAreFifoAndNeverOverlap
+[       OK ] WtArbiExecuterSerialization.SameCodePositionsAreFifoAndNeverOverlap (1 ms)
+[ RUN      ] WtArbiExecuterSerialization.OlderPositionBatchCannotClearNewerTargetSnapshots
+[       OK ] WtArbiExecuterSerialization.OlderPositionBatchCannotClearNewerTargetSnapshots (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.PublicSetPositionAppliesGroupTargetsAndClearsOnEmptyInput
+[       OK ] WtArbiExecuterSerialization.PublicSetPositionAppliesGroupTargetsAndClearsOnEmptyInput (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.OverlappingGroupsUseConfiguredOrder
+[       OK ] WtArbiExecuterSerialization.OverlappingGroupsUseConfiguredOrder (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.OlderTargetBatchCannotWriteAfterNewerBatchStarts
+[       OK ] WtArbiExecuterSerialization.OlderTargetBatchCannotWriteAfterNewerBatchStarts (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.DifferentCodesCanRunInParallel
+[       OK ] WtArbiExecuterSerialization.DifferentCodesCanRunInParallel (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.ReadyAndLostCallbacksRemainOrdered
+[       OK ] WtArbiExecuterSerialization.ReadyAndLostCallbacksRemainOrdered (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.RepeatedReadyAndNullTraderAssignmentAreIdempotent
+[       OK ] WtArbiExecuterSerialization.RepeatedReadyAndNullTraderAssignmentAreIdempotent (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.ReadyCallbackAfterTraderBindingIsObservableAndIdempotent
+[       OK ] WtArbiExecuterSerialization.ReadyCallbackAfterTraderBindingIsObservableAndIdempotent (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.QueuedReadyRecoveryIsDiscardedAfterChannelEpochChanges
+[       OK ] WtArbiExecuterSerialization.QueuedReadyRecoveryIsDiscardedAfterChannelEpochChanges (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.LostEventRemainsObservableAcrossReadyLostReadyBurst
+[       OK ] WtArbiExecuterSerialization.LostEventRemainsObservableAcrossReadyLostReadyBurst (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.ReentrantPositionCallbackQueuesWithoutDeadlock
+[       OK ] WtArbiExecuterSerialization.ReentrantPositionCallbackQueuesWithoutDeadlock (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.NoPoolBusyCallerReturnsAfterEnqueue
+[       OK ] WtArbiExecuterSerialization.NoPoolBusyCallerReturnsAfterEnqueue (10 ms)
+[ RUN      ] WtArbiExecuterSerialization.PublicSetPositionQueuesTargetBeforeJoinedTickDuringInitialization
+[       OK ] WtArbiExecuterSerialization.PublicSetPositionQueuesTargetBeforeJoinedTickDuringInitialization (10 ms)
+[ RUN      ] WtArbiExecuterSerialization.ChannelReadyCallbackCanJoinSameCodeSubmission
+[       OK ] WtArbiExecuterSerialization.ChannelReadyCallbackCanJoinSameCodeSubmission (10 ms)
+[ RUN      ] WtArbiExecuterSerialization.AccountUpdateDuringInitializationIsDeliveredAfterRegistration
+[       OK ] WtArbiExecuterSerialization.AccountUpdateDuringInitializationIsDeliveredAfterRegistration (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.InitialDrainReservationRejectsCompetingReservedCaller
+[       OK ] WtArbiExecuterSerialization.InitialDrainReservationRejectsCompetingReservedCaller (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.SupersededQueuedTargetIsSkippedButLaterEventsRemain
+[       OK ] WtArbiExecuterSerialization.SupersededQueuedTargetIsSkippedButLaterEventsRemain (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.StartingNewBatchInvalidatesQueuedTargetBeforeApply
+[       OK ] WtArbiExecuterSerialization.StartingNewBatchInvalidatesQueuedTargetBeforeApply (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.PublicSetPositionConcurrentClearLeavesLatestTarget
+[       OK ] WtArbiExecuterSerialization.PublicSetPositionConcurrentClearLeavesLatestTarget (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.ReadyCallbackFailureDisablesUnitAndReportsStatus
+[       OK ] WtArbiExecuterSerialization.ReadyCallbackFailureDisablesUnitAndReportsStatus (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.StartupCallbackFailureDiscardsRetainedTickAndStaysFailed
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r220_arbi_serialization_test.cpp:1272: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] WtArbiExecuterSerialization.StartupCallbackFailureDiscardsRetainedTickAndStaysFailed (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.PluginInitializationFailureCanRetryAfterEnvironmentRecovers
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r220_arbi_serialization_test.cpp:1339: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] WtArbiExecuterSerialization.PluginInitializationFailureCanRetryAfterEnvironmentRecovers (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.InitializedV21PluginOwnerIsRetainedUntilItsHooksQuiesce
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r220_arbi_serialization_test.cpp:1390: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] WtArbiExecuterSerialization.InitializedV21PluginOwnerIsRetainedUntilItsHooksQuiesce (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.QuiesceWaitsForAcceptedFifoAndRejectsNewIngress
+[       OK ] WtArbiExecuterSerialization.QuiesceWaitsForAcceptedFifoAndRejectsNewIngress (34 ms)
+[ RUN      ] WtArbiExecuterSerialization.UnsupportedPluginBackgroundThreadKeepsOwnerPinned
+[       OK ] WtArbiExecuterSerialization.UnsupportedPluginBackgroundThreadKeepsOwnerPinned (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.QuiesceFailsWhenCallbackDropsAcceptedQueuedEvent
+[       OK ] WtArbiExecuterSerialization.QuiesceFailsWhenCallbackDropsAcceptedQueuedEvent (2 ms)
+[ RUN      ] WtArbiExecuterSerialization.SynchronousFallbackCallbackCannotWaitForItself
+[       OK ] WtArbiExecuterSerialization.SynchronousFallbackCallbackCannotWaitForItself (24 ms)
+[ RUN      ] WtArbiExecuterSerialization.EmptyExecutorCanCompleteHostQuiescence
+[       OK ] WtArbiExecuterSerialization.EmptyExecutorCanCompleteHostQuiescence (0 ms)
+[ RUN      ] WtArbiExecuterSerialization.PreflightAllowsOtherThreadIngressAndDrainWaits
+[       OK ] WtArbiExecuterSerialization.PreflightAllowsOtherThreadIngressAndDrainWaits (28 ms)
+[----------] 30 tests from WtArbiExecuterSerialization (127 ms total)
+
+[----------] 6 tests from R71CtaTest
+[ RUN      ] R71CtaTest.LoadDataOptionalDefaultsAndZeroVolumeQueries
+[       OK ] R71CtaTest.LoadDataOptionalDefaultsAndZeroVolumeQueries (3 ms)
+[ RUN      ] R71CtaTest.TickConditionsCoverAllAlgorithmsAndActions
+[       OK ] R71CtaTest.TickConditionsCoverAllAlgorithmsAndActions (2 ms)
+[ RUN      ] R71CtaTest.CloseReverseSlippageAndEarlyExitsWriteLogs
+[       OK ] R71CtaTest.CloseReverseSlippageAndEarlyExitsWriteLogs (3 ms)
+[ RUN      ] R71CtaTest.ScheduleEmitsTwentyTimesAndPersistsCondition
+[       OK ] R71CtaTest.ScheduleEmitsTwentyTimesAndPersistsCondition (6 ms)
+[ RUN      ] R71CtaTest.BarsTicksPricesAndChartDump
+[       OK ] R71CtaTest.BarsTicksPricesAndChartDump (0 ms)
+[ RUN      ] R71CtaTest.ExitAndSetPositionConditionBranches
+[       OK ] R71CtaTest.ExitAndSetPositionConditionBranches (2 ms)
+[----------] 6 tests from R71CtaTest (18 ms total)
+
+[----------] 3 tests from R71DtMgrTest
+[ RUN      ] R71DtMgrTest.ReaderInitAdjustingAndKlineDelegation
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_dtmgr_test.cpp:67: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtDataStorageAD，无法驱动 reader 成功路径
+
+[  FAILED  ] R71DtMgrTest.ReaderInitAdjustingAndKlineDelegation (0 ms)
+[ RUN      ] R71DtMgrTest.RealtimeTickCacheAndNotifyQueueLifecycle
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_dtmgr_test.cpp:111: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R71DtMgrTest.RealtimeTickCacheAndNotifyQueueLifecycle (0 ms)
+[ RUN      ] R71DtMgrTest.ResampleCachePathWithEmptyStoreReturnsNull
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_dtmgr_test.cpp:155: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R71DtMgrTest.ResampleCachePathWithEmptyStoreReturnsNull (0 ms)
+[ DISABLED ] R71DtMgrTest.DISABLED_InitNullCfgCrashes
+[----------] 3 tests from R71DtMgrTest (0 ms total)
+
+[----------] 20 tests from R71ExecTest
+[ RUN      ] R71ExecTest.LocalUnitLifecycleAndCallbackDispatch
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.LocalUnitLifecycleAndCallbackDispatch (0 ms)
+[ RUN      ] R71ExecTest.LocalSetPositionGroupsStaleAndStrictSync
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.LocalSetPositionGroupsStaleAndStrictSync (0 ms)
+[ RUN      ] R71ExecTest.ArbiUnitDispatchAndSetPosition
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.ArbiUnitDispatchAndSetPosition (0 ms)
+[ RUN      ] R71ExecTest.ArbiInitialTargetReplaySubmitsOnFirstTick
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.ArbiInitialTargetReplaySubmitsOnFirstTick (39 ms)
+[ RUN      ] R71ExecTest.ArbiReadyWithoutActionableTargetDoesNotSubmit
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.ArbiReadyWithoutActionableTargetDoesNotSubmit (1 ms)
+[ RUN      ] R71ExecTest.DiffUnitDispatchAndChannelRecovery
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.DiffUnitDispatchAndChannelRecovery (0 ms)
+[ RUN      ] R71ExecTest.LocalFailedInitializationRetriesAfterV2CleanupWithoutQueuedCallbacks
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.LocalFailedInitializationRetriesAfterV2CleanupWithoutQueuedCallbacks (0 ms)
+[ RUN      ] R71ExecTest.ArbiFailedInitializationRetriesAfterV2CleanupAndReplaysOriginalTarget
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.ArbiFailedInitializationRetriesAfterV2CleanupAndReplaysOriginalTarget (0 ms)
+[ RUN      ] R71ExecTest.DiffV2FailedInitializationStillRequiresSafeAutomaticRetry
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.DiffV2FailedInitializationStillRequiresSafeAutomaticRetry (0 ms)
+[ RUN      ] R71ExecTest.K06DiffCleanFailureFollowedBySuccessfulRetryLetsQuiesceComplete
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.K06DiffCleanFailureFollowedBySuccessfulRetryLetsQuiesceComplete (0 ms)
+[ RUN      ] R71ExecTest.K06DiffCleanFailureWithoutSuccessfulRetryKeepsQuiesceIncomplete
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.K06DiffCleanFailureWithoutSuccessfulRetryKeepsQuiesceIncomplete (0 ms)
+[ RUN      ] R71ExecTest.UnitInitializationStatusIsQueryableAndFailedStatusCanBeCleared
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.UnitInitializationStatusIsQueryableAndFailedStatusCanBeCleared (0 ms)
+[ RUN      ] R71ExecTest.ExecManagerRegistrySupportsConcurrentAddsAndSnapshots
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.ExecManagerRegistrySupportsConcurrentAddsAndSnapshots (0 ms)
+[ RUN      ] R71ExecTest.ConcurrentSameCodeCreationAndPreRegistrationChannelEdges
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.ConcurrentSameCodeCreationAndPreRegistrationChannelEdges (0 ms)
+[ RUN      ] R71ExecTest.LocalFailedInitializationRequestsCoalesceAndFailClosedAfterReadyCallback
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.LocalFailedInitializationRequestsCoalesceAndFailClosedAfterReadyCallback (0 ms)
+[ RUN      ] R71ExecTest.ArbiFailedInitializationRequestsReturnBeforeRegistration
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.ArbiFailedInitializationRequestsReturnBeforeRegistration (0 ms)
+[ RUN      ] R71ExecTest.DiffFailedInitializationWaitersShareOneGeneration
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.DiffFailedInitializationWaitersShareOneGeneration (0 ms)
+[ RUN      ] R71ExecTest.SameThreadInitializationReentryFailsWithoutDuplicateUnit
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.SameThreadInitializationReentryFailsWithoutDuplicateUnit (0 ms)
+[ RUN      ] R71ExecTest.ThrowingInitializationChannelCallbackDoesNotBlockConcurrentTargetUpdate
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.ThrowingInitializationChannelCallbackDoesNotBlockConcurrentTargetUpdate (0 ms)
+[ RUN      ] R71ExecTest.AccountFanoutSkipsInitializingUnitUntilReady
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_executers_test.cpp:396: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71ExecTest.AccountFanoutSkipsInitializingUnitUntilReady (0 ms)
+[----------] 20 tests from R71ExecTest (48 ms total)
+
+[----------] 1 test from R71ExecScheduleTest
+[ RUN      ] R71ExecScheduleTest.RejectedChannelDrainRunsFallbackSynchronously
+[       OK ] R71ExecScheduleTest.RejectedChannelDrainRunsFallbackSynchronously (0 ms)
+[----------] 1 test from R71ExecScheduleTest (0 ms total)
+
+[----------] 4 tests from R71HftTest
+[ RUN      ] R71HftTest.TradingMethodsForwardToTraderAdapter
+[       OK ] R71HftTest.TradingMethodsForwardToTraderAdapter (1 ms)
+[ RUN      ] R71HftTest.CustomRuleMappingAndTradingGuards
+[       OK ] R71HftTest.CustomRuleMappingAndTradingGuards (0 ms)
+[ RUN      ] R71HftTest.TradeAccountingAndDynProfitExtremes
+[       OK ] R71HftTest.TradeAccountingAndDynProfitExtremes (1 ms)
+[ RUN      ] R71HftTest.HistoricalSlicesAndL2Subscriptions
+[       OK ] R71HftTest.HistoricalSlicesAndL2Subscriptions (0 ms)
+[----------] 4 tests from R71HftTest (4 ms total)
+
+[----------] 18 tests from R71LocalSerialTest
+[ RUN      ] R71LocalSerialTest.QuiesceDrainsAcceptedCallbacksAndRejectsNewIngress
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.QuiesceDrainsAcceptedCallbacksAndRejectsNewIngress (0 ms)
+[ RUN      ] R71LocalSerialTest.QuiesceWaitFromPluginCallbackReturnsFalseWithoutBlocking
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.QuiesceWaitFromPluginCallbackReturnsFalseWithoutBlocking (41 ms)
+[ RUN      ] R71LocalSerialTest.QuiesceWaitsForIngressProducerBeforeDrainingAcceptedTarget
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.QuiesceWaitsForIngressProducerBeforeDrainingAcceptedTarget (0 ms)
+[ RUN      ] R71LocalSerialTest.NoPoolSynchronousCallbackCanRequestQuiesce
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.NoPoolSynchronousCallbackCanRequestQuiesce (0 ms)
+[ RUN      ] R71LocalSerialTest.SameCodeCallbacksStayFifoAndReentrantCallbackDoesNotWait
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.SameCodeCallbacksStayFifoAndReentrantCallbackDoesNotWait (0 ms)
+[ RUN      ] R71LocalSerialTest.InitializationCallbackCanSpawnAndJoinSameCodePositionEvent
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.InitializationCallbackCanSpawnAndJoinSameCodePositionEvent (0 ms)
+[ RUN      ] R71LocalSerialTest.AccountEventQueuedDuringInitializationRunsAfterSuccessfulReady
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.AccountEventQueuedDuringInitializationRunsAfterSuccessfulReady (0 ms)
+[ RUN      ] R71LocalSerialTest.LatestTargetReconciliationPrecedesTickQueuedDuringInitialization
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.LatestTargetReconciliationPrecedesTickQueuedDuringInitialization (0 ms)
+[ RUN      ] R71LocalSerialTest.TargetReservationCapturesTicksBeforeCreatorStarts
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.TargetReservationCapturesTicksBeforeCreatorStarts (0 ms)
+[ RUN      ] R71LocalSerialTest.StrictSyncUnmanagedHoldBecomesAuthoritativeZeroTarget
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.StrictSyncUnmanagedHoldBecomesAuthoritativeZeroTarget (0 ms)
+[ RUN      ] R71LocalSerialTest.DifferentContractsCanRunCallbacksInParallel
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.DifferentContractsCanRunCallbacksInParallel (0 ms)
+[ RUN      ] R71LocalSerialTest.ChannelEventsContinueAfterBlockedReadyCallback
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.ChannelEventsContinueAfterBlockedReadyCallback (0 ms)
+[ RUN      ] R71LocalSerialTest.ChannelLostTransitionIsDeliveredBeforeQueuedTickAndRecovery
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.ChannelLostTransitionIsDeliveredBeforeQueuedTickAndRecovery (0 ms)
+[ RUN      ] R71LocalSerialTest.RolloverClearDuringFailedTeardownIsRetainedWithoutUnsafeReplay
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.RolloverClearDuringFailedTeardownIsRetainedWithoutUnsafeReplay (0 ms)
+[ RUN      ] R71LocalSerialTest.InitializationCallbackFailureCannotRetryWithoutRecoveryContract
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.InitializationCallbackFailureCannotRetryWithoutRecoveryContract (0 ms)
+[ RUN      ] R71LocalSerialTest.FailedInitializedUnitStaysOwnedWhileFakePluginWorkerIsActive
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.FailedInitializedUnitStaysOwnedWhileFakePluginWorkerIsActive (0 ms)
+[ RUN      ] R71LocalSerialTest.PreflightFailureBeforePluginEntryCanBeCleared
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.PreflightFailureBeforePluginEntryCanBeCleared (0 ms)
+[ RUN      ] R71LocalSerialTest.ReadyCallbackFailureStaysLockedAcrossTargetAndClearRequests
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/r71_local_serialization_test.cpp:561: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact，无法创建真实执行单元
+
+[  FAILED  ] R71LocalSerialTest.ReadyCallbackFailureStaysLockedAcrossTargetAndClearRequests (0 ms)
+[----------] 18 tests from R71LocalSerialTest (49 ms total)
+
+[----------] 6 tests from S1TraderEntryGate
+[ RUN      ] S1TraderEntryGate.K05SiblingAdaptersOfOneAccountShareInFlightQuantity
+[       OK ] S1TraderEntryGate.K05SiblingAdaptersOfOneAccountShareInFlightQuantity (1 ms)
+[ RUN      ] S1TraderEntryGate.K05ConcurrentEntriesCannotBothPassTheAccountCheck
+[       OK ] S1TraderEntryGate.K05ConcurrentEntriesCannotBothPassTheAccountCheck (0 ms)
+[ RUN      ] S1TraderEntryGate.K03LiveOrderReportAfterNotSentClosurePausesAccount
+[       OK ] S1TraderEntryGate.K03LiveOrderReportAfterNotSentClosurePausesAccount (0 ms)
+[ RUN      ] S1TraderEntryGate.K03TradeAfterNotSentClosurePausesAccount
+[       OK ] S1TraderEntryGate.K03TradeAfterNotSentClosurePausesAccount (0 ms)
+[ RUN      ] S1TraderEntryGate.K03NotSentWithoutLiveEvidenceKeepsTheAccountOpen
+[       OK ] S1TraderEntryGate.K03NotSentWithoutLiveEvidenceKeepsTheAccountOpen (1 ms)
+[ RUN      ] S1TraderEntryGate.New006ClockFailureRejectsEntryBeforeTheProvider
+[       OK ] S1TraderEntryGate.New006ClockFailureRejectsEntryBeforeTheProvider (0 ms)
+[----------] 6 tests from S1TraderEntryGate (5 ms total)
+
+[----------] 2 tests from S3New072DiffCallbacks
+[ RUN      ] S3New072DiffCallbacks.CallbacksDuringCreationReturnPromptlyAndAreDeliveredAfterReady
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s3_new072_diff_callbacks_nonblocking_test.cpp:155: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+libWtExeFact is required to create the real execution unit
+
+[  FAILED  ] S3New072DiffCallbacks.CallbacksDuringCreationReturnPromptlyAndAreDeliveredAfterReady (0 ms)
+[ RUN      ] S3New072DiffCallbacks.CallbacksDuringFailedCreationReturnPromptlyAndAreDroppedWithWarning
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s3_new072_diff_callbacks_nonblocking_test.cpp:155: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+libWtExeFact is required to create the real execution unit
+
+[  FAILED  ] S3New072DiffCallbacks.CallbacksDuringFailedCreationReturnPromptlyAndAreDroppedWithWarning (0 ms)
+[----------] 2 tests from S3New072DiffCallbacks (1 ms total)
+
+[----------] 5 tests from S4OwnerRelease
+[ RUN      ] S4OwnerRelease.HftContextReturnsItsClaimsWhenDestroyed
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s4_owner_release_test.cpp:118: Failure
+Value of: otherOwnerCanTrade(trader, kAg)
+  Actual: false
+Expected: true
+a destroyed context no longer blocks the contract
+
+[  FAILED  ] S4OwnerRelease.HftContextReturnsItsClaimsWhenDestroyed (2 ms)
+[ RUN      ] S4OwnerRelease.HftContextReturnsClaimsOfThePreviousTraderWhenRebound
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s4_owner_release_test.cpp:135: Failure
+Value of: otherOwnerCanTrade(traderA, kAg)
+  Actual: false
+Expected: true
+the binding to trader A has ended
+
+[  FAILED  ] S4OwnerRelease.HftContextReturnsClaimsOfThePreviousTraderWhenRebound (1 ms)
+[ RUN      ] S4OwnerRelease.LocalExecuterReturnsItsClaimsWhenDestroyed
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s4_owner_release_test.cpp:157: Failure
+Value of: otherOwnerCanTrade(trader, kAg)
+  Actual: false
+Expected: true
+a destroyed executer no longer blocks the contract
+
+[  FAILED  ] S4OwnerRelease.LocalExecuterReturnsItsClaimsWhenDestroyed (1 ms)
+[ RUN      ] S4OwnerRelease.ArbiExecuterReturnsItsClaimsWhenDestroyed
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s4_owner_release_test.cpp:175: Failure
+Value of: otherOwnerCanTrade(trader, kAg)
+  Actual: false
+Expected: true
+
+[  FAILED  ] S4OwnerRelease.ArbiExecuterReturnsItsClaimsWhenDestroyed (1 ms)
+[ RUN      ] S4OwnerRelease.ManualClaimIsNotReleasedByAnExecuterTeardown
+[       OK ] S4OwnerRelease.ManualClaimIsNotReleasedByAnExecuterTeardown (1 ms)
+[----------] 5 tests from S4OwnerRelease (8 ms total)
+
+[----------] 3 tests from S4TwoDiffOwnerRouting
+[ RUN      ] S4TwoDiffOwnerRouting.ReportsCancelsAndSnapshotsStayWithTheSendingExecuter
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s4_two_diff_owner_routing_test.cpp:93: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+libWtExeFact is required for the real units
+
+[  FAILED  ] S4TwoDiffOwnerRouting.ReportsCancelsAndSnapshotsStayWithTheSendingExecuter (0 ms)
+[ RUN      ] S4TwoDiffOwnerRouting.CachedTargetsRouteExplicitAndAllEntriesToTheirOwnLedgers
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s4_two_diff_owner_routing_test.cpp:93: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+libWtExeFact is required for the real units
+
+[  FAILED  ] S4TwoDiffOwnerRouting.CachedTargetsRouteExplicitAndAllEntriesToTheirOwnLedgers (0 ms)
+[ RUN      ] S4TwoDiffOwnerRouting.WithoutRoutingAFillReachesBothLedgersAsBefore
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s4_two_diff_owner_routing_test.cpp:93: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+libWtExeFact is required for the real units
+
+[  FAILED  ] S4TwoDiffOwnerRouting.WithoutRoutingAFillReachesBothLedgersAsBefore (0 ms)
+[----------] 3 tests from S4TwoDiffOwnerRouting (1 ms total)
+
+[----------] 2 tests from S5MainK05EntryLimit
+[ RUN      ] S5MainK05EntryLimit.EntryAboveTheAccountLimitIsRejectedAndReductionsStayAllowed
+[       OK ] S5MainK05EntryLimit.EntryAboveTheAccountLimitIsRejectedAndReductionsStayAllowed (2 ms)
+[ RUN      ] S5MainK05EntryLimit.WithoutADeclaredLimitEntriesAreNotRestricted
+[       OK ] S5MainK05EntryLimit.WithoutADeclaredLimitEntriesAreNotRestricted (1 ms)
+[----------] 2 tests from S5MainK05EntryLimit (3 ms total)
+
+[----------] 2 tests from S5MainK07dSyncReport
+[ RUN      ] S5MainK07dSyncReport.AcceptedThenCanceledDuringInsertKeepsTheOrder
+[       OK ] S5MainK07dSyncReport.AcceptedThenCanceledDuringInsertKeepsTheOrder (1 ms)
+[ RUN      ] S5MainK07dSyncReport.RejectedWithoutAcceptanceDuringInsertFails
+[       OK ] S5MainK07dSyncReport.RejectedWithoutAcceptanceDuringInsertFails (1 ms)
+[----------] 2 tests from S5MainK07dSyncReport (2 ms total)
+
+[----------] 2 tests from S5MainK31DateBinding
+[ RUN      ] S5MainK31DateBinding.BindingHolderValidatesOnceAndFallsBackToLegacy
+[       OK ] S5MainK31DateBinding.BindingHolderValidatesOnceAndFallsBackToLegacy (0 ms)
+[ RUN      ] S5MainK31DateBinding.StorageAndXeleModulesExportVersionedBinders
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:124: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+missing module WtDataStorage
+Google Test trace:
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:122: WtDataStorage
+
+[  FAILED  ] S5MainK31DateBinding.StorageAndXeleModulesExportVersionedBinders (0 ms)
+[----------] 2 tests from S5MainK31DateBinding (0 ms total)
+
+[----------] 2 tests from S5MainK31HostChain
+[ RUN      ] S5MainK31HostChain.InjectedTableDrivesTheReaderDateMapping
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:214: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+missing libWtDataStorageAD
+
+[  FAILED  ] S5MainK31HostChain.InjectedTableDrivesTheReaderDateMapping (0 ms)
+[ RUN      ] S5MainK31HostChain.WithoutHostTableTheReaderKeepsTheLegacyPath
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n01_wtcore_tradepaths/s5_main_k31_date_binding_test.cpp:244: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+missing libWtDataStorageAD
+
+[  FAILED  ] S5MainK31HostChain.WithoutHostTableTheReaderKeepsTheLegacyPath (0 ms)
+[----------] 2 tests from S5MainK31HostChain (0 ms total)
+
+[----------] 4 tests from S5MainK44OwnerParticipation
+[ RUN      ] S5MainK44OwnerParticipation.ManualEntryUnderRoutingClaimsTheContractExclusively
+[       OK ] S5MainK44OwnerParticipation.ManualEntryUnderRoutingClaimsTheContractExclusively (1 ms)
+[ RUN      ] S5MainK44OwnerParticipation.ExecuterOwnedContractRejectsManualEntryUnderRouting
+[       OK ] S5MainK44OwnerParticipation.ExecuterOwnedContractRejectsManualEntryUnderRouting (1 ms)
+[ RUN      ] S5MainK44OwnerParticipation.WithoutRoutingManualAndHftEntriesDoNotClaim
+[       OK ] S5MainK44OwnerParticipation.WithoutRoutingManualAndHftEntriesDoNotClaim (3 ms)
+[ RUN      ] S5MainK44OwnerParticipation.HftContextUnderRoutingOwnsItsContractAndSeesOnlyItsOwnFills
+[       OK ] S5MainK44OwnerParticipation.HftContextUnderRoutingOwnsItsContractAndSeesOnlyItsOwnFills (2 ms)
+[----------] 4 tests from S5MainK44OwnerParticipation (9 ms total)
+
+[----------] 2 tests from S5MainL01014ResumeInbox
+[ RUN      ] S5MainL01014ResumeInbox.EachRequestIsTakenExactlyOnceAndArchivedByOutcome
+[       OK ] S5MainL01014ResumeInbox.EachRequestIsTakenExactlyOnceAndArchivedByOutcome (5 ms)
+[ RUN      ] S5MainL01014ResumeInbox.RealGateResumesOnlyWithTheReviewedGenerationAndAudits
+[       OK ] S5MainL01014ResumeInbox.RealGateResumesOnlyWithTheReviewedGenerationAndAudits (2 ms)
+[----------] 2 tests from S5MainL01014ResumeInbox (8 ms total)
+
+[----------] 12 tests from DiffOrderOwnershipJournalV1
+[ RUN      ] DiffOrderOwnershipJournalV1.PersistsOwnerLedgerAndActiveOrdersAcrossRestart
+[       OK ] DiffOrderOwnershipJournalV1.PersistsOwnerLedgerAndActiveOrdersAcrossRestart (1 ms)
+[ RUN      ] DiffOrderOwnershipJournalV1.TargetBaselineAndTradeReplayInOneSequence
+[       OK ] DiffOrderOwnershipJournalV1.TargetBaselineAndTradeReplayInOneSequence (0 ms)
+[ RUN      ] DiffOrderOwnershipJournalV1.LocalOrderHighWaterAndUnresolvedIntentSurviveRestart
+[       OK ] DiffOrderOwnershipJournalV1.LocalOrderHighWaterAndUnresolvedIntentSurviveRestart (0 ms)
+[ RUN      ] DiffOrderOwnershipJournalV1.RequiresDurableLegacyLocalIdFloorBeforeReservingOrder
+[       OK ] DiffOrderOwnershipJournalV1.RequiresDurableLegacyLocalIdFloorBeforeReservingOrder (0 ms)
+[ RUN      ] DiffOrderOwnershipJournalV1.RepeatedRejectAndPartialCancelProgressStayIdempotentAfterReplay
+[       OK ] DiffOrderOwnershipJournalV1.RepeatedRejectAndPartialCancelProgressStayIdempotentAfterReplay (0 ms)
+[ RUN      ] DiffOrderOwnershipJournalV1.LateTradeAdvancesSameTerminalProgressOnceAcrossReplay
+[       OK ] DiffOrderOwnershipJournalV1.LateTradeAdvancesSameTerminalProgressOnceAcrossReplay (1 ms)
+[ RUN      ] DiffOrderOwnershipJournalV1.UInt32LocalOrderIdExhaustionFailsWithoutWrapping
+[       OK ] DiffOrderOwnershipJournalV1.UInt32LocalOrderIdExhaustionFailsWithoutWrapping (0 ms)
+[ RUN      ] DiffOrderOwnershipJournalV1.RejectsUnknownOrdersAndConflictingTradeKeysFailClosed
+[       OK ] DiffOrderOwnershipJournalV1.RejectsUnknownOrdersAndConflictingTradeKeysFailClosed (0 ms)
+[ RUN      ] DiffOrderOwnershipJournalV1.TruncatedAndChecksumDamagedWalFailClosed
+[       OK ] DiffOrderOwnershipJournalV1.TruncatedAndChecksumDamagedWalFailClosed (1 ms)
+[ RUN      ] DiffOrderOwnershipJournalV1.FailingIntentWriteBlocksFurtherMutations
+[       OK ] DiffOrderOwnershipJournalV1.FailingIntentWriteBlocksFurtherMutations (0 ms)
+[ RUN      ] DiffOrderOwnershipJournalV1.FlushFailureReturnsBeforeSendCommitAndBlocksJournal
+[       OK ] DiffOrderOwnershipJournalV1.FlushFailureReturnsBeforeSendCommitAndBlocksJournal (0 ms)
+[ RUN      ] DiffOrderOwnershipJournalV1.ExclusiveOpenAndConcurrentIntentsAreSerialized
+[       OK ] DiffOrderOwnershipJournalV1.ExclusiveOpenAndConcurrentIntentsAreSerialized (0 ms)
+[----------] 12 tests from DiffOrderOwnershipJournalV1 (9 ms total)
+
+[----------] 3 tests from DiffOwnerSinkRegistry
+[ RUN      ] DiffOwnerSinkRegistry.DisabledByDefaultAndRoutesOnlyMatchingOwner
+[       OK ] DiffOwnerSinkRegistry.DisabledByDefaultAndRoutesOnlyMatchingOwner (0 ms)
+[ RUN      ] DiffOwnerSinkRegistry.ConcurrentRemoveWaitsForOwnerCallback
+[       OK ] DiffOwnerSinkRegistry.ConcurrentRemoveWaitsForOwnerCallback (159 ms)
+[ RUN      ] DiffOwnerSinkRegistry.ReentrantUnregisterAndRemoveDoNotHoldRoutingLocks
+[       OK ] DiffOwnerSinkRegistry.ReentrantUnregisterAndRemoveDoNotHoldRoutingLocks (13 ms)
+[----------] 3 tests from DiffOwnerSinkRegistry (173 ms total)
+
+[----------] 1 test from DiffOwnerSinkDelivery
+[ RUN      ] DiffOwnerSinkDelivery.CallbackExceptionPropagatesAndReleasesReservation
+[       OK ] DiffOwnerSinkDelivery.CallbackExceptionPropagatesAndReleasesReservation (0 ms)
+[----------] 1 test from DiffOwnerSinkDelivery (0 ms total)
+
+[----------] 2 tests from I03New112WtCoreCwd
+[ RUN      ] I03New112WtCoreCwd.LongWorkingDirectoryIsReturnedInFull
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new112_wtcore_cwd_test.cpp:6: Failure
+Expected equality of these values:
+  0
+  i03_new112::runInChild([] { return std::string(WtHelper::getCWD()); }, false)
+    Which is: 20
+
+[  FAILED  ] I03New112WtCoreCwd.LongWorkingDirectoryIsReturnedInFull (7 ms)
+[ RUN      ] I03New112WtCoreCwd.RemovedWorkingDirectoryFallsBackToDot
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/i03_new112_wtcore_cwd_test.cpp:6: Failure
+Expected equality of these values:
+  0
+  i03_new112::runInChild([] { return std::string(WtHelper::getCWD()); }, true)
+    Which is: 20
+
+[  FAILED  ] I03New112WtCoreCwd.RemovedWorkingDirectoryFallsBackToDot (27 ms)
+[----------] 2 tests from I03New112WtCoreCwd (34 ms total)
+
+[----------] 31 tests from WtDiffExecuterConcurrencyTest
+[ RUN      ] WtDiffExecuterConcurrencyTest.SameCodeCallbacksAreFifoAndReentryDoesNotDeadlock
+[       OK ] WtDiffExecuterConcurrencyTest.SameCodeCallbacksAreFifoAndReentryDoesNotDeadlock (30 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.NoPoolCrossThreadReentryQueuesWithoutDeadlock
+[       OK ] WtDiffExecuterConcurrencyTest.NoPoolCrossThreadReentryQueuesWithoutDeadlock (1 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.DifferentCodesCanRunCallbacksInParallel
+[       OK ] WtDiffExecuterConcurrencyTest.DifferentCodesCanRunCallbacksInParallel (8 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.ReadyPrecedesRecoveryAndOldReadyEpochIsSkipped
+[       OK ] WtDiffExecuterConcurrencyTest.ReadyPrecedesRecoveryAndOldReadyEpochIsSkipped (28 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.RecoveryUsesDiffCapturedBeforeQueuedTrade
+[       OK ] WtDiffExecuterConcurrencyTest.RecoveryUsesDiffCapturedBeforeQueuedTrade (1 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.ReadyTraderBindingWaitsForExplicitPostRegistrationReady
+[       OK ] WtDiffExecuterConcurrencyTest.ReadyTraderBindingWaitsForExplicitPostRegistrationReady (44 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.RuntimeReadyExceptionFailsUnitAndSkipsRecovery
+[       OK ] WtDiffExecuterConcurrencyTest.RuntimeReadyExceptionFailsUnitAndSkipsRecovery (21 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.InitialReadyExceptionBlocksRetryBeforeCreationCompletes
+[       OK ] WtDiffExecuterConcurrencyTest.InitialReadyExceptionBlocksRetryBeforeCreationCompletes (0 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.RuntimeFailureAfterPartialTradeBlocksTargetReplay
+[       OK ] WtDiffExecuterConcurrencyTest.RuntimeFailureAfterPartialTradeBlocksTargetReplay (25 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.PositionChangedTargetAndDiffSurviveReload
+[       OK ] WtDiffExecuterConcurrencyTest.PositionChangedTargetAndDiffSurviveReload (6 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.TradeAndTargetUseConsistentPersistedSnapshot
+[       OK ] WtDiffExecuterConcurrencyTest.TradeAndTargetUseConsistentPersistedSnapshot (2 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.OmittedTargetZeroUsesSignedTargetDelta
+[       OK ] WtDiffExecuterConcurrencyTest.OmittedTargetZeroUsesSignedTargetDelta (28 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.OmittedTargetThreeToZeroUsesRawCodeAndExchangeAndPersists
+[       OK ] WtDiffExecuterConcurrencyTest.OmittedTargetThreeToZeroUsesRawCodeAndExchangeAndPersists (2 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.MissingMatchingExchangeRetainsOmittedTargetAndReportsError
+[       OK ] WtDiffExecuterConcurrencyTest.MissingMatchingExchangeRetainsOmittedTargetAndReportsError (27 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.NewerReentrantTargetBatchWinsWithoutDroppingTrade
+[       OK ] WtDiffExecuterConcurrencyTest.NewerReentrantTargetBatchWinsWithoutDroppingTrade (13 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.OmittedSweepPreservesIncrementalTargetUpdatedAfterBatchStart
+[       OK ] WtDiffExecuterConcurrencyTest.OmittedSweepPreservesIncrementalTargetUpdatedAfterBatchStart (1 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.ExplicitTargetBatchPreservesIncrementalUpdateForUnprocessedCode
+[       OK ] WtDiffExecuterConcurrencyTest.ExplicitTargetBatchPreservesIncrementalUpdateForUnprocessedCode (1 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.SnapshotFailureBlocksPositionDispatchAndPersistsTombstoneWhenWritable
+[       OK ] WtDiffExecuterConcurrencyTest.SnapshotFailureBlocksPositionDispatchAndPersistsTombstoneWhenWritable (4 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.QuiesceDrainsAcceptedPoolFifoAndRejectsNewIngress
+[       OK ] WtDiffExecuterConcurrencyTest.QuiesceDrainsAcceptedPoolFifoAndRejectsNewIngress (39 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.QuiesceDefersPluginWorkerWaitUntilCoordinatorPhase
+[       OK ] WtDiffExecuterConcurrencyTest.QuiesceDefersPluginWorkerWaitUntilCoordinatorPhase (0 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.CoordinatorPendingAndPluginWaitFailureRetainUnitOwner
+[       OK ] WtDiffExecuterConcurrencyTest.CoordinatorPendingAndPluginWaitFailureRetainUnitOwner (0 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.RealV2DiffPluginInitializesAndDirectHookCanShutdown
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/n02_diff_concurrency_test.cpp:1678: Failure
+Value of: pluginDir.ok()
+  Actual: false
+Expected: true
+missing libWtExeFact plugin
+
+[  FAILED  ] WtDiffExecuterConcurrencyTest.RealV2DiffPluginInitializesAndDirectHookCanShutdown (0 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.QuiescePreflightRejectsSynchronousCallbackSelfWait
+[       OK ] WtDiffExecuterConcurrencyTest.QuiescePreflightRejectsSynchronousCallbackSelfWait (0 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.QuiesceStaysIncompleteWhenCallbackDropsQueuedEvent
+[       OK ] WtDiffExecuterConcurrencyTest.QuiesceStaysIncompleteWhenCallbackDropsQueuedEvent (1 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.QueuedOlderSaveCannotOverwriteFailureTombstone
+[       OK ] WtDiffExecuterConcurrencyTest.QueuedOlderSaveCannotOverwriteFailureTombstone (114 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.FailedAtomicReplacementKeepsRevisionRetryable
+[       OK ] WtDiffExecuterConcurrencyTest.FailedAtomicReplacementKeepsRevisionRetryable (3 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.QuiesceIgnoresBroadcastReportsForUnownedCodes
+[       OK ] WtDiffExecuterConcurrencyTest.QuiesceIgnoresBroadcastReportsForUnownedCodes (0 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.BroadcastReportsOnlyUpdateTheOwningExecuterCode
+[       OK ] WtDiffExecuterConcurrencyTest.BroadcastReportsOnlyUpdateTheOwningExecuterCode (1 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.QuiesceMarksLostReportsForOwnedLedgerCodeIncomplete
+[       OK ] WtDiffExecuterConcurrencyTest.QuiesceMarksLostReportsForOwnedLedgerCodeIncomplete (0 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.QuiesceMarksUnitStateInvalidationDuringOrderOrEntrustIncomplete
+[       OK ] WtDiffExecuterConcurrencyTest.QuiesceMarksUnitStateInvalidationDuringOrderOrEntrustIncomplete (1 ms)
+[ RUN      ] WtDiffExecuterConcurrencyTest.RejectedPoolScheduleRunsFallbackSynchronously
+[       OK ] WtDiffExecuterConcurrencyTest.RejectedPoolScheduleRunsFallbackSynchronously (0 ms)
+[----------] 31 tests from WtDiffExecuterConcurrencyTest (418 ms total)
+
+[----------] 16 tests from WtExecMgrQuiesceCoordinator
+[ RUN      ] WtExecMgrQuiesceCoordinator.RunsEveryPhaseAcrossManagersBeforeAdvancing
+[       OK ] WtExecMgrQuiesceCoordinator.RunsEveryPhaseAcrossManagersBeforeAdvancing (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.SharedFactoryAndUnitOwnersDeduplicateAndRetryAcrossManagers
+[       OK ] WtExecMgrQuiesceCoordinator.SharedFactoryAndUnitOwnersDeduplicateAndRetryAcrossManagers (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.UnknownInitializedFactoryWrapperFailsClosedAndStaysOwned
+[       OK ] WtExecMgrQuiesceCoordinator.UnknownInitializedFactoryWrapperFailsClosedAndStaysOwned (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.UninitializedDirectFactoryWrapperIsRetainedButNotWaited
+[       OK ] WtExecMgrQuiesceCoordinator.UninitializedDirectFactoryWrapperIsRetainedButNotWaited (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.GlobalHostPreflightFailurePreventsEveryDrain
+[       OK ] WtExecMgrQuiesceCoordinator.GlobalHostPreflightFailurePreventsEveryDrain (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.StableFactoryPreflightFailureSendsNoUnitRequest
+[       OK ] WtExecMgrQuiesceCoordinator.StableFactoryPreflightFailureSendsNoUnitRequest (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.FactoryOperationWaitFailurePreservesHostsAndRetries
+[       OK ] WtExecMgrQuiesceCoordinator.FactoryOperationWaitFailurePreservesHostsAndRetries (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.FactorySnapshotFailureRetainsHostOwnerAndRetries
+[       OK ] WtExecMgrQuiesceCoordinator.FactorySnapshotFailureRetainsHostOwnerAndRetries (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.PartialSnapshotOwnersStayRetainedForRetry
+[       OK ] WtExecMgrQuiesceCoordinator.PartialSnapshotOwnersStayRetainedForRetry (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.PluginWaitPreflightFailureStartsNoWait
+[       OK ] WtExecMgrQuiesceCoordinator.PluginWaitPreflightFailureStartsNoWait (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.RetriesEveryPluginWaitAndRetainsOwnersAfterFailedWait
+[       OK ] WtExecMgrQuiesceCoordinator.RetriesEveryPluginWaitAndRetainsOwnersAfterFailedWait (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.OldWaitCannotReportSuccessBeforeAllAcksSucceed
+[       OK ] WtExecMgrQuiesceCoordinator.OldWaitCannotReportSuccessBeforeAllAcksSucceed (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.OverlappingManagerClaimsBindAtomicallyAndCanRetry
+[       OK ] WtExecMgrQuiesceCoordinator.OverlappingManagerClaimsBindAtomicallyAndCanRetry (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.ConcurrentRetryIsRejectedUntilCurrentRoundReturns
+[       OK ] WtExecMgrQuiesceCoordinator.ConcurrentRetryIsRejectedUntilCurrentRoundReturns (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.MissingStageSupportFailsClosedAndRetainsOwners
+[       OK ] WtExecMgrQuiesceCoordinator.MissingStageSupportFailsClosedAndRetainsOwners (0 ms)
+[ RUN      ] WtExecMgrQuiesceCoordinator.CallbackThreadPreflightReturnsBeforeAnyHostDrain
+[       OK ] WtExecMgrQuiesceCoordinator.CallbackThreadPreflightReturnsBeforeAnyHostDrain (0 ms)
+[----------] 16 tests from WtExecMgrQuiesceCoordinator (2 ms total)
+
+[----------] 19 tests from N02ExecMgrTest
+[ RUN      ] N02ExecMgrTest.AddAndEnumExecuters
+[       OK ] N02ExecMgrTest.AddAndEnumExecuters (0 ms)
+[ RUN      ] N02ExecMgrTest.HandleTickBroadcastsToEveryExecuter
+[       OK ] N02ExecMgrTest.HandleTickBroadcastsToEveryExecuter (0 ms)
+[ RUN      ] N02ExecMgrTest.SetPositionsWithoutFilterGivesEveryExecuterTheSameMap
+[       OK ] N02ExecMgrTest.SetPositionsWithoutFilterGivesEveryExecuterTheSameMap (0 ms)
+[ RUN      ] N02ExecMgrTest.SetPositionsDropsIgnoredCodeAndAppliesRedirect
+[       OK ] N02ExecMgrTest.SetPositionsDropsIgnoredCodeAndAppliesRedirect (0 ms)
+[ RUN      ] N02ExecMgrTest.SetPositionsSkipsExecuterBannedByFilter
+[       OK ] N02ExecMgrTest.SetPositionsSkipsExecuterBannedByFilter (0 ms)
+[ RUN      ] N02ExecMgrTest.HandlePosChangeWithAllReachesEveryUnroutedExecuter
+[       OK ] N02ExecMgrTest.HandlePosChangeWithAllReachesEveryUnroutedExecuter (0 ms)
+[ RUN      ] N02ExecMgrTest.HandlePosChangeSkipsRoutedExecutersWhenExecidIsAll
+[       OK ] N02ExecMgrTest.HandlePosChangeSkipsRoutedExecutersWhenExecidIsAll (0 ms)
+[ RUN      ] N02ExecMgrTest.HandlePosChangeWithExplicitExecidHitsRoutedExecuter
+[       OK ] N02ExecMgrTest.HandlePosChangeWithExplicitExecidHitsRoutedExecuter (0 ms)
+[ RUN      ] N02ExecMgrTest.HandlePosChangeHonoursCodeAndExecuterFilters
+[       OK ] N02ExecMgrTest.HandlePosChangeHonoursCodeAndExecuterFilters (0 ms)
+[ RUN      ] N02ExecMgrTest.CacheAccumulatesAndCommitSendsAllGroup
+[       OK ] N02ExecMgrTest.CacheAccumulatesAndCommitSendsAllGroup (0 ms)
+[ RUN      ] N02ExecMgrTest.CommitScalesAndKeepsSignAndSkipsZero
+[       OK ] N02ExecMgrTest.CommitScalesAndKeepsSignAndSkipsZero (0 ms)
+[ RUN      ] N02ExecMgrTest.CommitPrefersOwnGroupAndIgnoresUnmatchedGroups
+[       OK ] N02ExecMgrTest.CommitPrefersOwnGroupAndIgnoresUnmatchedGroups (0 ms)
+[ RUN      ] N02ExecMgrTest.CommitAppliesFiltersAndClearsCache
+[       OK ] N02ExecMgrTest.CommitAppliesFiltersAndClearsCache (0 ms)
+[ RUN      ] N02ExecMgrTest.LoadRouterRulesRejectsNullAndNonArray
+[       OK ] N02ExecMgrTest.LoadRouterRulesRejectsNullAndNonArray (0 ms)
+[ RUN      ] N02ExecMgrTest.LoadRouterRulesAcceptsStringAndArrayExecuters
+[       OK ] N02ExecMgrTest.LoadRouterRulesAcceptsStringAndArrayExecuters (0 ms)
+[ RUN      ] N02ExecMgrTest.RouteOfUnknownStrategyFallsBackToAll
+[       OK ] N02ExecMgrTest.RouteOfUnknownStrategyFallsBackToAll (0 ms)
+[ RUN      ] N02ExecMgrTest.RouterRuleWithoutExecuterNodeIsRejected
+[       OK ] N02ExecMgrTest.RouterRuleWithoutExecuterNodeIsRejected (0 ms)
+[ RUN      ] N02ExecMgrTest.MalformedRouterRulesDoNotPartiallyReplaceExistingRoutes
+[       OK ] N02ExecMgrTest.MalformedRouterRulesDoNotPartiallyReplaceExistingRoutes (3 ms)
+[ RUN      ] N02ExecMgrTest.RouterRuleWithoutStrategyIsRejected
+[       OK ] N02ExecMgrTest.RouterRuleWithoutStrategyIsRejected (0 ms)
+[----------] 19 tests from N02ExecMgrTest (9 ms total)
+
+[----------] 15 tests from N02ExecuterFactoryTest
+[ RUN      ] N02ExecuterFactoryTest.LoadFactoriesFromMissingDirectoryReturnsFalse
+[       OK ] N02ExecuterFactoryTest.LoadFactoriesFromMissingDirectoryReturnsFalse (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.LoadFactoriesFromEmptyDirectoryReturnsTrue
+[       OK ] N02ExecuterFactoryTest.LoadFactoriesFromEmptyDirectoryReturnsTrue (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.LoadFactoriesSkipsDirectoriesAndForeignExtensions
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_exefact_54684/plugins/bogus.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_exefact_54684/plugins/bogus.dylib' (slice is not valid mach-o file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_exefact_54684/plugins/bogus.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_exefact_54684/plugins/bogus.dylib' (slice is not valid mach-o file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_exefact_54684/plugins/bogus.dylib' (slice is not valid mach-o file), '/System/Volumes/Preboot/Cryptexes/OS/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_exefact_54684/plugins/bogus.dylib' (no such file), '/private/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_exefact_54684/plugins/bogus.dylib' (slice is not valid mach-o file)
+[       OK ] N02ExecuterFactoryTest.LoadFactoriesSkipsDirectoriesAndForeignExtensions (1 ms)
+[ RUN      ] N02ExecuterFactoryTest.LoadFactoriesWithRegularFileReturnsFalseWithoutThrowing
+[       OK ] N02ExecuterFactoryTest.LoadFactoriesWithRegularFileReturnsFalseWithoutThrowing (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.LoadFactoriesWithUnreadableDirectoryReturnsFalseWithoutThrowing
+[       OK ] N02ExecuterFactoryTest.LoadFactoriesWithUnreadableDirectoryReturnsFalseWithoutThrowing (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.CreatePlainUnitFailsForUnknownFactory
+[       OK ] N02ExecuterFactoryTest.CreatePlainUnitFailsForUnknownFactory (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.CreateDiffUnitFailsForUnknownFactory
+[       OK ] N02ExecuterFactoryTest.CreateDiffUnitFailsForUnknownFactory (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.CreateArbiUnitFailsForUnknownFactory
+[       OK ] N02ExecuterFactoryTest.CreateArbiUnitFailsForUnknownFactory (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.SingleNameOverloadRejectsNameWithoutFactoryDot
+[       OK ] N02ExecuterFactoryTest.SingleNameOverloadRejectsNameWithoutFactoryDot (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.ThreeSegmentNameTakesFirstTwoParts
+[       OK ] N02ExecuterFactoryTest.ThreeSegmentNameTakesFirstTwoParts (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.WrapperExposesUnitAndReleasesItThroughFact
+[       OK ] N02ExecuterFactoryTest.WrapperExposesUnitAndReleasesItThroughFact (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.WrapperReleasesExactlyOnceForSharedOwner
+[       OK ] N02ExecuterFactoryTest.WrapperReleasesExactlyOnceForSharedOwner (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.WrapperWithNullUnitDoesNotTouchFact
+[       OK ] N02ExecuterFactoryTest.WrapperWithNullUnitDoesNotTouchFact (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.FakeUnitCallbacksAreReachableThroughBasePointer
+[       OK ] N02ExecuterFactoryTest.FakeUnitCallbacksAreReachableThroughBasePointer (0 ms)
+[ RUN      ] N02ExecuterFactoryTest.FactCanReturnNullForUnknownUnitName
+[       OK ] N02ExecuterFactoryTest.FactCanReturnNullForUnknownUnitName (0 ms)
+[----------] 15 tests from N02ExecuterFactoryTest (4 ms total)
+
+[----------] 19 tests from N02FilterMgrTest
+[ RUN      ] N02FilterMgrTest.LoadWithoutAnyFileReturnsImmediately
+[       OK ] N02FilterMgrTest.LoadWithoutAnyFileReturnsImmediately (0 ms)
+[ RUN      ] N02FilterMgrTest.LoadMissingFileIsLoggedAndSkipped
+[       OK ] N02FilterMgrTest.LoadMissingFileIsLoggedAndSkipped (0 ms)
+[ RUN      ] N02FilterMgrTest.NullStrategyFiltersSectionIsIgnored
+[       OK ] N02FilterMgrTest.NullStrategyFiltersSectionIsIgnored (0 ms)
+[ RUN      ] N02FilterMgrTest.StrategyIgnoreFilterDropsPosition
+[       OK ] N02FilterMgrTest.StrategyIgnoreFilterDropsPosition (0 ms)
+[ RUN      ] N02FilterMgrTest.StrategyRedirectFilterRewritesPosition
+[       OK ] N02FilterMgrTest.StrategyRedirectFilterRewritesPosition (0 ms)
+[ RUN      ] N02FilterMgrTest.StrategyFilterDropsAnyDiffPosition
+[       OK ] N02FilterMgrTest.StrategyFilterDropsAnyDiffPosition (0 ms)
+[ RUN      ] N02FilterMgrTest.UnrecognizedAndMissingStrategyPassThrough
+[       OK ] N02FilterMgrTest.UnrecognizedAndMissingStrategyPassThrough (0 ms)
+[ RUN      ] N02FilterMgrTest.CodeFilterMatchesExactStdCode
+[       OK ] N02FilterMgrTest.CodeFilterMatchesExactStdCode (0 ms)
+[ RUN      ] N02FilterMgrTest.CodeFilterFallsBackToCommodityId
+[       OK ] N02FilterMgrTest.CodeFilterFallsBackToCommodityId (0 ms)
+[ RUN      ] N02FilterMgrTest.CodeFilterLeavesUnconfiguredCodesAlone
+[       OK ] N02FilterMgrTest.CodeFilterLeavesUnconfiguredCodesAlone (0 ms)
+[ RUN      ] N02FilterMgrTest.ExecuterFilterHonoursBooleanFlag
+[       OK ] N02FilterMgrTest.ExecuterFilterHonoursBooleanFlag (0 ms)
+[ RUN      ] N02FilterMgrTest.SecondLoadWithSameTimestampIsSkipped
+[       OK ] N02FilterMgrTest.SecondLoadWithSameTimestampIsSkipped (0 ms)
+[ RUN      ] N02FilterMgrTest.ReloadPicksUpNewContentAfterFileTimeAdvances
+[       OK ] N02FilterMgrTest.ReloadPicksUpNewContentAfterFileTimeAdvances (0 ms)
+[ RUN      ] N02FilterMgrTest.FailedReloadPreservesRulesAndAllowsRetryAtSameTimestamp
+[       OK ] N02FilterMgrTest.FailedReloadPreservesRulesAndAllowsRetryAtSameTimestamp (0 ms)
+[ RUN      ] N02FilterMgrTest.FailedFirstLoadDoesNotBlockValidRetryAtSameTimestamp
+[       OK ] N02FilterMgrTest.FailedFirstLoadDoesNotBlockValidRetryAtSameTimestamp (1 ms)
+[ RUN      ] N02FilterMgrTest.NonObjectJsonRootsPreserveRulesAndDoNotAdvanceTimestamp
+[       OK ] N02FilterMgrTest.NonObjectJsonRootsPreserveRulesAndDoNotAdvanceTimestamp (1 ms)
+[ RUN      ] N02FilterMgrTest.InvalidSectionAndItemTypesPreserveRulesUntilValidRetry
+[       OK ] N02FilterMgrTest.InvalidSectionAndItemTypesPreserveRulesUntilValidRetry (2 ms)
+[ RUN      ] N02FilterMgrTest.MalformedYamlReloadIsSafeAndStringScalarsRemainCompatible
+[       OK ] N02FilterMgrTest.MalformedYamlReloadIsSafeAndStringScalarsRemainCompatible (113 ms)
+[ RUN      ] N02FilterMgrTest.ScalarYamlRootReloadPreservesRulesAndAllowsRetry
+[       OK ] N02FilterMgrTest.ScalarYamlRootReloadPreservesRulesAndAllowsRetry (3 ms)
+[----------] 19 tests from N02FilterMgrTest (130 ms total)
+
+[----------] 5 tests from N02WtHelperTest
+[ RUN      ] N02WtHelperTest.CwdIsStandardisedAbsolutePath
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/n02_helper_dist_executer_test.cpp:108: Failure
+Value of: fs::exists(fs::path(cwd))
+  Actual: false
+Expected: true
+
+[  FAILED  ] N02WtHelperTest.CwdIsStandardisedAbsolutePath (0 ms)
+[ RUN      ] N02WtHelperTest.ModulePathIsBuiltFromCwdByDefault
+[       OK ] N02WtHelperTest.ModulePathIsBuiltFromCwdByDefault (0 ms)
+[ RUN      ] N02WtHelperTest.ModulePathFallsBackToInstDirWhenNotCwd
+[       OK ] N02WtHelperTest.ModulePathFallsBackToInstDirWhenNotCwd (0 ms)
+[ RUN      ] N02WtHelperTest.TimeStateIsRoundTrippedNotWallClock
+[       OK ] N02WtHelperTest.TimeStateIsRoundTrippedNotWallClock (0 ms)
+[ RUN      ] N02WtHelperTest.GenerateDirectoriesAreCreatedOnDemand
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/n02_helper_dist_executer_test.cpp:161: Failure
+Value of: endsWith(base, "generated/")
+  Actual: false
+Expected: true
+
+[  FAILED  ] N02WtHelperTest.GenerateDirectoriesAreCreatedOnDemand (0 ms)
+[----------] 5 tests from N02WtHelperTest (0 ms total)
+
+[----------] 10 tests from N02DistExecuterTest
+[ RUN      ] N02DistExecuterTest.NameAccessorsComeFromIExecCommand
+[       OK ] N02DistExecuterTest.NameAccessorsComeFromIExecCommand (0 ms)
+[ RUN      ] N02DistExecuterTest.InitRejectsNullParams
+[       OK ] N02DistExecuterTest.InitRejectsNullParams (0 ms)
+[ RUN      ] N02DistExecuterTest.InitRetainsConfigurationOnceAndReleasesItOnDestruction
+[       OK ] N02DistExecuterTest.InitRetainsConfigurationOnceAndReleasesItOnDestruction (0 ms)
+[ RUN      ] N02DistExecuterTest.InitSucceedsWithoutScaleNode
+[       OK ] N02DistExecuterTest.InitSucceedsWithoutScaleNode (0 ms)
+[ RUN      ] N02DistExecuterTest.OnPositionChangedAppliesScaleAndHandlesUnchangedValue
+[       OK ] N02DistExecuterTest.OnPositionChangedAppliesScaleAndHandlesUnchangedValue (0 ms)
+[ RUN      ] N02DistExecuterTest.SetPositionHandlesWholeMap
+[       OK ] N02DistExecuterTest.SetPositionHandlesWholeMap (0 ms)
+[ RUN      ] N02DistExecuterTest.OnTickIsDocumentedNoOp
+[       OK ] N02DistExecuterTest.OnTickIsDocumentedNoOp (0 ms)
+[ RUN      ] N02DistExecuterTest.StagedQuiesceDrainsSynchronousWorkWithoutFactoryOwners
+[       OK ] N02DistExecuterTest.StagedQuiesceDrainsSynchronousWorkWithoutFactoryOwners (0 ms)
+[ RUN      ] N02DistExecuterTest.InFlightCallbackBlocksWaitAndQuiesceRejectsNewIngress
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[dist_quiesce_gate]XHE.000001目标仓位更新: 0 -> 1
+[dist_quiesce_gate]XHE.000001目标仓位更新: 0 -> 1
+[       OK ] N02DistExecuterTest.InFlightCallbackBlocksWaitAndQuiesceRejectsNewIngress (1560 ms)
+[ RUN      ] N02DistExecuterTest.ExecuterIsUsableThroughIExecCommandBase
+[       OK ] N02DistExecuterTest.ExecuterIsUsableThroughIExecCommandBase (0 ms)
+[----------] 10 tests from N02DistExecuterTest (1564 ms total)
+
+[----------] 4 tests from WtCoreParserAdapterInitFailure
+[ RUN      ] WtCoreParserAdapterInitFailure.falseResultCannotRunApi
+[       OK ] WtCoreParserAdapterInitFailure.falseResultCannotRunApi (0 ms)
+[ RUN      ] WtCoreParserAdapterInitFailure.exceptionCannotRunApi
+[       OK ] WtCoreParserAdapterInitFailure.exceptionCannotRunApi (0 ms)
+[ RUN      ] WtCoreParserAdapterInitFailure.nullManagerRetainsTransferredApiWithoutCallingProvider
+[       OK ] WtCoreParserAdapterInitFailure.nullManagerRetainsTransferredApiWithoutCallingProvider (0 ms)
+[ RUN      ] WtCoreParserAdapterInitFailure.missingModuleIsSafePreApiFailure
+[       OK ] WtCoreParserAdapterInitFailure.missingModuleIsSafePreApiFailure (0 ms)
+[----------] 4 tests from WtCoreParserAdapterInitFailure (0 ms total)
+
+[----------] 3 tests from N02CtaTickerTest
+[ RUN      ] N02CtaTickerTest.ConstructsWithoutAnyEngine
+[       OK ] N02CtaTickerTest.ConstructsWithoutAnyEngine (0 ms)
+[ RUN      ] N02CtaTickerTest.StopBeforeRunIsIdempotent
+[       OK ] N02CtaTickerTest.StopBeforeRunIsIdempotent (0 ms)
+[ RUN      ] N02CtaTickerTest.PreInitQueriesUseFallback
+[       OK ] N02CtaTickerTest.PreInitQueriesUseFallback (0 ms)
+[----------] 3 tests from N02CtaTickerTest (0 ms total)
+
+[----------] 2 tests from N02SelTickerTest
+[ RUN      ] N02SelTickerTest.ConstructsWithoutAnyEngine
+[       OK ] N02SelTickerTest.ConstructsWithoutAnyEngine (0 ms)
+[ RUN      ] N02SelTickerTest.StopBeforeRunIsIdempotent
+[       OK ] N02SelTickerTest.StopBeforeRunIsIdempotent (0 ms)
+[----------] 2 tests from N02SelTickerTest (0 ms total)
+
+[----------] 2 tests from N02HftTickerTest
+[ RUN      ] N02HftTickerTest.ConstructsWithoutAnyEngine
+[       OK ] N02HftTickerTest.ConstructsWithoutAnyEngine (0 ms)
+[ RUN      ] N02HftTickerTest.StopBeforeRunIsIdempotent
+[       OK ] N02HftTickerTest.StopBeforeRunIsIdempotent (0 ms)
+[----------] 2 tests from N02HftTickerTest (0 ms total)
+
+[----------] 2 tests from R101CtaEngineHot
+[ RUN      ] R101CtaEngineHot.OnInitAndScheduleMapHotCode
+[       OK ] R101CtaEngineHot.OnInitAndScheduleMapHotCode (17 ms)
+[ RUN      ] R101CtaEngineHot.PooledScheduleMapsHotCode
+[       OK ] R101CtaEngineHot.PooledScheduleMapsHotCode (5 ms)
+[----------] 2 tests from R101CtaEngineHot (23 ms total)
+
+[----------] 9 tests from R101DtMgrStore
+[ RUN      ] R101DtMgrStore.HfqTickCacheGeneratedThenAppended
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r101_dtmgr_store_test.cpp:177: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R101DtMgrStore.HfqTickCacheGeneratedThenAppended (2 ms)
+[ RUN      ] R101DtMgrStore.KlineResampleCacheAndBarNotifications
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r101_dtmgr_store_test.cpp:230: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R101DtMgrStore.KlineResampleCacheAndBarNotifications (0 ms)
+[ RUN      ] R101DtMgrStore.DelayedBarNotificationsKeepMutableSlotSnapshots
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r101_dtmgr_store_test.cpp:312: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R101DtMgrStore.DelayedBarNotificationsKeepMutableSlotSnapshots (0 ms)
+[ RUN      ] R101DtMgrStore.DelayedForcedCacheBarNotificationsKeepMutableSlotSnapshots
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r101_dtmgr_store_test.cpp:364: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R101DtMgrStore.DelayedForcedCacheBarNotificationsKeepMutableSlotSnapshots (0 ms)
+[ RUN      ] R101DtMgrStore.DelayedResampledNotificationsKeepUpdatedBarSnapshots
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r101_dtmgr_store_test.cpp:412: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R101DtMgrStore.DelayedResampledNotificationsKeepUpdatedBarSnapshots (0 ms)
+[ RUN      ] R101DtMgrStore.ReentrantDrainDefersNestedCallbacksButDrainsRequestedBatch
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r101_dtmgr_store_test.cpp:462: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R101DtMgrStore.ReentrantDrainDefersNestedCallbacksButDrainsRequestedBatch (0 ms)
+[ RUN      ] R101DtMgrStore.ThrowingBarCallbackRetainsFailedAndRemainingNotifications
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r101_dtmgr_store_test.cpp:519: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R101DtMgrStore.ThrowingBarCallbackRetainsFailedAndRemainingNotifications (0 ms)
+[ RUN      ] R101DtMgrStore.WorkerThreadCanEnqueueDuringEngineCallback
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r101_dtmgr_store_test.cpp:578: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R101DtMgrStore.WorkerThreadCanEnqueueDuringEngineCallback (0 ms)
+[ RUN      ] R101DtMgrStore.WorkerThreadDrainRequestDuringBatchIsNotLost
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r101_dtmgr_store_test.cpp:653: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+
+[  FAILED  ] R101DtMgrStore.WorkerThreadDrainRequestDuringBatchIsNotLost (0 ms)
+[----------] 9 tests from R101DtMgrStore (4 ms total)
+
+[----------] 2 tests from R101EngineGap
+[ RUN      ] R101EngineGap.FundSettlementAndZeroDetailClose
+[       OK ] R101EngineGap.FundSettlementAndZeroDetailClose (1 ms)
+[ RUN      ] R101EngineGap.FeeFileErrorAndMissingCommodity
+[       OK ] R101EngineGap.FeeFileErrorAndMissingCommodity (3 ms)
+[----------] 2 tests from R101EngineGap (4 ms total)
+
+[----------] 1 test from R101EventNotifierLoader
+[ RUN      ] R101EventNotifierLoader.IncompatibleModuleRejected
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r101_event_notifier_loader_test.cpp:38: Skipped
+libWtDataStorage not found
+
+[  SKIPPED ] R101EventNotifierLoader.IncompatibleModuleRejected (0 ms)
+[----------] 1 test from R101EventNotifierLoader (0 ms total)
+
+[----------] 2 tests from R101SelCtx
+[ RUN      ] R101SelCtx.SignalAccountingAndQueryFallbacks
+[       OK ] R101SelCtx.SignalAccountingAndQueryFallbacks (6 ms)
+[ RUN      ] R101SelCtx.UserDataAndScheduleFlush
+[       OK ] R101SelCtx.UserDataAndScheduleFlush (5 ms)
+[----------] 2 tests from R101SelCtx (12 ms total)
+
+[----------] 1 test from R101TraderReport
+[ RUN      ] R101TraderReport.AutoCancelErrorAndShortCloseBranches
+[       OK ] R101TraderReport.AutoCancelErrorAndShortCloseBranches (1 ms)
+[ DISABLED ] R101TraderReport.DISABLED_NetShortCloseOverDeductsNewPosition
+[----------] 1 test from R101TraderReport (1 ms total)
+
+[----------] 2 tests from R10EventNotifier
+[ RUN      ] R10EventNotifier.MissingRegisterExportUnloadsCandidateAndPreservesActiveNotifier
+[       OK ] R10EventNotifier.MissingRegisterExportUnloadsCandidateAndPreservesActiveNotifier (870 ms)
+[ RUN      ] R10EventNotifier.MissingCreateServerExportUnloadsWithoutStartingWorker
+[       OK ] R10EventNotifier.MissingCreateServerExportUnloadsWithoutStartingWorker (425 ms)
+[----------] 2 tests from R10EventNotifier (1295 ms total)
+
+[----------] 34 tests from R41EngineFixture
+[ RUN      ] R41EngineFixture.R120QfqSubscriptionDispatchesThroughPool
+[       OK ] R41EngineFixture.R120QfqSubscriptionDispatchesThroughPool (1 ms)
+[ RUN      ] R41EngineFixture.R120QfqSubscriptionDispatchesDirectlyWithoutPool
+[       OK ] R41EngineFixture.R120QfqSubscriptionDispatchesDirectlyWithoutPool (2 ms)
+[ RUN      ] R41EngineFixture.R41OnInitEnumeratesContextPosition
+[       OK ] R41EngineFixture.R41OnInitEnumeratesContextPosition (3 ms)
+[ RUN      ] R41EngineFixture.R41OnInitAppliesRiskScaleToCachedTargets
+[       OK ] R41EngineFixture.R41OnInitAppliesRiskScaleToCachedTargets (2 ms)
+[ RUN      ] R41EngineFixture.R41OnScheduleWithoutPoolSubmitsContextTarget
+[       OK ] R41EngineFixture.R41OnScheduleWithoutPoolSubmitsContextTarget (2 ms)
+[ RUN      ] R41EngineFixture.R41OnScheduleWithPoolUsesThreadPool
+[       OK ] R41EngineFixture.R41OnScheduleWithPoolUsesThreadPool (3 ms)
+[ RUN      ] R41EngineFixture.R41OnTickDispatchesRawAndHfqAdjusted
+[       OK ] R41EngineFixture.R41OnTickDispatchesRawAndHfqAdjusted (4 ms)
+[ RUN      ] R41EngineFixture.R41PlainQfqSubscriptionDispatchesFrontAdjusted
+[       OK ] R41EngineFixture.R41PlainQfqSubscriptionDispatchesFrontAdjusted (7 ms)
+[ RUN      ] R41EngineFixture.R41AdjustedTickDispatchMatchesDirectAndPoolModes
+[       OK ] R41EngineFixture.R41AdjustedTickDispatchMatchesDirectAndPoolModes (2 ms)
+[ RUN      ] R41EngineFixture.R41UnruledStockAdjustmentDispatchMatchesDirectAndPoolModes
+[       OK ] R41EngineFixture.R41UnruledStockAdjustmentDispatchMatchesDirectAndPoolModes (1 ms)
+[ RUN      ] R41EngineFixture.R41OnBarDispatchesToSubscribedContext
+[       OK ] R41EngineFixture.R41OnBarDispatchesToSubscribedContext (1 ms)
+[ RUN      ] R41EngineFixture.R41SessionEventsReachContextAndListener
+[       OK ] R41EngineFixture.R41SessionEventsReachContextAndListener (2 ms)
+[ RUN      ] R41EngineFixture.R41ExecuterStubAccessors
+[       OK ] R41EngineFixture.R41ExecuterStubAccessors (1 ms)
+[ RUN      ] R41EngineFixture.R41InitWithoutRiskMonCreatesOutputFiles
+[       OK ] R41EngineFixture.R41InitWithoutRiskMonCreatesOutputFiles (1 ms)
+[ RUN      ] R41EngineFixture.R41InitLoadsFeeTemplatesAndToleratesMissingFile
+[       OK ] R41EngineFixture.R41InitLoadsFeeTemplatesAndToleratesMissingFile (1 ms)
+[ RUN      ] R41EngineFixture.R41LoadsPersistedPortfolioAndAppliesRiskScale
+[       OK ] R41EngineFixture.R41LoadsPersistedPortfolioAndAppliesRiskScale (2 ms)
+[ RUN      ] R41EngineFixture.R41PositionLifecycleOpenReverseAndFlatten
+[       OK ] R41EngineFixture.R41PositionLifecycleOpenReverseAndFlatten (2 ms)
+[ RUN      ] R41EngineFixture.R41StandbySignalFiresOnNextTick
+[       OK ] R41EngineFixture.R41StandbySignalFiresOnNextTick (3 ms)
+[ RUN      ] R41EngineFixture.R58LegacyPositionWithoutSessionKeepsStandbySignalPending
+[       OK ] R41EngineFixture.R58LegacyPositionWithoutSessionKeepsStandbySignalPending (4 ms)
+[ RUN      ] R41EngineFixture.R41PriceSessionAndKlineAccessors
+[       OK ] R41EngineFixture.R41PriceSessionAndKlineAccessors (2 ms)
+[ RUN      ] R41EngineFixture.R41SessionBeginEndSettlesFundAndNotifiesListener
+[       OK ] R41EngineFixture.R41SessionBeginEndSettlesFundAndNotifiesListener (2 ms)
+[ RUN      ] R41EngineFixture.R41RiskMonConfigBranchesDoNotBreakInit
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libr41_missing_riskmon.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libr41_missing_riskmon.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libr41_missing_riskmon.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libr41_missing_riskmon.dylib' (no such file)
+[       OK ] R41EngineFixture.R41RiskMonConfigBranchesDoNotBreakInit (1 ms)
+[ RUN      ] R41EngineFixture.R41CalcFeeUsesLoadedTemplateAndDefaultsWithoutOne
+[       OK ] R41EngineFixture.R41CalcFeeUsesLoadedTemplateAndDefaultsWithoutOne (1 ms)
+[ RUN      ] R41EngineFixture.R41OnScheduleWithPoolCommitsLeftoverPositionToZero
+[       OK ] R41EngineFixture.R41OnScheduleWithPoolCommitsLeftoverPositionToZero (1 ms)
+[ RUN      ] R41EngineFixture.R41CtaTickerInitWithSession
+[       OK ] R41EngineFixture.R41CtaTickerInitWithSession (2 ms)
+[ RUN      ] R41EngineFixture.R41CtaTickerToleratesMissingSession
+[       OK ] R41EngineFixture.R41CtaTickerToleratesMissingSession (4 ms)
+[ RUN      ] R41EngineFixture.R41CtaTickerOnTickFeedsEngine
+[       OK ] R41EngineFixture.R41CtaTickerOnTickFeedsEngine (3 ms)
+[ RUN      ] R41EngineFixture.R41HftTickerOnTickFeedsHftEngine
+[       OK ] R41EngineFixture.R41HftTickerOnTickFeedsHftEngine (1 ms)
+[ RUN      ] R41EngineFixture.R41SelTickerOnTickFeedsSelEngine
+[       OK ] R41EngineFixture.R41SelTickerOnTickFeedsSelEngine (1 ms)
+[ RUN      ] R41EngineFixture.R41HftTickerInitWithMissingSession
+[       OK ] R41EngineFixture.R41HftTickerInitWithMissingSession (1 ms)
+[ RUN      ] R41EngineFixture.S5CtaTickerRunWithoutSessionStartsNothing
+
+[WARNING] /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest-death-test.cc:1104:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test detected 3 threads. See https://github.com/google/googletest/blob/main/docs/advanced.md#death-tests-and-threads for more explanation and suggested solutions, especially if this is the last message you see before your test times out.
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_ticker_null_session_test.cpp:52: Failure
+Death test: std::exit((runWithoutSession<WtCtaEngine, WtCtaRtTicker>(cfg, _bd.get(), _dt.get(), _hot.get())))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] libc++abi: terminating due to uncaught exception of type std::__1::system_error: thread::join failed: No such process
+[  DEATH   ] 
+
+[  FAILED  ] R41EngineFixture.S5CtaTickerRunWithoutSessionStartsNothing (46 ms)
+[ RUN      ] R41EngineFixture.S5SelTickerRunWithoutSessionStartsNothing
+
+[WARNING] /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest-death-test.cc:1104:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test detected 3 threads. See https://github.com/google/googletest/blob/main/docs/advanced.md#death-tests-and-threads for more explanation and suggested solutions, especially if this is the last message you see before your test times out.
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_ticker_null_session_test.cpp:60: Failure
+Death test: std::exit((runWithoutSession<WtSelEngine, WtSelRtTicker>(cfg, _bd.get(), _dt.get(), _hot.get())))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] libc++abi: terminating due to uncaught exception of type std::__1::system_error: thread::join failed: No such process
+[  DEATH   ] 
+
+[  FAILED  ] R41EngineFixture.S5SelTickerRunWithoutSessionStartsNothing (54 ms)
+[ RUN      ] R41EngineFixture.S5HftTickerRunWithoutSessionStartsNothing
+
+[WARNING] /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest-death-test.cc:1104:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test detected 3 threads. See https://github.com/google/googletest/blob/main/docs/advanced.md#death-tests-and-threads for more explanation and suggested solutions, especially if this is the last message you see before your test times out.
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_ticker_null_session_test.cpp:68: Failure
+Death test: std::exit((runWithoutSession<WtHftEngine, WtHftRtTicker>(cfg, _bd.get(), _dt.get(), _hot.get())))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] libc++abi: terminating due to uncaught exception of type std::__1::system_error: thread::join failed: No such process
+[  DEATH   ] 
+
+[  FAILED  ] R41EngineFixture.S5HftTickerRunWithoutSessionStartsNothing (20 ms)
+[ RUN      ] R41EngineFixture.S5TickerRunWithoutSessionReportsFailure
+[       OK ] R41EngineFixture.S5TickerRunWithoutSessionReportsFailure (1 ms)
+[----------] 34 tests from R41EngineFixture (201 ms total)
+
+[----------] 2 tests from R120DiffTest
+[ RUN      ] R120DiffTest.PoolForwardsEveryCallbackAndPersistsDiff
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r120_diff_executer_unit_test.cpp:131: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact
+
+[  FAILED  ] R120DiffTest.PoolForwardsEveryCallbackAndPersistsDiff (0 ms)
+[ RUN      ] R120DiffTest.SetPositionMigratesExpiredTargetToZero
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r120_diff_executer_unit_test.cpp:131: Failure
+Value of: plug.ok()
+  Actual: false
+Expected: true
+缺少 libWtExeFact
+
+[  FAILED  ] R120DiffTest.SetPositionMigratesExpiredTargetToZero (0 ms)
+[----------] 2 tests from R120DiffTest (1 ms total)
+
+[----------] 2 tests from R120Notifier
+[ RUN      ] R120Notifier.BurstPublishesEveryPayload
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r120_event_notifier_publish_test.cpp:86: Skipped
+libWtMsgQue not found
+
+[  SKIPPED ] R120Notifier.BurstPublishesEveryPayload (0 ms)
+[ RUN      ] R120Notifier.NullTradeAndOrderGuardsPlusLatePost
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r120_event_notifier_publish_test.cpp:139: Skipped
+libWtMsgQue not found
+
+[  SKIPPED ] R120Notifier.NullTradeAndOrderGuardsPlusLatePost (0 ms)
+[----------] 2 tests from R120Notifier (0 ms total)
+
+[----------] 3 tests from R120ParserTest
+[ RUN      ] R120ParserTest.InitParsesFilterAndSubscribesContracts
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r120_parser_stratmgr_test.cpp:112: Failure
+Value of: copy_module(root, "parsers", "ParserUDP", "ParserUDP")
+  Actual: false
+Expected: true
+
+[  FAILED  ] R120ParserTest.InitParsesFilterAndSubscribesContracts (0 ms)
+[ RUN      ] R120ParserTest.InitRejectsModuleWithoutCreateParser
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r120_parser_stratmgr_test.cpp:146: Failure
+Value of: copy_module(root, "parsers", "WtDataStorage", "NoParserHere")
+  Actual: false
+Expected: true
+
+[  FAILED  ] R120ParserTest.InitRejectsModuleWithoutCreateParser (0 ms)
+[ RUN      ] R120ParserTest.StrategyManagersScanDirectoriesAndMiss
+[       OK ] R120ParserTest.StrategyManagersScanDirectoriesAndMiss (1 ms)
+[----------] 3 tests from R120ParserTest (1 ms total)
+
+[----------] 2 tests from R120SelFixture
+[ RUN      ] R120SelFixture.RunWritesStrategyAndChannelMarkers
+[       OK ] R120SelFixture.RunWritesStrategyAndChannelMarkers (2 ms)
+[ RUN      ] R120SelFixture.MinuteEndSkipsTaskOnHoliday
+[       OK ] R120SelFixture.MinuteEndSkipsTaskOnHoliday (1 ms)
+[----------] 2 tests from R120SelFixture (3 ms total)
+
+[----------] 5 tests from R160DtMgrTest
+[ RUN      ] R160DtMgrTest.R160HfqTickCacheUsesEngineClockAndStepsBackOneTick
+[       OK ] R160DtMgrTest.R160HfqTickCacheUsesEngineClockAndStepsBackOneTick (0 ms)
+[ RUN      ] R160DtMgrTest.R160HfqTickCacheRetriesNullSliceAndOwnsCopiedData
+[       OK ] R160DtMgrTest.R160HfqTickCacheRetriesNullSliceAndOwnsCopiedData (0 ms)
+[ RUN      ] R160DtMgrTest.R160HfqTickCacheRetriesEmptySliceWhenDataArrives
+[       OK ] R160DtMgrTest.R160HfqTickCacheRetriesEmptySliceWhenDataArrives (0 ms)
+[ RUN      ] R160DtMgrTest.R160OnBarClosesCachedMinute5HourAndHalfBars
+[       OK ] R160DtMgrTest.R160OnBarClosesCachedMinute5HourAndHalfBars (0 ms)
+[ RUN      ] R160DtMgrTest.R160KlineReaderExceptionsAreCaughtAndPeriodsFormatted
+[       OK ] R160DtMgrTest.R160KlineReaderExceptionsAreCaughtAndPeriodsFormatted (0 ms)
+[----------] 5 tests from R160DtMgrTest (2 ms total)
+
+[----------] 12 tests from R160EventNotifier
+[ RUN      ] R160EventNotifier.FakeModuleObservesExactServerAndPublishAbi
+[       OK ] R160EventNotifier.FakeModuleObservesExactServerAndPublishAbi (2 ms)
+[ RUN      ] R160EventNotifier.WorkGuardKeepsWorkerAliveForEveryPublishLambda
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r160_event_notifier_test.cpp:268: Skipped
+libWtMsgQue not found next to test binary
+
+[  SKIPPED ] R160EventNotifier.WorkGuardKeepsWorkerAliveForEveryPublishLambda (0 ms)
+[ RUN      ] R160EventNotifier.DiscardedOrderHandlerReleasesRetainedReference
+[       OK ] R160EventNotifier.DiscardedOrderHandlerReleasesRetainedReference (0 ms)
+[ RUN      ] R160EventNotifier.AsyncOrderHandlerDestroysObjectOnceAfterPublisherReturns
+[       OK ] R160EventNotifier.AsyncOrderHandlerDestroysObjectOnceAfterPublisherReturns (0 ms)
+[ RUN      ] R160EventNotifier.DiscardedOrderHandlerDestroysLastReferenceOnce
+[       OK ] R160EventNotifier.DiscardedOrderHandlerDestroysLastReferenceOnce (0 ms)
+[ RUN      ] R160EventNotifier.ThrowingOrderPublisherDestroysLastReferenceOnce
+EventNotifier TRD_ORDER handler failed: R160 trade publisher failure
+[       OK ] R160EventNotifier.ThrowingOrderPublisherDestroysLastReferenceOnce (0 ms)
+[ RUN      ] R160EventNotifier.WorkerFinishesPendingOrderBeforeDestructorReturns
+[       OK ] R160EventNotifier.WorkerFinishesPendingOrderBeforeDestructorReturns (23 ms)
+[ RUN      ] R160EventNotifier.DiscardedTradeHandlerReleasesRetainedReference
+[       OK ] R160EventNotifier.DiscardedTradeHandlerReleasesRetainedReference (0 ms)
+[ RUN      ] R160EventNotifier.ThrowingTradePublisherReleasesRetainedReference
+EventNotifier TRD_TRADE handler failed: R160 trade publisher failure
+[       OK ] R160EventNotifier.ThrowingTradePublisherReleasesRetainedReference (0 ms)
+[ RUN      ] R160EventNotifier.DeliversAfterIdleWithoutExternalWorkGuard
+[       OK ] R160EventNotifier.DeliversAfterIdleWithoutExternalWorkGuard (104 ms)
+[ RUN      ] R160EventNotifier.ThrowingPublisherIsReportedAndLaterItemRuns
+[       OK ] R160EventNotifier.ThrowingPublisherIsReportedAndLaterItemRuns (0 ms)
+[ RUN      ] R160EventNotifier.ConcurrentStopDrainsAcceptedItemsAndRejectsLaterItems
+[       OK ] R160EventNotifier.ConcurrentStopDrainsAcceptedItemsAndRejectsLaterItems (29 ms)
+[----------] 12 tests from R160EventNotifier (161 ms total)
+
+[----------] 5 tests from R160HftTickerTest
+[ RUN      ] R160HftTickerTest.AutoCloseKeepsDaySessionTimeEncodingForNextPass
+[       OK ] R160HftTickerTest.AutoCloseKeepsDaySessionTimeEncodingForNextPass (19 ms)
+[ RUN      ] R160HftTickerTest.ConcurrentRunCallsStartOnlyOneWorker
+[       OK ] R160HftTickerTest.ConcurrentRunCallsStartOnlyOneWorker (25 ms)
+[ RUN      ] R160HftTickerTest.StartupStopSkipsSessionBeginAndWorkerCreation
+[       OK ] R160HftTickerTest.StartupStopSkipsSessionBeginAndWorkerCreation (0 ms)
+[ RUN      ] R160HftTickerTest.WorkerStopBeforeTargetRunSkipsTargetCallbacks
+[       OK ] R160HftTickerTest.WorkerStopBeforeTargetRunSkipsTargetCallbacks (10 ms)
+[ RUN      ] R160HftTickerTest.MidnightRolloverAndConcurrentWorkerStopAreSafe
+[       OK ] R160HftTickerTest.MidnightRolloverAndConcurrentWorkerStopAreSafe (21 ms)
+[----------] 5 tests from R160HftTickerTest (76 ms total)
+
+[----------] 5 tests from R160TraderTest
+[ RUN      ] R160TraderTest.R160InitLoadsTraderModuleAndParsesNodeConfig
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r160_trader_adapter_test.cpp:78: Skipped
+libTraderMocker not found next to test binary
+
+[  SKIPPED ] R160TraderTest.R160InitLoadsTraderModuleAndParsesNodeConfig (0 ms)
+[ RUN      ] R160TraderTest.R160ReleaseAfterInitDetachesAndDeletesMocker
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r160_trader_adapter_test.cpp:122: Skipped
+libTraderMocker not found next to test binary
+
+[  SKIPPED ] R160TraderTest.R160ReleaseAfterInitDetachesAndDeletesMocker (0 ms)
+[ RUN      ] R160TraderTest.R160DisconnectThenReleaseStillJoinsWorkers
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r160_trader_adapter_test.cpp:163: Skipped
+libTraderMocker not found next to test binary
+
+[  SKIPPED ] R160TraderTest.R160DisconnectThenReleaseStillJoinsWorkers (0 ms)
+[ RUN      ] R160TraderTest.R160RspEntrustErrorsCoverMonthlyFlatAndCloseToday
+[       OK ] R160TraderTest.R160RspEntrustErrorsCoverMonthlyFlatAndCloseToday (1 ms)
+[ RUN      ] R160TraderTest.R160CanceledCloseShortTodayOrderAndDeadCancelPaths
+[       OK ] R160TraderTest.R160CanceledCloseShortTodayOrderAndDeadCancelPaths (1 ms)
+[----------] 5 tests from R160TraderTest (3 ms total)
+
+[----------] 1 test from R202HftStrategyFactoryAbi
+[ RUN      ] R202HftStrategyFactoryAbi.ManagerAndStrategyDestructWithRepositoryPlugin
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r202_hft_strategy_factory_abi_test.cpp:24: Failure
+Value of: plugin.ok()
+  Actual: false
+Expected: true
+coverage WtHftStraFact plugin is unavailable
+
+[  FAILED  ] R202HftStrategyFactoryAbi.ManagerAndStrategyDestructWithRepositoryPlugin (0 ms)
+[----------] 1 test from R202HftStrategyFactoryAbi (0 ms total)
+
+[----------] 4 tests from R214EngineTaskShutdown
+[ RUN      ] R214EngineTaskShutdown.releaseCannotLoseWakeBetweenIdleCheckAndWait
+
+[WARNING] /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest-death-test.cc:1104:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test detected 3 threads. See https://github.com/google/googletest/blob/main/docs/advanced.md#death-tests-and-threads for more explanation and suggested solutions, especially if this is the last message you see before your test times out.
+[       OK ] R214EngineTaskShutdown.releaseCannotLoseWakeBetweenIdleCheckAndWait (173 ms)
+[ RUN      ] R214EngineTaskShutdown.externalReleaseDrainsAcceptedTasksAndSerializesCallers
+
+[WARNING] /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest-death-test.cc:1104:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test detected 3 threads. See https://github.com/google/googletest/blob/main/docs/advanced.md#death-tests-and-threads for more explanation and suggested solutions, especially if this is the last message you see before your test times out.
+[       OK ] R214EngineTaskShutdown.externalReleaseDrainsAcceptedTasksAndSerializesCallers (5 ms)
+[ RUN      ] R214EngineTaskShutdown.stoppedEngineDoesNotRunTaskAndReleasesCapture
+
+[WARNING] /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest-death-test.cc:1104:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test detected 3 threads. See https://github.com/google/googletest/blob/main/docs/advanced.md#death-tests-and-threads for more explanation and suggested solutions, especially if this is the last message you see before your test times out.
+[       OK ] R214EngineTaskShutdown.stoppedEngineDoesNotRunTaskAndReleasesCapture (7 ms)
+[ RUN      ] R214EngineTaskShutdown.taskCanRequestStopAndOwnerLaterJoinsWorker
+
+[WARNING] /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest-death-test.cc:1104:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test detected 3 threads. See https://github.com/google/googletest/blob/main/docs/advanced.md#death-tests-and-threads for more explanation and suggested solutions, especially if this is the last message you see before your test times out.
+[       OK ] R214EngineTaskShutdown.taskCanRequestStopAndOwnerLaterJoinsWorker (6 ms)
+[----------] 4 tests from R214EngineTaskShutdown (193 ms total)
+
+[----------] 6 tests from R41EventNotifierTest
+[ RUN      ] R41EventNotifierTest.DefaultConstructorInitializesMqHooksToNull
+[       OK ] R41EventNotifierTest.DefaultConstructorInitializesMqHooksToNull (0 ms)
+[ RUN      ] R41EventNotifierTest.InactiveNotifierShortCircuitsEveryNotify
+[       OK ] R41EventNotifierTest.InactiveNotifierShortCircuitsEveryNotify (1 ms)
+[ RUN      ] R41EventNotifierTest.MissingMqModuleFailsInit
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r41_ntf_missing_54684_2/no_module_here/libWtMsgQue.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r41_ntf_missing_54684_2/no_module_here/libWtMsgQue.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r41_ntf_missing_54684_2/no_module_here/libWtMsgQue.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/wt_r41_ntf_missing_54684_2/no_module_here/libWtMsgQue.dylib' (no such file)
+[       OK ] R41EventNotifierTest.MissingMqModuleFailsInit (1 ms)
+[ RUN      ] R41EventNotifierTest.ActiveNotifierPublishesAllJsonPayloads
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r41_event_notifier_test.cpp:214: Skipped
+libWtMsgQue not found next to test binary; JSON paths stay uncovered
+
+[  SKIPPED ] R41EventNotifierTest.ActiveNotifierPublishesAllJsonPayloads (0 ms)
+[ RUN      ] R41EventNotifierTest.InactiveNotifierRejectsNonNullTradeAndOrder
+[       OK ] R41EventNotifierTest.InactiveNotifierRejectsNonNullTradeAndOrder (1 ms)
+[ RUN      ] R41EventNotifierTest.ActiveNotifierSkipsNullTradeAndOrder
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r41_event_notifier_test.cpp:300: Skipped
+libWtMsgQue not found next to test binary
+
+[  SKIPPED ] R41EventNotifierTest.ActiveNotifierSkipsNullTradeAndOrder (0 ms)
+[----------] 6 tests from R41EventNotifierTest (4 ms total)
+
+[----------] 6 tests from R73CtaCtxTest
+[ RUN      ] R73CtaCtxTest.LoadToleratesBadJsonAndRestoresUserData
+[       OK ] R73CtaCtxTest.LoadToleratesBadJsonAndRestoresUserData (5 ms)
+[ RUN      ] R73CtaCtxTest.SignalHeldOutsideSessionThenExecutedWhenTriggered
+[       OK ] R73CtaCtxTest.SignalHeldOutsideSessionThenExecutedWhenTriggered (3 ms)
+[ RUN      ] R73CtaCtxTest.ScheduleWaitsForMainBarCloseAndRespectsCloseTime
+[       OK ] R73CtaCtxTest.ScheduleWaitsForMainBarCloseAndRespectsCloseTime (2 ms)
+[ RUN      ] R73CtaCtxTest.MainBarsExpireConditionsAndNullSlicesAreGuarded
+[       OK ] R73CtaCtxTest.MainBarsExpireConditionsAndNullSlicesAreGuarded (1 ms)
+[ RUN      ] R73CtaCtxTest.PositionQueriesCoverTagsAndFundFlags
+[       OK ] R73CtaCtxTest.PositionQueriesCoverTagsAndFundFlags (2 ms)
+[ RUN      ] R73CtaCtxTest.OutputsAreIdempotentAndChartApisGuardState
+[       OK ] R73CtaCtxTest.OutputsAreIdempotentAndChartApisGuardState (2 ms)
+[----------] 6 tests from R73CtaCtxTest (18 ms total)
+
+[----------] 3 tests from R73DtMgrTest
+[ RUN      ] R73DtMgrTest.ReaderInitAndSliceDelegation
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r73_dtmgr_test.cpp:87: Failure
+Value of: initMgr(mgr, false)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R73DtMgrTest.ReaderInitAndSliceDelegation (0 ms)
+[ RUN      ] R73DtMgrTest.BarPeriodMappingNotifiesEngine
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r73_dtmgr_test.cpp:108: Failure
+Value of: initMgr(mgr, false)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R73DtMgrTest.BarPeriodMappingNotifiesEngine (0 ms)
+[ RUN      ] R73DtMgrTest.ForcedCacheResampleOnEmptyStore
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/r73_dtmgr_test.cpp:137: Failure
+Value of: initMgr(mgr, true)
+  Actual: false
+Expected: true
+
+[  FAILED  ] R73DtMgrTest.ForcedCacheResampleOnEmptyStore (0 ms)
+[ DISABLED ] R73DtMgrTest.DISABLED_EmptyStoreTickSliceCrashesInReader
+[----------] 3 tests from R73DtMgrTest (1 ms total)
+
+[----------] 4 tests from R73ExecTest
+[ RUN      ] R73ExecTest.LocalAccessorsAndGuards
+[       OK ] R73ExecTest.LocalAccessorsAndGuards (0 ms)
+[ RUN      ] R73ExecTest.LocalAutoClearEarlyExits
+[       OK ] R73ExecTest.LocalAutoClearEarlyExits (1 ms)
+[ RUN      ] R73ExecTest.ArbiAccessorsQueriesAndAutoClear
+[       OK ] R73ExecTest.ArbiAccessorsQueriesAndAutoClear (0 ms)
+[ RUN      ] R73ExecTest.DiffAccessorsAndSlices
+[       OK ] R73ExecTest.DiffAccessorsAndSlices (0 ms)
+[----------] 4 tests from R73ExecTest (2 ms total)
+
+[----------] 4 tests from R73HftCtxTest
+[ RUN      ] R73HftCtxTest.PositionLifecycleCoversCloseAndReverse
+[       OK ] R73HftCtxTest.PositionLifecycleCoversCloseAndReverse (0 ms)
+[ RUN      ] R73HftCtxTest.DynProfitUsesBidAskAndWritesFunds
+[       OK ] R73HftCtxTest.DynProfitUsesBidAskAndWritesFunds (1 ms)
+[ RUN      ] R73HftCtxTest.NullSlicesAreGuarded
+[       OK ] R73HftCtxTest.NullSlicesAreGuarded (0 ms)
+[ RUN      ] R73HftCtxTest.DirtyUserDataAndNonAgentCallbacks
+[       OK ] R73HftCtxTest.DirtyUserDataAndNonAgentCallbacks (3 ms)
+[ DISABLED ] R73HftCtxTest.DISABLED_SellUnknownProductDereferencesNullCommodity
+[----------] 4 tests from R73HftCtxTest (5 ms total)
+
+[----------] 4 tests from R73TraderReportTest
+[ RUN      ] R73TraderReportTest.OptionReportsAndPushes
+[       OK ] R73TraderReportTest.OptionReportsAndPushes (1 ms)
+[ RUN      ] R73TraderReportTest.StockAndFlatCodeConversions
+[       OK ] R73TraderReportTest.StockAndFlatCodeConversions (1 ms)
+[ RUN      ] R73TraderReportTest.CancelAcrossContractCategories
+[       OK ] R73TraderReportTest.CancelAcrossContractCategories (1 ms)
+[ RUN      ] R73TraderReportTest.ReportTolerantItemsAndPreReadyQueries
+[       OK ] R73TraderReportTest.ReportTolerantItemsAndPreReadyQueries (1 ms)
+[----------] 4 tests from R73TraderReportTest (7 ms total)
+
+[----------] 2 tests from S1K24NotifierStop
+[ RUN      ] S1K24NotifierStop.BlockedPublisherIsDetachedAfterBoundedWait
+[       OK ] S1K24NotifierStop.BlockedPublisherIsDetachedAfterBoundedWait (296 ms)
+[ RUN      ] S1K24NotifierStop.IdleNotifierDrainsAndDestroysServerOnce
+[       OK ] S1K24NotifierStop.IdleNotifierDrainsAndDestroysServerOnce (6 ms)
+[----------] 2 tests from S1K24NotifierStop (306 ms total)
+
+[----------] 1 test from S3New063SelOpenFee
+[ RUN      ] S3New063SelOpenFee.SameDirectionAddIsChargedOnTheOpenedIncrement
+[       OK ] S3New063SelOpenFee.SameDirectionAddIsChargedOnTheOpenedIncrement (12 ms)
+[----------] 1 test from S3New063SelOpenFee (12 ms total)
+
+[----------] 3 tests from S5EngineUninitMetadata
+[ RUN      ] S5EngineUninitMetadata.ZeroInitializedSelEngineReportsNoMetadata
+
+[WARNING] /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest-death-test.cc:1104:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test detected 3 threads. See https://github.com/google/googletest/blob/main/docs/advanced.md#death-tests-and-threads for more explanation and suggested solutions, especially if this is the last message you see before your test times out.
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_engine_uninit_metadata_test.cpp:68: Failure
+Death test: std::exit(probeUninitializedEngine<WtSelEngine>(0x00))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] libc++abi: terminating due to uncaught exception of type std::__1::system_error: thread::join failed: No such process
+[  DEATH   ] 
+
+[  FAILED  ] S5EngineUninitMetadata.ZeroInitializedSelEngineReportsNoMetadata (9 ms)
+[ RUN      ] S5EngineUninitMetadata.IndeterminateStorageSelEngineReportsNoMetadata
+
+[WARNING] /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest-death-test.cc:1104:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test detected 3 threads. See https://github.com/google/googletest/blob/main/docs/advanced.md#death-tests-and-threads for more explanation and suggested solutions, especially if this is the last message you see before your test times out.
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_engine_uninit_metadata_test.cpp:74: Failure
+Death test: std::exit(probeUninitializedEngine<WtSelEngine>(0xA5))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] libc++abi: terminating due to uncaught exception of type std::__1::system_error: thread::join failed: No such process
+[  DEATH   ] 
+
+[  FAILED  ] S5EngineUninitMetadata.IndeterminateStorageSelEngineReportsNoMetadata (19 ms)
+[ RUN      ] S5EngineUninitMetadata.ZeroInitializedCtaAndHftEnginesReportNoMetadata
+
+[WARNING] /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest-death-test.cc:1104:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test detected 3 threads. See https://github.com/google/googletest/blob/main/docs/advanced.md#death-tests-and-threads for more explanation and suggested solutions, especially if this is the last message you see before your test times out.
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_engine_uninit_metadata_test.cpp:80: Failure
+Death test: std::exit(probeUninitializedEngine<WtCtaEngine>(0x00))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] libc++abi: terminating due to uncaught exception of type std::__1::system_error: thread::join failed: No such process
+[  DEATH   ] 
+
+
+[WARNING] /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest-death-test.cc:1104:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test detected 3 threads. See https://github.com/google/googletest/blob/main/docs/advanced.md#death-tests-and-threads for more explanation and suggested solutions, especially if this is the last message you see before your test times out.
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/s5_engine_uninit_metadata_test.cpp:82: Failure
+Death test: std::exit(probeUninitializedEngine<WtHftEngine>(0x00))
+    Result: died but not with expected exit code:
+            Terminated by signal 6
+Actual msg:
+[  DEATH   ] libc++abi: terminating due to uncaught exception of type std::__1::system_error: thread::join failed: No such process
+[  DEATH   ] 
+
+[  FAILED  ] S5EngineUninitMetadata.ZeroInitializedCtaAndHftEnginesReportNoMetadata (37 ms)
+[----------] 3 tests from S5EngineUninitMetadata (66 ms total)
+
+[----------] 9 tests from S5LiveFeeSchedule
+[ RUN      ] S5LiveFeeSchedule.ContractRateWinsOverProductRate
+[       OK ] S5LiveFeeSchedule.ContractRateWinsOverProductRate (2 ms)
+[ RUN      ] S5LiveFeeSchedule.ProductRateIsTheFallback
+[       OK ] S5LiveFeeSchedule.ProductRateIsTheFallback (1 ms)
+[ RUN      ] S5LiveFeeSchedule.ExplicitZeroRateIsAValidFee
+[       OK ] S5LiveFeeSchedule.ExplicitZeroRateIsAValidFee (1 ms)
+[ RUN      ] S5LiveFeeSchedule.MissingFeeIsAnObservableError
+[       OK ] S5LiveFeeSchedule.MissingFeeIsAnObservableError (1 ms)
+[ RUN      ] S5LiveFeeSchedule.ContinuousCodeIsPricedWithItsMappedContract
+[       OK ] S5LiveFeeSchedule.ContinuousCodeIsPricedWithItsMappedContract (1 ms)
+[ RUN      ] S5LiveFeeSchedule.FillIsKeptWhenItsFeeIsMissing
+[       OK ] S5LiveFeeSchedule.FillIsKeptWhenItsFeeIsMissing (7 ms)
+[ RUN      ] S5LiveFeeSchedule.PortfolioFeeIsChargedOnTheOpenedIncrement
+[       OK ] S5LiveFeeSchedule.PortfolioFeeIsChargedOnTheOpenedIncrement (2 ms)
+[ RUN      ] S5LiveFeeSchedule.InvalidVersionedTemplateBlocksStart
+[       OK ] S5LiveFeeSchedule.InvalidVersionedTemplateBlocksStart (2 ms)
+[ RUN      ] S5LiveFeeSchedule.VersionedYamlTemplateIsAccepted
+[       OK ] S5LiveFeeSchedule.VersionedYamlTemplateIsAccepted (2 ms)
+[----------] 9 tests from S5LiveFeeSchedule (23 ms total)
+
+[----------] 32 tests from UnresolvedReportJournal
+[ RUN      ] UnresolvedReportJournal.MissingOpenDoesNotBootstrapAndFreshRecordSurvivesRestart
+[       OK ] UnresolvedReportJournal.MissingOpenDoesNotBootstrapAndFreshRecordSurvivesRestart (2 ms)
+[ RUN      ] UnresolvedReportJournal.BootstrapCannotBeImplicitlyRepeated
+[       OK ] UnresolvedReportJournal.BootstrapCannotBeImplicitlyRepeated (1 ms)
+[ RUN      ] UnresolvedReportJournal.BootstrapRejectsOrphanArtifactsWithoutCreatingOthers
+[       OK ] UnresolvedReportJournal.BootstrapRejectsOrphanArtifactsWithoutCreatingOthers (3 ms)
+[ RUN      ] UnresolvedReportJournal.BootstrapProbeErrorDoesNotCreateArtifacts
+[       OK ] UnresolvedReportJournal.BootstrapProbeErrorDoesNotCreateArtifacts (0 ms)
+[ RUN      ] UnresolvedReportJournal.MissingWalWithOtherJournalArtifactsRequiresRecovery
+[       OK ] UnresolvedReportJournal.MissingWalWithOtherJournalArtifactsRequiresRecovery (1 ms)
+[ RUN      ] UnresolvedReportJournal.AckRequiresExactPendingHighWaterAndPersistsAuditFields
+[       OK ] UnresolvedReportJournal.AckRequiresExactPendingHighWaterAndPersistsAuditFields (4 ms)
+[ RUN      ] UnresolvedReportJournal.SerializedShortWritesCompleteTheFrame
+[       OK ] UnresolvedReportJournal.SerializedShortWritesCompleteTheFrame (2 ms)
+[ RUN      ] UnresolvedReportJournal.ConcurrentThreadAppendsReceiveUniqueOrderedSequences
+[       OK ] UnresolvedReportJournal.ConcurrentThreadAppendsReceiveUniqueOrderedSequences (7 ms)
+[ RUN      ] UnresolvedReportJournal.LockContentionIsRejectedAcrossProcesses
+[       OK ] UnresolvedReportJournal.LockContentionIsRejectedAcrossProcesses (50 ms)
+[ RUN      ] UnresolvedReportJournal.TruncatedPrimaryExportsCompletePrefixAndFirstBadOffset
+[       OK ] UnresolvedReportJournal.TruncatedPrimaryExportsCompletePrefixAndFirstBadOffset (3 ms)
+[ RUN      ] UnresolvedReportJournal.CorruptPrimaryChecksumPreservesBytesAndForensicPrefix
+[       OK ] UnresolvedReportJournal.CorruptPrimaryChecksumPreservesBytesAndForensicPrefix (6 ms)
+[ RUN      ] UnresolvedReportJournal.TruncatedGuardPreservesItsGoodPrefix
+[       OK ] UnresolvedReportJournal.TruncatedGuardPreservesItsGoodPrefix (2 ms)
+[ RUN      ] UnresolvedReportJournal.InterruptedPrimaryAppendAfterProcessExitExportsForensicPrefix
+[       OK ] UnresolvedReportJournal.InterruptedPrimaryAppendAfterProcessExitExportsForensicPrefix (22 ms)
+[ RUN      ] UnresolvedReportJournal.EveryWriteAndCleanupFailureRequiresRecovery
+[       OK ] UnresolvedReportJournal.EveryWriteAndCleanupFailureRequiresRecovery (29 ms)
+[ RUN      ] UnresolvedReportJournal.ComponentProbeErrorFailsClosedWithoutTreatingPathAsMissing
+[       OK ] UnresolvedReportJournal.ComponentProbeErrorFailsClosedWithoutTreatingPathAsMissing (1 ms)
+[ RUN      ] UnresolvedReportJournal.MarkerPermissionFailureRetainsImmediateAndRestartEvidence
+[       OK ] UnresolvedReportJournal.MarkerPermissionFailureRetainsImmediateAndRestartEvidence (2 ms)
+[ RUN      ] UnresolvedReportJournal.AckMarkerPermissionFailurePreservesPendingEvidence
+[       OK ] UnresolvedReportJournal.AckMarkerPermissionFailurePreservesPendingEvidence (2 ms)
+[ RUN      ] UnresolvedReportJournal.CleanupComponentProbeErrorFailsClosedWithoutTreatingPathAsMissing
+[       OK ] UnresolvedReportJournal.CleanupComponentProbeErrorFailsClosedWithoutTreatingPathAsMissing (1 ms)
+[ RUN      ] UnresolvedReportJournal.FailedAckCommitImmediatelyExposesPriorReportsAndAckEvidence
+[       OK ] UnresolvedReportJournal.FailedAckCommitImmediatelyExposesPriorReportsAndAckEvidence (2 ms)
+[ RUN      ] UnresolvedReportJournal.AmbiguousAckCommitRemainsRecoveryRequiredAfterProcessExit
+[       OK ] UnresolvedReportJournal.AmbiguousAckCommitRemainsRecoveryRequiredAfterProcessExit (20 ms)
+[ RUN      ] UnresolvedReportJournal.AmbiguousAckPrimaryFlushRemainsRecoveryRequiredAfterProcessExit
+[       OK ] UnresolvedReportJournal.AmbiguousAckPrimaryFlushRemainsRecoveryRequiredAfterProcessExit (26 ms)
+[ RUN      ] UnresolvedReportJournal.MarkerRemovalDirectoryFlushFailurePersistsCleanupUncertainty
+[       OK ] UnresolvedReportJournal.MarkerRemovalDirectoryFlushFailurePersistsCleanupUncertainty (20 ms)
+[ RUN      ] UnresolvedReportJournal.AckCleanupFailuresExposeReportAndMatchedCommitBeforeAndAfterReopen
+[       OK ] UnresolvedReportJournal.AckCleanupFailuresExposeReportAndMatchedCommitBeforeAndAfterReopen (12 ms)
+[ RUN      ] UnresolvedReportJournal.SymlinkAndVisiblePathReplacementFailClosed
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/n02_wtcore_engines/unresolved_report_journal_test.cpp:984: Skipped
+policy (iteration 03, BUG-I02-NEW-137): creating a symbolic link is not allowed
+
+[  SKIPPED ] UnresolvedReportJournal.SymlinkAndVisiblePathReplacementFailClosed (0 ms)
+[ RUN      ] UnresolvedReportJournal.VisiblePathAndLockReplacementFailClosed
+[       OK ] UnresolvedReportJournal.VisiblePathAndLockReplacementFailClosed (7 ms)
+[ RUN      ] UnresolvedReportJournal.SystemLinkInDirectoryPathIsCanonicalizedToOneJournal
+[       OK ] UnresolvedReportJournal.SystemLinkInDirectoryPathIsCanonicalizedToOneJournal (3 ms)
+[ RUN      ] UnresolvedReportJournal.GenuineExtendedAclOnJournalFileIsRejected
+[       OK ] UnresolvedReportJournal.GenuineExtendedAclOnJournalFileIsRejected (70 ms)
+[ RUN      ] UnresolvedReportJournal.UnsafeDirectoryPermissionsAreRejected
+[       OK ] UnresolvedReportJournal.UnsafeDirectoryPermissionsAreRejected (2 ms)
+[ RUN      ] UnresolvedReportJournal.ExistingWalGuardAndLockPermissionsAreValidated
+[       OK ] UnresolvedReportJournal.ExistingWalGuardAndLockPermissionsAreValidated (5 ms)
+[ RUN      ] UnresolvedReportJournal.ReplacedContainingDirectoryIsDetectedBeforeMutation
+[       OK ] UnresolvedReportJournal.ReplacedContainingDirectoryIsDetectedBeforeMutation (2 ms)
+[ RUN      ] UnresolvedReportJournal.PayloadAndAuditFieldLimitsAreRejected
+[       OK ] UnresolvedReportJournal.PayloadAndAuditFieldLimitsAreRejected (2 ms)
+[ RUN      ] UnresolvedReportJournal.SequenceExhaustionPoisonsInstanceBeforeWriting
+[       OK ] UnresolvedReportJournal.SequenceExhaustionPoisonsInstanceBeforeWriting (1 ms)
+[----------] 32 tests from UnresolvedReportJournal (329 ms total)
+
+[----------] 9 tests from P01CtaQueryTest
+[ RUN      ] P01CtaQueryTest.identity_and_clock_passthrough
+[       OK ] P01CtaQueryTest.identity_and_clock_passthrough (0 ms)
+[ RUN      ] P01CtaQueryTest.comminfo_and_rawcode_lookup
+[       OK ] P01CtaQueryTest.comminfo_and_rawcode_lookup (0 ms)
+[ RUN      ] P01CtaQueryTest.empty_book_lookups_return_neutral_values
+[       OK ] P01CtaQueryTest.empty_book_lookups_return_neutral_values (0 ms)
+[ RUN      ] P01CtaQueryTest.fund_data_flags_are_consistent
+[       OK ] P01CtaQueryTest.fund_data_flags_are_consistent (0 ms)
+[ RUN      ] P01CtaQueryTest.on_tick_fills_price_map_and_respects_emit_flag
+[       OK ] P01CtaQueryTest.on_tick_fills_price_map_and_respects_emit_flag (0 ms)
+[ RUN      ] P01CtaQueryTest.on_bar_notifies_only_after_subscribing_bar_events
+[       OK ] P01CtaQueryTest.on_bar_notifies_only_after_subscribing_bar_events (0 ms)
+[ RUN      ] P01CtaQueryTest.sub_ticks_is_idempotent
+[       OK ] P01CtaQueryTest.sub_ticks_is_idempotent (1 ms)
+[ RUN      ] P01CtaQueryTest.user_data_store_and_default_value
+[       OK ] P01CtaQueryTest.user_data_store_and_default_value (0 ms)
+[ RUN      ] P01CtaQueryTest.log_levels_are_forwarded
+[       OK ] P01CtaQueryTest.log_levels_are_forwarded (0 ms)
+[----------] 9 tests from P01CtaQueryTest (1 ms total)
+
+[----------] 18 tests from P01CtaOrderTest
+[ RUN      ] P01CtaOrderTest.unknown_contract_is_rejected_without_any_state
+[       OK ] P01CtaOrderTest.unknown_contract_is_rejected_without_any_state (0 ms)
+[ RUN      ] P01CtaOrderTest.short_is_rejected_on_non_shortable_product
+[       OK ] P01CtaOrderTest.short_is_rejected_on_non_shortable_product (0 ms)
+[ RUN      ] P01CtaOrderTest.exit_on_flat_book_is_noop
+[       OK ] P01CtaOrderTest.exit_on_flat_book_is_noop (0 ms)
+[ RUN      ] P01CtaOrderTest.exit_long_ignored_when_position_is_short
+[       OK ] P01CtaOrderTest.exit_long_ignored_when_position_is_short (0 ms)
+[ RUN      ] P01CtaOrderTest.exit_short_ignored_when_position_is_long
+[       OK ] P01CtaOrderTest.exit_short_ignored_when_position_is_long (0 ms)
+[ RUN      ] P01CtaOrderTest.enter_long_accumulates_on_top_of_current_qty
+[       OK ] P01CtaOrderTest.enter_long_accumulates_on_top_of_current_qty (0 ms)
+[ RUN      ] P01CtaOrderTest.enter_short_accumulates_below_zero
+[       OK ] P01CtaOrderTest.enter_short_accumulates_below_zero (0 ms)
+[ RUN      ] P01CtaOrderTest.exit_long_cuts_at_most_the_available_qty
+[       OK ] P01CtaOrderTest.exit_long_cuts_at_most_the_available_qty (0 ms)
+[ RUN      ] P01CtaOrderTest.exit_short_cuts_at_most_the_available_qty
+[       OK ] P01CtaOrderTest.exit_short_cuts_at_most_the_available_qty (0 ms)
+[ RUN      ] P01CtaOrderTest.limit_price_registers_condition_without_signal
+[       OK ] P01CtaOrderTest.limit_price_registers_condition_without_signal (0 ms)
+[ RUN      ] P01CtaOrderTest.stop_price_registers_reverse_comparison
+[       OK ] P01CtaOrderTest.stop_price_registers_reverse_comparison (0 ms)
+[ RUN      ] P01CtaOrderTest.short_condition_orders_are_registered_symmetrically
+[       OK ] P01CtaOrderTest.short_condition_orders_are_registered_symmetrically (0 ms)
+[ RUN      ] P01CtaOrderTest.set_position_condition_is_skipped_when_target_equals_current
+[       OK ] P01CtaOrderTest.set_position_condition_is_skipped_when_target_equals_current (0 ms)
+[ RUN      ] P01CtaOrderTest.set_position_rejects_missing_commodity_without_side_effects
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p01_wtcore_stractx/p01_cta_order_cond_test.cpp:264: Failure
+Value of: std::filesystem::exists(stateFile)
+  Actual: true
+Expected: false
+
+[  FAILED  ] P01CtaOrderTest.set_position_rejects_missing_commodity_without_side_effects (0 ms)
+[ RUN      ] P01CtaOrderTest.set_position_without_engine_has_no_side_effects
+[       OK ] P01CtaOrderTest.set_position_without_engine_has_no_side_effects (0 ms)
+[ RUN      ] P01CtaOrderTest.valid_session_tick_consumes_pending_signal
+[       OK ] P01CtaOrderTest.valid_session_tick_consumes_pending_signal (0 ms)
+[ RUN      ] P01CtaOrderTest.tick_can_be_emitted_to_strategy_after_condition_handling
+[       OK ] P01CtaOrderTest.tick_can_be_emitted_to_strategy_after_condition_handling (0 ms)
+[ RUN      ] P01CtaOrderTest.missing_session_exit_and_tick_preserve_saved_signal
+[       OK ] P01CtaOrderTest.missing_session_exit_and_tick_preserve_saved_signal (2 ms)
+[----------] 18 tests from P01CtaOrderTest (8 ms total)
+
+[----------] 17 tests from R42CtaPersistTest
+[ RUN      ] R42CtaPersistTest.OnInitLoadsPersistedStateAndPreparesOutputs
+[       OK ] R42CtaPersistTest.OnInitLoadsPersistedStateAndPreparesOutputs (3 ms)
+[ RUN      ] R42CtaPersistTest.SaveDataRoundTripAcrossContexts
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p01_wtcore_stractx/r42_cta_persist_test.cpp:349: Failure
+Expected equality of these values:
+  ctx->stra_get_position(kR42Code)
+    Which is: 7
+  5.0
+    Which is: 5
+
+[  FAILED  ] R42CtaPersistTest.SaveDataRoundTripAcrossContexts (1 ms)
+[ RUN      ] R42CtaPersistTest.MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions
+[       OK ] R42CtaPersistTest.MalformedSnapshotsDoNotPublishAnyStateOrSubscriptions (205 ms)
+[ RUN      ] R42CtaPersistTest.ExpiredPositionCodesHaveBoundedLogDisplay
+[       OK ] R42CtaPersistTest.ExpiredPositionCodesHaveBoundedLogDisplay (1 ms)
+[ RUN      ] R42CtaPersistTest.ExpiredSignalCodesHaveBoundedLogDisplay
+[       OK ] R42CtaPersistTest.ExpiredSignalCodesHaveBoundedLogDisplay (1 ms)
+[ RUN      ] R42CtaPersistTest.LongRecoveredPositionCodesKeepTheirFullIdentity
+[       OK ] R42CtaPersistTest.LongRecoveredPositionCodesKeepTheirFullIdentity (2 ms)
+[ RUN      ] R42CtaPersistTest.LongRecoveredSignalCodesKeepTheirFullIdentity
+[       OK ] R42CtaPersistTest.LongRecoveredSignalCodesKeepTheirFullIdentity (2 ms)
+[ RUN      ] R42CtaPersistTest.LongDirectTickSubscriptionsKeepTheirFullIdentity
+[       OK ] R42CtaPersistTest.LongDirectTickSubscriptionsKeepTheirFullIdentity (0 ms)
+[ RUN      ] R42CtaPersistTest.MaximumSupportedDetailAndSignalTagsRestoreAndExecute
+[       OK ] R42CtaPersistTest.MaximumSupportedDetailAndSignalTagsRestoreAndExecute (5 ms)
+[ RUN      ] R42CtaPersistTest.LookupFailureWhilePreparingSnapshotDoesNotPublishCandidate
+[       OK ] R42CtaPersistTest.LookupFailureWhilePreparingSnapshotDoesNotPublishCandidate (2 ms)
+[ RUN      ] R42CtaPersistTest.ScheduleEmitsCalculateAndChartWrites
+[       OK ] R42CtaPersistTest.ScheduleEmitsCalculateAndChartWrites (7 ms)
+[ RUN      ] R42CtaPersistTest.ChartApisRejectUseOutsideScheduleAndUnknownNames
+[       OK ] R42CtaPersistTest.ChartApisRejectUseOutsideScheduleAndUnknownNames (0 ms)
+[ RUN      ] R42CtaPersistTest.SessionBeginReleasesFrozenAndPersistsUserData
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p01_wtcore_stractx/r42_cta_persist_test.cpp:755: Failure
+Expected equality of these values:
+  ctx->stra_get_position(kR42T1Code)
+    Which is: 8
+  3.0
+    Which is: 3
+
+[  FAILED  ] R42CtaPersistTest.SessionBeginReleasesFrozenAndPersistsUserData (5 ms)
+[ RUN      ] R42CtaPersistTest.PositionAccountingQueriesReactToTicks
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p01_wtcore_stractx/r42_cta_persist_test.cpp:795: Failure
+Expected equality of these values:
+  ctx->stra_get_position_avgpx(kR42Code)
+    Which is: 679
+  (3395.0 * 2 + 3595.0 * 3) / 5.0
+    Which is: 3515
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p01_wtcore_stractx/r42_cta_persist_test.cpp:796: Failure
+Expected equality of these values:
+  ctx->stra_get_position(kR42Code, false, "B")
+    Which is: 0
+  3.0
+    Which is: 3
+
+[  FAILED  ] R42CtaPersistTest.PositionAccountingQueriesReactToTicks (1 ms)
+[ RUN      ] R42CtaPersistTest.LogsSubscriptionsAndMetadataAccessors
+[       OK ] R42CtaPersistTest.LogsSubscriptionsAndMetadataAccessors (0 ms)
+[ RUN      ] R42CtaPersistTest.K45UnknownMembersRejectTheWholeSnapshot
+[       OK ] R42CtaPersistTest.K45UnknownMembersRejectTheWholeSnapshot (20 ms)
+[ RUN      ] R42CtaPersistTest.K45AllocationFailureDuringRestorePropagatesWithoutPartialState
+[       OK ] R42CtaPersistTest.K45AllocationFailureDuringRestorePropagatesWithoutPartialState (4 ms)
+[----------] 17 tests from R42CtaPersistTest (264 ms total)
+
+[----------] 14 tests from P02DiffExecuterTest
+[ RUN      ] P02DiffExecuterTest.InitRejectsNullParams
+[       OK ] P02DiffExecuterTest.InitRejectsNullParams (0 ms)
+[ RUN      ] P02DiffExecuterTest.InitSucceedsWhenSnapshotIsMissing
+[       OK ] P02DiffExecuterTest.InitSucceedsWhenSnapshotIsMissing (0 ms)
+[ RUN      ] P02DiffExecuterTest.InitRejectsMalformedSnapshot
+[       OK ] P02DiffExecuterTest.InitRejectsMalformedSnapshot (0 ms)
+[ RUN      ] P02DiffExecuterTest.LoadDataRejectsMalformedSnapshotsWithoutPartialRestore
+[       OK ] P02DiffExecuterTest.LoadDataRejectsMalformedSnapshotsWithoutPartialRestore (3 ms)
+[ RUN      ] P02DiffExecuterTest.LoadDataAcceptsCurrentArrayAndHistoricalObjectMap
+[       OK ] P02DiffExecuterTest.LoadDataAcceptsCurrentArrayAndHistoricalObjectMap (0 ms)
+[ RUN      ] P02DiffExecuterTest.PartialWriteFlushAndCloseFailuresPreserveLastGoodAndRetry
+[       OK ] P02DiffExecuterTest.PartialWriteFlushAndCloseFailuresPreserveLastGoodAndRetry (2 ms)
+[ RUN      ] P02DiffExecuterTest.LoadDataSkipsContractsWithUnknownTicker
+[       OK ] P02DiffExecuterTest.LoadDataSkipsContractsWithUnknownTicker (0 ms)
+[ RUN      ] P02DiffExecuterTest.SaveDataCreatesFileWhenNothingLoaded
+[       OK ] P02DiffExecuterTest.SaveDataCreatesFileWhenNothingLoaded (0 ms)
+[ RUN      ] P02DiffExecuterTest.GetUnitUsesDefaultPolicyWhenProductMissing
+[       OK ] P02DiffExecuterTest.GetUnitUsesDefaultPolicyWhenProductMissing (0 ms)
+[ RUN      ] P02DiffExecuterTest.ContextReadsGuardedWhenTraderMissing
+[       OK ] P02DiffExecuterTest.ContextReadsGuardedWhenTraderMissing (0 ms)
+[ RUN      ] P02DiffExecuterTest.OrderCallsRejectedBeforeChannelReady
+[       OK ] P02DiffExecuterTest.OrderCallsRejectedBeforeChannelReady (0 ms)
+[ RUN      ] P02DiffExecuterTest.PositionTargetsSkippedWhenUnitMissing
+[       OK ] P02DiffExecuterTest.PositionTargetsSkippedWhenUnitMissing (1 ms)
+[ RUN      ] P02DiffExecuterTest.ReportForwardingAndChannelToggleAreNoOps
+[       OK ] P02DiffExecuterTest.ReportForwardingAndChannelToggleAreNoOps (0 ms)
+[ RUN      ] P02DiffExecuterTest.ScaleAppliedOnlyAfterUnitExists
+[       OK ] P02DiffExecuterTest.ScaleAppliedOnlyAfterUnitExists (0 ms)
+[----------] 14 tests from P02DiffExecuterTest (13 ms total)
+
+[----------] 9 tests from P02LocalExecuterTest
+[ RUN      ] P02LocalExecuterTest.InitRejectsNullParams
+[       OK ] P02LocalExecuterTest.InitRejectsNullParams (0 ms)
+[ RUN      ] P02LocalExecuterTest.InitParsesScaleClearListAndGroups
+[       OK ] P02LocalExecuterTest.InitParsesScaleClearListAndGroups (0 ms)
+[ RUN      ] P02LocalExecuterTest.ContextReadsFallBackWhenTraderMissing
+[       OK ] P02LocalExecuterTest.ContextReadsFallBackWhenTraderMissing (0 ms)
+[ RUN      ] P02LocalExecuterTest.TradingCallsRejectedBeforeChannelReady
+[       OK ] P02LocalExecuterTest.TradingCallsRejectedBeforeChannelReady (0 ms)
+[ RUN      ] P02LocalExecuterTest.ReportForwardingIsNoOpWithoutUnits
+[       OK ] P02LocalExecuterTest.ReportForwardingIsNoOpWithoutUnits (0 ms)
+[ RUN      ] P02LocalExecuterTest.ChannelStateToggleWithEmptyUnitMap
+[       OK ] P02LocalExecuterTest.ChannelStateToggleWithEmptyUnitMap (0 ms)
+[ RUN      ] P02LocalExecuterTest.PositionReportTracksChannelHolds
+[       OK ] P02LocalExecuterTest.PositionReportTracksChannelHolds (0 ms)
+[ RUN      ] P02LocalExecuterTest.SetAndDeltaPositionWithoutExecutableUnits
+[       OK ] P02LocalExecuterTest.SetAndDeltaPositionWithoutExecutableUnits (0 ms)
+[ RUN      ] P02LocalExecuterTest.InitWithoutClearGroupsAndPoolKeepsDefaults
+[       OK ] P02LocalExecuterTest.InitWithoutClearGroupsAndPoolKeepsDefaults (0 ms)
+[----------] 9 tests from P02LocalExecuterTest (3 ms total)
+
+[----------] 2 tests from P02ArbiExecuterTest
+[ RUN      ] P02ArbiExecuterTest.InitRejectsNullAndParsesFullConfig
+[       OK ] P02ArbiExecuterTest.InitRejectsNullAndParsesFullConfig (0 ms)
+[ RUN      ] P02ArbiExecuterTest.GuardsAndForwardersWithNoTraderAndNoUnits
+[       OK ] P02ArbiExecuterTest.GuardsAndForwardersWithNoTraderAndNoUnits (0 ms)
+[----------] 2 tests from P02ArbiExecuterTest (0 ms total)
+
+[----------] 10 tests from P02EngineTest
+[ RUN      ] P02EngineTest.DateTimeGettersMirrorTheValuesSet
+[       OK ] P02EngineTest.DateTimeGettersMirrorTheValuesSet (0 ms)
+[ RUN      ] P02EngineTest.PortContextQueriesWithoutInit
+[       OK ] P02EngineTest.PortContextQueriesWithoutInit (0 ms)
+[ RUN      ] P02EngineTest.InitBuildsPortFundAndReadsNoFiles
+[       OK ] P02EngineTest.InitBuildsPortFundAndReadsNoFiles (0 ms)
+[ RUN      ] P02EngineTest.AdjustingFlagPropagatesDataManagerValues
+[       OK ] P02EngineTest.AdjustingFlagPropagatesDataManagerValues (1 ms)
+[ RUN      ] P02EngineTest.AdjustingFlagDefaultsToZeroWithoutDataManager
+[       OK ] P02EngineTest.AdjustingFlagDefaultsToZeroWithoutDataManager (0 ms)
+[ RUN      ] P02EngineTest.PriceLookupsReturnZeroWithoutTicks
+[       OK ] P02EngineTest.PriceLookupsReturnZeroWithoutTicks (0 ms)
+[ RUN      ] P02EngineTest.LoadDatasParsesFundPositionsAndRiskMon
+[       OK ] P02EngineTest.LoadDatasParsesFundPositionsAndRiskMon (0 ms)
+[ RUN      ] P02EngineTest.LoadDatasToleratesBrokenAndEmptyFiles
+[       OK ] P02EngineTest.LoadDatasToleratesBrokenAndEmptyFiles (0 ms)
+[ RUN      ] P02EngineTest.LoadDatasWithoutRiskMonSection
+[       OK ] P02EngineTest.LoadDatasWithoutRiskMonSection (0 ms)
+[ RUN      ] P02EngineTest.AppendSignalIsHeldWhenNoPriceYet
+[       OK ] P02EngineTest.AppendSignalIsHeldWhenNoPriceYet (0 ms)
+[----------] 10 tests from P02EngineTest (4 ms total)
+
+[----------] 4 tests from R42DtMgrTest
+[ RUN      ] R42DtMgrTest.InitReportsStoreFailures
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libr42_missing_store_module.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libr42_missing_store_module.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libr42_missing_store_module.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libr42_missing_store_module.dylib' (no such file)
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libr42_no_such_data_storage.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libr42_no_such_data_storage.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libr42_no_such_data_storage.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libr42_no_such_data_storage.dylib' (no such file)
+[       OK ] R42DtMgrTest.InitReportsStoreFailures (0 ms)
+[ RUN      ] R42DtMgrTest.ForwardersAndReaderGuards
+[       OK ] R42DtMgrTest.ForwardersAndReaderGuards (0 ms)
+[ RUN      ] R42DtMgrTest.PushQuoteUpdatesRealtimeCache
+[       OK ] R42DtMgrTest.PushQuoteUpdatesRealtimeCache (0 ms)
+[ RUN      ] R42DtMgrTest.BarCallbacksWithoutSubscriptionAreNoop
+[       OK ] R42DtMgrTest.BarCallbacksWithoutSubscriptionAreNoop (0 ms)
+[----------] 4 tests from R42DtMgrTest (0 ms total)
+
+[----------] 4 tests from R42HftCtxTest
+[ RUN      ] R42HftCtxTest.DataAgentInitCreatesOutputFilesIdempotently
+[       OK ] R42HftCtxTest.DataAgentInitCreatesOutputFilesIdempotently (1 ms)
+[ RUN      ] R42HftCtxTest.NonDataAgentInitSkipsOutputs
+[       OK ] R42HftCtxTest.NonDataAgentInitSkipsOutputs (0 ms)
+[ RUN      ] R42HftCtxTest.UserDataFlushedByCallbacksAndReloaded
+[       OK ] R42HftCtxTest.UserDataFlushedByCallbacksAndReloaded (5 ms)
+[ RUN      ] R42HftCtxTest.LogsSubscriptionsMetadataAndSessionEnd
+[       OK ] R42HftCtxTest.LogsSubscriptionsMetadataAndSessionEnd (1 ms)
+[----------] 4 tests from R42HftCtxTest (8 ms total)
+
+[----------] 11 tests from R42ParserAdapterTest
+[ RUN      ] R42ParserAdapterTest.InitRejectsNullOrMissingModule
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/parsers/libr42_no_such_parser.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/parsers/libr42_no_such_parser.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/parsers/libr42_no_such_parser.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/parsers/libr42_no_such_parser.dylib' (no such file)
+[       OK ] R42ParserAdapterTest.InitRejectsNullOrMissingModule (0 ms)
+[ RUN      ] R42ParserAdapterTest.InitExtHandlesApiStates
+[       OK ] R42ParserAdapterTest.InitExtHandlesApiStates (0 ms)
+[ RUN      ] R42ParserAdapterTest.BusyInitExtRetainsAndDeduplicatesTransferredApis
+[       OK ] R42ParserAdapterTest.BusyInitExtRetainsAndDeduplicatesTransferredApis (0 ms)
+[ RUN      ] R42ParserAdapterTest.ReleaseExceptionFailsClosedWithoutRetry
+[       OK ] R42ParserAdapterTest.ReleaseExceptionFailsClosedWithoutRetry (0 ms)
+[ RUN      ] R42ParserAdapterTest.RemoverExceptionPreservesOwnerAndFailsClosed
+[       OK ] R42ParserAdapterTest.RemoverExceptionPreservesOwnerAndFailsClosed (0 ms)
+[ RUN      ] R42ParserAdapterTest.ParserAdapterMgrRetainsFailedOwner
+[       OK ] R42ParserAdapterTest.ParserAdapterMgrRetainsFailedOwner (0 ms)
+[ RUN      ] R42ParserAdapterTest.ParserAdapterMgrRetriesDeferredRemoverWithoutLosingOwner
+[       OK ] R42ParserAdapterTest.ParserAdapterMgrRetriesDeferredRemoverWithoutLosingOwner (0 ms)
+[ RUN      ] R42ParserAdapterTest.ManagerReleaseStopsRetainedSuccessfulAdapter
+[       OK ] R42ParserAdapterTest.ManagerReleaseStopsRetainedSuccessfulAdapter (0 ms)
+[ RUN      ] R42ParserAdapterTest.HandleQuoteConvertsMonthlyCodeAndFiltersInvalid
+[       OK ] R42ParserAdapterTest.HandleQuoteConvertsMonthlyCodeAndFiltersInvalid (0 ms)
+[ RUN      ] R42ParserAdapterTest.OrderAndTradeDataForwarding
+[       OK ] R42ParserAdapterTest.OrderAndTradeDataForwarding (0 ms)
+[ RUN      ] R42ParserAdapterTest.AdapterManagerAddGetRunRelease
+[       OK ] R42ParserAdapterTest.AdapterManagerAddGetRunRelease (0 ms)
+[----------] 11 tests from R42ParserAdapterTest (0 ms total)
+
+[----------] 5 tests from R42SelCtxTest
+[ RUN      ] R42SelCtxTest.OnInitRestoresPersistedPositionsAndSignals
+[       OK ] R42SelCtxTest.OnInitRestoresPersistedPositionsAndSignals (1 ms)
+[ RUN      ] R42SelCtxTest.SaveDataRoundTripAndSetPositionGuards
+[       OK ] R42SelCtxTest.SaveDataRoundTripAndSetPositionGuards (4 ms)
+[ RUN      ] R42SelCtxTest.ScheduleEmitsAutoExitAndPeriodicStats
+[       OK ] R42SelCtxTest.ScheduleEmitsAutoExitAndPeriodicStats (3 ms)
+[ RUN      ] R42SelCtxTest.TickAccountingAndSessionBeginReleasesFrozen
+[       OK ] R42SelCtxTest.TickAccountingAndSessionBeginReleasesFrozen (2 ms)
+[ RUN      ] R42SelCtxTest.MetadataLogsAndDetailQueries
+[       OK ] R42SelCtxTest.MetadataLogsAndDetailQueries (0 ms)
+[----------] 5 tests from R42SelCtxTest (13 ms total)
+
+[----------] 4 tests from R42SelEngineLifecycle
+[ RUN      ] R42SelEngineLifecycle.FreshAutomaticStorageDestructionIsSafe
+[       OK ] R42SelEngineLifecycle.FreshAutomaticStorageDestructionIsSafe (0 ms)
+[ RUN      ] R42SelEngineLifecycle.ReleaseThenAutomaticStorageDestructionIsSafe
+[       OK ] R42SelEngineLifecycle.ReleaseThenAutomaticStorageDestructionIsSafe (0 ms)
+[ RUN      ] R42SelEngineLifecycle.InvalidFeeInitializationCanRunFailClosedAndReleaseConfig
+[       OK ] R42SelEngineLifecycle.InvalidFeeInitializationCanRunFailClosedAndReleaseConfig (0 ms)
+[ RUN      ] R42SelEngineLifecycle.SuccessfulInitializationReleasesConfigAfterDestruction
+[       OK ] R42SelEngineLifecycle.SuccessfulInitializationReleasesConfigAfterDestruction (0 ms)
+[----------] 4 tests from R42SelEngineLifecycle (0 ms total)
+
+[----------] 6 tests from R81CtaTest
+[ RUN      ] R81CtaTest.LoadOptionalFieldsAndZeroVolumeQueries
+[       OK ] R81CtaTest.LoadOptionalFieldsAndZeroVolumeQueries (4 ms)
+[ RUN      ] R81CtaTest.ConditionAlgorithmsActionsAndNoMatchCode
+[       OK ] R81CtaTest.ConditionAlgorithmsActionsAndNoMatchCode (3 ms)
+[ RUN      ] R81CtaTest.ConditionRecoveryRejectsWholeMalformedSnapshotAndRestoresValidSnapshot
+[       OK ] R81CtaTest.ConditionRecoveryRejectsWholeMalformedSnapshotAndRestoresValidSnapshot (4 ms)
+[ RUN      ] R81CtaTest.ScheduleTwentiethEmitPersistsUserDataAndConditions
+[       OK ] R81CtaTest.ScheduleTwentiethEmitPersistsUserDataAndConditions (9 ms)
+[ RUN      ] R81CtaTest.ExitConditionsAndPositionAccountingBranches
+[       OK ] R81CtaTest.ExitConditionsAndPositionAccountingBranches (34 ms)
+[ RUN      ] R81CtaTest.NullEnginePriceAccessorsReturnZero
+[       OK ] R81CtaTest.NullEnginePriceAccessorsReturnZero (0 ms)
+[----------] 6 tests from R81CtaTest (57 ms total)
+
+[----------] 3 tests from R81HftTest
+[ RUN      ] R81HftTest.RiskRejectsCancelBuyAndSellBranches
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p02_wtcore_engines2/r81_hft_gap_test.cpp:263: Failure
+Value of: pluginEnv.prepare(moduleName)
+  Actual: false
+Expected: true
+WtHelper CWD cache differs from the process CWD: Operation not supported
+
+[  FAILED  ] R81HftTest.RiskRejectsCancelBuyAndSellBranches (0 ms)
+[ RUN      ] R81HftTest.RuleCodeQueriesAndMissingContractSell
+[       OK ] R81HftTest.RuleCodeQueriesAndMissingContractSell (0 ms)
+[ RUN      ] R81HftTest.UserDataEmptyFileAndTradeAccounting
+[       OK ] R81HftTest.UserDataEmptyFileAndTradeAccounting (0 ms)
+[----------] 3 tests from R81HftTest (0 ms total)
+
+[----------] 2 tests from P11CrashClass
+[ RUN      ] P11CrashClass.error_and_log_paths_are_safe
+[       OK ] P11CrashClass.error_and_log_paths_are_safe (1 ms)
+[ RUN      ] P11CrashClass.mgr_holds_two_channels_with_own_apis
+[       OK ] P11CrashClass.mgr_holds_two_channels_with_own_apis (1 ms)
+[ DISABLED ] P11CrashClass.DISABLED_report_paths_that_dereference_null_before_run
+[----------] 2 tests from P11CrashClass (2 ms total)
+
+[----------] 8 tests from P11PreOrderRisk
+[ RUN      ] P11PreOrderRisk.entrust_fields_are_rewritten_before_sending
+[       OK ] P11PreOrderRisk.entrust_fields_are_rewritten_before_sending (1 ms)
+[ RUN      ] P11PreOrderRisk.submit_failure_returns_max_id
+[       OK ] P11PreOrderRisk.submit_failure_returns_max_id (13 ms)
+[ RUN      ] P11PreOrderRisk.cancel_paths
+[       OK ] P11PreOrderRisk.cancel_paths (34 ms)
+[ RUN      ] P11PreOrderRisk.cancel_of_dead_order_is_rejected
+[       OK ] P11PreOrderRisk.cancel_of_dead_order_is_rejected (1 ms)
+[ RUN      ] P11PreOrderRisk.risk_params_loaded_by_init_and_cancel_limit_blocks
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/p11_preorder_risk_test.cpp:427: Failure
+Value of: mockerEnv.ok()
+  Actual: false
+Expected: true
+WtHelper CWD cache differs from the process CWD: Operation not supported
+
+[  FAILED  ] P11PreOrderRisk.risk_params_loaded_by_init_and_cancel_limit_blocks (0 ms)
+[ RUN      ] P11PreOrderRisk.order_frequency_window_rejects_standard_code_after_successful_orders
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/p11_preorder_risk_test.cpp:479: Failure
+Value of: mockerEnv.ok()
+  Actual: false
+Expected: true
+WtHelper CWD cache differs from the process CWD: Operation not supported
+
+[  FAILED  ] P11PreOrderRisk.order_frequency_window_rejects_standard_code_after_successful_orders (0 ms)
+[ RUN      ] P11PreOrderRisk.inactive_riskmon_short_circuits_before_stat_map
+[       OK ] P11PreOrderRisk.inactive_riskmon_short_circuits_before_stat_map (1 ms)
+[ RUN      ] P11PreOrderRisk.init_rejects_null_params_and_second_cfg
+[       OK ] P11PreOrderRisk.init_rejects_null_params_and_second_cfg (1 ms)
+[----------] 8 tests from P11PreOrderRisk (54 ms total)
+
+[----------] 8 tests from P11PushNotify
+[ RUN      ] P11PushNotify.push_order_first_time_and_repeat
+[       OK ] P11PushNotify.push_order_first_time_and_repeat (0 ms)
+[ RUN      ] P11PushNotify.push_order_claims_avail_across_new_and_old
+[       OK ] P11PushNotify.push_order_claims_avail_across_new_and_old (1 ms)
+[ RUN      ] P11PushNotify.external_orders_do_not_touch_undone
+[       OK ] P11PushNotify.external_orders_do_not_touch_undone (1 ms)
+[ RUN      ] P11PushNotify.first_local_canceled_push_is_not_returned_as_alive
+[       OK ] P11PushNotify.first_local_canceled_push_is_not_returned_as_alive (1 ms)
+[ RUN      ] P11PushNotify.push_trade_updates_position_and_undone
+[       OK ] P11PushNotify.push_trade_updates_position_and_undone (1 ms)
+[ RUN      ] P11PushNotify.push_trade_net_mode
+[       OK ] P11PushNotify.push_trade_net_mode (0 ms)
+[ RUN      ] P11PushNotify.self_match_via_push_trade
+[       OK ] P11PushNotify.self_match_via_push_trade (1 ms)
+[ RUN      ] P11PushNotify.entrust_error_updates_undone_once
+[       OK ] P11PushNotify.entrust_error_updates_undone_once (0 ms)
+[----------] 8 tests from P11PushNotify (8 ms total)
+
+[----------] 5 tests from P11PushPersist
+[ RUN      ] P11PushPersist.init_ext_creates_csv_headers
+[       OK ] P11PushPersist.init_ext_creates_csv_headers (0 ms)
+[ RUN      ] P11PushPersist.trade_and_order_reports_are_appended
+[       OK ] P11PushPersist.trade_and_order_reports_are_appended (1 ms)
+[ RUN      ] P11PushPersist.save_data_writes_position_and_fund_snapshot
+[       OK ] P11PushPersist.save_data_writes_position_and_fund_snapshot (1 ms)
+[ RUN      ] P11PushPersist.reopened_csv_keeps_header_and_appends
+[       OK ] P11PushPersist.reopened_csv_keeps_header_and_appends (1 ms)
+[ RUN      ] P11PushPersist.channel_events_do_not_change_state
+[       OK ] P11PushPersist.channel_events_do_not_change_state (0 ms)
+[----------] 5 tests from P11PushPersist (5 ms total)
+
+[----------] 8 tests from P11SyncReport
+[ RUN      ] P11SyncReport.login_result_drives_query_chain
+[       OK ] P11SyncReport.login_result_drives_query_chain (1 ms)
+[ RUN      ] P11SyncReport.position_report_writes_table_and_skips_unknown_contract
+[       OK ] P11SyncReport.position_report_writes_table_and_skips_unknown_contract (1 ms)
+[ RUN      ] P11SyncReport.order_report_rebuilds_table_and_undone
+[       OK ] P11SyncReport.order_report_rebuilds_table_and_undone (1 ms)
+[ RUN      ] P11SyncReport.trade_report_stats_and_self_match_guard
+[       OK ] P11SyncReport.trade_report_stats_and_self_match_guard (0 ms)
+[ RUN      ] P11SyncReport.k42_complete_empty_snapshot_retires_absent_live_orders
+[       OK ] P11SyncReport.k42_complete_empty_snapshot_retires_absent_live_orders (0 ms)
+[ RUN      ] P11SyncReport.k42_partial_snapshot_never_retires_missing_orders
+[       OK ] P11SyncReport.k42_partial_snapshot_never_retires_missing_orders (1 ms)
+[ RUN      ] P11SyncReport.k42_failed_query_changes_nothing
+[       OK ] P11SyncReport.k42_failed_query_changes_nothing (0 ms)
+[ RUN      ] P11SyncReport.l01014_raw_provider_report_is_kept_and_pauses_the_account
+[       OK ] P11SyncReport.l01014_raw_provider_report_is_kept_and_pauses_the_account (0 ms)
+[----------] 8 tests from P11SyncReport (8 ms total)
+
+[----------] 3 tests from P11TraderTest
+[ RUN      ] P11TraderTest.init_rejects_overlong_ids_and_keeps_empty_id_accepted
+[2026-11-05 13:58:14.405] [warning] [] No risk control rule setup of trading channel
+[2026-11-05 13:58:14.817] [info] [] Trader module /var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/p11_init_rejects_overlong_ids_and_keeps_empty_id_accepted_54684/usertag_bounds_module/traders/libR59CredentialsTrader.dylib loaded
+[       OK ] P11TraderTest.init_rejects_overlong_ids_and_keeps_empty_id_accepted (416 ms)
+[ RUN      ] P11TraderTest.init_ext_rejects_long_ids_before_touching_api_or_files
+[       OK ] P11TraderTest.init_ext_rejects_long_ids_before_touching_api_or_files (0 ms)
+[ RUN      ] P11TraderTest.longest_representable_id_produces_a_terminated_user_tag
+[       OK ] P11TraderTest.longest_representable_id_produces_a_terminated_user_tag (0 ms)
+[----------] 3 tests from P11TraderTest (417 ms total)
+
+[----------] 2 tests from R54TraderContractLookup
+[ RUN      ] R54TraderContractLookup.query_trade_lookup_updates_open_risk_statistics
+[       OK ] R54TraderContractLookup.query_trade_lookup_updates_open_risk_statistics (1 ms)
+[ RUN      ] R54TraderContractLookup.pushed_trade_lookup_updates_position_and_notifies_standard_code
+[       OK ] R54TraderContractLookup.pushed_trade_lookup_updates_position_and_notifies_standard_code (0 ms)
+[----------] 2 tests from R54TraderContractLookup (2 ms total)
+
+[----------] 7 tests from R59Exec
+[ RUN      ] R59Exec.local_auto_clear_checks_hot_code_and_filters
+[       OK ] R59Exec.local_auto_clear_checks_hot_code_and_filters (1 ms)
+[ RUN      ] R59Exec.arbi_auto_clear_checks_hot_code_and_filters
+[       OK ] R59Exec.arbi_auto_clear_checks_hot_code_and_filters (1 ms)
+[ RUN      ] R59Exec.null_data_manager_and_pool_lifecycle
+[       OK ] R59Exec.null_data_manager_and_pool_lifecycle (1 ms)
+[ RUN      ] R59Exec.diff_loads_valid_targets_and_recovers_on_channel_ready
+[       OK ] R59Exec.diff_loads_valid_targets_and_recovers_on_channel_ready (1 ms)
+[ RUN      ] R59Exec.set_trader_forwards_orders_only_while_channel_ready
+[       OK ] R59Exec.set_trader_forwards_orders_only_while_channel_ready (3 ms)
+[ RUN      ] R59Exec.diff_stale_target_uses_raw_code_lookup_and_clears_with_real_unit
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/r59_exec_autoclear_test.cpp:644: Failure
+Value of: pluginBin.empty()
+  Actual: true
+Expected: false
+cannot locate build-cov plugin bin
+
+[  FAILED  ] R59Exec.diff_stale_target_uses_raw_code_lookup_and_clears_with_real_unit (1 ms)
+[ RUN      ] R59Exec.diff_stale_target_clears_with_raw_code_only_contract_lookup
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p11_wtcore_traderadapter/r59_exec_autoclear_test.cpp:705: Failure
+Value of: pluginBin.empty()
+  Actual: true
+Expected: false
+cannot locate build-cov plugin bin
+
+[  FAILED  ] R59Exec.diff_stale_target_clears_with_raw_code_only_contract_lookup (0 ms)
+[----------] 7 tests from R59Exec (10 ms total)
+
+[----------] 6 tests from R59Buy
+[ RUN      ] R59Buy.open_splits_by_limit_volume_and_handles_market_price
+[       OK ] R59Buy.open_splits_by_limit_volume_and_handles_market_price (1 ms)
+[ RUN      ] R59Buy.open_skips_when_long_or_total_limit_reached
+[       OK ] R59Buy.open_skips_when_long_or_total_limit_reached (1 ms)
+[ RUN      ] R59Buy.open_caps_quantity_by_remaining_long_and_total_limits
+[       OK ] R59Buy.open_caps_quantity_by_remaining_long_and_total_limits (1 ms)
+[ RUN      ] R59Buy.close_today_uses_cover_mode_and_pure_guard
+[       OK ] R59Buy.close_today_uses_cover_mode_and_pure_guard (1 ms)
+[ RUN      ] R59Buy.close_yestoday_pure_guard_and_force_close
+[       OK ] R59Buy.close_yestoday_pure_guard_and_force_close (1 ms)
+[ RUN      ] R59Buy.close_splits_pre_then_new_and_self_match_blocks_buy
+[       OK ] R59Buy.close_splits_pre_then_new_and_self_match_blocks_buy (1 ms)
+[----------] 6 tests from R59Buy (9 ms total)
+
+[----------] 8 tests from R59Misc
+[ RUN      ] R59Misc.init_ext_guards_and_run_without_api
+[       OK ] R59Misc.init_ext_guards_and_run_without_api (0 ms)
+[ RUN      ] R59Misc.connect_event_uses_cfg_credentials
+[       OK ] R59Misc.connect_event_uses_cfg_credentials (249 ms)
+[ RUN      ] R59Misc.init_ext_connect_event_reports_state_without_login
+[       OK ] R59Misc.init_ext_connect_event_reports_state_without_login (2 ms)
+[ RUN      ] R59Misc.null_report_arrays_advance_state_machine
+[       OK ] R59Misc.null_report_arrays_advance_state_machine (2 ms)
+[ RUN      ] R59Misc.push_trade_without_contract_is_ignored
+[       OK ] R59Misc.push_trade_without_contract_is_ignored (1 ms)
+[ RUN      ] R59Misc.manager_rejects_bad_channels_and_refreshes_ready_funds
+[       OK ] R59Misc.manager_rejects_bad_channels_and_refreshes_ready_funds (2 ms)
+[ RUN      ] R59Misc.net_mode_sell_clamps_long_new_and_opens_only_remainder
+[       OK ] R59Misc.net_mode_sell_clamps_long_new_and_opens_only_remainder (4 ms)
+[ RUN      ] R59Misc.net_mode_buy_clamps_short_new_and_opens_only_remainder
+[       OK ] R59Misc.net_mode_buy_clamps_short_new_and_opens_only_remainder (1 ms)
+[----------] 8 tests from R59Misc (265 ms total)
+
+[----------] 6 tests from R59Sell
+[ RUN      ] R59Sell.open_splits_by_limit_volume_and_handles_market_price
+[       OK ] R59Sell.open_splits_by_limit_volume_and_handles_market_price (3 ms)
+[ RUN      ] R59Sell.open_skips_when_short_or_total_limit_reached
+[       OK ] R59Sell.open_skips_when_short_or_total_limit_reached (4 ms)
+[ RUN      ] R59Sell.open_caps_quantity_by_remaining_short_and_total_limits
+[       OK ] R59Sell.open_caps_quantity_by_remaining_short_and_total_limits (3 ms)
+[ RUN      ] R59Sell.close_today_uses_cover_mode_and_pure_guard
+[       OK ] R59Sell.close_today_uses_cover_mode_and_pure_guard (1 ms)
+[ RUN      ] R59Sell.close_yestoday_pure_guard_and_force_close
+[       OK ] R59Sell.close_yestoday_pure_guard_and_force_close (1 ms)
+[ RUN      ] R59Sell.close_splits_pre_then_new_and_self_match_blocks_sell
+[       OK ] R59Sell.close_splits_pre_then_new_and_self_match_blocks_sell (1 ms)
+[----------] 6 tests from R59Sell (15 ms total)
+
+[----------] 3 tests from S5MainK43TraderResidency
+[ RUN      ] S5MainK43TraderResidency.ReleasedModuleProviderAndModuleStayResident
+[       OK ] S5MainK43TraderResidency.ReleasedModuleProviderAndModuleStayResident (242 ms)
+[ RUN      ] S5MainK43TraderResidency.ProviderWithoutCallbackChannelIsStillDeletedAndUnloaded
+[       OK ] S5MainK43TraderResidency.ProviderWithoutCallbackChannelIsStillDeletedAndUnloaded (257 ms)
+[ RUN      ] S5MainK43TraderResidency.ManagerKeepsReleasedModuleAdapterObjects
+[       OK ] S5MainK43TraderResidency.ManagerKeepsReleasedModuleAdapterObjects (250 ms)
+[----------] 3 tests from S5MainK43TraderResidency (750 ms total)
+
+[----------] 1 test from I03New014DiffConfig
+[ RUN      ] I03New014DiffConfig.UninitializedHostRejectsUnitCreationBeforeReadingConfig
+[       OK ] I03New014DiffConfig.UninitializedHostRejectsUnitCreationBeforeReadingConfig (0 ms)
+[----------] 1 test from I03New014DiffConfig (0 ms total)
+
+[----------] 7 tests from P025AccountNetLimit
+[ RUN      ] P025AccountNetLimit.executers_on_one_account_share_the_contract_limit
+[       OK ] P025AccountNetLimit.executers_on_one_account_share_the_contract_limit (0 ms)
+[ RUN      ] P025AccountNetLimit.different_contracts_are_limited_separately_and_net_by_sign
+[       OK ] P025AccountNetLimit.different_contracts_are_limited_separately_and_net_by_sign (0 ms)
+[ RUN      ] P025AccountNetLimit.group_limit_and_account_limit_both_apply
+[       OK ] P025AccountNetLimit.group_limit_and_account_limit_both_apply (0 ms)
+[ RUN      ] P025AccountNetLimit.strictest_declaration_wins_and_reduction_is_allowed
+[       OK ] P025AccountNetLimit.strictest_declaration_wins_and_reduction_is_allowed (0 ms)
+[ RUN      ] P025AccountNetLimit.local_arbi_and_diff_share_one_account
+[       OK ] P025AccountNetLimit.local_arbi_and_diff_share_one_account (0 ms)
+[ RUN      ] P025AccountNetLimit.account_identity_follows_the_shared_account_gate
+[       OK ] P025AccountNetLimit.account_identity_follows_the_shared_account_gate (0 ms)
+[ RUN      ] P025AccountNetLimit.invalid_account_limits_are_rejected_eagerly
+[       OK ] P025AccountNetLimit.invalid_account_limits_are_rejected_eagerly (0 ms)
+[----------] 7 tests from P025AccountNetLimit (3 ms total)
+
+[----------] 8 tests from Q01HftCtxTest
+[ RUN      ] Q01HftCtxTest.id_name_and_time_passthrough
+[       OK ] Q01HftCtxTest.id_name_and_time_passthrough (0 ms)
+[ RUN      ] Q01HftCtxTest.init_with_data_agent_creates_files
+[       OK ] Q01HftCtxTest.init_with_data_agent_creates_files (0 ms)
+[ RUN      ] Q01HftCtxTest.init_without_data_agent_creates_nothing
+[       OK ] Q01HftCtxTest.init_without_data_agent_creates_nothing (0 ms)
+[ RUN      ] Q01HftCtxTest.data_callbacks_only_flush_userdata
+[       OK ] Q01HftCtxTest.data_callbacks_only_flush_userdata (0 ms)
+[ RUN      ] Q01HftCtxTest.get_inner_code_unmapped_returns_input
+[       OK ] Q01HftCtxTest.get_inner_code_unmapped_returns_input (0 ms)
+[ RUN      ] Q01HftCtxTest.stra_buy_unknown_contract_returns_empty
+[       OK ] Q01HftCtxTest.stra_buy_unknown_contract_returns_empty (0 ms)
+[ RUN      ] Q01HftCtxTest.user_data_roundtrip_across_ctx
+[       OK ] Q01HftCtxTest.user_data_roundtrip_across_ctx (0 ms)
+[ RUN      ] Q01HftCtxTest.log_paths_do_not_throw
+[       OK ] Q01HftCtxTest.log_paths_do_not_throw (0 ms)
+[----------] 8 tests from Q01HftCtxTest (1 ms total)
+
+[----------] 7 tests from Q01SelCallbackTest
+[ RUN      ] Q01SelCallbackTest.on_bar_null_early_return
+[       OK ] Q01SelCallbackTest.on_bar_null_early_return (0 ms)
+[ RUN      ] Q01SelCallbackTest.on_bar_close_assembles_period
+[       OK ] Q01SelCallbackTest.on_bar_close_assembles_period (0 ms)
+[ RUN      ] Q01SelCallbackTest.on_tick_emits_update_but_no_trigger_without_trading_time
+[       OK ] Q01SelCallbackTest.on_tick_emits_update_but_no_trigger_without_trading_time (0 ms)
+[ RUN      ] Q01SelCallbackTest.on_schedule_reads_sched_time_and_autoexits
+[       OK ] Q01SelCallbackTest.on_schedule_reads_sched_time_and_autoexits (1 ms)
+[ RUN      ] Q01SelCallbackTest.session_begin_releases_frozen
+[       OK ] Q01SelCallbackTest.session_begin_releases_frozen (0 ms)
+[ RUN      ] Q01SelCallbackTest.session_end_writes_and_saves
+[       OK ] Q01SelCallbackTest.session_end_writes_and_saves (1 ms)
+[ RUN      ] Q01SelCallbackTest.sub_ticks_is_idempotent
+[       OK ] Q01SelCallbackTest.sub_ticks_is_idempotent (0 ms)
+[----------] 7 tests from Q01SelCallbackTest (4 ms total)
+
+[----------] 4 tests from Q01SelPositionTest
+[ RUN      ] Q01SelPositionTest.set_position_rejects_unknown_commodity
+[       OK ] Q01SelPositionTest.set_position_rejects_unknown_commodity (0 ms)
+[ RUN      ] Q01SelPositionTest.set_position_rejects_short_when_cannot_short
+[       OK ] Q01SelPositionTest.set_position_rejects_short_when_cannot_short (0 ms)
+[ RUN      ] Q01SelPositionTest.set_position_records_signal
+[       OK ] Q01SelPositionTest.set_position_records_signal (0 ms)
+[ RUN      ] Q01SelPositionTest.set_position_equal_target_is_noop
+[       OK ] Q01SelPositionTest.set_position_equal_target_is_noop (0 ms)
+[ DISABLED ] Q01SelPositionTest.DISABLED_SelCrashClass_null_history_mgr
+[----------] 4 tests from Q01SelPositionTest (3 ms total)
+
+[----------] 7 tests from Q01SelQueryTest
+[ RUN      ] Q01SelQueryTest.id_and_date_time_passthrough
+[       OK ] Q01SelQueryTest.id_and_date_time_passthrough (0 ms)
+[ RUN      ] Q01SelQueryTest.get_price_hits_local_map_after_tick
+[       OK ] Q01SelQueryTest.get_price_hits_local_map_after_tick (0 ms)
+[ RUN      ] Q01SelQueryTest.comminfo_rawcode_sessinfo
+[       OK ] Q01SelQueryTest.comminfo_rawcode_sessinfo (0 ms)
+[ RUN      ] Q01SelQueryTest.fund_data_flags_on_empty_book
+[       OK ] Q01SelQueryTest.fund_data_flags_on_empty_book (0 ms)
+[ RUN      ] Q01SelQueryTest.user_data_roundtrip_in_memory
+[       OK ] Q01SelQueryTest.user_data_roundtrip_in_memory (0 ms)
+[ RUN      ] Q01SelQueryTest.log_paths_do_not_throw
+[       OK ] Q01SelQueryTest.log_paths_do_not_throw (0 ms)
+[ RUN      ] Q01SelQueryTest.position_getters_zero_on_empty_book
+[       OK ] Q01SelQueryTest.position_getters_zero_on_empty_book (0 ms)
+[----------] 7 tests from Q01SelQueryTest (0 ms total)
+
+[----------] 4 tests from Q01SelPersistTest
+[ RUN      ] Q01SelPersistTest.on_init_creates_outputs_and_missing_files_return
+[       OK ] Q01SelPersistTest.on_init_creates_outputs_and_missing_files_return (0 ms)
+[ RUN      ] Q01SelPersistTest.signal_saved_then_recovered
+[       OK ] Q01SelPersistTest.signal_saved_then_recovered (1 ms)
+[ RUN      ] Q01SelPersistTest.load_full_position_fixture
+[       OK ] Q01SelPersistTest.load_full_position_fixture (0 ms)
+[ RUN      ] Q01SelPersistTest.userdata_saved_then_loaded
+[       OK ] Q01SelPersistTest.userdata_saved_then_loaded (1 ms)
+[----------] 4 tests from Q01SelPersistTest (3 ms total)
+
+[----------] 14 tests from R10DtMgrTest
+[ RUN      ] R10DtMgrTest.fresh_manager_has_no_reader_and_queries_return_null
+[       OK ] R10DtMgrTest.fresh_manager_has_no_reader_and_queries_return_null (0 ms)
+[ RUN      ] R10DtMgrTest.init_without_store_sets_engine_and_returns_false
+[       OK ] R10DtMgrTest.init_without_store_sets_engine_and_returns_false (0 ms)
+[ RUN      ] R10DtMgrTest.init_forwards_loader_registered_before_init
+[       OK ] R10DtMgrTest.init_forwards_loader_registered_before_init (0 ms)
+[ RUN      ] R10DtMgrTest.adjusting_factor_and_flag_fall_back_without_reader
+[       OK ] R10DtMgrTest.adjusting_factor_and_flag_fall_back_without_reader (0 ms)
+[ RUN      ] R10DtMgrTest.no_reader_call_does_not_cache_flag_for_later_reader
+[       OK ] R10DtMgrTest.no_reader_call_does_not_cache_flag_for_later_reader (0 ms)
+[ RUN      ] R10DtMgrTest.alternating_managers_read_their_own_reader_flags
+[       OK ] R10DtMgrTest.alternating_managers_read_their_own_reader_flags (0 ms)
+[ RUN      ] R10DtMgrTest.flag_tracks_reader_reconfiguration
+[       OK ] R10DtMgrTest.flag_tracks_reader_reconfiguration (0 ms)
+[ RUN      ] R10DtMgrTest.handle_push_quote_null_tick_is_ignored
+[       OK ] R10DtMgrTest.handle_push_quote_null_tick_is_ignored (0 ms)
+[ RUN      ] R10DtMgrTest.handle_push_quote_caches_and_grab_retains
+[       OK ] R10DtMgrTest.handle_push_quote_caches_and_grab_retains (0 ms)
+[ RUN      ] R10DtMgrTest.destructor_releases_rt_tick_cache
+[       OK ] R10DtMgrTest.destructor_releases_rt_tick_cache (0 ms)
+[ RUN      ] R10DtMgrTest.on_bar_without_subscription_and_without_cache_returns_early
+[       OK ] R10DtMgrTest.on_bar_without_subscription_and_without_cache_returns_early (0 ms)
+[ RUN      ] R10DtMgrTest.on_bar_other_periods_also_return_early
+[       OK ] R10DtMgrTest.on_bar_other_periods_also_return_early (0 ms)
+[ RUN      ] R10DtMgrTest.reader_log_passes_every_level
+[       OK ] R10DtMgrTest.reader_log_passes_every_level (0 ms)
+[ RUN      ] R10DtMgrTest.kline_slice_null_reader_for_every_period
+[       OK ] R10DtMgrTest.kline_slice_null_reader_for_every_period (0 ms)
+[----------] 14 tests from R10DtMgrTest (0 ms total)
+
+[----------] 20 tests from R10ExecuterTest
+[ RUN      ] R10ExecuterTest.arbi_init_null_and_null_trader_guards
+[       OK ] R10ExecuterTest.arbi_init_null_and_null_trader_guards (0 ms)
+[ RUN      ] R10ExecuterTest.arbi_stub_backed_context_queries
+[       OK ] R10ExecuterTest.arbi_stub_backed_context_queries (0 ms)
+[ RUN      ] R10ExecuterTest.arbi_getunit_creates_nothing_and_callbacks_early_return
+[       OK ] R10ExecuterTest.arbi_getunit_creates_nothing_and_callbacks_early_return (0 ms)
+[ RUN      ] R10ExecuterTest.arbi_set_position_group_math_emits_nothing_without_unit
+[       OK ] R10ExecuterTest.arbi_set_position_group_math_emits_nothing_without_unit (0 ms)
+[ RUN      ] R10ExecuterTest.arbi_strict_sync_scans_channel_holds
+[       OK ] R10ExecuterTest.arbi_strict_sync_scans_channel_holds (0 ms)
+[ RUN      ] R10ExecuterTest.arbi_channel_events_over_empty_unit_map
+[       OK ] R10ExecuterTest.arbi_channel_events_over_empty_unit_map (0 ms)
+[ RUN      ] R10ExecuterTest.arbi_autoclear_matrix_not_monthly_code
+[       OK ] R10ExecuterTest.arbi_autoclear_matrix_not_monthly_code (0 ms)
+[ RUN      ] R10ExecuterTest.arbi_autoclear_matrix_not_prev_hot
+[       OK ] R10ExecuterTest.arbi_autoclear_matrix_not_prev_hot (0 ms)
+[ RUN      ] R10ExecuterTest.arbi_autoclear_matrix_exclude_list
+[       OK ] R10ExecuterTest.arbi_autoclear_matrix_exclude_list (0 ms)
+[ RUN      ] R10ExecuterTest.arbi_autoclear_matrix_include_list_miss
+[       OK ] R10ExecuterTest.arbi_autoclear_matrix_include_list_miss (0 ms)
+[ RUN      ] R10ExecuterTest.arbi_autoclear_matrix_will_clear_but_no_unit
+[       OK ] R10ExecuterTest.arbi_autoclear_matrix_will_clear_but_no_unit (0 ms)
+[ RUN      ] R10ExecuterTest.arbi_write_log_and_set_trader_null
+[       OK ] R10ExecuterTest.arbi_write_log_and_set_trader_null (0 ms)
+[ RUN      ] R10ExecuterTest.diff_init_null_and_guards_without_trader_or_data
+[       OK ] R10ExecuterTest.diff_init_null_and_guards_without_trader_or_data (0 ms)
+[ RUN      ] R10ExecuterTest.diff_stub_queries_and_data_forwarding
+[       OK ] R10ExecuterTest.diff_stub_queries_and_data_forwarding (0 ms)
+[ RUN      ] R10ExecuterTest.diff_load_data_then_set_position_roundtrip
+[       OK ] R10ExecuterTest.diff_load_data_then_set_position_roundtrip (0 ms)
+[ RUN      ] R10ExecuterTest.diff_set_position_on_missing_file_persists_target_without_unit
+[       OK ] R10ExecuterTest.diff_set_position_on_missing_file_persists_target_without_unit (0 ms)
+[ RUN      ] R10ExecuterTest.diff_load_data_broken_json_and_empty_file_are_rejected_without_overwrite
+[       OK ] R10ExecuterTest.diff_load_data_broken_json_and_empty_file_are_rejected_without_overwrite (0 ms)
+[ RUN      ] R10ExecuterTest.diff_failed_init_rejects_nonempty_targets_and_keeps_rejected_snapshot
+[       OK ] R10ExecuterTest.diff_failed_init_rejects_nonempty_targets_and_keeps_rejected_snapshot (0 ms)
+[ RUN      ] R10ExecuterTest.diff_channel_ready_recovers_loaded_diffs
+[       OK ] R10ExecuterTest.diff_channel_ready_recovers_loaded_diffs (0 ms)
+[ RUN      ] R10ExecuterTest.diff_callbacks_without_unit_early_return
+[       OK ] R10ExecuterTest.diff_callbacks_without_unit_early_return (0 ms)
+[----------] 20 tests from R10ExecuterTest (3 ms total)
+
+[----------] 9 tests from R10HftTest
+[ RUN      ] R10HftTest.on_trade_opens_position_then_avgpx_is_volume_weighted
+[       OK ] R10HftTest.on_trade_opens_position_then_avgpx_is_volume_weighted (0 ms)
+[ RUN      ] R10HftTest.on_trade_close_is_fifo_and_leaves_the_last_detail
+[       OK ] R10HftTest.on_trade_close_is_fifo_and_leaves_the_last_detail (0 ms)
+[ RUN      ] R10HftTest.update_dyn_profit_uses_bid_price_and_vol_scale
+[       OK ] R10HftTest.update_dyn_profit_uses_bid_price_and_vol_scale (0 ms)
+[ RUN      ] R10HftTest.volume_zero_position_resets_dynprofit
+[       OK ] R10HftTest.volume_zero_position_resets_dynprofit (0 ms)
+[ RUN      ] R10HftTest.slippage_shifts_fill_price
+[       OK ] R10HftTest.slippage_shifts_fill_price (0 ms)
+[ RUN      ] R10HftTest.report_callbacks_flush_userdata
+[       OK ] R10HftTest.report_callbacks_flush_userdata (0 ms)
+[ RUN      ] R10HftTest.session_end_writes_fund_line_when_agent_on
+[       OK ] R10HftTest.session_end_writes_fund_line_when_agent_on (0 ms)
+[ RUN      ] R10HftTest.close_and_trade_logs_stay_empty_without_trades
+[       OK ] R10HftTest.close_and_trade_logs_stay_empty_without_trades (2 ms)
+[ RUN      ] R10HftTest.price_query_falls_back_to_engine
+[       OK ] R10HftTest.price_query_falls_back_to_engine (0 ms)
+[----------] 9 tests from R10HftTest (3 ms total)
+
+[----------] 4 tests from R10EvtTest
+[ RUN      ] R10EvtTest.init_inactive_returns_false
+[       OK ] R10EvtTest.init_inactive_returns_false (0 ms)
+[ RUN      ] R10EvtTest.init_without_mq_module_returns_false
+dlopen(/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libWtMsgQue.dylib, 0x0002): tried: '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libWtMsgQue.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libWtMsgQue.dylib' (no such file), '/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/n02_instdir_54684/libWtMsgQue.dylib' (no such file)
+[       OK ] R10EvtTest.init_without_mq_module_returns_false (0 ms)
+[ RUN      ] R10EvtTest.every_notify_returns_before_enqueue
+[       OK ] R10EvtTest.every_notify_returns_before_enqueue (0 ms)
+[ RUN      ] R10EvtTest.null_trade_and_order_infos_are_guarded
+[       OK ] R10EvtTest.null_trade_and_order_infos_are_guarded (0 ms)
+[----------] 4 tests from R10EvtTest (0 ms total)
+
+[----------] 13 tests from R10SelEngineTest
+[ RUN      ] R10SelEngineTest.not_ready_until_session_begin
+[       OK ] R10SelEngineTest.not_ready_until_session_begin (0 ms)
+[ RUN      ] R10SelEngineTest.comm_sess_and_real_time_from_engine_members
+[       OK ] R10SelEngineTest.comm_sess_and_real_time_from_engine_members (0 ms)
+[ RUN      ] R10SelEngineTest.add_context_registers_and_duplicate_is_rejected
+[       OK ] R10SelEngineTest.add_context_registers_and_duplicate_is_rejected (0 ms)
+[ RUN      ] R10SelEngineTest.on_bar_without_subscription_only_logs
+[       OK ] R10SelEngineTest.on_bar_without_subscription_only_logs (0 ms)
+[ RUN      ] R10SelEngineTest.on_bar_dispatches_only_to_subscribed_context
+[       OK ] R10SelEngineTest.on_bar_dispatches_only_to_subscribed_context (0 ms)
+[ RUN      ] R10SelEngineTest.on_tick_pushes_data_and_dispatches_raw_code
+[       OK ] R10SelEngineTest.on_tick_pushes_data_and_dispatches_raw_code (0 ms)
+[ RUN      ] R10SelEngineTest.on_tick_adjusting_suffixes_for_qfq_and_hfq
+[       OK ] R10SelEngineTest.on_tick_adjusting_suffixes_for_qfq_and_hfq (0 ms)
+[ RUN      ] R10SelEngineTest.on_tick_ignored_before_ready_flag
+[       OK ] R10SelEngineTest.on_tick_ignored_before_ready_flag (0 ms)
+[ RUN      ] R10SelEngineTest.minute_end_skips_tasks_by_time_and_holiday
+[       OK ] R10SelEngineTest.minute_end_skips_tasks_by_time_and_holiday (0 ms)
+[ RUN      ] R10SelEngineTest.minute_end_holiday_task_is_skipped
+[       OK ] R10SelEngineTest.minute_end_holiday_task_is_skipped (0 ms)
+[ RUN      ] R10SelEngineTest.minute_end_period_branches_that_do_not_fire
+[       OK ] R10SelEngineTest.minute_end_period_branches_that_do_not_fire (0 ms)
+[ RUN      ] R10SelEngineTest.handle_pos_change_creates_pos_and_signal
+[       OK ] R10SelEngineTest.handle_pos_change_creates_pos_and_signal (0 ms)
+[ RUN      ] R10SelEngineTest.minute_end_fires_task_without_terminating_process
+[       OK ] R10SelEngineTest.minute_end_fires_task_without_terminating_process (890 ms)
+[----------] 13 tests from R10SelEngineTest (892 ms total)
+
+[----------] 2 tests from R110CtaRule
+[ RUN      ] R110CtaRule.RulesAndFiltersOnInitScheduleAndPosChange
+Assertion failed: (false), function operator[], file document.h, line 1231.

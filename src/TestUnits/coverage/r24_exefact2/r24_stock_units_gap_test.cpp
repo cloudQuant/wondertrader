@@ -953,7 +953,7 @@ TEST(r24_stkmin, sell_odd_lot_uses_valid_position_and_zero_blocks_order)
 //  - StockMinImpact L580-584：L503-504 已先 !last_tick 早退。
 //  - 两边的分桶量：L609（StockVWap）无条件覆盖 curQty（BUG-R7-007）。
 //////////////////////////////////////////////////////////////////////////
-TEST(r24_stkvw, DISABLED_afternoon_bucket_index_out_of_range_read)
+TEST(r24_stkvw, afternoon_bucket_index_out_of_range_read)
 {
 	// calTmStamp 下午段 L119：240 + (hour-13)*60 + minute - 30
 	// 14:00 -> 240+60-30 = 270 > 240 行 -> L578 VwapAim[270] 越界读（BUG-R7-003 的下午面）

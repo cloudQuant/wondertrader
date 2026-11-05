@@ -1,0 +1,26 @@
+--- a/CTPLoader/TraderSpi.h
++++ b/CTPLoader/TraderSpi.h
+@@ -9,6 +9,7 @@
+ #include "../Includes/LoaderDef.hpp"
+ 
+ #include <functional>
++#include <atomic>
+ #include <condition_variable>
+ #include <mutex>
+ #include <queue>
+@@ -62,7 +63,7 @@
+ 
+ 	void DumpToJson();
+ 
+-	void DumpFees();
++	bool DumpFees();
+ 
+ 	void LoadFromJson();
+ 
+@@ -80,4 +81,6 @@
+ 	std::condition_variable	_query_ready;
+ 	std::shared_ptr<boost::thread>	_worker;
+ 	bool			_stopped;
++	// A failed fee/margin response remains a failure for this loader instance.
++	std::atomic<bool> _fee_response_failed{false};
+ };

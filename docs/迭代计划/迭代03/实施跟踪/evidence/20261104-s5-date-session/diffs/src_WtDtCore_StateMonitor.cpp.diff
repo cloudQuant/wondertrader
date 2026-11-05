@@ -1,0 +1,73 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-date-session/before/src/WtDtCore/StateMonitor.cpp	2026-11-03 18:20:47
++++ src/WtDtCore/StateMonitor.cpp	2026-11-04 13:33:33
+@@ -245,6 +245,18 @@
+ 
+ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
+ {
++	// Decision card 1 / I03-NEW-006: an invalid snapshot must not drive any
++	// state transition or writer event. Date 0 is rejected here because the
++	// checked date helpers would otherwise substitute a new clock reading.
++	uint32_t weekDay = 0;
++	uint32_t prevDate = 0; // 前一天日期
++	if (curDate == 0 || !TimeUtils::tryGetWeekDay(curDate, weekDay) ||
++		!WTSSessionInfo::isValidSessionTime(curMin) || !TimeUtils::tryGetNextDate(curDate, -1, prevDate))
++	{
++		WTSLogger::error("State monitor skipped invalid date/time snapshot {}.{}", curDate, curMin);
++		return;
++	}
++
+ 	// Hold ownership of the current entries without retaining the lock across
+ 	// base-data or writer callbacks, which may query this monitor reentrantly.
+ 	std::vector<StatePtr> states;
+@@ -258,9 +270,14 @@
+ 	{
+ 		WTSSessionInfo* sInfo = stateInfo->_sInfo; // 获取交易时间段信息
+ 
+-		// 获取偏移后的日期和前一天日期，用于识别夜盘和节假日情况
+-		uint32_t offDate = sInfo->getOffsetDate(curDate, curMin); // 计算偏移后的日期
+-		uint32_t prevDate = TimeUtils::getNextDate(curDate, -1); // 前一天日期
++		// 获取偏移后的日期，用于识别夜盘和节假日情况；失败时该时段不做任何状态转换
++		uint32_t offDate = 0;
++		if (!sInfo->tryGetOffsetDate(curDate, curMin, offDate))
++		{
++			WTSLogger::error("State monitor skipped session {}: offset date of {}.{} is unavailable",
++				stateInfo->_session, curDate, curMin);
++			continue;
++		}
+ 
+ 		// 根据当前状态执行相应的状态转换逻辑
+ 		// 各个状态有不同的转换条件和目标状态
+@@ -610,6 +627,7 @@
+ 		_thrd.reset(new StdThread([this](){
+ 			currentMonitorWorker = this;
+ 			uint64_t lastTime = 0;
++			bool clockFailed = false;
+ 			auto failWorker = [this](const char* message) {
+ 				{
+ 					std::lock_guard<std::mutex> stateLock(_state_mutex);
+@@ -642,9 +660,22 @@
+ 				if(_stopped.load(std::memory_order_relaxed))
+ 					break;
+ 
+-				// 获取当前日期和分钟数
+-				uint32_t curDate = TimeUtils::getCurDate(); // 当前日期，格式YYYYMMDD
+-				uint32_t curMin = TimeUtils::getCurMin() / 100; // 当前分钟数，格式HHMM
++				// 获取当前日期和分钟数：一次校验过的时钟快照（I03-NEW-006）。
++				// 时钟或时区失败时不推进任何状态、不触发收盘作业或缓存清理，
++				// 保持现有状态并在下一秒重试；失败与恢复各记录一次。
++				uint32_t curDate = 0, clockTime = 0;
++				if (!TimeUtils::tryGetDateTime(curDate, clockTime))
++				{
++					if (!clockFailed)
++						WTSLogger::error("State monitor clock snapshot failed, state transitions suspended");
++					clockFailed = true;
++					lastTime = TimeUtils::getLocalTimeNow();
++					continue;
++				}
++				if (clockFailed)
++					WTSLogger::info("State monitor clock snapshot recovered at {}.{}", curDate, clockTime / 100000);
++				clockFailed = false;
++				const uint32_t curMin = clockTime / 100000; // 当前分钟数，格式HHMM
+ 
+ 				advanceOnce(curDate, curMin);
+ 				// 更新上次检查时间

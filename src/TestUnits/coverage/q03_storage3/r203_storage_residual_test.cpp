@@ -101,8 +101,8 @@ TEST_F(R203StorageResidualTest, R203ReaderReturnsNullForMissingHistoricalDetailA
 }
 
 // 正确契约候选：三类合法文件齐全时，先读 queue 不应阻止 detail/trans 首次装载。
-// 保持禁用：同类 WtDataReader 路径已有 SIGTRAP 记录（BUG-R74-001）；本候选未运行。
-TEST_F(R203StorageResidualTest, DISABLED_R203ReaderQueueDetailTransCacheContract)
+// 迭代03 最终验收复核后启用（原禁用：同类 WtDataReader 路径 SIGTRAP，BUG-R74-001）。
+TEST_F(R203StorageResidualTest, R203ReaderQueueDetailTransCacheContract)
 {
 	_bd.set_cur_tdate(20240110);
 	vector<WTSOrdQueStruct> ques{make_ordque(20240109, 20240109, 93000000, 0)};
@@ -172,8 +172,8 @@ TEST_F(R203StorageResidualTest, R203RdmReturnsNullForMissingHistoricalDetailAndT
 }
 
 // 正确契约候选：三类合法文件齐全时，同键先读 queue 不应阻止 detail/trans 首次装载。
-// 本候选未运行；RDM 的对应源码缺陷见 R1 §2 / R185，动态复现尚未确认。
-TEST_F(R203StorageResidualTest, DISABLED_R203RdmQueueDetailTransCacheContract)
+// 迭代03 最终验收复核后启用（原禁用：RDM 跨类型缓存缺陷 R1 §2 / R185 动态复现未确认）。
+TEST_F(R203StorageResidualTest, R203RdmQueueDetailTransCacheContract)
 {
 	_bd.set_cur_tdate(20240110);
 	vector<WTSOrdQueStruct> ques{make_ordque(20240109, 20240109, 93000000, 0)};
@@ -262,7 +262,7 @@ TEST_F(R203StorageResidualTest, R203ReaderReversedSectionSkipsWindow)
 	WTSKlineSlice* slice = _reader.readKlineSlice("SHFE.rb.HOT", KP_Minute1, 100,
 		202401101500ull);
 	ASSERT_TRUE(slice != NULL);
-	EXPECT_EQ(slice->size(), 0u);
+	EXPECT_EQ(slice->size(), 0);
 	slice->release();
 }
 

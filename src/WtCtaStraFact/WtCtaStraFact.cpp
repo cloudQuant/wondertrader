@@ -142,3 +142,49 @@ const char* WtStraFact::getName()
 {
 	return FACT_NAME;
 }
+
+
+//////////////////////////////////////////////////////////////////////////
+// Versioned strategy plugin entry (iteration 03, card 4b=A). The legacy
+// exports above stay for older hosts; current hosts use only this table.
+// The factory and its strategies start no asynchronous work, so the plugin
+// advertises synchronous teardown (card 9a).
+#include "../Includes/IStrategyPluginV2.h"
+
+namespace
+{
+	void* WT_STRA_PLUGIN_V2_CALL create_factory_v2()
+	{
+		try
+		{
+			ICtaStrategyFact* fact = new WtStraFact();
+			return static_cast<void*>(fact);
+		}
+		catch (...)
+		{
+			return NULL;
+		}
+	}
+
+	void WT_STRA_PLUGIN_V2_CALL destroy_factory_v2(void* fact)
+	{
+		delete static_cast<ICtaStrategyFact*>(fact);
+	}
+
+	const WtStrategyPluginApiV2 g_strategy_plugin_api_v2 = {
+		sizeof(WtStrategyPluginApiV2),
+		WT_STRA_PLUGIN_V2_ABI_VERSION,
+		WT_STRA_PLUGIN_V2_FAMILY_CTA,
+		WT_STRA_PLUGIN_V2_OBJECT_REVISION,
+		WT_STRA_PLUGIN_V2_CAP_SYNC_TEARDOWN,
+		{ 0, 0, 0 },
+		create_factory_v2,
+		destroy_factory_v2
+	};
+}
+
+WT_STRA_PLUGIN_V2_EXTERN_C WT_STRA_PLUGIN_V2_EXPORT
+const WtStrategyPluginApiV2* WT_STRA_PLUGIN_V2_CALL getCtaStrategyPluginApiV2(uint32_t requested_major)
+{
+	return requested_major == WT_STRA_PLUGIN_V2_ABI_MAJOR ? &g_strategy_plugin_api_v2 : NULL;
+}

@@ -8,8 +8,10 @@
  */
 #pragma once
 
+#include <chrono>
 #include <cstring>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "TraderYD/TraderYD.h"
@@ -33,6 +35,14 @@ public:
 	const char* version_ = "yd-stub-1.0";
 
 	YDListener* listener_ = NULL;
+
+	// ydApi.h: startDestroy() is asynchronous and ends with notifyBeforeApiDestroy()
+	// then notifyAfterApiDestroy() to the listener. 1 = deliver both synchronously
+	// inside startDestroy() (default), 2 = deliver from a fake SDK thread after
+	// destroy_delay_ms_, 0 = never deliver (models an SDK whose destroy never ends).
+	int		destroy_mode_ = 1;
+	int		destroy_delay_ms_ = 100;
+	std::thread	destroy_thread_;
 	std::string login_user_;
 	std::string login_pass_;
 
@@ -57,10 +67,32 @@ public:
 		instrument_.m_pExchange = &exchange_;
 	}
 
-	virtual ~R93YdApiStub() {}
+	virtual ~R93YdApiStub()
+	{
+		if (destroy_thread_.joinable())
+			destroy_thread_.join();
+	}
 
 	virtual bool start(YDListener* pListener) override { ++n_start_; listener_ = pListener; return true; }
-	virtual void startDestroy(void) override { ++n_destroy_; }
+	virtual void startDestroy(void) override
+	{
+		++n_destroy_;
+		YDListener* listener = listener_;
+		if (listener == NULL || destroy_mode_ == 0)
+			return;
+		if (destroy_mode_ == 1)
+		{
+			listener->notifyBeforeApiDestroy();
+			listener->notifyAfterApiDestroy();
+			return;
+		}
+		const int delay = destroy_delay_ms_;
+		destroy_thread_ = std::thread([listener, delay]() {
+			std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+			listener->notifyBeforeApiDestroy();
+			listener->notifyAfterApiDestroy();
+		});
+	}
 	virtual void disconnect(void) override { ++n_disconnect_; }
 	virtual bool login(const char* username, const char* password, const char*, const char*) override
 	{

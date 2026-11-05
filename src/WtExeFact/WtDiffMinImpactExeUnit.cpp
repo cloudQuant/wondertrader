@@ -10,6 +10,7 @@
  *          实现对市场影响最小化的执行策略，适用于大单交易场景
  */
 #include "WtDiffMinImpactExeUnit.h"
+#include "../Includes/IExecPluginV2.h"
 
 #include "../Includes/WTSVariant.hpp"
 #include "../Includes/WTSContractInfo.hpp"
@@ -103,6 +104,8 @@ const char* WtDiffMinImpactExeUnit::getName()
  */
 void WtDiffMinImpactExeUnit::init(ExecuteContext* ctx, const char* stdCode, WTSVariant* cfg)
 {
+	// Reserved host key (IExecPluginV2.h): automatic timeout cancels only with host-verified identity.
+	_host_order_identity = cfg != NULL && cfg->getUInt32(WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY) == 1;
 	if (_ctx != NULL)
 	{
 		if (ctx)
@@ -180,8 +183,15 @@ void WtDiffMinImpactExeUnit::on_order(uint32_t localid, const char* stdCode, boo
 		if (isCanceled || leftover == 0)
 		{	
 			// Keep the local-id association for a possibly late trade report, but
-			// remove this terminal order from future expiry scans.
-			_orders_mon.mark_order_terminal(localid);
+			// remove this terminal order from future expiry scans. A repeated
+			// terminal report (duplicate ACK) was already applied: decrementing the
+			// cancel counter again would release a still-pending cancellation of
+			// another order and re-price/recalculate twice (BUG-R17-001).
+			if (!_orders_mon.mark_order_terminal(localid))
+			{
+				_ctx->writeLog(fmtutil::format("Duplicate terminal report of order {} for {} ignored", localid, _code.c_str()));
+				return;
+			}
 			if (_cancel_cnt > 0)
 			{
 				_cancel_cnt--;
@@ -307,6 +317,20 @@ void WtDiffMinImpactExeUnit::on_tick(WTSTickData* newTick)
 	{
 		uint64_t now = _ctx->getCurTime();
 		_orders_mon.check_orders_with_generation(_expire_secs, now, [this, now](uint32_t localid, uint64_t generation) {
+			if (_host_order_identity)
+			{
+				// 迭代03 卡5 / N05-003：宿主按 owner 与不可复用身份核验后才撤单；核验失败即隔离，不回退裸 ID。
+				const int verified = _orders_mon.cancel_timeout_verified(localid, generation, _expire_secs, now,
+					[this](uint32_t id) { return _ctx->cancel(id); });
+				if (verified > 0)
+				{
+				_cancel_cnt++;
+					_ctx->writeLog((std::string("Expired order ") + std::to_string(localid) + " of " + _code + " canceled with host-verified identity").c_str());
+				}
+				else if (verified < 0)
+					_ctx->writeLog((std::string("Expired order ") + std::to_string(localid) + " of " + _code + " cannot be auto-canceled: host could not verify its identity; order remains monitored").c_str());
+				return;
+			}
 			if (!_orders_mon.mark_unverified_timeout(localid, generation, _expire_secs, now))
 				return; // 终态或 localid 已复用；不得复活旧快照
 			_ctx->writeLog(fmtutil::format("Expired order {} of {} cannot be auto-canceled: legacy localid is unverified; order remains monitored",

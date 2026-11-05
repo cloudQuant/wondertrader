@@ -14,10 +14,17 @@
 
 #include "../Includes/FasterDefs.h"
 #include "../Includes/IHftStraCtx.h"
+#include "OwnerClaimLease.h"
 #include "../Share/BoostFile.hpp"
 #include "../Share/fmtlib.h"
 
+#include <cstdint>
+#include <deque>
+#include <functional>
 #include <map>
+#include <mutex>
+#include <set>
+#include <string>
 
 #include "ITrdNotifySink.h"
 
@@ -61,6 +68,8 @@ public:
 	 * @details 将交易适配器关联到策略上下文，使策略可以发送交易指令
 	 */
 	void setTrader(TraderAdapter* trader);
+	/** Decision K44: stable owner id of this context's orders when owner routing is enabled. */
+	std::string ownerId() const { return std::string("hft:") + _name; }
 
 public:
 	//////////////////////////////////////////////////////////////////////////
@@ -620,15 +629,20 @@ protected:
 	 * @brief 获取订单标签
 	 * @param localid 本地订单ID
 	 * @return 订单标签字符串
-	 * @details 根据本地订单ID获取用户自定义标签，用于跟踪订单的目的和来源
+	 * @details 根据本地订单ID获取用户自定义标签，用于跟踪订单的目的和来源。
+	 *          R15-001 合同：标签存储受互斥保护，可在策略线程与回报线程并发读写；
+	 *          返回的指针指向本上下文内不可变的驻留字符串，即使同一 localid 随后被
+	 *          替换或删除也在上下文生命周期内保持有效（内存上界为不同标签值的数量）。
+	 *          未登记或已淘汰的 localid 返回空串。
 	 */
 	inline const char* getOrderTag(uint32_t localid)
 	{
+		std::lock_guard<std::mutex> lock(_tag_mutex);
 		auto it = _orders.find(localid);
-		if (it == _orders.end())
+		if (it == _orders.end() || it->second.tag == nullptr)
 			return "";
 
-		return it->second.c_str();
+		return it->second.tag->c_str();
 	}
 
 
@@ -636,22 +650,35 @@ protected:
 	 * @brief 设置订单用户标签
 	 * @param localid 本地订单ID
 	 * @param usertag 用户自定义标签
-	 * @details 为指定的订单设置用户自定义标签，用于跟踪订单的目的和来源
+	 * @details 为指定的订单设置用户自定义标签，用于跟踪订单的目的和来源；同一 localid
+	 *          再次登记即替换并重新视为存活订单。
 	 */
 	inline void setUserTag(uint32_t localid, const char* usertag)
 	{
-		_orders[localid] = usertag ? usertag : "";
+		std::lock_guard<std::mutex> lock(_tag_mutex);
+		registerOrderTagLocked(localid, usertag);
 	}
 
 	/**
 	 * @brief 删除订单标签
 	 * @param localid 本地订单ID
-	 * @details 删除指定订单的用户自定义标签，通常在订单完成或撤销后调用
+	 * @details 删除指定订单的用户自定义标签；已返回的标签指针仍然有效。
 	 */
 	inline void eraseOrderTag(uint32_t localid)
 	{
+		std::lock_guard<std::mutex> lock(_tag_mutex);
 		_orders.erase(localid);
 	}
+
+	/**
+	 * @brief 订单终态后退役其标签（R15-001）
+	 * @details 存活订单的标签从不被淘汰；终态订单进入有界退役窗口
+	 *          （kRetiredOrderTagLimit 笔），窗口内的迟到成交仍能读回标签，
+	 *          超出窗口时只淘汰最早退役的终态标签，读回空串。
+	 */
+	void retireOrderTag(uint32_t localid);
+
+	static constexpr size_t kRetiredOrderTagLimit = 16384;
 
 	// Detect synchronous rebinding while a trading action calls into other
 	// components. This does not synchronize concurrent access or own the adapter.
@@ -671,6 +698,9 @@ protected:
 	WtHftEngine*	_engine;
 	TraderAdapter*	_trader = nullptr;
 	uint64_t		_trader_binding_epoch = 0;
+	// I03-NEW-089: returns this owner's contract claims when it is rebound to
+	// another account gate or destroyed (the gate is held weakly).
+	OwnerClaimLease		_owner_claims;
 	int32_t			_slippage;
 
 	wt_hashmap<std::string, std::string> _code_map;
@@ -742,9 +772,25 @@ private:
 	typedef wt_hashmap<std::string, PosInfo> PositionMap;
 	PositionMap		_pos_map;
 
-	// No fixed capacity: registering another order must not silently evict an
-	// existing tag. Callers still need to resolve callback ordering and lifetime.
-	std::map<uint32_t, std::string> _orders;
+	// R15-001: localid -> tag. No fixed capacity for live orders; terminal
+	// orders are retired into a bounded window. Tag strings are interned and
+	// immutable, so pointers handed to callbacks never dangle while this
+	// context lives. Everything below is guarded by _tag_mutex.
+	struct OrderTagSlot
+	{
+		const std::string* tag = nullptr;
+		uint64_t generation = 0;
+		bool retired = false;
+	};
+	void registerOrderTagLocked(uint32_t localid, const char* usertag);
+	// Registers userTag for every local id the adapter reserves inside submit
+	// (before the provider call) and drops tags of reservations not accepted.
+	OrderIDs submitTagged(TraderAdapter* trader, const char* userTag, const std::function<OrderIDs()>& submit);
+	std::mutex _tag_mutex;
+	std::map<uint32_t, OrderTagSlot> _orders;
+	std::set<std::string> _tag_pool;
+	std::deque<std::pair<uint32_t, uint64_t>> _retired_order_tags;
+	uint64_t _order_tag_generation = 0;
 
 	/**
 	 * @brief 策略资金信息结构体

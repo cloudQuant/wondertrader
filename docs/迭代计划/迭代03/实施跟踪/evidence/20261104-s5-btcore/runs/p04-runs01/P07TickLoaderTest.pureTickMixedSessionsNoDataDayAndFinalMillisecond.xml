@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="1" failures="1" disabled="0" errors="0" time="0.1" timestamp="2026-11-04T20:00:58.360" name="AllTests">
+  <testsuite name="P07TickLoaderTest" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="0.099" timestamp="2026-11-04T20:00:58.360">
+    <testcase name="pureTickMixedSessionsNoDataDayAndFinalMillisecond" file="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp" line="6" status="run" result="completed" time="0.099" timestamp="2026-11-04T20:00:58.360" classname="P07TickLoaderTest">
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:75&#x0A;Value of: HisDataReplayerTestAccess::replay_terminated(replayer)&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:75
+Value of: HisDataReplayerTestAccess::replay_terminated(replayer)
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:76&#x0A;Expected equality of these values:&#x0A;  std::vector&lt;double&gt;({1,2,3,4,5})&#x0A;    Which is: { 1, 2, 3, 4, 5 }&#x0A;  sink.tickPrices&#x0A;    Which is: { 1, 2, 3 }&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:76
+Expected equality of these values:
+  std::vector<double>({1,2,3,4,5})
+    Which is: { 1, 2, 3, 4, 5 }
+  sink.tickPrices
+    Which is: { 1, 2, 3 }
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:77&#x0A;Expected equality of these values:&#x0A;  std::vector&lt;std::string&gt;({codeA,codeB,codeA,codeB,codeA})&#x0A;    Which is: { &quot;CRY.COIN.BTC&quot;, &quot;ZZZ.NEG.N1&quot;, &quot;CRY.COIN.BTC&quot;, &quot;ZZZ.NEG.N1&quot;, &quot;CRY.COIN.BTC&quot; }&#x0A;  sink.tickCodes&#x0A;    Which is: { &quot;CRY.COIN.BTC&quot;, &quot;ZZZ.NEG.N1&quot;, &quot;CRY.COIN.BTC&quot; }&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:77
+Expected equality of these values:
+  std::vector<std::string>({codeA,codeB,codeA,codeB,codeA})
+    Which is: { "CRY.COIN.BTC", "ZZZ.NEG.N1", "CRY.COIN.BTC", "ZZZ.NEG.N1", "CRY.COIN.BTC" }
+  sink.tickCodes
+    Which is: { "CRY.COIN.BTC", "ZZZ.NEG.N1", "CRY.COIN.BTC" }
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:78&#x0A;Expected equality of these values:&#x0A;  std::vector&lt;uint32_t&gt;({20200108u,20200108u,20200108u,20200110u,20200110u})&#x0A;    Which is: { 20200108, 20200108, 20200108, 20200110, 20200110 }&#x0A;  sink.tickDates&#x0A;    Which is: { 20200108, 20200108, 20200108 }&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:78
+Expected equality of these values:
+  std::vector<uint32_t>({20200108u,20200108u,20200108u,20200110u,20200110u})
+    Which is: { 20200108, 20200108, 20200108, 20200110, 20200110 }
+  sink.tickDates
+    Which is: { 20200108, 20200108, 20200108 }
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:79&#x0A;Expected equality of these values:&#x0A;  std::vector&lt;uint32_t&gt;({p07_action_time(5),p07_action_time(131,10,100),p07_action_time(2359,59,999),p07_action_time(131,10,100),p07_action_time(2359,59,999)})&#x0A;    Which is: { 500000, 13110100, 235959999, 13110100, 235959999 }&#x0A;  sink.tickActionTimes&#x0A;    Which is: { 500000, 13110100, 235959999 }&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:79
+Expected equality of these values:
+  std::vector<uint32_t>({p07_action_time(5),p07_action_time(131,10,100),p07_action_time(2359,59,999),p07_action_time(131,10,100),p07_action_time(2359,59,999)})
+    Which is: { 500000, 13110100, 235959999, 13110100, 235959999 }
+  sink.tickActionTimes
+    Which is: { 500000, 13110100, 235959999 }
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:80&#x0A;Expected equality of these values:&#x0A;  5u&#x0A;    Which is: 5&#x0A;  clocks.size()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:80
+Expected equality of these values:
+  5u
+    Which is: 5
+  clocks.size()
+    Which is: 3
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:84&#x0A;Expected equality of these values:&#x0A;  5u&#x0A;    Which is: 5&#x0A;  visible.size()&#x0A;    Which is: 3&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/s5btcore/p04src/cross_session_test_01.cpp:84
+Expected equality of these values:
+  5u
+    Which is: 5
+  visible.size()
+    Which is: 3
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

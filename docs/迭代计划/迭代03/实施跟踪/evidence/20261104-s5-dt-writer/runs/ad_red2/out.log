@@ -1,0 +1,22 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.I03AdReleaseFromWorkerCallbackDoesNotSelfJoin
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.I03AdReleaseFromWorkerCallbackDoesNotSelfJoin
+/tmp/wt-i03-s5-dt-writer-base2/src/TestUnits/coverage/p05_datastorage2/i03_writer_ad_lifecycle_v1_test.cpp:77: Failure
+Value of: threw
+  Actual: true
+Expected: false
+release on the worker escaped: thread::join failed: Resource deadlock avoided
+
+[  FAILED  ] R4WriterADTest.I03AdReleaseFromWorkerCallbackDoesNotSelfJoin (25 ms)
+[----------] 1 test from R4WriterADTest (25 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (27 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R4WriterADTest.I03AdReleaseFromWorkerCallbackDoesNotSelfJoin
+
+ 1 FAILED TEST

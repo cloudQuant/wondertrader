@@ -1,0 +1,10 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-storage-read/before-r2/src/WtDataStorage/WtDataReader.h	2026-11-02 09:33:23
++++ src/WtDataStorage/WtDataReader.h	2026-11-04 21:20:17
+@@ -119,6 +119,7 @@
+ 		HisTickBlock*	_block;
+ 		uint64_t		_date;
+ 		std::string		_buffer;
++		std::vector<WTSTickStruct> _items;  // R132-001: aligned records; _buffer keeps only the packed header
+ 
+ 		_HisTBlockPair()
+ 		{

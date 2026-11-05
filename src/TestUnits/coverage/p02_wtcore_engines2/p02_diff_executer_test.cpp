@@ -53,8 +53,94 @@ namespace wtp
 class P02DiffExecuterTestAccess
 {
 public:
+	static void beginUnregisteredCreation(WtDiffExecuter& executor, const std::string& code)
+	{
+		auto state = std::make_shared<WtDiffExecuter::UnitLifecycleState>();
+		state->std_code = code;
+		state->creation_owner = std::this_thread::get_id();
+		state->init_generation = 1;
+		SpinLock lock(executor._mtx_units);
+		executor._unit_states[code] = state;
+	}
+	static bool registerCreated(WtDiffExecuter& executor, const std::string& code,
+		ExecuteUnit* raw, IExecuterFact* fact)
+	{
+		ExecuteUnitPtr unit(new ExeUnitWrapper(raw, fact));
+		std::shared_ptr<WtDiffExecuter::UnitLifecycleState> state;
+		{
+			SpinLock lock(executor._mtx_units);
+			state = executor._unit_states.at(code);
+		}
+		if (!executor.registerCreatedUnit(code, unit, state)) return false;
+		{
+			std::lock_guard<std::mutex> lock(state->mutex);
+			state->result = unit;
+		}
+		return true;
+	}
+	static void registerInitializing(WtDiffExecuter& executor, const std::string& code,
+		ExecuteUnit* raw, IExecuterFact* fact)
+	{
+		ExecuteUnitPtr unit(new ExeUnitWrapper(raw, fact));
+		auto state = std::make_shared<WtDiffExecuter::UnitLifecycleState>();
+		state->std_code = code;
+		state->creation_owner = std::this_thread::get_id();
+		state->result = unit;
+		state->init_generation = 1;
+		SpinLock lock(executor._mtx_units);
+		executor._unit_map[code] = unit;
+		executor._unit_states[code] = state;
+	}
+	static void finishInitializing(WtDiffExecuter& executor, const std::string& code)
+	{
+		ExecuteUnitPtr unit;
+		std::shared_ptr<WtDiffExecuter::UnitLifecycleState> state;
+		{
+			SpinLock lock(executor._mtx_units);
+			unit = executor._unit_map.at(code);
+			state = executor._unit_states.at(code);
+			std::lock_guard<std::mutex> stateLock(state->mutex);
+			state->creation_complete = true;
+			state->init_status = ExecUnitInitState::READY;
+		}
+		executor.drainUnitChannelEvents(unit, state);
+	}
+	static void unregisterUnit(WtDiffExecuter& executor, const std::string& code)
+	{
+		SpinLock lock(executor._mtx_units);
+		executor._unit_map.erase(code);
+		executor._unit_states.erase(code);
+	}
 	static bool load(WtDiffExecuter& executor) { return executor.load_data(); }
 	static bool save(WtDiffExecuter& executor) { return executor.save_data(); }
+	static void setBatchHook(WtDiffExecuter& executor, std::function<void(uint64_t)> hook)
+	{
+		executor._batch_preflight_test_hook = std::move(hook);
+	}
+	static void setTargetLookupHook(WtDiffExecuter& executor, std::function<void(const std::string&)> hook)
+	{
+		executor._target_lookup_test_hook = std::move(hook);
+	}
+	static void setReadyForRegistration(WtDiffExecuter& executor)
+	{
+		std::lock_guard<std::mutex> lock(executor._position_update_mutex);
+		executor._channel_ready.store(true);
+		++executor._channel_epoch;
+	}
+	static size_t activeBatches(WtDiffExecuter& executor)
+	{
+		std::lock_guard<std::mutex> lock(executor._position_update_mutex);
+		return executor._active_batch_targets.size();
+	}
+	static void setSaveHook(WtDiffExecuter& executor, std::function<bool(bool)> hook)
+	{
+		executor._save_test_hook = std::move(hook);
+	}
+	static size_t unitStates(WtDiffExecuter& executor)
+	{
+		SpinLock lock(executor._mtx_units);
+		return executor._unit_states.size();
+	}
 
 	static void setSnapshot(WtDiffExecuter& executor, const std::string& code,
 		double target, double diff)

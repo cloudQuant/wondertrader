@@ -198,13 +198,8 @@ class R172AdTest : public AdFixture
 
 // WtRdmDtReaderAD.cpp:236-247
 //
-// 2026-10-28 R185：本用例是产品缺陷 BUG-R32-001 的复现，不是夹具问题。
-// 首次载入后 `WTSTickStruct& curTs = _ticks.front(); curTs = _ticks.back();`
-// 把末笔整体覆写回 `_ticks[0]`（R32 已取证：3 笔 [09:30,09:31,09:32] 变成
-// [09:32,09:31,09:32]），于是 `_ticks[0]` 恒为末笔、不再早于窗口起点，
-// `:232` 的条件走 if 臂，`:236-247` 的第二次 lower_bound 永远不执行，
-// 切片也只剩 0 条。保留原输入与断言并禁用，待产品修复后恢复。
-TEST_F(R172AdTest, DISABLED_R172RdmADTickRangeStartsAtFirstTick)
+// 迭代03 最终验收复核后启用（原禁用：BUG-R32-001）。
+TEST_F(R172AdTest, R172RdmADTickRangeStartsAtFirstTick)
 {
 	const uint32_t date = 20240110;
 	// 区间内至少放两笔，避免命中「单笔且时间等于 eTick」时 pTick-- 的既有下溢面
@@ -231,15 +226,8 @@ TEST_F(R172AdTest, DISABLED_R172RdmADTickRangeStartsAtFirstTick)
 
 // WtDataReaderAD.cpp:287-290 / 357-361；第二次读取时 LMDB 已追平 RT 缓存的时间戳
 //
-// 2026-10-28 R185：本用例是产品缺陷 BUG-R144-002 的复现，不是夹具问题。
-// `cacheBarsFromStorage` 首次 `get_k_db` 后缓存槽仍有效；首读的
-// `update_cache_from_lmdb` 是第 2 次取句柄（`std::move` 把槽位掏空但返回值可用）；
-// 第二次读的 `update_cache_from_lmdb` 是第 3 次取句柄，得到空 `WtLMDBPtr`
-// （既有 BUG-P05-001 / R4-BUG-02），`WtLMDBQuery query(*db)` 直接解引用空指针
-// （WtDataReaderAD.cpp:272-274 无 null 检查），必现 SIGSEGV。
-// :287-290 的「同时间戳且上次来自 RT 缓存」分支因此在公开 API 下不可达。
-// 保留原输入与全部断言并禁用，待生产代码修复后恢复。
-TEST_F(R172AdTest, DISABLED_R172ReaderADRtCacheBarPromotedToLmdb)
+// 迭代03 最终验收复核后启用（原禁用：BUG-R144-002）。
+TEST_F(R172AdTest, R172ReaderADRtCacheBarPromotedToLmdb)
 {
 	const uint32_t date = 20240110;
 	const uint32_t t1 = min_time(date, 931);
@@ -275,13 +263,8 @@ TEST_F(R172AdTest, DISABLED_R172ReaderADRtCacheBarPromotedToLmdb)
 
 // WtDataReaderAD.cpp:444-456；LMDB 只到 09:30，RT 缓存的 09:32 大于截止 09:31
 //
-// 2026-10-28 R185：同 BUG-R144-002。本用例在首读内触发「RT bar 越过 etime →
-// 二次回源 LMDB」，此时 `get_k_db` 已是第 3 次取句柄（首读的
-// `cacheBarsFromStorage` 第 1 次、首次 `update_cache_from_lmdb` 第 2 次），
-// 命中被 `std::move` 掏空的槽位返回空 `WtLMDBPtr`，`WtLMDBQuery query(*db)`
-// 解引用空指针（既有 BUG-P05-001 / R4-BUG-02），必现 SIGSEGV。
-// :444-456 分支因此在公开 API 下不可达；保留原输入与全部断言并禁用。
-TEST_F(R172AdTest, DISABLED_R172ReaderADRtCacheBarAheadOfEtime)
+// 迭代03 最终验收复核后启用（原禁用：BUG-R144-002）。
+TEST_F(R172AdTest, R172ReaderADRtCacheBarAheadOfEtime)
 {
 	const uint32_t date = 20240110;
 	const uint32_t t0 = min_time(date, 930);

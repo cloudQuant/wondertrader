@@ -21,7 +21,9 @@
 #include <WtCore/WtExecMgr.h>
 #include <WtCore/WtLocalExecuter.h>
 
+#include <chrono>
 #include <cstdlib>
+#include <thread>
 #include <memory>
 #include <vector>
 
@@ -144,9 +146,23 @@ TEST_F(R90ExecPool, LocalPoolForwardsEverything)
     ASSERT_TRUE(local->init(cfg));
     cfg->release();
     local->setTrader(&trader);
+    // 迭代02 起 setTrader 只绑定适配器，通道就绪经已注册 sink 的回调送达（与 runner 接线一致）；
+    // 原用例只 setTrader、不 addSink，执行器通道始终未就绪，故不可能下单。
+    trader.addSink(local.get());
 
-    // 单元创建（通道未就绪，创建时不回调）
+    // 单元创建；卡8/P02-002：set_position 为整表目标，下方整表目标不含 ag 会把 ag 清零，
+    // 因此在 ag 目标为 2 时先送一笔 ag 行情，由真实最小冲击单元下单（经池调度）。
     local->on_position_changed(kCode, 2.0);
+    {
+        WTSTickData* first = tick(kCode, 3500.0, 93059000);
+        ASSERT_NE(nullptr, first);
+        local->on_tick(kCode, first);
+        first->release();
+    }
+    // 同 Arbi 用例（I03-NEW-099）：首笔委托由池工作线程发出，继续驱动前有界等待，断言不变。
+    for (int i = 0; i < 2500 && traderEnv.api.n_insert.load() <= base; ++i)
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    ASSERT_GT(traderEnv.api.n_insert.load(), base) << "pool worker did not place the first order";
 
     // 组合匹配 + 池调度 set_position
     wt_hashmap<std::string, double> targets;
@@ -178,6 +194,7 @@ TEST_F(R90ExecPool, LocalPoolForwardsEverything)
     local->on_position(kCode, true, 1, 1, 1, 1, 20250110);
 
     ASSERT_TRUE(quiesce.quiesceAll());
+    ASSERT_TRUE(trader.removeSink(local.get()));
     // tick 触发的最小冲击单元至少发出一笔委托
     EXPECT_GT(traderEnv.api.n_insert, base);
 }
@@ -201,8 +218,23 @@ TEST_F(R90ExecPool, ArbiPoolForwardsEverything)
     ASSERT_TRUE(arbi->init(cfg));
     cfg->release();
     arbi->setTrader(&trader);
+    // 迭代02 起 setTrader 只绑定适配器，通道就绪经已注册 sink 的回调送达（与 runner 接线一致）；
+    // 原用例只 setTrader、不 addSink，执行器通道始终未就绪，故不可能下单。
+    trader.addSink(arbi.get());
 
     arbi->on_position_changed(kCode, 2.0);
+    {
+        WTSTickData* first = tick(kCode, 3500.0, 93059000);
+        ASSERT_NE(nullptr, first);
+        arbi->on_tick(kCode, first);
+        first->release();
+    }
+    // 首笔委托由线程池工作线程处理首个 tick 时发出。并行负载下工作线程可能晚于下方的
+    // set_position(empty)/on_channel_lost 运行，此时执行器按通道已断开正确拒单，原用例偶发 0 笔
+    // （I03-NEW-099，12 路并行压测 3/180）。在继续驱动前有界等待首笔委托，断言不变。
+    for (int i = 0; i < 2500 && traderEnv.api.n_insert.load() <= base; ++i)
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    ASSERT_GT(traderEnv.api.n_insert.load(), base) << "pool worker did not place the first order";
 
     wt_hashmap<std::string, double> targets;
     targets["SHFE.rb.2510"] = 3.0;
@@ -230,6 +262,7 @@ TEST_F(R90ExecPool, ArbiPoolForwardsEverything)
     arbi->on_position(kCode, true, 1, 1, 1, 1, 20250110);
 
     ASSERT_TRUE(quiesce.quiesceAll());
+    ASSERT_TRUE(trader.removeSink(arbi.get()));
     EXPECT_GT(traderEnv.api.n_insert, base);
 }
 

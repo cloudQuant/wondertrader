@@ -162,6 +162,7 @@ private:
 	enum class TestFaultPoint
 	{
 		None,
+		FailMarkerPermissions,
 		FailMarkerFlush,
 		FailMarkerCreateDirectoryFlush,
 		FailPrepareFlush,

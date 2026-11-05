@@ -41,6 +41,8 @@
 USING_NS_WTP;
 
 extern WtRtRunner& getRunner();
+// I03-NEW-064（迭代03）：C API 只在 runner 已配置的引擎上建上下文（.before 见 s5-runners 证据）。
+bool i03s5_fresh_configured_porter(const char* engine);
 
 namespace {
 
@@ -269,6 +271,13 @@ namespace {
 		const CtxHandler h = create_hft_context("r13_hft_registered", traderId.c_str(), false, 1);
 		if (h == 0 || getRunner().getHftContext(h) == NULL)
 			return fail_hft_probe(6, "registered trader context was not created");
+		if (create_hft_context("r13_hft_missing", "R13_TRADER_NOT_EXISTS", false, 1) != 0
+			|| create_hft_context("r13_hft_empty", "", false, 1) != 0
+			|| create_hft_context("r13_hft_null", nullptr, false, 1) != 0)
+			return fail_hft_probe(15, "unknown trader produced a handle");
+		const CtxHandler next = create_hft_context("r13_hft_registered_again", traderId.c_str(), false, 1);
+		if (next != h + 1 || getRunner().getHftContext(next) == NULL)
+			return fail_hft_probe(16, "failed binding allocated or registered a context");
 
 		/* This getter traverses _trader->getPosition; zero proves the empty adapter is bound. */
 		if (hft_get_position(h, kHftCode, true) != 0.0)
@@ -317,7 +326,9 @@ protected:
 	void SetUp() override
 	{
 		g_pos.clear();
-		_h = create_sel_context("r13_sel_export", 20240601, 153000, "d",
+		ASSERT_TRUE(i03s5_fresh_configured_porter("sel"));
+		_h = create_sel_context("r13_sel_export", 20240601, 1530, "d",	/* K27=A（2026-11-04 用户裁定）：SEL 调度时间为 HHMM，HHMMSS 值在入口被拒；原写法 93000/153000 见证据 before/。 */
+			
 			"CHINA", "TRADING", 2);
 		ASSERT_NE(_h, 0U);
 		ASSERT_TRUE(getRunner().getSelContext(_h) != NULL);
@@ -327,26 +338,41 @@ protected:
 };
 
 /*
- * 这里只验证 runner 当前识别的 period token 会注册出可查找的独立上下文，
- * 不验证调度触发。WtPorter.h 的 d1/w1/m1 周期示例与 runner 当前识别的
- * d/w/m/y/min 写法不一致；仅检查句柄不能证明这些文档示例实际参与调度。
+ * K27=A（2026-11-04 用户裁定，BUG-R13-004）：time 为 HHMM（min 周期为 1..1440 的间隔分钟），
+ * date 对 w 为 0..6、m 为 1..31、y 为 MMDD；d1/w1/m1 等别名不受理。原用例对所有周期统一使用
+ * date=20240602、time=93000（HHMMSS），在实盘永不触发，见证据 before/。
  */
 TEST_F(R13PorterSelExport, create_sel_context_registers_contexts_for_supported_period_tokens)
 {
-	const char* periods[] = { "w", "m", "y", "min", "d" };
+	struct Spec { const char* period; uint32_t date; uint32_t time; };
+	const Spec specs[] = { { "w", 2, 930 }, { "m", 2, 930 }, { "y", 602, 930 }, { "min", 0, 5 }, { "d", 0, 930 } };
 	CtxHandler prev = _h;
-	for (const char* p : periods)
+	for (const Spec& s : specs)
 	{
-		const CtxHandler h = create_sel_context("r13_sel_period", 20240602, 93000, p,
+		const CtxHandler h = create_sel_context("r13_sel_period", s.date, s.time, s.period,
 			"CHINA", "TRADING", 0);
-		ASSERT_NE(h, 0U) << p;
-		EXPECT_NE(h, prev) << p;
-		EXPECT_TRUE(getRunner().getSelContext(h) != NULL) << p;
+		ASSERT_NE(h, 0U) << s.period;
+		EXPECT_NE(h, prev) << s.period;
+		EXPECT_TRUE(getRunner().getSelContext(h) != NULL) << s.period;
 		prev = h;
 	}
 
 	// 非法句柄仍无法查找，作为有效上下文句柄的对照。
 	EXPECT_TRUE(getRunner().getSelContext(kBadHandle) == NULL);
+}
+
+TEST_F(R13PorterSelExport, create_sel_context_rejects_schedules_that_can_never_fire)
+{
+	EXPECT_EQ(0U, create_sel_context("r13_bad", 0, 93000, "d", "CHINA", "TRADING", 0));	// HHMMSS
+	EXPECT_EQ(0U, create_sel_context("r13_bad", 0, 960, "d", "CHINA", "TRADING", 0));	// 分钟 60
+	EXPECT_EQ(0U, create_sel_context("r13_bad", 7, 930, "w", "CHINA", "TRADING", 0));
+	EXPECT_EQ(0U, create_sel_context("r13_bad", 0, 930, "m", "CHINA", "TRADING", 0));
+	EXPECT_EQ(0U, create_sel_context("r13_bad", 32, 930, "m", "CHINA", "TRADING", 0));
+	EXPECT_EQ(0U, create_sel_context("r13_bad", 1302, 930, "y", "CHINA", "TRADING", 0));
+	EXPECT_EQ(0U, create_sel_context("r13_bad", 0, 0, "min", "CHINA", "TRADING", 0));
+	EXPECT_EQ(0U, create_sel_context("r13_bad", 0, 1441, "min", "CHINA", "TRADING", 0));
+	EXPECT_EQ(0U, create_sel_context("r13_bad", 0, 930, "d1", "CHINA", "TRADING", 0));	// 别名不受理
+	EXPECT_EQ(0U, create_sel_context("r13_bad", 2, 930, "m1", "CHINA", "TRADING", 0));
 }
 
 TEST_F(R13PorterSelExport, sel_userdata_roundtrips_exact_value_and_default)
@@ -406,9 +432,8 @@ TEST_F(R13PorterSelExport, sel_log_text_passes_all_levels_without_touching_state
 	EXPECT_STREQ(sel_load_userdata(_h, "state", "AFTER"), "before");
 }
 
-/* 崩溃面：sel_set_position/sel_sub_ticks 进 WtEngine::do_set_position 与 sub_tick，
- * 依赖 _data_mgr/_hot_mgr；本夹具没有（也拿不到）config() 成功的路径。 */
-TEST_F(R13PorterSelExport, DISABLED_sel_mutation_and_subscription_need_engine_seam)
+/* 迭代03 最终验收复核后启用（原禁用：未 config 引擎上的 sel 仓位/订阅入口崩溃）。 */
+TEST_F(R13PorterSelExport, sel_mutation_and_subscription_need_engine_seam)
 {
 	sel_set_position(_h, kSelCode, 100, "r13");
 	sel_sub_ticks(_h, kSelCode);
@@ -434,40 +459,61 @@ TEST(R13PorterHftExport, map_getters_userdata_and_logging_use_registered_dummy_t
 }
 
 /*
- * BUG-R13-001 regression candidate. Keep DISABLED_: a missing trader still
- * produces a context handle, while HftStraBaseCtx::_trader is not initialized
- * on the failed binding path. The calls below reach that unbound pointer and
- * must not be executed until the production defect is fixed and the test is
- * redesigned to assert the repaired contract.
+ * I03-NEW-128（BUG-Q06-002 同族，卡 4a）：runner 未 config 时没有引擎。
+ * cta/sel/hft 三族的 14 个引擎直取入口（cta_get_price/day_price/tdate/date/time、
+ * sel_get_price/day_price/tdate/date/time、hft_get_price/date/time/secs）与
+ * get_raw_stdcode 必须返回各自的失败值（0 / 空串）并记录诊断，不得解引用空引擎。
+ * 改前第一个调用即崩溃（UBSan WtPorter.cpp:1022，原 DISABLED_ 用例
+ * engine_direct_getters_deref_null_engine）。
+ *
+ * 在 threadsafe 死亡测试子进程里跑：子进程重新执行本二进制，进程级 runner
+ * 一定未 config（同二进制的其他用例会在进程内 config 它）。子进程用 exit()
+ * 退出，让 LLVM profile 正常落盘。
  */
-TEST(R13PorterHftExport, DISABLED_hft_trader_bound_entries_deref_unbound_pointer)
+static int run_unconfigured_engine_getter_probe()
 {
-	const CtxHandler h = create_hft_context("r13_hft_unbound_candidate",
-		"R13_TRADER_NOT_EXISTS", false, 1);
-	ASSERT_NE(h, 0U);
-	ASSERT_TRUE(getRunner().getHftContext(h) != NULL);
+	if (getRunner().getEngine() != NULL)
+	{
+		std::fprintf(stderr, "[I03-NEW-128] precondition: the process-global runner is already configured\n");
+		return 100;
+	}
 
-	hft_get_position(h, kHftCode, true);
-	hft_get_undone(h, kHftCode);
-	hft_cancel(h, 1);
-	hft_cancel_all(h, kHftCode, true);
-	hft_buy(h, kHftCode, 3500.0, 1, "r13", 0);
-	hft_sell(h, kHftCode, 3500.0, 1, "r13", 0);
-	hft_sub_ticks(h, kHftCode);
-	hft_sub_order_queue(h, kHftCode);
-	hft_sub_order_detail(h, kHftCode);
-	hft_sub_transaction(h, kHftCode);
+	int failures = 0;
+	auto check = [&failures](bool ok, const char* what) {
+		if (!ok)
+		{
+			std::fprintf(stderr, "[I03-NEW-128] %s did not fail closed\n", what);
+			failures++;
+		}
+	};
+
+	check(cta_get_price(kHftCode) == 0.0, "cta_get_price");
+	check(cta_get_day_price(kHftCode, 0) == 0.0, "cta_get_day_price");
+	check(cta_get_tdate() == 0u, "cta_get_tdate");
+	check(cta_get_date() == 0u, "cta_get_date");
+	check(cta_get_time() == 0u, "cta_get_time");
+	check(sel_get_price(kSelCode) == 0.0, "sel_get_price");
+	check(sel_get_day_price(kSelCode, 3) == 0.0, "sel_get_day_price");
+	check(sel_get_tdate() == 0u, "sel_get_tdate");
+	check(sel_get_date() == 0u, "sel_get_date");
+	check(sel_get_time() == 0u, "sel_get_time");
+	check(hft_get_price(kHftCode) == 0.0, "hft_get_price");
+	check(hft_get_date() == 0u, "hft_get_date");
+	check(hft_get_time() == 0u, "hft_get_time");
+	check(hft_get_secs() == 0u, "hft_get_secs");
+
+	const char* raw = get_raw_stdcode(kHftCode);
+	check(raw != NULL && raw[0] == '\0', "get_raw_stdcode");
+
+	check(getRunner().getEngine() == NULL, "the getters left the runner unconfigured");
+	return failures;
 }
 
-/*
- * 崩溃面（BUG-R6-003/Q06-002 同族）：cta/sel/hft 三族的 getEngine() 直取入口
- * （WtPorter.cpp:857/872/883/894/905、1215/1226/1237/1421、1743/1755/1767/1779）
- * 全部无条件解引用 getRunner().getEngine()，未 config 时是 NULL。
- * 这 14 个入口约 42 行在「进程内 + 不 config」的口径下取不到样。
- */
-TEST(R13PorterEngineSeam, DISABLED_engine_direct_getters_deref_null_engine)
+TEST(R13PorterEngineSeam, engine_direct_getters_fail_closed_without_engine)
 {
-	EXPECT_DOUBLE_EQ(cta_get_price(kHftCode), 0.0);
-	EXPECT_DOUBLE_EQ(sel_get_price(kSelCode), 0.0);
-	EXPECT_DOUBLE_EQ(hft_get_price(kHftCode), 0.0);
+	const std::string oldStyle = GTEST_FLAG_GET(death_test_style);
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
+	EXPECT_EXIT(std::exit(run_unconfigured_engine_getter_probe()),
+		::testing::ExitedWithCode(0), ".*");
+	GTEST_FLAG_SET(death_test_style, oldStyle);
 }

@@ -1,0 +1,35 @@
+[==========] Running 13 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 7 tests from XeleEvents
+[ RUN      ] XeleEvents.ConnectThenLoginOnlyAfterFirstValidFrame
+[       OK ] XeleEvents.ConnectThenLoginOnlyAfterFirstValidFrame (1528 ms)
+[ RUN      ] XeleEvents.SnapshotFailureEmitsNoSuccessEvent
+[       OK ] XeleEvents.SnapshotFailureEmitsNoSuccessEvent (58 ms)
+[ RUN      ] XeleEvents.InvalidFramesDoNotConfirm
+[       OK ] XeleEvents.InvalidFramesDoNotConfirm (111 ms)
+[ RUN      ] XeleEvents.ReconnectStartsNewEventEpoch
+[       OK ] XeleEvents.ReconnectStartsNewEventEpoch (4 ms)
+[ RUN      ] XeleEvents.ReleaseFromAnotherThreadDuringConnectEmitsNothing
+[       OK ] XeleEvents.ReleaseFromAnotherThreadDuringConnectEmitsNothing (357 ms)
+[ RUN      ] XeleEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing
+[       OK ] XeleEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing (52 ms)
+[ RUN      ] XeleEvents.V2StopDuringConnectDrainsWithoutEvents
+[       OK ] XeleEvents.V2StopDuringConnectDrainsWithoutEvents (333 ms)
+[----------] 7 tests from XeleEvents (2445 ms total)
+[----------] 6 tests from UdpEvents
+[ RUN      ] UdpEvents.ConnectThenLoginOnlyAfterFirstValidMessage
+[       OK ] UdpEvents.ConnectThenLoginOnlyAfterFirstValidMessage (700 ms)
+[ RUN      ] UdpEvents.PartialConnectFailureEmitsNoSuccessEvent
+[       OK ] UdpEvents.PartialConnectFailureEmitsNoSuccessEvent (570 ms)
+[ RUN      ] UdpEvents.InvalidMessagesDoNotConfirm
+[       OK ] UdpEvents.InvalidMessagesDoNotConfirm (106 ms)
+[ RUN      ] UdpEvents.ReconnectStartsNewEventEpoch
+[       OK ] UdpEvents.ReconnectStartsNewEventEpoch (1 ms)
+[ RUN      ] UdpEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing
+[       OK ] UdpEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing (65 ms)
+[ RUN      ] UdpEvents.V2StopFromLogCallbackDuringConnectDrainsWithoutEvents
+[       OK ] UdpEvents.V2StopFromLogCallbackDuringConnectDrainsWithoutEvents (23 ms)
+[----------] 6 tests from UdpEvents (1470 ms total)
+[----------] Global test environment tear-down
+[==========] 13 tests from 2 test suites ran. (3916 ms total)
+[  PASSED  ] 13 tests.

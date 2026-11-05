@@ -1,0 +1,65 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-uftcore/before/src/TestUnits/coverage/q04_uftcore3/r11_parser_adapter_test.cpp	2026-10-30 04:38:08
++++ src/TestUnits/coverage/q04_uftcore3/r11_parser_adapter_test.cpp	2026-11-04 18:39:39
+@@ -165,6 +165,17 @@
+ 	return api;
+ }
+ 
++// Card 9 (BUG-R78-001): an external API is destroyed only with a provider
++// confirmation. Without a remover the adapter quarantines it (never deletes).
++// Tests whose intent is "a quiescent fake is released and destroyed once"
++// therefore pass this remover, which confirms destruction after deleting.
++void deleteFakeParserConfirmed(IParserApi*& api)
++{
++	IParserApi* original = api;
++	api = nullptr;
++	delete original;
++}
++
+ void deleteFakeParserThenThrow(IParserApi*& api)
+ {
+ 	IParserApi* original = api;
+@@ -248,7 +259,7 @@
+ 	// same adapter can accept a later external candidate.
+ 	ApiStats st;
+ 	FakeParserApi* api = newApi(&st, &adapter, &env._stub);
+-	EXPECT_TRUE(adapter.initExt("p2-reuse", api, &env._stub, &env._bd));
++	EXPECT_TRUE(adapter.initExt("p2-reuse", api, &env._stub, &env._bd, deleteFakeParserConfirmed));
+ 	EXPECT_EQ(1u, cfg->retainCount());
+ 	adapter.release();
+ 	EXPECT_EQ((uint32_t)1, st._destroyCnt);
+@@ -284,7 +295,7 @@
+ 	ParserAdapter adapter;
+ 	ApiStats st;
+ 	FakeParserApi* api = newApi(&st, &adapter, &env._stub);
+-	ASSERT_TRUE(adapter.initExt("p5", api, &env._stub, &env._bd));
++	ASSERT_TRUE(adapter.initExt("p5", api, &env._stub, &env._bd, deleteFakeParserConfirmed));
+ 	EXPECT_EQ((uint32_t)1, st._regSpiCnt);
+ 	EXPECT_TRUE(st._lastSpiIsAdapter);
+ 	EXPECT_EQ((uint32_t)1, st._initCnt);
+@@ -311,7 +322,7 @@
+ 	ApiStats st;
+ 	FakeParserApi* api = new FakeParserApi(&st);
+ 	api->_initRet = false;
+-	EXPECT_FALSE(adapter.initExt("p6", api, &env._stub, &env._bd));
++	EXPECT_FALSE(adapter.initExt("p6", api, &env._stub, &env._bd, deleteFakeParserConfirmed));
+ 	EXPECT_TRUE(adapter.hasApi());
+ 	EXPECT_FALSE(adapter.isInitialized());
+ 	EXPECT_EQ((uint32_t)1, st._initCnt);
+@@ -342,7 +353,7 @@
+ 	{
+ 		ParserAdapterMgr mgr;
+ 		ParserAdapterPtr adapter(new ParserAdapter());
+-		ASSERT_TRUE(adapter->initExt("release-throw", api, &env._stub, &env._bd));
++		ASSERT_TRUE(adapter->initExt("release-throw", api, &env._stub, &env._bd, deleteFakeParserConfirmed));
+ 		ASSERT_TRUE(mgr.addAdapter("release-throw", adapter));
+ 
+ 		mgr.release();
+@@ -695,7 +706,7 @@
+ 	ParserAdapterPtr first(new ParserAdapter());
+ 	ApiStats st;
+ 	FakeParserApi* api1 = newApi(&st, first.get(), &env._stub);
+-	ASSERT_TRUE(first->initExt("m2", api1, &env._stub, &env._bd));
++	ASSERT_TRUE(first->initExt("m2", api1, &env._stub, &env._bd, deleteFakeParserConfirmed));
+ 	//空 id 会被 strlen(id)==0 拒绝
+ 	EXPECT_FALSE(mgr.addAdapter("", first));
+ 	EXPECT_TRUE(mgr.addAdapter("m2", first));

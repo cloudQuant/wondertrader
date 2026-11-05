@@ -1,0 +1,77 @@
+{
+  "说明": "2026-11-05 用户指示：需要 Windows、Linux MSan、真实厂商 SDK/数据或完整生产环境才能验证的条目，在非对应平台测试时标记为 skipped（平台），从阻塞中解除，后续在 Linux/Windows/真实环境复跑。skipped 不计为通过。",
+  "items": [
+    {
+      "id": "BUG-L00-010",
+      "platforms": [
+        "windows"
+      ],
+      "requires": "Windows/MSVC",
+      "rerun": "MSVC 实际构建并运行双 DLL、多 TU、静态初始化与卸载重载测试"
+    },
+    {
+      "id": "BUG-L01-018",
+      "platforms": [
+        "windows"
+      ],
+      "requires": "Windows/MSVC",
+      "rerun": "MSVC 下运行有效/非法/1969 日期矩阵（weekday helper 合组及日期映射传播用例）"
+    },
+    {
+      "id": "BUG-R160-002",
+      "platforms": [
+        "windows"
+      ],
+      "requires": "Windows/MSVC 签名构建",
+      "rerun": "MSVC 签名构建并验证产物"
+    },
+    {
+      "id": "BUG-R42-001",
+      "platforms": [
+        "linux"
+      ],
+      "requires": "Linux + MSan（或 Valgrind）",
+      "rerun": "MSan 全插桩构建后运行 r41_ticker/r101_sel_ctx_gap/r120_sel_engine_run 等相关用例的未初始化读取检测"
+    },
+    {
+      "id": "BUG-R93-005",
+      "platforms": [
+        "vendor:xtp"
+      ],
+      "requires": "真实 XTP SDK",
+      "rerun": "真实 XTP SDK 回调排空/Release 合同验证"
+    },
+    {
+      "id": "BUG-R93-006",
+      "platforms": [
+        "vendor:yd"
+      ],
+      "requires": "真实 YD 柜台/官方时序",
+      "rerun": "部分成交、首包终态、乱序与 TradeVolume 语义验证"
+    },
+    {
+      "id": "BUG-P05-010",
+      "platforms": [
+        "data:real-lmdb"
+      ],
+      "requires": "有来源的真实历史 LMDB 键样本及版本说明",
+      "rerun": "以真实样本运行 AD 键兼容读取验证"
+    },
+    {
+      "id": "BUG-R8-003",
+      "platforms": [
+        "env:production-dtservo"
+      ],
+      "requires": "完整 dtservo/生产数据服务环境",
+      "rerun": "完整 dtservo 生产数据服务验收"
+    },
+    {
+      "id": "BUG-P04-011",
+      "platforms": [
+        "vendor:provider"
+      ],
+      "requires": "真实 provider（部分：其余需合同裁定）",
+      "rerun": "真实 provider 同步回调合同与同刻并发回调顺序验证"
+    }
+  ]
+}

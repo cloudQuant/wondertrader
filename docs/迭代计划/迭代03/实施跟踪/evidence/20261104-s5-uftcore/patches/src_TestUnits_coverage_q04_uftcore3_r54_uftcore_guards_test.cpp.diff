@@ -1,0 +1,28 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-uftcore/before/src/TestUnits/coverage/q04_uftcore3/r54_uftcore_guards_test.cpp	2026-11-01 09:02:26
++++ src/TestUnits/coverage/q04_uftcore3/r54_uftcore_guards_test.cpp	2026-11-04 18:40:08
+@@ -124,6 +124,16 @@
+ 			return one;
+ 	}
+ 	return std::string();
++}
++
++// Card 9 (BUG-R78-001): only a provider confirmation authorizes destroying an
++// external API; without a remover the adapter quarantines it. This quiescent
++// fake is released through a remover that confirms its destruction.
++void deleteR54ParserConfirmed(IParserApi*& api)
++{
++	IParserApi* original = api;
++	api = nullptr;
++	delete original;
+ }
+ 
+ }	// namespace
+@@ -155,7 +165,7 @@
+ 
+ 	ParserAdapter adapter;
+ 	R54FakeParserApi* api = new R54FakeParserApi(&stats);
+-	ASSERT_TRUE(adapter.initExt("r54parser", api, &stub, &bd));
++	ASSERT_TRUE(adapter.initExt("r54parser", api, &stub, &bd, deleteR54ParserConfirmed));
+ 	EXPECT_EQ(1u, stats._initCnt);
+ 	EXPECT_EQ(1u, stats._regSpiCnt);
+ 	EXPECT_EQ(1u, stats._subCnt);

@@ -210,7 +210,10 @@ TEST(t6_parserudp_init, missing_host_reports_initialization_failure)
 	cfg->release();
 }
 
-TEST(t6_parserudp_init, wtcore_parser_adapter_init_ext_passes_null_and_releases_real_parser)
+// Card 9 (9a=A, iteration 03): a WtCore initExt API carries no lifecycle V2
+// drain proof, so WtCore ParserAdapter retains it instead of destroying it on
+// release(). The former oracle expected release() to drop the owner.
+TEST(t6_parserudp_init, wtcore_parser_adapter_init_ext_passes_null_and_retains_real_parser)
 {
 	InitExtBaseDataMgr bdMgr;
 	IParserStub stub;
@@ -223,20 +226,22 @@ TEST(t6_parserudp_init, wtcore_parser_adapter_init_ext_passes_null_and_releases_
 	EXPECT_TRUE(adapter.hasApi());
 
 	// initExt transfers ownership even when ParserUDP rejects the NULL config.
-	// It has not connected or started a worker, so release can drain synchronously.
+	// Without a V2 proof the owner stays retained after release(); the parser
+	// never connected or started a worker, so the retained object is inert and
+	// is deliberately leaked by this test.
 	adapter.release();
 	parser = nullptr;
-	EXPECT_FALSE(adapter.hasApi());
+	EXPECT_TRUE(adapter.hasApi());
 }
 
-TEST(t6_parserudp_init, init_can_be_reapplied_with_a_different_host)
+TEST(t6_parserudp_init, repeated_init_is_rejected)
 {
 	ParserUDP parser;
 	WTSVariant* c1 = make_cfg("239.1.2.3", 0, 0, 10);
 	WTSVariant* c2 = make_cfg("239.9.9.9", 0, 0, 20);
 	ASSERT_TRUE(parser.init(c1));
-	// 第二次 init 覆盖端点：证明 init 不是幂等空函数
-	ASSERT_TRUE(parser.init(c2));
+	// Re-initialization is rejected once configuration has been accepted.
+	ASSERT_FALSE(parser.init(c2));
 	c1->release();
 	c2->release();
 	EXPECT_FALSE(parser.isConnected());

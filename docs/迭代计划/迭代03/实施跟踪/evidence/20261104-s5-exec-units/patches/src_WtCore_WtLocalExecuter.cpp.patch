@@ -1,0 +1,131 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-exec-units/before/src/WtCore/WtLocalExecuter.cpp	2026-11-04 09:06:22
++++ src/WtCore/WtLocalExecuter.cpp	2026-11-04 19:44:29
+@@ -401,9 +401,12 @@
+  */
+ WtLocalExecuter::~WtLocalExecuter()
+ {
+-	std::lock_guard<std::mutex> lock(_quiesce_mutex);
+-	if (!_quiesced)
+-		std::terminate();
++	{
++		std::lock_guard<std::mutex> lock(_quiesce_mutex);
++		if (!_quiesced)
++			std::terminate();
++	}
++	account_net_limits::Registry::instance().release(this);
+ }
+ 
+ /**
+@@ -459,6 +462,9 @@
+ 		error = "invalid group configuration: " + groupError;
+ 		return false;
+ 	}
++	account_net_limits::Limits accountLimits;
++	if (!account_net_limits::parse(params, accountLimits, error))
++		return false;
+ 	return exec_policy_config::validateClear(params, error) &&
+ 		exec_policy_config::validatePolicy(params, error);
+ }
+@@ -495,6 +501,16 @@
+ 		return false;
+ 	}
+ 	_group_rules.swap(groupRules);
++	{
++		account_net_limits::Limits accountLimits;
++		std::string accountError;
++		if (!account_net_limits::parse(params, accountLimits, accountError))
++		{
++			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Invalid account limits: {}", accountError);
++			return false;
++		}
++		_account_limits = accountLimits;
++	}
+ 
+ 	_config = params;
+ 	_config->retain();
+@@ -722,9 +738,21 @@
+ 				_unit_map.erase(unitIt);
+ 			}
+ 			std::lock_guard<std::mutex> stateLock(state->mutex);
+-			const bool acceptedHostCallbacksWillBeDiscarded =
+-				!state->callback_events.empty() || state->callback_active ||
+-				state->callback_drain_scheduled;
++			bool acceptedHostCallbacksWillBeDiscarded =
++				state->callback_active || state->callback_drain_scheduled;
++			for (const UnitCallbackEvent& event : state->callback_events)
++			{
++				// A host-side preflight failure ran no factory/plugin code. Target
++				// reconciliation and clear-position events are projections of the
++				// retained authoritative _target_pos/_pending_clear_position state
++				// and a later generation re-queues them at registration, so dropping
++				// them discards no accepted work. Every other event still counts.
++				if (!externalCodeEntered && unit == NULL &&
++					(event.is_target_reconciliation || event.is_clear_position))
++					continue;
++				acceptedHostCallbacksWillBeDiscarded = true;
++				break;
++			}
+ 			// _target_pos and _pending_clear_position are authoritative business
+ 			// state retained for a later retry. Only their accepted callback work
+ 			// in this generation is considered discarded here.
+@@ -820,9 +848,17 @@
+ 		// plugin initialization has a no-side-effect contract. Any failure from
+ 		// this point is retained as fail-closed and cannot be retried in-process.
+ 		externalCodeEntered = true;
+-		unit = _factory->createExeUnit(name);
++		bool pluginEntered = true;
++		unit = _factory->createExeUnit(name, pluginEntered);
+ 		if (unit == NULL)
++		{
++			// The factory rejected the request before handing control to any
++			// plugin entry (unknown factory, malformed name, closed admission):
++			// this is a host-side preflight failure with no external effect.
++			if (!pluginEntered)
++				externalCodeEntered = false;
+ 			return failCreation("execution-unit creation failed");
++		}
+ 		std::string error;
+ 		unitInitialized = unit->initialize(this, stdCode, cfg, error, true);
+ 		if (unitInitialized)
+@@ -1452,13 +1488,29 @@
+ 	}
+ 	for (Action& action : actions)
+ 		if (!action.bypass) action.allowed = !_trader || _trader->checkOrderLimits(action.code.c_str());
++	// Card 8 / BUG-P02-005: the executer's complete physical targets, in trader
++	// quantity, are checked against the per-contract account net limit shared
++	// by every executer on the same account. Group limits were checked above;
++	// both must pass. The account identity is the trader's shared gate (WP1).
++	account_net_limits::Positions accountTargets;
++	for (const auto& item : physical)
++		if (item.second != 0.0) accountTargets[item.first] = item.second * _scale;
++	const std::shared_ptr<const void> accountKeepalive = _trader ?
++		std::shared_ptr<const void>(_trader->accountGate()) : std::shared_ptr<const void>();
++	const void* accountKey = accountKeepalive ? accountKeepalive.get() : static_cast<const void*>(this);
+ 	bool stale = false;
++	std::string accountError;
+ 	{
+ 		SpinLock unitsLock(_mtx_units);
+ 		{
+ 			std::lock_guard<std::mutex> positionLock(_position_state_mutex);
++			account_net_limits::Positions previousAccount;
++			const void* previousAccountKey = NULL;
+ 			if (_target_revision != revision)
+ 				stale = true;
++			else if (!account_net_limits::Registry::instance().apply(accountKey, accountKeepalive, this,
++				_name, _account_limits, accountTargets, previousAccount, previousAccountKey, accountError))
++				stale = true;
+ 			else
+ 			{
+ 				auto newTargets = _target_pos;
+@@ -1526,7 +1578,10 @@
+ 	}
+ 	if (stale)
+ 	{
+-		WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Target batch rejected: target state changed during validation");
++		if (!accountError.empty())
++			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Target batch rejected: {}", accountError);
++		else
++			WTSLogger::log_dyn("executer", _name.c_str(), LL_ERROR, "Target batch rejected: target state changed during validation");
+ 		return;
+ 	}
+ 	for (Action& action : actions)

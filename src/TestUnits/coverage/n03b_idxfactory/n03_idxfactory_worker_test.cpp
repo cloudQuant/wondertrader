@@ -25,6 +25,7 @@
 #include "Includes/WTSContractInfo.hpp"
 #include "Includes/WTSDataDef.hpp"
 
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <limits>
@@ -681,4 +682,42 @@ TEST(n03_blkidx, weight_alg_validation)
 		cfg->append("weight_alg", invalidReal);
 		expectRejectedWithoutSubscription(env, cfg, "blk22");
 	}
+}
+
+// BUG-R68-003 (iteration 03): a worker with a positive timeout owns a trigger
+// thread. Deleting it through its factory must stop and join that thread.
+// Before the fix the thread was never stopped and the joinable std::thread was
+// destroyed with the worker, which calls std::terminate.
+TEST(n03_blkidx, timeout_trigger_thread_is_joined_when_worker_is_deleted)
+{
+	N03BlkIdxEnv env;
+	WTSContractInfo* c1 = env.regContract("SSE", "600000");
+	ASSERT_NE(nullptr, env.regContract("SSE", "600519"));
+	IIndexWorker* w = env.create("WtBuiltinIndex", "blk_timeout");
+	ASSERT_NE(nullptr, w);
+
+	WTSVariant* cfg = WTSVariant::createObject();
+	cfg->append("exchg", "SSE");
+	cfg->append("code", "BLK001");
+	cfg->append("trigger", "time");
+	cfg->append("timeout", (uint32_t)60000);	// the trigger thread sleeps until stopped
+	cfg->append("weight_alg", (uint32_t)0);
+	WTSVariant* codes = WTSVariant::createArray();
+	codes->append("SSE.600000");
+	codes->append("SSE.600519");
+	cfg->append("codes", codes);
+	codes->release();
+	env.ctx._baselines["SSE.600000"] = makeTick("SSE", "600000", 10.0, 100, 1000.0, 500.0);
+	env.ctx._baselines["SSE.600519"] = makeTick("SSE", "600519", 20.0, 200, 2000.0, 600.0);
+	ASSERT_TRUE(w->init(cfg));
+	cfg->release();
+
+	WTSTickStruct t1 = makeTick("SSE", "600000", 10.0, 100, 1000.0, 500.0);
+	feedTick(env, c1, t1);		// starts the trigger thread and arms a 60 s recalculation
+
+	const auto begin = std::chrono::steady_clock::now();
+	EXPECT_TRUE(env.fact->delete_worker(w));
+	env.worker = nullptr;
+	EXPECT_LT(std::chrono::steady_clock::now() - begin, std::chrono::seconds(5));
+	EXPECT_TRUE(env.ctx._pushed.empty());	// the armed recalculation never ran
 }

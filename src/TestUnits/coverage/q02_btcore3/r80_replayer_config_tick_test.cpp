@@ -94,6 +94,17 @@ TEST_F(R80ConfigTick, ContractArrayMalformedFeesAndAdjEntries)
 	opts.contracts.push_back((_root / "dist/common/contracts.json").string());
 	opts.contracts.push_back((_root / "dist/common/stocks.json").string());
 
+	// 卡13d“缺费/坏费报错”：配置了却无法解析的费用模板使 init 显式失败
+	// （旧断言期望 init 成功，与已裁定卡13d冲突，改写；原文件见证据 before/）
+	{
+		HisDataReplayer bad;
+		WTSVariant* badCfg = r80::make_cfg(_root, _base, 202001010930ull, 202001071500ull, opts);
+		EXPECT_FALSE(bad.init(badCfg));
+		badCfg->release();
+	}
+
+	// 合约数组与部分损坏的复权因子仍按原目标验证（不配置费用模板）
+	opts.fees = "";
 	HisDataReplayer rp;
 	WTSVariant* cfg = r80::make_cfg(_root, _base, 202001010930ull, 202001071500ull, opts);
 	ASSERT_TRUE(rp.init(cfg));

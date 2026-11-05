@@ -1,0 +1,107 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = DtPorterHost.WriterReleaseReachesLiveExtDumpers
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from DtPorterHost
+[ RUN      ] DtPorterHost.WriterReleaseReachesLiveExtDumpers
+=================================================================
+==16118==ERROR: AddressSanitizer: heap-use-after-free on address 0x603000003f10 at pc 0x0001030dc384 bp 0x00016f591a10 sp 0x00016f591a08
+READ of size 8 at 0x603000003f10 thread T0
+    #0 0x0001030dc380 in (anonymous namespace)::FakeWriter::release()+0x45c (libI03DtFakeWriter.dylib:arm64+0x8380)
+    #1 0x000100a134e8 in DataManager::WriterHost::finalize()+0x2a8 (dtporter_host_base:arm64+0x1001a74e8)
+    #2 0x000100a11aa8 in DataManager::WriterHost::requestRelease(bool)+0x3a4 (dtporter_host_base:arm64+0x1001a5aa8)
+    #3 0x000100a11690 in DataManager::~DataManager()+0x50 (dtporter_host_base:arm64+0x1001a5690)
+    #4 0x000100a11b08 in DataManager::~DataManager()+0x18 (dtporter_host_base:arm64+0x1001a5b08)
+    #5 0x0001008a9bb8 in WtDtRunner::~WtDtRunner()+0xd4 (dtporter_host_base:arm64+0x10003dbb8)
+    #6 0x0001008a9d9c in WtDtRunner::~WtDtRunner()+0x50 (dtporter_host_base:arm64+0x10003dd9c)
+    #7 0x000100894558 in (anonymous namespace)::DtPorterHost_WriterReleaseReachesLiveExtDumpers_Test::TestBody()+0xf84 (dtporter_host_base:arm64+0x100028558)
+    #8 0x000100b60fcc in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (dtporter_host_base:arm64+0x1002f4fcc)
+    #9 0x000100b60f14 in testing::Test::Run()+0xcc (dtporter_host_base:arm64+0x1002f4f14)
+    #10 0x000100b61af4 in testing::TestInfo::Run()+0xd0 (dtporter_host_base:arm64+0x1002f5af4)
+    #11 0x000100b62578 in testing::TestSuite::Run()+0x1c4 (dtporter_host_base:arm64+0x1002f6578)
+    #12 0x000100b6d9a0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (dtporter_host_base:arm64+0x1003019a0)
+    #13 0x000100b6d34c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (dtporter_host_base:arm64+0x10030134c)
+    #14 0x000100b6d2b0 in testing::UnitTest::Run()+0x78 (dtporter_host_base:arm64+0x1003012b0)
+    #15 0x000100b4e5e8 in main+0x40 (dtporter_host_base:arm64+0x1002e25e8)
+    #16 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+0x603000003f10 is located 0 bytes inside of 32-byte region [0x603000003f10,0x603000003f30)
+freed by thread T0 here:
+    #0 0x000101a6d4d0 in _ZdlPv+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x654d0)
+    #1 0x000100a100d0 in ExpDumper::~ExpDumper()+0x58 (dtporter_host_base:arm64+0x1001a40d0)
+    #2 0x0001009d13b0 in std::__1::default_delete<ExpDumper>::operator()[abi:nqe220108](ExpDumper*) const+0xfc (dtporter_host_base:arm64+0x1001653b0)
+    #3 0x0001009d0f18 in std::__1::__shared_ptr_pointer<ExpDumper*, std::__1::shared_ptr<ExpDumper>::__shared_ptr_default_delete<ExpDumper, ExpDumper>, std::__1::allocator<ExpDumper>>::__on_zero_shared()+0x100 (dtporter_host_base:arm64+0x100164f18)
+    #4 0x0001008fab9c in std::__1::__shared_count::__release_shared[abi:nqe220108]()+0x120 (dtporter_host_base:arm64+0x10008eb9c)
+    #5 0x0001008faa58 in std::__1::__shared_weak_count::__release_shared[abi:nqe220108]()+0x70 (dtporter_host_base:arm64+0x10008ea58)
+    #6 0x0001009d1860 in std::__1::shared_ptr<ExpDumper>::~shared_ptr[abi:nqe220108]()+0x110 (dtporter_host_base:arm64+0x100165860)
+    #7 0x0001008c2404 in std::__1::shared_ptr<ExpDumper>::~shared_ptr[abi:nqe220108]()+0x50 (dtporter_host_base:arm64+0x100056404)
+    #8 0x000100933b94 in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>::~pair()+0x54 (dtporter_host_base:arm64+0x1000c7b94)
+    #9 0x000100933b2c in std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>::~pair()+0x50 (dtporter_host_base:arm64+0x1000c7b2c)
+    #10 0x000100933acc in void std::__1::__destroy_at[abi:nqe220108]<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>>(std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>*)+0x4c (dtporter_host_base:arm64+0x1000c7acc)
+    #11 0x000100933990 in void std::__1::allocator_traits<std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<ExpDumper>>, void*>>>::destroy[abi:nqe220108]<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>, 0>(std::__1::allocator<std::__1::__tree_node<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<ExpDumper>>, void*>>&, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>*)+0x18 (dtporter_host_base:arm64+0x1000c7990)
+    #12 0x0001009337a4 in std::__1::__tree<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<ExpDumper>>, std::__1::__map_value_compare<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>>>::__tree_deleter::operator()[abi:nqe220108](std::__1::__tree_node<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<ExpDumper>>, void*>*)+0x340 (dtporter_host_base:arm64+0x1000c77a4)
+    #13 0x000100933204 in std::__1::__tree<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<ExpDumper>>, std::__1::__map_value_compare<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>>>::destroy(std::__1::__tree_node<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<ExpDumper>>, void*>*)+0x190 (dtporter_host_base:arm64+0x1000c7204)
+    #14 0x000100933060 in std::__1::__tree<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<ExpDumper>>, std::__1::__map_value_compare<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>>>::~__tree[abi:nqe220108]()+0x5c (dtporter_host_base:arm64+0x1000c7060)
+    #15 0x000100932ff0 in std::__1::__tree<std::__1::__value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<ExpDumper>>, std::__1::__map_value_compare<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>>>::~__tree[abi:nqe220108]()+0x50 (dtporter_host_base:arm64+0x1000c6ff0)
+    #16 0x000100932f8c in std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<ExpDumper>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>>>::~map[abi:nqe220108]()+0x50 (dtporter_host_base:arm64+0x1000c6f8c)
+    #17 0x0001008a9c70 in std::__1::map<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, std::__1::shared_ptr<ExpDumper>, std::__1::less<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>> const, std::__1::shared_ptr<ExpDumper>>>>::~map[abi:nqe220108]()+0x50 (dtporter_host_base:arm64+0x10003dc70)
+    #18 0x0001008a9b88 in WtDtRunner::~WtDtRunner()+0xa4 (dtporter_host_base:arm64+0x10003db88)
+    #19 0x0001008a9d9c in WtDtRunner::~WtDtRunner()+0x50 (dtporter_host_base:arm64+0x10003dd9c)
+    #20 0x000100894558 in (anonymous namespace)::DtPorterHost_WriterReleaseReachesLiveExtDumpers_Test::TestBody()+0xf84 (dtporter_host_base:arm64+0x100028558)
+    #21 0x000100b60fcc in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (dtporter_host_base:arm64+0x1002f4fcc)
+    #22 0x000100b60f14 in testing::Test::Run()+0xcc (dtporter_host_base:arm64+0x1002f4f14)
+    #23 0x000100b61af4 in testing::TestInfo::Run()+0xd0 (dtporter_host_base:arm64+0x1002f5af4)
+    #24 0x000100b62578 in testing::TestSuite::Run()+0x1c4 (dtporter_host_base:arm64+0x1002f6578)
+    #25 0x000100b6d9a0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (dtporter_host_base:arm64+0x1003019a0)
+    #26 0x000100b6d34c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (dtporter_host_base:arm64+0x10030134c)
+    #27 0x000100b6d2b0 in testing::UnitTest::Run()+0x78 (dtporter_host_base:arm64+0x1003012b0)
+    #28 0x000100b4e5e8 in main+0x40 (dtporter_host_base:arm64+0x1002e25e8)
+    #29 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+previously allocated by thread T0 here:
+    #0 0x000101a6d0e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x0001008c1844 in WtDtRunner::createExtDumper(char const*)+0x19c (dtporter_host_base:arm64+0x100055844)
+    #2 0x00010089400c in (anonymous namespace)::DtPorterHost_WriterReleaseReachesLiveExtDumpers_Test::TestBody()+0xa38 (dtporter_host_base:arm64+0x10002800c)
+    #3 0x000100b60fcc in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (dtporter_host_base:arm64+0x1002f4fcc)
+    #4 0x000100b60f14 in testing::Test::Run()+0xcc (dtporter_host_base:arm64+0x1002f4f14)
+    #5 0x000100b61af4 in testing::TestInfo::Run()+0xd0 (dtporter_host_base:arm64+0x1002f5af4)
+    #6 0x000100b62578 in testing::TestSuite::Run()+0x1c4 (dtporter_host_base:arm64+0x1002f6578)
+    #7 0x000100b6d9a0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (dtporter_host_base:arm64+0x1003019a0)
+    #8 0x000100b6d34c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (dtporter_host_base:arm64+0x10030134c)
+    #9 0x000100b6d2b0 in testing::UnitTest::Run()+0x78 (dtporter_host_base:arm64+0x1003012b0)
+    #10 0x000100b4e5e8 in main+0x40 (dtporter_host_base:arm64+0x1002e25e8)
+    #11 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: heap-use-after-free (libI03DtFakeWriter.dylib:arm64+0x8380) in (anonymous namespace)::FakeWriter::release()+0x45c
+Shadow bytes around the buggy address:
+  0x603000003c80: 00 00 fa fa fd fd fd fd fa fa 00 00 00 00 fa fa
+  0x603000003d00: 00 00 00 00 fa fa 00 00 00 00 fa fa fd fd fd fa
+  0x603000003d80: fa fa 00 00 00 00 fa fa 00 00 00 00 fa fa fd fd
+  0x603000003e00: fd fd fa fa fd fd fd fa fa fa fd fd fd fa fa fa
+  0x603000003e80: fd fd fd fd fa fa 00 00 00 00 fa fa 00 00 00 00
+=>0x603000003f00: fa fa[fd]fd fd fd fa fa fd fd fd fd fa fa 00 00
+  0x603000003f80: 00 00 fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x603000004000: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x603000004080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x603000004100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x603000004180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==16118==ABORTING

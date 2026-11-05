@@ -102,6 +102,12 @@ namespace
 		IBaseDataMgr* bdMgr() const { return m_bdMgr; }
 		ITraderSpi* traderSink() const { return m_bscSink; }
 		TraderCTPOpt::PositionMap* mapPos() const { return m_mapPosition; }
+		/* BUG-R65-002：直接注入持仓回调前登记在途请求号（模拟 queryPositions 已发送）。 */
+#ifdef WT_I03_SDK_EVENTS_BASELINE
+		void expectPositionRequest(int) {}
+#else
+		void expectPositionRequest(int requestId) { m_iPosQryReqID.store(requestId); }
+#endif
 		WTSArray* ayExecOrds() const { return m_ayExecOrds; }
 		WTSArray* ayOrders() const { return m_ayOrders; }
 	};
@@ -596,11 +602,11 @@ TEST(TraderCTPOpt, exec_order_query_uses_constructor_initialized_array_and_start
 	ASSERT_EQ(1u, probe.ayExecOrds()->size());
 	probe.release();
 	EXPECT_EQ(0u, probe.ayExecOrds()->size());
+	/* 迭代03 s5（卡9a/9d）改写：旧断言要求 release() 之后的回调仍被处理并推送给宿主。
+	 * 停止后回调闸门关闭，迟到回调不得再到达宿主 sink 或再填充容器。原断言见证据 before/。 */
 	probe.OnRspQryExecOrder(&next, nullptr, 5, true);
-	EXPECT_EQ(3u, fx.opt.ordersOptCalls);
-	EXPECT_EQ(1u, fx.opt.lastOrdersOptSize);
-	ASSERT_EQ(1u, fx.opt.lastOrdersOptItems.size());
-	EXPECT_EQ("EXEC-43", fx.opt.lastOrdersOptItems[0].first);
+	EXPECT_EQ(2u, fx.opt.ordersOptCalls);
+	EXPECT_EQ(0u, probe.ayExecOrds()->size());
 }
 
 TEST(TraderCTPOpt, front_lifecycle_events_forward_to_sink)
@@ -646,12 +652,16 @@ TEST(TraderCTPOpt, generic_error_response_logs_nonzero_error_and_keeps_success_q
 	EXPECT_EQ(LL_ERROR, fx.spi.logs[0].first);
 	EXPECT_NE(std::string::npos, fx.spi.logs[0].second.find("17 rsp error: 42 : generic response failed"));
 
+	/* T1-CTPOpt-07 / 卡14 14c（2026-11-03 裁定）：头文件未声明空 pRspInfo 的契约，按失败可见处理，不再静默 no-op。 */
 	probe.OnRspError(nullptr, 18, true);
-	EXPECT_EQ(1u, fx.spi.logs.size());	/* Defensive local no-op; this does not assert SDK callback guarantees. */
+	ASSERT_EQ(2u, fx.spi.logs.size());
+	EXPECT_EQ(LL_ERROR, fx.spi.logs[1].first);
+	EXPECT_NE(std::string::npos, fx.spi.logs[1].second.find("18 rsp error: empty response info without SDK contract, treated as failure"));
 
 	probe.registerSpi(nullptr);
 	probe.OnRspError(&error, 19, true);
-	EXPECT_EQ(1u, fx.spi.logs.size());	/* Empty sink has no observer to receive a log. */
+	probe.OnRspError(nullptr, 20, true);
+	EXPECT_EQ(2u, fx.spi.logs.size());	/* Empty sink has no observer to receive a log. */
 }
 
 TEST(TraderCTPOpt, authentication_and_login_failure_branches_report_to_sink)
@@ -895,7 +905,7 @@ TEST(TraderCTPOpt, make_order_info_maps_ctp_order_fields_to_wts)
 	EXPECT_STREQ("000007#0000000008#000009", oi->getEntrustID());
 	EXPECT_STREQ(" 10086 ", oi->getOrderID());
 	EXPECT_EQ(20260105u, oi->getOrderDate());
-	EXPECT_EQ(TimeUtils::makeTime(20260105, 93001 * 1000), oi->getOrderTime());
+	EXPECT_EQ(static_cast<uint64_t>(TimeUtils::makeTime(20260105, 93001 * 1000)), oi->getOrderTime());
 	/* ini 无标签 → userTag 回退为 entrustID */
 	EXPECT_STREQ(oi->getEntrustID(), oi->getUserTag());
 	oi->release();
@@ -938,7 +948,7 @@ TEST(TraderCTPOpt, make_trade_record_and_error_conversions)
 	/* Buy + CloseToday → WDT_SHORT（买平=做空方向） */
 	EXPECT_EQ(WDT_SHORT, tr->getDirection());
 	EXPECT_EQ(WOT_CLOSETODAY, tr->getOffsetType());
-	EXPECT_EQ(TimeUtils::makeTime(20260105, 100000 * 1000), tr->getTradeTime());
+	EXPECT_EQ(static_cast<uint64_t>(TimeUtils::makeTime(20260105, 100000 * 1000)), tr->getTradeTime());
 	tr->release();
 
 	std::snprintf(tf.InstrumentID, sizeof(tf.InstrumentID), "%s", "NOPE01");
@@ -947,7 +957,7 @@ TEST(TraderCTPOpt, make_trade_record_and_error_conversions)
 	CThostFtdcRspInfoField err = makeRsp(70, "not login");
 	WTSError* e = probe.makeError(&err);
 	ASSERT_NE(nullptr, e);
-	EXPECT_EQ(70, e->getErrorCode());
+	EXPECT_EQ(70u, e->getErrorCode());
 	EXPECT_STREQ("not login", e->getMessage());
 	e->release();
 
@@ -1188,6 +1198,7 @@ TEST(TraderCTPOpt, position_query_aggregates_today_cover_mode)
 	probe.harden();
 	CtpFixture fx;
 	probe.registerSpi(&fx.spi);
+	probe.expectPositionRequest(1);
 
 	CThostFtdcInvestorPositionField pf;
 	std::memset(&pf, 0, sizeof(pf));
@@ -1249,11 +1260,8 @@ TEST(DISABLED_TraderCTPOpt, login_success_and_connect_require_real_ctp_lib)
 	probe.connect();
 }
 
-/*
- * OnRspOrderAction/OnRspExecOrderAction 在 pRspInfo==NULL（IsErrorRspInfo false）
- * 的 else 分支直接 deref pRspInfo->ErrorMsg → 空指针崩溃；见 bug 文件。
- */
-TEST(DISABLED_TraderCTPOpt, order_action_rsp_null_rspinfo_derefs_errormsg)
+/* 迭代03 最终验收复核后启用（原禁用：OnRspOrderAction 空 pRspInfo 解引用）。 */
+TEST(TraderCTPOpt, order_action_rsp_null_rspinfo_derefs_errormsg)
 {
 	CtpProbe probe;
 	probe.harden();

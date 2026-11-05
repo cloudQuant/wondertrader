@@ -247,24 +247,27 @@ TEST_F(Q05ResampleTest, DayResampleOfTenDailyBarsPassesThrough)
 	ASSERT_TRUE(store_bars(file.string().c_str(), bars, 10, "d", q05Logger));
 
 	resetCapture();
-	// 全区间 d->d：times=1 与基础周期一致，按实现约定应为原样透传（10 条）
+	// 决策 K47=B（2026-11-05 用户裁定，BUG-I02-NEW-104）：同周期 d->d、times=1 不是重采样，明确拒绝并诊断，
+	// 不回调（改前期望“原样透传 10 条”，实现从未透传，原失败只报笼统的“K线重采样失败”）。
 	WtUInt32 ret = resample_bars(file.string().c_str(), q05Bars, q05Cnt,
 		20200106, 20200117, "d", 1, kDaySess, q05Logger);
-	EXPECT_EQ(ret, 10u);
-	EXPECT_EQ(g_cntArg, ret);
-	EXPECT_EQ(g_cbArg, ret);
-	EXPECT_TRUE(g_cbIsLast);
-	if (ret == 10)
-	{
-		EXPECT_EQ(g_firstBar.date, 20200106u);
-		EXPECT_EQ(g_lastBar.date, 20200117u);
-	}
+	EXPECT_EQ(ret, 0u);
+	EXPECT_EQ(g_cbArg, 0u);
+	EXPECT_NE(g_lastLog.find("同周期重采样不受支持"), std::string::npos) << g_lastLog;
 
-	// fromTime>endTime：L887-890 交换后应与正序结果一致
+	// fromTime>endTime：交换后同样到达倍数校验，结果一致
 	resetCapture();
 	WtUInt32 retSwap = resample_bars(file.string().c_str(), q05Bars, q05Cnt,
 		20200117, 20200106, "d", 1, kDaySess, q05Logger);
 	EXPECT_EQ(retSwap, ret);
+	EXPECT_NE(g_lastLog.find("同周期重采样不受支持"), std::string::npos) << g_lastLog;
+
+	// 倍数大于 1 的日线重采样照常工作（2 日合 1，10 条 -> 5 条）
+	resetCapture();
+	WtUInt32 retTwo = resample_bars(file.string().c_str(), q05Bars, q05Cnt,
+		20200106, 20200117, "d", 2, kDaySess, q05Logger);
+	EXPECT_EQ(retTwo, 5u);
+	EXPECT_EQ(g_cbArg, retTwo);
 }
 
 TEST_F(Q05ResampleTest, DayRangeAfterLastBarFindsNothing)

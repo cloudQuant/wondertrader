@@ -1,0 +1,23 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.ManualAsyncAcceptedEnqueueStillDuplicatesOnRetry
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.ManualAsyncAcceptedEnqueueStillDuplicatesOnRetry
+/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/R4-AD-writer-partial-replay-20261102/partial_replay_probe.cpp:79: Failure
+Expected equality of these values:
+  counters.accepted.load()
+    Which is: 3
+  2
+async enqueue succeeds although the first attempt partially committed
+
+[  FAILED  ] R4WriterADTest.ManualAsyncAcceptedEnqueueStillDuplicatesOnRetry (2 ms)
+[----------] 1 test from R4WriterADTest (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R4WriterADTest.ManualAsyncAcceptedEnqueueStillDuplicatesOnRetry
+
+ 1 FAILED TEST

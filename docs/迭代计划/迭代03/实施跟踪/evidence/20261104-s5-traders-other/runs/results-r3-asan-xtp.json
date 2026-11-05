@@ -1,0 +1,60 @@
+[
+ {
+  "id": "r3-asan-xtp-red",
+  "name": "XTP-minus-map",
+  "argv": [
+   "perl",
+   "-e",
+   "alarm 900; exec @ARGV or exit 127",
+   "--",
+   "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan-r2/tests",
+   "--gtest_filter=*-xtp_map.*",
+   "--gtest_output=xml:/tmp/wt-i03-s5-traders-other-run/run/r3-asan-xtp-red/XTP-minus-map/result.xml"
+  ],
+  "cwd": "/tmp/wt-i03-s5-traders-other-run/run/r3-asan-xtp-red/XTP-minus-map",
+  "exit": 23,
+  "env_overrides": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "bin_exists": true,
+  "xml": {
+   "tests": "48",
+   "failures": "0",
+   "disabled": "3",
+   "errors": "0",
+   "skipped": null
+  },
+  "skipped_cases": 0
+ },
+ {
+  "id": "r3-asan-xtp-green",
+  "name": "XTP-minus-map",
+  "argv": [
+   "perl",
+   "-e",
+   "alarm 900; exec @ARGV or exit 127",
+   "--",
+   "/tmp/wt-i03-s5-traders-other-san/manual/xtp-fix-asan/tests",
+   "--gtest_filter=*-xtp_map.*",
+   "--gtest_output=xml:/tmp/wt-i03-s5-traders-other-run/run/r3-asan-xtp-green/XTP-minus-map/result.xml"
+  ],
+  "cwd": "/tmp/wt-i03-s5-traders-other-run/run/r3-asan-xtp-green/XTP-minus-map",
+  "exit": 0,
+  "env_overrides": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "bin_exists": true,
+  "xml": {
+   "tests": "48",
+   "failures": "0",
+   "disabled": "2",
+   "errors": "0",
+   "skipped": null
+  },
+  "skipped_cases": 0
+ }
+]

@@ -1,0 +1,21 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before/src/TestUnits/fixtures/i03_leaks_main_20261104/manual_build.sh	2026-11-04 08:13:27
++++ src/TestUnits/fixtures/i03_leaks_main_20261104/manual_build.sh	2026-11-04 18:40:29
+@@ -7,7 +7,8 @@
+ cd $REPO
+ if [ $variant = base ]; then PSRC=$R/baseline/src; else PSRC=$REPO/src; fi
+ # product-header resolution: base build puts the baseline tree first so "TraderMocker/TraderMocker.h" etc. resolve to baseline
+-INC="-I$R/boost-include"
++# s5 (2026-11-04): WT_I03_BOOST_INCLUDE overrides the physical Boost header copy.
++INC="-I${WT_I03_BOOST_INCLUDE:-$R/boost-include}"
+ [ $variant = base ] && INC="$INC -iquote $R/baseline/src -I$R/baseline/src"
+ COMMON="-std=gnu++17 -g -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL $INC -Isrc/Includes -Isrc/Share -Isrc/WTSTools -Isrc/WTSUtils -isystem /opt/homebrew/include -isystem /usr/local/include -isystem src -include src/Share/fmt_enum_compat.h"
+ WARN="-Wall -Wextra -Wno-deprecated-copy-with-user-provided-copy -Wno-#pragma-messages"
+@@ -20,6 +21,8 @@
+ if [ $mod = femas ]; then
+   PROD=$PSRC/TraderFemas/TraderFemas.cpp
+   TESTS="src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp"
++  # s5: optional extra Femas lane TUs (e.g. t4_003_femas_lifecycle_test.cpp).
++  for x in ${WT_I03_FEMAS_EXTRA_TESTS:-}; do TESTS="$TESTS src/TestUnits/coverage/t_TraderFemas/$x"; done
+ else
+   PROD=$PSRC/TraderMocker/TraderMocker.cpp
+   TESTS=$(ls src/TestUnits/coverage/t_TraderMocker/*.cpp)

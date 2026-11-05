@@ -18,6 +18,7 @@
 #include <atomic>
 #include <cstdint>
 #include <cstring>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -1097,7 +1098,8 @@ TEST_F(P07TickLoaderTest, emptyNullTickLoaderCallbackIsAValidEmptyBucket)
 	EXPECT_EQ(1u, loader._tickCalls);
 	EXPECT_TRUE(loader._lastTickLoadReturned);
 	EXPECT_TRUE(loader._lastTickCallbackHadObj);
-	EXPECT_FALSE(HisDataReplayerTestAccess::replay_terminated(replayer));
+	// K38 BT-B（2026-11-04 用户裁定）：区间内无任何 HFT 事件判 WT_REPLAY_ERROR_NO_SOURCE 并终止；原断言见证据 before/。
+	EXPECT_TRUE(HisDataReplayerTestAccess::replay_terminated(replayer));
 	EXPECT_TRUE(sink.tickTimes.empty());
 	EXPECT_EQ(0u, sink.beginCalls);
 	EXPECT_EQ(0u, sink.endCalls);
@@ -1146,7 +1148,8 @@ TEST_F(P07TickLoaderTest, emptyReplayBucketsStayBoundedAcrossLongNoDataRange)
 
 	EXPECT_GT(loader._tickCalls, 30u);
 	EXPECT_LE(HisDataReplayerTestAccess::replay_tick_bucket_count(replayer), 10u);
-	EXPECT_FALSE(HisDataReplayerTestAccess::replay_terminated(replayer));
+	// K38 BT-B（2026-11-04 用户裁定）：区间内无任何 HFT 事件判 WT_REPLAY_ERROR_NO_SOURCE 并终止；原断言见证据 before/。
+	EXPECT_TRUE(HisDataReplayerTestAccess::replay_terminated(replayer));
 	EXPECT_TRUE(sink.tickTimes.empty());
 	EXPECT_EQ(0u, sink.beginCalls);
 	EXPECT_EQ(0u, sink.endCalls);
@@ -1218,7 +1221,7 @@ TEST_F(P07TickLoaderTest, continuous24HourReplayReadsFullSaturdayNaturalDateBuck
 	{
 		std::ofstream out(sessions);
 		ASSERT_TRUE(out.is_open());
-		out << R"({"P07_24H":{"name":"continuous","offset":0,"sections":[{"from":0,"to":2400}]}})";
+		out << R"({"TRADING":{"name":"default","offset":0,"sections":[{"from":0,"to":0}]},"P07_24H":{"name":"continuous","offset":0,"sections":[{"from":0,"to":0}]}})";
 	}
 	{
 		std::ofstream out(commodities);
@@ -1274,7 +1277,7 @@ TEST_F(P07TickLoaderTest, continuous24HourPositiveOffsetUsesNaturalDateCut)
 	{
 		std::ofstream out(sessions);
 		ASSERT_TRUE(out.is_open());
-		out << R"({"P07_24H_POS":{"name":"continuous-offset","offset":300,"sections":[{"from":0,"to":2400}]}})";
+		out << R"({"TRADING":{"name":"default","offset":0,"sections":[{"from":0,"to":0}]},"P07_24H_POS":{"name":"continuous-offset","offset":300,"sections":[{"from":0,"to":0}]}})";
 	}
 	{
 		std::ofstream out(commodities);
@@ -1329,7 +1332,7 @@ TEST_F(P07TickLoaderTest, continuous24HourNegativeOffsetUsesNaturalDateCut)
 	{
 		std::ofstream out(sessions);
 		ASSERT_TRUE(out.is_open());
-		out << R"({"P07_24H_NEG":{"name":"continuous-negative-offset","offset":-300,"sections":[{"from":0,"to":2400}]}})";
+		out << R"({"TRADING":{"name":"default","offset":0,"sections":[{"from":0,"to":0}]},"P07_24H_NEG":{"name":"continuous-negative-offset","offset":-300,"sections":[{"from":0,"to":0}]}})";
 	}
 	{
 		std::ofstream out(commodities);
@@ -1786,7 +1789,7 @@ TEST_F(P07TickLoaderTest, minuteEndIncludesLastSecondAndEndsFinalTradingDateOnce
 	{
 		std::ofstream out(sessions);
 		ASSERT_TRUE(out.is_open());
-		out << R"({"P07_24H":{"name":"continuous","offset":0,"sections":[{"from":0,"to":2400}]}})";
+		out << R"({"TRADING":{"name":"default","offset":0,"sections":[{"from":0,"to":0}]},"P07_24H":{"name":"continuous","offset":0,"sections":[{"from":0,"to":0}]}})";
 	}
 	{
 		std::ofstream out(commodities);
@@ -1854,7 +1857,8 @@ TEST_F(P07TickLoaderTest, sameTimestampOrdersRoundsAcrossCodesAndTradingDateBuck
 		std::ofstream out(sessions);
 		ASSERT_TRUE(out.is_open());
 		out << R"({
-			"P07_24H": {"name":"continuous","offset":0,"sections":[{"from":0,"to":2400}]},
+			"TRADING": {"name":"default","offset":0,"sections":[{"from":0,"to":0}]},
+			"P07_24H": {"name":"continuous","offset":0,"sections":[{"from":0,"to":0}]},
 			"P07_NEG": {"name":"offset-negative","offset":-300,"sections":[{"from":0,"to":200}]}
 		})";
 	}
@@ -2330,7 +2334,8 @@ TEST_F(P07TickLoaderTest, hftTickCallbackExceptionAllowsReplayByDayRetry)
 	replayer.run(false);
 	EXPECT_EQ(std::vector<uint32_t>({931u}), sink.tickTimes);
 	EXPECT_EQ(std::vector<double>({10.5}), sink.tickPrices);
-	EXPECT_EQ(1u, sink.replayDoneCalls);
+	// K38 BT-B（2026-11-04 用户裁定）：每代恰好一次 handle_replay_done（回调异常的一代亦送达，状态 FAILED）；原断言见证据 before/。
+	EXPECT_EQ(2u, sink.replayDoneCalls);
 }
 
 TEST_F(P07TickLoaderTest, hftTickCallbackExceptionAllowsBarReplayRetry)
@@ -3165,6 +3170,15 @@ TEST_F(P07TickLoaderTest, calcFeeUsesLoadedFeeTemplate)
 	std::string fees;
 	ASSERT_TRUE(write_fee_template(_base, fees));
 	WTSVariant* cfg = loader_cfg(_root, _base, 202001020930ull, 202001031500ull, false, fees);
+	// 卡13d：费用按可核验的实际合约计算，夹具提供三只合约元数据
+	const std::filesystem::path contracts = _base / "p07_fee_contracts.json";
+	std::ofstream(contracts) << "{\"SSE\":{\"600000\":{\"name\":\"pf\",\"code\":\"600000\",\"exchg\":\"SSE\",\"product\":\"STK\","
+		"\"opendate\":20000101,\"expiredate\":20991231},"
+		"\"000001\":{\"name\":\"idx\",\"code\":\"000001\",\"exchg\":\"SSE\",\"product\":\"IDX\","
+		"\"opendate\":20000101,\"expiredate\":20991231}},"
+		"\"SZSE\":{\"000001\":{\"name\":\"pa\",\"code\":\"000001\",\"exchg\":\"SZSE\",\"product\":\"STK\","
+		"\"opendate\":20000101,\"expiredate\":20991231}}}";
+	cfg->get("basefiles")->append("contract", contracts.string().c_str());
 	ASSERT_TRUE(replayer.init(cfg, NULL, &loader));
 	cfg->release();
 
@@ -3181,10 +3195,10 @@ TEST_F(P07TickLoaderTest, calcFeeUsesLoadedFeeTemplate)
 	EXPECT_DOUBLE_EQ(6.0, replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 0));
 	EXPECT_DOUBLE_EQ(9.0, replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 1));
 	EXPECT_DOUBLE_EQ(3.0, replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 2));
-	// offset 非法 -> 0
-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 9));
-	// 费率表里没有的品种 -> 0
-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("DCE.IDX.999999", 10.0, 3.0, 0));
+	// 卡13d“缺费报错”：offset 非法与费率表里没有的品种均返回可观察错误（NaN）
+	// （两条旧断言期望 0.0，与已裁定卡13d冲突，改写；原文件见证据 before/）
+	EXPECT_TRUE(std::isnan(replayer.calc_fee("SSE.IDX.000001", 10.0, 3.0, 9)));
+	EXPECT_TRUE(std::isnan(replayer.calc_fee("DCE.IDX.999999", 10.0, 3.0, 0)));
 }
 
 /*
@@ -3210,3 +3224,167 @@ TEST_F(P07TickLoaderTest, DISABLED_mismatchedTickDateHangsReplayHftDatas)
 	// 有主K线 + tick 模式 -> run_by_bars 内部调 replayHftDatas
 	replayer.run(false);
 }
+
+// 迭代03 第五会话主线程：BUG-P04-011（产品缺陷部分）——默认历史 tick 查询按品种自身交易日取桶。
+// 混合会话回放中，全局交易日可能已是夜盘品种的下一交易日；24 小时品种在其自然日末查询时，
+// 改前取全局交易日桶（无该品种数据）而看不到同日更早的记录。改后另装查询桶，不改写派发共用缓存。
+TEST_F(P07TickLoaderTest, p04011TickQueryUsesTheInstrumentsOwnTradingDayInMixedSessions)
+{
+    InstDirRestore restoreInstDir;
+    ASSERT_TRUE(set_data_storage_inst_dir(_root));
+    const auto sessions = _base / "p04011_sessions.json";
+    const auto commodities = _base / "p04011_commodities.json";
+    {
+        std::ofstream out(sessions);
+        ASSERT_TRUE(out.is_open());
+        out << R"({"TRADING":{"name":"default","offset":0,"sections":[{"from":0,"to":0}]},"P07_24H":{"name":"continuous","offset":0,"sections":[{"from":0,"to":0}]},"P07_NEG":{"name":"night market","offset":300,"sections":[{"from":2100,"to":2300},{"from":900,"to":1015},{"from":1030,"to":1130},{"from":1330,"to":1500}]}})";
+    }
+    {
+        std::ofstream out(commodities);
+        ASSERT_TRUE(out.is_open());
+        out << R"({"CRY":{"COIN":{"category":1,"covermode":0,"exchg":"CRY","holiday":"CHINA","name":"continuous","precision":2,"pricemode":1,"pricetick":0.01,"session":"P07_24H","volscale":1}},"SHFE":{"rb":{"category":1,"covermode":1,"exchg":"SHFE","holiday":"CHINA","name":"negative offset","precision":2,"pricemode":1,"pricetick":0.01,"session":"P07_NEG","volscale":1}}})";
+    }
+    const std::string codeA = "CRY.COIN.BTC", codeB = "SHFE.rb.2001";
+    auto mk = [](const char* exchg, const char* code, uint32_t day, uint32_t tradeDay,
+                 uint32_t hhmm, uint32_t sec, uint32_t ms, double price) {
+        WTSTickStruct t{};
+        std::strcpy(t.exchg, exchg); std::strcpy(t.code, code);
+        t.action_date = day; t.trading_date = tradeDay; t.action_time = p07_action_time(hhmm, sec, ms);
+        t.open = t.high = t.low = t.price = price; t.volume = t.total_volume = 1;
+        return t;
+    };
+    ASSERT_TRUE(write_raw_block(_base / "his/ticks/CRY/20200108/BTC.dsb", BT_HIS_Ticks,
+        std::vector<WTSTickStruct>{mk("CRY", "BTC", 20200108u, 20200108u, 5, 0, 0, 1),
+                                   mk("CRY", "BTC", 20200108u, 20200108u, 2359, 59, 999, 3)}));
+    ASSERT_TRUE(write_raw_block(_base / "his/ticks/SHFE/20200109/rb2001.dsb", BT_HIS_Ticks,
+        std::vector<WTSTickStruct>{mk("SHFE", "rb2001", 20200108u, 20200109u, 2200, 10, 100, 2)}));
+    ASSERT_TRUE(write_raw_block(_base / "his/ticks/SHFE/20200113/rb2001.dsb", BT_HIS_Ticks,
+        std::vector<WTSTickStruct>{mk("SHFE", "rb2001", 20200110u, 20200113u, 2200, 10, 100, 4)}));
+    ASSERT_TRUE(write_raw_block(_base / "his/ticks/CRY/20200110/BTC.dsb", BT_HIS_Ticks,
+        std::vector<WTSTickStruct>{mk("CRY", "BTC", 20200110u, 20200110u, 2359, 59, 999, 5)}));
+    // Level-2 records of BTC's own trading day 20200108 (same-class queries of P04-011).
+    {
+        WTSTransStruct tr{}; std::strcpy(tr.exchg, "CRY"); std::strcpy(tr.code, "BTC");
+        tr.trading_date = 20200108u; tr.action_date = 20200108u; tr.action_time = p07_action_time(6); tr.price = 11; tr.volume = 1;
+        ASSERT_TRUE(write_raw_block(_base / "his/trans/CRY/20200108/BTC.dsb", BT_HIS_Trnsctn, std::vector<WTSTransStruct>{tr}));
+        WTSOrdDtlStruct od{}; std::strcpy(od.exchg, "CRY"); std::strcpy(od.code, "BTC");
+        od.trading_date = 20200108u; od.action_date = 20200108u; od.action_time = p07_action_time(6); od.price = 12; od.volume = 1;
+        ASSERT_TRUE(write_raw_block(_base / "his/orders/CRY/20200108/BTC.dsb", BT_HIS_OrdDetail, std::vector<WTSOrdDtlStruct>{od}));
+        WTSOrdQueStruct oq{}; std::strcpy(oq.exchg, "CRY"); std::strcpy(oq.code, "BTC");
+        oq.trading_date = 20200108u; oq.action_date = 20200108u; oq.action_time = p07_action_time(6); oq.price = 13;
+        ASSERT_TRUE(write_raw_block(_base / "his/queue/CRY/20200108/BTC.dsb", BT_HIS_OrdQueue, std::vector<WTSOrdQueStruct>{oq}));
+    }
+    HisDataReplayer replayer;
+    WTSVariant* cfg = bin_tick_cfg(_root, _base, 20200108000000ull, 20200110235959ull,
+                                   "stk_comms.json", sessions, commodities);
+    ASSERT_TRUE(replayer.init(cfg)); cfg->release();
+    TickSink sink;
+    sink.onInit = [&]() { replayer.sub_tick(1u, codeA.c_str()); replayer.sub_tick(2u, codeB.c_str()); };
+    std::vector<uint64_t> clocks;
+    std::vector<uint32_t> tradingDates;
+    std::vector<std::size_t> visible;
+    std::vector<double> lastVisiblePrice;
+    std::vector<std::size_t> l2Visible;	// trans, order detail, order queue at the third event
+    sink.onTickProbe = [&](uint32_t) {
+        const uint64_t clock = uint64_t(replayer.get_date()) * 1000000000ull +
+            uint64_t(replayer.get_min_time()) * 100000ull + replayer.get_secs();
+        clocks.push_back(clock);
+        tradingDates.push_back(replayer.get_trading_date());
+        const std::string& code = sink.tickCodes.back();
+        WTSTickSlice* slice = replayer.get_tick_slice(code.c_str(), 100u);
+        visible.push_back(slice ? slice->size() : 0);
+        lastVisiblePrice.push_back(slice && slice->size() > 0 ? slice->at((int32_t)slice->size() - 1)->price : 0.0);
+        if (clocks.size() == 3 && code == codeA) {
+            WTSTransSlice* trans = replayer.get_transaction_slice(code.c_str(), 100u);
+            l2Visible.push_back(trans ? trans->size() : 0);
+            if (trans) trans->release();
+            WTSOrdDtlSlice* orders = replayer.get_order_detail_slice(code.c_str(), 100u);
+            l2Visible.push_back(orders ? orders->size() : 0);
+            if (orders) orders->release();
+            WTSOrdQueSlice* queue = replayer.get_order_queue_slice(code.c_str(), 100u);
+            l2Visible.push_back(queue ? queue->size() : 0);
+            if (queue) queue->release();
+        }
+        if (slice) {
+            for (int32_t i = 0; i < (int32_t)slice->size(); ++i) {
+                const WTSTickStruct* tick = slice->at(i);
+                ASSERT_NE(nullptr, tick);
+                EXPECT_LT(uint64_t(tick->action_date) * 1000000000ull + tick->action_time, clock);
+            }
+            slice->release();
+        }
+    };
+    replayer.register_sink(&sink, "p04011_mixed_sessions");
+    ASSERT_TRUE(replayer.prepare()); replayer.run(false);
+    EXPECT_FALSE(HisDataReplayerTestAccess::replay_terminated(replayer));
+    EXPECT_EQ(std::vector<double>({1,2,3,4,5}), sink.tickPrices) << "dispatch is unchanged by the separate query bucket";
+    EXPECT_EQ(std::vector<std::string>({codeA,codeB,codeA,codeB,codeA}), sink.tickCodes);
+    ASSERT_EQ(5u, tradingDates.size());
+    EXPECT_EQ(20200109u, tradingDates[2]) << "the global trading date is the night product's next day";
+    ASSERT_EQ(5u, visible.size());
+    EXPECT_EQ(1u, visible[2]) << "BTC at 2020-01-08 23:59:59.999 sees its own earlier record of that day";
+    EXPECT_DOUBLE_EQ(1.0, lastVisiblePrice[2]);
+    EXPECT_EQ((std::vector<std::size_t>{1u, 1u, 1u}), l2Visible)
+        << "transaction, order detail and order queue queries also use BTC's own trading day";
+    EXPECT_EQ(1u, sink.replayDoneCalls);
+}
+
+// 迭代03 第五会话主线程：BUG-P04-011 合同（2026-11-05 用户裁定“维持 fail-closed”）——纯 tick 混合会话回放中
+// 含负 offset 品种（offset=-300、0:00–2:00）时，回放器拒绝继续，以错误终止，不按未定义的跨日口径派发。
+TEST_F(P07TickLoaderTest, p04011NegativeOffsetMixedTickReplayFailsClosed)
+{
+    InstDirRestore restoreInstDir;
+    ASSERT_TRUE(set_data_storage_inst_dir(_root));
+    const auto sessions = _base / "p04011neg_sessions.json";
+    const auto commodities = _base / "p04011neg_commodities.json";
+    {
+        std::ofstream out(sessions);
+        ASSERT_TRUE(out.is_open());
+        out << R"({"TRADING":{"name":"default","offset":0,"sections":[{"from":0,"to":0}]},"P07_24H":{"name":"continuous","offset":0,"sections":[{"from":0,"to":0}]},"P07_NEG":{"name":"offset-negative","offset":-300,"sections":[{"from":0,"to":200}]}})";
+    }
+    {
+        std::ofstream out(commodities);
+        ASSERT_TRUE(out.is_open());
+        out << R"({"CRY":{"COIN":{"category":1,"covermode":0,"exchg":"CRY","holiday":"CHINA","name":"continuous","precision":2,"pricemode":1,"pricetick":0.01,"session":"P07_24H","volscale":1}},"ZZZ":{"NEG":{"category":1,"covermode":0,"exchg":"ZZZ","holiday":"CHINA","name":"negative offset","precision":2,"pricemode":1,"pricetick":0.01,"session":"P07_NEG","volscale":1}}})";
+    }
+    const std::string codeA = "CRY.COIN.BTC", codeB = "ZZZ.NEG.N1";
+    auto mk = [](const char* exchg, const char* code, uint32_t day, uint32_t tradeDay,
+                 uint32_t hhmm, uint32_t sec, uint32_t ms, double price) {
+        WTSTickStruct t{};
+        std::strcpy(t.exchg, exchg); std::strcpy(t.code, code);
+        t.action_date = day; t.trading_date = tradeDay; t.action_time = p07_action_time(hhmm, sec, ms);
+        t.open = t.high = t.low = t.price = price; t.volume = t.total_volume = 1;
+        return t;
+    };
+    ASSERT_TRUE(write_raw_block(_base / "his/ticks/CRY/20200108/BTC.dsb", BT_HIS_Ticks,
+        std::vector<WTSTickStruct>{mk("CRY", "BTC", 20200108u, 20200108u, 5, 0, 0, 1),
+                                   mk("CRY", "BTC", 20200108u, 20200108u, 2359, 59, 999, 3)}));
+    ASSERT_TRUE(write_raw_block(_base / "his/ticks/ZZZ/20200107/N1.dsb", BT_HIS_Ticks,
+        std::vector<WTSTickStruct>{mk("ZZZ", "N1", 20200108u, 20200107u, 131, 10, 100, 2)}));
+    ASSERT_TRUE(write_raw_block(_base / "his/ticks/ZZZ/20200109/N1.dsb", BT_HIS_Ticks,
+        std::vector<WTSTickStruct>{mk("ZZZ", "N1", 20200110u, 20200109u, 131, 10, 100, 4)}));
+    ASSERT_TRUE(write_raw_block(_base / "his/ticks/CRY/20200110/BTC.dsb", BT_HIS_Ticks,
+        std::vector<WTSTickStruct>{mk("CRY", "BTC", 20200110u, 20200110u, 2359, 59, 999, 5)}));
+    HisDataReplayer replayer;
+    WTSVariant* cfg = bin_tick_cfg(_root, _base, 20200108000000ull, 20200110235959ull,
+                                   "stk_comms.json", sessions, commodities);
+    ASSERT_TRUE(replayer.init(cfg)); cfg->release();
+    TickSink sink;
+    sink.onInit = [&]() { replayer.sub_tick(1u, codeA.c_str()); replayer.sub_tick(2u, codeB.c_str()); };
+    replayer.register_sink(&sink, "p04011_negative_offset_mixed");
+    const bool prepared = replayer.prepare();
+    if (prepared)
+        replayer.run(false);
+    const WtReplayStatusV1 status = replayer.replay_status();
+    std::string dispatched;
+    for (double p : sink.tickPrices) dispatched += std::to_string((int)p) + ",";
+    std::cerr << "[p04011neg] prepared=" << prepared << " state=" << status.state << " error_code=" << status.error_code
+              << " dispatched=" << dispatched << " message=" << status.message << std::endl;
+    ASSERT_TRUE(prepared);
+    EXPECT_TRUE(HisDataReplayerTestAccess::replay_terminated(replayer));
+    EXPECT_EQ((uint32_t)WT_REPLAY_ERROR_INTERNAL, status.error_code) << status.message;
+    // Records before the negative-offset day transition are delivered in order;
+    // nothing is dispatched past the undefined cross-day boundary (ticks 4 and 5).
+    EXPECT_EQ(std::vector<double>({1, 2, 3}), sink.tickPrices) << dispatched;
+}
+

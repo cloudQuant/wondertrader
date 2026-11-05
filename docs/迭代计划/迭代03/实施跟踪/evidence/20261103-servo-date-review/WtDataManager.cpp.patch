@@ -1,0 +1,37 @@
+--- /tmp/i03_servo_date_baseline_20261103/WtDataManager.cpp	2026-11-03 17:43:31
++++ src/WtDtServo/WtDataManager.cpp	2026-11-03 17:47:11
+@@ -242,13 +242,30 @@
+ 
+ WTSKlineSlice* WtDataManager::get_kline_slice_by_date(const char* stdCode, WTSKlinePeriod period, uint32_t times, uint32_t uDate /* = 0 */)
+ {
+-	if (_reader == NULL || _bd_mgr == NULL)
++	if (stdCode == NULL || *stdCode == '\0' || _reader == NULL ||
++		_runner == NULL || _bd_mgr == NULL || _hot_mgr == NULL ||
++		_bd_mgr != &_runner->getBaseDataMgr() || _hot_mgr != &_runner->getHotMgr())
+ 		return NULL;
+ 
++	// Snapshot the current date once so both boundaries use the same day.
++	if (uDate == 0)
++	{
++		uint32_t clockTime = 0;
++		if (!TimeUtils::tryGetDateTime(uDate, clockTime))
++			return NULL;
++	}
++
+ 	CodeHelper::CodeInfo codeInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
+-	uint64_t stime = _bd_mgr->getBoundaryTime(codeInfo.stdCommID(), uDate, false, true);
+-	uint64_t etime = _bd_mgr->getBoundaryTime(codeInfo.stdCommID(), uDate, false, false);
+-	return get_kline_slice_by_range(stdCode, period, times, stime, etime);
++	DateMappingV1 mapping = _runner->getBaseDataMgr().getDateMappingV1();
++	if (mapping.size != sizeof(DateMappingV1) || mapping.version != 1 ||
++		mapping.context != &_runner->getBaseDataMgr() || mapping.getBoundaryTime == NULL)
++		return NULL;
++	const DateMappingResult64 start = mapping.getBoundaryTime(&mapping, codeInfo.stdCommID(), uDate, 0, 1);
++	const DateMappingResult64 end = mapping.getBoundaryTime(&mapping, codeInfo.stdCommID(), uDate, 0, 0);
++	if (start.status != DateMappingStatus::Ok || end.status != DateMappingStatus::Ok ||
++		start.value == 0 || end.value == 0 || start.value > end.value)
++		return NULL;
++	return get_kline_slice_by_range(stdCode, period, times, start.value, end.value);
+ }
+ 
+ WTSKlineSlice* WtDataManager::get_kline_slice_by_range(const char* stdCode, WTSKlinePeriod period, uint32_t times,uint64_t stime, uint64_t etime /* = 0 */)

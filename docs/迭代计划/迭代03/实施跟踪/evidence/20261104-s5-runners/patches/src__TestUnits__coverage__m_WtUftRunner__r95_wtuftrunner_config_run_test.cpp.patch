@@ -1,0 +1,19 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp	2026-11-01 01:38:39
++++ src/TestUnits/coverage/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp	2026-11-04 20:09:40
+@@ -395,13 +395,15 @@
+ 
+ /* WTSSessionInfo 的 0~2400 单段：任何 hhmm 都在交易时段内，ticker 线程不会落进 10s 休眠。
+  * 2400 经 offsetTime(..., false) 仍是 2400，isLastOfSection 只在 24:00 边界命中。 */
++// 卡2 2b=A（用户裁定 2026-11-03）：交易时段全天只能写 0-0，0-2400 被会话加载器拒绝
++// （迭代03 s5-runners 更新，原为 to: 2400）。
+ const char* kSessionsYaml =
+ 	"ALLDAY:\n"
+ 	"    name: AllDay\n"
+ 	"    offset: 0\n"
+ 	"    sections:\n"
+ 	"        - from: 0\n"
+-	"          to: 2400\n";
++	"          to: 0\n";
+ 
+ const char* kCommoditiesYaml =
+ 	"SHFE:\n"

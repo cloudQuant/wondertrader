@@ -1,0 +1,31 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-other/before/src/TraderMocker/TraderMocker.h	2026-11-04 08:16:04
++++ src/TraderMocker/TraderMocker.h	2026-11-04 17:59:56
+@@ -44,7 +44,18 @@
+ 
+ 	uint32_t	makeTradeID();
+ 	uint32_t	makeOrderID();
+-	ITraderSpi*	get_listener() const { return _listener.load(std::memory_order_acquire); }
++	// BUG-R60-001: once stop has been requested (release()/disconnect(), from any
++	// thread) this instance delivers nothing more to its listener. Every delivery
++	// re-reads the listener through this gate, and all deliveries are serialized
++	// by _mtx_awaits, so a stop requested inside one callback isolates every later
++	// callback of the same (still alive) instance from the host and from any new
++	// session object that reuses the same listener.
++	ITraderSpi*	get_listener() const
++	{
++		if (_delivery_closed.load(std::memory_order_acquire))
++			return NULL;
++		return _listener.load(std::memory_order_acquire);
++	}
+ 
+ 	void		load_positions();
+ 	void		save_positions();
+@@ -70,6 +81,8 @@
+ 	std::mutex		_release_mutex;
+ 	bool			_released = false;
+ 	std::atomic<bool>	_match_started{ false };
++	// BUG-R60-001: closed together with request admission; see get_listener().
++	std::atomic<bool>	_delivery_closed{ false };
+ 
+ 	bool		on_own_thread() const;
+ 	void		request_stop_from_callback();

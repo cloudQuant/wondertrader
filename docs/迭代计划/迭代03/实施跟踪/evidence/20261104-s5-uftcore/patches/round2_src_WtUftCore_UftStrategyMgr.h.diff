@@ -1,0 +1,87 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-uftcore/before2/src/WtUftCore/UftStrategyMgr.h	2026-10-29 14:57:06
++++ src/WtUftCore/UftStrategyMgr.h	2026-11-04 21:24:54
+@@ -10,10 +10,12 @@
+  */
+ #pragma once
+ #include <memory>
++#include <string>
+ #include <boost/core/noncopyable.hpp>
+ 
+ #include "../Includes/FasterDefs.h"
+ #include "../Includes/UftStrategyDefs.h"
++#include "../Includes/IStrategyPluginV2.h"
+ 
+ #include "../Share/DLLHelper.hpp"
+ 
+@@ -112,42 +114,51 @@
+ 
+ private:
+ 	/**
++	 * @brief 版本化工厂的所有者(卡4b=A / 卡9a)
++	 * @details 管理器条目与其创建的每个策略包装共享本对象(经 shared_ptr 删除器)。
++	 * 最后一个引用释放时，仅当插件声明同步拆除能力才调用 destroy_factory；否则工厂与
++	 * 模块隔离到进程退出。模块句柄从不卸载(加载器引用常驻)。
++	 */
++	struct FactoryOwner
++	{
++		FactoryOwner(IUftStrategyFact* fact, const WtStrategyPluginApiV2* api, DllHandle module)
++			: _fact(fact), _api(api), _module_inst(module) {}
++		FactoryOwner(const FactoryOwner&) = delete;
++		FactoryOwner& operator=(const FactoryOwner&) = delete;
++		~FactoryOwner();
++
++		IUftStrategyFact*				_fact;
++		const WtStrategyPluginApiV2*	_api;
++		DllHandle						_module_inst;
++	};
++
++	/**
+ 	 * @brief 策略工厂信息结构体
+-	 * @details 存储策略工厂的动态库路径、句柄和相关函数指针
++	 * @details 存储策略工厂的动态库路径、句柄与版本化所有者
+ 	 */
+ 	typedef struct _StraFactInfo
+ 	{
+ 		std::string		_module_path;		///< 模块路径
+ 		DllHandle		_module_inst;		///< 动态链接库句柄
+ 		IUftStrategyFact*	_fact;			///< 策略工厂指针
+-		FuncCreateUftStraFact	_creator;	///< 创建策略工厂的函数指针
+-		FuncDeleteUftStraFact	_remover;	///< 删除策略工厂的函数指针
++		std::shared_ptr<FactoryOwner> _owner;	///< 工厂所有者(决定能否拆除)
+ 
+-		/**
+-		 * @brief 构造函数
+-		 * @details 初始化成员变量
+-		 */
+ 		_StraFactInfo()
+ 		{
+ 			_module_inst = NULL;
+ 			_fact = NULL;
+ 		}
+-
+-		/**
+-		 * @brief 析构函数
+-		 * @details 释放策略工厂资源
+-		 */
+-		~_StraFactInfo()
+-		{
+-			if (_fact)
+-			{
+-				_remover(_fact);
+-				_fact = NULL;
+-			}
+-		}
+ 	} StraFactInfo;
+ 
++	UftStrategyPtr wrapStrategy(StraFactInfo& fInfo, const char* unitname, const char* id);
++
+ 	/**
++	 * @brief 已加载但未发布工厂的模块(被拒/外族/非插件/工厂创建失败/重名)，常驻不卸载
++	 */
++	wt_hashset<std::string> _refused_modules;
++	wt_hashset<std::string> _skipped_modules;
++
++	/**
+ 	 * @brief 策略工厂映射类型
+ 	 * @details 使用哈希表存储策略工厂信息，以工厂名称为键
+ 	 */

@@ -8,6 +8,9 @@
  * \brief 
  */
 #include "HftMocker.h"
+#include "ReplayTradeReceipt.hpp"
+#include <algorithm>
+#include <memory>
 #include "WtHelper.h"
 
 #include <stdarg.h>
@@ -268,24 +271,44 @@ bool HftMocker::init_hft_factory(WTSVariant* cfg)
 	if (hInst == NULL)
 		return false;
 
-	FuncCreateHftStraFact creator = (FuncCreateHftStraFact)DLLHelper::get_symbol(hInst, "createStrategyFact");
-	FuncDeleteHftStraFact remover = (FuncDeleteHftStraFact)DLLHelper::get_symbol(hInst, "deleteStrategyFact");
-	if (creator == NULL || remover == NULL)
+	// Card 4b=A / BUG-R31-002: only a validated versioned HFT table is used.
+	// CTA/UFT plugins export the same legacy symbol names, so v1 creators and
+	// deleters are never called.
+	const WtStrategyPluginApiV2* api = NULL;
+	std::string rejectReason;
+	const auto probe = wt_stra_plugin::probeModule(
+		[hInst](const char* symbol) { return DLLHelper::get_symbol(hInst, symbol); },
+		WT_STRA_PLUGIN_V2_FAMILY_HFT, api, rejectReason);
+	if (probe != wt_stra_plugin::ProbeResult::Accepted)
 	{
-		WTSLogger::error("HFT strategy module {} is missing {}", module,
-			creator == NULL ? "createStrategyFact" : "deleteStrategyFact");
+		WTSLogger::error("HFT strategy module {} rejected: {}", module,
+			probe == wt_stra_plugin::ProbeResult::NotStrategyPlugin ?
+				std::string("no versioned HFT strategy plugin entry") : rejectReason);
 		DLLHelper::free_library(hInst);
 		return false;
 	}
 
-	return init_hft_factory_impl(cfg, hInst, module, creator, remover);
+	return init_hft_factory_core(cfg, hInst, module, NULL, NULL, api);
 }
 
 bool HftMocker::init_hft_factory_impl(WTSVariant* cfg, DllHandle module,
 	const std::string& modulePath, FuncCreateHftStraFact creator,
 	FuncDeleteHftStraFact remover)
 {
-	if (cfg == NULL || creator == NULL || remover == NULL ||
+	// In-process seam with explicit v1 functions (tests only).
+	if (creator == NULL || remover == NULL)
+	{
+		DLLHelper::free_library(module);
+		return false;
+	}
+	return init_hft_factory_core(cfg, module, modulePath, creator, remover, NULL);
+}
+
+bool HftMocker::init_hft_factory_core(WTSVariant* cfg, DllHandle module,
+	const std::string& modulePath, FuncCreateHftStraFact creator,
+	FuncDeleteHftStraFact remover, const WtStrategyPluginApiV2* api)
+{
+	if (cfg == NULL || (api == NULL && (creator == NULL || remover == NULL)) ||
 		_factory._fact != NULL || _factory._module_inst != NULL || _strategy != NULL)
 	{
 		DLLHelper::free_library(module);
@@ -310,7 +333,7 @@ bool HftMocker::init_hft_factory_impl(WTSVariant* cfg, DllHandle module,
 	try
 	{
 		modulePathValue = modulePath;
-		fact = creator();
+		fact = api != NULL ? static_cast<IHftStrategyFact*>(api->create_factory()) : creator();
 		if (fact != NULL)
 		{
 			strategy = fact->createStrategy(strategyName, strategyId);
@@ -336,6 +359,7 @@ bool HftMocker::init_hft_factory_impl(WTSVariant* cfg, DllHandle module,
 		_factory._module_path = std::move(modulePathValue);
 		_factory._creator = creator;
 		_factory._remover = remover;
+		_factory._api = api;
 		_factory._fact = fact;
 		_strategy = strategy;
 		_name = std::move(strategyIdValue);
@@ -367,6 +391,7 @@ bool HftMocker::init_hft_factory_impl(WTSVariant* cfg, DllHandle module,
 			_factory._module_path = std::move(modulePathValue);
 			_factory._creator = creator;
 			_factory._remover = remover;
+			_factory._api = api;
 			_factory._fact = fact;
 			_factory.pin();
 			return false;
@@ -378,6 +403,7 @@ bool HftMocker::init_hft_factory_impl(WTSVariant* cfg, DllHandle module,
 		_factory._module_path = std::move(modulePathValue);
 		_factory._creator = creator;
 		_factory._remover = remover;
+		_factory._api = api;
 		_factory._fact = fact;
 		_strategy = strategy;
 		return false;
@@ -385,9 +411,18 @@ bool HftMocker::init_hft_factory_impl(WTSVariant* cfg, DllHandle module,
 
 	if (fact != NULL)
 	{
+		if (api != NULL && !wt_stra_plugin::hasSyncTeardown(api))
+		{
+			// Card 9a: no teardown promise, keep factory and module to exit.
+			WTSLogger::error("HFT strategy initialization failed for {}; plugin without teardown capability retained", strategyName);
+			return false;
+		}
 		try
 		{
-			remover(fact);
+			if (api != NULL)
+				api->destroy_factory(static_cast<void*>(fact));
+			else
+				remover(fact);
 		}
 		catch (...)
 		{
@@ -639,16 +674,25 @@ void HftMocker::on_init()
 void HftMocker::on_session_begin(uint32_t curTDate)
 {
 	//每个交易日开始，要把冻结持仓置零
-	for (auto& it : _pos_map)
+	//卡3 3d=C：冻结量归属交易日（上一个 session）与本交易日相同（同日重复 session-begin）时保留
+	if (_frozen_tdate != curTDate)
 	{
-		const char* stdCode = it.first.c_str();
-		PosInfo& pInfo = (PosInfo&)it.second;
-		if (!decimal::eq(pInfo._frozen, 0))
+		for (auto& it : _pos_map)
 		{
-			log_debug("{} of {} frozen released on {}", pInfo._frozen, stdCode, curTDate);
-			pInfo._frozen = 0;
+			const char* stdCode = it.first.c_str();
+			PosInfo& pInfo = (PosInfo&)it.second;
+			if (!decimal::eq(pInfo._frozen, 0))
+			{
+				log_debug("{} of {} frozen released on {}", pInfo._frozen, stdCode, curTDate);
+				pInfo._frozen = 0;
+			}
 		}
 	}
+	else
+	{
+		log_debug("Frozen positions kept on same-tradingday session begin {}", curTDate);
+	}
+	_frozen_tdate = curTDate;
 
 	if (_strategy)
 		_strategy->on_session_begin(this, curTDate);
@@ -798,13 +842,136 @@ void HftMocker::on_order(uint32_t localid, const char* stdCode, bool isBuy, doub
 		_strategy->on_order(this, localid, stdCode, isBuy, totalQty, leftQty, price, isCanceled, userTag);
 }
 
-void HftMocker::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag/* = ""*/)
+bool HftMocker::plan_trade_fees(const char* stdCode, bool isBuy, const std::vector<double>& volumes,
+ double price, const wt_fee::Context& context, std::vector<std::vector<double>>& fees)
 {
-	const PosInfo& posInfo = _pos_map[stdCode];
-	double curPos = posInfo._volume + vol * (isBuy ? 1 : -1);
-	do_set_position(stdCode, curPos, price, userTag);
-	if (_strategy)
-		_strategy->on_trade(this, localid, stdCode, isBuy, vol, price, userTag);
+ auto found = _pos_map.find(stdCode);
+ PosInfo simulated = found == _pos_map.end() ? PosInfo() : found->second;
+ double total = _fund_info._total_fees;
+ double totalProfit = _fund_info._total_profit;
+ auto* commodity = _replayer->get_commodity_info(stdCode);
+ if (!replay_trade::fundFinite(totalProfit, _fund_info._total_dynprofit, total) || !commodity ||
+     !std::isfinite(commodity->getVolScale())) return false;
+ const uint32_t today = _replayer->get_trading_date();
+ for (double vol : volumes) {
+  if (!std::isfinite(vol) || vol <= 0 || !std::isfinite(price) || price < 0) return false;
+  const double diff = vol * (isBuy ? 1 : -1);
+  const double target = simulated._volume + diff;
+  if (!std::isfinite(target) || decimal::eq(target, simulated._volume)) return false;
+  std::vector<double> segments;
+  if (decimal::gt(simulated._volume * diff, 0)) {
+   if (!replay_trade::appendFee(context, price, std::abs(diff), 0, total, segments) ||
+       !replay_trade::fundFinite(totalProfit, _fund_info._total_dynprofit, total)) return false;
+   DetailInfo detail; detail._volume = std::abs(diff); detail._opentdate = today;
+   detail._price = price; detail._long = decimal::gt(target, 0);
+   simulated._details.emplace_back(detail);
+  } else {
+   double left = std::abs(diff);
+   size_t count = 0;
+   for (auto& detail : simulated._details) {
+    const double used = std::min(detail._volume, left);
+    if (decimal::eq(used, 0)) continue;
+    double profit = (price - detail._price) * used * commodity->getVolScale();
+    if (!detail._long) profit *= -1;
+    if (!std::isfinite(profit) || !std::isfinite(totalProfit + profit) ||
+        !std::isfinite(simulated._closeprofit + profit)) return false;
+    totalProfit += profit; simulated._closeprofit += profit;
+    if (!replay_trade::appendFee(context, price, used, detail._opentdate == today ? 2 : 1, total, segments) ||
+        !replay_trade::fundFinite(totalProfit, _fund_info._total_dynprofit, total)) return false;
+    detail._volume -= used; left -= used;
+    if (decimal::eq(detail._volume, 0)) ++count;
+    if (left == 0) break;
+   }
+   for (size_t i = 0; i < count; ++i)
+    if (!decimal::eq(simulated._details[i]._volume, 0)) return false;
+   simulated._details.erase(simulated._details.begin(), simulated._details.begin() + count);
+   if (left > 0) {
+    if (!replay_trade::appendFee(context, price, left, 0, total, segments) ||
+        !replay_trade::fundFinite(totalProfit, _fund_info._total_dynprofit, total)) return false;
+    DetailInfo detail; detail._volume = left; detail._opentdate = today;
+    detail._price = price; detail._long = decimal::gt(target, 0);
+    simulated._details.emplace_back(detail);
+   }
+  }
+  simulated._volume = target;
+  fees.push_back(std::move(segments));
+ }
+ return true;
+}
+
+void HftMocker::on_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag)
+{
+ apply_trade(localid, stdCode, isBuy, vol, price, userTag);
+}
+
+std::function<bool()> HftMocker::trade_state_guard(const std::string& key)
+{
+ auto existing = _pos_map.find(key);
+ const bool existed = existing != _pos_map.end();
+ const PosInfo snapshot = existed ? existing->second : PosInfo();
+ const double feeSnapshot = _fund_info._total_fees, profitSnapshot = _fund_info._total_profit;
+ const double dynamicSnapshot = _fund_info._total_dynprofit;
+ const uint32_t dateSnapshot = _replayer->get_trading_date();
+ return [this, key, snapshot, existed, feeSnapshot, profitSnapshot, dynamicSnapshot, dateSnapshot]() {
+  auto it = _pos_map.find(key);
+  if ((it != _pos_map.end()) != existed || _fund_info._total_fees != feeSnapshot ||
+      _fund_info._total_profit != profitSnapshot || _fund_info._total_dynprofit != dynamicSnapshot ||
+      _replayer->get_trading_date() != dateSnapshot) return false;
+  if (!existed) return true;
+  const PosInfo& p = it->second;
+  if (p._volume != snapshot._volume || p._closeprofit != snapshot._closeprofit ||
+      p._dynprofit != snapshot._dynprofit || p._frozen != snapshot._frozen ||
+      p._details.size() != snapshot._details.size()) return false;
+  for (size_t i = 0; i < p._details.size(); ++i) {
+   const auto& a = p._details[i]; const auto& b = snapshot._details[i];
+   if (a._long != b._long || a._price != b._price || a._volume != b._volume ||
+       a._opentime != b._opentime || a._opentdate != b._opentdate ||
+       a._max_profit != b._max_profit || a._max_loss != b._max_loss || a._profit != b._profit ||
+       std::memcmp(a._usertag, b._usertag, sizeof(a._usertag)) != 0) return false;
+  }
+  return true;
+ };
+}
+
+bool HftMocker::apply_trade(uint32_t localid, const char* stdCode, bool isBuy, double vol, double price, const char* userTag)
+{
+ if (!stdCode || !userTag || !_replayer->fee_error().empty()) return false;
+ // I03-NEW-095: a zero-volume trade report changes nothing (legacy behaviour) and is not
+ // a fee failure; latching a fee error here would terminate the whole replay.
+ if (vol == 0.0) return false;
+ auto* frame = replay_trade::find(this);
+ replay_trade::Frame direct;
+ std::vector<std::vector<double>> planned;
+ std::unique_ptr<replay_trade::Scope> scope;
+ if (frame) {
+  if (!frame->expected || frame->committed || !frame->stateValid || !frame->stateValid() ||
+      (frame->remaining && *frame->remaining != frame->expectedRemaining) ||
+      frame->localid != localid || frame->code != stdCode ||
+      frame->direction != isBuy || frame->quantity != vol || frame->price != price || !frame->fees) {
+   frame->rejected = true; _replayer->report_fee_error("reentrant or mismatched HFT trade"); return false;
+  }
+ } else {
+  wt_fee::Context context; std::string error;
+  if (!_replayer->prepare_fee_context(stdCode, nullptr, context, error) ||
+      !plan_trade_fees(stdCode, isBuy, {vol}, price, context, planned)) {
+   _replayer->report_fee_error(error.empty() ? "HFT trade fee preflight failed" : error); return false;
+  }
+  direct.owner = this; direct.code = stdCode; direct.localid = localid; direct.direction = isBuy;
+  direct.quantity = vol; direct.price = price; direct.fees = &planned[0]; direct.expected = true;
+  direct.stateValid = trade_state_guard(stdCode);
+  scope.reset(new replay_trade::Scope(direct)); frame = &direct;
+ }
+ frame->expected = false;
+ auto it = _pos_map.find(stdCode);
+ const double current = it == _pos_map.end() ? 0.0 : it->second._volume;
+ if (!do_set_position(stdCode, current + vol * (isBuy ? 1 : -1), price, userTag, *frame->fees)) {
+  _replayer->report_fee_error("HFT trade commit failed"); return false;
+ }
+ frame->committed = true;
+ frame->stateValid = trade_state_guard(stdCode);
+ if (_strategy) _strategy->on_trade(this, localid, stdCode, isBuy, vol, price, userTag);
+ if (!frame->stateValid()) _replayer->report_fee_error("HFT trade plan invalidated by callback");
+ return true;
 }
 
 void HftMocker::on_entrust(uint32_t localid, const char* /*stdCode*/, bool bSuccess, const char* message, const char* userTag/* = ""*/)
@@ -856,6 +1023,12 @@ void HftMocker::update_dyn_profit(const char* stdCode, WTSTickData* newTick)
 
 bool HftMocker::procOrder(uint32_t localid)
 {
+	if (auto* active = replay_trade::find(this)) {
+		active->rejected = true; _replayer->report_fee_error("reentrant HFT order matching"); return false;
+	}
+	if (!_replayer->fee_error().empty()) return false;
+	replay_trade::Frame frame; frame.owner = this;
+	replay_trade::Scope receipt(frame);
 	OrderInfoPtr ordInfo;
 	{
 		auto it = _orders.find(localid);
@@ -879,7 +1052,9 @@ bool HftMocker::procOrder(uint32_t localid)
 		ordInfo->_proced_after_placed = true;
 	}
 
-	WTSTickData* curTick = stra_get_last_tick(ordInfo->_code);
+	auto tickReleaser = [](WTSTickData* tick) { if (tick) tick->release(); };
+	std::unique_ptr<WTSTickData, decltype(tickReleaser)> tick(stra_get_last_tick(ordInfo->_code), tickReleaser);
+	WTSTickData* curTick = tick.get();
 	if (curTick == NULL)
 		return false;
 
@@ -894,11 +1069,9 @@ bool HftMocker::procOrder(uint32_t localid)
 		//if (curPx == 0.0)
 		if(decimal::eq(curPx, 0.0))
 		{
-			curTick->release();
 			return false;
 		}
 	}
-	curTick->release();
 
 	//如果没有成交条件,则退出逻辑
 	if(!decimal::eq(ordInfo->_price, 0.0))
@@ -919,14 +1092,70 @@ bool HftMocker::procOrder(uint32_t localid)
 	/*
 	 *	下面就要模拟成交了
 	 */
+	if (!std::isfinite(orderQty) || !std::isfinite(ordInfo->_left)) {
+		_replayer->report_fee_error("invalid HFT order quantity"); return false;
+	}
 	double maxQty = min(orderQty, ordInfo->_left);
+	if (!std::isfinite(maxQty) || maxQty <= 0 || maxQty > static_cast<double>(UINT32_MAX)) {
+		_replayer->report_fee_error("invalid HFT fill quantity"); return false;
+	}
 	auto vols = splitVolume((uint32_t)maxQty);
-	for(uint32_t curQty : vols)
+	if (vols.empty()) return false;
+	if (frame.rejected || !_replayer->fee_error().empty()) return false;
+	wt_fee::Context context; std::string error;
+	// I03-NEW-080: the fee context is the authority for the fill contract. A continuous
+	// order without the tick's physical contract still fails closed there; a physical
+	// order code resolves its own contract (same as the CTA/SEL mockers).
+	if (!_replayer->prepare_fee_context(ordInfo->_code, curTick->getContractInfo(), context, error)) {
+		_replayer->report_fee_error(error); return false;
+	}
+	tick.reset();
+	std::vector<double> volumes(vols.begin(), vols.end());
+	std::vector<std::vector<double>> fees;
+	if (!plan_trade_fees(ordInfo->_code, ordInfo->_isBuy, volumes, curPx, context, fees)) {
+		_replayer->report_fee_error("HFT split-fill fee preflight failed"); return false;
+	}
+	frame.code = ordInfo->_code;
+	frame.localid = localid; frame.direction = ordInfo->_isBuy; frame.offset = 0; frame.price = curPx;
+	for (size_t index = 0; index < vols.size(); ++index)
 	{
-		on_trade(ordInfo->_localid, ordInfo->_code, ordInfo->_isBuy, curQty, curPx, ordInfo->_usertag);
+		uint32_t curQty = vols[index];
+		if (!std::isfinite(ordInfo->_left) || ordInfo->_left < curQty) {
+			_replayer->report_fee_error("HFT order remaining is smaller than planned fill"); return false;
+		}
+		frame.quantity = curQty; frame.fees = &fees[index]; frame.expected = true; frame.committed = false;
+		frame.remaining = &ordInfo->_left; frame.expectedRemaining = ordInfo->_left;
+		frame.stateValid = trade_state_guard(frame.code);
+		try {
+			on_trade(ordInfo->_localid, ordInfo->_code, ordInfo->_isBuy, curQty, curPx, ordInfo->_usertag);
+		} catch (...) {
+			frame.expected = false;
+			if (frame.committed && ordInfo->_left == frame.expectedRemaining) ordInfo->_left -= curQty;
+			_replayer->report_fee_error("HFT trade callback threw");
+			return false;
+		}
+		frame.expected = false;
+		if (!frame.committed) {
+			_replayer->report_fee_error("HFT virtual trade callback did not commit"); return false;
+		}
+		if (ordInfo->_left != frame.expectedRemaining) {
+			_replayer->report_fee_error("HFT order changed during trade callback"); return false;
+		}
 
 		ordInfo->_left -= curQty;
-		on_order(localid, ordInfo->_code, ordInfo->_isBuy, ordInfo->_total, ordInfo->_left, ordInfo->_price, false, ordInfo->_usertag);
+		const double remainingAfterFill = ordInfo->_left;
+		if (frame.rejected || !_replayer->fee_error().empty() || !frame.stateValid || !frame.stateValid()) {
+			_replayer->report_fee_error("HFT trade plan invalidated by callback"); return false;
+		}
+		try {
+			on_order(localid, ordInfo->_code, ordInfo->_isBuy, ordInfo->_total, ordInfo->_left, ordInfo->_price, false, ordInfo->_usertag);
+		} catch (...) {
+			_replayer->report_fee_error("HFT order callback threw after fill"); return false;
+		}
+		if (frame.rejected || !_replayer->fee_error().empty() || !frame.stateValid() ||
+		    ordInfo->_left != remainingAfterFill) {
+			_replayer->report_fee_error("HFT trade plan invalidated by order callback"); return false;
+		}
 
 		double curPos = stra_get_position(ordInfo->_code);
 
@@ -1246,24 +1475,21 @@ void HftMocker::log_close(const char* stdCode, bool isLong, uint64_t openTime, d
 		totalprofit, enterTag, exitTag);
 }
 
-void HftMocker::do_set_position(const char* stdCode, double qty, double price /* = 0.0 */, const char* userTag /*= ""*/)
+bool HftMocker::do_set_position(const char* stdCode, double qty, double price, const char* userTag, const std::vector<double>& fees)
 {
+	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
+	if (!commInfo) return false;
+	size_t feeIndex = 0;
 	PosInfo& pInfo = _pos_map[stdCode];
 	double curPx = price;
-	if (decimal::eq(price, 0.0))
-		curPx = _price_map[stdCode];
 	uint64_t curTm = (uint64_t)_replayer->get_date() * 1000000000 + (uint64_t)_replayer->get_min_time()*100000 + _replayer->get_secs();
 	uint32_t curTDate = _replayer->get_trading_date();
 
 	//手数相等则不用操作了
 	if (decimal::eq(pInfo._volume, qty))
-		return;
+		return true;
 
 	log_debug("[{:04d}.{:05d}] {} position updated: {} -> {}", _replayer->get_min_time(), _replayer->get_secs(), stdCode, pInfo._volume, qty);
-
-	WTSCommodityInfo* commInfo = _replayer->get_commodity_info(stdCode);
-	if (commInfo == NULL)
-		return;
 
 	//成交价
 	double trdPx = curPx;
@@ -1290,7 +1516,7 @@ void HftMocker::do_set_position(const char* stdCode, double qty, double price /*
 		strcpy(dInfo._usertag, userTag);
 		pInfo._details.emplace_back(dInfo);
 
-		double fee = _replayer->calc_fee(stdCode, trdPx, abs(diff), 0);
+		double fee = fees[feeIndex++];
 		_fund_info._total_fees += fee;
 
 		log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(diff), fee, userTag);
@@ -1326,7 +1552,7 @@ void HftMocker::do_set_position(const char* stdCode, double qty, double price /*
 			pInfo._dynprofit = pInfo._dynprofit*dInfo._volume / (dInfo._volume + maxQty);//浮盈也要做等比缩放
 			_fund_info._total_profit += profit;
 
-			double fee = _replayer->calc_fee(stdCode, trdPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
+			double fee = fees[feeIndex++];
 			_fund_info._total_fees += fee;
 			//这里写成交记录
 			log_trade(stdCode, dInfo._long, false, curTm, trdPx, maxQty, fee, userTag);
@@ -1367,9 +1593,10 @@ void HftMocker::do_set_position(const char* stdCode, double qty, double price /*
 			pInfo._details.emplace_back(dInfo);
 
 			//这里还需要写一笔成交记录
-			double fee = _replayer->calc_fee(stdCode, trdPx, abs(left), 0);
+			double fee = fees[feeIndex++];
 			_fund_info._total_fees += fee;
 			log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(left), fee, userTag);
 		}
 	}
+	return true;
 }

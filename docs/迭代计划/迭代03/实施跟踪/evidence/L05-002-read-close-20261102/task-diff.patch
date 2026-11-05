@@ -1,0 +1,160 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/L05-002-read-close-20261102/baseline/WtDtHelper.cpp	2026-11-02 14:03:13
++++ src/WtDtHelper/WtDtHelper.cpp	2026-11-02 14:03:57
+@@ -40,12 +40,18 @@
+ namespace
+ {
+ 	thread_local bool g_fail_next_block_close_for_test = false;
++	thread_local bool g_fail_next_csv_read_close_for_test = false;
+ }
+ 
+ extern "C" void wt_dt_helper_fail_next_close_for_test()
+ {
+ 	g_fail_next_block_close_for_test = true;
+ }
++
++extern "C" void wt_dt_helper_fail_next_csv_read_close_for_test()
++{
++	g_fail_next_csv_read_close_for_test = true;
++}
+ #endif
+ 
+ /*
+@@ -303,7 +309,54 @@
+ 
+ namespace
+ {
+-	bool write_csv_file(WtString filename, const std::string& content, FuncLogCallback cbLogger);
++    // CSV exports need to observe input close failures as well as short reads.
++    // Keep the common readHelperFile behavior unchanged for other entry points.
++    bool read_csv_source(const std::string& path, std::string& content, FuncLogCallback cbLogger)
++    {
++        try
++        {
++            const auto length = std::filesystem::file_size(path);
++            if (length > (std::numeric_limits<std::size_t>::max)() ||
++                length > static_cast<std::uintmax_t>((std::numeric_limits<std::streamsize>::max)()))
++                throw std::runtime_error("Input file is too large to read");
++            std::ifstream file(path, std::ios::binary);
++            if (!file.is_open())
++                throw std::runtime_error("Failed to open file");
++            std::string input(static_cast<std::size_t>(length), '\0');
++            if (!input.empty())
++            {
++                file.read(&input[0], static_cast<std::streamsize>(input.size()));
++                if (file.gcount() != static_cast<std::streamsize>(input.size()) || file.bad())
++                    throw std::runtime_error("Failed to read expected number of bytes");
++            }
++            file.close();
++            bool closed = !file.fail();
++#ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
++            if (g_fail_next_csv_read_close_for_test)
++            {
++                g_fail_next_csv_read_close_for_test = false;
++                closed = false;
++            }
++#endif
++            if (!closed)
++                throw std::runtime_error("Failed to close input file");
++            content.swap(input);
++            return true;
++        }
++        catch (const std::exception& e)
++        {
++            if (cbLogger)
++                cbLogger(fmtutil::format(u8"读取数据文件{}失败: {}", path.c_str(), e.what()));
++        }
++        catch (...)
++        {
++            if (cbLogger)
++                cbLogger(fmtutil::format(u8"读取数据文件{}失败: 未知异常", path.c_str()));
++        }
++        return false;
++    }
++
++    bool write_csv_file(WtString filename, const std::string& content, FuncLogCallback cbLogger);
+ }
+ 
+ void dump_bars(WtString binFolder, WtString csvFolder, WtString /*strFilter*/ /* = "" */, FuncLogCallback cbLogger /* = NULL */)
+@@ -349,7 +402,7 @@
+ 			cbLogger(fmtutil::format(u8"正在读取数据文件{}...", path));
+ 
+ 		std::string buffer;
+-		if (!readHelperFile(path, buffer, cbLogger))
++		if (!read_csv_source(path, buffer, cbLogger))
+ 		{
+ 			allSucceeded = false;
+ 			continue;
+@@ -487,7 +540,7 @@
+ 			cbLogger(fmtutil::format(u8"正在读取数据文件{}...", path.c_str()));
+ 
+ 		std::string buffer;
+-		if (!readHelperFile(path, buffer, cbLogger))
++		if (!read_csv_source(path, buffer, cbLogger))
+ 		{
+ 			allSucceeded = false;
+ 			continue;
+--- docs/迭代计划/迭代03/实施跟踪/evidence/L05-002-read-close-20261102/baseline/l05_dt_helper_bar_test.cpp	2026-11-02 14:03:13
++++ src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_bar_test.cpp	2026-11-02 14:04:11
+@@ -33,6 +33,7 @@
+ 
+ #ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
+ extern "C" void wt_dt_helper_fail_next_close_for_test();
++extern "C" void wt_dt_helper_fail_next_csv_read_close_for_test();
+ #endif
+ 
+ namespace {
+@@ -919,6 +920,20 @@
+ }
+ 
+ #ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
++TEST_F(L05HelperBarTest, DumpBarsReportsInputCloseFailureWithoutSuccess)
++{
++    std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 3000) };
++    ASSERT_TRUE(store_bars(file("bar.dsb").c_str(), bars.data(), 1, "d", NULL));
++    log_sink().clear();
++    wt_dt_helper_fail_next_csv_read_close_for_test();
++    dump_bars(_root.string().c_str(), file("csv").c_str(), "", log_cb);
++    EXPECT_TRUE(any_log_has("读取数据文件"));
++    EXPECT_TRUE(any_log_has("Failed to close input file"));
++    EXPECT_FALSE(any_log_has("写入完成"));
++    EXPECT_FALSE(any_log_has("全部导出完成"));
++    EXPECT_FALSE(std::filesystem::exists(_root / "csv" / "bar.csv"));
++}
++
+ TEST_F(L05HelperBarTest, DumpBarsReportsCloseFailureWithoutSuccess)
+ {
+ 	std::vector<WTSBarStruct> bars{ make_day_bar(20200101, 3000) };
+--- docs/迭代计划/迭代03/实施跟踪/evidence/L05-002-read-close-20261102/baseline/l05_dt_helper_tick_test.cpp	2026-11-02 14:03:13
++++ src/TestUnits/coverage/l05_dt_servo_porter/l05_dt_helper_tick_test.cpp	2026-11-02 14:04:11
+@@ -25,6 +25,10 @@
+ 
+ USING_NS_WTP;
+ 
++#ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
++extern "C" void wt_dt_helper_fail_next_csv_read_close_for_test();
++#endif
++
+ namespace {
+ 
+ 	std::vector<std::string>& t_log_sink()
+@@ -661,4 +665,20 @@
+ 	t_log_sink().clear();
+ 	EXPECT_NO_THROW(dump_ticks(file("source_file").c_str(), file("csv").c_str(), "", t_log_cb));
+ 	EXPECT_FALSE(t_any_log_has("全部导出完成"));
++}
++
++#ifdef WT_DT_HELPER_CLOSE_TEST_HOOKS
++TEST_F(L05HelperTickTest, DumpTicksReportsInputCloseFailureWithoutSuccess)
++{
++    std::vector<WTSTickStruct> ticks{ make_tick(93000, 3000) };
++    ASSERT_TRUE(store_ticks(file("tick.dsb").c_str(), ticks.data(), 1, NULL));
++    t_log_sink().clear();
++    wt_dt_helper_fail_next_csv_read_close_for_test();
++    dump_ticks(_root.string().c_str(), file("csv").c_str(), "", t_log_cb);
++    EXPECT_TRUE(t_any_log_has("读取数据文件"));
++    EXPECT_TRUE(t_any_log_has("Failed to close input file"));
++    EXPECT_FALSE(t_any_log_has("写入完成"));
++    EXPECT_FALSE(t_any_log_has("全部导出完成"));
++    EXPECT_FALSE(std::filesystem::exists(_root / "csv" / "tick.csv"));
+ }
++#endif

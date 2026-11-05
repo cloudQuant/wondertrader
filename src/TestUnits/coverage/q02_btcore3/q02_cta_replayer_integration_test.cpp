@@ -105,10 +105,26 @@ namespace
 		cfg->append("align_by_section", false);
 		cfg->append("dont_simtick_if_notrade", false);
 		cfg->append("cache_clear_days", static_cast<uint32_t>(10));
-		cfg->append("fees", "");
+		// Card 13d: a fill needs a verified physical contract and a fee rate
+		// (missing rate is an error, a legal zero rate is valid). These cases
+		// test signal/condition restore, not fees, so the fixture provides the
+		// contract metadata and an explicit zero-rate schedule for SSE.STK.
+		const std::filesystem::path fees = base / "q02_zero_fees.json";
+		{
+			std::ofstream out(fees);
+			out << "{\"SSE.STK\":{\"open\":0.0,\"close\":0.0,\"closetoday\":0.0,\"byvolume\":false}}";
+		}
+		const std::filesystem::path contracts = base / "q02_contracts.json";
+		{
+			std::ofstream out(contracts);
+			out << "{\"SSE\":{\"000001\":{\"name\":\"q02\",\"code\":\"000001\",\"exchg\":\"SSE\",\"product\":\"STK\","
+				"\"opendate\":20000101,\"expiredate\":20991231}}}";
+		}
+		cfg->append("fees", fees.string().c_str());
 		WTSVariant* basefiles = WTSVariant::createObject();
 		basefiles->append("session", (root / "dist/common/sessions.json").string().c_str());
 		basefiles->append("commodity", (root / "dist/common/stk_comms.json").string().c_str());
+		basefiles->append("contract", contracts.string().c_str());
 		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
 		cfg->append("basefiles", basefiles);
 		basefiles->release();
@@ -245,7 +261,8 @@ TEST_F(Q02CtaIntegrationTest, queriesDelegateToReplayer)
 	ASSERT_NE(nullptr, mocker.stra_get_comminfo(kCode));
 	EXPECT_EQ(nullptr, mocker.stra_get_comminfo("DCE.FUTU.999999"));
 
-	EXPECT_EQ(std::string("000001"), mocker.stra_get_rawcode(kCode));
+	// K38 BT-A（2026-11-04 用户裁定）：无规则代码 rawcode 返回 ""（实盘、回测、HEAD 一致）。
+	EXPECT_EQ(std::string(""), mocker.stra_get_rawcode(kCode));
 	EXPECT_EQ(_replayer.get_date(), mocker.stra_get_date());
 	EXPECT_EQ(_replayer.get_trading_date(), mocker.stra_get_tdate());
 	EXPECT_EQ(_replayer.get_min_time(), mocker.stra_get_time());
@@ -495,8 +512,8 @@ TEST_F(Q02CtaIntegrationTest, unknownCodeAndFlatQueriesAreSafe)
 	EXPECT_EQ(0ull, mocker.stra_get_last_entertime("DCE.FUTU.999999"));
 	EXPECT_EQ(0ull, mocker.stra_get_last_exittime("DCE.FUTU.999999"));
 	EXPECT_DOUBLE_EQ(0.0, mocker.stra_get_last_enterprice("DCE.FUTU.999999"));
-	// 未知合约的 rawcode 原样返回（找不到 pid 时的兜底口径）
-	EXPECT_EQ(std::string("DCE.FUTU.999999"), std::string(mocker.stra_get_rawcode("DCE.FUTU.999999")));
+	// K38 BT-A（2026-11-04 用户裁定）：无规则代码（含未知合约）rawcode 返回 ""。
+	EXPECT_EQ(std::string(""), std::string(mocker.stra_get_rawcode("DCE.FUTU.999999")));
 
 	std::map<std::string, double> got;
 	mocker.enum_position([&got](const char* stdCode, double qty) { got[stdCode] = qty; }, false);

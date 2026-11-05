@@ -637,8 +637,8 @@ void SelStraBaseCtx::on_bar(const char* stdCode, const char* period, uint32_t ti
 	thread_local static char realPeriod[8] = { 0 };
 	fmtutil::format_to(realPeriod, "{}{}", period, times);
 
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", stdCode, realPeriod);
+	// I03-NEW-039: caller stdCode is unbounded; no fixed 64-byte key buffer
+	std::string key = fmt::format("{}#{}", stdCode, realPeriod);
 
 	KlineTag& tag = _kline_tags[key];
 	tag._closed = true;
@@ -979,10 +979,12 @@ void SelStraBaseCtx::do_set_position(const char* stdCode, double qty, const char
 		pInfo._details.push_back(dInfo);
 		pInfo._last_entertime = curTm;
 
-		double fee = commInfo->calcFee(trdPx, abs(qty), 0);
+		// The opened quantity is the increment, as in the CTA context and the
+		// SEL backtest mocker (I03-NEW-008 review).
+		double fee = _engine->calc_fee(stdCode, trdPx, abs(diff), 0);
 		_fund_info._total_fees += fee;
 		//_engine->mutate_fund(fee, FFT_Fee);
-		log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(qty), userTag, fee);
+		log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(diff), userTag, fee);
 	}
 	else
 	{//持仓方向和目标仓位方向不一致, 需要平仓
@@ -1017,7 +1019,7 @@ void SelStraBaseCtx::do_set_position(const char* stdCode, double qty, const char
 			pInfo._last_exittime = curTm;
 			_fund_info._total_profit += profit;
 
-			double fee = commInfo->calcFee(trdPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
+			double fee = _engine->calc_fee(stdCode, trdPx, maxQty, dInfo._opentdate == curTDate ? 2 : 1);
 			_fund_info._total_fees += fee;
 			//这里写成交记录
 			log_trade(stdCode, dInfo._long, false, curTm, trdPx, maxQty, userTag, fee);
@@ -1065,7 +1067,7 @@ void SelStraBaseCtx::do_set_position(const char* stdCode, double qty, const char
 			pInfo._last_entertime = curTm;
 
 			//这里还需要写一笔成交记录
-			double fee = commInfo->calcFee(trdPx, abs(qty), 0);
+			double fee = _engine->calc_fee(stdCode, trdPx, abs(left), 0);
 			_fund_info._total_fees += fee;
 			//_engine->mutate_fund(fee, FFT_Fee);
 			log_trade(stdCode, dInfo._long, true, curTm, trdPx, abs(left), userTag, fee);
@@ -1080,8 +1082,8 @@ void SelStraBaseCtx::do_set_position(const char* stdCode, double qty, const char
 
 WTSKlineSlice* SelStraBaseCtx::stra_get_bars(const char* stdCode, const char* period, uint32_t count)
 {
-	thread_local static char key[64] = { 0 };
-	fmtutil::format_to(key, "{}#{}", stdCode, period);
+	// I03-NEW-039: caller stdCode is unbounded; no fixed 64-byte key buffer
+	std::string key = fmt::format("{}#{}", stdCode, period);
 
 	thread_local static char basePeriod[2] = { 0 };
 	basePeriod[0] = period[0];

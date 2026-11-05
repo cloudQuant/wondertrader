@@ -1,0 +1,24 @@
+--- /tmp/i03_servo_date_baseline_20261103/WtDtRunner.cpp	2026-11-03 17:43:31
++++ src/WtDtServo/WtDtRunner.cpp	2026-11-03 17:44:45
+@@ -384,6 +384,9 @@
+ 		WTSLogger::error("WtDtServo not initialized");
+ 		return NULL;
+ 	}
++
++	if (stdCode == NULL || *stdCode == '\0' || period == NULL || *period == '\0')
++		return NULL;
+ 
+ 	thread_local static char basePeriod[2] = { 0 };
+ 	basePeriod[0] = period[0];
+@@ -409,11 +412,6 @@
+ 	{
+ 		WTSLogger::log_raw(LL_ERROR, "get_bars_by_date only supports minute period");
+ 		return NULL;
+-	}
+-
+-	if (uDate == 0)
+-	{
+-		uDate = TimeUtils::getCurDate();
+ 	}
+ 
+ 	return _data_mgr.get_kline_slice_by_date(stdCode, kp, realTimes, uDate);

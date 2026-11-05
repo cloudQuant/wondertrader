@@ -1243,7 +1243,8 @@ TEST_F(P07MinuteReplayTest, throwingBarCloseCallbackAbortsAndClearsRunningState)
 	ASSERT_TRUE(replayer.prepare());
 
 	EXPECT_THROW(replayer.run(false), std::runtime_error);
-	EXPECT_EQ(0u, sink.replayDoneCalls);
+	// K38 BT-B（2026-11-04 用户裁定）：每代恰好一次 handle_replay_done（回调异常的一代亦送达，状态 FAILED）；原断言见证据 before/。
+	EXPECT_EQ(1u, sink.replayDoneCalls);
 	sink.onBarCloseProbe = nullptr;
 	sink.closedCodes.clear();
 	sink.closedPeriods.clear();
@@ -1266,7 +1267,8 @@ TEST_F(P07MinuteReplayTest, throwingBarCloseCallbackAbortsAndClearsRunningState)
 	EXPECT_DOUBLE_EQ(kM1Bars[0].close, sink.closedPrices[0]);
 	ASSERT_EQ(4u, sink.tickPrices.size());
 	EXPECT_EQ(std::vector<double>({kM1Bars[0].open, kM1Bars[0].high, kM1Bars[0].low, kM1Bars[0].close}), sink.tickPrices);
-	EXPECT_EQ(1u, sink.replayDoneCalls);
+	// K38 BT-B：失败一代与重试成功一代各送达一次 done。
+	EXPECT_EQ(2u, sink.replayDoneCalls);
 	EXPECT_EQ(std::vector<uint32_t>({20200102u}), sink.beginTDates);
 }
 
@@ -1296,7 +1298,8 @@ TEST_F(P07MinuteReplayTest, throwingInitCallbackLeavesReplayerRetryable)
 	ASSERT_EQ(1u, sink.closedPrices.size());
 	EXPECT_EQ(931u, sink.closedTimes[0] % 10000u);
 	EXPECT_DOUBLE_EQ(kM1Bars[0].close, sink.closedPrices[0]);
-	EXPECT_EQ(1u, sink.replayDoneCalls);
+	// K38 BT-B：prepare 中 init 回调抛异常的一代与重试成功一代各送达一次 done。
+	EXPECT_EQ(2u, sink.replayDoneCalls);
 }
 
 TEST_F(P07MinuteReplayTest, closeCallbackCanAddSeriesWithoutInvalidatingReplay)
@@ -1740,14 +1743,8 @@ TEST_F(P07MinuteReplayTest, nightSessionDailyBarUsesItsTradingDateClose)
 	EXPECT_EQ(1u, sink.replayDoneCalls);
 }
 
-/*
- * 崩溃/越界一类输入统一收进禁用用例（与 p04 同类，引用既有编号，不重复立案）：
- * 分钟CSV只有表头、0 行时，cacheRawBarsFromCSV 仍然执行
- *   stime = barsList->_bars[0].date / etime = _bars[_count - 1].date（_count == 0）
- * —— 空 vector 下标访问是未定义行为（BUG-P04-004），
- * 随后 locate_barindex 在空缓存上算出 UINT32_MAX 越界下标（BUG-P04-005）。
- */
-TEST_F(P07MinuteReplayTest, DISABLED_emptyMinuteCsvHitsUnsubscriptedBars)
+/* 迭代03 最终验收复核后启用（原禁用：BUG-P04-004 / BUG-P04-005 空分钟 CSV）。 */
+TEST_F(P07MinuteReplayTest, emptyMinuteCsvHitsUnsubscriptedBars)
 {
 	ASSERT_TRUE(write_bars_csv(_base, "SSE.STK.600002_m1", kM1Bars, 0, false));
 	HisDataReplayer replayer;

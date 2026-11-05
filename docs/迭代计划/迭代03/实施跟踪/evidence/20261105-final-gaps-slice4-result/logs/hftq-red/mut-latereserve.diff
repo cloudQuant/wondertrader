@@ -1,0 +1,8 @@
+366c366
+< 		if (_strategies.find(strategyId) != _strategies.end())
+---
+> 		if (!_strategies.emplace(strategyId, HftStrategyPtr()).second)
+396c396
+< 		_strategies[strategyId] = ret; /* red: registry insert after the creator */
+---
+> 		_strategies.find(strategyId)->second = ret;

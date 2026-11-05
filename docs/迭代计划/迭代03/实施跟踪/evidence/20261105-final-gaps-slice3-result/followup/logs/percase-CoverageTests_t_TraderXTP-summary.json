@@ -1,0 +1,311 @@
+{
+ "binary": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-result-build/build_x64/Debug/bin/TestUnits/CoverageTests_t_TraderXTP",
+ "filter": "*",
+ "summary": {
+  "pass": 60,
+  "fail": 0,
+  "skipped": 0
+ },
+ "cases": [
+  {
+   "test": "gate_placeholder_TraderXTP.compiles_with_module_flags",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.connect_reconnect_and_release_use_stub",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.logout_before_successful_login_is_rejected_without_sdk_call",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.connect_notification_can_login_while_reconnect_waits",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.failed_reconnect_retry_is_owned_and_cancellable",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.release_cancels_delayed_relogin_and_is_repeatable",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.release_joins_worker_blocked_in_login",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.release_waits_for_public_login_and_callback_release_defers",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.concurrent_release_calls_release_api_once",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.reconnect_drains_inflight_sdk_calls_before_replacing_api",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.login_failure_publishes_error_asynchronously",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.concurrent_public_logins_do_not_race_credentials_or_cache_init",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.logout_during_login_is_rejected_then_successful_session_can_logout",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.login_success_then_recovery_and_logout",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.order_insert_fills_xtp_request_and_logs_failure",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.order_insert_encodes_close_yesterday_offset_in_effect_field",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.order_action_and_queries_call_stub_with_session",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.entrust_and_order_cache_backfills_user_tags",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "R93XtpTest.disconnect_resets_state_and_reconnect_requires_login",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.init_then_all_business_calls_rejected_without_api",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.init_defaults_flowdir_and_release_is_repeatable",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.make_entrust_id_format_and_reject",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.on_error_routes_vendor_message_into_trader_log",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.on_disconnected_publishes_close_event_with_reason",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.cancel_error_guarded_by_error_id",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.order_event_without_error_converts_stock_order",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.order_event_szse_unregistered_and_rejected_mapping",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.order_event_non_stock_uses_wrap_tables",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.trade_event_converts_report_into_trade_info",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.option_close_yesterday_order_and_trade_callbacks_preserve_offset",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.trade_event_of_unregistered_contract_dropped",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.l01014_unregistered_trade_is_forwarded_raw_when_host_supports_it",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.query_order_accumulates_then_publishes_on_last",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.k42_order_query_reports_completeness_when_host_supports_it",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.query_trade_skips_row_when_error_info_present",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.query_position_maps_direction_and_availability",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.query_asset_maps_into_account_info",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.query_asset_negative_deposit_withdraw_forwards_account_without_sign_oracle",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.order_event_with_error_converts_entrust_and_error",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.connect_calls_null_creator_and_writes_flow_dirs",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.order_event_error_branch_releases_null_entrust",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "TraderXTPTest.l01014_unregistered_query_rows_are_forwarded_raw",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "xtp_plugin_factory.create_and_delete_roundtrip_null_safe",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "xtp_map.is_error_info_requires_nonzero_id_and_accepts_null",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "xtp_map.position_direction_short_only",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "xtp_map.wts_side_to_vendor_side_uses_offset",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "xtp_map.vendor_side_to_wts_direction_uses_position_effect",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "xtp_map.wts_offset_maps_to_xtp_position_effect",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "xtp_map.xtp_position_effect_maps_to_wts_offset",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "xtp_map.supported_offsets_round_trip_through_xtp_effects",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "xtp_map.price_type_limit_versus_everything_else",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "xtp_map.order_state_table_and_default",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "xtp_map.make_ref_id_returns_consecutive_uint32_values",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "XtpS5Lifecycle.error_callbacks_after_register_spi_null_do_not_crash",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "XtpS5Lifecycle.delete_trader_from_sdk_callback_quarantines",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "XtpS5Lifecycle.release_waits_for_inflight_callback_before_api_release",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "XtpS5Lifecycle.callback_drain_timeout_retains_api_and_remover_quarantines",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "XtpS5Lifecycle.late_disconnect_of_replaced_api_session_does_not_relogin",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "XtpS5Lifecycle.disconnect_of_current_session_still_relogins",
+   "status": "pass",
+   "rc": 0
+  },
+  {
+   "test": "XtpS5Lifecycle.init_fails_without_module_and_rejects_repeated_init",
+   "status": "pass",
+   "rc": 0
+  }
+ ]
+}

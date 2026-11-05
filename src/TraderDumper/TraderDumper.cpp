@@ -5,8 +5,10 @@
 
 Dumper& getDumper()
 {
-	static Dumper dumper;
-	return dumper;
+	// T3-012 / 卡9a：导出单例保活到进程退出，不在静态析构期销毁仍可能被
+	// worker、交易通道回调或用户回调使用的对象。
+	static Dumper* dumper = new Dumper();
+	return *dumper;
 }
 
 void register_callbacks(FuncOnAccount cbAccount, FuncOnOrder  cbOrder, FuncOnTrade cbTrade, FuncOnPosition cbPosition)

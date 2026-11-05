@@ -25,7 +25,13 @@ const char* kAutoContracts = R"({
 			"rules": {"pricetick": 0.5, "volscale": 100, "covermode": 0, "pricemode": 0, "lotstick": 2, "minlots": 3},
 			"maxmarketqty": 9, "minmarketqty": 7,
 			"opendate": 20240101, "expiredate": 20241231
-		},
+		}
+	}
+})";
+
+// I03-NEW-053（整批校验后发布）：引用未加载品种的合约使整份文件被拒，旧“跳过该条”的期望改为单独夹具。
+const char* kMissingProductContracts = R"({
+	"DCE": {
 		"i2406": {
 			"name": "r56缺失品种",
 			"exchg": "DCE",
@@ -40,10 +46,15 @@ const char* kHolidays = R"({
 	"R56BAD": {"not": "an array"}
 })";
 
+// 卡2b：全天时段唯一表达为 0–0；2400 不是合法 HHMM，旧夹具的 0–2400 整份被拒。
 const char* kFullDaySessions = R"({
-	"R56FULL0":   {"name": "24h零偏移", "offset": 0,    "sections": [{"from": 0, "to": 2400}]},
-	"R56FULLPOS": {"name": "24h后偏移", "offset": 300,  "sections": [{"from": 0, "to": 2400}]},
-	"R56FULLNEG": {"name": "24h前偏移", "offset": -300, "sections": [{"from": 0, "to": 2400}]}
+	"R56FULL0":   {"name": "24h零偏移", "offset": 0,    "sections": [{"from": 0, "to": 0}]},
+	"R56FULLPOS": {"name": "24h后偏移", "offset": 300,  "sections": [{"from": 0, "to": 0}]},
+	"R56FULLNEG": {"name": "24h前偏移", "offset": -300, "sections": [{"from": 0, "to": 0}]}
+})";
+
+const char* kLegacy2400Session = R"({
+	"R56FULL2400": {"name": "旧24h写法", "offset": 0, "sections": [{"from": 0, "to": 2400}]}
 })";
 
 const char* kPartDaySessions = R"({
@@ -68,6 +79,17 @@ protected:
 TEST_F(R56BaseDataMgr, ContractRulesAutoCreateCommodityAndWindows)
 {
 	const std::string file = r56tmp::write_file(m_dir, "contracts.json", kAutoContracts);
+	// I03-NEW-053（整批校验后发布）：rules 自动建的品种必须挂上已加载的会话；ALLDAY 未加载时整份文件被拒
+	// （改前期望：接受并得到 session 信息为空的品种）。
+	{
+		WTSBaseDataMgr noSession;
+		EXPECT_FALSE(noSession.loadContracts(file.c_str()));
+		EXPECT_EQ(nullptr, noSession.getCommodity("DCE", "i2405"));
+		EXPECT_EQ(nullptr, noSession.getContract("i2405", ""));
+	}
+	const std::string sessFile = r56tmp::write_file(m_dir, "sessions_allday.json",
+		R"({"ALLDAY": {"name": "全天", "offset": 0, "sections": [{"from": 0, "to": 0}]}})");
+	ASSERT_TRUE(m_mgr.loadSessions(sessFile.c_str()));
 	ASSERT_TRUE(m_mgr.loadContracts(file.c_str()));
 
 	// 无 product 但带 rules：自动建品种，session 缺省为 ALLDAY
@@ -81,9 +103,9 @@ TEST_F(R56BaseDataMgr, ContractRulesAutoCreateCommodityAndWindows)
 	EXPECT_DOUBLE_EQ(0.5, comm->getPriceTick());
 	EXPECT_DOUBLE_EQ(2.0, comm->getLotsTick());
 	EXPECT_DOUBLE_EQ(3.0, comm->getMinLots());
-	// ALLDAY 模板未装载 -> 品种的 session 信息为空
-	EXPECT_EQ(nullptr, comm->getSessionInfo());
-	EXPECT_EQ(nullptr, m_mgr.getSession("ALLDAY"));
+	// 缺省会话 ALLDAY 已加载，品种挂上该会话
+	ASSERT_NE(nullptr, m_mgr.getSession("ALLDAY"));
+	EXPECT_EQ(m_mgr.getSession("ALLDAY"), comm->getSessionInfo());
 
 	// 合约手数限制与日期窗口
 	WTSContractInfo* ct = m_mgr.getContract("i2405", "", 20240601);
@@ -95,11 +117,13 @@ TEST_F(R56BaseDataMgr, ContractRulesAutoCreateCommodityAndWindows)
 	EXPECT_STREQ("i2405", ct->getAltCode());
 	// 日期窗口之外按代码查（无交易所）应落空，走到循环结束的 return NULL
 	EXPECT_EQ(nullptr, m_mgr.getContract("i2405", "", 20250101));
-	// 缺失 product 的合约被跳过
+	// I03-NEW-053：引用未加载品种的合约文件整份被拒，不发布任何合约，已加载的合约不受影响
+	const std::string bad = r56tmp::write_file(m_dir, "contracts_missing_product.json", kMissingProductContracts);
+	EXPECT_FALSE(m_mgr.loadContracts(bad.c_str()));
 	EXPECT_EQ(nullptr, m_mgr.getContract("i2406", ""));
+	EXPECT_NE(nullptr, m_mgr.getContract("i2405", "", 20240601));
 
-	// session 为空的品种：边界时间直接返回 0
-	EXPECT_EQ(0u, m_mgr.getBoundaryTime("DCE.i2405", 20240108));
+	// “session 为空的品种”在 I03-NEW-053 后不可经加载器产生，原 getBoundaryTime==0 早退断言随之移除
 	EXPECT_EQ(nullptr, m_mgr.getCommodity("DCE", "nope"));
 }
 
@@ -147,6 +171,12 @@ TEST_F(R56BaseDataMgr, CalcTradingDateFullDaySessions)
 	EXPECT_EQ(20240109u, m_mgr.calcTradingDate("R56FULLPOS", 20240108, 2300, true));
 	// 24h + 前偏移：时间早于偏移点 -> 上一自然日
 	EXPECT_EQ(20240107u, m_mgr.calcTradingDate("R56FULLNEG", 20240108, 100, true));
+
+	// 卡2b：旧的 0–2400 写法整份被拒，不登记模板
+	WTSBaseDataMgr legacy;
+	const std::string legacyFile = r56tmp::write_file(m_dir, "sessions_2400.json", kLegacy2400Session);
+	EXPECT_FALSE(legacy.loadSessions(legacyFile.c_str()));
+	EXPECT_EQ(nullptr, legacy.getSession("R56FULL2400"));
 }
 
 // WTSBaseDataMgr.cpp:719-758
@@ -171,26 +201,39 @@ TEST_F(R56BaseDataMgr, CalcTradingDatePartDayOffsetAndWeekend)
 }
 
 // WTSBaseDataMgr.cpp:300-326,328-391
+// I03-NEW-053/K28（整批校验后发布）：缺 session、session 未加载的品种不再被“跳过”，而是整份
+// 品种文件被拒；空 sections 的会话模板整份会话文件被拒。旧夹具中的 ag/cu/R56EMPTY 改为单独拒绝夹具。
 TEST_F(R56BaseDataMgr, CommodityLoadingSkipsMissingSession)
 {
 	const char* sessions = R"({
 		"R56DAY": {"name": "日盘", "offset": 0, "auction": {"from": 915, "to": 925},
-			"sections": [{"from": 900, "to": 1130}, {"from": 1300, "to": 1500}]},
-		"R56EMPTY": {"name": "无时段", "offset": 0, "sections": []}
+			"sections": [{"from": 900, "to": 1130}, {"from": 1300, "to": 1500}]}
 	})";
 	const char* commodities = R"({
 		"SHFE": {
 			"rb": {"name": "螺纹", "session": "R56DAY", "holiday": "CHN", "pricetick": 1,
-				"volscale": 10, "covermode": 0, "pricemode": 1, "trademode": 0, "lotstick": 1, "minlots": 1},
-			"ag": {"name": "白银", "session": "", "pricetick": 1, "volscale": 15},
-			"cu": {"name": "铜", "session": "R56NOSUCH", "pricetick": 10, "volscale": 5},
-			"empty": {"name": "无时段品种", "session": "R56EMPTY", "pricetick": 1, "volscale": 1}
+				"volscale": 10, "covermode": 0, "pricemode": 1, "trademode": 0, "lotstick": 1, "minlots": 1}
 		}
 	})";
 	const std::string sfile = r56tmp::write_file(m_dir, "sessions.json", sessions);
 	const std::string cfile = r56tmp::write_file(m_dir, "commodities.json", commodities);
 	ASSERT_TRUE(m_mgr.loadSessions(sfile.c_str()));
 	ASSERT_TRUE(m_mgr.loadCommodities(cfile.c_str()));
+
+	// K28：空 sections 的会话文件整份被拒，已登记的 R56DAY 不受影响
+	const std::string emptySecs = r56tmp::write_file(m_dir, "sessions_empty.json",
+		R"({"R56EMPTY": {"name": "无时段", "offset": 0, "sections": []}})");
+	EXPECT_FALSE(m_mgr.loadSessions(emptySecs.c_str()));
+	EXPECT_EQ(nullptr, m_mgr.getSession("R56EMPTY"));
+	// I03-NEW-053：缺 session / session 未加载的品种使整份品种文件被拒，同文件的合法品种也不发布
+	const std::string noSess = r56tmp::write_file(m_dir, "commodities_nosession.json", R"({"SHFE": {
+		"hc": {"name": "热卷", "session": "R56DAY", "pricetick": 1, "volscale": 10},
+		"ag": {"name": "白银", "session": "", "pricetick": 1, "volscale": 15}}})");
+	EXPECT_FALSE(m_mgr.loadCommodities(noSess.c_str()));
+	const std::string unknownSess = r56tmp::write_file(m_dir, "commodities_unknown.json", R"({"SHFE": {
+		"cu": {"name": "铜", "session": "R56NOSUCH", "pricetick": 10, "volscale": 5}}})");
+	EXPECT_FALSE(m_mgr.loadCommodities(unknownSess.c_str()));
+	EXPECT_EQ(nullptr, m_mgr.getCommodity("SHFE.hc"));
 
 	// 正常品种：类别/交易模式/手数步长按配置落库
 	WTSCommodityInfo* rb = m_mgr.getCommodity("SHFE.rb");
@@ -204,17 +247,13 @@ TEST_F(R56BaseDataMgr, CommodityLoadingSkipsMissingSession)
 	ASSERT_NE(nullptr, comms);
 	EXPECT_TRUE(comms->find("SHFE.rb") != comms->end());
 
-	// 缺 session / session 不存在的品种被跳过
+	// 被拒文件中的品种均未发布
 	EXPECT_EQ(nullptr, m_mgr.getCommodity("SHFE.ag"));
 	EXPECT_EQ(nullptr, m_mgr.getCommodity("SHFE.cu"));
-	// 有 session 但无 sections 的品种仍然入库
-	WTSCommodityInfo* empty = m_mgr.getCommodity("SHFE.empty");
-	ASSERT_NE(nullptr, empty);
-	EXPECT_EQ(0u, empty->getSessionInfo()->getSectionCount());
 
 	WTSArray* all = m_mgr.getAllSessions();
 	ASSERT_NE(nullptr, all);
-	EXPECT_EQ(2u, all->size());
+	EXPECT_EQ(1u, all->size());
 	all->release();
 }
 
@@ -226,8 +265,7 @@ TEST_F(R56BaseDataMgr, SessionAuctionVariantsAndMissingSections)
 			"sections": [{"from": 930, "to": 1130}]},
 		"R56AUC2": {"name": "多集合竞价", "offset": 0,
 			"auctions": [{"from": 915, "to": 920}, {"from": 921, "to": 925}],
-			"sections": [{"from": 930, "to": 1130}]},
-		"R56NOSEC": {"name": "缺 sections", "offset": 0}
+			"sections": [{"from": 930, "to": 1130}]}
 	})";
 	const std::string file = r56tmp::write_file(m_dir, "sessions_auc.json", sessions);
 	ASSERT_TRUE(m_mgr.loadSessions(file.c_str()));
@@ -244,7 +282,14 @@ TEST_F(R56BaseDataMgr, SessionAuctionVariantsAndMissingSections)
 	EXPECT_EQ(915u, auc2->getAuctionStartTime());
 	EXPECT_EQ(1u, auc2->getSectionCount());
 
-	// 没有 sections 的条目在登记前就 continue，不会出现在 session 表里
+	// I03-NEW-053：缺 sections 的条目使整份会话文件被拒（旧语义为跳过该条），同文件合法模板也不发布
+	const std::string noSec = r56tmp::write_file(m_dir, "sessions_nosec.json", R"({
+		"R56AUC3": {"name": "合法", "offset": 0, "sections": [{"from": 930, "to": 1130}]},
+		"R56NOSEC": {"name": "缺 sections", "offset": 0}
+	})");
+	EXPECT_FALSE(m_mgr.loadSessions(noSec.c_str()));
 	EXPECT_EQ(nullptr, m_mgr.getSession("R56NOSEC"));
+	EXPECT_EQ(nullptr, m_mgr.getSession("R56AUC3"));
 	EXPECT_EQ(nullptr, m_mgr.getSessionComms("R56NOSEC"));
+	EXPECT_NE(nullptr, m_mgr.getSession("R56AUC1"));
 }

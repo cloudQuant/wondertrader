@@ -15,7 +15,10 @@
 
 #include <WtCore/WtArbiExecuter.h>
 #include <WtCore/WtDiffExecuter.h>
+#include <WtCore/WtExecMgr.h>
 #include <WtCore/WtLocalExecuter.h>
+
+#include <cstdlib>
 
 using namespace wtp;
 
@@ -41,6 +44,31 @@ public:
 
     uint32_t tick_calls = 0;
     uint32_t last_calls = 0;
+};
+
+// 卡9（9a=A+C、9b=A）/ 迭代02 Local 宿主合同: WtLocalExecuter 只有在协调 quiesce
+// 发布完成后才能析构, 否则 ~WtLocalExecuter 以 std::terminate fail-stop。
+// 栈上宿主用不拥有所有权的 manager 条目驱动同一套 quiesce；守卫须声明在宿主之后。
+class LocalQuiesceScope
+{
+public:
+    explicit LocalQuiesceScope(WtLocalExecuter& executer) : _executer(executer) {}
+    LocalQuiesceScope(const LocalQuiesceScope&) = delete;
+    LocalQuiesceScope& operator=(const LocalQuiesceScope&) = delete;
+    ~LocalQuiesceScope()
+    {
+        WtExecuterMgr manager;
+        manager.add_executer(ExecCmdPtr(&_executer, [](IExecCommand*) {}));
+        WtExecQuiesceCoordinator coordinator({ &manager });
+        if (!coordinator.quiesce_all() || !coordinator.is_complete() || !manager.wait_quiesced())
+        {
+            ADD_FAILURE() << "local executer quiesce did not complete";
+            std::abort();
+        }
+    }
+
+private:
+    WtLocalExecuter& _executer;
 };
 
 WTSVariant* makeCfg(const char* clear, uint32_t poolsize = 0)
@@ -114,6 +142,7 @@ protected:
 TEST_F(R73ExecTest, LocalAccessorsAndGuards)
 {
     WtLocalExecuter exe(&_factory, "r73_local", &_dm);
+    LocalQuiesceScope exeQuiesce(exe);
     initLocal(exe, NULL);
 
     exe.writeLog("r73 local write log");
@@ -142,6 +171,7 @@ TEST_F(R73ExecTest, LocalAutoClearEarlyExits)
 {
     {
         WtLocalExecuter exe(&_factory, "r73_local_off", NULL);
+        LocalQuiesceScope exeQuiesce(exe);
         initLocal(exe, "\"clear\":{\"active\":false},");
         exe.on_position(kCode, true, 0, 0, 1, 1, 20250110);
         EXPECT_EQ(0u, _hot.prev_code.size());
@@ -149,6 +179,7 @@ TEST_F(R73ExecTest, LocalAutoClearEarlyExits)
 
     {
         WtLocalExecuter exe(&_factory, "r73_local_ex", NULL);
+        LocalQuiesceScope exeQuiesce(exe);
         initLocal(exe, "\"clear\":{\"active\":true,\"excludes\":\"SHFE.rb\"},");
         _hot.prev_code = "rb2510";
 
@@ -163,11 +194,13 @@ TEST_F(R73ExecTest, LocalAutoClearEarlyExits)
 
         // includes 非空且不包含 -> 早退
         WtLocalExecuter exe2(&_factory, "r73_local_in", NULL);
+        LocalQuiesceScope exe2Quiesce(exe2);
         initLocal(exe2, "\"clear\":{\"active\":true,\"includes\":\"SHFE.ag\"},");
         exe2.on_position(kCode, true, 0, 0, 1, 1, 20250110);
 
         // includes 命中 -> 进入 getUnit（工厂未加载，unit 为空，不崩溃）
         WtLocalExecuter exe3(&_factory, "r73_local_hit", NULL);
+        LocalQuiesceScope exe3Quiesce(exe3);
         initLocal(exe3, "\"clear\":{\"active\":true,\"includes\":\"SHFE.rb\"},");
         exe3.on_position(kCode, true, 0, 0, 1, 1, 20250110);
     }

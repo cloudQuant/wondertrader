@@ -1,0 +1,68 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = C3TickerReentry.WorkerQueuedInOrderSel
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from C3TickerReentry
+[ RUN      ] C3TickerReentry.WorkerQueuedInOrderSel
+/private/tmp/wt-i03-card3-20261104/r9d-base/merged.cpp:790: Failure
+Value of: all
+  Actual: false
+Expected: true
+
+/private/tmp/wt-i03-card3-20261104/r9d-base/merged.cpp:791: Failure
+Expected equality of these values:
+  1
+  seenAtReturn.load()
+    Which is: 3
+re-entrant ticks must be queued, not executed inside the callback
+
+/private/tmp/wt-i03-card3-20261104/r9d-base/merged.cpp:792: Failure
+Expected equality of these values:
+  (std::vector<double>{3500.0, 3501.0, 3502.0, 3503.0})
+    Which is: { 3500, 3501, 3502, 3503 }
+  prices
+    Which is: { 3501, 3502, 3503 }
+queued ticks delivered in order exactly once
+
+/private/tmp/wt-i03-card3-20261104/r9d-base/merged.cpp:794: Failure
+Expected equality of these values:
+  next
+    Which is: 20261106
+  actualTDate
+    Which is: 20261105
+
+/private/tmp/wt-i03-card3-20261104/r9d-base/merged.cpp:795: Failure
+Expected: (2400u) != (actualTime), actual: 2400 vs 2400
+worker must not write 2400 back after re-entry
+
+/private/tmp/wt-i03-card3-20261104/r9d-base/merged.cpp:796: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  actualTime
+    Which is: 2400
+
+/private/tmp/wt-i03-card3-20261104/r9d-base/merged.cpp:797: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  closes
+    Which is: 1
+
+/private/tmp/wt-i03-card3-20261104/r9d-base/merged.cpp:798: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  lastClose
+    Which is: 2400
+
+[  FAILED  ] C3TickerReentry.WorkerQueuedInOrderSel (3122 ms)
+[----------] 1 test from C3TickerReentry (3122 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3122 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] C3TickerReentry.WorkerQueuedInOrderSel
+
+ 1 FAILED TEST

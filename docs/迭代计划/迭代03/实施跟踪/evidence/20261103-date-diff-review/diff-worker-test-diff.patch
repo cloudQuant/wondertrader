@@ -1,0 +1,99 @@
+--- baseline/p02_diff_executer_test.cpp
++++ worktree/p02_diff_executer_test.cpp
+@@ -53,6 +53,31 @@
+ class P02DiffExecuterTestAccess
+ {
+ public:
++	static void beginUnregisteredCreation(WtDiffExecuter& executor, const std::string& code)
++	{
++		auto state = std::make_shared<WtDiffExecuter::UnitLifecycleState>();
++		state->std_code = code;
++		state->creation_owner = std::this_thread::get_id();
++		state->init_generation = 1;
++		SpinLock lock(executor._mtx_units);
++		executor._unit_states[code] = state;
++	}
++	static bool registerCreated(WtDiffExecuter& executor, const std::string& code,
++		ExecuteUnit* raw, IExecuterFact* fact)
++	{
++		ExecuteUnitPtr unit(new ExeUnitWrapper(raw, fact));
++		std::shared_ptr<WtDiffExecuter::UnitLifecycleState> state;
++		{
++			SpinLock lock(executor._mtx_units);
++			state = executor._unit_states.at(code);
++		}
++		if (!executor.registerCreatedUnit(code, unit, state)) return false;
++		{
++			std::lock_guard<std::mutex> lock(state->mutex);
++			state->result = unit;
++		}
++		return true;
++	}
+ 	static void registerInitializing(WtDiffExecuter& executor, const std::string& code,
+ 		ExecuteUnit* raw, IExecuterFact* fact)
+ 	{
+@@ -88,6 +113,34 @@
+ 	}
+ 	static bool load(WtDiffExecuter& executor) { return executor.load_data(); }
+ 	static bool save(WtDiffExecuter& executor) { return executor.save_data(); }
++	static void setBatchHook(WtDiffExecuter& executor, std::function<void(uint64_t)> hook)
++	{
++		executor._batch_preflight_test_hook = std::move(hook);
++	}
++	static void setTargetLookupHook(WtDiffExecuter& executor, std::function<void(const std::string&)> hook)
++	{
++		executor._target_lookup_test_hook = std::move(hook);
++	}
++	static void setReadyForRegistration(WtDiffExecuter& executor)
++	{
++		std::lock_guard<std::mutex> lock(executor._position_update_mutex);
++		executor._channel_ready.store(true);
++		++executor._channel_epoch;
++	}
++	static size_t activeBatches(WtDiffExecuter& executor)
++	{
++		std::lock_guard<std::mutex> lock(executor._position_update_mutex);
++		return executor._active_batch_targets.size();
++	}
++	static void setSaveHook(WtDiffExecuter& executor, std::function<bool(bool)> hook)
++	{
++		executor._save_test_hook = std::move(hook);
++	}
++	static size_t unitStates(WtDiffExecuter& executor)
++	{
++		SpinLock lock(executor._mtx_units);
++		return executor._unit_states.size();
++	}
+ 
+ 	static void setSnapshot(WtDiffExecuter& executor, const std::string& code,
+ 		double target, double diff)
+--- baseline/n02_diff_concurrency_test.cpp
++++ worktree/n02_diff_concurrency_test.cpp
+@@ -1326,8 +1326,9 @@
+     EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, "SHFE.ag.2512"), 12.0);
+     EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, "SHFE.rb.2510"), 6.0);
+     EXPECT_EQ(agUnit->positions(), (std::vector<double>{10.0, 12.0}));
+-    EXPECT_EQ(rbUnit->positions(), (std::vector<double>{5.0, 7.0}));
+-    EXPECT_EQ(rbUnit->events(), (std::vector<std::string>{"position", "position", "trade"}));
++    // The older batch commits and queues its omitted target before the reentrant batch.
++    EXPECT_EQ(rbUnit->positions(), (std::vector<double>{5.0, 0.0, 7.0}));
++    EXPECT_EQ(rbUnit->events(), (std::vector<std::string>{"position", "position", "position", "trade"}));
+     fs::remove(path, ec);
+ }
+ 
+@@ -1447,11 +1448,12 @@
+ 
+     EXPECT_TRUE(incrementalUpdateRan.load());
+     EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::target(executor, firstCode), 10.0);
+-    EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::target(executor, secondCode), 4.0);
++    // The batch commits both codes before callbacks; this reentrant increment follows 20.
++    EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::target(executor, secondCode), 22.0);
+     EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, firstCode), 10.0);
+-    EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, secondCode), 4.0);
++    EXPECT_DOUBLE_EQ(WtDiffExecuterConcurrencyTest::diff(executor, secondCode), 22.0);
+     EXPECT_EQ(firstUnit->positions(), (std::vector<double>{1.0, 10.0}));
+-    EXPECT_EQ(secondUnit->positions(), (std::vector<double>{2.0, 4.0}));
++    EXPECT_EQ(secondUnit->positions(), (std::vector<double>{2.0, 20.0, 22.0}));
+     fs::remove(path, ec);
+ }
+ 

@@ -1,0 +1,16 @@
+[0/2] Re-checking globbed directories...
+[1/8] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/r7_exefact/r7_twap_unit_test.cpp.o
+FAILED: TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/r7_exefact/r7_twap_unit_test.cpp.o 
+/usr/bin/c++ -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -DNOTFOUND -Dinst_hlp=cov_inst_hlp_f02e9db5 -I/opt/homebrew/include -I/tmp/wt-i03-twap-bounded-review/build/TestUnits/coverage/cov_boost_include -I/tmp/wt-i03-twap-bounded-review/src/Includes -I/tmp/wt-i03-twap-bounded-review/src/Share -I/tmp/wt-i03-twap-bounded-review/src/WTSTools -I/tmp/wt-i03-twap-bounded-review/src/WTSUtils -isystem /tmp/wt-i03-twap-bounded-review/src -isystem /opt/homebrew/Cellar/googletest/1.17.0/include -include /tmp/wt-i03-twap-bounded-review/src/Share/fmt_enum_compat.h -g -std=gnu++17 -Wall -Wextra -Wno-deprecated-copy-with-user-provided-copy "-Wno-#pragma-messages" -Werror -fprofile-instr-generate -fcoverage-mapping -fsanitize=undefined,float-cast-overflow -fno-sanitize-recover=all -MD -MT TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/r7_exefact/r7_twap_unit_test.cpp.o -MF TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/r7_exefact/r7_twap_unit_test.cpp.o.d -o TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/r7_exefact/r7_twap_unit_test.cpp.o -c /tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:316:24: error: too few arguments to function call, expected 2, have 1
+  316 |                 unit.fire_at_once(1.0);
+      |                 ~~~~~~~~~~~~~~~~~    ^
+/tmp/wt-i03-twap-bounded-review/src/WtExeFact/WtTWapExeUnit.h:49:7: note: 'fire_at_once' declared here
+   49 |         void    fire_at_once(double qty, bool forceClose);
+      |                 ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1 error generated.
+[2/8] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtExeFact.cpp.o
+[3/8] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/__/__/WtExeFact/WtExeFact.cpp.o
+[4/8] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtTWapExeUnit.cpp.o
+[5/8] Building CXX object TestUnits/coverage/CMakeFiles/CoverageTests_exefact.dir/__/__/WtExeFact/WtTWapExeUnit.cpp.o
+ninja: build stopped: subcommand failed.

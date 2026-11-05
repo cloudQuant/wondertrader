@@ -1,0 +1,40 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R78UftParserAdapterInit.release_does_not_register_a_null_spi
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R78UftParserAdapterInit
+[ RUN      ] R78UftParserAdapterInit.release_does_not_register_a_null_spi
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/r78_uftcore_adapter_init_test.cpp:435: Failure
+Value of: adapter.initExt("r78parsernonnull", new NonNullSpiParserApi(), nullptr, &env.bd)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/r78_uftcore_adapter_init_test.cpp:436: Failure
+Value of: adapter.run()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/r78_uftcore_adapter_init_test.cpp:439: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  NonNullSpiParserApi::register_calls
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/r78_uftcore_adapter_init_test.cpp:443: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  NonNullSpiParserApi::connect_calls
+    Which is: 0
+
+[  FAILED  ] R78UftParserAdapterInit.release_does_not_register_a_null_spi (0 ms)
+[----------] 1 test from R78UftParserAdapterInit (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R78UftParserAdapterInit.release_does_not_register_a_null_spi
+
+ 1 FAILED TEST

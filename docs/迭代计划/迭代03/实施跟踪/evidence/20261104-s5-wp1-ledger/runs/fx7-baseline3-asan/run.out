@@ -1,0 +1,42 @@
+    Which is: 0
+  adapter.getPosition(kStdCode, false)
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1317: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  adapter.getUndoneQty(kStdCode)
+    Which is: 0
+ledger untouched by the dropped callback
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:1320: Failure
+Expected equality of these values:
+  refsBefore
+    Which is: 1
+  live->retainCount()
+    Which is: 2
+destructor released the adapter-owned order map
+
+[  FAILED  ] Wp1Test.ReleaseDrainsSpiCallbacksDropsLateOnesAndFreesOrderMap (617 ms)
+[----------] 36 tests from Wp1Test (18980 ms total)
+
+[----------] Global test environment tear-down
+[==========] 36 tests from 1 test suite ran. (18980 ms total)
+[  PASSED  ] 26 tests.
+[  SKIPPED ] 1 test, listed below:
+[  SKIPPED ] Wp1Test.ChildScenario
+[  FAILED  ] 9 tests, listed below:
+[  FAILED  ] Wp1Test.EmptyOrderSnapshotIsAmbiguousAndKeepsLiveOrders
+[  FAILED  ] Wp1Test.OwnerScopeDoesNotLeakIntoSinkCallbacks
+[  FAILED  ] Wp1Test.RemovedOwnerSinkDeclarationEndsWithTheSink
+[  FAILED  ] Wp1Test.UnownedEventsNeverReachOwnerSinksUnderRouting
+[  FAILED  ] Wp1Test.UnresolvableOwnerTradeIsQuarantinedUnderRouting
+[  FAILED  ] Wp1Test.PositionSnapshotWithoutBaselineAndNewerTradePausesAccount
+[  FAILED  ] Wp1Test.DuplicateTradePushIsAppliedOnceButSelfMatchSidesAreNot
+[  FAILED  ] Wp1Test.ThrowingCancelReleasesItsClaim
+[  FAILED  ] Wp1Test.ReleaseDrainsSpiCallbacksDropsLateOnesAndFreesOrderMap
+
+ 9 FAILED TESTS
+exit=1
+exit=1

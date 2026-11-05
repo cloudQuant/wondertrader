@@ -469,6 +469,11 @@ TEST(R130MiscTail, CtaRunStartsRiskMonitor)
     WtDtMgr dm;
     TraderAdapterMgr adapterMgr;
 
+    // The monitor and its factory must outlive the engine: since BUG-R42-001
+    // the engine destructor stops the risk monitor before releasing fund data.
+    R130RiskMon mon;
+    R130RiskFact fact;
+
     WtCtaEngine engine;
     engine.set_adapter_mgr(&adapterMgr);
     WTSVariant* cfg = sessionCfg();
@@ -476,8 +481,6 @@ TEST(R130MiscTail, CtaRunStartsRiskMonitor)
     engine.init(cfg, &bd, &dm, &hot, NULL);
     cfg->release();
 
-    R130RiskMon mon;
-    R130RiskFact fact;
     WtRiskMonPtr risk(new WtRiskMonWrapper(&mon, &fact));
     engine.setRiskMonitor(risk);
 

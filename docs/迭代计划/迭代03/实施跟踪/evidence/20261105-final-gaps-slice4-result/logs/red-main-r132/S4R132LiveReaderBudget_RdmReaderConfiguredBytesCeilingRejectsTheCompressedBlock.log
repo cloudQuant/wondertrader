@@ -1,0 +1,36 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S4R132LiveReaderBudget.RdmReaderConfiguredBytesCeilingRejectsTheCompressedBlock
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S4R132LiveReaderBudget
+[ RUN      ] S4R132LiveReaderBudget.RdmReaderConfiguredBytesCeilingRejectsTheCompressedBlock
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp:185: Failure
+Expected equality of these values:
+  4096u
+    Which is: 4096
+  WTSCmpHelper::uncompress_max_bytes()
+    Which is: 1073741824
+store config must reach this module's budget
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp:187: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  rdm_read(reader, "SSE.STK.600000")
+    Which is: 2000
+declared size above the configured 4 KiB ceiling
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp:188: Failure
+Expected: (sink.count_of(LL_ERROR)) > (0u), actual: 0 vs 0
+the rejected block must be reported
+
+[  FAILED  ] S4R132LiveReaderBudget.RdmReaderConfiguredBytesCeilingRejectsTheCompressedBlock (20 ms)
+[----------] 1 test from S4R132LiveReaderBudget (20 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (20 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S4R132LiveReaderBudget.RdmReaderConfiguredBytesCeilingRejectsTheCompressedBlock
+
+ 1 FAILED TEST

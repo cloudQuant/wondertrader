@@ -1,0 +1,28 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = P04ReplayerConfigTest.missingFeesFileLeavesEmptyFeeMap
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from P04ReplayerConfigTest
+[ RUN      ] P04ReplayerConfigTest.missingFeesFileLeavesEmptyFeeMap
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:342: Failure
+Value of: replayer.init(cfg)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/p04_btcore_replayer/p04_replayer_config_prepare_test.cpp:344: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  replayer.calc_fee("SSE.STK.000001", 1.0, 100.0, 0)
+    Which is: nan
+
+[  FAILED  ] P04ReplayerConfigTest.missingFeesFileLeavesEmptyFeeMap (2 ms)
+[----------] 1 test from P04ReplayerConfigTest (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (2 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] P04ReplayerConfigTest.missingFeesFileLeavesEmptyFeeMap
+
+ 1 FAILED TEST

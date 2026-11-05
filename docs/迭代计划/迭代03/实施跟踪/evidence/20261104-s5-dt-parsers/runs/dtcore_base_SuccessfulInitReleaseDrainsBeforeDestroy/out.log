@@ -1,0 +1,58 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = DtCoreHost.SuccessfulInitReleaseDrainsBeforeDestroy
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from DtCoreHost
+[ RUN      ] DtCoreHost.SuccessfulInitReleaseDrainsBeforeDestroy
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:151: Failure
+Expected equality of these values:
+  _v2[C_DELETE_UNSAFE]
+    Which is: 1
+  0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:153: Failure
+Expected equality of these values:
+  _v2[C_DESTROY]
+    Which is: 0
+  1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:154: Failure
+Expected equality of these values:
+  _v2[C_LIVE]
+    Which is: 1
+  0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:155: Failure
+Value of: pa.hasApi()
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:156: Failure
+Value of: pa.releaseComplete()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:157: Failure
+Expected equality of these values:
+  cfg->retainCount()
+    Which is: 2
+  1u
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:159: Failure
+Expected equality of these values:
+  _v2[C_DESTROY]
+    Which is: 0
+  1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_dt_parser_host_20261104s5/dtcore_host_test.cpp:161: Failure
+Expected equality of these values:
+  cfg->retainCount()
+    Which is: 2
+  1u
+    Which is: 1
+
+[  FAILED  ] DtCoreHost.SuccessfulInitReleaseDrainsBeforeDestroy (9 ms)
+[----------] 1 test from DtCoreHost (9 ms total)
+
+[----------] Global test environment tear-down

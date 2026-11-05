@@ -1,0 +1,32 @@
+# 仅本段（slice2-result）对 run_fixtures.py 的改动：i03_csv_status_20261103 处理函数；同期其他代理的改动不在此列
+--- /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/fixtures/run_fixtures.py.bak-slice2-result-182135	2026-11-05 18:21:35
++++ /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/fixtures/run_fixtures.py	2026-11-05 18:41:06
+@@ -1294,10 +1296,24 @@
+ 
+ @suite('i03_csv_status_20261103', 'src/TestUnits/fixtures/i03_csv_status_20261103/CMakeLists.txt')
+ def s_csv_status(ctx):
+-    ctx.attribution = '夹具问题'
+-    ctx.suggestion = '把 README 所述改前 WtDtHelper.cpp/.h 存入套件（如 baseline/），或让 CMake 在缺少 BASELINE_SOURCE 时只构建 csv_status 与 exports 并跳过字节对比'
+-    raise Blocked('CMakeLists 在 BASELINE_SOURCE 不存在时 FATAL_ERROR；green 用例 csv_status 依赖 csv_baseline 产生的黄金 CSV。'
+-                  '改前 WtDtHelper.cpp 只存在于旧 /tmp/i03-csv-status-baseline-20261103（不在套件、--tree 或 --build 内），按规则不使用', '夹具问题')
++    # slice2-result 2026-11-05: the fixture now builds without BASELINE_SOURCE (the pre-change
++    # helper snapshot is not retained); the prior-bytes comparison is then not built.
++    rel = 'src/TestUnits/fixtures/i03_csv_status_20261103/CMakeLists.txt'
++    ctx.mirror([(rel, '/tmp/wt-i03-r41-drain/libs', str(ctx.libs), 2)])
++    b = ctx.dir / 'build'
++
++    def green():
++        rc = cmake_fixture(ctx, 'fixture', ctx.fxdir(), b, llvm=True)
++        if rc != 0:
++            return 'fail', 'CMake 配置/构建 exit %s' % rc
++        v, r, _ = gtest_run(ctx, 'csv_status', b / 'csv_status', [], cwd=b, env=ASAN_ENV)
++        rc2, text = ctx.sh('nm-exports', '/usr/bin/nm -gU %s | /usr/bin/grep -E "dump_(bars|ticks)(_v2)?$"' % shlex.quote(str(b / 'libcsv_status_exports.dylib')), cwd=b)
++        syms = [l.split()[-1] for l in text.splitlines() if 'dump_' in l and not l.startswith('#')]
++        ok = v == 'pass' and rc2 == 0 and syms
++        return ('pass' if ok else 'fail'), '%s；导出符号 %s' % (r, ','.join(syms) or '无')
++    ctx.variant('green', green)
++    ctx.note('BASELINE_SOURCE 未传：改前 WtDtHelper.cpp 快照未保留，NormalMatchesPriorBytes（与改前字节对比）不构建，按 not-applicable')
++    return combine(ctx)
+ 
+ 
+ # ---------------------------------------------------------------------- snapshot/coverage builds of --tree

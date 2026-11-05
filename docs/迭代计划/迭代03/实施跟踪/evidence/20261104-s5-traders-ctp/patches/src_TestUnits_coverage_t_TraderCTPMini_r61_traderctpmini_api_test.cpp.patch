@@ -1,0 +1,89 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-traders-ctp/before/src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp	2026-11-02 10:41:12
++++ src/TestUnits/coverage/t_TraderCTPMini/r61_traderctpmini_api_test.cpp	2026-11-04 18:37:38
+@@ -706,23 +706,36 @@
+ 	EXPECT_EQ((int)THOST_TERT_RESUME, (int)api.priv_topic);
+ 	EXPECT_TRUE(fs::exists(tmp.path + "/flows/9999/tester"));
+ 
++	/* 迭代03 s5（卡9、T2-CTP-03 原修复方向“无 worker/停止时不留旧释放任务”）改写：
++	 * 旧断言要求 disconnect 只把 release() 压入查询队列、由 drainQueue 执行，且同实例可再次 connect。
++	 * 现合同：disconnect 为有界终止停止，直接释放 SDK 一次、不留队列任务；实例单次使用，
++	 * 停止后 connect 被拒绝。原断言见证据 before/。 */
+ 	probe.disconnect();
+ 	EXPECT_TRUE(probe.workerNull());
+-	ASSERT_EQ(1u, probe.queueSize());
+-	probe.drainQueue();
++	EXPECT_EQ(0u, probe.queueSize());
+ 	EXPECT_EQ(nullptr, probe.api());
+ 	EXPECT_EQ(1u, api.release_calls);
+ 
+-	/* quick 分支 */
+ 	R61MiniApi api2;
+ 	g_created_mini_api = &api2;
+ 	probe.setQuick(true);
+-	probe.setDummyWorker();
+ 	probe.connect();
++	EXPECT_EQ(0u, api2.init_calls);
++	EXPECT_EQ(nullptr, probe.api());
++
++	/* quick 分支：新实例 */
++	R61MiniProbe quick;
++	quick.harden();
++	quick.setFlowDir(tmp.path + "/");
++	quick.setBrokerUser("9999", "tester");
++	quick.setFront("tcp://127.0.0.1:1");
++	quick.setCreator(&r61_mini_creator);
++	quick.setQuick(true);
++	quick.setDummyWorker();
++	quick.connect();
+ 	EXPECT_EQ((int)THOST_TERT_QUICK, (int)api2.pub_topic);
+ 	EXPECT_EQ((int)THOST_TERT_QUICK, (int)api2.priv_topic);
+-	probe.disconnect();
+-	probe.drainQueue();
++	quick.disconnect();
+ 	EXPECT_EQ(1u, api2.release_calls);
+ 	g_created_mini_api = nullptr;
+ }
+@@ -980,20 +993,32 @@
+ 	EXPECT_EQ((int)THOST_FTDC_OF_CloseToday, (int)api.order.CombOffsetFlag[0]);
+ 	EXPECT_EQ(3, api.order.VolumeTotalOriginal);
+ 
++	/* 迭代03 s5 / T2-CTP-08（卡6d）改写：旧断言重复提交同一委托并期望无 userTag 的各单复用
++	 * OrderRef "0"（BUG-R61-005）。现合同：缺委托 ID 原子分配唯一 OrderRef（1、2、3…）、写回委托 ID
++	 * 与自动 tag；同一身份不得重复提交。每个 OrderFlag 变体改为清空身份后重新下单。原断言见证据 before/。 */
++	EXPECT_EQ("1", std::string(api.order.OrderRef));
++	EXPECT_STREQ("000001#0000000002#000001", ent->getEntrustID());
++	EXPECT_EQ("ctpmini-auto:000001#0000000002#000001", probe.eidGet("000001#0000000002#000001"));
++	EXPECT_EQ(-1, probe.orderInsert(ent));		/* 同一身份重复提交被拒绝 */
++	ASSERT_EQ(1u, api.order_calls);
++
++	ent->setEntrustID("");
++	ent->setUserTag("");
+ 	ent->setOrderFlag(WOF_FAK);
+ 	EXPECT_EQ(0, probe.orderInsert(ent));
+ 	ASSERT_EQ(2u, api.order_calls);
+ 	EXPECT_EQ((int)THOST_FTDC_TC_IOC, (int)api.order.TimeCondition);
+ 	EXPECT_EQ((int)THOST_FTDC_VC_AV, (int)api.order.VolumeCondition);
+-	/* 无 userTag 的第二单仍复用同一 OrderRef（BUG-R61-005） */
+-	EXPECT_EQ("0", std::string(api.order.OrderRef));
++	EXPECT_EQ("2", std::string(api.order.OrderRef));
+ 
++	ent->setEntrustID("");
++	ent->setUserTag("");
+ 	ent->setOrderFlag(WOF_FOK);
+ 	EXPECT_EQ(0, probe.orderInsert(ent));
+ 	ASSERT_EQ(3u, api.order_calls);
+ 	EXPECT_EQ((int)THOST_FTDC_TC_IOC, (int)api.order.TimeCondition);
+ 	EXPECT_EQ((int)THOST_FTDC_VC_CV, (int)api.order.VolumeCondition);
+-	EXPECT_EQ("0", std::string(api.order.OrderRef));
++	EXPECT_EQ("3", std::string(api.order.OrderRef));
+ 
+ 	/* 带 userTag：OrderRef 取 eid 第三段，并写入 eidCache */
+ 	ent->setUserTag("tagF");
+@@ -1004,6 +1029,7 @@
+ 	EXPECT_EQ("tagF", probe.eidGet("000001#0000000002#000077"));
+ 
+ 	api.stub_ret_ = -9;
++	ent->setEntrustID("000001#0000000002#000078");	/* 新身份：同一身份不重复提交 */
+ 	EXPECT_EQ(0, probe.orderInsert(ent));
+ 	EXPECT_TRUE(sink.hasLog("Order inserting failed"));
+ 

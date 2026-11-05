@@ -1,0 +1,18 @@
+--- src/TestUnits/coverage/p11_wtcore_traderadapter/r59_trader_buy_test.cpp	2026-10-30 22:00:44
++++ /tmp/wt-i03-time-orderid-20261102/snapshot/TestUnits/coverage/p11_wtcore_traderadapter/r59_trader_buy_test.cpp	2026-11-02 14:56:47
+@@ -243,3 +243,15 @@
+ }
+ 
+ } // namespace
++
++TEST_F(R59Buy, I03TimeFailureMustNotSubmitOrChangeUndone)
++{
++    ActionPolicyMgr pm;
++    ASSERT_TRUE(loadPolicy(pm, "i03_time_failure.json", R"json({"default":{"order":[{"action":"open"}]}})json"));
++    TraderAdapter trader;
++    build(trader, &pm);
++    const OrderIDs ids = trader.buy(kStdCode, 7000.0, 1.0, 0, false);
++    EXPECT_TRUE(ids.empty());
++    EXPECT_EQ(0u, api2_.n_insert_);
++    EXPECT_DOUBLE_EQ(0.0, trader.getUndoneQty(kStdCode));
++}

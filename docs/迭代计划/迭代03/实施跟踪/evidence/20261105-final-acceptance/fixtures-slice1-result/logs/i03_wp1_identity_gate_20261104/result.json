@@ -1,0 +1,95 @@
+{
+ "suite": "i03_wp1_identity_gate_20261104",
+ "entry": "src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/run.sh",
+ "command": "/bin/bash /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/run.sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/_deps/plain /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/current-asan current-asan",
+ "exit": 0,
+ "seconds": 1340.6,
+ "verdict": "pass",
+ "reason": "current-asan[pass]: current-asan exit 0（tests=41 failures=0）；current-tsan[pass]: current-tsan exit 0（tests=41 failures=0）；baseline-asan[expected-red/red]: baseline-asan exit 1（tests=11 failures=11）；baseline2-asan[expected-red/red]: baseline2-asan exit 1（tests=20 failures=2）",
+ "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/logs/01-run.sh-current-asan.log",
+ "started": "2026-11-05T18:26:44",
+ "workdir": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104",
+ "runner_sha256": "9397c38eb0027c817faf24eae78286ab7716a060db8d00ab9768069ece85af3a",
+ "mirror": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror",
+ "attribution": "夹具问题",
+ "suggestion": "watched 列表无条件包含 docs 证据 s5before 文件、且 git rev-parse 失败即中止（set -e）；应只在 baseline3 变体登记，或把副本放入套件",
+ "notes": [
+  "共享依赖 plain 构建 WtCore,WtDtCore,WTSTools,WTSUtils：exit 0，648s，日志 /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/_deps/logs/plain-build-WtCore_WtDtCore_WTSTools_WTSUtils.log",
+  "使用 --tree 的 APFS 克隆副本 /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror 运行；路径改写见 /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror.patch",
+  "run.sh 的 watched 哈希列表无条件包含 docs/…/s5-wp1-ledger/before 的 TraderAdapter.*；镜像中只读复制该两份 docs 证据文件仅用于登记哈希，baseline3 红控不运行"
+ ],
+ "variants": [
+  {
+   "name": "current-asan",
+   "role": "primary",
+   "verdict": "pass",
+   "reason": "current-asan exit 0（tests=41 failures=0）",
+   "seconds": 338.8,
+   "commands": [
+    {
+     "label": "run.sh-current-asan",
+     "command": "/bin/bash /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/run.sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/_deps/plain /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/current-asan current-asan",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104",
+     "env": {},
+     "exit": 0,
+     "seconds": 338.8,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/logs/01-run.sh-current-asan.log"
+    }
+   ]
+  },
+  {
+   "name": "current-tsan",
+   "role": "primary",
+   "verdict": "pass",
+   "reason": "current-tsan exit 0（tests=41 failures=0）",
+   "seconds": 159.5,
+   "commands": [
+    {
+     "label": "run.sh-current-tsan",
+     "command": "/bin/bash /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/run.sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/_deps/plain /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/current-tsan current-tsan",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104",
+     "env": {},
+     "exit": 0,
+     "seconds": 159.5,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/logs/02-run.sh-current-tsan.log"
+    }
+   ]
+  },
+  {
+   "name": "baseline-asan",
+   "role": "red",
+   "verdict": "expected-red",
+   "reason": "baseline-asan exit 1（tests=11 failures=11）",
+   "seconds": 112.4,
+   "commands": [
+    {
+     "label": "run.sh-baseline-asan",
+     "command": "/bin/bash /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/run.sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/_deps/plain /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/baseline-asan baseline-asan",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104",
+     "env": {},
+     "exit": 1,
+     "seconds": 112.4,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/logs/03-run.sh-baseline-asan.log"
+    }
+   ]
+  },
+  {
+   "name": "baseline2-asan",
+   "role": "red",
+   "verdict": "expected-red",
+   "reason": "baseline2-asan exit 1（tests=20 failures=2）",
+   "seconds": 60.2,
+   "commands": [
+    {
+     "label": "run.sh-baseline2-asan",
+     "command": "/bin/bash /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/mirror/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/run.sh /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/_deps/plain /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/baseline2-asan baseline2-asan",
+     "cwd": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104",
+     "env": {},
+     "exit": 1,
+     "seconds": 60.2,
+     "log": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice1-result-fxrun/i03_wp1_identity_gate_20261104/logs/04-run.sh-baseline2-asan.log"
+    }
+   ]
+  }
+ ]
+}

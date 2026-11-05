@@ -1,0 +1,113 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 13 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 7 tests from XeleEvents
+[ RUN      ] XeleEvents.ConnectThenLoginOnlyAfterFirstValidFrame
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:105: Failure
+Value of: x.create()
+  Actual: false
+Expected: true
+
+[  FAILED  ] XeleEvents.ConnectThenLoginOnlyAfterFirstValidFrame (11 ms)
+[ RUN      ] XeleEvents.SnapshotFailureEmitsNoSuccessEvent
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:117: Failure
+Value of: x.create(1)
+  Actual: false
+Expected: true
+
+[  FAILED  ] XeleEvents.SnapshotFailureEmitsNoSuccessEvent (12 ms)
+[ RUN      ] XeleEvents.InvalidFramesDoNotConfirm
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:124: Failure
+Value of: x.create()
+  Actual: false
+Expected: true
+
+[  FAILED  ] XeleEvents.InvalidFramesDoNotConfirm (12 ms)
+[ RUN      ] XeleEvents.ReconnectStartsNewEventEpoch
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:138: Failure
+Value of: x.create()
+  Actual: false
+Expected: true
+
+[  FAILED  ] XeleEvents.ReconnectStartsNewEventEpoch (11 ms)
+[ RUN      ] XeleEvents.ReleaseFromAnotherThreadDuringConnectEmitsNothing
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:154: Failure
+Value of: x.create(slow.port())
+  Actual: false
+Expected: true
+
+[  FAILED  ] XeleEvents.ReleaseFromAnotherThreadDuringConnectEmitsNothing (5004 ms)
+[ RUN      ] XeleEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:172: Failure
+Value of: x.create()
+  Actual: false
+Expected: true
+
+[  FAILED  ] XeleEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing (3 ms)
+[ RUN      ] XeleEvents.V2StopDuringConnectDrainsWithoutEvents
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:183: Failure
+Expected: (nullptr) != (x.module.table), actual: (nullptr) vs NULL
+
+[  FAILED  ] XeleEvents.V2StopDuringConnectDrainsWithoutEvents (5006 ms)
+[----------] 7 tests from XeleEvents (10062 ms total)
+
+[----------] 6 tests from UdpEvents
+[ RUN      ] UdpEvents.ConnectThenLoginOnlyAfterFirstValidMessage
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:230: Failure
+Value of: u.create()
+  Actual: false
+Expected: true
+
+[  FAILED  ] UdpEvents.ConnectThenLoginOnlyAfterFirstValidMessage (0 ms)
+[ RUN      ] UdpEvents.PartialConnectFailureEmitsNoSuccessEvent
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:244: Failure
+Expected: (nullptr) != (fail), actual: (nullptr) vs NULL
+
+[  FAILED  ] UdpEvents.PartialConnectFailureEmitsNoSuccessEvent (0 ms)
+[ RUN      ] UdpEvents.InvalidMessagesDoNotConfirm
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:252: Failure
+Value of: u.create()
+  Actual: false
+Expected: true
+
+[  FAILED  ] UdpEvents.InvalidMessagesDoNotConfirm (0 ms)
+[ RUN      ] UdpEvents.ReconnectStartsNewEventEpoch
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:266: Failure
+Value of: u.create()
+  Actual: false
+Expected: true
+
+[  FAILED  ] UdpEvents.ReconnectStartsNewEventEpoch (0 ms)
+[ RUN      ] UdpEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:284: Failure
+Value of: u.create()
+  Actual: false
+Expected: true
+
+[  FAILED  ] UdpEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing (0 ms)
+[ RUN      ] UdpEvents.V2StopFromLogCallbackDuringConnectDrainsWithoutEvents
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_parser_event_contract_20261103/events.cpp:294: Failure
+Expected: (nullptr) != (u.module.table), actual: (nullptr) vs NULL
+
+[  FAILED  ] UdpEvents.V2StopFromLogCallbackDuringConnectDrainsWithoutEvents (0 ms)
+[----------] 6 tests from UdpEvents (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 13 tests from 2 test suites ran. (10064 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 13 tests, listed below:
+[  FAILED  ] XeleEvents.ConnectThenLoginOnlyAfterFirstValidFrame
+[  FAILED  ] XeleEvents.SnapshotFailureEmitsNoSuccessEvent
+[  FAILED  ] XeleEvents.InvalidFramesDoNotConfirm
+[  FAILED  ] XeleEvents.ReconnectStartsNewEventEpoch
+[  FAILED  ] XeleEvents.ReleaseFromAnotherThreadDuringConnectEmitsNothing
+[  FAILED  ] XeleEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing
+[  FAILED  ] XeleEvents.V2StopDuringConnectDrainsWithoutEvents
+[  FAILED  ] UdpEvents.ConnectThenLoginOnlyAfterFirstValidMessage
+[  FAILED  ] UdpEvents.PartialConnectFailureEmitsNoSuccessEvent
+[  FAILED  ] UdpEvents.InvalidMessagesDoNotConfirm
+[  FAILED  ] UdpEvents.ReconnectStartsNewEventEpoch
+[  FAILED  ] UdpEvents.ReleaseFromLogCallbackDuringConnectEmitsNothing
+[  FAILED  ] UdpEvents.V2StopFromLogCallbackDuringConnectDrainsWithoutEvents
+
+13 FAILED TESTS

@@ -1,0 +1,91 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 33 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from T2ParserXeleSktStatic
+[ RUN      ] T2ParserXeleSktStatic.plugin_entry_points_build_and_destroy_parser
+[       OK ] T2ParserXeleSktStatic.plugin_entry_points_build_and_destroy_parser (0 ms)
+[----------] 1 test from T2ParserXeleSktStatic (0 ms total)
+
+[----------] 12 tests from T2ParserXeleSktTest
+[ RUN      ] T2ParserXeleSktTest.init_builds_endpoints_without_opening_sockets
+[       OK ] T2ParserXeleSktTest.init_builds_endpoints_without_opening_sockets (1 ms)
+[ RUN      ] T2ParserXeleSktTest.init_reports_failure_for_unparsable_tcp_host
+[       OK ] T2ParserXeleSktTest.init_reports_failure_for_unparsable_tcp_host (0 ms)
+[ RUN      ] T2ParserXeleSktTest.init_reports_failure_when_tcp_host_is_missing
+[       OK ] T2ParserXeleSktTest.init_reports_failure_when_tcp_host_is_missing (0 ms)
+[ RUN      ] T2ParserXeleSktTest.init_reports_failure_for_empty_tcp_host
+[       OK ] T2ParserXeleSktTest.init_reports_failure_for_empty_tcp_host (0 ms)
+[ RUN      ] T2ParserXeleSktTest.init_reports_failure_for_null_configuration
+[       OK ] T2ParserXeleSktTest.init_reports_failure_for_null_configuration (0 ms)
+[ RUN      ] T2ParserXeleSktTest.register_spi_wires_sink_and_base_datamgr
+[       OK ] T2ParserXeleSktTest.register_spi_wires_sink_and_base_datamgr (0 ms)
+[ RUN      ] T2ParserXeleSktTest.registering_second_sink_logs_replacement
+[       OK ] T2ParserXeleSktTest.registering_second_sink_logs_replacement (0 ms)
+[ RUN      ] T2ParserXeleSktTest.unregistering_sink_keeps_public_calls_crash_free
+[       OK ] T2ParserXeleSktTest.unregistering_sink_keeps_public_calls_crash_free (0 ms)
+[ RUN      ] T2ParserXeleSktTest.subscribe_is_additive_and_repeatable
+[       OK ] T2ParserXeleSktTest.subscribe_is_additive_and_repeatable (0 ms)
+[ RUN      ] T2ParserXeleSktTest.unsubscribe_is_an_empty_stub_today
+[       OK ] T2ParserXeleSktTest.unsubscribe_is_an_empty_stub_today (0 ms)
+[ RUN      ] T2ParserXeleSktTest.release_body_is_empty
+[       OK ] T2ParserXeleSktTest.release_body_is_empty (0 ms)
+[ RUN      ] T2ParserXeleSktTest.disconnect_without_connect_closes_nothing
+[       OK ] T2ParserXeleSktTest.disconnect_without_connect_closes_nothing (0 ms)
+[ DISABLED ] T2ParserXeleSktTest.DISABLED_connect_joins_multicast_and_starts_parser_thread
+[----------] 12 tests from T2ParserXeleSktTest (3 ms total)
+
+[----------] 9 tests from R76ParserXeleSktSnapshotTest
+[ RUN      ] R76ParserXeleSktSnapshotTest.ConsumesOneExactProtocolSnapshot
+[       OK ] R76ParserXeleSktSnapshotTest.ConsumesOneExactProtocolSnapshot (0 ms)
+[ RUN      ] R76ParserXeleSktSnapshotTest.ConsumesMultipleProtocolSnapshots
+[       OK ] R76ParserXeleSktSnapshotTest.ConsumesMultipleProtocolSnapshots (0 ms)
+[ RUN      ] R76ParserXeleSktSnapshotTest.InvalidVersionIsFatalAndDoesNotProcessFollowingFrame
+[       OK ] R76ParserXeleSktSnapshotTest.InvalidVersionIsFatalAndDoesNotProcessFollowingFrame (0 ms)
+[ RUN      ] R76ParserXeleSktSnapshotTest.InvalidTypeIsFatalAndDoesNotProcessFollowingFrame
+[       OK ] R76ParserXeleSktSnapshotTest.InvalidTypeIsFatalAndDoesNotProcessFollowingFrame (0 ms)
+[ RUN      ] R76ParserXeleSktSnapshotTest.ResetConsumesReturnedBytesButFailsRead
+[       OK ] R76ParserXeleSktSnapshotTest.ResetConsumesReturnedBytesButFailsRead (0 ms)
+[ RUN      ] R76ParserXeleSktSnapshotTest.InvalidInstrumentIdDoesNotHideFollowingSnapshot
+[       OK ] R76ParserXeleSktSnapshotTest.InvalidInstrumentIdDoesNotHideFollowingSnapshot (0 ms)
+[ RUN      ] R76ParserXeleSktSnapshotTest.RetainsSplitFrameAndShortTailUntilMoreBytesArrive
+[       OK ] R76ParserXeleSktSnapshotTest.RetainsSplitFrameAndShortTailUntilMoreBytesArrive (0 ms)
+[ RUN      ] R76ParserXeleSktSnapshotTest.EofWithShortTailFailsAfterProcessingCompleteSnapshots
+[       OK ] R76ParserXeleSktSnapshotTest.EofWithShortTailFailsAfterProcessingCompleteSnapshots (0 ms)
+[ RUN      ] R76ParserXeleSktSnapshotTest.CompleteEofProcessesFramesAndReportsSuccess
+[       OK ] R76ParserXeleSktSnapshotTest.CompleteEofProcessesFramesAndReportsSuccess (0 ms)
+[----------] 9 tests from R76ParserXeleSktSnapshotTest (0 ms total)
+
+[----------] 2 tests from R76ParserXeleSktLoopbackTest
+[ RUN      ] R76ParserXeleSktLoopbackTest.PrepareCommitsOnlyCompleteTcpSnapshotBatches
+[       OK ] R76ParserXeleSktLoopbackTest.PrepareCommitsOnlyCompleteTcpSnapshotBatches (39 ms)
+[ RUN      ] R76ParserXeleSktLoopbackTest.FirstReconnectFailureLeavesRetryUnseeded
+[       OK ] R76ParserXeleSktLoopbackTest.FirstReconnectFailureLeavesRetryUnseeded (45 ms)
+[----------] 2 tests from R76ParserXeleSktLoopbackTest (84 ms total)
+
+[----------] 9 tests from R76ParserXeleSktTest
+[ RUN      ] R76ParserXeleSktTest.InitAcceptsIpv6TcpHostAndZeroGpsize
+[       OK ] R76ParserXeleSktTest.InitAcceptsIpv6TcpHostAndZeroGpsize (0 ms)
+[ RUN      ] R76ParserXeleSktTest.InitRejectsEmptyAndMalformedMulticastAddresses
+[       OK ] R76ParserXeleSktTest.InitRejectsEmptyAndMalformedMulticastAddresses (0 ms)
+[ RUN      ] R76ParserXeleSktTest.InitRejectsEmptyAndMalformedLocalAddresses
+[       OK ] R76ParserXeleSktTest.InitRejectsEmptyAndMalformedLocalAddresses (0 ms)
+[ RUN      ] R76ParserXeleSktTest.ConnectRejectsSnapshotTcpFailureWithoutStartingReceiver
+[       OK ] R76ParserXeleSktTest.ConnectRejectsSnapshotTcpFailureWithoutStartingReceiver (1 ms)
+[ RUN      ] R76ParserXeleSktTest.SecondInitIsRejectedKeepsOriginalAndReleaseIsIdempotent
+[       OK ] R76ParserXeleSktTest.SecondInitIsRejectedKeepsOriginalAndReleaseIsIdempotent (0 ms)
+[ RUN      ] R76ParserXeleSktTest.RegisterSpiNullMakesNextRegistrationSilent
+[       OK ] R76ParserXeleSktTest.RegisterSpiNullMakesNextRegistrationSilent (0 ms)
+[ RUN      ] R76ParserXeleSktTest.SubscribeMutatesOnlyInternalSetAndUnsubscribeIsStub
+[       OK ] R76ParserXeleSktTest.SubscribeMutatesOnlyInternalSetAndUnsubscribeIsStub (0 ms)
+[ RUN      ] R76ParserXeleSktTest.DisconnectBeforeConnectDefersCloseAndIsIdempotent
+[       OK ] R76ParserXeleSktTest.DisconnectBeforeConnectDefersCloseAndIsIdempotent (0 ms)
+[ RUN      ] R76ParserXeleSktTest.FactoryRoundtripClearsPointerTwice
+[       OK ] R76ParserXeleSktTest.FactoryRoundtripClearsPointerTwice (0 ms)
+[----------] 9 tests from R76ParserXeleSktTest (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 33 tests from 5 test suites ran. (91 ms total)
+[  PASSED  ] 33 tests.
+
+  YOU HAVE 1 DISABLED TEST
+

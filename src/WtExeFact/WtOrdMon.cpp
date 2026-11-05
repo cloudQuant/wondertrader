@@ -62,6 +62,10 @@ WtOrdMonOrderIdentity WtOrdMon::push_order_locked(uint32_t localid, uint64_t cur
 	OrderInfo& ordInfo = _orders[localid];
 	ordInfo.enterTime = curTime;
 	ordInfo.unverifiedTimeout = false;
+	ordInfo.cancelClaimed = false;
+	// A reused localid starts a new live order; the retained terminal record of
+	// an earlier order with the same id is replaced.
+	ordInfo.terminal = false;
 	if (_identity_sequence_exhausted)
 	{
 		// 身份空间耗尽后拒绝继续发出可超时撤单的无身份记录。
@@ -108,6 +112,10 @@ bool WtOrdMon::mark_order_terminal(uint32_t localid)
 
 	// Keep the local-id association so late trade callbacks can still be applied,
 	// but never consider a terminal order eligible for an expiry cancellation.
+	// A duplicate terminal report (repeated ACK) must not be applied twice.
+	if (it->second.terminal)
+		return false;
+	it->second.terminal = true;
 	it->second.canCancel = false;
 	return true;
 }
@@ -180,7 +188,7 @@ void WtOrdMon::check_orders_with_identity(uint32_t expiresecs, uint64_t curTime,
 		for (const auto& m : _orders)
 		{
 			const OrderInfo& ordInfo = m.second;
-			if (!ordInfo.canCancel || ordInfo.unverifiedTimeout || !ordInfo.identity.valid())	// 不可撤、无可验证身份或已进入 fail-closed 状态
+			if (!ordInfo.canCancel || ordInfo.unverifiedTimeout || ordInfo.cancelClaimed || !ordInfo.identity.valid())	// 不可撤、无可验证身份、已发核验撤单或已进入 fail-closed 状态
 				continue;
 
 			if (curTime < ordInfo.enterTime || curTime - ordInfo.enterTime < expireMs)
@@ -194,6 +202,46 @@ void WtOrdMon::check_orders_with_identity(uint32_t expiresecs, uint64_t curTime,
 	{
 		callback(candidate.first, candidate.second);
 	}
+}
+
+bool WtOrdMon::claim_timeout_cancel(uint32_t localid, uint64_t generation,
+	uint32_t expiresecs, uint64_t curTime)
+{
+	StdLocker<StdRecurMutex> lock(_mtx_ords);
+	auto it = _orders.find(localid);
+	if (it == _orders.end())
+		return false;
+
+	OrderInfo& order = it->second;
+	if (!order.identity.valid() || order.identity._version != WtOrdMonOrderIdentity::kCurrentVersion ||
+		order.identity._instance_id != _monitor_instance_id ||
+		order.identity._sequence != generation || !order.canCancel || order.unverifiedTimeout || order.cancelClaimed)
+		return false;
+
+	const uint64_t expireMs = static_cast<uint64_t>(expiresecs) * 1000ULL;
+	if (curTime < order.enterTime || curTime - order.enterTime < expireMs)
+		return false;
+
+	order.cancelClaimed = true;
+	return true;
+}
+
+bool WtOrdMon::fail_timeout_cancel(uint32_t localid, uint64_t generation)
+{
+	StdLocker<StdRecurMutex> lock(_mtx_ords);
+	auto it = _orders.find(localid);
+	if (it == _orders.end())
+		return false;
+
+	OrderInfo& order = it->second;
+	if (!order.identity.valid() || order.identity._sequence != generation || !order.cancelClaimed)
+		return false;
+
+	order.cancelClaimed = false;
+	order.canCancel = false;
+	order.unverifiedTimeout = true;
+	_has_unverified_timeout = true;
+	return true;
 }
 
 bool WtOrdMon::mark_unverified_timeout(uint32_t localid, uint64_t generation,

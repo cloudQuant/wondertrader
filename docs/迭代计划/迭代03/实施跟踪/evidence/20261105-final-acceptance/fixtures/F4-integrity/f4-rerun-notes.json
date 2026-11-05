@@ -1,0 +1,40 @@
+{
+ "run": {
+  "command": "/usr/bin/python3 -I SCRATCH/fixtures/run_fixtures.py --tree SCRATCH/final4/tree --build SCRATCH/final4/build --out SCRATCH/final4/fixtures --repo-git <repo>/.git --head ccaad010e9169f610aded4d8dc0f5647f70a5cff --annotations SCRATCH/fixtures/empty-annotations.json --parallel 2 --jobs 2",
+  "start": "2026-11-05T20:43:43+0800",
+  "end": "2026-11-05T22:32:58+0800",
+  "runner_sha256": "157e300b4279ae6a64e823fe1c04634a4bab8c49cc2632b2817e24aa7def4b6a",
+  "counts": {
+   "pass": 90,
+   "not-applicable": 13,
+   "expected-red": 2,
+   "fail": 7,
+   "blocked-env": 1,
+   "timeout": 0,
+   "total": 113
+  },
+  "timeouts_1200s": "无；无需复跑"
+ },
+ "tree_check": {
+  "before": "files=6717 manifest_files=6717 digest=e9f734487a6a49f706bad47e178f739c7b11badab0b054ef76c6237c1a24427f manifest_digest=e9f734487a6a49f706bad47e178f739c7b11badab0b054ef76c6237c1a24427f filelist_equal=yes symlinks=0",
+  "after": "files=6717 manifest_files=6717 digest=e9f734487a6a49f706bad47e178f739c7b11badab0b054ef76c6237c1a24427f manifest_digest=e9f734487a6a49f706bad47e178f739c7b11badab0b054ef76c6237c1a24427f filelist_equal=yes symlinks=0",
+  "before_after_sha256_list_identical": true
+ },
+ "build_side_effect": {
+  "file": "SCRATCH/final4/build/.ninja_log",
+  "effect": "被删除（运行前存在，运行后不存在；其余 17522 个文件 mtime/清单不变）",
+  "cause": "i03_card3_dayboundary_20261104/r202_run.py 硬编码 /opt/homebrew/bin/ninja（1.12.1）对 --build 执行 -t deps；F4 构建由 Anaconda kitware ninja 1.13 写出 v7 日志，1.12.1 读到“build log version is too new; starting over”后 unlink 日志。运行器把该脚本的旧隔离构建改指向 --build，属运行器缺陷。",
+  "evidence": [
+   "SCRATCH/final4/fixtures/i03_card3_dayboundary_20261104/logs/15-r202_run.log 第 6 行",
+   "SCRATCH/final4/fixtures-check/ninja-log-probe（受控复现：1.12.1 的 -t query / -n 删除 v7 日志，-t compdb/commands/targets 不删）"
+  ],
+  "impact": "已编译产物未变；但之后在 SCRATCH/final4/build 内再跑 ninja 会因 command line not found in log 全量重编。"
+ },
+ "t26_request_completion": {
+  "verdict": "fail",
+  "failing_case": "tsan timeout：exit -6（期望 1），TSan data race on std::cerr（ios_base::width）",
+  "product_location": "src/CTPLoader/TraderSpi.cpp RunQueryWorker 超时分支（约 829-835 行）不检查/不声明 _fee_finish_claimed；RunFeeWatchdog（约 766-776 行）声明后解锁；两线程同时判定超时，各自打印 'CTP fee query timed out' 并调用 Finish(EXIT_FAILURE)",
+  "repro": "SCRATCH/final4/fixtures-check/t26-repro/results.txt：用本次构建的探针重复 timeout 模式各 30 次——tsan 4/30 exit 134 且双重超时消息+TSan 警告；normal 3/30 双重超时消息（exit 仍为 1）",
+  "fixfix_class": "STALE_FIXTURE（slice1，当时 pass）"
+ }
+}

@@ -1,0 +1,87 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 32 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from gate_placeholder_ParserCTPOpt
+[ RUN      ] gate_placeholder_ParserCTPOpt.compiles_with_module_flags
+[       OK ] gate_placeholder_ParserCTPOpt.compiles_with_module_flags (0 ms)
+[----------] 1 test from gate_placeholder_ParserCTPOpt (0 ms total)
+
+[----------] 16 tests from R105OptTest
+[ RUN      ] R105OptTest.injected_api_connect_login_and_do_subscribe
+[       OK ] R105OptTest.injected_api_connect_login_and_do_subscribe (0 ms)
+[ RUN      ] R105OptTest.nonzero_login_error_does_not_report_success_or_subscribe
+[       OK ] R105OptTest.nonzero_login_error_does_not_report_success_or_subscribe (0 ms)
+[ RUN      ] R105OptTest.sdk_error_callbacks_are_logged_and_success_responses_are_quiet
+[       OK ] R105OptTest.sdk_error_callbacks_are_logged_and_success_responses_are_quiet (0 ms)
+[ RUN      ] R105OptTest.logged_in_subscription_handles_500_and_501_contracts
+[       OK ] R105OptTest.logged_in_subscription_handles_500_and_501_contracts (1 ms)
+[ RUN      ] R105OptTest.configured_subbatch_splits_subscriptions_by_limit
+[       OK ] R105OptTest.configured_subbatch_splits_subscriptions_by_limit (7 ms)
+[ RUN      ] R105OptTest.invalid_subbatch_fails_init_closed
+[       OK ] R105OptTest.invalid_subbatch_fails_init_closed (0 ms)
+[ RUN      ] R105OptTest.subscription_confirmation_is_a_separate_event
+[       OK ] R105OptTest.subscription_confirmation_is_a_separate_event (0 ms)
+[ RUN      ] R105OptTest.init_fails_closed_for_missing_module_and_creator
+dlopen(/private/tmp/wt-i03-sdk-events-20261103/build/build_x64/Debug/bin/TestUnits/wt_r105_missing_ctpopt_module_OylZWY.dylib, 0x0002): tried: '/private/tmp/wt-i03-sdk-events-20261103/build/build_x64/Debug/bin/TestUnits/wt_r105_missing_ctpopt_module_OylZWY.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/private/tmp/wt-i03-sdk-events-20261103/build/build_x64/Debug/bin/TestUnits/wt_r105_missing_ctpopt_module_OylZWY.dylib' (no such file), '/private/tmp/wt-i03-sdk-events-20261103/build/build_x64/Debug/bin/TestUnits/wt_r105_missing_ctpopt_module_OylZWY.dylib' (no such file)
+[       OK ] R105OptTest.init_fails_closed_for_missing_module_and_creator (0 ms)
+[ RUN      ] R105OptTest.init_fails_closed_for_loaded_module_without_creator_symbol
+[       OK ] R105OptTest.init_fails_closed_for_loaded_module_without_creator_symbol (6 ms)
+[ RUN      ] R105OptTest.init_fails_closed_when_loaded_creator_returns_null
+[       OK ] R105OptTest.init_fails_closed_when_loaded_creator_returns_null (5 ms)
+[ RUN      ] R105OptTest.init_accepts_loaded_module_with_injected_api
+[       OK ] R105OptTest.init_accepts_loaded_module_with_injected_api (2 ms)
+[ RUN      ] R105OptTest.zero_error_login_response_reports_success_and_subscribes
+[       OK ] R105OptTest.zero_error_login_response_reports_success_and_subscribes (0 ms)
+[ RUN      ] R105OptTest.login_failure_and_inline_subscribe_branches
+[       OK ] R105OptTest.login_failure_and_inline_subscribe_branches (0 ms)
+[ RUN      ] R105OptTest.init_flowdir_creation_failure_throws_before_vendor_symbol
+[       OK ] R105OptTest.init_flowdir_creation_failure_throws_before_vendor_symbol (0 ms)
+[ RUN      ] R105OptTest.depth_null_manager_unknown_contract_and_actionday_fallback
+[       OK ] R105OptTest.depth_null_manager_unknown_contract_and_actionday_fallback (0 ms)
+[ RUN      ] R105OptTest.null_sink_and_no_api_guards
+[       OK ] R105OptTest.null_sink_and_no_api_guards (0 ms)
+[----------] 16 tests from R105OptTest (26 ms total)
+
+[----------] 1 test from T2ParserCTPOptStatic
+[ RUN      ] T2ParserCTPOptStatic.plugin_entry_points_build_and_destroy_parser
+[       OK ] T2ParserCTPOptStatic.plugin_entry_points_build_and_destroy_parser (0 ms)
+[----------] 1 test from T2ParserCTPOptStatic (0 ms total)
+
+[----------] 14 tests from T2ParserCTPOptTest
+[ RUN      ] T2ParserCTPOptTest.fresh_parser_is_not_connected_but_lifecycle_is_safe
+[       OK ] T2ParserCTPOptTest.fresh_parser_is_not_connected_but_lifecycle_is_safe (0 ms)
+[ RUN      ] T2ParserCTPOptTest.register_spi_pulls_base_datamgr_once
+[       OK ] T2ParserCTPOptTest.register_spi_pulls_base_datamgr_once (0 ms)
+[ RUN      ] T2ParserCTPOptTest.front_connected_and_close_events
+[       OK ] T2ParserCTPOptTest.front_connected_and_close_events (0 ms)
+[ RUN      ] T2ParserCTPOptTest.heartbeat_warning_logs_without_event
+[       OK ] T2ParserCTPOptTest.heartbeat_warning_logs_without_event (0 ms)
+[ RUN      ] T2ParserCTPOptTest.error_callbacks_are_safe_and_do_not_publish_quotes
+[       OK ] T2ParserCTPOptTest.error_callbacks_are_safe_and_do_not_publish_quotes (0 ms)
+[ RUN      ] T2ParserCTPOptTest.login_rsp_without_is_last_is_ignored
+[       OK ] T2ParserCTPOptTest.login_rsp_without_is_last_is_ignored (0 ms)
+[ RUN      ] T2ParserCTPOptTest.depth_tick_guards_null_datamgr_and_missing_contract
+[       OK ] T2ParserCTPOptTest.depth_tick_guards_null_datamgr_and_missing_contract (0 ms)
+[ RUN      ] T2ParserCTPOptTest.depth_tick_maps_prices_and_levels
+[       OK ] T2ParserCTPOptTest.depth_tick_maps_prices_and_levels (0 ms)
+[ RUN      ] T2ParserCTPOptTest.concurrent_parser_callbacks_keep_update_times_isolated
+[       OK ] T2ParserCTPOptTest.concurrent_parser_callbacks_keep_update_times_isolated (4 ms)
+[ RUN      ] T2ParserCTPOptTest.depth_tick_invalid_values_are_zeroed
+[       OK ] T2ParserCTPOptTest.depth_tick_invalid_values_are_zeroed (0 ms)
+[ RUN      ] T2ParserCTPOptTest.czce_turnover_is_scaled_by_volscale
+[       OK ] T2ParserCTPOptTest.czce_turnover_is_scaled_by_volscale (0 ms)
+[ RUN      ] T2ParserCTPOptTest.stale_tick_time_is_lifted_to_latest
+[       OK ] T2ParserCTPOptTest.stale_tick_time_is_lifted_to_latest (0 ms)
+[ RUN      ] T2ParserCTPOptTest.first_zero_time_tick_falls_back_to_local_clock
+[       OK ] T2ParserCTPOptTest.first_zero_time_tick_falls_back_to_local_clock (0 ms)
+[ RUN      ] T2ParserCTPOptTest.subscribe_and_unsubscribe_without_api_are_harmless
+[       OK ] T2ParserCTPOptTest.subscribe_and_unsubscribe_without_api_are_harmless (0 ms)
+[ DISABLED ] T2ParserCTPOptTest.DISABLED_init_and_login_rsp_dereference_missing_ctpopt_library
+[----------] 14 tests from T2ParserCTPOptTest (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 32 tests from 4 test suites ran. (31 ms total)
+[  PASSED  ] 32 tests.
+
+  YOU HAVE 1 DISABLED TEST
+

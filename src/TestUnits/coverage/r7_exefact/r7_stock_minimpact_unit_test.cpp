@@ -81,7 +81,8 @@ public:
 		OrderIDs ids{ nextId++ };
 		return ids;
 	}
-	bool cancel(uint32_t id) override { byidCancels.push_back(id); return true; }
+	bool cancelByIdRet = true;
+	bool cancel(uint32_t id) override { byidCancels.push_back(id); return cancelByIdRet; }
 	OrderIDs cancel(const char* c, bool isBuy, double = 0) override
 	{
 		bydirCancels.push_back({ c, isBuy });
@@ -1244,4 +1245,56 @@ TEST(r7_stkmin, timeout_without_verified_identity_keeps_monitor_and_never_cancel
 		EXPECT_EQ(ctx.countLog("Expired order 6351"), 1u);
 	}
 	ctx.comm->release();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 迭代03 WP1（卡5/N05-003，2026-11-04）：宿主通过保留配置键声明已按 owner 与不可复用
+// 身份核验撤单时，超时撤单经 ctx->cancel(localid) 发出且同一单只发一次；宿主拒绝核验
+// （cancel 返回 false）即转为持久隔离，不回退裸 ID、不重复撤单。未声明时保持原 fail-closed。
+//////////////////////////////////////////////////////////////////////////
+#include "Includes/IExecPluginV2.h"
+#ifndef WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY
+#define WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY "__wt_host_order_identity"
+#endif
+
+TEST(r7_stkmin, wp1_timeout_with_host_verified_identity_cancels_once_or_latches)
+{
+	for (int refuse = 0; refuse < 2; ++refuse)
+	{
+		MFakeCtx ctx;
+		ctx.comm = mkMComm("STK");
+		ctx.cancelByIdRet = refuse == 0;
+		{
+			WtStockMinImpactExeUnit unit;
+			WTSVariant* cfg = mkMCfg(0, 0, 0, false, 500.0, 0.0, 100.0, 1);
+			cfg->append(WT_EXEC_PLUGIN_V2_HOST_ORDER_IDENTITY_KEY, (uint32_t)1);
+			unit.init(&ctx, kSmStk, cfg);
+			cfg->release();
+			const uint32_t id = 6361;
+			unit._orders_mon.push_order(&id, 1, ctx.curTime);
+			WTSTickData* first = mkMTick(kSmStk, 100000000, 10.50, 10.49, 1000, 10.51, 800);
+			unit.on_tick(first);
+			first->release();
+			first->release();
+			EXPECT_TRUE(ctx.byidCancels.empty());
+			ctx.curTime += 1000;
+			WTSTickData* second = mkMTick(kSmStk, 100002000, 10.50, 10.49, 1000, 10.51, 800);
+			unit.on_tick(second);
+			second->release();
+			second->release();
+			ASSERT_EQ(1u, ctx.byidCancels.size()) << "refuse=" << refuse;
+			EXPECT_EQ(id, ctx.byidCancels[0]);
+			EXPECT_TRUE(unit._orders_mon.has_order(id));
+			EXPECT_EQ(refuse == 1, unit._orders_mon.has_unverified_timeout());
+			EXPECT_EQ(refuse == 0, ctx.countLog("canceled with host-verified identity") == 1u);
+			EXPECT_EQ(refuse == 1, ctx.countLog("host could not verify its identity") == 1u);
+			ctx.curTime += 2000;
+			WTSTickData* third = mkMTick(kSmStk, 100004000, 10.50, 10.49, 1000, 10.51, 800);
+			unit.on_tick(third);
+			third->release();
+			third->release();
+			EXPECT_EQ(1u, ctx.byidCancels.size()) << "claimed or latched order is never re-cancelled";
+		}
+		ctx.comm->release();
+	}
 }

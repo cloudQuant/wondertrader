@@ -1,0 +1,17 @@
+In file included from /Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_task_bars_test.cpp:14:
+/opt/homebrew/include/gtest/gtest.h:1394:11: warning: comparison of integers of different signs: 'const unsigned int' and 'const int' [-Wsign-compare]
+ 1394 |   if (lhs == rhs) {
+      |       ~~~ ^  ~~~
+/opt/homebrew/include/gtest/gtest.h:1413:12: note: in instantiation of function template specialization 'testing::internal::CmpHelperEQ<unsigned int, int>' requested here
+ 1413 |     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
+      |            ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q02_btcore3/r80_replayer_task_bars_test.cpp:82:2: note: in instantiation of function template specialization 'testing::internal::EqHelper::Compare<unsigned int, int, nullptr>' requested here
+   82 |         ASSERT_EQ(1u, sink.slice->size());
+      |         ^
+/opt/homebrew/include/gtest/gtest.h:1914:31: note: expanded from macro 'ASSERT_EQ'
+ 1914 | #define ASSERT_EQ(val1, val2) GTEST_ASSERT_EQ(val1, val2)
+      |                               ^
+/opt/homebrew/include/gtest/gtest.h:1898:54: note: expanded from macro 'GTEST_ASSERT_EQ'
+ 1898 |   ASSERT_PRED_FORMAT2(::testing::internal::EqHelper::Compare, val1, val2)
+      |                                                      ^
+1 warning generated.

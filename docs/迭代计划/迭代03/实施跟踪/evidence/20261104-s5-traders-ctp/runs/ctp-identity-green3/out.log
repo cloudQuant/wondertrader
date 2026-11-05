@@ -1,0 +1,132 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 58 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 58 tests from T25TraderCTPTest
+[ RUN      ] T25TraderCTPTest.plugin_entry_points_build_and_destroy_trader
+[       OK ] T25TraderCTPTest.plugin_entry_points_build_and_destroy_trader (6 ms)
+[ RUN      ] T25TraderCTPTest.init_falls_back_to_ctptdflow_and_ignores_non_string_front
+[       OK ] T25TraderCTPTest.init_falls_back_to_ctptdflow_and_ignores_non_string_front (0 ms)
+[ RUN      ] T25TraderCTPTest.init_keeps_trailing_slash_of_given_flowdir
+[       OK ] T25TraderCTPTest.init_keeps_trailing_slash_of_given_flowdir (0 ms)
+[ RUN      ] T25TraderCTPTest.str_to_time_strips_colons_and_parses_to_uint
+[       OK ] T25TraderCTPTest.str_to_time_strips_colons_and_parses_to_uint (4 ms)
+[ RUN      ] T25TraderCTPTest.login_rsp_with_error_marks_login_failed_and_never_queries_confirm
+[       OK ] T25TraderCTPTest.login_rsp_with_error_marks_login_failed_and_never_queries_confirm (8 ms)
+[ RUN      ] T25TraderCTPTest.login_rsp_with_null_rspinfo_is_taken_as_success
+[       OK ] T25TraderCTPTest.login_rsp_with_null_rspinfo_is_taken_as_success (21 ms)
+[ RUN      ] T25TraderCTPTest.do_login_send_failure_is_logged_without_waiting_for_response
+[       OK ] T25TraderCTPTest.do_login_send_failure_is_logged_without_waiting_for_response (0 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_and_action_send_failures_return_error_and_are_logged
+[       OK ] T25TraderCTPTest.order_insert_and_action_send_failures_return_error_and_are_logged (7 ms)
+[ RUN      ] T25TraderCTPTest.authenticate_sync_failure_returns_error_without_waiting_for_login
+[       OK ] T25TraderCTPTest.authenticate_sync_failure_returns_error_without_waiting_for_login (0 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_without_usertag_allocates_identity_and_cache
+[       OK ] T25TraderCTPTest.order_insert_without_usertag_allocates_identity_and_cache (2 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_rejects_malformed_entrust_id_when_usertag_set
+[       OK ] T25TraderCTPTest.order_insert_rejects_malformed_entrust_id_when_usertag_set (4 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_wraps_bestprice_lastprice_and_every_offset
+[       OK ] T25TraderCTPTest.order_insert_wraps_bestprice_lastprice_and_every_offset (2 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_direction_flag_is_swapped_for_short_close
+[       OK ] T25TraderCTPTest.order_insert_direction_flag_is_swapped_for_short_close (1 ms)
+[ RUN      ] T25TraderCTPTest.order_action_rejects_entrust_id_with_only_one_hash
+[       OK ] T25TraderCTPTest.order_action_rejects_entrust_id_with_only_one_hash (32 ms)
+[ RUN      ] T25TraderCTPTest.disconnect_without_worker_only_queues_release
+[       OK ] T25TraderCTPTest.disconnect_without_worker_only_queues_release (7 ms)
+[ RUN      ] T25TraderCTPTest.release_after_ready_clears_api_and_every_container
+[       OK ] T25TraderCTPTest.release_after_ready_clears_api_and_every_container (24 ms)
+[ RUN      ] T25TraderCTPTest.connect_with_stub_creator_wires_spi_fronts_and_worker_sends_query
+[       OK ] T25TraderCTPTest.connect_with_stub_creator_wires_spi_fronts_and_worker_sends_query (21 ms)
+[ RUN      ] T25TraderCTPTest.settlement_confirm_older_than_trading_day_goes_through_confirm
+[       OK ] T25TraderCTPTest.settlement_confirm_older_than_trading_day_goes_through_confirm (32 ms)
+[ RUN      ] T25TraderCTPTest.settlement_confirm_query_with_null_field_or_error_keeps_or_skips_state
+[       OK ] T25TraderCTPTest.settlement_confirm_query_with_null_field_or_error_keeps_or_skips_state (15 ms)
+[ RUN      ] T25TraderCTPTest.settlement_confirm_rsp_only_acts_in_confirm_qryed_state
+[       OK ] T25TraderCTPTest.settlement_confirm_rsp_only_acts_in_confirm_qryed_state (1 ms)
+[ RUN      ] T25TraderCTPTest.confirm_send_failure_fails_login_without_waiting_for_callback
+[       OK ] T25TraderCTPTest.confirm_send_failure_fails_login_without_waiting_for_callback (15 ms)
+[ RUN      ] T25TraderCTPTest.query_confirm_send_failure_is_logged_inside_worker_item
+[       OK ] T25TraderCTPTest.query_confirm_send_failure_is_logged_inside_worker_item (9 ms)
+[ RUN      ] T25TraderCTPTest.query_confirm_sync_failure_clears_gate_and_worker_releases
+[       OK ] T25TraderCTPTest.query_confirm_sync_failure_clears_gate_and_worker_releases (1050 ms)
+[ RUN      ] T25TraderCTPTest.position_cover_today_short_today_row_subtracts_long_frozen
+[       OK ] T25TraderCTPTest.position_cover_today_short_today_row_subtracts_long_frozen (7 ms)
+[ RUN      ] T25TraderCTPTest.position_cover_today_history_rows_clamp_negative_availability
+[       OK ] T25TraderCTPTest.position_cover_today_history_rows_clamp_negative_availability (8 ms)
+[ RUN      ] T25TraderCTPTest.position_direct_cover_splits_new_pre_and_both_freeze_sides
+[       OK ] T25TraderCTPTest.position_direct_cover_splits_new_pre_and_both_freeze_sides (1 ms)
+[ RUN      ] T25TraderCTPTest.position_combination_skips_availability_and_zero_margin_clears_it
+[       OK ] T25TraderCTPTest.position_combination_skips_availability_and_zero_margin_clears_it (1 ms)
+[ RUN      ] T25TraderCTPTest.position_zero_total_sets_avg_price_to_zero_and_still_pushes
+[       OK ] T25TraderCTPTest.position_zero_total_sets_avg_price_to_zero_and_still_pushes (1 ms)
+[ RUN      ] T25TraderCTPTest.position_error_last_row_pushs_accumulated_then_map_is_reset
+[       OK ] T25TraderCTPTest.position_error_last_row_pushs_accumulated_then_map_is_reset (7 ms)
+[ RUN      ] T25TraderCTPTest.usertag_round_trips_from_eid_cache_into_order_then_trade
+[       OK ] T25TraderCTPTest.usertag_round_trips_from_eid_cache_into_order_then_trade (2 ms)
+[ RUN      ] T25TraderCTPTest.order_rsp_maps_rejected_submit_status_and_mv_volume_and_reverse_types
+[       OK ] T25TraderCTPTest.order_rsp_maps_rejected_submit_status_and_mv_volume_and_reverse_types (1 ms)
+[ RUN      ] T25TraderCTPTest.entrust_rsp_maps_ioc_cv_to_fok_and_usertag_from_cache
+[       OK ] T25TraderCTPTest.entrust_rsp_maps_ioc_cv_to_fok_and_usertag_from_cache (2 ms)
+[ RUN      ] T25TraderCTPTest.rsp_order_insert_with_unknown_contract_pushes_only_trader_error
+[       OK ] T25TraderCTPTest.rsp_order_insert_with_unknown_contract_pushes_only_trader_error (2 ms)
+[ RUN      ] T25TraderCTPTest.rsp_order_action_error_carries_action_fields_and_bare_message
+[       OK ] T25TraderCTPTest.rsp_order_action_error_carries_action_fields_and_bare_message (9 ms)
+[ RUN      ] T25TraderCTPTest.trade_with_unknown_contract_is_dropped_by_both_channels
+[       OK ] T25TraderCTPTest.trade_with_unknown_contract_is_dropped_by_both_channels (1 ms)
+[ RUN      ] T25TraderCTPTest.qry_order_and_trade_rows_accumulate_and_clear_after_last
+[       OK ] T25TraderCTPTest.qry_order_and_trade_rows_accumulate_and_clear_after_last (1 ms)
+[ RUN      ] T25TraderCTPTest.settlement_info_concatenates_rows_and_pushes_only_when_non_empty
+[       OK ] T25TraderCTPTest.settlement_info_concatenates_rows_and_pushes_only_when_non_empty (3 ms)
+[ RUN      ] T25TraderCTPTest.unsupported_time_condition_keeps_other_order_mappings
+[       OK ] T25TraderCTPTest.unsupported_time_condition_keeps_other_order_mappings (17 ms)
+[ RUN      ] T25TraderCTPTest.front_and_heartbeat_paths_are_quiet_when_sink_is_unregistered
+[       OK ] T25TraderCTPTest.front_and_heartbeat_paths_are_quiet_when_sink_is_unregistered (2 ms)
+[ RUN      ] T25TraderCTPTest.front_disconnect_resets_state_and_logout_reports_reason
+[       OK ] T25TraderCTPTest.front_disconnect_resets_state_and_logout_reports_reason (2 ms)
+[ RUN      ] T25TraderCTPTest.confirm_guard_rejects_when_api_is_gone_or_state_moved_on
+[       OK ] T25TraderCTPTest.confirm_guard_rejects_when_api_is_gone_or_state_moved_on (22 ms)
+[ RUN      ] T25TraderCTPTest.login_warns_and_continues_when_cache_dir_is_not_writable
+[       OK ] T25TraderCTPTest.login_warns_and_continues_when_cache_dir_is_not_writable (12 ms)
+[ RUN      ] T25TraderCTPTest.order_insert_rejects_when_user_tag_cache_init_failed
+[       OK ] T25TraderCTPTest.order_insert_rejects_when_user_tag_cache_init_failed (3 ms)
+[ DISABLED ] T25TraderCTPTest.DISABLED_settlement_info_last_row_without_payload_crashes
+[ DISABLED ] T25TraderCTPTest.DISABLED_rsp_error_with_null_sink_crashes
+[ DISABLED ] T25TraderCTPTest.DISABLED_disconnect_hangs_when_no_response_clears_in_query
+[ DISABLED ] T25TraderCTPTest.DISABLED_plugin_created_trader_has_indeterminate_sink
+[ RUN      ] T25TraderCTPTest.I03IdentityReservedIdAndEmptyTagStayAligned
+[       OK ] T25TraderCTPTest.I03IdentityReservedIdAndEmptyTagStayAligned (1 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentityMissingIdIsAllocatedAndSuppliedTagPreserved
+[       OK ] T25TraderCTPTest.I03IdentityMissingIdIsAllocatedAndSuppliedTagPreserved (21 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentityRejectsBadUnknownAndWrongSession
+[       OK ] T25TraderCTPTest.I03IdentityRejectsBadUnknownAndWrongSession (3 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentitySmallBufferDoesNotReserve
+[       OK ] T25TraderCTPTest.I03IdentitySmallBufferDoesNotReserve (45 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentityExistingCacheKeyIsNeverOverwritten
+[       OK ] T25TraderCTPTest.I03IdentityExistingCacheKeyIsNeverOverwritten (3 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentityConcurrentAllocationAndDuplicateSubmission
+[       OK ] T25TraderCTPTest.I03IdentityConcurrentAllocationAndDuplicateSubmission (3 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentityFailedSendNeverReusesReference
+[       OK ] T25TraderCTPTest.I03IdentityFailedSendNeverReusesReference (1 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentitySyncErrorAndTradeBeforeOrderAreAssociated
+[       OK ] T25TraderCTPTest.I03IdentitySyncErrorAndTradeBeforeOrderAreAssociated (12 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentityConflictingOrderSystemKeyDoesNotAttributeTrade
+[       OK ] T25TraderCTPTest.I03IdentityConflictingOrderSystemKeyDoesNotAttributeTrade (12 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentityLoginCallbackDuringInsertClosesAdmission
+[       OK ] T25TraderCTPTest.I03IdentityLoginCallbackDuringInsertClosesAdmission (5 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentitySyncRejectCallbackCanSubmitAnotherOrder
+[       OK ] T25TraderCTPTest.I03IdentitySyncRejectCallbackCanSubmitAnotherOrder (1 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentityReloginKeepsHighWaterAndRejectsOldReservation
+[       OK ] T25TraderCTPTest.I03IdentityReloginKeepsHighWaterAndRejectsOldReservation (3 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentityDuplicateReservationOnlyOneConcurrentSend
+[       OK ] T25TraderCTPTest.I03IdentityDuplicateReservationOnlyOneConcurrentSend (4 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentityInvalidLoginMetadataClosesAdmission
+[       OK ] T25TraderCTPTest.I03IdentityInvalidLoginMetadataClosesAdmission (0 ms)
+[ RUN      ] T25TraderCTPTest.I03IdentityReferenceExhaustionDoesNotWrap
+[       OK ] T25TraderCTPTest.I03IdentityReferenceExhaustionDoesNotWrap (12 ms)
+[----------] 58 tests from T25TraderCTPTest (1526 ms total)
+
+[----------] Global test environment tear-down
+[==========] 58 tests from 1 test suite ran. (1529 ms total)
+[  PASSED  ] 58 tests.
+
+  YOU HAVE 4 DISABLED TESTS
+

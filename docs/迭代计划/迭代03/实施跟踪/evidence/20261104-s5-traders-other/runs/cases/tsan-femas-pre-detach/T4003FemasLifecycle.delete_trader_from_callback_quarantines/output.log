@@ -1,0 +1,37 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = T4003FemasLifecycle.delete_trader_from_callback_quarantines
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from T4003FemasLifecycle
+[ RUN      ] T4003FemasLifecycle.delete_trader_from_callback_quarantines
+[TraderFemas] deleteTrader: instance quarantined until process exit (called from a worker or SPI callback thread)
+==================
+WARNING: ThreadSanitizer: thread leak (pid=4412)
+  Thread T1 (tid=6503428, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 std::__1::thread::thread[abi:nqe220108]<TraderFemas::connect()::$_0, 0>(TraderFemas::connect()::$_0&&) <null> (tests:arm64+0x100009f74)
+    #2 TraderFemas::connect() <null> (tests:arm64+0x10000971c)
+    #3 std::__1::__function::__func<T4003FemasLifecycle_delete_trader_from_callback_quarantines_Test::TestBody()::$_0, int ()>::operator()() <null> (tests:arm64+0x10008310c)
+    #4 std::__1::function<int ()>::operator()() const <null> (tests:arm64+0x10007c4cc)
+    #5 (anonymous namespace)::run_forked(std::__1::function<int ()> const&) <null> (tests:arm64+0x10007b5e4)
+    #6 T4003FemasLifecycle_delete_trader_from_callback_quarantines_Test::TestBody() <null> (tests:arm64+0x10007bb60)
+    #7 void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) <null> (tests:arm64+0x10009ac14)
+
+SUMMARY: ThreadSanitizer: thread leak (tests:arm64+0x100009f74) in std::__1::thread::thread[abi:nqe220108]<TraderFemas::connect()::$_0, 0>(TraderFemas::connect()::$_0&&)+0x98
+==================
+src/TestUnits/coverage/t_TraderFemas/t4_003_femas_lifecycle_test.cpp:286: Failure
+Value of: (((*(int *)&(status)) & 0177) == 0)
+  Actual: false
+Expected: true
+child killed by signal 6
+
+[  FAILED  ] T4003FemasLifecycle.delete_trader_from_callback_quarantines (5760 ms)
+[----------] 1 test from T4003FemasLifecycle (5763 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (5763 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] T4003FemasLifecycle.delete_trader_from_callback_quarantines
+
+ 1 FAILED TEST

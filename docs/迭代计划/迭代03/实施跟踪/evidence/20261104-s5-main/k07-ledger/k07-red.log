@@ -1,0 +1,45 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = q04_trader_push.k07c_own_trade_without_trade_id_is_not_booked
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from q04_trader_push
+[ RUN      ] q04_trader_push.k07c_own_trade_without_trade_id_is_not_booked
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_trader_push_report_test.cpp:381: Failure
+Expected equality of these values:
+  10.0
+    Which is: 10
+  env._adapter.getPosition(kAg, false, 1)
+    Which is: 14
+an own fill without a trade id must not be booked
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_trader_push_report_test.cpp:382: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  env._sink._trades.size()
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_trader_push_report_test.cpp:385: Failure
+Expected equality of these values:
+  14.0
+    Which is: 14
+  env._adapter.getPosition(kAg, false, 1)
+    Which is: 18
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q04_uftcore3/q04_trader_push_report_test.cpp:386: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  env._sink._trades.size()
+    Which is: 2
+
+[  FAILED  ] q04_trader_push.k07c_own_trade_without_trade_id_is_not_booked (1 ms)
+[----------] 1 test from q04_trader_push (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] q04_trader_push.k07c_own_trade_without_trade_id_is_not_booked
+
+ 1 FAILED TEST

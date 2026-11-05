@@ -1,0 +1,131 @@
+[0/2] Re-checking globbed directories...
+[1/116] Building CXX object WtDtCore/CMakeFiles/WtDtCore.dir/ParserAdapter.cpp.o
+[2/116] Building CXX object WtDtCore/CMakeFiles/WtDtCore.dir/DataManager.cpp.o
+[3/116] Building CXX object WtDataStorageAD/CMakeFiles/WtDataStorageAD.dir/WtDataReaderAD.cpp.o
+[4/116] Building CXX object WtDtCore/CMakeFiles/WtDtCore.dir/StateMonitor.cpp.o
+[5/116] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/EventNotifier.cpp.o
+[6/116] Building CXX object WtDtCore/CMakeFiles/WtDtCore.dir/UDPCaster.cpp.o
+[7/116] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/CtaMocker.cpp.o
+[8/116] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/ExecMocker.cpp.o
+[9/116] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/HftMocker.cpp.o
+[10/116] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/MatchEngine.cpp.o
+[11/116] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/SelMocker.cpp.o
+[12/116] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/UftMocker.cpp.o
+[13/116] Building CXX object TraderCTP/CMakeFiles/TraderCTP.dir/TraderCTP.cpp.o
+[14/116] Building CXX object WtBtCore/CMakeFiles/WtBtCore.dir/HisDataReplayer.cpp.o
+[15/116] Building CXX object TraderCTPMini/CMakeFiles/TraderCTPMini.dir/TraderCTPMini.cpp.o
+[16/116] Building CXX object TraderFemas/CMakeFiles/TraderFemas.dir/TraderFemas.cpp.o
+[17/116] Building CXX object TraderCTPOpt/CMakeFiles/TraderCTPOpt.dir/TraderCTPOpt.cpp.o
+[18/116] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtDiffMinImpactExeUnit.cpp.o
+[19/116] Building CXX object TraderMocker/CMakeFiles/TraderMocker.dir/TraderMocker.cpp.o
+[20/116] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtExeFact.cpp.o
+[21/116] Building CXX object TraderXTP/CMakeFiles/TraderXTP.dir/TraderXTP.cpp.o
+[22/116] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtOrdMon.cpp.o
+[23/116] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtMinImpactExeUnit.cpp.o
+[24/116] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtStockMinImpactExeUnit.cpp.o
+[25/116] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtTWapExeUnit.cpp.o
+[26/116] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtStockVWapExeUnit.cpp.o
+[27/116] Building CXX object WtRiskMonFact/CMakeFiles/WtRiskMonFact.dir/WtSimpRiskMon.cpp.o
+[28/116] Building CXX object WtMsgQue/CMakeFiles/WtMsgQue.dir/MQClient.cpp.o
+[29/116] Building CXX object WtExeFact/CMakeFiles/WtExeFact.dir/WtVWapExeUnit.cpp.o
+[30/116] Building CXX object WtMsgQue/CMakeFiles/WtMsgQue.dir/MQServer.cpp.o
+[31/116] Building CXX object WtCore/CMakeFiles/WtCore.dir/CtaStraContext.cpp.o
+[32/116] Building CXX object WtCore/CMakeFiles/WtCore.dir/CtaStrategyMgr.cpp.o
+[33/116] Building CXX object WtCore/CMakeFiles/WtCore.dir/EventNotifier.cpp.o
+[34/116] Building CXX object WtCore/CMakeFiles/WtCore.dir/HftStraContext.cpp.o
+[35/116] Building CXX object WtCore/CMakeFiles/WtCore.dir/CtaStraBaseCtx.cpp.o
+[36/116] Building CXX object WtCore/CMakeFiles/WtCore.dir/HftStrategyMgr.cpp.o
+[37/116] Building CXX object WtCore/CMakeFiles/WtCore.dir/HftStraBaseCtx.cpp.o
+[38/116] Building CXX object WtCore/CMakeFiles/WtCore.dir/ParserAdapter.cpp.o
+[39/116] Building CXX object WtCore/CMakeFiles/WtCore.dir/SelStrategyMgr.cpp.o
+[40/116] Building CXX object WtCore/CMakeFiles/WtCore.dir/WtArbiExecuter.cpp.o
+FAILED: [code=1] WtCore/CMakeFiles/WtCore.dir/WtArbiExecuter.cpp.o 
+/usr/bin/c++ -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/opt/homebrew/include -isystem /Users/yunjinqi/Documents/new_projects/wondertrader/src -include /Users/yunjinqi/Documents/new_projects/wondertrader/src/Share/fmt_enum_compat.h -fPIC -g -std=gnu++17 -arch arm64 -Wall -Wextra -Wno-deprecated-copy-with-user-provided-copy "-Wno-#pragma-messages" -Werror -fprofile-instr-generate -fcoverage-mapping -MD -MT WtCore/CMakeFiles/WtCore.dir/WtArbiExecuter.cpp.o -MF WtCore/CMakeFiles/WtCore.dir/WtArbiExecuter.cpp.o.d -o WtCore/CMakeFiles/WtCore.dir/WtArbiExecuter.cpp.o -c /Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:506:10: error: member access into incomplete type 'TraderAdapter'
+  506 |                 _trader->declareOwnerSink(this, ExecOwnerModes::ownerId(name()));
+      |                        ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1274:16: error: member access into incomplete type 'TraderAdapter'
+ 1274 |         return _trader->getPosition(stdCode, validOnly, flag);
+      |                       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1288:13: error: member access into incomplete type 'TraderAdapter'
+ 1288 |         if (_trader->isOwnerRoutingEnabled())
+      |                    ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1289:17: error: member access into incomplete type 'TraderAdapter'
+ 1289 |                 return _trader->getUndoneQtyForOwner(stdCode, ExecOwnerModes::ownerId(name()));
+      |                               ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1290:16: error: member access into incomplete type 'TraderAdapter'
+ 1290 |         return _trader->getUndoneQty(stdCode);
+      |                       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1304:13: error: member access into incomplete type 'TraderAdapter'
+ 1304 |         if (_trader->isOwnerRoutingEnabled())
+      |                    ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1305:17: error: member access into incomplete type 'TraderAdapter'
+ 1305 |                 return _trader->getOrdersForOwner(stdCode, ExecOwnerModes::ownerId(name()));
+      |                               ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1306:16: error: member access into incomplete type 'TraderAdapter'
+ 1306 |         return _trader->getOrders(stdCode);
+      |                       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1324:16: error: member access into incomplete type 'TraderAdapter'
+ 1324 |         return _trader->buyAsOwner(ExecOwnerModes::ownerId(name()), _owner_modes.sharedCapable(stdCode),
+      |                       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1342:16: error: member access into incomplete type 'TraderAdapter'
+ 1342 |         return _trader->sellAsOwner(ExecOwnerModes::ownerId(name()), _owner_modes.sharedCapable(stdCode),
+      |                       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1358:16: error: member access into incomplete type 'TraderAdapter'
+ 1358 |         return _trader->cancelForOwner(localid, ExecOwnerModes::ownerId(name()));
+      |                       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1374:16: error: member access into incomplete type 'TraderAdapter'
+ 1374 |         return _trader->cancelForOwner(stdCode, isBuy, qty, ExecOwnerModes::ownerId(name()));
+      |                       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1525:59: error: member access into incomplete type 'TraderAdapter'
+ 1525 |                 if (!action.bypass) action.allowed = !_trader || _trader->checkOrderLimits(action.code.c_str());
+      |                                                                         ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.cpp:1533:38: error: member access into incomplete type 'TraderAdapter'
+ 1533 |                 std::shared_ptr<const void>(_trader->accountGate()) : std::shared_ptr<const void>();
+      |                                                    ^
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/WtCore/WtArbiExecuter.h:35:7: note: forward declaration of 'wtp::TraderAdapter'
+   35 | class TraderAdapter;
+      |       ^
+14 errors generated.
+[41/116] Building CXX object WtCore/CMakeFiles/WtCore.dir/SelStraBaseCtx.cpp.o
+[42/116] Building CXX object WtCore/CMakeFiles/WtCore.dir/TraderAdapter.cpp.o
+ninja: build stopped: subcommand failed.

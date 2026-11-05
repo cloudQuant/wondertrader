@@ -1,0 +1,26 @@
+[
+ {
+  "id": "asan-mocker2",
+  "name": "LANE",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/mocker-fix-asan/tests",
+  "filter": "*-t6_init.wtcore_init_ext_rejects_tradermocker_null_config",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 900
+ },
+ {
+  "id": "asan-mocker2",
+  "name": "R214",
+  "bin": "/tmp/wt-i03-s5-traders-other-san/manual/mocker-fix-asan/tests",
+  "filter": "R214MockerBranches.UnregisteredOrderDoesNotTradeOnOtherContractTick",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  },
+  "timeout": 120
+ }
+]

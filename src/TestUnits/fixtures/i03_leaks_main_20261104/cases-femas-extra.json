@@ -1,0 +1,46 @@
+[
+ {
+  "id": "femas-extra-base-asan",
+  "name": "isolated",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/femas-base-asan/extra",
+  "filter": "*isolated_query_push_same_user_order_id*",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  }
+ },
+ {
+  "id": "femas-extra-base-asan",
+  "name": "ALL",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/femas-base-asan/extra",
+  "filter": "*",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  }
+ },
+ {
+  "id": "femas-extra-fix-asan",
+  "name": "isolated",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/femas-fix-asan/extra",
+  "filter": "*isolated_query_push_same_user_order_id*",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  }
+ },
+ {
+  "id": "femas-extra-fix-asan",
+  "name": "ALL",
+  "bin": "/tmp/wt-i03-leaks-20261104/manual/femas-fix-asan/extra",
+  "filter": "*",
+  "env": {
+   "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+   "LSAN_OPTIONS": "exitcode=23:report_objects=1",
+   "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+  }
+ }
+]

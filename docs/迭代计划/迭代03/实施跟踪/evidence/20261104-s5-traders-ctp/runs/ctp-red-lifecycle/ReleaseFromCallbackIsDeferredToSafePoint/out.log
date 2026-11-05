@@ -1,0 +1,41 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03S5TraderCTPLifecycle.ReleaseFromCallbackIsDeferredToSafePoint
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03S5TraderCTPLifecycle
+[ RUN      ] I03S5TraderCTPLifecycle.ReleaseFromCallbackIsDeferredToSafePoint
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/i03s5_traderctp_lifecycle_test.cpp:505: Failure
+Expected equality of these values:
+  0
+  releasesInsideCallback
+    Which is: 1
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/i03s5_traderctp_lifecycle_test.cpp:506: Failure
+Expected equality of these values:
+  kDeferred
+    Which is: 1
+  stateInsideCallback
+    Which is: -1
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/i03s5_traderctp_lifecycle_test.cpp:512: Failure
+Expected equality of these values:
+  kReleased
+    Which is: 2
+  trader_.stopState()
+    Which is: -1
+
+/tmp/wt-i03-s5-traders-ctp-before/src/TestUnits/coverage/t_TraderCTP/i03s5_traderctp_lifecycle_test.cpp:514: Failure
+Value of: trader_.hasWorker()
+  Actual: true
+Expected: false
+
+[  FAILED  ] I03S5TraderCTPLifecycle.ReleaseFromCallbackIsDeferredToSafePoint (5 ms)
+[----------] 1 test from I03S5TraderCTPLifecycle (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (5 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] I03S5TraderCTPLifecycle.ReleaseFromCallbackIsDeferredToSafePoint
+
+ 1 FAILED TEST

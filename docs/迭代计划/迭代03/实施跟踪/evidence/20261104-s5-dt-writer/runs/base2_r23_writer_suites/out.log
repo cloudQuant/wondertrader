@@ -1,0 +1,235 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R23WriterTest.*:R100WriterTest.*:R112WriterResizeFailureTest.*:R122WriterBaseInitTest.*:R162WriterClosingEdgeTest.*:R172WriterClearCacheTest.*:R193WriterAltCodeTest.*:R212WriterTailTest.*:WriterResizeAfterExtendTest.*:R52WriterTest.*:R70WriterResidualTest.*:R74WriterResidualTest.*:R94WriterMidnightTest.*:L03WriterSessionDate.*:R195WriterSessionEdgeTest.*:R22WriterStartTest.*:WriterTickRangeE2ETest.*
+[==========] Running 80 tests from 17 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from WriterTickRangeE2ETest
+[ RUN      ] WriterTickRangeE2ETest.PublishedWriterTicksAreVisibleThroughPublicRange
+[       OK ] WriterTickRangeE2ETest.PublishedWriterTicksAreVisibleThroughPublicRange (89 ms)
+[----------] 1 test from WriterTickRangeE2ETest (89 ms total)
+
+[----------] 2 tests from R195WriterSessionEdgeTest
+[ RUN      ] R195WriterSessionEdgeTest.auction_tick_and_lunch_break_tick
+[       OK ] R195WriterSessionEdgeTest.auction_tick_and_lunch_break_tick (87 ms)
+[ RUN      ] R195WriterSessionEdgeTest.night_session_cross_day_offset_and_close_time
+[       OK ] R195WriterSessionEdgeTest.night_session_cross_day_offset_and_close_time (26 ms)
+[----------] 2 tests from R195WriterSessionEdgeTest (113 ms total)
+
+[----------] 2 tests from R22WriterStartTest
+[ RUN      ] R22WriterStartTest.RealWriterInitAcceptsAndPersistsTick
+[       OK ] R22WriterStartTest.RealWriterInitAcceptsAndPersistsTick (10 ms)
+[ RUN      ] R22WriterStartTest.RunnerStartsWithRealWriterAndReleasesItOnScopeExit
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R22WriterStartTest.RunnerStartsWithRealWriterAndReleasesItOnScopeExit
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R22WriterStartTest
+[ RUN      ] R22WriterStartTest.RunnerStartsWithRealWriterAndReleasesItOnScopeExit
+[       OK ] R22WriterStartTest.RunnerStartsWithRealWriterAndReleasesItOnScopeExit (143 ms)
+[----------] 1 test from R22WriterStartTest (143 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (143 ms total)
+[  PASSED  ] 1 test.
+[       OK ] R22WriterStartTest.RunnerStartsWithRealWriterAndReleasesItOnScopeExit (4722 ms)
+[----------] 2 tests from R22WriterStartTest (4733 ms total)
+
+[----------] 6 tests from L03WriterSessionDate
+[ RUN      ] L03WriterSessionDate.InvalidDateRejectedBeforeSynchronousEffectsAndCanRetry
+[       OK ] L03WriterSessionDate.InvalidDateRejectedBeforeSynchronousEffectsAndCanRetry (30 ms)
+[ RUN      ] L03WriterSessionDate.InvalidDateRejectedBeforeAsyncAdmission
+[       OK ] L03WriterSessionDate.InvalidDateRejectedBeforeAsyncAdmission (7 ms)
+[ RUN      ] L03WriterSessionDate.MissingAndMalformedDatesAndMissingSessionRejected
+[       OK ] L03WriterSessionDate.MissingAndMalformedDatesAndMissingSessionRejected (2 ms)
+[ RUN      ] L03WriterSessionDate.AcceptedQueuedTickRecheckedBeforeEffects
+[       OK ] L03WriterSessionDate.AcceptedQueuedTickRecheckedBeforeEffects (50 ms)
+[ RUN      ] L03WriterSessionDate.SynchronousSinkReentryCannotPublishInvalidDate
+[       OK ] L03WriterSessionDate.SynchronousSinkReentryCannotPublishInvalidDate (2 ms)
+[ RUN      ] L03WriterSessionDate.MissingContractKeepsAcceptedNoOpBehavior
+[       OK ] L03WriterSessionDate.MissingContractKeepsAcceptedNoOpBehavior (1 ms)
+[----------] 6 tests from L03WriterSessionDate (96 ms total)
+
+[----------] 1 test from R100WriterTest
+[ RUN      ] R100WriterTest.R100WriterNullDumperAndUnknownSessionComm
+[       OK ] R100WriterTest.R100WriterNullDumperAndUnknownSessionComm (24 ms)
+[----------] 1 test from R100WriterTest (24 ms total)
+
+[----------] 1 test from R112WriterResizeFailureTest
+[ RUN      ] R112WriterResizeFailureTest.R112WriterTickBlockExpansionFailureIsLogged
+[       OK ] R112WriterResizeFailureTest.R112WriterTickBlockExpansionFailureIsLogged (2212 ms)
+[----------] 1 test from R112WriterResizeFailureTest (2212 ms total)
+
+[----------] 1 test from R122WriterBaseInitTest
+[ RUN      ] R122WriterBaseInitTest.R122WriterTickCacheUninitializedIsLogged
+[       OK ] R122WriterBaseInitTest.R122WriterTickCacheUninitializedIsLogged (14 ms)
+[----------] 1 test from R122WriterBaseInitTest (14 ms total)
+
+[----------] 2 tests from R162WriterClosingEdgeTest
+[ RUN      ] R162WriterClosingEdgeTest.R162WriterClosingOpenFailuresAreLogged
+[       OK ] R162WriterClosingEdgeTest.R162WriterClosingOpenFailuresAreLogged (185 ms)
+[ RUN      ] R162WriterClosingEdgeTest.R162WriterRawMin1BlockHeaderIsStrippedBeforeAppend
+[       OK ] R162WriterClosingEdgeTest.R162WriterRawMin1BlockHeaderIsStrippedBeforeAppend (125 ms)
+[----------] 2 tests from R162WriterClosingEdgeTest (310 ms total)
+
+[----------] 3 tests from R172WriterClearCacheTest
+[ RUN      ] R172WriterClearCacheTest.R172WriterClearCacheRebuildsExpiredCode
+[       OK ] R172WriterClearCacheTest.R172WriterClearCacheRebuildsExpiredCode (85 ms)
+[ RUN      ] R172WriterClearCacheTest.R172WriterClearCacheKeepsAllLiveCodes
+[       OK ] R172WriterClearCacheTest.R172WriterClearCacheKeepsAllLiveCodes (60 ms)
+[ RUN      ] R172WriterClearCacheTest.R172WriterClearCacheWithEmptyCache
+[       OK ] R172WriterClearCacheTest.R172WriterClearCacheWithEmptyCache (253 ms)
+[----------] 3 tests from R172WriterClearCacheTest (398 ms total)
+
+[----------] 1 test from R193WriterAltCodeTest
+[ RUN      ] R193WriterAltCodeTest.DumpBarsRenamesAltCodeFileAndAppends
+[       OK ] R193WriterAltCodeTest.DumpBarsRenamesAltCodeFileAndAppends (99 ms)
+[----------] 1 test from R193WriterAltCodeTest (99 ms total)
+
+[----------] 3 tests from R212WriterTailTest
+[ RUN      ] R212WriterTailTest.R212WriterTickResizeRejectsTruncatedFile
+[       OK ] R212WriterTailTest.R212WriterTickResizeRejectsTruncatedFile (3967 ms)
+[ RUN      ] R212WriterTailTest.R212WriterKlineZeroLowThenNonZeroLowMerge
+[       OK ] R212WriterTailTest.R212WriterKlineZeroLowThenNonZeroLowMerge (127 ms)
+[ RUN      ] R212WriterTailTest.R212WriterSessionRejectionSkipsAllIntradayBlocks
+[       OK ] R212WriterTailTest.R212WriterSessionRejectionSkipsAllIntradayBlocks (2 ms)
+[----------] 3 tests from R212WriterTailTest (4097 ms total)
+
+[----------] 39 tests from R23WriterTest
+[ RUN      ] R23WriterTest.TransHisDataMovesRtTicksToCompressedDsb
+[       OK ] R23WriterTest.TransHisDataMovesRtTicksToCompressedDsb (29 ms)
+[ RUN      ] R23WriterTest.TransHisDataWritesMarkerThenNextInitSeesSessionProceeded
+[       OK ] R23WriterTest.TransHisDataWritesMarkerThenNextInitSeesSessionProceeded (13 ms)
+[ RUN      ] R23WriterTest.TransHisDataWithUnknownSessionStaysSilent
+[       OK ] R23WriterTest.TransHisDataWithUnknownSessionStaysSilent (297 ms)
+[ RUN      ] R23WriterTest.SecondClosingRunAppendsMinBarsAndReplacesDayBar
+[       OK ] R23WriterTest.SecondClosingRunAppendsMinBarsAndReplacesDayBar (57 ms)
+[ RUN      ] R23WriterTest.ExtendedDumperReceivesDayMin1Min5BarsAndTicks
+[       OK ] R23WriterTest.ExtendedDumperReceivesDayMin1Min5BarsAndTicks (148 ms)
+[ RUN      ] R23WriterTest.ExtendedDumperFailureOnlyLogsError
+[       OK ] R23WriterTest.ExtendedDumperFailureOnlyLogsError (185 ms)
+[ RUN      ] R23WriterTest.DisabledHistorySkipsClosingWorkButStillMarks
+[       OK ] R23WriterTest.DisabledHistorySkipsClosingWorkButStillMarks (17 ms)
+[ RUN      ] R23WriterTest.GetCurTickSeesCacheWrittenBeforeClosing
+[       OK ] R23WriterTest.GetCurTickSeesCacheWrittenBeforeClosing (76 ms)
+[ DISABLED ] R23WriterTest.DISABLED_ClearCacheCommandMaySleepThreeHundredSeconds
+[ RUN      ] R23WriterTest.Min1BarIsLabelledWithMinuteEnd
+[       OK ] R23WriterTest.Min1BarIsLabelledWithMinuteEnd (14 ms)
+[ RUN      ] R23WriterTest.SecondTickSameMinuteMergesOhlcAndAmounts
+[       OK ] R23WriterTest.SecondTickSameMinuteMergesOhlcAndAmounts (55 ms)
+[ RUN      ] R23WriterTest.Min5BucketsEveryFiveMinutes
+[       OK ] R23WriterTest.Min5BucketsEveryFiveMinutes (79 ms)
+[ RUN      ] R23WriterTest.LastMinuteOfSectionFallsIntoSectionCloseLabel
+[       OK ] R23WriterTest.LastMinuteOfSectionFallsIntoSectionCloseLabel (58 ms)
+[ RUN      ] R23WriterTest.ZeroPriceOpeningTickIsBackfilledByNextTick
+[       OK ] R23WriterTest.ZeroPriceOpeningTickIsBackfilledByNextTick (72 ms)
+[ RUN      ] R23WriterTest.InvalidActionTimeOnlyWarnsAndKeepsBars
+[       OK ] R23WriterTest.InvalidActionTimeOnlyWarnsAndKeepsBars (14 ms)
+[ RUN      ] R23WriterTest.SkipNotradeBarSuppressesBarGeneration
+[       OK ] R23WriterTest.SkipNotradeBarSuppressesBarGeneration (38 ms)
+[ RUN      ] R23WriterTest.SkipNotradeTickMergesOnlyTradingTicks
+[       OK ] R23WriterTest.SkipNotradeTickMergesOnlyTradingTicks (61 ms)
+[ RUN      ] R23WriterTest.MinPriceModeOneWritesBidAskIntoHoldAddUnion
+[       OK ] R23WriterTest.MinPriceModeOneWritesBidAskIntoHoldAddUnion (100 ms)
+[ RUN      ] R23WriterTest.OrderQueueWritesRtBlockAndCountsReceipts
+[       OK ] R23WriterTest.OrderQueueWritesRtBlockAndCountsReceipts (39 ms)
+[ RUN      ] R23WriterTest.OrderDetailAndTransactionWriteTheirOwnRtBlocks
+[       OK ] R23WriterTest.OrderDetailAndTransactionWriteTheirOwnRtBlocks (10 ms)
+[ RUN      ] R23WriterTest.NullAndDisabledHftWritersAreRejected
+[       OK ] R23WriterTest.NullAndDisabledHftWritersAreRejected (47 ms)
+[ RUN      ] R23WriterTest.DisableOrderDetailAndTransactionAreIndependent
+[       OK ] R23WriterTest.DisableOrderDetailAndTransactionAreIndependent (135 ms)
+[ RUN      ] R23WriterTest.SessionNotReceivingStopsAllHftWriters
+[       OK ] R23WriterTest.SessionNotReceivingStopsAllHftWriters (70 ms)
+[ RUN      ] R23WriterTest.InitCreatesCacheDmbSizedByContractCount
+[       OK ] R23WriterTest.InitCreatesCacheDmbSizedByContractCount (25 ms)
+[ RUN      ] R23WriterTest.InitReadsMarkerSectionAndReportsProceededByDate
+[       OK ] R23WriterTest.InitReadsMarkerSectionAndReportsProceededByDate (11 ms)
+[ DISABLED ] R23WriterTest.DISABLED_SecondInitOnSameWriterTerminatesProcess
+[ RUN      ] R23WriterTest.LoadCacheReindexesItemsFromExistingFile
+[       OK ] R23WriterTest.LoadCacheReindexesItemsFromExistingFile (126 ms)
+[ RUN      ] R23WriterTest.GetCurTickRejectsEmptyCodeAndUnknownAndUncached
+[       OK ] R23WriterTest.GetCurTickRejectsEmptyCodeAndUnknownAndUncached (27 ms)
+[ RUN      ] R23WriterTest.WriteTickNullReturnsFalse
+[       OK ] R23WriterTest.WriteTickNullReturnsFalse (15 ms)
+[ RUN      ] R23WriterTest.FirstTickOfTradingdaySeedsCacheAndRaisesNewHighLow
+[       OK ] R23WriterTest.FirstTickOfTradingdaySeedsCacheAndRaisesNewHighLow (84 ms)
+[ RUN      ] R23WriterTest.ProcFlagOneDerivesIncrementalVolumeTurnoverInterest
+[       OK ] R23WriterTest.ProcFlagOneDerivesIncrementalVolumeTurnoverInterest (16 ms)
+[ RUN      ] R23WriterTest.TickWithOlderTradingdayIsDroppedBeforeAnyWrite
+[       OK ] R23WriterTest.TickWithOlderTradingdayIsDroppedBeforeAnyWrite (75 ms)
+[ RUN      ] R23WriterTest.NightSessionOffsetDateAheadOfTradingdayAbandonsTick
+[       OK ] R23WriterTest.NightSessionOffsetDateAheadOfTradingdayAbandonsTick (71 ms)
+[ RUN      ] R23WriterTest.TotalVolumeRollbackAbandonsTick
+[       OK ] R23WriterTest.TotalVolumeRollbackAbandonsTick (44 ms)
+[ RUN      ] R23WriterTest.SameOrEarlierTimestampGetsCentisecondBumpChain
+[       OK ] R23WriterTest.SameOrEarlierTimestampGetsCentisecondBumpChain (22 ms)
+[ RUN      ] R23WriterTest.CacheGrowsByStepWhenCapacityExhausted
+[       OK ] R23WriterTest.CacheGrowsByStepWhenCapacityExhausted (92 ms)
+[ RUN      ] R23WriterTest.CacheResizeMapFailurePreservesOldCacheAndAllowsRetry
+[       OK ] R23WriterTest.CacheResizeMapFailurePreservesOldCacheAndAllowsRetry (58 ms)
+[ RUN      ] R23WriterTest.SaveTickLogWritesCommaSeparatedRows
+[       OK ] R23WriterTest.SaveTickLogWritesCommaSeparatedRows (76 ms)
+[ RUN      ] R23WriterTest.DisableTickStillFeedsCacheAndKlines
+[       OK ] R23WriterTest.DisableTickStillFeedsCacheAndKlines (13 ms)
+[ RUN      ] R23WriterTest.SessionNotReceivingStopsEverythingBeforeCache
+[       OK ] R23WriterTest.SessionNotReceivingStopsEverythingBeforeCache (24 ms)
+[ RUN      ] R23WriterTest.LogGroupSizeControlsReceiptCounterLogging
+[       OK ] R23WriterTest.LogGroupSizeControlsReceiptCounterLogging (60 ms)
+[----------] 39 tests from R23WriterTest (2478 ms total)
+
+[----------] 5 tests from WriterResizeAfterExtendTest
+[ RUN      ] WriterResizeAfterExtendTest.RemapFailureAfterFileExtensionKeepsOldTicksAndCanRetry
+[       OK ] WriterResizeAfterExtendTest.RemapFailureAfterFileExtensionKeepsOldTicksAndCanRetry (3970 ms)
+[ RUN      ] WriterResizeAfterExtendTest.ShortExtensionWithLegacyOversizedTailDoesNotPublishCapacityAndCanRetry
+[       OK ] WriterResizeAfterExtendTest.ShortExtensionWithLegacyOversizedTailDoesNotPublishCapacityAndCanRetry (4453 ms)
+[ RUN      ] WriterResizeAfterExtendTest.DailyRecordBlocksKeepOldPointerAndRetryAfterRemapFailure
+[       OK ] WriterResizeAfterExtendTest.DailyRecordBlocksKeepOldPointerAndRetryAfterRemapFailure (3534 ms)
+[ RUN      ] WriterResizeAfterExtendTest.ReopenedDailyBlocksPreserveCommittedSizeAcrossExpandedTails
+[       OK ] WriterResizeAfterExtendTest.ReopenedDailyBlocksPreserveCommittedSizeAcrossExpandedTails (980 ms)
+[ RUN      ] WriterResizeAfterExtendTest.MinuteBlocksKeepOldDataAndRetryAfterRemapFailure
+[       OK ] WriterResizeAfterExtendTest.MinuteBlocksKeepOldDataAndRetryAfterRemapFailure (444 ms)
+[----------] 5 tests from WriterResizeAfterExtendTest (13386 ms total)
+
+[----------] 4 tests from R52WriterTest
+[ RUN      ] R52WriterTest.R52RtBlockDateRolloverResetsAllFourBlocks
+[       OK ] R52WriterTest.R52RtBlockDateRolloverResetsAllFourBlocks (219 ms)
+[ RUN      ] R52WriterTest.R52RtBlockCapacityRepairFromFileSize
+[       OK ] R52WriterTest.R52RtBlockCapacityRepairFromFileSize (83 ms)
+[ RUN      ] R52WriterTest.R52Min1Min5BlocksGrowWhenCapacityExhausted
+[       OK ] R52WriterTest.R52Min1Min5BlocksGrowWhenCapacityExhausted (962 ms)
+[ RUN      ] R52WriterTest.R52DayBarAltCodeRenameAndCompressionAfterHundredBars
+[       OK ] R52WriterTest.R52DayBarAltCodeRenameAndCompressionAfterHundredBars (111 ms)
+[----------] 4 tests from R52WriterTest (1399 ms total)
+
+[----------] 4 tests from R70WriterResidualTest
+[ RUN      ] R70WriterResidualTest.R70WriterClosingDumpsTransOrderAndQueueHis
+[       OK ] R70WriterResidualTest.R70WriterClosingDumpsTransOrderAndQueueHis (173 ms)
+[ RUN      ] R70WriterResidualTest.R70WriterClosingResetsTickCsvStream
+[       OK ] R70WriterResidualTest.R70WriterClosingResetsTickCsvStream (113 ms)
+[ RUN      ] R70WriterResidualTest.R70WriterInitCreatesDirAndDefaultCacheName
+[       OK ] R70WriterResidualTest.R70WriterInitCreatesDirAndDefaultCacheName (11 ms)
+[ RUN      ] R70WriterResidualTest.R70WriterAsyncPipelineDrainsAllTypes
+[       OK ] R70WriterResidualTest.R70WriterAsyncPipelineDrainsAllTypes (122 ms)
+[----------] 4 tests from R70WriterResidualTest (421 ms total)
+
+[----------] 4 tests from R74WriterResidualTest
+[ RUN      ] R74WriterResidualTest.R74WriterMinPriceModeUpdatesMergedBars
+[       OK ] R74WriterResidualTest.R74WriterMinPriceModeUpdatesMergedBars (57 ms)
+[ RUN      ] R74WriterResidualTest.R74WriterNullDumperIsSkippedInAllBarLoops
+[       OK ] R74WriterResidualTest.R74WriterNullDumperIsSkippedInAllBarLoops (56 ms)
+[ RUN      ] R74WriterResidualTest.R74WriterClosingWithoutTickSkipsBarDumps
+[       OK ] R74WriterResidualTest.R74WriterClosingWithoutTickSkipsBarDumps (91 ms)
+[ RUN      ] R74WriterResidualTest.R74WriterReopenSeesCachedTickAndOverwritesSlot
+[       OK ] R74WriterResidualTest.R74WriterReopenSeesCachedTickAndOverwritesSlot (114 ms)
+[----------] 4 tests from R74WriterResidualTest (319 ms total)
+
+[----------] 1 test from R94WriterMidnightTest
+[ RUN      ] R94WriterMidnightTest.R94WriterMidnightBarWrapsToTradingDate
+[       OK ] R94WriterMidnightTest.R94WriterMidnightBarWrapsToTradingDate (70 ms)
+[----------] 1 test from R94WriterMidnightTest (70 ms total)
+
+[----------] Global test environment tear-down
+[==========] 80 tests from 17 test suites ran. (30274 ms total)
+[  PASSED  ] 80 tests.
+
+  YOU HAVE 2 DISABLED TESTS
+

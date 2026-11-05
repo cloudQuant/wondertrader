@@ -1,0 +1,30 @@
+--- tree/src/TestUnits/fixtures/i03_sdk_events_20261103/run.sh
++++ mirror/src/TestUnits/fixtures/i03_sdk_events_20261103/run.sh
+@@ -1,6 +1,6 @@
+ #!/bin/bash
+ # 迭代03 卡14 BUG-T26-011 CTPLoader 探针：baseline（反向应用本目录补丁=修改前）、normal、ASan/UBSan、TSan。
+-# 用法：bash run.sh <不存在的输出目录>；需 LLVM 22、Homebrew boost/fmt/spdlog/libiconv 与 /tmp/wt-i03-r41-drain/libs/libWTSUtils.a。
++# 用法：bash run.sh <不存在的输出目录>；需 LLVM 22、Homebrew boost/fmt/spdlog/libiconv 与 /private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build/build_x64/Debug/libs/libWTSUtils.a。
+ set -euo pipefail
+ root=$(cd "$(dirname "$0")/../../../.." && pwd)
+ cd "$root"
+@@ -37,7 +37,7 @@
+   -include "$snap/Share/fmt_enum_compat.h" -I"$snap" -Isrc/TestUnits/coverage/t_CTPLoader
+   -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include
+   -I/opt/homebrew/Cellar/spdlog/1.15.3/include -isystem /usr/local/include)
+- libs=(/tmp/wt-i03-r41-drain/libs/libWTSUtils.a /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.a
++ libs=(/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build/build_x64/Debug/libs/libWTSUtils.a /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.a
+   /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_thread.a /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_system.a
+   /opt/homebrew/Cellar/libiconv/1.18/lib/libiconv.a -fprofile-instr-generate -lpthread)
+  (
+--- tree/src/TestUnits/fixtures/i03_sdk_events_20261103/run_t26_regression.sh
++++ mirror/src/TestUnits/fixtures/i03_sdk_events_20261103/run_t26_regression.sh
+@@ -10,7 +10,7 @@
+  if [[ $variant == tsan ]]; then flags+=(-fsanitize=thread -fno-omit-frame-pointer); fi
+  args=(-std=c++17 -g -O1 -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -include stdlib.h -include "$snap/Share/fmt_enum_compat.h" -I"$snap" -Isrc/TestUnits/coverage/t_CTPLoader
+   -I/opt/homebrew/Cellar/boost/1.88.0/include -I/opt/homebrew/Cellar/fmt/11.2.0/include -I/opt/homebrew/Cellar/spdlog/1.15.3/include -isystem /usr/local/include)
+- libs=(/tmp/wt-i03-r41-drain/libs/libWTSUtils.a /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.a /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_thread.a
++ libs=(/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/final3/build/build_x64/Debug/libs/libWTSUtils.a /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_filesystem.a /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_thread.a
+   /opt/homebrew/Cellar/boost/1.88.0/lib/libboost_system.a /opt/homebrew/Cellar/libiconv/1.18/lib/libiconv.a -fprofile-instr-generate -lpthread)
+  ( set -x
+    "$compiler" "${args[@]}" "${flags[@]}" -c "$snap/CTPLoader/TraderSpi.cpp" -o "$out/$variant.o"

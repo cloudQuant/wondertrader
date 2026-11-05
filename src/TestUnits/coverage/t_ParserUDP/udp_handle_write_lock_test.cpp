@@ -465,13 +465,25 @@ namespace
 		void handleParserLog(WTSLogLevel, const char*) override {}
 		void handleEvent(WTSParserEvent, int32_t) override
 		{
-			if (_on_event)
-				_on_event();
+			// I03-NEW-115（测试侧 TSan）：事件线程可能在 registerSpi 之后、set_on_event 期间回调；
+			// 回调对象的读写都经 _on_event_mtx，调用在锁外进行（回调内会释放 parser）。
+			std::function<void()> callback;
+			{
+				std::lock_guard<std::mutex> lock(_on_event_mtx);
+				callback = _on_event;
+			}
+			if (callback)
+				callback();
 		}
 
-		void set_on_event(std::function<void()> callback) { _on_event = std::move(callback); }
+		void set_on_event(std::function<void()> callback)
+		{
+			std::lock_guard<std::mutex> lock(_on_event_mtx);
+			_on_event = std::move(callback);
+		}
 
 	private:
+		std::mutex _on_event_mtx;
 		std::function<void()> _on_event;
 	};
 
@@ -1289,12 +1301,30 @@ TEST(ParserUDPShutdownTest, SuccessfulCurrentSendResetsItsRecoveryBudget)
 	EXPECT_TRUE(parser.shutdown());
 }
 
+// I03-NEW-012: this case runs the real worker. With sport=0 the subscription
+// packet goes to 127.0.0.1:0; macOS fails that async_send_to with
+// EADDRNOTAVAIL on the worker, which is a genuine failure of the recovered
+// epoch and races with the injected-error assertions below (a second Close).
+// Give the subscription channel a bound local receiver so only the injected
+// read errors can end an epoch.
+class LocalUdpReceiver
+{
+public:
+	LocalUdpReceiver() : _socket(_io, boost::asio::ip::udp::endpoint(boost::asio::ip::make_address("127.0.0.1"), 0)) {}
+	int port() const { return static_cast<int>(_socket.local_endpoint().port()); }
+
+private:
+	boost::asio::io_context _io;
+	boost::asio::ip::udp::socket _socket;
+};
+
 TEST(ParserUDPShutdownTest, OldTwoChannelReadCompletionsBelongToOneReconnectEpoch)
 {
 	for (bool broadcast_error_first : { true, false })
 	{
+		LocalUdpReceiver receiver;
 		ParserUDP parser;
-		WTSVariant* config = make_udp_config();
+		WTSVariant* config = make_udp_config(receiver.port());
 		ASSERT_TRUE(parser.init(config));
 		config->release();
 

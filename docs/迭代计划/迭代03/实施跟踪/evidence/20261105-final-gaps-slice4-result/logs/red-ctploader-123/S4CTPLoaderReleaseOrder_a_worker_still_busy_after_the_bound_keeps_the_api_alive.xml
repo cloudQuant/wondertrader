@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="1" failures="1" disabled="0" errors="0" time="0.001" timestamp="2026-11-05T15:22:56.952" name="AllTests">
+  <testsuite name="S4CTPLoaderReleaseOrder" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="0.001" timestamp="2026-11-05T15:22:56.952">
+    <testcase name="a_worker_still_busy_after_the_bound_keeps_the_api_alive" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_CTPLoader/s4_ctploader_release_order_test.cpp" line="119" status="run" result="completed" time="0.001" timestamp="2026-11-05T15:22:56.952" classname="S4CTPLoaderReleaseOrder">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_CTPLoader/s4_ctploader_release_order_test.cpp:129&#x0A;Value of: retained&#x0A;  Actual: false&#x0A;Expected: true&#x0A;a worker still inside the API call must be reported&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_CTPLoader/s4_ctploader_release_order_test.cpp:129
+Value of: retained
+  Actual: false
+Expected: true
+a worker still inside the API call must be reported
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_CTPLoader/s4_ctploader_release_order_test.cpp:130&#x0A;Expected equality of these values:&#x0A;  0&#x0A;  api-&gt;releases()&#x0A;    Which is: 1&#x0A;an API still in use by a worker is never released&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_CTPLoader/s4_ctploader_release_order_test.cpp:130
+Expected equality of these values:
+  0
+  api->releases()
+    Which is: 1
+an API still in use by a worker is never released
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_CTPLoader/s4_ctploader_release_order_test.cpp:131&#x0A;Value of: api-&gt;releasedDuringCall()&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_CTPLoader/s4_ctploader_release_order_test.cpp:131
+Value of: api->releasedDuringCall()
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_CTPLoader/s4_ctploader_release_order_test.cpp:132&#x0A;Value of: api-&gt;detachedDuringCall()&#x0A;  Actual: true&#x0A;Expected: false&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_CTPLoader/s4_ctploader_release_order_test.cpp:132
+Value of: api->detachedDuringCall()
+  Actual: true
+Expected: false
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_CTPLoader/s4_ctploader_release_order_test.cpp:133&#x0A;Expected equality of these values:&#x0A;  static_cast&lt;CThostFtdcTraderApi*&gt;(api)&#x0A;    Which is: 0x106eaa4f0&#x0A;  pUserApi&#x0A;    Which is: NULL&#x0A;the worker&apos;s API pointer stays valid&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_CTPLoader/s4_ctploader_release_order_test.cpp:133
+Expected equality of these values:
+  static_cast<CThostFtdcTraderApi*>(api)
+    Which is: 0x106eaa4f0
+  pUserApi
+    Which is: NULL
+the worker's API pointer stays valid
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

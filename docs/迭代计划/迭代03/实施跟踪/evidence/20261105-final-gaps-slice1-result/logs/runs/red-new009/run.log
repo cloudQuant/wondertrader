@@ -1,0 +1,41 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R76ParserXeleSktUdpFrameTest.*
+[==========] Running 3 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 3 tests from R76ParserXeleSktUdpFrameTest
+[ RUN      ] R76ParserXeleSktUdpFrameTest.UnknownFrameTypeEndsParsingOfTheDatagram
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserXeleSkt/r76_xele_boundary_test.cpp:1057: Failure
+Value of: returned
+  Actual: false
+Expected: true
+extract_buffer did not return on an unknown frame type
+
+[  FAILED  ] R76ParserXeleSktUdpFrameTest.UnknownFrameTypeEndsParsingOfTheDatagram (2002 ms)
+[ RUN      ] R76ParserXeleSktUdpFrameTest.FrameLongerThanTheDatagramIsNotRead
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserXeleSkt/r76_xele_boundary_test.cpp:1092: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  heartbeatLogs(sink)
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserXeleSkt/r76_xele_boundary_test.cpp:1098: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  heartbeatLogs(sink)
+    Which is: 4
+
+[  FAILED  ] R76ParserXeleSktUdpFrameTest.FrameLongerThanTheDatagramIsNotRead (9 ms)
+[ RUN      ] R76ParserXeleSktUdpFrameTest.ConsecutiveValidFramesAreAllParsed
+[       OK ] R76ParserXeleSktUdpFrameTest.ConsecutiveValidFramesAreAllParsed (2 ms)
+[----------] 3 tests from R76ParserXeleSktUdpFrameTest (2015 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 1 test suite ran. (2015 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] R76ParserXeleSktUdpFrameTest.UnknownFrameTypeEndsParsingOfTheDatagram
+[  FAILED  ] R76ParserXeleSktUdpFrameTest.FrameLongerThanTheDatagramIsNotRead
+
+ 2 FAILED TESTS

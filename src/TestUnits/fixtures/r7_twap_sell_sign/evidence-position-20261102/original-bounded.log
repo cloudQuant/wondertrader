@@ -1,0 +1,104 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r7_twap_sell_sign.*:r7_twap_bounded.*
+[==========] Running 12 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 5 tests from r7_twap_sell_sign
+[ RUN      ] r7_twap_sell_sign.canceled_sell_does_not_submit_a_buy
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1117: Failure
+Expected equality of these values:
+  ctx.sells.size()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] r7_twap_sell_sign.canceled_sell_does_not_submit_a_buy (0 ms)
+[ RUN      ] r7_twap_sell_sign.last_slice_never_reverses_a_sell_into_a_buy
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1134: Failure
+Expected equality of these values:
+  ctx.sells.size()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] r7_twap_sell_sign.last_slice_never_reverses_a_sell_into_a_buy (0 ms)
+[ RUN      ] r7_twap_sell_sign.late_buy_fill_must_not_be_retried_twice
+[       OK ] r7_twap_sell_sign.late_buy_fill_must_not_be_retried_twice (0 ms)
+[ RUN      ] r7_twap_sell_sign.accounted_buy_fill_retries_only_the_remainder
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1177: Failure
+Expected equality of these values:
+  ctx.buys.size()
+    Which is: 1
+  2u
+    Which is: 2
+
+[  FAILED  ] r7_twap_sell_sign.accounted_buy_fill_retries_only_the_remainder (0 ms)
+[ RUN      ] r7_twap_sell_sign.sell_slice_does_not_exceed_target_difference
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1192: Failure
+Expected equality of these values:
+  ctx.sells.size()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] r7_twap_sell_sign.sell_slice_does_not_exceed_target_difference (0 ms)
+[----------] 5 tests from r7_twap_sell_sign (1 ms total)
+
+[----------] 7 tests from r7_twap_bounded
+[ RUN      ] r7_twap_bounded.opening_minimum_above_remaining_does_not_cross_target
+[       OK ] r7_twap_bounded.opening_minimum_above_remaining_does_not_cross_target (0 ms)
+[ RUN      ] r7_twap_bounded.fractional_target_is_not_exceeded
+[       OK ] r7_twap_bounded.fractional_target_is_not_exceeded (0 ms)
+[ RUN      ] r7_twap_bounded.crossing_zero_closes_before_opening_opposite_position
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1233: Failure
+Expected equality of these values:
+  ctx.sells.size()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] r7_twap_bounded.crossing_zero_closes_before_opening_opposite_position (0 ms)
+[ RUN      ] r7_twap_bounded.cancel_retry_never_reverses_when_position_moves_past_slice_target
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1247: Failure
+Expected equality of these values:
+  ctx.sells.size()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] r7_twap_bounded.cancel_retry_never_reverses_when_position_moves_past_slice_target (0 ms)
+[ RUN      ] r7_twap_bounded.subminimum_opening_cancel_remainder_is_not_enlarged
+[       OK ] r7_twap_bounded.subminimum_opening_cancel_remainder_is_not_enlarged (0 ms)
+[ RUN      ] r7_twap_bounded.canceled_long_close_below_open_minimum_keeps_sell_direction
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1276: Failure
+Expected equality of these values:
+  ctx.sells.size()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] r7_twap_bounded.canceled_long_close_below_open_minimum_keeps_sell_direction (0 ms)
+[ RUN      ] r7_twap_bounded.canceled_short_close_below_open_minimum_keeps_buy_direction
+/tmp/wt-i03-twap-bounded-review/src/TestUnits/coverage/r7_exefact/r7_twap_unit_test.cpp:1292: Failure
+Expected equality of these values:
+  ctx.buys.size()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] r7_twap_bounded.canceled_short_close_below_open_minimum_keeps_buy_direction (0 ms)
+[----------] 7 tests from r7_twap_bounded (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 12 tests from 2 test suites ran. (1 ms total)
+[  PASSED  ] 4 tests.
+[  FAILED  ] 8 tests, listed below:
+[  FAILED  ] r7_twap_sell_sign.canceled_sell_does_not_submit_a_buy
+[  FAILED  ] r7_twap_sell_sign.last_slice_never_reverses_a_sell_into_a_buy
+[  FAILED  ] r7_twap_sell_sign.accounted_buy_fill_retries_only_the_remainder
+[  FAILED  ] r7_twap_sell_sign.sell_slice_does_not_exceed_target_difference
+[  FAILED  ] r7_twap_bounded.crossing_zero_closes_before_opening_opposite_position
+[  FAILED  ] r7_twap_bounded.cancel_retry_never_reverses_when_position_moves_past_slice_target
+[  FAILED  ] r7_twap_bounded.canceled_long_close_below_open_minimum_keeps_sell_direction
+[  FAILED  ] r7_twap_bounded.canceled_short_close_below_open_minimum_keeps_buy_direction
+
+ 8 FAILED TESTS

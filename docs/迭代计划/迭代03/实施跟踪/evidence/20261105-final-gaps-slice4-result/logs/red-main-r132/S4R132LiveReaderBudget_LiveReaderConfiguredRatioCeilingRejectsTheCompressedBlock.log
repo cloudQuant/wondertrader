@@ -1,0 +1,36 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S4R132LiveReaderBudget.LiveReaderConfiguredRatioCeilingRejectsTheCompressedBlock
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S4R132LiveReaderBudget
+[ RUN      ] S4R132LiveReaderBudget.LiveReaderConfiguredRatioCeilingRejectsTheCompressedBlock
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp:138: Failure
+Expected equality of these values:
+  5u
+    Which is: 5
+  WTSCmpHelper::uncompress_max_ratio()
+    Which is: 1000
+store config must reach this module's budget
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp:140: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  live_read(reader, "SSE.STK.600000")
+    Which is: 10
+the CMP_V2 block exceeds the configured ratio
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l04_datastorage/s4_r132_live_reader_budget_test.cpp:141: Failure
+Expected: (sink.count_of(LL_ERROR)) > (0u), actual: 0 vs 0
+the rejected block must be reported
+
+[  FAILED  ] S4R132LiveReaderBudget.LiveReaderConfiguredRatioCeilingRejectsTheCompressedBlock (10 ms)
+[----------] 1 test from S4R132LiveReaderBudget (10 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (10 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S4R132LiveReaderBudget.LiveReaderConfiguredRatioCeilingRejectsTheCompressedBlock
+
+ 1 FAILED TEST

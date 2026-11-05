@@ -190,6 +190,16 @@ public:
     }
     virtual void onRspTrades(const WTSArray* ayTrades) override
     { ++n_rsp_trades_; trades_size_ = ayTrades == NULL ? 0 : ayTrades->size(); }
+    // K42 / L01-014
+    uint32_t n_rsp_orders_status_ = 0;
+    uint32_t last_query_status_ = 0;
+    uint32_t status_orders_size_ = 0;
+    virtual void onRspOrdersWithStatus(const WTSArray* ayOrders, uint32_t status) override
+    { ++n_rsp_orders_status_; last_query_status_ = status; status_orders_size_ = ayOrders == NULL ? 0 : ayOrders->size(); }
+    uint32_t n_unresolved_ = 0;
+    std::string unresolved_kind_, unresolved_raw_;
+    virtual void onUnresolvedProviderReport(const char* kind, const char* reason, const char* raw) override
+    { (void)reason; ++n_unresolved_; unresolved_kind_ = kind ? kind : ""; unresolved_raw_ = raw ? raw : ""; }
     virtual void onRspSettlementInfo(uint32_t uDate, const char* content) override
     { ++n_settlement_; settle_date_ = uDate; settle_content_ = content; }
     virtual void onPushOrder(WTSOrderInfo* orderInfo) override
@@ -431,19 +441,22 @@ protected:
         memset(&loginf, 0, sizeof(loginf));
         loginf.FrontID = 12345;
         loginf.SessionID = 67;
-        strcpy(loginf.BrokerID, "8888");
+        // 迭代03 s5 N-2 夹具迁移（11-03 已实施的 CTP 身份合同：登录回报 Broker/User 须与配置一致、各回报须匹配本次登录代次的请求号）：
+        // 旧夹具 BrokerID 为 "8888"（与配置 "9999" 不符）且未执行排队的确认查询就以任意请求号回报。
+        strcpy(loginf.BrokerID, "9999");
         strcpy(loginf.UserID, "88880001");
         strcpy(loginf.TradingDay, "20240115");
         strcpy(loginf.LoginTime, "09:30:00");
         strcpy(loginf.MaxOrderRef, "1000");
         strcpy(loginf.SystemName, "ctp");
-        trader_.OnRspUserLogin(&loginf, &ok, 2, true);
+        trader_.OnRspUserLogin(&loginf, &ok, api_.last_req_id_, true);
         ASSERT_EQ(TraderCTP::WS_LOGINED, trader_.state());
+        ASSERT_EQ(1u, trader_.drainQueries());     // 生产由 worker 发出确认查询
 
         CThostFtdcSettlementInfoConfirmField conf;
         memset(&conf, 0, sizeof(conf));
         strcpy(conf.ConfirmDate, confirm_date);
-        trader_.OnRspQrySettlementInfoConfirm(&conf, &ok, 2, true);
+        trader_.OnRspQrySettlementInfoConfirm(&conf, &ok, api_.last_req_id_, true);
     }
 
     WTSCommodityInfo* comm_ = NULL;
@@ -563,7 +576,8 @@ TEST_F(T2TraderCTPTest, authenticate_failure_marks_login_failed_and_reports)
     strcpy(err.ErrorMsg, "AuthCode invalid");
     CThostFtdcRspAuthenticateField f;
     memset(&f, 0, sizeof(f));
-    trader_.OnRspAuthenticate(&f, &err, 3, true);
+    // 迭代03 s5 N-2 夹具迁移（11-03 已实施的 CTP 身份合同：登录回报 Broker/User 须与配置一致、各回报须匹配本次登录代次的请求号）：回报请求号取本次认证请求号（旧夹具用任意值 3）。
+    trader_.OnRspAuthenticate(&f, &err, api_.last_req_id_, true);
 
     EXPECT_EQ(TraderCTP::WS_LOGINFAILED, trader_.state());
     EXPECT_EQ(0, api_.n_login_);           // 认证失败不允许再发登录请求
@@ -609,7 +623,10 @@ TEST_F(T2TraderCTPTest, settlement_unconfirmed_goes_through_confirm)
     loginf.SessionID = 67;
     strcpy(loginf.MaxOrderRef, "1000");
     strcpy(loginf.TradingDay, "20240115");
-    trader_.OnRspUserLogin(&loginf, &ok, 2, true);
+    // 迭代03 s5 N-2 夹具迁移（11-03 已实施的 CTP 身份合同：登录回报 Broker/User 须与配置一致、各回报须匹配本次登录代次的请求号）。
+    strcpy(loginf.BrokerID, "9999");
+    strcpy(loginf.UserID, "88880001");
+    trader_.OnRspUserLogin(&loginf, &ok, api_.last_req_id_, true);
 
     // 登录响应后应有一个待执行的查询
     EXPECT_EQ(1u, trader_.queryDepth());
@@ -622,7 +639,7 @@ TEST_F(T2TraderCTPTest, settlement_unconfirmed_goes_through_confirm)
     CThostFtdcSettlementInfoConfirmField conf;
     memset(&conf, 0, sizeof(conf));
     strcpy(conf.ConfirmDate, "20240112");
-    trader_.OnRspQrySettlementInfoConfirm(&conf, &ok, 2, true);
+    trader_.OnRspQrySettlementInfoConfirm(&conf, &ok, api_.last_req_id_, true);
     EXPECT_EQ(TraderCTP::WS_CONFIRM_QRYED != trader_.state(), false);
     EXPECT_FALSE(trader_.isConnected());
     EXPECT_EQ(1, api_.n_confirm_);
@@ -631,7 +648,7 @@ TEST_F(T2TraderCTPTest, settlement_unconfirmed_goes_through_confirm)
     // 柜台确认响应回来后进入就绪
     CThostFtdcSettlementInfoConfirmField conf2;
     memset(&conf2, 0, sizeof(conf2));
-    trader_.OnRspSettlementInfoConfirm(&conf2, &ok, 3, true);
+    trader_.OnRspSettlementInfoConfirm(&conf2, &ok, api_.last_req_id_, true);
     EXPECT_EQ(TraderCTP::WS_ALLREADY, trader_.state());
     EXPECT_TRUE(trader_.isConnected());
     EXPECT_TRUE(sink_.last_succ_);
@@ -712,6 +729,10 @@ TEST_F(T2TraderCTPTest, order_insert_maps_types_and_ref_for_shfe)
     o.OrderStatus = THOST_FTDC_OST_NoTradeQueueing;
     strcpy(o.InsertDate, "20240115");
     strcpy(o.InsertTime, "10:00:00");
+    // 迭代03 s5 N-2 夹具迁移（11-03 CTP 身份合同：回报须带与登记身份一致的 Broker/Investor/TradingDay 才归属本地 tag）。
+    strcpy(o.BrokerID, "9999");
+    strcpy(o.InvestorID, "88880001");
+    strcpy(o.TradingDay, "20240115");
     trader_.OnRtnOrder(&o);
     ASSERT_EQ(1u, sink_.n_push_order_);
     EXPECT_EQ("TAG-A", sink_.push_order_usertag_);
@@ -740,6 +761,10 @@ TEST_F(T2TraderCTPTest, order_insert_cffex_anyprice_and_close_offsets)
     EXPECT_EQ(THOST_FTDC_TC_IOC, api_.order_.TimeCondition);
     EXPECT_EQ(THOST_FTDC_VC_CV, api_.order_.VolumeCondition);
 
+    // 迭代03 s5 N-2 前提迁移（卡6d / 11-03 身份合同：同一身份不重复提交）：旧用例复用同一委托 ID 连续下单，
+    // 改为每次下单前重新 makeEntrustID；映射断言不变。
+    ASSERT_TRUE(trader_.makeEntrustID(eid, sizeof(eid)));
+    e->setEntrustID(eid);
     e->setOffsetType(WOT_CLOSEYESTERDAY);
     e->setOrderFlag(WOF_NOR);
     EXPECT_EQ(0, trader_.orderInsert(e));
@@ -750,6 +775,8 @@ TEST_F(T2TraderCTPTest, order_insert_cffex_anyprice_and_close_offsets)
     EXPECT_EQ(2, api_.n_insert_);
 
     e->setDirection(WDT_SHORT);
+    ASSERT_TRUE(trader_.makeEntrustID(eid, sizeof(eid)));
+    e->setEntrustID(eid);
     e->setOffsetType(WOT_FORCECLOSE);
     EXPECT_EQ(0, trader_.orderInsert(e));
     EXPECT_EQ(THOST_FTDC_OF_ForceClose, api_.order_.CombOffsetFlag[0]);
@@ -803,7 +830,10 @@ TEST_F(T2TraderCTPTest, queries_enqueue_then_send_on_drain)
     loginf.SessionID = 67;
     strcpy(loginf.MaxOrderRef, "1000");
     strcpy(loginf.TradingDay, "20240115");
-    trader_.OnRspUserLogin(&loginf, &ok, 2, true);
+    // 迭代03 s5 N-2 夹具迁移（11-03 已实施的 CTP 身份合同：登录回报 Broker/User 须与配置一致、各回报须匹配本次登录代次的请求号）。
+    strcpy(loginf.BrokerID, "9999");
+    strcpy(loginf.UserID, "88880001");
+    trader_.OnRspUserLogin(&loginf, &ok, api_.last_req_id_, true);
     ASSERT_EQ(1u, trader_.queryDepth());
     ASSERT_EQ(1u, trader_.drainQueries());
     ASSERT_EQ(1, api_.n_qry_confirm_);
@@ -811,7 +841,7 @@ TEST_F(T2TraderCTPTest, queries_enqueue_then_send_on_drain)
     CThostFtdcSettlementInfoConfirmField conf;
     memset(&conf, 0, sizeof(conf));
     strcpy(conf.ConfirmDate, "20240115");
-    trader_.OnRspQrySettlementInfoConfirm(&conf, &ok, 3, true);
+    trader_.OnRspQrySettlementInfoConfirm(&conf, &ok, api_.last_req_id_, true);
     ASSERT_EQ(TraderCTP::WS_ALLREADY, trader_.state());
 
     EXPECT_EQ(0, trader_.queryAccount());
@@ -1012,6 +1042,10 @@ TEST_F(T2TraderCTPTest, trade_conversion_amount_and_usertag_chain)
     o.OrderStatus = THOST_FTDC_OST_NoTradeQueueing;
     strcpy(o.InsertDate, "20240115");
     strcpy(o.InsertTime, "09:15:00");
+    // 迭代03 s5 N-2 夹具迁移（11-03 CTP 身份合同：回报须带与登记身份一致的 Broker/Investor/TradingDay 才归属本地 tag）。
+    strcpy(o.BrokerID, "9999");
+    strcpy(o.InvestorID, "88880001");
+    strcpy(o.TradingDay, "20240115");
     trader_.OnRtnOrder(&o);
     ASSERT_EQ(1u, sink_.n_push_order_);
     EXPECT_EQ("TAG-CHAIN", sink_.push_order_usertag_);
@@ -1028,6 +1062,9 @@ TEST_F(T2TraderCTPTest, trade_conversion_amount_and_usertag_chain)
     t.OffsetFlag = THOST_FTDC_OF_Open;
     strcpy(t.TradeDate, "20240115");
     strcpy(t.TradeTime, "09:16:30");
+    strcpy(t.BrokerID, "9999");          // 同上：成交按 Broker/Investor/TradingDay/系统单号关联
+    strcpy(t.InvestorID, "88880001");
+    strcpy(t.TradingDay, "20240115");
     trader_.OnRtnTrade(&t);
     ASSERT_EQ(1u, sink_.n_push_trade_);
     EXPECT_EQ("T0001", sink_.push_trade_id_);
@@ -1105,8 +1142,9 @@ TEST_F(T2TraderCTPTest, rsp_order_insert_and_action_error_paths)
 TEST_F(T2TraderCTPTest, rsp_account_position_and_settlement)
 {
     bringToReady();
-    ASSERT_EQ(1u, trader_.queryDepth());
-    ASSERT_EQ(1u, trader_.drainQueries());
+    // 迭代03 s5 N-2：迁移后的 bringToReady 已在就绪前执行确认查询（真实请求号链路），此处不再有待执行项。
+    ASSERT_EQ(0u, trader_.queryDepth());
+    ASSERT_EQ(0u, trader_.drainQueries());
     ASSERT_EQ(0u, trader_.queryDepth());
 
     CThostFtdcTradingAccountField acct;
@@ -1293,4 +1331,122 @@ TEST_F(T2TraderCTPTest, DISABLED_connect_starts_worker_thread_and_needs_real_fro
     // 门禁规则禁止起线程/连柜台，整条路径改名 DISABLED_，留给主控裁定（见 bugs 文件）。
     trader_.attach(&api_);
     EXPECT_NO_THROW(trader_.disconnect());
+}
+
+// 迭代03 第五会话主线程：K42（查询完整性状态）与 BUG-L01-014（provider 原始回报上送）的 CTP 迁移。
+TEST_F(T2TraderCTPTest, k42_order_query_reports_completeness_when_host_supports_it)
+{
+    bringToReady();
+    trader_.setSpiFeatures(WT_TRADER_SPI_FEATURE_QUERY_STATUS);
+    CThostFtdcRspInfoField ok;
+    memset(&ok, 0, sizeof(ok));
+    CThostFtdcOrderField o;
+    memset(&o, 0, sizeof(o));
+    strcpy(o.InstrumentID, kRawCode);
+    strcpy(o.ExchangeID, kExchg);
+    strcpy(o.OrderSysID, "S1");
+    o.FrontID = 12345;
+    o.SessionID = 67;
+    strcpy(o.OrderRef, "1001");
+    o.LimitPrice = 7000.0;
+    o.VolumeTotalOriginal = 1;
+    o.OrderStatus = THOST_FTDC_OST_NoTradeQueueing;
+    strcpy(o.InsertDate, "20240115");
+    strcpy(o.InsertTime, "10:00:00");
+    const uint32_t legacyBefore = sink_.n_rsp_orders_;
+
+    trader_.OnRspQryOrder(&o, &ok, 30, true);
+    ASSERT_EQ(1u, sink_.n_rsp_orders_status_);
+    EXPECT_EQ(WT_QUERY_STATUS_COMPLETE, sink_.last_query_status_);
+    EXPECT_EQ(1u, sink_.status_orders_size_);
+    EXPECT_EQ(legacyBefore, sink_.n_rsp_orders_) << "a host that understands status gets only the versioned callback";
+
+    trader_.OnRspQryOrder(NULL, &ok, 31, true);	// "no orders"
+    EXPECT_EQ(WT_QUERY_STATUS_COMPLETE, sink_.last_query_status_);
+    EXPECT_EQ(0u, sink_.status_orders_size_);
+
+    CThostFtdcOrderField unknown = o;
+    strcpy(unknown.InstrumentID, "zz9999");
+    trader_.OnRspQryOrder(&o, &ok, 32, false);
+    trader_.OnRspQryOrder(&unknown, &ok, 32, true);
+    EXPECT_EQ(WT_QUERY_STATUS_PARTIAL, sink_.last_query_status_) << "a dropped row makes the snapshot partial";
+    EXPECT_EQ(1u, sink_.status_orders_size_);
+
+    CThostFtdcRspInfoField err;
+    memset(&err, 0, sizeof(err));
+    err.ErrorID = 3000;
+    trader_.OnRspQryOrder(&o, &err, 33, true);
+    EXPECT_EQ(WT_QUERY_STATUS_FAILED, sink_.last_query_status_);
+
+    // The next query starts clean.
+    trader_.OnRspQryOrder(&o, &ok, 34, true);
+    EXPECT_EQ(WT_QUERY_STATUS_COMPLETE, sink_.last_query_status_);
+}
+
+TEST_F(T2TraderCTPTest, l01014_unconvertible_trade_is_forwarded_raw_only_to_a_host_that_keeps_it)
+{
+    bringToReady();
+    CThostFtdcTradeField t;
+    memset(&t, 0, sizeof(t));
+    strcpy(t.InstrumentID, "zz9999");	// unknown to the base data
+    strcpy(t.ExchangeID, kExchg);
+    strcpy(t.TradeID, "T0099");
+    strcpy(t.OrderSysID, "S99");
+    t.Price = 7000.0;
+    t.Volume = 2;
+    t.Direction = THOST_FTDC_D_Buy;
+    t.OffsetFlag = THOST_FTDC_OF_Open;
+    strcpy(t.TradeDate, "20240115");
+    strcpy(t.TradeTime, "10:00:01");
+
+    trader_.OnRtnTrade(&t);
+    EXPECT_EQ(0u, sink_.n_unresolved_) << "an older host only gets a log line";
+    EXPECT_NE(std::string::npos, sink_.last_log_.find("dropped")) << sink_.last_log_;
+
+    trader_.setSpiFeatures(WT_TRADER_SPI_FEATURE_RAW_UNRESOLVED);
+    trader_.OnRtnTrade(&t);
+    ASSERT_EQ(1u, sink_.n_unresolved_);
+    EXPECT_EQ("trade", sink_.unresolved_kind_);
+    EXPECT_NE(std::string::npos, sink_.unresolved_raw_.find("InstrumentID=zz9999"));
+    EXPECT_NE(std::string::npos, sink_.unresolved_raw_.find("TradeID=T0099"));
+    EXPECT_NE(std::string::npos, sink_.unresolved_raw_.find("Volume=2"));
+}
+
+
+// 卡6：持仓与成交查询中无法转换的行同样上送原始字段（宿主据此暂停账户），未声明能力的宿主仅记日志。
+TEST_F(T2TraderCTPTest, l01014_unconvertible_position_and_trade_query_rows_are_forwarded_raw)
+{
+    bringToReady();
+    CThostFtdcRspInfoField ok;
+    memset(&ok, 0, sizeof(ok));
+    CThostFtdcInvestorPositionField p;
+    memset(&p, 0, sizeof(p));
+    strcpy(p.InstrumentID, "zz9999");
+    strcpy(p.ExchangeID, kExchg);
+    p.PosiDirection = THOST_FTDC_PD_Long;
+    p.PositionDate = THOST_FTDC_PSD_Today;
+    p.Position = 3;
+    p.TodayPosition = 3;
+    CThostFtdcTradeField t;
+    memset(&t, 0, sizeof(t));
+    strcpy(t.InstrumentID, "zz9999");
+    strcpy(t.ExchangeID, kExchg);
+    strcpy(t.TradeID, "TQ01");
+    t.Volume = 3;
+
+    trader_.OnRspQryInvestorPosition(&p, &ok, 40, true);
+    trader_.OnRspQryTrade(&t, &ok, 41, true);
+    EXPECT_EQ(0u, sink_.n_unresolved_);
+
+    trader_.setSpiFeatures(WT_TRADER_SPI_FEATURE_RAW_UNRESOLVED);
+    trader_.OnRspQryInvestorPosition(&p, &ok, 42, true);
+    ASSERT_EQ(1u, sink_.n_unresolved_);
+    EXPECT_EQ("position", sink_.unresolved_kind_);
+    EXPECT_NE(std::string::npos, sink_.unresolved_raw_.find("InstrumentID=zz9999"));
+    EXPECT_NE(std::string::npos, sink_.unresolved_raw_.find("Position=3"));
+
+    trader_.OnRspQryTrade(&t, &ok, 43, true);
+    ASSERT_EQ(2u, sink_.n_unresolved_);
+    EXPECT_EQ("trade", sink_.unresolved_kind_);
+    EXPECT_NE(std::string::npos, sink_.unresolved_raw_.find("TradeID=TQ01"));
 }

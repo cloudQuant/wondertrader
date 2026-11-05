@@ -1,0 +1,81 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 8 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 4 tests from TickDivisor/0, where TypeParam = CtaMocker
+[ RUN      ] TickDivisor/0.ZeroTickWithRatioSlippageIsRejected
+[       OK ] TickDivisor/0.ZeroTickWithRatioSlippageIsRejected (1 ms)
+[ RUN      ] TickDivisor/0.ZeroTickWithFixedSlippageIsRejected
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/mocker_tick_divisor_test.cpp:55: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  m._sig_map.count(code)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/mocker_tick_divisor_test.cpp:56: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  m._pos_map.count(code)
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/mocker_tick_divisor_test.cpp:57: Failure
+Value of: m._trade_logs.str().empty()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/mocker_tick_divisor_test.cpp:59: Failure
+Value of: rp.fee_error().empty()
+  Actual: true
+Expected: false
+
+[  FAILED  ] TickDivisor/0.ZeroTickWithFixedSlippageIsRejected, where TypeParam = CtaMocker (0 ms)
+[ RUN      ] TickDivisor/0.ValidTickAppliesSlippage
+[       OK ] TickDivisor/0.ValidTickAppliesSlippage (0 ms)
+[ RUN      ] TickDivisor/0.ZeroTickWithoutSlippageStillFills
+[       OK ] TickDivisor/0.ZeroTickWithoutSlippageStillFills (0 ms)
+[----------] 4 tests from TickDivisor/0 (1 ms total)
+
+[----------] 4 tests from TickDivisor/1, where TypeParam = SelMocker
+[ RUN      ] TickDivisor/1.ZeroTickWithRatioSlippageIsRejected
+[       OK ] TickDivisor/1.ZeroTickWithRatioSlippageIsRejected (0 ms)
+[ RUN      ] TickDivisor/1.ZeroTickWithFixedSlippageIsRejected
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/mocker_tick_divisor_test.cpp:55: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  m._sig_map.count(code)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/mocker_tick_divisor_test.cpp:56: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  m._pos_map.count(code)
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/mocker_tick_divisor_test.cpp:57: Failure
+Value of: m._trade_logs.str().empty()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_commodity_ready_20261103/mocker_tick_divisor_test.cpp:59: Failure
+Value of: rp.fee_error().empty()
+  Actual: true
+Expected: false
+
+[  FAILED  ] TickDivisor/1.ZeroTickWithFixedSlippageIsRejected, where TypeParam = SelMocker (0 ms)
+[ RUN      ] TickDivisor/1.ValidTickAppliesSlippage
+[       OK ] TickDivisor/1.ValidTickAppliesSlippage (0 ms)
+[ RUN      ] TickDivisor/1.ZeroTickWithoutSlippageStillFills
+[       OK ] TickDivisor/1.ZeroTickWithoutSlippageStillFills (0 ms)
+[----------] 4 tests from TickDivisor/1 (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 8 tests from 2 test suites ran. (2 ms total)
+[  PASSED  ] 6 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] TickDivisor/0.ZeroTickWithFixedSlippageIsRejected, where TypeParam = CtaMocker
+[  FAILED  ] TickDivisor/1.ZeroTickWithFixedSlippageIsRejected, where TypeParam = SelMocker
+
+ 2 FAILED TESTS

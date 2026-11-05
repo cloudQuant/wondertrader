@@ -1,0 +1,323 @@
+--- src/TestUnits/fixtures/i03_parser_vendor_v2_20261104/baseline/ParserCTPOpt/ParserCTPOpt.cpp	2026-11-04 08:47:58
++++ src/ParserCTPOpt/ParserCTPOpt.cpp	2026-11-04 09:04:38
+@@ -20,6 +20,7 @@
+ #include "../Share/ModuleHelper.hpp"
+ #include "../Share/Converter.hpp"
+ 
++#include <exception>
+ #include <filesystem>
+ #include <limits>
+ #include <vector>
+@@ -43,18 +44,29 @@
+ {
+ 	EXPORT_FLAG IParserApi* createParser()
+ 	{
+-		ParserCTPOpt* parser = new ParserCTPOpt();
+-		return parser;
++		try { return new ParserCTPOpt(); } catch (...) { return NULL; }
+ 	}
+ 
++	/*
++	 *	卡9 9b：仅当没有回调/接口重入、且本实例从未创建过 SDK 对象时才删除；
++	 *	否则保留指针（不置空），由宿主隔离到进程退出。
++	 */
+ 	EXPORT_FLAG void deleteParser(IParserApi* &parser)
+ 	{
+ 		if (NULL != parser)
+ 		{
++			ParserCTPOpt* typed = dynamic_cast<ParserCTPOpt*>(parser);
++			if (typed == NULL || !typed->removableLegacy())
++				return;
+ 			delete parser;
+ 			parser = NULL;
+ 		}
+ 	}
++
++	WT_PARSER_LIFECYCLE_V2_EXPORT const WtParserLifecycleApiV2* WT_PARSER_LIFECYCLE_V2_CALL getParserLifecycleApiV2(uint32_t major)
++	{
++		return wt_vendor_md_v2::Table<ParserCTPOpt>::get(major);
++	}
+ };
+ 
+ 
+@@ -95,11 +107,88 @@
+ 
+ ParserCTPOpt::~ParserCTPOpt()
+ {
++	// 在自身回调或接口调用内直接析构无法做到安全（栈上仍有本对象帧）：fail-stop。
++	if (wt_vendor_md_v2::Lifecycle::reentered(this))
++		std::terminate();
++	(void)shutdownLegacy();
++}
++
++/*
++ *	Parser lifecycle V2（卡9 9a=A+C）
++ *	CTPOpt 头文件 API/CTPOpt3.5.8/ThostFtdcMdApi.h:92-102 对 Release() 只写「删除接口对象本身」、
++ *	对 Join() 只写「等待接口线程结束运行」；RegisterSpi（:126-128）无注销语义，均未声明回调线程 join 或返回后不再回调。
++ *	因此 SDK 释放后不再卸载厂商库（旧 release 中的 unloadApiLibrary 只保留给从未创建 SDK 对象的实例）。
++ *	因此一旦创建过 SDK 对象，排空状态不可证明：wait_drained 释放一次 SDK 后返回 ERROR，宿主隔离到进程退出。
++ */
++WtParserLifecycleV2Status ParserCTPOpt::requestStopV2() noexcept
++{
++	return _lc.requestStop();
++}
++
++WtParserLifecycleV2Status ParserCTPOpt::canWaitV2() const noexcept
++{
++	return (wt_vendor_md_v2::Lifecycle::reentered(this)) ? WT_PARSER_LIFECYCLE_V2_WOULD_DEADLOCK : WT_PARSER_LIFECYCLE_V2_OK;
++}
++
++WtParserLifecycleV2Status ParserCTPOpt::waitDrainedV2(uint32_t timeoutMs) noexcept
++{
++	return _lc.waitDrained(canWaitV2(), timeoutMs,
++		[this]() { return sdkSeen(); },
++		[this]() { releaseSdk(); },
++		[this]() {
++			std::lock_guard<std::mutex> lock(_sdk_mutex);
++			m_sink = NULL;
++			m_pBaseDataMgr = NULL;
++		});
++}
++
++bool ParserCTPOpt::destroyableV2() const noexcept
++{
++	return _lc.destroyable(canWaitV2()) && !sdkSeen();
++}
++
++bool ParserCTPOpt::removableLegacy() noexcept
++{
++	return shutdownLegacy() && !sdkSeen();
++}
++
++bool ParserCTPOpt::sdkSeen() const noexcept
++{
++	return _lc.sdk_created.load(std::memory_order_acquire) || m_pUserAPI != NULL;
++}
++
++bool ParserCTPOpt::shutdownLegacy() noexcept
++{
++	return _lc.shutdownLegacy(this, false, [this]() { releaseSdk(); });
++}
++
++void ParserCTPOpt::releaseSdk() noexcept
++{
++	// 调用方保证：两道闸门已关闭且已排空，当前线程不在本实例回调/接口帧内
++	std::lock_guard<std::mutex> lock(_sdk_mutex);
++	CThostFtdcMdApi* api = m_pUserAPI;
+ 	m_pUserAPI = NULL;
++	if (api == NULL)
++		return;
++	// 曾存在 SDK 对象：不卸载厂商库（无回调线程退出确认，卡9 9a）
++	_lc.sdk_created.store(true, std::memory_order_release);
++	try
++	{
++		api->RegisterSpi(NULL);
++		api->Release();
++	}
++	catch (...)
++	{
++	}
+ }
+ 
+ bool ParserCTPOpt::init(WTSVariant* config)
+ {
++	auto call = _lc.call(this);
++	// 卡9 9c：重复初始化拒绝并保留原实例；停止后、回调内或无配置均拒绝
++	if (!call || config == NULL || _init_done || sdkSeen() || _lc.shutDown() || _lc.insideCallback(this))
++		return false;
++
+ 	m_strFrontAddr = config->getCString("front");
+ 	m_strBroker = config->getCString("broker");
+ 	m_strUserID = config->getCString("user");
+@@ -172,6 +261,7 @@
+ 		unloadApiLibrary();
+ 		return false;
+ 	}
++	_init_done = true;
+ 
+ 	return true;
+ }
+@@ -184,6 +274,8 @@
+ 	m_pUserAPI = creator(flowPath, false, false);
+ 	if (m_pUserAPI == NULL)
+ 		return false;
++	// 从此刻起存在 SDK 对象：本实例的排空不再可证明
++	_lc.sdk_created.store(true, std::memory_order_release);
+ 
+ 	m_pUserAPI->RegisterSpi(this);
+ 	m_pUserAPI->RegisterFront((char*)m_strFrontAddr.c_str());
+@@ -202,14 +294,24 @@
+ 
+ void ParserCTPOpt::release()
+ {
+-	disconnect();
+-	unloadApiLibrary();
++	// 卡9 9a：曾存在 SDK 对象时保留厂商库到进程退出；从未创建时照旧卸载
++	if (shutdownLegacy() && !sdkSeen())
++		unloadApiLibrary();
+ }
+ 
+ bool ParserCTPOpt::connect()
+ {
++	auto call = _lc.call(this);
++	// 卡9 9d：回调内同步重入 connect 返回 busy(false)
++	if (!call || _lc.shutDown() || _lc.insideCallback(this))
++		return false;
++
+ 	if(m_pUserAPI)
+ 	{
++		// SDK 的 Init 只允许调用一次；重复 connect 不再触发
++		if (_connect_issued)
++			return false;
++		_connect_issued = true;
+ 		m_pUserAPI->Init();
+ 	}
+ 
+@@ -218,23 +320,23 @@
+ 
+ bool ParserCTPOpt::disconnect()
+ {
+-	if(m_pUserAPI)
+-	{
+-		m_pUserAPI->RegisterSpi(NULL);
+-		m_pUserAPI->Release();
+-		m_pUserAPI = NULL;
+-	}
+-
+-	return true;
++	// 终止性关闭：回调/接口重入时只关闭准入并延后 SDK 释放，返回 false（卡9 9d）
++	return shutdownLegacy();
+ }
+ 
+ void ParserCTPOpt::OnRspError( CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/ )
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	IsErrorRspInfo(pRspInfo);
+ }
+ 
+ void ParserCTPOpt::OnFrontConnected()
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if(m_sink)
+ 	{
+ 		write_log(m_sink, LL_INFO, "[ParserCTPOpt] Market data server connected");
+@@ -246,6 +348,9 @@
+ 
+ void ParserCTPOpt::OnRspUserLogin( CThostFtdcRspUserLoginField */*pRspUserLogin*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool bIsLast )
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if (!bIsLast)
+ 		return;
+ 
+@@ -259,7 +364,10 @@
+ 		return;
+ 	}
+ 
+-	m_uTradingDate = convert::to_uint32(m_pUserAPI->GetTradingDay());
++	{
++		std::lock_guard<std::recursive_mutex> lock(_data_mutex);
++		m_uTradingDate = convert::to_uint32(m_pUserAPI->GetTradingDay());
++	}
+ 
+ 	if(m_sink)
+ 	{
+@@ -272,6 +380,9 @@
+ 
+ void ParserCTPOpt::OnRspUserLogout(CThostFtdcUserLogoutField */*pUserLogout*/, CThostFtdcRspInfoField */*pRspInfo*/, int /*nRequestID*/, bool /*bIsLast*/)
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if(m_sink)
+ 	{
+ 		m_sink->handleEvent(WPE_Logout, 0);
+@@ -280,6 +391,9 @@
+ 
+ void ParserCTPOpt::OnFrontDisconnected( int nReason )
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if(m_sink)
+ 	{
+ 		write_log(m_sink, LL_ERROR, "[ParserCTPOpt] Market data server disconnected: {}", nReason);
+@@ -289,11 +403,17 @@
+ 
+ void ParserCTPOpt::OnRspUnSubMarketData( CThostFtdcSpecificInstrumentField */*pSpecificInstrument*/, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/ )
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	IsErrorRspInfo(pRspInfo);
+ }
+ 
+ void ParserCTPOpt::OnRtnDepthMarketData( CThostFtdcDepthMarketDataField *pDepthMarketData )
+ {	
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if(m_pBaseDataMgr == NULL)
+ 	{
+ 		return;
+@@ -404,6 +524,9 @@
+ 
+ void ParserCTPOpt::OnRspSubMarketData( CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int /*nRequestID*/, bool /*bIsLast*/ )
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if(!IsErrorRspInfo(pRspInfo))
+ 	{
+ 		// 卡14 14a："已确认"事件与发送分开记录；空 pSpecificInstrument 不被当作确认。
+@@ -419,6 +542,9 @@
+ 
+ void ParserCTPOpt::OnHeartBeatWarning( int nTimeLapse )
+ {
++	auto cb = _lc.callback(this);
++	if (!cb)
++		return;
+ 	if (m_sink)
+ 		write_log(m_sink, LL_INFO, "[ParserCTPOpt] Heartbeating, elapse: {}", nTimeLapse);
+ }
+@@ -446,6 +572,7 @@
+ 
+ void ParserCTPOpt::SubscribeMarketData()
+ {
++	std::lock_guard<std::recursive_mutex> lock(_data_mutex);
+ 	CodeSet codeFilter = m_filterSubs;
+ 	if(codeFilter.empty())
+ 	{//如果订阅礼包只空的,则取出全部合约列表
+@@ -509,6 +636,10 @@
+ 
+ void ParserCTPOpt::subscribe(const CodeSet &vecSymbols)
+ {
++	auto call = _lc.call(this);
++	if (!call)
++		return;
++	std::lock_guard<std::recursive_mutex> lock(_data_mutex);
+ 	if(m_uTradingDate == 0)
+ 	{
+ 		m_filterSubs = vecSymbols;
+@@ -526,11 +657,15 @@
+ 
+ bool ParserCTPOpt::isConnected()
+ {
+-	return m_pUserAPI!=NULL;
++	auto call = _lc.call(this);
++	return call && m_pUserAPI!=NULL;
+ }
+ 
+ void ParserCTPOpt::registerSpi(IParserSpi* listener)
+ {
++	auto call = _lc.call(this);
++	if (!call)
++		return;
+ 	m_sink = listener;
+ 
+ 	if(m_sink)

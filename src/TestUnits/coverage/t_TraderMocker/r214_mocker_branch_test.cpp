@@ -98,6 +98,11 @@ TEST_F(R214MockerBranches, UnregisteredOrderDoesNotTradeOnOtherContractTick)
 		}
 	}
 	EXPECT_DOUBLE_EQ(5.0, registered_trade_volume);
+
+	/* s5：未登记进 BdMgr 的合约/品种由本用例创建、本用例释放（订单只持非拥有指针，
+	 * 撮合线程与 io worker 已在上方 release() 中 join），避免 LSan 报告测试侧泄漏。 */
+	zz_ct->getCommInfo()->release();
+	zz_ct->release();
 }
 
 TEST_F(R214MockerBranches, SameRawCodeOrdersAreIsolatedByExchange)

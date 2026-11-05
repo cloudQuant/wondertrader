@@ -1,0 +1,88 @@
+(lldb) target create "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_porter"
+Current executable set to '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_porter' (arm64).
+(lldb) settings set -- target.run-args  "--gtest_filter=R143PorterBars.cta_get_bars_returns_loaded_blocks"
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1279
+Breakpoint 1: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1294
+Breakpoint 2: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1302
+Breakpoint 3: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1307
+Breakpoint 4: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1313
+Breakpoint 5: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1350
+Breakpoint 6: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1360
+Breakpoint 7: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1378
+Breakpoint 8: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1508
+Breakpoint 9: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1515
+Breakpoint 10: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1521
+Breakpoint 11: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1541
+Breakpoint 12: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1548
+Breakpoint 13: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1554
+Breakpoint 14: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1560
+Breakpoint 15: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1565
+Breakpoint 16: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1586
+Breakpoint 17: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1593
+Breakpoint 18: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1599
+Breakpoint 19: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1607
+Breakpoint 20: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1613
+Breakpoint 21: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1640
+Breakpoint 22: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1645
+Breakpoint 23: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1652
+Breakpoint 24: 2 locations.
+(lldb) breakpoint set -f WtRtRunner.cpp -l 1663
+Breakpoint 25: 2 locations.
+(lldb) run
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[0;33mNote: Google Test filter = R143PorterBars.cta_get_bars_returns_loaded_blocks
+[m[0;32m[==========] [mRunning 1 test from 1 test suite.
+[0;32m[----------] [mGlobal test environment set-up.
+[0;32m[----------] [m1 test from R143PorterBars
+[0;32m[ RUN      ] [mR143PorterBars.cta_get_bars_returns_loaded_blocks
+Process 68729 launched: '/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/a64516e7-fd3c-498f-b283-179c28398f44/scratchpad/build-cov/build_x64/Debug/bin/TestUnits/CoverageTests_porter' (arm64)
+Process 68729 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 11.1
+    frame #0: 0x00000001001d17dc CoverageTests_porter`WtRtRunner::config(this=0x0000000100476990, cfgFile="{\"basefiles\":{\"session\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_68729/sessions.json\",\"commodity\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_68729/commodities.json\",\"contract\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_68729/contracts.json\",\"holiday\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_68729/holidays.json\"},\"env\":{\"name\":\"cta\"},\"data\":{\"store\":{\"module\":\"WtDataStorage\",\"path\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_68729\"}},\"bspolicy\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_68729/actions.json\"}", isFile=false) at WtRtRunner.cpp:1521:3
+   1518		//初始化开平策略
+   1519		if (!initActionPolicy())
+   1520		{
+-> 1521			return false;
+    			^
+   1522		}
+   1523	
+   1524		//初始化行情通道
+Target 0: (CoverageTests_porter) stopped.
+(lldb) bt
+* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 11.1
+  * frame #0: 0x00000001001d17dc CoverageTests_porter`WtRtRunner::config(this=0x0000000100476990, cfgFile="{\"basefiles\":{\"session\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_68729/sessions.json\",\"commodity\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_68729/commodities.json\",\"contract\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_68729/contracts.json\",\"holiday\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_68729/holidays.json\"},\"env\":{\"name\":\"cta\"},\"data\":{\"store\":{\"module\":\"WtDataStorage\",\"path\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_68729\"}},\"bspolicy\":\"/var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/r143_porter_cta_68729/actions.json\"}", isFile=false) at WtRtRunner.cpp:1521:3
+    frame #1: 0x00000001000c9a74 CoverageTests_porter`(anonymous namespace)::LiveFixture::setup(this=0x000000016fdfe500, tag="cta", env="cta") at r143_porter_bars_test.cpp:198:20
+    frame #2: 0x00000001000c88a0 CoverageTests_porter`R143PorterBars_cta_get_bars_returns_loaded_blocks_Test::TestBody(this=0x000000010457b6a0) at r143_porter_bars_test.cpp:224:10
+    frame #3: 0x00000001002d4efc CoverageTests_porter`void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*) + 104
+    frame #4: 0x00000001002d4e44 CoverageTests_porter`testing::Test::Run() + 208
+    frame #5: 0x00000001002d5a24 CoverageTests_porter`testing::TestInfo::Run() + 212
+    frame #6: 0x00000001002d64a8 CoverageTests_porter`testing::TestSuite::Run() + 456
+    frame #7: 0x00000001002e18d0 CoverageTests_porter`testing::internal::UnitTestImpl::RunAllTests() + 1328
+    frame #8: 0x00000001002e127c CoverageTests_porter`bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*) + 104
+    frame #9: 0x00000001002e11e0 CoverageTests_porter`testing::UnitTest::Run() + 124
+    frame #10: 0x00000001001fcb14 CoverageTests_porter`main + 68
+    frame #11: 0x000000018800fe00 dyld`start + 6992
+(lldb) quit

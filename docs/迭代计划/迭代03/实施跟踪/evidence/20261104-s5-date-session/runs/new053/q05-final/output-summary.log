@@ -1,0 +1,163 @@
+[==========] Running 63 tests from 13 test suites.
+[----------] Global test environment set-up.
+[----------] 8 tests from Q05StateMonitorTest
+[ RUN      ] Q05StateMonitorTest.InitializeMissingFileReturnsFalse
+[       OK ] Q05StateMonitorTest.InitializeMissingFileReturnsFalse (2 ms)
+[ RUN      ] Q05StateMonitorTest.InitializeMalformedJsonReturnsFalse
+[       OK ] Q05StateMonitorTest.InitializeMalformedJsonReturnsFalse (1 ms)
+[ RUN      ] Q05StateMonitorTest.ConfigReferenceReturnsToObserverAfterEmptyAndPopulatedSuccess
+[       OK ] Q05StateMonitorTest.ConfigReferenceReturnsToObserverAfterEmptyAndPopulatedSuccess (1 ms)
+[ RUN      ] Q05StateMonitorTest.ConfigReferenceReturnsToObserverAfterMidSessionException
+[       OK ] Q05StateMonitorTest.ConfigReferenceReturnsToObserverAfterMidSessionException (0 ms)
+[ RUN      ] Q05StateMonitorTest.InitializeEmptyObjectSucceedsWithNoSessions
+[       OK ] Q05StateMonitorTest.InitializeEmptyObjectSucceedsWithNoSessions (0 ms)
+[ RUN      ] Q05StateMonitorTest.InitializeSkipsUnknownSessionTemplate
+[       OK ] Q05StateMonitorTest.InitializeSkipsUnknownSessionTemplate (0 ms)
+[ RUN      ] Q05StateMonitorTest.InitializeAssemblesOriginalStateForKnownSessions
+[       OK ] Q05StateMonitorTest.InitializeAssemblesOriginalStateForKnownSessions (0 ms)
+[ RUN      ] Q05StateMonitorTest.RepeatedInitializeReplacesNothingButStaysIdempotentTrue
+[       OK ] Q05StateMonitorTest.RepeatedInitializeReplacesNothingButStaysIdempotentTrue (0 ms)
+[----------] 8 tests from Q05StateMonitorTest (9 ms total)
+[----------] 8 tests from R145StateMonitorRunTest
+[ RUN      ] R145StateMonitorRunTest.HolidaySessionWithoutCommoditiesTransitionsToHoliday
+[       OK ] R145StateMonitorRunTest.HolidaySessionWithoutCommoditiesTransitionsToHoliday (16 ms)
+[ RUN      ] R145StateMonitorRunTest.CommodityMarkedHolidayDrivesHolidayBranchOfOriginal
+[       OK ] R145StateMonitorRunTest.CommodityMarkedHolidayDrivesHolidayBranchOfOriginal (78 ms)
+[ RUN      ] R145StateMonitorRunTest.ClosedSessionAfterConfiguredCloseTime
+[       OK ] R145StateMonitorRunTest.ClosedSessionAfterConfiguredCloseTime (25 ms)
+[ RUN      ] R145StateMonitorRunTest.SessionWithoutAuctionReachesInitialized
+[       OK ] R145StateMonitorRunTest.SessionWithoutAuctionReachesInitialized (15 ms)
+[ RUN      ] R145StateMonitorRunTest.AuctionStartedInsideSectionsReachesReceiving
+[       OK ] R145StateMonitorRunTest.AuctionStartedInsideSectionsReachesReceiving (17 ms)
+[ RUN      ] R145StateMonitorRunTest.AuctionStartedOutsideSectionsReachesPaused
+[       OK ] R145StateMonitorRunTest.AuctionStartedOutsideSectionsReachesPaused (16 ms)
+[ RUN      ] R145StateMonitorRunTest.OutsideSectionsPastMarketCloseStillReceivesSettlement
+[       OK ] R145StateMonitorRunTest.OutsideSectionsPastMarketCloseStillReceivesSettlement (13 ms)
+[ RUN      ] R145StateMonitorRunTest.EmptyMapRunThenStopJoinsWithoutWriter
+[       OK ] R145StateMonitorRunTest.EmptyMapRunThenStopJoinsWithoutWriter (4823 ms)
+[ DISABLED ] R145StateMonitorRunTest.DISABLED_SecondStopAfterRunThrows
+[----------] 8 tests from R145StateMonitorRunTest (5007 ms total)
+[----------] 6 tests from R154StateMonitorStatesTest
+[ RUN      ] R154StateMonitorStatesTest.InitializedThenReceivingStaysReceiving
+[       OK ] R154StateMonitorStatesTest.InitializedThenReceivingStaysReceiving (2218 ms)
+[ RUN      ] R154StateMonitorStatesTest.InitializedOutsideSectionsTransitionsToPaused
+[       OK ] R154StateMonitorStatesTest.InitializedOutsideSectionsTransitionsToPaused (3 ms)
+[ RUN      ] R154StateMonitorStatesTest.ClosedProcessingProcedThenResetToOriginal
+[       OK ] R154StateMonitorStatesTest.ClosedProcessingProcedThenResetToOriginal (3012 ms)
+[ RUN      ] R154StateMonitorStatesTest.ClosedBeforeProcTimeFallsBackToPaused
+[       OK ] R154StateMonitorStatesTest.ClosedBeforeProcTimeFallsBackToPaused (1 ms)
+[ RUN      ] R154StateMonitorStatesTest.HolidaySessionStaysHolidayAcrossSecondRound
+[       OK ] R154StateMonitorStatesTest.HolidaySessionStaysHolidayAcrossSecondRound (2015 ms)
+[ RUN      ] R154StateMonitorStatesTest.InitializedWaitsForAuctionStart
+[       OK ] R154StateMonitorStatesTest.InitializedWaitsForAuctionStart (1321 ms)
+[----------] 6 tests from R154StateMonitorStatesTest (8573 ms total)
+[----------] 2 tests from R164StateMonitorHolidayTest
+[ RUN      ] R164StateMonitorHolidayTest.AuctionStartedSessionStaysReceiving
+[       OK ] R164StateMonitorHolidayTest.AuctionStartedSessionStaysReceiving (1510 ms)
+[ RUN      ] R164StateMonitorHolidayTest.HolidayInstrumentStaysHolidayAcrossSecondRound
+[       OK ] R164StateMonitorHolidayTest.HolidayInstrumentStaysHolidayAcrossSecondRound (2512 ms)
+[----------] 2 tests from R164StateMonitorHolidayTest (4022 ms total)
+[----------] 1 test from R174StateInfoSectionsTest
+[ RUN      ] R174StateInfoSectionsTest.HalfOpenBoundsAndEmptySections
+[       OK ] R174StateInfoSectionsTest.HalfOpenBoundsAndEmptySections (0 ms)
+[----------] 1 test from R174StateInfoSectionsTest (0 ms total)
+[----------] 1 test from R174StateMonitorQueryTest
+[ RUN      ] R174StateMonitorQueryTest.InitializedMapHitAndMissThroughMemberPointers
+[       OK ] R174StateMonitorQueryTest.InitializedMapHitAndMissThroughMemberPointers (1 ms)
+[----------] 1 test from R174StateMonitorQueryTest (1 ms total)
+[----------] 1 test from R174StateMonitorEmptyQueryTest
+[ RUN      ] R174StateMonitorEmptyQueryTest.EmptyMapQueriesAreVacuous
+[       OK ] R174StateMonitorEmptyQueryTest.EmptyMapQueriesAreVacuous (0 ms)
+[----------] 1 test from R174StateMonitorEmptyQueryTest (0 ms total)
+[----------] 6 tests from R44DataManagerEdgesTest
+[ RUN      ] R44DataManagerEdgesTest.InitFailsOnExistingButCorruptDefaultModuleFile
+[       OK ] R44DataManagerEdgesTest.InitFailsOnExistingButCorruptDefaultModuleFile (2 ms)
+[ RUN      ] R44DataManagerEdgesTest.InitFailsWhenDefaultModuleNameIsDirectory
+[       OK ] R44DataManagerEdgesTest.InitFailsWhenDefaultModuleNameIsDirectory (2 ms)
+[ RUN      ] R44DataManagerEdgesTest.DuplicateCasterIsFannedOutTwice
+[       OK ] R44DataManagerEdgesTest.DuplicateCasterIsFannedOutTwice (1 ms)
+[ RUN      ] R44DataManagerEdgesTest.FourBroadcastOverloadsReachCaster
+[       OK ] R44DataManagerEdgesTest.FourBroadcastOverloadsReachCaster (1 ms)
+[ RUN      ] R44DataManagerEdgesTest.ReleaseWithoutWriterIsIdempotent
+[       OK ] R44DataManagerEdgesTest.ReleaseWithoutWriterIsIdempotent (2 ms)
+[ RUN      ] R44DataManagerEdgesTest.SessionCommsExposeCommodityFullPids
+[       OK ] R44DataManagerEdgesTest.SessionCommsExposeCommodityFullPids (500 ms)
+[ DISABLED ] R44DataManagerEdgesTest.DISABLED_NullBaseDataManagerIsAnInvalidDependencyProbe
+[----------] 6 tests from R44DataManagerEdgesTest (512 ms total)
+[----------] 4 tests from R44StateMonitorLifecycleTest
+[ RUN      ] R44StateMonitorLifecycleTest.StopBeforeRunIsSafeAndIdempotent
+[       OK ] R44StateMonitorLifecycleTest.StopBeforeRunIsSafeAndIdempotent (0 ms)
+[ RUN      ] R44StateMonitorLifecycleTest.MissingFileWithNullBdMgrReturnsBeforeDeref
+[       OK ] R44StateMonitorLifecycleTest.MissingFileWithNullBdMgrReturnsBeforeDeref (0 ms)
+[ RUN      ] R44StateMonitorLifecycleTest.EmptyConfigFileReturnsFalse
+[       OK ] R44StateMonitorLifecycleTest.EmptyConfigFileReturnsFalse (0 ms)
+[ RUN      ] R44StateMonitorLifecycleTest.EmptySessionKeyIsSkippedButValidSessionAssembles
+[       OK ] R44StateMonitorLifecycleTest.EmptySessionKeyIsSkippedButValidSessionAssembles (1 ms)
+[ DISABLED ] R44StateMonitorLifecycleTest.DISABLED_ReinitializeSemanticsNeedContract
+[ DISABLED ] R44StateMonitorLifecycleTest.DISABLED_InitializeCrashesWithNullBdMgr
+[----------] 4 tests from R44StateMonitorLifecycleTest (3 ms total)
+[----------] 1 test from R22StateMonitorStop
+[ RUN      ] R22StateMonitorStop.RunningWorkerObservesStopAcrossThreads
+[       OK ] R22StateMonitorStop.RunningWorkerObservesStopAcrossThreads (300 ms)
+[----------] 1 test from R22StateMonitorStop (300 ms total)
+[----------] 14 tests from R5StateMonitorBdtTest
+[ RUN      ] R5StateMonitorBdtTest.SessionCommsPresentOverwritesSeededTradingDate
+[       OK ] R5StateMonitorBdtTest.SessionCommsPresentOverwritesSeededTradingDate (2 ms)
+[ RUN      ] R5StateMonitorBdtTest.SessionWithoutCommsKeepsSeededTradingDate
+[       OK ] R5StateMonitorBdtTest.SessionWithoutCommsKeepsSeededTradingDate (2 ms)
+[ RUN      ] R5StateMonitorBdtTest.TodayAsHolidayDrivesHolidayLogBranchOfInitLoop
+[       OK ] R5StateMonitorBdtTest.TodayAsHolidayDrivesHolidayLogBranchOfInitLoop (2 ms)
+[ RUN      ] R5StateMonitorBdtTest.FifteenCharSessionIdFitsStateKeyBuffer
+[       OK ] R5StateMonitorBdtTest.FifteenCharSessionIdFitsStateKeyBuffer (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.MissingTimeFieldsDefaultToZeroAndStillAssembleSections
+[       OK ] R5StateMonitorBdtTest.MissingTimeFieldsDefaultToZeroAndStillAssembleSections (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.ReinitializeWithExtraSessionGrowsStateTable
+[       OK ] R5StateMonitorBdtTest.ReinitializeWithExtraSessionGrowsStateTable (2 ms)
+[ RUN      ] R5StateMonitorBdtTest.SessionWithoutAuctionKeepsOnlyTradingSections
+[       OK ] R5StateMonitorBdtTest.SessionWithoutAuctionKeepsOnlyTradingSections (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions
+[       OK ] R5StateMonitorBdtTest.InitializeSectionsDriveMembershipForMidnightAndOrdinarySessions (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries
+[       OK ] R5StateMonitorBdtTest.CrossMidnightSectionsSplitAndKeepHalfOpenBoundaries (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.CrossMidnightPaddingOverlapCollapsesToFullDay
+[       OK ] R5StateMonitorBdtTest.CrossMidnightPaddingOverlapCollapsesToFullDay (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.InvalidSessionEntriesRejectWholeFile
+[       OK ] R5StateMonitorBdtTest.InvalidSessionEntriesRejectWholeFile (3 ms)
+[ RUN      ] R5StateMonitorBdtTest.ZeroStartSectionUsesClampedMidnightPadding
+[       OK ] R5StateMonitorBdtTest.ZeroStartSectionUsesClampedMidnightPadding (1 ms)
+[ RUN      ] R5StateMonitorBdtTest.NonObjectEntriesDegradeToDefaultTimes
+[       OK ] R5StateMonitorBdtTest.NonObjectEntriesDegradeToDefaultTimes (2 ms)
+[ RUN      ] R5StateMonitorBdtTest.MixedKnownAndUnknownSessionsKeepTableConsistent
+[       OK ] R5StateMonitorBdtTest.MixedKnownAndUnknownSessionsKeepTableConsistent (1 ms)
+[ DISABLED ] R5StateMonitorBdtTest.DISABLED_StateMachineAdvanceNeedsInjectableClockSeam
+[----------] 14 tests from R5StateMonitorBdtTest (28 ms total)
+[----------] 4 tests from R68StateMonitorInputsTest
+[ RUN      ] R68StateMonitorInputsTest.JsonNullMemberIsTreatedAsAbsent
+[       OK ] R68StateMonitorInputsTest.JsonNullMemberIsTreatedAsAbsent (0 ms)
+[ RUN      ] R68StateMonitorInputsTest.NumericSessionEntryDefaultsTimesToZero
+[       OK ] R68StateMonitorInputsTest.NumericSessionEntryDefaultsTimesToZero (3 ms)
+[ RUN      ] R68StateMonitorInputsTest.BooleanSessionEntryDefaultsTimesToZero
+[       OK ] R68StateMonitorInputsTest.BooleanSessionEntryDefaultsTimesToZero (0 ms)
+[ RUN      ] R68StateMonitorInputsTest.EmptyFilenameReturnsFalseBeforeConfigLoad
+[       OK ] R68StateMonitorInputsTest.EmptyFilenameReturnsFalseBeforeConfigLoad (0 ms)
+[----------] 4 tests from R68StateMonitorInputsTest (5 ms total)
+[----------] 7 tests from R84bStateMonitorPositiveOffsetTest
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetSingleCommodityTodayHoliday
+[       OK ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetSingleCommodityTodayHoliday (1 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetMultipleCommoditiesShareHoliday
+[       OK ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetMultipleCommoditiesShareHoliday (1 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.TwoPositiveSessionsUseIndependentHolidayTemplates
+[       OK ] R84bStateMonitorPositiveOffsetTest.TwoPositiveSessionsUseIndependentHolidayTemplates (1 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetAcrossMidnightWithHoliday
+[       OK ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetAcrossMidnightWithHoliday (1 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetNonObjectEntryDefaultsTimes
+[       OK ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetNonObjectEntryDefaultsTimes (1 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetMixedWithUnknownSession
+[       OK ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetMixedWithUnknownSession (1 ms)
+[ RUN      ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetSessionWithoutCommoditiesSkipsDateLoop
+[       OK ] R84bStateMonitorPositiveOffsetTest.PositiveOffsetSessionWithoutCommoditiesSkipsDateLoop (1 ms)
+[ DISABLED ] R84bStateMonitorPositiveOffsetTest.DISABLED_NullSessionIdContractUnproven
+[----------] 7 tests from R84bStateMonitorPositiveOffsetTest (10 ms total)
+[----------] Global test environment tear-down
+[==========] 63 tests from 13 test suites ran. (18480 ms total)
+[  PASSED  ] 63 tests.

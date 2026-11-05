@@ -1,0 +1,74 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-uftcore/before2/src/WtUftCore/UftStraContext.h	2026-11-04 17:50:32
++++ src/WtUftCore/UftStraContext.h	2026-11-04 21:30:00
+@@ -16,7 +16,13 @@
+ #include "../Share/fmtlib.h"
+ 
+ #include "../Share/BoostMappingFile.hpp"
++// Feature macros (iteration 03): local blocks grow and retain unrecordable events
++// in order (I03-NEW-056); order ids are registered before the provider call (I03-NEW-059).
++#define WT_UFT_LOCAL_LEDGER_BACKLOG 1
++#define WT_UFT_PRE_REGISTERED_ORDER_IDS 1
++#include <deque>
+ #include <mutex>
++#include <string>
+ typedef std::shared_ptr<BoostMappingFile> BoostMFPtr;
+ 
+ class UftStrategy;
+@@ -62,7 +68,19 @@
+ 	 * @param trader 交易适配器指针
+ 	 */
+ 	void setTrader(TraderAdapter* trader);
++
++	/**
++	 * @brief 本地账务记录是否阻塞(I03-NEW-056)
++	 * @details 本地数据块无法扩容时，成交/委托事件不丢弃：按到达顺序保留在内存积压中，
++	 * 记错误日志，并拒绝新的下单(撤单不受影响)，直到积压按序补记完成。
++	 */
++	bool	local_ledger_blocked() const;
+ 
++	/**
++	 * @brief 尚未写入本地数据块的事件数(I03-NEW-056)
++	 */
++	std::size_t	local_backlog_size() const;
++
+ public:
+ 	/**
+ 	 * @brief 获取上下文ID
+@@ -794,6 +812,37 @@
+ 	bool	load_local_data(uint32_t tradingday);
+ 
+ 	/**
++	 * @brief 本地事件(I03-NEW-056: 无法落块时按序保留)
++	 */
++	typedef struct _LocalEvent
++	{
++		bool		_is_trade;
++		uint32_t	_localid;
++		std::string	_code;
++		bool		_is_long;
++		uint32_t	_offset;
++		double		_qty;		///< 成交量或委托总量
++		double		_left;
++		double		_price;
++		bool		_canceled;
++	} LocalEvent;
++
++	// The helpers below require _local_mutex.
++	bool	apply_trade_locked(uint32_t localid, const char* stdCode, bool isLong, uint32_t offset, double vol, double price);
++	bool	apply_order_locked(uint32_t localid, const char* stdCode, uint32_t offset, double totalQty, double leftQty, double price, bool isCanceled);
++	bool	apply_local_event_locked(const LocalEvent& ev);
++	bool	drain_local_backlog_locked();
++	void	retain_local_event_locked(const LocalEvent& ev);
++	// Extends the position/trade/round/order blocks so that they can take the
++	// given numbers of new records; pointers into a remapped block are rebased.
++	bool	ensure_local_capacity_locked(uint32_t posNeeded, uint32_t trdNeeded, uint32_t rndNeeded, uint32_t ordNeeded);
++	// I03-NEW-059: called by TraderAdapter before the provider call for every
++	// local order id created on behalf of this context.
++	static void register_local_order(void* owner, uint32_t localid);
++
++	std::deque<LocalEvent>	_local_backlog;
++
++	/**
+ 	 * @brief 持仓块配对
+ 	 */
+ 	/**

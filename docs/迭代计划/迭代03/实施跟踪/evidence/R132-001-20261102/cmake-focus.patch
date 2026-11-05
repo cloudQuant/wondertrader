@@ -1,0 +1,21 @@
+--- src/TestUnits/coverage/CMakeLists.txt	2026-11-01 21:25:00
++++ /tmp/wt-i03-r132-20261102/source/src/TestUnits/coverage/CMakeLists.txt	2026-11-02 09:07:14
+@@ -1533,6 +1533,7 @@
+ # header itself no longer contributes a conflicting external symbol.
+ WT_COV_ISOLATE_INST_HLP(${COV_SRCS})
+ 
++SET(COV_SRCS "${CMAKE_SOURCE_DIR}/TestUnits/coverage/q03_storage3/r132_reader_his_test.cpp" "${CMAKE_SOURCE_DIR}/WtDataStorage/WtDataReader.cpp")
+ ADD_EXECUTABLE(CoverageTests ${COV_SRCS})
+ TARGET_INCLUDE_DIRECTORIES(CoverageTests PRIVATE ${WT_COV_INCS})
+ TARGET_LINK_LIBRARIES(CoverageTests PRIVATE ${WT_COV_SHARED_LIBS} WtDtCore WtCore)
+@@ -1645,3 +1646,10 @@
+ 		RUNTIME_OUTPUT_DIRECTORY "${T6_CTP_YAML_TEST_DIR}"
+ 		CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+ endif()
++
++# R132-only isolated verification target; no changes to repository build graph.
++add_executable(R132Focused ${CMAKE_SOURCE_DIR}/TestUnits/coverage/q03_storage3/r132_reader_his_test.cpp ${CMAKE_SOURCE_DIR}/WtDataStorage/WtDataReader.cpp)
++target_include_directories(R132Focused PRIVATE ${WT_COV_INCS})
++target_link_libraries(R132Focused PRIVATE GTest::gtest_main Threads::Threads WTSTools WTSUtils boost_filesystem boost_thread ${ICONV_LIBRARY})
++target_compile_definitions(R132Focused PRIVATE WT_DATA_WRITER_TEST_HOOKS WT_RDM_DT_READER_TEST_HOOKS)
++set_target_properties(R132Focused PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)

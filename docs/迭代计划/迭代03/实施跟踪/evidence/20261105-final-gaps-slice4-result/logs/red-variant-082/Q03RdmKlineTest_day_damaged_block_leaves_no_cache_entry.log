@@ -1,0 +1,26 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q03RdmKlineTest.day_damaged_block_leaves_no_cache_entry
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q03RdmKlineTest
+[ RUN      ] Q03RdmKlineTest.day_damaged_block_leaves_no_cache_entry
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_kline_file_test.cpp:226: Failure
+Expected: (_sink.count_of(LL_ERROR)) > (errorsAfterFirst), actual: 1 vs 1
+the second read must re-read and reject the file, not hit a cached result
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/q03_rdm_kline_file_test.cpp:232: Failure
+Value of: repaired != __null
+  Actual: false
+Expected: true
+a repaired file is loaded without clearCache
+
+[  FAILED  ] Q03RdmKlineTest.day_damaged_block_leaves_no_cache_entry (2 ms)
+[----------] 1 test from Q03RdmKlineTest (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] Q03RdmKlineTest.day_damaged_block_leaves_no_cache_entry
+
+ 1 FAILED TEST

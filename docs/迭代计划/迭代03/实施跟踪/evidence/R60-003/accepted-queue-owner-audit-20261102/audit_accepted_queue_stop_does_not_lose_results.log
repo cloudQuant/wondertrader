@@ -1,0 +1,36 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R60MockerTest.audit_accepted_queue_stop_does_not_lose_results
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R60MockerTest
+[ RUN      ] R60MockerTest.audit_accepted_queue_stop_does_not_lose_results
+/tmp/wt-i03-r60-queue-audit/test.cpp:1477: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  sink.n_entrust()
+    Which is: 0
+accepted order received no result
+
+/tmp/wt-i03-r60-queue-audit/test.cpp:1478: Failure
+Expected: (sink.n_account()) >= (1u), actual: 0 vs 1
+accepted query received no result
+
+/tmp/wt-i03-r60-queue-audit/test.cpp:1479: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  order->retainCount()
+    Which is: 2
+queued order remains retained after release
+
+[  FAILED  ] R60MockerTest.audit_accepted_queue_stop_does_not_lose_results (6 ms)
+[----------] 1 test from R60MockerTest (6 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (6 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] R60MockerTest.audit_accepted_queue_stop_does_not_lose_results
+
+ 1 FAILED TEST

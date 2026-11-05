@@ -1,0 +1,20 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = R56Logger.*
+[==========] Running 9 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 9 tests from R56Logger
+[ RUN      ] R56Logger.InitSuccessWritesAllLevelsAndCategories
+cat-warn
+cat-error
+cat-fatal
+[       OK ] R56Logger.InitSuccessWritesAllLevelsAndCategories (1 ms)
+[ RUN      ] R56Logger.InitReleasesConfigAndKeepsRetainedPatternAfterMissingRoot
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l02_wtstools_mq/r56_logger_test.cpp:178: Failure
+Expected: WTSLogger::init(missingRoot.c_str(), false, __null) throws an exception of type std::runtime_error.
+  Actual: it throws nothing.
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/l02_wtstools_mq/r56_logger_test.cpp:184: Failure
+Expected: (nullptr) != (dynamicLogger.get()), actual: (nullptr) vs NULL
+
+[  FAILED  ] R56Logger.InitReleasesConfigAndKeepsRetainedPatternAfterMissingRoot (0 ms)
+[ RUN      ] R56Logger.SecondInitReturnsWithoutReconfiguring

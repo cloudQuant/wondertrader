@@ -1,0 +1,11 @@
+Running main() from /opt/homebrew/Cellar/googletest/1.17.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from R4WriterADTest
+[ RUN      ] R4WriterADTest.L03InvalidSessionDateRejectedBeforeSynchronousEffects
+/tmp/wt-i03-l03-adwriter-20261102/src/WtDataStorageAD/WtDataWriterAD.cpp:1221:31: runtime error: constructor call on misaligned address 0x00016f6b5684 for type 'wtp::WTSTickStruct', which requires 8 byte alignment
+0x00016f6b5684: note: pointer points here
+  00 00 00 00 01 00 00 00  28 57 6b 6f 01 00 00 00  00 00 02 00 80 00 00 00  30 14 00 00 40 60 00 00
+              ^ 
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /tmp/wt-i03-l03-adwriter-20261102/src/WtDataStorageAD/WtDataWriterAD.cpp:1221:31 

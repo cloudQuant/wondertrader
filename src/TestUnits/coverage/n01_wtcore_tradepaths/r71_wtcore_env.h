@@ -21,6 +21,7 @@
 #pragma once
 
 #include <gtest/gtest.h>
+#include <atomic>
 
 #include <cstdint>
 #include <cstdio>
@@ -583,7 +584,8 @@ class R71FakeTraderApi : public wtp::ITraderApi
 {
 public:
     uint32_t n_init = 0;
-    uint32_t n_insert = 0;
+    // 线程池执行器在工作线程下单，测试线程读取/轮询计数，必须为原子量（I03-NEW-099）。
+    std::atomic<uint32_t> n_insert{0};
     uint32_t n_action = 0;
     std::string last_code;
     double last_price = 0;

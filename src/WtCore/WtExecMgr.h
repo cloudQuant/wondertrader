@@ -58,9 +58,14 @@ public:
 	 */
 	inline const wt_hashset<std::string>& get_route_by_strategy(const char* strategyid)
 	{
-		static wt_hashset<std::string> ALL_EXECUTERS;
-		if (ALL_EXECUTERS.empty())
-			ALL_EXECUTERS.insert("ALL");
+		// I03-NEW-124: built once by the (thread-safe) static initializer; the
+		// CTA pool calls this from handle_pos_change() concurrently, so the
+		// set must not be filled lazily on first use.
+		static const wt_hashset<std::string> ALL_EXECUTERS = []() {
+			wt_hashset<std::string> s;
+			s.insert("ALL");
+			return s;
+		}();
 
 		if (_router_rules_strategy.empty())
 			return ALL_EXECUTERS;

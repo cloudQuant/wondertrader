@@ -1,0 +1,33 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = Q03RdmClearLifetime.RealtimeTickSurvivesClear
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Q03RdmClearLifetime
+[ RUN      ] Q03RdmClearLifetime.RealtimeTickSurvivesClear
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==64352==ERROR: AddressSanitizer: SEGV on unknown address 0x000102e40048 (pc 0x000102631ab4 bp 0x00016da66850 sp 0x00016da65d80 T0)
+==64352==The signal is caused by a READ memory access.
+    #0 0x000102631ab4 in q03::Q03RdmClearLifetime_RealtimeTickSurvivesClear_Test::TestBody()+0xf10 (i03_slice_rdm:arm64+0x100299ab4)
+    #1 0x0001027a77c0 in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (i03_slice_rdm:arm64+0x10040f7c0)
+    #2 0x0001027a7708 in testing::Test::Run()+0xcc (i03_slice_rdm:arm64+0x10040f708)
+    #3 0x0001027a82e8 in testing::TestInfo::Run()+0xd0 (i03_slice_rdm:arm64+0x1004102e8)
+    #4 0x0001027a8d6c in testing::TestSuite::Run()+0x1c4 (i03_slice_rdm:arm64+0x100410d6c)
+    #5 0x0001027b4194 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (i03_slice_rdm:arm64+0x10041c194)
+    #6 0x0001027b3b40 in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (i03_slice_rdm:arm64+0x10041bb40)
+    #7 0x0001027b3aa4 in testing::UnitTest::Run()+0x78 (i03_slice_rdm:arm64+0x10041baa4)
+    #8 0x000102794ddc in main+0x40 (i03_slice_rdm:arm64+0x1003fcddc)
+    #9 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+==64352==Register values:
+ x[0] = 0x0000000102e40018   x[1] = 0x000000016da65be0   x[2] = 0x000000016da652e0   x[3] = 0x0000608000000910  
+ x[4] = 0x0000000000000058   x[5] = 0x0000000000000058   x[6] = 0x000000016d26c000   x[7] = 0x0000000000000001  
+ x[8] = 0x000000016da66510   x[9] = 0x000000016da65d80  x[10] = 0x0000000102e40018  x[11] = 0x0000000000000000  
+x[12] = 0x0000000000000000  x[13] = 0x0000000102e40018  x[14] = 0x00007fffffffffff  x[15] = 0x000010800001ffff  
+x[16] = 0x0000000102490994  x[17] = 0x00000001f5bd5568  x[18] = 0x0000000000000000  x[19] = 0x000000016da66580  
+x[20] = 0x0000000000000001  x[21] = 0x0000618000000080  x[22] = 0x0000618000000080  x[23] = 0x0000000000000004  
+x[24] = 0x0000000102a23000  x[25] = 0x0000000000000000  x[26] = 0x0000000000000000  x[27] = 0x000000016da66a10  
+x[28] = 0x0000000000000001     fp = 0x000000016da66850     lr = 0x0000000102631a40     sp = 0x000000016da65d80  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (i03_slice_rdm:arm64+0x100299ab4) in q03::Q03RdmClearLifetime_RealtimeTickSurvivesClear_Test::TestBody()+0xf10
+==64352==ABORTING

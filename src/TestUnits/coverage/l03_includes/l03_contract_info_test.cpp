@@ -2,6 +2,7 @@
 // 目标文件: src/Includes/WTSContractInfo.hpp (L168-L357)
 // 注意：m_maxMktQty/m_maxLmtQty/m_minMktQty/m_minLmtQty/m_strAltCode 无初始化，
 // 读取前必须先写入（见 bugs/l03_includes.md BUG-L03-002）。
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 #include <array>
@@ -49,7 +50,7 @@ std::filesystem::path writeIdentityConfig(const std::string& body)
 {
 	const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
 	const auto path = std::filesystem::temp_directory_path() /
-		("wt_l03_identity_" + std::to_string(stamp) + ".json");
+		("wt_l03_identity_" + std::to_string(static_cast<long>(::getpid())) + "_" + std::to_string(stamp) + ".json");
 	std::ofstream output(path);
 	output << body;
 	output.close();
@@ -236,20 +237,36 @@ TEST(l03_contract, oversized_configured_identity_is_rejected_before_registration
 	std::filesystem::remove(altPath);
 }
 
+// 2026-11-04 (BUG-L03-002, decision card 4a=A): rules-derived commodities are
+// registered only when ready (positive pricetick/volscale and a loaded
+// session), and a file with any rejected entry is not published at all. The
+// original oracle used rules without pricetick/volscale, never loaded the
+// ALLDAY session, and expected the valid half of a mixed file to be
+// registered; those three expectations contradict the decided contract. The
+// width limits themselves are unchanged: every invalid case below is
+// otherwise ready, so width is its only reason for rejection.
 TEST(l03_contract, storage_width_contract_limits_preserve_valid_edges_and_reject_before_rules_registration)
 {
 	const std::string validExchg(MAX_EXCHANGE_LENGTH - 1, 'E');
 	const std::string longExchg(MAX_EXCHANGE_LENGTH, 'X');
 	const std::string validCode(MAX_INSTRUMENT_LENGTH - 1, 'C');
 	const std::string longCode(MAX_INSTRUMENT_LENGTH, 'D');
-	auto body = [](const std::string& group, const std::string& exchg, const std::string& code) {
+	const std::string readyRules =
+		"\"rules\":{\"session\":\"ALLDAY\",\"pricetick\":1,\"volscale\":1}";
+	auto body = [&readyRules](const std::string& group, const std::string& exchg, const std::string& code) {
 		return "{\"" + group + "\":{\"" + code +
 			"\":{\"name\":\"contract\",\"exchg\":\"" + exchg +
-			"\",\"rules\":{\"session\":\"ALLDAY\"}}}}";
+			"\"," + readyRules + "}}}";
+	};
+	const auto sessionFile = writeIdentityConfig(
+		"{\"ALLDAY\":{\"name\":\"all day\",\"offset\":0,\"sections\":[{\"from\":0,\"to\":0}]}}");
+	auto loadSession = [&sessionFile](WTSBaseDataMgr& mgr) {
+		return mgr.loadSessions(sessionFile.string().c_str());
 	};
 
 	const auto validFile = writeIdentityConfig(body(validExchg, validExchg, validCode));
 	WTSBaseDataMgr validMgr;
+	ASSERT_TRUE(loadSession(validMgr));
 	ASSERT_TRUE(validMgr.loadContracts(validFile.string().c_str()));
 	WTSContractInfo* valid = validMgr.getContract(validCode.c_str(), validExchg.c_str());
 	ASSERT_NE(nullptr, valid);
@@ -270,6 +287,7 @@ TEST(l03_contract, storage_width_contract_limits_preserve_valid_edges_and_reject
 	{
 		const auto file = writeIdentityConfig(body(entry.group, entry.exchg, entry.code));
 		WTSBaseDataMgr mgr;
+		ASSERT_TRUE(loadSession(mgr));
 		EXPECT_FALSE(mgr.loadContracts(file.string().c_str()));
 		EXPECT_EQ(nullptr, mgr.getContract(entry.code.c_str(), entry.exchg.c_str()));
 		EXPECT_EQ(nullptr, mgr.getCommodity(entry.group.c_str(), entry.code.c_str()));
@@ -278,17 +296,21 @@ TEST(l03_contract, storage_width_contract_limits_preserve_valid_edges_and_reject
 	}
 	const std::string mixed = "{\"" + validExchg + "\":{\"" + validCode +
 		"\":{\"name\":\"good\",\"exchg\":\"" + validExchg +
-		"\",\"rules\":{\"session\":\"ALLDAY\"}},\"" + longCode +
+		"\"," + readyRules + "},\"" + longCode +
 		"\":{\"name\":\"bad\",\"exchg\":\"" + validExchg +
-		"\",\"rules\":{\"session\":\"ALLDAY\"}}}}";
+		"\"," + readyRules + "}}}";
 	const auto mixedFile = writeIdentityConfig(mixed);
 	WTSBaseDataMgr mixedMgr;
+	ASSERT_TRUE(loadSession(mixedMgr));
 	EXPECT_FALSE(mixedMgr.loadContracts(mixedFile.string().c_str()));
-	EXPECT_NE(nullptr, mixedMgr.getContract(validCode.c_str(), validExchg.c_str()));
+	// Card 4a=A: one rejected entry keeps the whole file unpublished.
+	EXPECT_EQ(nullptr, mixedMgr.getContract(validCode.c_str(), validExchg.c_str()));
+	EXPECT_EQ(nullptr, mixedMgr.getCommodity(validExchg.c_str(), validCode.c_str()));
 	EXPECT_EQ(nullptr, mixedMgr.getContract(longCode.c_str(), validExchg.c_str()));
 	EXPECT_EQ(nullptr, mixedMgr.getCommodity(validExchg.c_str(), longCode.c_str()));
-	EXPECT_EQ(1u, mixedMgr.getGlobalSize());
+	EXPECT_EQ(0u, mixedMgr.getGlobalSize());
 	std::filesystem::remove(mixedFile);
+	std::filesystem::remove(sessionFile);
 }
 
 //////////////////////////////////////////////////////////////////////////

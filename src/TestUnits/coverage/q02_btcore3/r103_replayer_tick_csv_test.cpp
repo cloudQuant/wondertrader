@@ -56,7 +56,7 @@ TEST_F(R103Fixture, R103Replayer_CsvTickDsbAndSliceFallback)
 	replayer.clear_cache();
 	WTSTickSlice* slice = replayer.get_tick_slice(kCode, 2u, 202001020933ull);
 	ASSERT_NE(nullptr, slice);
-	ASSERT_EQ(1, slice->size());
+	ASSERT_EQ(1u, slice->size());
 	EXPECT_EQ(931u, slice->at(0)->action_time / 100000u);
 	EXPECT_DOUBLE_EQ(10.0, slice->at(0)->price);
 	slice->release();

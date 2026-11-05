@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <string>
+#include <unistd.h>
 
 #include <WtBtCore/HisDataMgr.h>
 #include <WtBtCore/WtHelper.h>
@@ -49,7 +50,8 @@ protected:
 	fs::path tempDir(const char* name)
 	{
 		fs::path base = fs::temp_directory_path();
-		fs::path dir = base / (std::string("n04_") + name);
+		// K48=A：按进程区分，避免并行逐例运行相互覆盖。
+		fs::path dir = base / (std::string("n04_") + name + "_" + std::to_string(static_cast<long>(::getpid())));
 		std::error_code ec;
 		fs::remove_all(dir, ec);
 		ec.clear();

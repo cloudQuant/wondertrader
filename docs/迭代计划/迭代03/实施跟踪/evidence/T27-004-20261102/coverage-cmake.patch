@@ -1,0 +1,14 @@
+--- /dev/fd/11	2026-11-02 11:56:07
++++ /tmp/wt-i03-t27-004/snapshot/src/TestUnits/coverage/CMakeLists.txt	2026-11-02 11:51:44
+@@ -319,7 +319,11 @@
+ 	ENDIF()
+ ENDFOREACH()
+ FOREACH(mod ${WT_TRANSPORT_DIRS})
++	IF(mod STREQUAL "ParserXTP")
++		LIST(APPEND WT_COV_SPLIT_TARGETS "t_${mod}|${mod}|t_ParserXTP/t27_parserxtp_api_seam_test.cpp")
++	ELSE()
+ 	LIST(APPEND WT_COV_SPLIT_TARGETS "t_${mod}|${mod}|dir:t_${mod}")
++	ENDIF()
+ ENDFOREACH()
+ LIST(LENGTH WT_COV_SPLIT_TARGETS _ntargets)
+ MESSAGE(STATUS "coverage: 收发族目录 ${WT_TRANSPORT_DIRS}；目标总数 ${_ntargets}")

@@ -71,6 +71,56 @@ WtDtRunner::WtDtRunner()
 
 WtDtRunner::~WtDtRunner()
 {
+	if (shutdown())
+		return;
+
+	// Destroying a runner whose parsers are not proven drained is an owner
+	// contract violation. Keep the adapter objects (the SPI the providers still
+	// hold) alive for the rest of the process; their callback gates are closed,
+	// so they no longer dispatch into this runner's members.
+	try
+	{
+		static std::vector<ParserAdapterPtr>* s_leaked_owners = new std::vector<ParserAdapterPtr>();
+		for (auto& entry : _parsers._adapters)
+			s_leaked_owners->push_back(entry.second);
+		s_leaked_owners->insert(s_leaked_owners->end(), _quarantined_parsers.begin(), _quarantined_parsers.end());
+	}
+	catch (...)
+	{
+		std::terminate();
+	}
+	WTSLogger::error("WtDtServo runner destroyed with parser owners that are not proven drained; owners leaked to process exit");
+}
+
+bool WtDtRunner::shutdown()
+{
+	bool stopped = _parsers.requestStopLifecycleAll();
+	for (const ParserAdapterPtr& parser : _quarantined_parsers)
+	{
+		if (parser && !parser->requestStopLifecycle())
+			stopped = false;
+	}
+
+	bool released = _parsers.finishReleaseLifecycleAll(2000);
+	for (auto it = _quarantined_parsers.begin(); it != _quarantined_parsers.end();)
+	{
+		const ParserAdapterPtr& parser = *it;
+		if (!parser || (parser->finishReleaseLifecycle(2000) && !parser->hasApi()))
+			it = _quarantined_parsers.erase(it);
+		else
+		{
+			released = false;
+			++it;
+		}
+	}
+
+	_parser_commands_submitted = false;
+	if (!stopped || !released || _parsers.hasRetainedAdapters() || !_quarantined_parsers.empty())
+	{
+		WTSLogger::error("WtDtServo parser shutdown is incomplete; parser owners are retained");
+		return false;
+	}
+	return true;
 }
 #ifdef _MSC_VER
 #include "../Common/mdump.h"
@@ -385,6 +435,9 @@ WTSKlineSlice* WtDtRunner::get_bars_by_date(const char* stdCode, const char* per
 		return NULL;
 	}
 
+	if (stdCode == NULL || *stdCode == '\0' || period == NULL || *period == '\0')
+		return NULL;
+
 	thread_local static char basePeriod[2] = { 0 };
 	basePeriod[0] = period[0];
 	uint32_t times = 1;
@@ -409,11 +462,6 @@ WTSKlineSlice* WtDtRunner::get_bars_by_date(const char* stdCode, const char* per
 	{
 		WTSLogger::log_raw(LL_ERROR, "get_bars_by_date only supports minute period");
 		return NULL;
-	}
-
-	if (uDate == 0)
-	{
-		uDate = TimeUtils::getCurDate();
 	}
 
 	return _data_mgr.get_kline_slice_by_date(stdCode, kp, realTimes, uDate);
@@ -520,6 +568,7 @@ bool WtDtRunner::initParsers(WTSVariant* cfg)
 
 	std::vector<ParserAdapterPtr> candidates;
 	std::set<std::string> stagedIds;
+	std::set<std::string> optionalIds;
 	for (uint32_t idx = 0; idx < cfg->size(); idx++)
 	{
 		WTSVariant* cfgItem = cfg->get(idx);
@@ -542,21 +591,38 @@ bool WtDtRunner::initParsers(WTSVariant* cfg)
 			return false;
 		}
 
+		// Decision K13=B (BUG-R104-002 / I03-NEW-003): `required` defaults to true and a
+		// failure stops the data service; an optional parser that fails is reported, its
+		// candidate is quarantined, and the service starts without it.
+		const bool required = !cfgItem->has("required") || cfgItem->getBoolean("required");
 		ParserAdapterPtr adapter(new ParserAdapter(&_bd_mgr, this));
 		if (!adapter->init(realid.c_str(), cfgItem))
 		{
 			_quarantined_parsers.push_back(adapter);
+			if (!required)
+			{
+				WTSLogger::warn("Optional parser '{}' failed to initialize; data service continues without it", realid.c_str());
+				continue;
+			}
 			_quarantined_parsers.insert(_quarantined_parsers.end(), candidates.begin(), candidates.end());
 			WTSLogger::error("Parser '{}' failed to initialize; data service will not start", realid.c_str());
 			return false;
 		}
 		candidates.push_back(adapter);
+		if (!required)
+			optionalIds.insert(realid);
 	}
 
 	for (auto& adapter : candidates)
 	{
 		if (!_parsers.addAdapter(adapter->id(), adapter))
 		{
+			if (optionalIds.count(adapter->id()) != 0)
+			{
+				_quarantined_parsers.push_back(adapter);
+				WTSLogger::warn("Optional parser '{}' could not be registered; data service continues without it", adapter->id());
+				continue;
+			}
 			_quarantined_parsers.insert(_quarantined_parsers.end(), candidates.begin(), candidates.end());
 			WTSLogger::error("Failed to register initialized parser '{}'", adapter->id());
 			return false;
@@ -575,8 +641,17 @@ void WtDtRunner::start()
 		return;
 	}
 
+	// Card 9c (I03-NEW-044): initialize() already started the parsers; a repeated
+	// start() must not submit connect commands to the same instances again.
+	if (_parsers_started.exchange(true))
+	{
+		WTSLogger::warn("WtDtServo parsers were already started; repeated start rejected");
+		return;
+	}
+
 	// Some providers may already have accepted a command when another fails.
 	// Keep all owners alive; callback-drain behavior is not established here.
+	_parser_commands_submitted = false;
 	_parser_commands_submitted = _parsers.runWithResult();
 	if (!_parser_commands_submitted)
 		WTSLogger::error("WtDtServo parser connect commands were not all submitted; partial startup may have occurred");

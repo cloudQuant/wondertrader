@@ -12,6 +12,8 @@
  *   - 空或非法 mcast_host/local_host 在 init 中受控拒绝，connect 返回 false 且不创建 socket；
  *   - registerSpi(NULL) 之后下一次注册不再算「替换」，旧行为与新行为的分界；
  *   - 空订阅集合、含点标准码、重复订阅、退订空实现；
+ *   - 2026-11-03 按用户裁定卡 9c：成功 init 后再次 init 被拒绝并保留原配置；
+ *     loopback 快照事务用例改为单次 init + 同端口顺序多段快照（见各用例注释）；
  *   - disconnect 在未 connect 时的幂等与「事件被 strand 推迟」契约。
  *
  * prepare() 的流处理与事务状态由本文件的 loopback TCP server 真实驱动；只验证本地
@@ -20,15 +22,21 @@
  */
 #include <gtest/gtest.h>
 
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <cstring>
 #include <map>
+#include <memory>
 #include <set>
 #include <stdexcept>
 #include <string>
 #include <thread>
 #include <vector>
+
+#include <condition_variable>
+#include <mutex>
+#include <utility>
 
 #include <boost/system/system_error.hpp>
 
@@ -55,6 +63,9 @@ struct ParserXeleSktTestAccess
 	static bool prepare(ParserXeleSkt& parser) { return parser.prepare(); }
 	static bool reconnect(ParserXeleSkt& parser) { return parser.reconnect(); }
 	static bool isPrepared(const ParserXeleSkt& parser) { return parser._prepared; }
+	static int tcpPort(const ParserXeleSkt& parser) { return parser._tcp_port; }
+	static int mcastPort(const ParserXeleSkt& parser) { return parser._mcast_port; }
+	static uint32_t gpsize(const ParserXeleSkt& parser) { return parser._gpsize; }
 
 	static bool hasTick(const ParserXeleSkt& parser, int instrumentNo)
 	{
@@ -78,6 +89,18 @@ struct ParserXeleSktTestAccess
 	{
 		auto it = parser._price_scales.find(instrumentNo);
 		return it == parser._price_scales.end() ? 0.0 : it->second;
+	}
+
+	// I03-NEW-009 (slice1 final gaps): drive the UDP feed parser directly.
+	static void ensureTickCache(ParserXeleSkt& parser)
+	{
+		if (parser._tick_cache == nullptr)
+			parser._tick_cache = ParserXeleSkt::TickCache::create();
+	}
+
+	static void extractBuffer(ParserXeleSkt& parser, const std::vector<char>& datagram)
+	{
+		parser.extract_buffer(static_cast<uint32_t>(datagram.size()), datagram.data(), 0);
 	}
 
 	static void cleanup(ParserXeleSkt& parser)
@@ -332,6 +355,115 @@ private:
 	std::thread worker_;
 	bool accepted_;
 	bool completed_;
+};
+
+/// 卡 9c 后同一 parser 只允许一次成功 init（TCP 端口固定）。本服务器在同一个
+/// loopback 端口上按接入顺序依次提供多段快照：第 n 个连接收到 steps[n]，
+/// 之后 EOF（reset=false）或 RST（reset=true）。用于替代原「每段重新 init 换端口」写法。
+class R76SequencedSnapshotServer
+{
+public:
+	explicit R76SequencedSnapshotServer(std::vector<std::pair<std::string, bool>> steps)
+		: acceptor_(io_, boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4::loopback(), 0))
+		, port_(acceptor_.local_endpoint().port())
+		, steps_(std::move(steps))
+	{
+		boost::system::error_code ec;
+		acceptor_.non_blocking(true, ec);
+		if (ec)
+			throw boost::system::system_error(ec);
+		worker_ = std::thread([this]() { serve(); });
+	}
+
+	~R76SequencedSnapshotServer()
+	{
+		stop_ = true;
+		if (worker_.joinable())
+			worker_.join();
+	}
+
+	uint16_t port() const { return port_; }
+
+	/// 等待第 count 个连接按预期写完并关闭。
+	bool waitCompleted(std::size_t count)
+	{
+		std::unique_lock<std::mutex> lock(mutex_);
+		return cv_.wait_for(lock, std::chrono::seconds(5), [&]() { return completed_ >= count || failed_; }) &&
+			!failed_ && completed_ >= count;
+	}
+
+private:
+	void finish(bool ok)
+	{
+		std::lock_guard<std::mutex> lock(mutex_);
+		if (ok)
+			++completed_;
+		else
+			failed_ = true;
+		cv_.notify_all();
+	}
+
+	void serve()
+	{
+		using boost::asio::ip::tcp;
+		for (const auto& step : steps_)
+		{
+			tcp::socket peer(io_);
+			boost::system::error_code ec;
+			const auto acceptDeadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+			for (;;)
+			{
+				acceptor_.accept(peer, ec);
+				if (!ec)
+					break;
+				if ((ec != boost::asio::error::would_block && ec != boost::asio::error::try_again) ||
+					stop_ || std::chrono::steady_clock::now() >= acceptDeadline)
+				{
+					finish(false);
+					return;
+				}
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
+
+			std::size_t written = 0;
+			while (written < step.first.size())
+			{
+				written += boost::asio::write(peer,
+					boost::asio::buffer(step.first.data() + written, step.first.size() - written), ec);
+				if (ec)
+					break;
+			}
+			if (ec)
+			{
+				finish(false);
+				return;
+			}
+			if (step.second)
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				peer.set_option(boost::asio::socket_base::linger(true, 0), ec);
+			}
+			else
+			{
+				peer.shutdown(tcp::socket::shutdown_send, ec);
+			}
+			peer.close(ec);
+			finish(true);
+		}
+		boost::system::error_code ignored;
+		acceptor_.close(ignored);
+	}
+
+	boost::asio::io_context io_;
+	boost::asio::ip::tcp::acceptor acceptor_;
+	uint16_t port_;
+	std::vector<std::pair<std::string, bool>> steps_;
+	std::thread worker_;
+	std::mutex mutex_;
+	std::condition_variable cv_;
+	std::size_t completed_ = 0;
+	bool failed_ = false;
+	std::atomic<bool> stop_{ false };
 };
 
 /* ------------------------------------------------------------------ 替身 */
@@ -591,6 +723,10 @@ TEST(R76ParserXeleSktSnapshotTest, CompleteEofProcessesFramesAndReportsSuccess)
 	EXPECT_TRUE(pending.empty());
 }
 
+/// 2026-11-03 按卡 9c 改写（原写法每段重新 init 换端口，现第二次 init 被拒绝）：
+/// 单次 init 指向同一 loopback 端口，由 R76SequencedSnapshotServer 依次提供五段内容；
+/// 每段的 prepare/reconnect 结果与缓存断言保持原样：完整批次提交、整读后 RST、
+/// 短尾、查合约抛异常均不覆盖已提交批次，最后一段完整批次整体替换。
 TEST(R76ParserXeleSktLoopbackTest, PrepareCommitsOnlyCompleteTcpSnapshotBatches)
 {
 	R76LoopbackSink sink;
@@ -598,57 +734,47 @@ TEST(R76ParserXeleSktLoopbackTest, PrepareCommitsOnlyCompleteTcpSnapshotBatches)
 	ParserXeleSktTestCleanup cleanup(parser);
 	addLoopbackContracts(sink, parser);
 
-	{
-		const std::string seedA = makeSeedSnapshot("ag2512", 11, 0.01);
-		R76LoopbackSnapshotServer server(seedA, false);
-		ASSERT_TRUE(initLoopbackParser(parser, server.port()));
-		ASSERT_TRUE(ParserXeleSktTestAccess::prepare(parser));
-		ASSERT_TRUE(server.joinAndReport());
-		expectOnlyCachedSeed(parser, 11, "ag2512", 0.01);
-	}
+	const std::string seedA = makeSeedSnapshot("ag2512", 11, 0.01);
+	const std::string seedB = makeSeedSnapshot("au2512", 22, 0.02);
+	const std::string seedC = makeSeedSnapshot("cu2512", 33, 0.03);
+	const std::string throwingFrame = makeSeedSnapshot("zz9999", 99, 0.09);
+	R76SequencedSnapshotServer server({
+		{ seedA, false },
+		{ makeFullReadThenResetPayload(seedB), true },
+		{ seedB + "tail", false },
+		{ seedB + throwingFrame, false },
+		{ seedC, false } });
+	ASSERT_TRUE(initLoopbackParser(parser, server.port()));
+	// 卡 9c：第二次 init 被拒绝，原端口保留。
+	EXPECT_FALSE(initLoopbackParser(parser, static_cast<uint16_t>(server.port() + 1)));
+	EXPECT_EQ(server.port(), ParserXeleSktTestAccess::tcpPort(parser));
 
-	{
-		const std::string seedB = makeSeedSnapshot("au2512", 22, 0.02);
-		R76LoopbackSnapshotServer server(makeFullReadThenResetPayload(seedB), true);
-		ASSERT_TRUE(initLoopbackParser(parser, server.port()));
-		EXPECT_FALSE(ParserXeleSktTestAccess::reconnect(parser));
-		ASSERT_TRUE(server.joinAndReport());
-		EXPECT_FALSE(ParserXeleSktTestAccess::isPrepared(parser));
-		expectOnlyCachedSeed(parser, 11, "ag2512", 0.01);
-	}
+	ASSERT_TRUE(ParserXeleSktTestAccess::prepare(parser));
+	ASSERT_TRUE(server.waitCompleted(1));
+	expectOnlyCachedSeed(parser, 11, "ag2512", 0.01);
 
-	{
-		const std::string seedB = makeSeedSnapshot("au2512", 22, 0.02);
-		R76LoopbackSnapshotServer server(seedB + "tail", false);
-		ASSERT_TRUE(initLoopbackParser(parser, server.port()));
-		EXPECT_FALSE(ParserXeleSktTestAccess::reconnect(parser));
-		ASSERT_TRUE(server.joinAndReport());
-		EXPECT_FALSE(ParserXeleSktTestAccess::isPrepared(parser));
-		expectOnlyCachedSeed(parser, 11, "ag2512", 0.01);
-	}
+	EXPECT_FALSE(ParserXeleSktTestAccess::reconnect(parser));
+	ASSERT_TRUE(server.waitCompleted(2));
+	EXPECT_FALSE(ParserXeleSktTestAccess::isPrepared(parser));
+	expectOnlyCachedSeed(parser, 11, "ag2512", 0.01);
 
-	{
-		const std::string seedB = makeSeedSnapshot("au2512", 22, 0.02);
-		const std::string throwingFrame = makeSeedSnapshot("zz9999", 99, 0.09);
-		R76LoopbackSnapshotServer server(seedB + throwingFrame, false);
-		ASSERT_TRUE(initLoopbackParser(parser, server.port()));
-		EXPECT_FALSE(ParserXeleSktTestAccess::prepare(parser));
-		ASSERT_TRUE(server.joinAndReport());
-		expectOnlyCachedSeed(parser, 11, "ag2512", 0.01);
-	}
+	EXPECT_FALSE(ParserXeleSktTestAccess::reconnect(parser));
+	ASSERT_TRUE(server.waitCompleted(3));
+	EXPECT_FALSE(ParserXeleSktTestAccess::isPrepared(parser));
+	expectOnlyCachedSeed(parser, 11, "ag2512", 0.01);
 
-	{
-		const std::string seedC = makeSeedSnapshot("cu2512", 33, 0.03);
-		R76LoopbackSnapshotServer server(seedC, false);
-		ASSERT_TRUE(initLoopbackParser(parser, server.port()));
-		ParserXeleSktTestAccess::reconnect(parser);
-		ASSERT_TRUE(server.joinAndReport());
-		EXPECT_TRUE(ParserXeleSktTestAccess::isPrepared(parser));
-		expectOnlyCachedSeed(parser, 33, "cu2512", 0.03);
-	}
+	EXPECT_FALSE(ParserXeleSktTestAccess::prepare(parser));
+	ASSERT_TRUE(server.waitCompleted(4));
+	expectOnlyCachedSeed(parser, 11, "ag2512", 0.01);
 
+	ParserXeleSktTestAccess::reconnect(parser);
+	ASSERT_TRUE(server.waitCompleted(5));
+	EXPECT_TRUE(ParserXeleSktTestAccess::isPrepared(parser));
+	expectOnlyCachedSeed(parser, 33, "cu2512", 0.03);
 }
 
+/// 2026-11-03 按卡 9c 改写：单次 init，同一端口先 RST 后完整批次；
+/// 首次失败不留种子、重试后只含新批次的断言保持原样。
 TEST(R76ParserXeleSktLoopbackTest, FirstReconnectFailureLeavesRetryUnseeded)
 {
 	R76LoopbackSink sink;
@@ -657,26 +783,22 @@ TEST(R76ParserXeleSktLoopbackTest, FirstReconnectFailureLeavesRetryUnseeded)
 	addLoopbackContracts(sink, parser);
 
 	const std::string seedB = makeSeedSnapshot("au2512", 22, 0.02);
-	{
-		R76LoopbackSnapshotServer server(makeFullReadThenResetPayload(seedB), true);
-		ASSERT_TRUE(initLoopbackParser(parser, server.port()));
-		EXPECT_FALSE(ParserXeleSktTestAccess::reconnect(parser));
-		ASSERT_TRUE(server.joinAndReport());
-		EXPECT_FALSE(ParserXeleSktTestAccess::isPrepared(parser));
-		EXPECT_FALSE(ParserXeleSktTestAccess::hasTick(parser, 22));
-		EXPECT_FALSE(ParserXeleSktTestAccess::hasPriceScale(parser, 22));
-	}
+	const std::string seedC = makeSeedSnapshot("cu2512", 33, 0.03);
+	R76SequencedSnapshotServer server({
+		{ makeFullReadThenResetPayload(seedB), true },
+		{ seedC, false } });
+	ASSERT_TRUE(initLoopbackParser(parser, server.port()));
 
-	{
-		const std::string seedC = makeSeedSnapshot("cu2512", 33, 0.03);
-		R76LoopbackSnapshotServer server(seedC, false);
-		ASSERT_TRUE(initLoopbackParser(parser, server.port()));
-		ParserXeleSktTestAccess::reconnect(parser);
-		ASSERT_TRUE(server.joinAndReport());
-		EXPECT_TRUE(ParserXeleSktTestAccess::isPrepared(parser));
-		expectOnlyCachedSeed(parser, 33, "cu2512", 0.03);
-	}
+	EXPECT_FALSE(ParserXeleSktTestAccess::reconnect(parser));
+	ASSERT_TRUE(server.waitCompleted(1));
+	EXPECT_FALSE(ParserXeleSktTestAccess::isPrepared(parser));
+	EXPECT_FALSE(ParserXeleSktTestAccess::hasTick(parser, 22));
+	EXPECT_FALSE(ParserXeleSktTestAccess::hasPriceScale(parser, 22));
 
+	ParserXeleSktTestAccess::reconnect(parser);
+	ASSERT_TRUE(server.waitCompleted(2));
+	EXPECT_TRUE(ParserXeleSktTestAccess::isPrepared(parser));
+	expectOnlyCachedSeed(parser, 33, "cu2512", 0.03);
 }
 
 /// IPv6 tcp_host 也能构造 endpoint；gpsize=0 走默认值；init 不开组播口
@@ -729,9 +851,10 @@ TEST(R76ParserXeleSktTest, ConnectRejectsSnapshotTcpFailureWithoutStartingReceiv
 	// 离开本测试时的析构也验证没有留下 joinable 后台线程。
 }
 
-/// init 可重复应用，后一次覆盖 tcp endpoint；release 为空实现，可重复调用
-/// （ParserXeleSkt.cpp:99-122）
-TEST(R76ParserXeleSktTest, InitIsRepeatableAndReleaseIsIdempotent)
+/// 2026-11-03 按卡 9c 改写（原名 InitIsRepeatableAndReleaseIsIdempotent，原断言第二次
+/// init 成功并覆盖 endpoint）：成功 init 之后再次 init 被拒绝并保留原配置；release
+/// 为可重复调用的同步关闭（无 worker 时无事件、无日志），其余断言保持原样。
+TEST(R76ParserXeleSktTest, SecondInitIsRejectedKeepsOriginalAndReleaseIsIdempotent)
 {
 	ParserXeleSkt parser;
 	R76XeleSink sink;
@@ -740,9 +863,12 @@ TEST(R76ParserXeleSktTest, InitIsRepeatableAndReleaseIsIdempotent)
 	WTSVariant* first = makeCfg("127.0.0.1", 9201, "224.1.2.3", 9202, "127.0.0.1", 10);
 	WTSVariant* second = makeCfg("10.20.30.40", 9203, "224.1.2.4", 9204, "0.0.0.0", 20);
 	ASSERT_TRUE(parser.init(first));
-	ASSERT_TRUE(parser.init(second));
+	EXPECT_FALSE(parser.init(second));
 	first->release();
 	second->release();
+	EXPECT_EQ(9201, ParserXeleSktTestAccess::tcpPort(parser));
+	EXPECT_EQ(9202, ParserXeleSktTestAccess::mcastPort(parser));
+	EXPECT_EQ(10u, ParserXeleSktTestAccess::gpsize(parser));
 
 	EXPECT_NO_THROW(parser.release());
 	EXPECT_NO_THROW(parser.release());
@@ -845,6 +971,147 @@ TEST(R76ParserXeleSktTest, FactoryRoundtripClearsPointerTwice)
 	deleteParser(api);
 	EXPECT_EQ(nullptr, api);
 	EXPECT_EQ(0u, sink.events);
+}
+
+} // namespace r76xele
+
+/* ------------------------------------------------------- I03-NEW-009：UDP 行情帧 */
+//
+// extract_buffer 曾在“版本正确但类型未知”的帧上不推进偏移而永久循环（worker 无法排空），
+// 并且不按收到的报文长度检查帧长。当前实现：未知类型结束本报文解析；不足一帧的尾部
+// 不读取。这里用精确长度的堆缓冲喂入报文（越读可被 ASan 发现），心跳帧的日志作为
+// 解析进度的可观察量；解析放在独立线程并有界等待，旧实现死循环时用例以超时失败
+// 而不是挂死进程（超时时故意泄漏 parser，避免线程仍在使用时析构）。
+
+namespace r76xele
+{
+
+std::vector<char> xeleUdpHead(int8_t type)
+{
+	std::vector<char> bytes(sizeof(CXeleShfeMarketHead), '\0');
+	CXeleShfeMarketHead* head = reinterpret_cast<CXeleShfeMarketHead*>(bytes.data());
+	head->Version = XELE_MD_DATA_VERSION;
+	head->Type = type;
+	return bytes;
+}
+
+std::vector<char> xeleUdpHeartbeat()
+{
+	std::vector<char> bytes = xeleUdpHead(MESSAGE_TYPE_HEART_BEAT);
+	bytes.resize(sizeof(CXeleShfeMarketHead) + sizeof(CXeleShfeHeartBeat), '\0');
+	return bytes;
+}
+
+void appendBytes(std::vector<char>& out, const std::vector<char>& part)
+{
+	out.insert(out.end(), part.begin(), part.end());
+}
+
+size_t heartbeatLogs(const R76XeleSink& sink)
+{
+	size_t n = 0;
+	for (const std::string& line : sink.logs)
+		if (line.find("heartbeat") != std::string::npos)
+			++n;
+	return n;
+}
+
+/// 在独立线程中解析一个报文；2 秒内未返回视为死循环（返回 false，parser 与 sink 故意泄漏）。
+bool extractWithinBound(ParserXeleSkt* parser, const std::vector<char>* datagram)
+{
+	std::shared_ptr<std::atomic<bool>> done = std::make_shared<std::atomic<bool>>(false);
+	std::thread worker([parser, datagram, done]() {
+		ParserXeleSktTestAccess::extractBuffer(*parser, *datagram);
+		done->store(true);
+	});
+	const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+	while (!done->load() && std::chrono::steady_clock::now() < deadline)
+		std::this_thread::sleep_for(std::chrono::milliseconds(2));
+	if (!done->load())
+	{
+		worker.detach();
+		return false;
+	}
+	worker.join();
+	return true;
+}
+
+/// Heap-allocated sink for the bounded-wait case (final: deleted through its own type).
+struct R76HeapXeleSink final : public R76XeleSink {};
+
+TEST(R76ParserXeleSktUdpFrameTest, UnknownFrameTypeEndsParsingOfTheDatagram)
+{
+	ParserXeleSkt* parser = new ParserXeleSkt();
+	R76HeapXeleSink* sink = new R76HeapXeleSink();
+	parser->registerSpi(sink);
+	ParserXeleSktTestAccess::ensureTickCache(*parser);
+
+	std::vector<char>* datagram = new std::vector<char>();
+	appendBytes(*datagram, xeleUdpHeartbeat());
+	std::vector<char> unknown = xeleUdpHead(0x7E);	// version ok, type unknown
+	unknown.resize(unknown.size() + 64, '\0');
+	appendBytes(*datagram, unknown);
+	appendBytes(*datagram, xeleUdpHeartbeat());	// must not be reached
+
+	const bool returned = extractWithinBound(parser, datagram);
+	ASSERT_TRUE(returned) << "extract_buffer did not return on an unknown frame type";
+	EXPECT_EQ(1u, heartbeatLogs(*sink)) << "parsing stops at the unknown frame";
+	EXPECT_EQ(0u, sink->quotes);
+
+	ParserXeleSktTestAccess::cleanup(*parser);
+	delete datagram;
+	delete parser;
+	delete sink;
+}
+
+TEST(R76ParserXeleSktUdpFrameTest, FrameLongerThanTheDatagramIsNotRead)
+{
+	ParserXeleSkt parser;
+	R76XeleSink sink;
+	parser.registerSpi(&sink);
+	ParserXeleSktTestAccess::ensureTickCache(parser);
+	ParserXeleSktTestCleanup cleanup(parser);
+
+	// 心跳 + 只有一半载荷的行情帧：行情帧长度超过报文剩余长度，不得读取。
+	std::vector<char> truncatedMarket;
+	appendBytes(truncatedMarket, xeleUdpHeartbeat());
+	std::vector<char> market = xeleUdpHead(MESSAGE_MARKET_DATA);
+	market.resize(market.size() + sizeof(CXeleShfeMarketData) / 2, '\0');
+	appendBytes(truncatedMarket, market);
+	ASSERT_TRUE(extractWithinBound(&parser, &truncatedMarket));
+	EXPECT_EQ(1u, heartbeatLogs(sink));
+	EXPECT_EQ(0u, sink.quotes);
+
+	// 截断的深度帧与截断的心跳帧同样被拒，不推进、不读越界。
+	std::vector<char> truncatedDepth = xeleUdpHead(MESSAGE_DEPTH);
+	truncatedDepth.resize(truncatedDepth.size() + sizeof(CXeleShfeDepthMarketData) - 1, '\0');
+	ASSERT_TRUE(extractWithinBound(&parser, &truncatedDepth));
+	std::vector<char> truncatedHeartbeat = xeleUdpHeartbeat();
+	truncatedHeartbeat.pop_back();
+	ASSERT_TRUE(extractWithinBound(&parser, &truncatedHeartbeat));
+	EXPECT_EQ(1u, heartbeatLogs(sink));
+
+	// 不足一个帧头的尾部同样直接结束。
+	std::vector<char> shortTail = xeleUdpHeartbeat();
+	shortTail.push_back(static_cast<char>(XELE_MD_DATA_VERSION));
+	ASSERT_TRUE(extractWithinBound(&parser, &shortTail));
+	EXPECT_EQ(2u, heartbeatLogs(sink));
+	EXPECT_EQ(0u, sink.quotes);
+}
+
+TEST(R76ParserXeleSktUdpFrameTest, ConsecutiveValidFramesAreAllParsed)
+{
+	ParserXeleSkt parser;
+	R76XeleSink sink;
+	parser.registerSpi(&sink);
+	ParserXeleSktTestAccess::ensureTickCache(parser);
+	ParserXeleSktTestCleanup cleanup(parser);
+
+	std::vector<char> datagram;
+	for (int i = 0; i < 3; i++)
+		appendBytes(datagram, xeleUdpHeartbeat());
+	ASSERT_TRUE(extractWithinBound(&parser, &datagram));
+	EXPECT_EQ(3u, heartbeatLogs(sink));
 }
 
 } // namespace r76xele

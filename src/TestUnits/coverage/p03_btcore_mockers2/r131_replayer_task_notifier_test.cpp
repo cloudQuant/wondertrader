@@ -113,7 +113,7 @@ TEST_F(R131Replayer, Minute5BarReplayNotifiesM5State)
 
 	WTSKlineSlice* slice = r.rp.get_kline_slice(kRb, "m", 1, 5, true);
 	ASSERT_NE(nullptr, slice);
-	EXPECT_EQ(1u, slice->size());
+	EXPECT_EQ(1, slice->size());
 	slice->release();
 
 	r.rp.run(false);

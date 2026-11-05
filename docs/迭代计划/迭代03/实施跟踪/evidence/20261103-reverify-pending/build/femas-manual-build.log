@@ -1,0 +1,28 @@
++ /usr/bin/c++ -std=gnu++17 -g -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/tmp/wt-i03-reverify-20261103/boost-include -Isrc/Includes -Isrc/Share -Isrc/WTSTools -Isrc/WTSUtils -isystem /opt/homebrew/include -isystem src -include src/Share/fmt_enum_compat.h -Dinst_hlp=femas_product -c src/TraderFemas/TraderFemas.cpp -o /tmp/wt-i03-reverify-20261103/femas/product-normal.o
+rc=0
++ /usr/bin/c++ -std=gnu++17 -g -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/tmp/wt-i03-reverify-20261103/boost-include -Isrc/Includes -Isrc/Share -Isrc/WTSTools -Isrc/WTSUtils -isystem /opt/homebrew/include -isystem src -include src/Share/fmt_enum_compat.h -DWT_T4_FEMAS_MISSING_LIBRARY_MODULE="wt_t4_femas_module_absent" -DWT_T4_FEMAS_MISSING_SYMBOL_MODULE="wt_t4_femas_missing_symbol" -DWT_T4_FEMAS_NULL_CREATOR_MODULE="wt_t4_femas_null_creator" -DWT_T4_FEMAS_SUCCESSFUL_CREATOR_MODULE="wt_t4_femas_successful_creator" -Dinst_hlp=femas_extra -c /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/T4-002-NEW-019/femas_extra.cpp -o /tmp/wt-i03-reverify-20261103/femas/extra-normal.o
+rc=0
++ /usr/bin/c++ -g /tmp/wt-i03-reverify-20261103/femas/product-normal.o /tmp/wt-i03-reverify-20261103/femas/extra-normal.o -o /tmp/wt-i03-reverify-20261103/femas/extra-normal -Wl,-undefined,dynamic_lookup -L/opt/homebrew/lib -Wl,-rpath,/opt/homebrew/lib /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a -lboost_filesystem -lboost_thread -liconv
+rc=0
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -include stdlib.h -O1 -fsanitize=address,undefined -fno-omit-frame-pointer -std=gnu++17 -g -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/tmp/wt-i03-reverify-20261103/boost-include -Isrc/Includes -Isrc/Share -Isrc/WTSTools -Isrc/WTSUtils -isystem /opt/homebrew/include -isystem src -include src/Share/fmt_enum_compat.h -Dinst_hlp=femas_product -c src/TraderFemas/TraderFemas.cpp -o /tmp/wt-i03-reverify-20261103/femas/product-asan.o
+rc=0
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -include stdlib.h -O1 -fsanitize=address,undefined -fno-omit-frame-pointer -std=gnu++17 -g -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/tmp/wt-i03-reverify-20261103/boost-include -Isrc/Includes -Isrc/Share -Isrc/WTSTools -Isrc/WTSUtils -isystem /opt/homebrew/include -isystem src -include src/Share/fmt_enum_compat.h -DWT_T4_FEMAS_MISSING_LIBRARY_MODULE="wt_t4_femas_module_absent" -DWT_T4_FEMAS_MISSING_SYMBOL_MODULE="wt_t4_femas_missing_symbol" -DWT_T4_FEMAS_NULL_CREATOR_MODULE="wt_t4_femas_null_creator" -DWT_T4_FEMAS_SUCCESSFUL_CREATOR_MODULE="wt_t4_femas_successful_creator" -Dinst_hlp=femas_test -c src/TestUnits/coverage/t_TraderFemas/femas_trader_test.cpp -o /tmp/wt-i03-reverify-20261103/femas/test-asan.o
+rc=0
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -include stdlib.h -O1 -fsanitize=address,undefined -fno-omit-frame-pointer -std=gnu++17 -g -DFMT_HEADER_ONLY -DSPDLOG_FMT_EXTERNAL -I/tmp/wt-i03-reverify-20261103/boost-include -Isrc/Includes -Isrc/Share -Isrc/WTSTools -Isrc/WTSUtils -isystem /opt/homebrew/include -isystem src -include src/Share/fmt_enum_compat.h -DWT_T4_FEMAS_MISSING_LIBRARY_MODULE="wt_t4_femas_module_absent" -DWT_T4_FEMAS_MISSING_SYMBOL_MODULE="wt_t4_femas_missing_symbol" -DWT_T4_FEMAS_NULL_CREATOR_MODULE="wt_t4_femas_null_creator" -DWT_T4_FEMAS_SUCCESSFUL_CREATOR_MODULE="wt_t4_femas_successful_creator" -Dinst_hlp=femas_extra -c /Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/T4-002-NEW-019/femas_extra.cpp -o /tmp/wt-i03-reverify-20261103/femas/extra-asan.o
+rc=0
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -g -fsanitize=address,undefined /tmp/wt-i03-reverify-20261103/femas/product-asan.o /tmp/wt-i03-reverify-20261103/femas/test-asan.o -o /tmp/wt-i03-reverify-20261103/femas/test-asan -Wl,-undefined,dynamic_lookup -L/opt/homebrew/lib -Wl,-rpath,/opt/homebrew/lib /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a -lboost_filesystem -lboost_thread -liconv
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-i03-reverify-20261103/femas/product-asan.o
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-i03-reverify-20261103/femas/test-asan.o
+rc=0
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -g -fsanitize=address,undefined /tmp/wt-i03-reverify-20261103/femas/product-asan.o /tmp/wt-i03-reverify-20261103/femas/extra-asan.o -o /tmp/wt-i03-reverify-20261103/femas/extra-asan -Wl,-undefined,dynamic_lookup -L/opt/homebrew/lib -Wl,-rpath,/opt/homebrew/lib /opt/homebrew/lib/libgtest_main.a /opt/homebrew/lib/libgtest.a -lboost_filesystem -lboost_thread -liconv
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-i03-reverify-20261103/femas/extra-asan.o
+ld: warning: can't parse dwarf compilation unit info in /tmp/wt-i03-reverify-20261103/femas/product-asan.o
+rc=0
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -g -fsanitize=address,undefined /tmp/wt-i03-reverify-20261103/femas/smoke.cpp -o /tmp/wt-i03-reverify-20261103/femas/smoke
+ld: warning: can't parse dwarf compilation unit info in /var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/smoke-9166e1.o
+warning: no debug symbols in executable (-arch arm64)
+rc=0
++ /opt/homebrew/Cellar/llvm/22.1.8/bin/clang++ -g -O0 -fsanitize=address /tmp/wt-i03-reverify-20261103/femas/leak-control.cpp -o /tmp/wt-i03-reverify-20261103/femas/leak-control
+ld: warning: can't parse dwarf compilation unit info in /var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/leak-control-f3bd17.o
+warning: no debug symbols in executable (-arch arm64)
+rc=0

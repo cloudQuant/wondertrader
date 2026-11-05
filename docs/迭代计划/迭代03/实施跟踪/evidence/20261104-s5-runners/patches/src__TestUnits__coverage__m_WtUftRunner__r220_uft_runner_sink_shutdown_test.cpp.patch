@@ -1,0 +1,54 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-runners/before/src/TestUnits/coverage/m_WtUftRunner/r220_uft_runner_sink_shutdown_test.cpp	2026-10-30 04:43:39
++++ src/TestUnits/coverage/m_WtUftRunner/r220_uft_runner_sink_shutdown_test.cpp	2026-11-04 21:18:06
+@@ -121,6 +121,15 @@
+ 	std::shared_ptr<ParserTeardownStats> _stats;
+ };
+ 
++// Card 9 (BUG-R78-001): an external parser API is destroyed only with a
++// provider confirmation; these quiescent fakes confirm through this remover.
++void confirmedParserRemover(IParserApi*& api)
++{
++	IParserApi* original = api;
++	api = nullptr;
++	delete original;
++}
++
+ void retryableParserRemover(IParserApi*& api)
+ {
+ 	if (api == nullptr)
+@@ -185,7 +194,7 @@
+ 		tick->release();
+ 	});
+ 	ParserAdapterPtr adapter(new ParserAdapter());
+-	if (!adapter->initExt("cross_thread_callback", api, &stub, &baseData))
++	if (!adapter->initExt("cross_thread_callback", api, &stub, &baseData, confirmedParserRemover))
+ 		return 1;
+ 	if (!runner._parsers.addAdapter("cross_thread_callback", adapter))
+ 		return 2;
+@@ -368,7 +377,7 @@
+ 	auto stats = std::make_shared<ParserStartStats>();
+ 	UftRunnerBlockingParserApi* api = new UftRunnerBlockingParserApi(stats);
+ 	ParserAdapterPtr candidate(new ParserAdapter());
+-	ASSERT_TRUE(candidate->initExt("duplicate", api, nullptr, &baseData));
++	ASSERT_TRUE(candidate->initExt("duplicate", api, nullptr, &baseData, confirmedParserRemover));
+ 	runner._quarantined_parsers.push_back(candidate);
+ 
+ 	EXPECT_FALSE(runner.registerParserCandidate("duplicate", candidate));
+@@ -416,7 +425,7 @@
+ 	auto stats = std::make_shared<ParserStartStats>();
+ 	UftRunnerBlockingParserApi* api = new UftRunnerBlockingParserApi(stats);
+ 	ParserAdapterPtr adapter(new ParserAdapter());
+-	ASSERT_TRUE(adapter->initExt("blocking", api, nullptr, &baseData));
++	ASSERT_TRUE(adapter->initExt("blocking", api, nullptr, &baseData, confirmedParserRemover));
+ 	ASSERT_TRUE(runner._parsers.addAdapter("blocking", adapter));
+ 
+ 	std::atomic<bool> start_result{false};
+@@ -480,7 +489,7 @@
+ 	UftRunnerBlockingParserApi* api = new UftRunnerBlockingParserApi(stats);
+ 	api->allowConnectToReturn();
+ 	ParserAdapterPtr adapter(new ParserAdapter());
+-	ASSERT_TRUE(adapter->initExt("reentrant", api, nullptr, &baseData));
++	ASSERT_TRUE(adapter->initExt("reentrant", api, nullptr, &baseData, confirmedParserRemover));
+ 	ASSERT_TRUE(runner._parsers.addAdapter("reentrant", adapter));
+ 
+ 	bool reentrant_shutdown_result = true;

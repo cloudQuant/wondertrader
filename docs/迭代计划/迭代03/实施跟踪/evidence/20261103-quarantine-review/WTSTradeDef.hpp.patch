@@ -1,0 +1,29 @@
+--- /tmp/i03_quarantine_baseline_20261103/WTSTradeDef.hpp	2026-11-03 16:56:14
++++ src/Includes/WTSTradeDef.hpp	2026-11-03 16:56:36
+@@ -481,8 +481,8 @@
+ 
+ typedef struct _WTSTradeStruct
+ {
+-	char	m_strExchg[MAX_EXCHANGE_LENGTH];	//市场
+-	char	m_strCode[MAX_INSTRUMENT_LENGTH];	//代码
++	char	m_strExchg[MAX_EXCHANGE_LENGTH] = { 0 };	//市场
++	char	m_strCode[MAX_INSTRUMENT_LENGTH] = { 0 };	//代码
+ 	char	m_strTradeID[64] = { 0 };			//成交单号
+ 	char	m_strRefOrder[64] = { 0 };			//本地委托序列号
+ 	char	m_strUserTag[64] = { 0 };			//用户标签
+@@ -505,7 +505,14 @@
+ 	WTSBusinessType		m_businessType;
+ 
+ 	_WTSTradeStruct()
+-		: m_dPrice(0)
++		: m_uTradeDate(0)
++		, m_uTradeTime(0)
++		, m_dVolume(0)
++		, m_dPrice(0)
++		, m_bIsNet(false)
++		, m_bIsBuy(false)
++		, m_direction(WDT_LONG)
++		, m_offsetType(WOT_OPEN)
+ 		, m_orderType(WORT_Normal)
+ 		, m_tradeType(WTT_Common)
+ 		, m_uAmount(0)

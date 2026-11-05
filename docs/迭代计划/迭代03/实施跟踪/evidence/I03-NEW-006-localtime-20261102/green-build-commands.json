@@ -1,0 +1,83 @@
+[
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-pthread",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/private/tmp/wt-i03-localtime-green/src",
+      "-I/private/tmp/wt-i03-localtime-green/src/Includes",
+      "-I/private/tmp/wt-i03-localtime-green/src/Share",
+      "-I/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTPOpt",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/private/tmp/wt-i03-localtime-green/src/Share/fmt_enum_compat.h",
+      "-DWT_TIME_SNAPSHOT_API",
+      "-DWT_TIME_SNAPSHOT_EPOCH_API",
+      "-c",
+      "/private/tmp/wt-i03-localtime-green/src/TraderCTPOpt/TraderCTPOpt.cpp",
+      "-o",
+      "/private/tmp/wt-i03-localtime-green/product.o"
+    ],
+    "exit": 0
+  },
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-pthread",
+      "-fsanitize=address,undefined",
+      "-fno-omit-frame-pointer",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/private/tmp/wt-i03-localtime-green/src",
+      "-I/private/tmp/wt-i03-localtime-green/src/Includes",
+      "-I/private/tmp/wt-i03-localtime-green/src/Share",
+      "-I/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderCTPOpt",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/private/tmp/wt-i03-localtime-green/src/Share/fmt_enum_compat.h",
+      "-DWT_TIME_SNAPSHOT_API",
+      "-DWT_TIME_SNAPSHOT_EPOCH_API",
+      "-c",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/ctpopt_time_snapshot/confirm_snapshot.cpp",
+      "-o",
+      "/private/tmp/wt-i03-localtime-green/test.o"
+    ],
+    "exit": 0
+  },
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-g",
+      "-pthread",
+      "-fsanitize=address,undefined",
+      "/private/tmp/wt-i03-localtime-green/product.o",
+      "/private/tmp/wt-i03-localtime-green/test.o",
+      "-o",
+      "/private/tmp/wt-i03-localtime-green/confirm-probe",
+      "-Wl,-undefined,dynamic_lookup",
+      "-L/opt/homebrew/Cellar/boost/1.88.0/lib",
+      "-Wl,-rpath,/opt/homebrew/Cellar/boost/1.88.0/lib",
+      "-lboost_filesystem",
+      "-lboost_thread",
+      "-liconv"
+    ],
+    "exit": 0
+  }
+]

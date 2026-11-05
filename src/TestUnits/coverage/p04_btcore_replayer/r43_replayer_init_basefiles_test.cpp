@@ -11,16 +11,21 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <string>
 #include <system_error>
+#include <vector>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #include <WtBtCore/HisDataReplayer.h>
 #include <WtBtCore/WtHelper.h>
 #include <Includes/WTSDataDef.hpp>
 #include <Includes/WTSVariant.hpp>
+#include <Includes/ILogHandler.h>
+#include <WTSTools/WTSLogger.h>
 
 namespace
 {
@@ -203,6 +208,8 @@ TEST_F(R43ReplayerInitBasefilesTest, storePathOverridesRootPath)
 	WTSVariant* basefiles = WTSVariant::createObject();
 	basefiles->append("session", (_root / "dist/common/sessions.json").string().c_str());
 	basefiles->append("commodity", (_root / "dist/common/stk_comms.json").string().c_str());
+	// prepare() 以 checked 映射校验起始交易日，需要 TRADING 时段与 CHINA 日历（卡1 A+C，I03-NEW-018）。
+	basefiles->append("holiday", (_root / "dist/common/holidays.json").string().c_str());
 	cfg->append("basefiles", basefiles);
 	basefiles->release();
 
@@ -218,7 +225,7 @@ TEST_F(R43ReplayerInitBasefilesTest, storePathOverridesRootPath)
 
 	WTSKlineSlice* slice = replayer.get_kline_slice("SSE.STK.000001", "d", 1, 1, false);
 	ASSERT_NE(nullptr, slice);
-	ASSERT_EQ(1u, slice->size());
+	ASSERT_EQ(1, slice->size());
 	EXPECT_EQ(20200101u, slice->at(0)->date);
 	EXPECT_DOUBLE_EQ(10.5, slice->at(0)->close);
 	slice->release();
@@ -258,6 +265,124 @@ TEST_F(R43ReplayerInitBasefilesTest, configuredCommodityLoadFailuresFailInit)
 	}
 }
 
+TEST_F(R43ReplayerInitBasefilesTest, configuredCommodityArrayLoadFailuresFailInit)
+{
+	const auto malformed = _base / "bad_commodities.json";
+	ASSERT_TRUE(r43_write_text(malformed, "{ this is not json"));
+	const auto validSession = _root / "dist/common/sessions.json";
+	const auto validCommodity = _root / "dist/common/stk_comms.json";
+	const auto missing = _base / "missing_commodities.json";
+	for (const auto& commodityFile : { missing, malformed })
+	{
+		WTSVariant* cfg = r43_init_cfg(_base);
+		WTSVariant* basefiles = WTSVariant::createObject();
+		WTSVariant* commodities = WTSVariant::createArray();
+		commodities->append(validCommodity.string().c_str());
+		commodities->append(commodityFile.string().c_str());
+		basefiles->append("session", validSession.string().c_str());
+		basefiles->append("commodity", commodities);
+		cfg->append("basefiles", basefiles);
+		commodities->release();
+		basefiles->release();
+		HisDataReplayer replayer;
+		EXPECT_FALSE(replayer.init(cfg)) << commodityFile;
+		cfg->release();
+	}
+}
+
+// WTSLogger is process-global. Re-execute this case so other coverage tests
+// cannot change its initial state or observe the temporary log handler.
+TEST_F(R43ReplayerInitBasefilesTest, requiredAndOptionalFailureDiagnosticsContainPaths)
+{
+	if (std::getenv("WT_R58_DIAGNOSTICS_CHILD") == nullptr)
+	{
+		const auto args = ::testing::internal::GetArgvs();
+		ASSERT_FALSE(args.empty());
+		const std::string executable = std::filesystem::absolute(args[0]).string();
+		const pid_t child = ::fork();
+		ASSERT_GE(child, 0);
+		if (child == 0)
+		{
+			::alarm(30);
+			::setenv("WT_R58_DIAGNOSTICS_CHILD", "1", 1);
+			::execl(executable.c_str(), executable.c_str(),
+				"--gtest_filter=R43ReplayerInitBasefilesTest.requiredAndOptionalFailureDiagnosticsContainPaths",
+				static_cast<char*>(nullptr));
+			::_exit(127);
+		}
+		int status = 0;
+		ASSERT_EQ(child, ::waitpid(child, &status, 0));
+		ASSERT_TRUE(WIFEXITED(status));
+		EXPECT_EQ(0, WEXITSTATUS(status));
+		return;
+	}
+
+	class LogCapture final : public ILogHandler
+	{
+	public:
+		void handleLogAppend(WTSLogLevel level, const char* message) override
+		{
+			if (level == LL_ERROR && message != nullptr)
+				messages.emplace_back(message);
+		}
+		bool contains(const std::string& label, const std::filesystem::path& path) const
+		{
+			for (const auto& message : messages)
+				if (message.find(label) != std::string::npos && message.find(path.string()) != std::string::npos)
+					return true;
+			return false;
+		}
+		std::vector<std::string> messages;
+	} capture;
+	const char* loggerConfig = R"({"root":{"level":"info","async":false,"sinks":[]}})";
+	WTSLogger::init(loggerConfig, false, &capture);
+	const auto validSession = _root / "dist/common/sessions.json";
+	const auto validCommodity = _root / "dist/common/stk_comms.json";
+	const auto missingSession = _base / "missing_sessions.json";
+	const auto missingCommodity = _base / "missing_commodities.json";
+	const auto badSession = _base / "bad_sessions.json";
+	const auto badCommodity = _base / "bad_commodities.json";
+	const auto badAdj = _base / "bad_adj.json";
+	const auto missingAdj = _base / "missing_adj.json";
+	ASSERT_TRUE(r43_write_text(badSession, "{ this is not json"));
+	ASSERT_TRUE(r43_write_text(badCommodity, "{ this is not json"));
+	ASSERT_TRUE(r43_write_text(badAdj, "{ this is not json"));
+
+	for (const auto& session : {missingSession, badSession})
+	{
+		WTSVariant* cfg = r43_init_cfg_with_basefiles(_base, session, validCommodity);
+		HisDataReplayer replayer;
+		EXPECT_FALSE(replayer.init(cfg));
+		cfg->release();
+		EXPECT_TRUE(capture.contains("Failed to load required trading sessions file", session));
+	}
+	for (const auto& commodity : {missingCommodity, badCommodity})
+	{
+		WTSVariant* cfg = r43_init_cfg_with_basefiles(_base, validSession, commodity);
+		HisDataReplayer replayer;
+		EXPECT_FALSE(replayer.init(cfg));
+		cfg->release();
+		EXPECT_TRUE(capture.contains("Failed to load required commodities file", commodity));
+	}
+	{
+		WTSVariant* cfg = r43_init_cfg_with_basefiles(_base, validSession, validCommodity);
+		cfg->append("adjfactor", badAdj.string().c_str());
+		HisDataReplayer replayer;
+		EXPECT_TRUE(replayer.init(cfg));
+		cfg->release();
+		EXPECT_TRUE(capture.contains("Parsing adjust factor file", badAdj));
+	}
+	{
+		WTSVariant* cfg = r43_init_cfg_with_basefiles(_base, validSession, validCommodity);
+		cfg->append("adjfactor", missingAdj.string().c_str());
+		HisDataReplayer replayer;
+		EXPECT_TRUE(replayer.init(cfg));
+		cfg->release();
+		EXPECT_TRUE(capture.contains("Adjust factor file", missingAdj));
+	}
+	WTSLogger::registerHandler(nullptr);
+}
+
 // 有效除权因子文件：带 PID 与不带 PID 的 code 都要能解析，且不影响 init 结果
 TEST_F(R43ReplayerInitBasefilesTest, adjFactorFileParsed)
 {
@@ -292,6 +417,9 @@ TEST_F(R43ReplayerInitBasefilesTest, badAdjFactorFileDoesNotBreakInit)
 	WTSVariant* basefiles = WTSVariant::createObject();
 	basefiles->append("session", (_root / "dist/common/sessions.json").string().c_str());
 	basefiles->append("commodity", (_root / "dist/common/stk_comms.json").string().c_str());
+	// prepare() 以 checked 日期映射校验起始交易日（卡1 A+C），需要默认 TRADING 时段及 CHINA 日历；
+	// 缺日历时按 MissingCalendar 显式失败，不再静默按自然日回退，故此处补齐日历输入。
+	basefiles->append("holiday", (_root / "dist/common/holidays.json").string().c_str());
 	cfg->append("basefiles", basefiles);
 	basefiles->release();
 

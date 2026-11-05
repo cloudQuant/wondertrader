@@ -1,0 +1,376 @@
+[
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-fsanitize=address,undefined",
+      "-fprofile-instr-generate",
+      "-fno-omit-frame-pointer",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/tmp/wt-r22-lifecycle-20261102/frozen/red/Share/fmt_enum_compat.h",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/tmp/wt-r22-lifecycle-20261102/frozen/red",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-DR22_OLD_BASELINE",
+      "/tmp/wt-r22-lifecycle-20261102/frozen/red/WtDtCore/StateMonitor.cpp",
+      "/tmp/wt-r22-lifecycle-20261102/frozen/red/WtDtCore/DataManager.cpp",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_monitor_lifecycle/probe.cpp",
+      "-L/tmp/wt-i03-start-cmake/build_x64/Debug/libs",
+      "-lWtDtCore",
+      "-lWTSTools",
+      "-lWTSUtils",
+      "-L/opt/homebrew/lib",
+      "-Wl,-rpath,/opt/homebrew/lib",
+      "-lboost_filesystem",
+      "-lboost_thread",
+      "/usr/local/lib/libiconv.dylib",
+      "-o",
+      "/tmp/wt-r22-lifecycle-20261102/red-asan-frozen"
+    ],
+    "exit": 0,
+    "log": "red-asan-frozen-build.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-asan-frozen",
+      "repeat"
+    ],
+    "exit": -6,
+    "log": "red-asan-frozen-repeat.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-asan-frozen",
+      "concurrent"
+    ],
+    "exit": -6,
+    "log": "red-asan-frozen-concurrent.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-asan-frozen",
+      "runstop"
+    ],
+    "exit": -6,
+    "log": "red-asan-frozen-runstop.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-asan-frozen",
+      "multiple"
+    ],
+    "exit": 0,
+    "log": "red-asan-frozen-multiple.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-asan-frozen",
+      "self"
+    ],
+    "exit": -6,
+    "log": "red-asan-frozen-self.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-asan-frozen",
+      "self-external-join"
+    ],
+    "exit": -6,
+    "log": "red-asan-frozen-self-external-join.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-asan-frozen",
+      "queries"
+    ],
+    "exit": 0,
+    "log": "red-asan-frozen-queries.log"
+  },
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-fsanitize=thread",
+      "-fprofile-instr-generate",
+      "-fno-omit-frame-pointer",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/tmp/wt-r22-lifecycle-20261102/frozen/red/Share/fmt_enum_compat.h",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/tmp/wt-r22-lifecycle-20261102/frozen/red",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "-DR22_OLD_BASELINE",
+      "/tmp/wt-r22-lifecycle-20261102/frozen/red/WtDtCore/StateMonitor.cpp",
+      "/tmp/wt-r22-lifecycle-20261102/frozen/red/WtDtCore/DataManager.cpp",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_monitor_lifecycle/probe.cpp",
+      "-L/tmp/wt-i03-start-cmake/build_x64/Debug/libs",
+      "-lWtDtCore",
+      "-lWTSTools",
+      "-lWTSUtils",
+      "-L/opt/homebrew/lib",
+      "-Wl,-rpath,/opt/homebrew/lib",
+      "-lboost_filesystem",
+      "-lboost_thread",
+      "/usr/local/lib/libiconv.dylib",
+      "-o",
+      "/tmp/wt-r22-lifecycle-20261102/red-tsan-frozen"
+    ],
+    "exit": 0,
+    "log": "red-tsan-frozen-build.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-tsan-frozen",
+      "repeat"
+    ],
+    "exit": -6,
+    "log": "red-tsan-frozen-repeat.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-tsan-frozen",
+      "concurrent"
+    ],
+    "exit": -6,
+    "log": "red-tsan-frozen-concurrent.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-tsan-frozen",
+      "runstop"
+    ],
+    "exit": -6,
+    "log": "red-tsan-frozen-runstop.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-tsan-frozen",
+      "multiple"
+    ],
+    "exit": -6,
+    "log": "red-tsan-frozen-multiple.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-tsan-frozen",
+      "self"
+    ],
+    "exit": -6,
+    "log": "red-tsan-frozen-self.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-tsan-frozen",
+      "self-external-join"
+    ],
+    "exit": -6,
+    "log": "red-tsan-frozen-self-external-join.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/red-tsan-frozen",
+      "queries"
+    ],
+    "exit": -6,
+    "log": "red-tsan-frozen-queries.log"
+  },
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-fsanitize=address,undefined",
+      "-fprofile-instr-generate",
+      "-fno-omit-frame-pointer",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/tmp/wt-r22-lifecycle-20261102/frozen/green/Share/fmt_enum_compat.h",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/tmp/wt-r22-lifecycle-20261102/frozen/green",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "/tmp/wt-r22-lifecycle-20261102/frozen/green/WtDtCore/StateMonitor.cpp",
+      "/tmp/wt-r22-lifecycle-20261102/frozen/green/WtDtCore/DataManager.cpp",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_monitor_lifecycle/probe.cpp",
+      "-L/tmp/wt-i03-start-cmake/build_x64/Debug/libs",
+      "-lWtDtCore",
+      "-lWTSTools",
+      "-lWTSUtils",
+      "-L/opt/homebrew/lib",
+      "-Wl,-rpath,/opt/homebrew/lib",
+      "-lboost_filesystem",
+      "-lboost_thread",
+      "/usr/local/lib/libiconv.dylib",
+      "-o",
+      "/tmp/wt-r22-lifecycle-20261102/green-asan-frozen"
+    ],
+    "exit": 0,
+    "log": "green-asan-frozen-build.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-asan-frozen",
+      "repeat"
+    ],
+    "exit": 0,
+    "log": "green-asan-frozen-repeat.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-asan-frozen",
+      "concurrent"
+    ],
+    "exit": 0,
+    "log": "green-asan-frozen-concurrent.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-asan-frozen",
+      "runstop"
+    ],
+    "exit": 0,
+    "log": "green-asan-frozen-runstop.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-asan-frozen",
+      "multiple"
+    ],
+    "exit": 0,
+    "log": "green-asan-frozen-multiple.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-asan-frozen",
+      "self"
+    ],
+    "exit": 0,
+    "log": "green-asan-frozen-self.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-asan-frozen",
+      "self-external-join"
+    ],
+    "exit": 0,
+    "log": "green-asan-frozen-self-external-join.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-asan-frozen",
+      "queries"
+    ],
+    "exit": 0,
+    "log": "green-asan-frozen-queries.log"
+  },
+  {
+    "argv": [
+      "/opt/homebrew/Cellar/llvm/22.1.8/bin/clang++",
+      "-std=c++17",
+      "-g",
+      "-O1",
+      "-fsanitize=thread",
+      "-fprofile-instr-generate",
+      "-fno-omit-frame-pointer",
+      "-include",
+      "stdlib.h",
+      "-include",
+      "/tmp/wt-r22-lifecycle-20261102/frozen/green/Share/fmt_enum_compat.h",
+      "-DFMT_HEADER_ONLY",
+      "-DSPDLOG_FMT_EXTERNAL",
+      "-I/tmp/wt-r22-lifecycle-20261102/frozen/green",
+      "-I/opt/homebrew/Cellar/boost/1.88.0/include",
+      "-I/opt/homebrew/Cellar/fmt/11.2.0/include",
+      "-I/opt/homebrew/Cellar/spdlog/1.15.3/include",
+      "/tmp/wt-r22-lifecycle-20261102/frozen/green/WtDtCore/StateMonitor.cpp",
+      "/tmp/wt-r22-lifecycle-20261102/frozen/green/WtDtCore/DataManager.cpp",
+      "/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/r22_monitor_lifecycle/probe.cpp",
+      "-L/tmp/wt-i03-start-cmake/build_x64/Debug/libs",
+      "-lWtDtCore",
+      "-lWTSTools",
+      "-lWTSUtils",
+      "-L/opt/homebrew/lib",
+      "-Wl,-rpath,/opt/homebrew/lib",
+      "-lboost_filesystem",
+      "-lboost_thread",
+      "/usr/local/lib/libiconv.dylib",
+      "-o",
+      "/tmp/wt-r22-lifecycle-20261102/green-tsan-frozen"
+    ],
+    "exit": 0,
+    "log": "green-tsan-frozen-build.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-tsan-frozen",
+      "repeat"
+    ],
+    "exit": 0,
+    "log": "green-tsan-frozen-repeat.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-tsan-frozen",
+      "concurrent"
+    ],
+    "exit": 0,
+    "log": "green-tsan-frozen-concurrent.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-tsan-frozen",
+      "runstop"
+    ],
+    "exit": 0,
+    "log": "green-tsan-frozen-runstop.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-tsan-frozen",
+      "multiple"
+    ],
+    "exit": 0,
+    "log": "green-tsan-frozen-multiple.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-tsan-frozen",
+      "self"
+    ],
+    "exit": 0,
+    "log": "green-tsan-frozen-self.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-tsan-frozen",
+      "self-external-join"
+    ],
+    "exit": 0,
+    "log": "green-tsan-frozen-self-external-join.log"
+  },
+  {
+    "argv": [
+      "/tmp/wt-r22-lifecycle-20261102/green-tsan-frozen",
+      "queries"
+    ],
+    "exit": 0,
+    "log": "green-tsan-frozen-queries.log"
+  }
+]

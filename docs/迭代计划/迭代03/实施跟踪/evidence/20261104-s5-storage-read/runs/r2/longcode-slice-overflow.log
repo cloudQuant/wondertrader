@@ -1,0 +1,36 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 46 tests from 7 test suites.
+[----------] Global test environment set-up.
+[----------] 5 tests from S5StorageReaderTest
+[ RUN      ] S5StorageReaderTest.RdmHistoryHftRecordsAreReadThroughAlignedStorage
+[       OK ] S5StorageReaderTest.RdmHistoryHftRecordsAreReadThroughAlignedStorage (106 ms)
+[ RUN      ] S5StorageReaderTest.RdmAndDataReaderHistoryTicksAreReadThroughAlignedStorage
+[       OK ] S5StorageReaderTest.RdmAndDataReaderHistoryTicksAreReadThroughAlignedStorage (32 ms)
+[ RUN      ] S5StorageReaderTest.RdmReaderUnknownCommodityIsRefusedWithoutDereference
+[       OK ] S5StorageReaderTest.RdmReaderUnknownCommodityIsRefusedWithoutDereference (1 ms)
+[ RUN      ] S5StorageReaderTest.DataReaderUnknownCommodityIsRefusedWithoutDereference
+[       OK ] S5StorageReaderTest.DataReaderUnknownCommodityIsRefusedWithoutDereference (10 ms)
+[ RUN      ] S5StorageReaderTest.LongestLegalStdCodeHistoryTickKeyStaysExact
+/opt/homebrew/Cellar/llvm/22.1.8/bin/../include/c++/v1/__memory/uninitialized_algorithms.h:568:22: runtime error: load of misaligned address 0x4343434343434343 for type 'std::pair<wtp::WTSTickStruct *, unsigned int> *', which requires 8 byte alignment
+0x4343434343434343: note: pointer points here
+<memory cannot be printed>
+    #0 0x000100f7648c in void std::__1::__uninitialized_allocator_relocate[abi:nqe220108]<std::__1::allocator<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>, std::__1::pair<wtp::WTSTickStruct*, unsigned int>*>(std::__1::allocator<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>&, std::__1::pair<wtp::WTSTickStruct*, unsigned int>*, std::__1::pair<wtp::WTSTickStruct*, unsigned int>*, std::__1::pair<wtp::WTSTickStruct*, unsigned int>*)+0x68 (s5_storage_align:arm64+0x10011648c)
+    #1 0x000100f74ef0 in std::__1::vector<std::__1::pair<wtp::WTSTickStruct*, unsigned int>, std::__1::allocator<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>>::__swap_out_circular_buffer(std::__1::__split_buffer<std::__1::pair<wtp::WTSTickStruct*, unsigned int>, std::__1::allocator<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>, std::__1::__split_buffer_pointer_layout>&)+0x240 (s5_storage_align:arm64+0x100114ef0)
+    #2 0x000100f7460c in std::__1::pair<wtp::WTSTickStruct*, unsigned int>* std::__1::vector<std::__1::pair<wtp::WTSTickStruct*, unsigned int>, std::__1::allocator<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>>::__emplace_back_slow_path<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>(std::__1::pair<wtp::WTSTickStruct*, unsigned int>&&)+0x2dc (s5_storage_align:arm64+0x10011460c)
+    #3 0x000100f733f0 in std::__1::pair<wtp::WTSTickStruct*, unsigned int>& std::__1::vector<std::__1::pair<wtp::WTSTickStruct*, unsigned int>, std::__1::allocator<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>>::emplace_back<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>(std::__1::pair<wtp::WTSTickStruct*, unsigned int>&&)::'lambda0'()::operator()() const+0xf8 (s5_storage_align:arm64+0x1001133f0)
+    #4 0x000100f730dc in void std::__1::__if_likely_else[abi:nqe220108]<std::__1::pair<wtp::WTSTickStruct*, unsigned int>& std::__1::vector<std::__1::pair<wtp::WTSTickStruct*, unsigned int>, std::__1::allocator<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>>::emplace_back<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>(std::__1::pair<wtp::WTSTickStruct*, unsigned int>&&)::'lambda'(), std::__1::pair<wtp::WTSTickStruct*, unsigned int>& std::__1::vector<std::__1::pair<wtp::WTSTickStruct*, unsigned int>, std::__1::allocator<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>>::emplace_back<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>(std::__1::pair<wtp::WTSTickStruct*, unsigned int>&&)::'lambda0'()>(bool, std::__1::pair<wtp::WTSTickStruct*, unsigned int>& std::__1::vector<std::__1::pair<wtp::WTSTickStruct*, unsigned int>, std::__1::allocator<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>>::emplace_back<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>(std::__1::pair<wtp::WTSTickStruct*, unsigned int>&&)::'lambda'(), std::__1::pair<wtp::WTSTickStruct*, unsigned int>& std::__1::vector<std::__1::pair<wtp::WTSTickStruct*, unsigned int>, std::__1::allocator<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>>::emplace_back<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>(std::__1::pair<wtp::WTSTickStruct*, unsigned int>&&)::'lambda0'())+0xe8 (s5_storage_align:arm64+0x1001130dc)
+    #5 0x000100f6f0c8 in std::__1::pair<wtp::WTSTickStruct*, unsigned int>& std::__1::vector<std::__1::pair<wtp::WTSTickStruct*, unsigned int>, std::__1::allocator<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>>::emplace_back<std::__1::pair<wtp::WTSTickStruct*, unsigned int>>(std::__1::pair<wtp::WTSTickStruct*, unsigned int>&&)+0x360 (s5_storage_align:arm64+0x10010f0c8)
+    #6 0x000100e770e0 in wtp::WTSTickSlice::create(char const*, wtp::WTSTickStruct*, unsigned int)+0x290 (s5_storage_align:arm64+0x1000170e0)
+    #7 0x00010107a408 in wtp::WtDataReader::readTickSlice(char const*, unsigned int, unsigned long long)+0x3124 (s5_storage_align:arm64+0x10021a408)
+    #8 0x0001013a7ee4 in s5sg::S5StorageReaderTest_LongestLegalStdCodeHistoryTickKeyStaysExact_Test::TestBody()+0x1e68 (s5_storage_align:arm64+0x100547ee4)
+    #9 0x00010161e71c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (s5_storage_align:arm64+0x1007be71c)
+    #10 0x00010161e664 in testing::Test::Run()+0xcc (s5_storage_align:arm64+0x1007be664)
+    #11 0x00010161f244 in testing::TestInfo::Run()+0xd0 (s5_storage_align:arm64+0x1007bf244)
+    #12 0x00010161fcc8 in testing::TestSuite::Run()+0x1c4 (s5_storage_align:arm64+0x1007bfcc8)
+    #13 0x00010162b0f0 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (s5_storage_align:arm64+0x1007cb0f0)
+    #14 0x00010162aa9c in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (s5_storage_align:arm64+0x1007caa9c)
+    #15 0x00010162aa00 in testing::UnitTest::Run()+0x78 (s5_storage_align:arm64+0x1007caa00)
+    #16 0x00010160bd38 in main+0x40 (s5_storage_align:arm64+0x1007abd38)
+    #17 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /opt/homebrew/Cellar/llvm/22.1.8/bin/../include/c++/v1/__memory/uninitialized_algorithms.h:568:22 

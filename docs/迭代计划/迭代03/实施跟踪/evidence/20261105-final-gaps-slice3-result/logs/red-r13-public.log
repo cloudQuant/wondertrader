@@ -1,0 +1,47 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S3R13SelPublicSchedule.*
+[==========] Running 2 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 2 tests from S3R13SelPublicSchedule
+[ RUN      ] S3R13SelPublicSchedule.DocumentedPeriodsCreatedThroughTheCApiFireOnTheirSchedule
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-red-src/src/TestUnits/coverage/q06_porter/s3_r13_sel_public_schedule_test.cpp:111: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  calcCount(monthly)
+    Which is: 0
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-red-src/src/TestUnits/coverage/q06_porter/s3_r13_sel_public_schedule_test.cpp:114: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  calcCount(minute)
+    Which is: 0
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-red-src/src/TestUnits/coverage/q06_porter/s3_r13_sel_public_schedule_test.cpp:116: Failure
+Expected equality of these values:
+  931u
+    Which is: 931
+  calcTime(minute)
+    Which is: 0
+
+[  FAILED  ] S3R13SelPublicSchedule.DocumentedPeriodsCreatedThroughTheCApiFireOnTheirSchedule (8 ms)
+[ RUN      ] S3R13SelPublicSchedule.AliasesAndUnschedulableInputsAreRejectedAndNeverFire
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/slice3-red-src/src/TestUnits/coverage/q06_porter/s3_r13_sel_public_schedule_test.cpp:126: Failure
+Expected equality of these values:
+  0U
+    Which is: 0
+  create_sel_context("s3_pub_hhmmss", 0, 93000, "d", "CHINA", "ALLDAY", 0)
+    Which is: 3008
+
+[  FAILED  ] S3R13SelPublicSchedule.AliasesAndUnschedulableInputsAreRejectedAndNeverFire (1 ms)
+[----------] 2 tests from S3R13SelPublicSchedule (10 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test suite ran. (10 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] S3R13SelPublicSchedule.DocumentedPeriodsCreatedThroughTheCApiFireOnTheirSchedule
+[  FAILED  ] S3R13SelPublicSchedule.AliasesAndUnschedulableInputsAreRejectedAndNeverFire
+
+ 2 FAILED TESTS

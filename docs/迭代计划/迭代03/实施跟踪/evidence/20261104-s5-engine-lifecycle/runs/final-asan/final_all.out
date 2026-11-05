@@ -1,0 +1,29 @@
+build exit 0
+UnprovenMonitorIsQuarantinedAndOutlivesEngineSafely variant=nocap detect_leaks=0 exit 0
+ProvenMonitorIsStoppedThenFundAndMonitorReleased variant=sync detect_leaks=1 exit 0
+RepeatedRiskMonitorInitIsRejected variant=sync detect_leaks=1 exit 0
+ld: warning: can't parse dwarf compilation unit info in /var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/fake_mq-822fbc.o
+warning: no debug symbols in executable (-arch arm64)
+ld: warning: can't parse dwarf compilation unit info in /var/folders/7d/hnmknylj1w91h3cvq6mh3thm0000gn/T/fake_mq-fe653d.o
+warning: no debug symbols in executable (-arch arm64)
+S5EventNotifierInit.CreateServerFailureIsReportedAndStartsNothing exit=0 sanitizer_reports=0
+S5EventNotifierInit.SuccessfulCreateStillPublishes exit=0 sanitizer_reports=0
+S5SelScheduleThread.FiredTaskRunsOnceOnItsContextAndIsJoined exit=0 sanitizer_reports=0
+S5SelScheduleThread.TasksOnSeveralDaysAreAllJoinedByRelease exit=0 sanitizer_reports=0
+fee link rc=0
+r130 link rc=0
+S5EngineUninitMetadata.ZeroInitializedSelEngineReportsNoMetadata exit=0 sanitizer_reports=0
+S5EngineUninitMetadata.IndeterminateStorageSelEngineReportsNoMetadata exit=0 sanitizer_reports=0
+S5EngineUninitMetadata.ZeroInitializedCtaAndHftEnginesReportNoMetadata exit=0 sanitizer_reports=0
+S5LiveFeeSchedule.ContractRateWinsOverProductRate exit=0 sanitizer_reports=0
+S5LiveFeeSchedule.ProductRateIsTheFallback exit=0 sanitizer_reports=0
+S5LiveFeeSchedule.ExplicitZeroRateIsAValidFee exit=0 sanitizer_reports=0
+S5LiveFeeSchedule.MissingFeeIsAnObservableError exit=0 sanitizer_reports=0
+S5LiveFeeSchedule.ContinuousCodeIsPricedWithItsMappedContract exit=0 sanitizer_reports=0
+S5LiveFeeSchedule.FillIsKeptWhenItsFeeIsMissing exit=0 sanitizer_reports=0
+S5LiveFeeSchedule.PortfolioFeeIsChargedOnTheOpenedIncrement exit=0 sanitizer_reports=0
+S5LiveFeeSchedule.InvalidVersionedTemplateBlocksStart exit=0 sanitizer_reports=0
+S5LiveFeeSchedule.VersionedYamlTemplateIsAccepted exit=0 sanitizer_reports=0
+r130 exit=0 tests="6" failures="0" san=0
+RELINK-DONE
+FINAL-ALL-DONE

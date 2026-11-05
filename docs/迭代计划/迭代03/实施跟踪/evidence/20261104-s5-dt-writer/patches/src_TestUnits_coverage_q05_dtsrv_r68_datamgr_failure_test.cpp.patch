@@ -1,0 +1,25 @@
+--- docs/迭代计划/迭代03/实施跟踪/evidence/20261104-s5-dt-writer/before/src/TestUnits/coverage/q05_dtsrv/r68_datamgr_failure_test.cpp.before	2026-10-28 13:23:06
++++ src/TestUnits/coverage/q05_dtsrv/r68_datamgr_failure_test.cpp	2026-11-04 20:59:59
+@@ -85,7 +85,7 @@
+ };
+ 
+ // DataManager.cpp:73-78、100-104 —— 显式 module 名拼出的路径是一个目录，
+-// dlopen 失败 -> error 日志 + return false；_bd_mgr 已在函数头写入，委托仍可用。
++// dlopen 失败 -> error 日志 + return false；失败态不登记借用依赖（卡9，见用例内说明）。
+ TEST_F(R68DataManagerFailureTest, InitFailsWhenCustomModuleNameIsDirectory)
+ {
+ 	fs::create_directories(_bin / "libr68_store.dylib");
+@@ -98,7 +98,12 @@
+ 	EXPECT_FALSE(dm.init(params, &bdMgr, nullptr));
+ 	params->release();
+ 
+-	EXPECT_EQ(dm.getBDMgr(), static_cast<IBaseDataMgr*>(&bdMgr));
++	// 迭代03 卡9（dt-writer 包，2026-11-04）：init 失败（模块/工厂未就绪）回滚为未初始化态，
++	// 借用的基础数据/状态机不在失败态对外发布（9c 拒绝/保留原实例的对偶：失败不留部分状态，可重试；
++	// 同 WP2“失败对象不得进入运行态”、13a 先准备后发布）。旧断言“函数头部已赋值”来自迭代01覆盖计划
++	// 的旧实现，与该合同冲突，按 BUG-I02-NEW-056 归因更新；原文件见证据 before/*.before。
++	EXPECT_EQ(dm.writerLifecycleState(), DataManager::WLS_None);
++	EXPECT_EQ(dm.getBDMgr(), nullptr);
+ 	// 状态机为 NULL -> 全天候模式；写手为 NULL -> 写入/查询守卫全部生效
+ 	EXPECT_TRUE(dm.canSessionReceive("SSE"));
+ 	EXPECT_FALSE(dm.writeTick(nullptr, 0));

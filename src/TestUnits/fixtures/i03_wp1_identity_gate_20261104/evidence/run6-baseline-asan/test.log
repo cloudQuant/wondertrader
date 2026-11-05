@@ -1,0 +1,258 @@
+[==========] Running 10 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 10 tests from Wp1Test
+[ RUN      ] Wp1Test.SharedAccountPauseClosesEverySiblingAdapter
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:140: Failure
+Value of: B.isUnresolvedReportPaused()
+  Actual: false
+Expected: true
+sibling adapter on the same account must be paused
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:141: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  B.openLong(kStdCode, 7000, 1, 0, ct_)
+    Which is: 1327812651
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:142: Failure
+Value of: B.buy(kStdCode, 7000, 1, 0, false, ct_).empty()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:143: Failure
+Value of: B.sell(kStdCode, 7000, 1, 0, false, ct_).empty()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:144: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  b.n_insert_
+    Which is: 4
+
+[  FAILED  ] Wp1Test.SharedAccountPauseClosesEverySiblingAdapter (631 ms)
+[ RUN      ] Wp1Test.AutomaticCancelIsBlockedWhileAccountPaused
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:160: Failure
+Value of: adapter.cancel(localid)
+  Actual: true
+Expected: false
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:161: Failure
+Value of: adapter.cancel(kStdCode, true, 0).empty()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:162: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  api2_.n_action_
+    Which is: 2
+
+[  FAILED  ] Wp1Test.AutomaticCancelIsBlockedWhileAccountPaused (294 ms)
+[ RUN      ] Wp1Test.MonthCodeContractKeepsThreeToSixDigitsAndRejectsOthers
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:173: Failure
+Expected equality of these values:
+  "SHFE.ag.25123"
+  CodeHelper::rawMonthCodeToStdCode("ag25123", "SHFE")
+    Which is: "SHFE.ag.2251"
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:174: Failure
+Expected equality of these values:
+  "SHFE.ag.251234"
+  CodeHelper::rawMonthCodeToStdCode("ag251234", "SHFE")
+    Which is: "SHFE.ag.2251"
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:175: Failure
+Expected equality of these values:
+  std::string("SHFE.ag.251234").size()
+    Which is: 14
+  CodeHelper::rawMonthCodeToStdCode("ag251234", "SHFE").size()
+    Which is: 12
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:176: Failure
+Value of: CodeHelper::rawMonthCodeToStdCode("ag2512345", "SHFE").empty()
+  Actual: false
+Expected: true
+7 digits exceed the contract
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:178: Failure
+Value of: CodeHelper::rawMonthCodeToStdCode("ag19x2", "SHFE").empty()
+  Actual: false
+Expected: true
+non-digit month
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:179: Failure
+Value of: CodeHelper::rawMonthCodeToStdCode("ag12-3", "SHFE").empty()
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:180: Failure
+Value of: CodeHelper::rawMonthCodeToStdCode("ag1 23", "SHFE").empty()
+  Actual: false
+Expected: true
+
+[  FAILED  ] Wp1Test.MonthCodeContractKeepsThreeToSixDigitsAndRejectsOthers (294 ms)
+[ RUN      ] Wp1Test.NonDigitMonthTradeIsQuarantinedAndLongMonthKeptIntact
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:196: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  adapter.getPosition("SHFE.ag.25123", false)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:203: Failure
+Value of: adapter.isUnresolvedReportPaused()
+  Actual: false
+Expected: true
+unparseable month code must pause the account
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:204: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  adapter.getPosition("SHFE.ag.19x2", false)
+    Which is: 3
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:206: Failure
+Expected equality of these values:
+  (2147483647 *2U +1U)
+    Which is: 4294967295
+  adapter.openLong(kStdCode, 7000, 1, 0, ct_)
+    Which is: 1327812656
+
+[  FAILED  ] Wp1Test.NonDigitMonthTradeIsQuarantinedAndLongMonthKeptIntact (304 ms)
+[ RUN      ] Wp1Test.DirectOrderReservesAndDuplicateCancelReleasesOnce
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:221: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  adapter.getUndoneQty(kStdCode)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:223: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  adapter.getUndoneQty(kStdCode)
+    Which is: -2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:225: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  adapter.getUndoneQty(kStdCode)
+    Which is: -4
+duplicate cancel must not release twice
+
+[  FAILED  ] Wp1Test.DirectOrderReservesAndDuplicateCancelReleasesOnce (291 ms)
+[ RUN      ] Wp1Test.BuySplitDuplicateTradeLateTradeAndDuplicateCancelAreIdempotent
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:239: Failure
+Expected equality of these values:
+  3.0
+    Which is: 3
+  adapter.getUndoneQty(kStdCode)
+    Which is: 1
+duplicate trade id must not shrink undone twice
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:241: Failure
+Expected equality of these values:
+  3.0
+    Which is: 3
+  adapter.getUndoneQty(kStdCode)
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:243: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  adapter.getUndoneQty(kStdCode)
+    Which is: -2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:245: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  adapter.getUndoneQty(kStdCode)
+    Which is: -5
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:247: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  adapter.getUndoneQty(kStdCode)
+    Which is: -6
+late trade after terminal must not go negative
+
+[  FAILED  ] Wp1Test.BuySplitDuplicateTradeLateTradeAndDuplicateCancelAreIdempotent (290 ms)
+[ RUN      ] Wp1Test.RejectionOfUnknownLocalIdDoesNotConsumeOtherOrders
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:264: Failure
+Expected equality of these values:
+  5.0
+    Which is: 5
+  adapter.getUndoneQty(kStdCode)
+    Which is: 0
+unknown order rejection must not touch undone
+
+[  FAILED  ] Wp1Test.RejectionOfUnknownLocalIdDoesNotConsumeOtherOrders (286 ms)
+[ RUN      ] Wp1Test.StaleSnapshotRowDoesNotResurrectNewerCancel
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:293: Failure
+Expected equality of these values:
+  0.0
+    Which is: 0
+  adapter.getUndoneQty(kStdCode)
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:294: Failure
+Value of: adapter.cancel(localid)
+  Actual: true
+Expected: false
+stale snapshot must not re-register a canceled order
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:295: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  api2_.n_action_
+    Which is: 1
+
+[  FAILED  ] Wp1Test.StaleSnapshotRowDoesNotResurrectNewerCancel (286 ms)
+[ RUN      ] Wp1Test.AbsentOrderBecomesRevivableTombstone
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:309: Failure
+Expected equality of these values:
+  1.0
+    Which is: 1
+  adapter.getUndoneQty(kStdCode)
+    Which is: 0
+newer realtime report revives an absent tombstone
+
+[  FAILED  ] Wp1Test.AbsentOrderBecomesRevivableTombstone (289 ms)
+[ RUN      ] Wp1Test.FailedSnapshotKeepsLedger
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/fixtures/i03_wp1_identity_gate_20261104/wp1_test.cpp:319: Failure
+Expected equality of these values:
+  2.0
+    Which is: 2
+  adapter.getUndoneQty(kStdCode)
+    Which is: 0
+
+[  FAILED  ] Wp1Test.FailedSnapshotKeepsLedger (288 ms)
+[----------] 10 tests from Wp1Test (3258 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 1 test suite ran. (3258 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 10 tests, listed below:
+[  FAILED  ] Wp1Test.SharedAccountPauseClosesEverySiblingAdapter
+[  FAILED  ] Wp1Test.AutomaticCancelIsBlockedWhileAccountPaused
+[  FAILED  ] Wp1Test.MonthCodeContractKeepsThreeToSixDigitsAndRejectsOthers
+[  FAILED  ] Wp1Test.NonDigitMonthTradeIsQuarantinedAndLongMonthKeptIntact
+[  FAILED  ] Wp1Test.DirectOrderReservesAndDuplicateCancelReleasesOnce
+[  FAILED  ] Wp1Test.BuySplitDuplicateTradeLateTradeAndDuplicateCancelAreIdempotent
+[  FAILED  ] Wp1Test.RejectionOfUnknownLocalIdDoesNotConsumeOtherOrders
+[  FAILED  ] Wp1Test.StaleSnapshotRowDoesNotResurrectNewerCancel
+[  FAILED  ] Wp1Test.AbsentOrderBecomesRevivableTombstone
+[  FAILED  ] Wp1Test.FailedSnapshotKeepsLedger
+
+10 FAILED TESTS

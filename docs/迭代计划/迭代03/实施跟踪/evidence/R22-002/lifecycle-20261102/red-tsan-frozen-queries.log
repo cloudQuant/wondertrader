@@ -1,0 +1,23 @@
+argv=["/tmp/wt-r22-lifecycle-20261102/red-tsan-frozen", "queries"]
+exit=-6
+==================
+WARNING: ThreadSanitizer: data race (pid=41253)
+  Write of size 4 at 0x000109100c5c by main thread:
+    #0 StateMonitor::advanceOnce(unsigned int, unsigned int) <null> (red-tsan-frozen:arm64+0x10000a964)
+    #1 main <null> (red-tsan-frozen:arm64+0x100022a1c)
+
+  Previous read of size 4 at 0x000109100c5c by thread T1:
+    #0 StateMonitor::isInState(char const*, tagSimpleState) const <null> (red-tsan-frozen:arm64+0x10001ebd4)
+    #1 void* std::__1::__thread_proxy[abi:nqe220108]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_4>>(void*) <null> (red-tsan-frozen:arm64+0x1000253d0)
+
+  Location is heap block of size 64 at 0x000109100c40 allocated by main thread:
+    #0 operator new(unsigned long) <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x92928)
+    #1 R154StateMonitorTestAccess::attach(StateMonitor&, DataManager*, wtp::WTSSessionInfo*, tagSimpleState, char const*) <null> (red-tsan-frozen:arm64+0x100023044)
+    #2 main <null> (red-tsan-frozen:arm64+0x10002293c)
+
+  Thread T1 (tid=1047769, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64+0x31d84)
+    #1 main <null> (red-tsan-frozen:arm64+0x1000229c4)
+
+SUMMARY: ThreadSanitizer: data race (red-tsan-frozen:arm64+0x10000a964) in StateMonitor::advanceOnce(unsigned int, unsigned int)+0x1410
+==================

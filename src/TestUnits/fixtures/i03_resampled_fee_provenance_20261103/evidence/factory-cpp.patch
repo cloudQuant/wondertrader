@@ -1,0 +1,207 @@
+--- /tmp/i03-resampled-provenance-baseline-20261103/WTSDataFactory.cpp	2026-11-03 17:28:48
++++ src/WTSTools/WTSDataFactory.cpp	2026-11-03 17:29:26
+@@ -8,6 +8,7 @@
+  * \brief 
+  */
+ #include "WTSDataFactory.h"
++#include <typeinfo>
+ #include "../Includes/WTSDataDef.hpp"
+ #include "../Includes/WTSContractInfo.hpp"
+ #include "../Includes/WTSSessionInfo.hpp"
+@@ -805,8 +806,41 @@
+ 	return NULL;
+ }
+ 
++WTSKlineData* WTSDataFactory::extractKlineDataWithRanges(WTSKlineSlice* baseKline,
++	WTSKlinePeriod period, uint32_t times, WTSSessionInfo* sInfo,
++	std::vector<BarIndexRange>& ranges, bool bIncludeOpen, bool bAlignSec)
++{
++	ranges.clear();
++	// An override may group differently. Preserve dispatch without asserting identity.
++	if (typeid(*this) != typeid(WTSDataFactory))
++		return extractKlineData(baseKline, period, times, sInfo, bIncludeOpen, bAlignSec);
++	if (!baseKline || baseKline->size() == 0 || times <= 1 || period == KP_Tick)
++		return NULL;
++	std::vector<BarIndexRange> local;
++	local.reserve(baseKline->size());
++	WTSKlineData* result = NULL;
++	if (period == KP_DAY)
++		result = extractDayData(baseKline, times, bIncludeOpen, &local);
++	else if (period == KP_Minute1)
++		result = extractMin1Data(baseKline, times, sInfo, bIncludeOpen, bAlignSec, &local);
++	else if (period == KP_Minute5 && times == PERIOD_TIMES_HOUR)
++		result = extractHourData(baseKline, sInfo, bIncludeOpen, &local);
++	else if (period == KP_Minute5 && times == PERIOD_TIMES_HALF)
++		result = extractHalfData(baseKline, sInfo, bIncludeOpen, &local);
++	else if (period == KP_Minute5)
++		result = extractMin5Data(baseKline, times, sInfo, bIncludeOpen, bAlignSec, &local);
++	if (result && local.size() == result->size())
++		ranges.swap(local);
++	return result;
++}
++
+ WTSKlineData* WTSDataFactory::extractMin1Data(WTSKlineSlice* baseKline, uint32_t times, WTSSessionInfo* sInfo, bool bIncludeOpen /* = true */, bool bAlignSec /* = false */)
+ {
++	return extractMin1Data(baseKline, times, sInfo, bIncludeOpen, bAlignSec, NULL);
++}
++
++WTSKlineData* WTSDataFactory::extractMin1Data(WTSKlineSlice* baseKline, uint32_t times, WTSSessionInfo* sInfo, bool bIncludeOpen /* = true */, bool bAlignSec /* = false */, std::vector<BarIndexRange>* ranges)
++{
+ 	//根据合约代码获取市场信息
+ 	if(sInfo == NULL)
+ 		return NULL;
+@@ -906,6 +940,11 @@
+ 			lastBar->hold = curBar.hold;
+ 		}
+ 
++		if (ranges)
++		{
++			if (bNewBar) ranges->emplace_back(i, i + 1);
++			else ranges->back().second = i + 1;
++		}
+ 		if(bNewBar)
+ 		{
+ 			ret->appendBar(*lastBar);
+@@ -921,7 +960,10 @@
+ 		if ( lastDesBar->date > lastRawBar->date || lastDesBar->time > lastRawBar->time)
+ 		{
+ 			if (!bIncludeOpen)
++			{
+ 				ret->getDataRef().resize(ret->size() - 1);
++				if (ranges) ranges->pop_back();
++			}
+ 			else
+ 				ret->setClosed(false);
+ 		}
+@@ -933,6 +975,11 @@
+ 
+ WTSKlineData* WTSDataFactory::extractMin5Data(WTSKlineSlice* baseKline, uint32_t times, WTSSessionInfo* sInfo, bool bIncludeOpen /* = true */, bool bAlignSec /* = false */)
+ {
++	return extractMin5Data(baseKline, times, sInfo, bIncludeOpen, bAlignSec, NULL);
++}
++
++WTSKlineData* WTSDataFactory::extractMin5Data(WTSKlineSlice* baseKline, uint32_t times, WTSSessionInfo* sInfo, bool bIncludeOpen /* = true */, bool bAlignSec /* = false */, std::vector<BarIndexRange>* ranges)
++{
+ 	if(sInfo == NULL)
+ 		return NULL;
+ 
+@@ -1029,6 +1076,11 @@
+ 			lastBar->hold = curBar.hold;
+ 		}
+ 
++		if (ranges)
++		{
++			if (bNewBar) ranges->emplace_back(i, i + 1);
++			else ranges->back().second = i + 1;
++		}
+ 		if(bNewBar)
+ 		{
+ 			ret->appendBar(*lastBar);
+@@ -1044,7 +1096,10 @@
+ 		if (lastDesBar->date > lastRawBar->date || lastDesBar->time > lastRawBar->time)
+ 		{
+ 			if (!bIncludeOpen)
++			{
+ 				ret->getDataRef().resize(ret->size() - 1);
++				if (ranges) ranges->pop_back();
++			}
+ 			else
+ 				ret->setClosed(false);
+ 		}
+@@ -1055,6 +1110,11 @@
+ 
+ WTSKlineData* WTSDataFactory::extractHourData(WTSKlineSlice* baseKline, WTSSessionInfo* sInfo, bool bIncludeOpen /* = true */)
+ {
++	return extractHourData(baseKline, sInfo, bIncludeOpen, NULL);
++}
++
++WTSKlineData* WTSDataFactory::extractHourData(WTSKlineSlice* baseKline, WTSSessionInfo* sInfo, bool bIncludeOpen /* = true */, std::vector<BarIndexRange>* ranges)
++{
+ 	if (sInfo == NULL)
+ 		return NULL;
+ 
+@@ -1118,6 +1178,11 @@
+ 			lastBar->hold = curBar.hold;
+ 		}
+ 
++		if (ranges)
++		{
++			if (bNewBar) ranges->emplace_back(i, i + 1);
++			else ranges->back().second = i + 1;
++		}
+ 		if (bNewBar)
+ 		{
+ 			ret->appendBar(*lastBar);
+@@ -1133,7 +1198,10 @@
+ 		if (lastDesBar->date > lastRawBar->date || lastDesBar->time > lastRawBar->time)
+ 		{
+ 			if (!bIncludeOpen)
++			{
+ 				ret->getDataRef().resize(ret->size() - 1);
++				if (ranges) ranges->pop_back();
++			}
+ 			else
+ 				ret->setClosed(false);
+ 		}
+@@ -1143,6 +1211,11 @@
+ }
+ 
+ WTSKlineData* WTSDataFactory::extractHalfData(WTSKlineSlice* baseKline, WTSSessionInfo* sInfo, bool bIncludeOpen /* = true */)
++{
++	return extractHalfData(baseKline, sInfo, bIncludeOpen, NULL);
++}
++
++WTSKlineData* WTSDataFactory::extractHalfData(WTSKlineSlice* baseKline, WTSSessionInfo* sInfo, bool bIncludeOpen /* = true */, std::vector<BarIndexRange>* ranges)
+ {
+ 	if (sInfo == NULL)
+ 		return NULL;
+@@ -1221,6 +1294,11 @@
+ 			lastBar->hold = curBar.hold;
+ 		}
+ 
++		if (ranges)
++		{
++			if (bNewBar) ranges->emplace_back(i, i + 1);
++			else ranges->back().second = i + 1;
++		}
+ 		if (bNewBar)
+ 		{
+ 			ret->appendBar(*lastBar);
+@@ -1236,7 +1314,10 @@
+ 		if (lastDesBar->date > lastRawBar->date || lastDesBar->time > lastRawBar->time)
+ 		{
+ 			if (!bIncludeOpen)
++			{
+ 				ret->getDataRef().resize(ret->size() - 1);
++				if (ranges) ranges->pop_back();
++			}
+ 			else
+ 				ret->setClosed(false);
+ 		}
+@@ -1245,8 +1326,13 @@
+ 	return ret;
+ }
+ 
+-WTSKlineData* WTSDataFactory::extractDayData(WTSKlineSlice* baseKline, uint32_t times, bool /*bIncludeOpen*/ /* = true */)
++WTSKlineData* WTSDataFactory::extractDayData(WTSKlineSlice* baseKline, uint32_t times, bool bIncludeOpen /* = true */)
+ {
++	return extractDayData(baseKline, times, bIncludeOpen, NULL);
++}
++
++WTSKlineData* WTSDataFactory::extractDayData(WTSKlineSlice* baseKline, uint32_t times, bool bIncludeOpen /* = true */, std::vector<BarIndexRange>* ranges)
++{
+ 	//计算时间步长
+ 	uint32_t steplen = times;
+ 
+@@ -1296,6 +1382,11 @@
+ 			lastBar->hold = curBar.hold;
+ 		}
+ 
++		if (ranges)
++		{
++			if (bNewBar) ranges->emplace_back(i, i + 1);
++			else ranges->back().second = i + 1;
++		}
+ 		if(bNewBar)
+ 		{
+ 			ret->appendBar(*lastBar);

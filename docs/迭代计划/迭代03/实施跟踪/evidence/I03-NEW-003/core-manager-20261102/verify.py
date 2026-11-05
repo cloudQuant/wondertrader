@@ -1,0 +1,5 @@
+import json,pathlib,subprocess
+out=pathlib.Path('/tmp/wt-i03-core-propagation'); root='/Users/yunjinqi/Documents/new_projects/wondertrader'; cases=[('core','core-tests','N01ParserAdapter.manager_reports_partial_submission_and_keeps_owners:N01ParserAdapter.run_reports_connection_command_submission'),('runner','runner-tests','R28ParserCommands.*'),('dt-partial','dtporter-tests','I03DtPorterStart.partial_submission_does_not_release_owners'),('dt-capi','dtporter-tests','I03DtPorterStart.capi_reports_initial_snapshot_not_later_connections')];records=[]
+for name,bin,filt in cases:
+ a=[str(out/bin),'--gtest_filter='+filt,'--gtest_output=xml:'+str(out/(name+'.xml'))];p=subprocess.run(a,cwd=root,capture_output=True,text=True,timeout=30);(out/(name+'-run.log')).write_text(p.stdout+p.stderr);records.append({'name':name,'cwd':root,'argv':a,'exit':p.returncode});print(name,p.returncode,flush=True)
+(out/'verify-commands.json').write_text(json.dumps(records,indent=2));raise SystemExit(any(x['exit'] for x in records))

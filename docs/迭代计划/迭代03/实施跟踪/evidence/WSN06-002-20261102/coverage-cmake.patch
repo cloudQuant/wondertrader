@@ -1,0 +1,12 @@
+--- /tmp/wt-i03-wsn06-002-20261102/original-coverage-cmake.txt	2026-11-02 11:33:50
++++ /tmp/wt-i03-wsn06-002-20261102/snapshot/src/TestUnits/coverage/CMakeLists.txt	2026-11-02 11:32:32
+@@ -1390,6 +1390,9 @@
+ FOREACH(mod ${WT_MAIN_MODULES})
+ 	file(GLOB mod_tus CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/${mod}/*.cpp")
+ 	file(GLOB mod_tests CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/m_${mod}/*.cpp")
++	if(mod STREQUAL "WtUftRunner")
++		set(mod_tests "${CMAKE_CURRENT_SOURCE_DIR}/m_WtUftRunner/r95_wtuftrunner_config_run_test.cpp")
++	endif()
+ 	if(NOT mod_tus OR NOT mod_tests)
+ 		continue()
+ 	endif()

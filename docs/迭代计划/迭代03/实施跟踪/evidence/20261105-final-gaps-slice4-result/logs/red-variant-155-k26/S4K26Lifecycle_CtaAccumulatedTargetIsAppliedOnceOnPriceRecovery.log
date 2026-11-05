@@ -1,0 +1,48 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S4K26Lifecycle.CtaAccumulatedTargetIsAppliedOnceOnPriceRecovery
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S4K26Lifecycle
+[ RUN      ] S4K26Lifecycle.CtaAccumulatedTargetIsAppliedOnceOnPriceRecovery
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s4_k26_lifecycle_test.cpp:256: Failure
+Expected equality of these values:
+  5.0
+    Which is: 5
+  engine.pendingTarget(kOld)
+    Which is: 3
+B1: +2 then +3 without a price gives 5
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s4_k26_lifecycle_test.cpp:263: Failure
+Expected equality of these values:
+  5.0
+    Which is: 5
+  engine.portfolio(kOld)
+    Which is: 3
+the accumulated target is applied on price recovery
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s4_k26_lifecycle_test.cpp:269: Failure
+Expected equality of these values:
+  5.0
+    Which is: 5
+  engine.portfolio(kOld)
+    Which is: 3
+applied exactly once
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q01_wtcore3/s4_k26_lifecycle_test.cpp:272: Failure
+Expected equality of these values:
+  6.0
+    Which is: 6
+  engine.portfolio(kOld)
+    Which is: 4
+with a price the increment is booked on the position
+
+[  FAILED  ] S4K26Lifecycle.CtaAccumulatedTargetIsAppliedOnceOnPriceRecovery (3 ms)
+[----------] 1 test from S4K26Lifecycle (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (5 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] S4K26Lifecycle.CtaAccumulatedTargetIsAppliedOnceOnPriceRecovery
+
+ 1 FAILED TEST

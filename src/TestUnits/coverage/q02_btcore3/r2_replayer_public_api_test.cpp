@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
+#include <cmath>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -101,6 +102,13 @@ namespace
 		basefiles->append("commodity", comms);
 		comms->release();
 		basefiles->append("holiday", (root / "dist/common/holidays.json").string().c_str());
+		// 卡13d：费用按可核验的实际合约计算，夹具提供两只合约元数据
+		const std::filesystem::path contracts = base / "r2_pub_contracts.json";
+		std::ofstream(contracts) << "{\"DCE\":{\"a2105\":{\"name\":\"a2105\",\"code\":\"a2105\",\"exchg\":\"DCE\",\"product\":\"a\","
+			"\"opendate\":20200101,\"expiredate\":20210531}},"
+			"\"SSE\":{\"000001\":{\"name\":\"r2\",\"code\":\"000001\",\"exchg\":\"SSE\",\"product\":\"STK\","
+			"\"opendate\":20000101,\"expiredate\":20991231}}}";
+		basefiles->append("contract", contracts.string().c_str());
 		cfg->append("basefiles", basefiles);
 		basefiles->release();
 		return cfg;
@@ -239,10 +247,10 @@ TEST_F(R2PublicTest, feeTemplateAndCalcFeeMatrix)
 	EXPECT_DOUBLE_EQ(5.0, replayer.calc_fee(kFut, 5000.0, 2, 1));
 	// closetoday=0 时 rate==0，minfee 不生效
 	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee(kFut, 5000.0, 10, 2));
-	// offset 越界 -> default 分支
-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee(kFut, 5000.0, 10, 9));
-	// 未登记费率的合约 -> 0
-	EXPECT_DOUBLE_EQ(0.0, replayer.calc_fee("CFFEX.IF2103", 5000.0, 1, 0));
+	// 卡13d“缺费报错”：offset 越界与未登记费率的合约均返回可观察错误（NaN），
+	// 不再静默为 0（两条旧断言期望 0.0，与已裁定卡13d冲突，改写；原文件见证据 before/）
+	EXPECT_TRUE(std::isnan(replayer.calc_fee(kFut, 5000.0, 10, 9)));
+	EXPECT_TRUE(std::isnan(replayer.calc_fee("CFFEX.IF2103", 5000.0, 1, 0)));
 
 	// 按额：1:2:3 的严格比例（金额相同，只有 rate 在变）
 	double fOpen = replayer.calc_fee(kStk, 10.0, 100, 0);
@@ -254,11 +262,13 @@ TEST_F(R2PublicTest, feeTemplateAndCalcFeeMatrix)
 	// 金额翻倍 -> 费用翻倍（四舍五入到分）
 	EXPECT_DOUBLE_EQ(2 * fClose, replayer.calc_fee(kStk, 20.0, 100, 1));
 
-	// 不存在的模板文件
+	// 不存在的模板文件：卡13d 下配置了却读不到的费用模板使 init 显式失败
+	// （旧版经 setup 断言 init 成功并期望费用 0.0，与已裁定卡13d冲突，改写）
 	HisDataReplayer r2;
-	CountSink s2;
-	setup(r2, s2, (_base / "no_such_fees.json").string().c_str());
-	EXPECT_DOUBLE_EQ(0.0, r2.calc_fee(kFut, 5000.0, 10, 0));
+	WTSVariant* missingCfg = pub_cfg(_root, _base, (_base / "no_such_fees.json").string().c_str());
+	EXPECT_FALSE(r2.init(missingCfg, NULL, NULL));
+	missingCfg->release();
+	EXPECT_TRUE(std::isnan(r2.calc_fee(kFut, 5000.0, 10, 0)));
 
 	// 坏文件（解析失败）
 	const std::filesystem::path bad = _base / "bad_fees.json";
@@ -266,10 +276,13 @@ TEST_F(R2PublicTest, feeTemplateAndCalcFeeMatrix)
 		std::ofstream out(bad);
 		out << "{ this is not a json at all ]]]";
 	}
+	// 卡13d：无法解析的费用模板使 init 显式失败、费用查询返回错误
+	// （旧版经 setup 断言 init 成功并期望费用 0.0，与已裁定卡13d冲突，改写）
 	HisDataReplayer r3;
-	CountSink s3;
-	setup(r3, s3, bad.string().c_str());
-	EXPECT_DOUBLE_EQ(0.0, r3.calc_fee(kStk, 10.0, 100, 0));
+	WTSVariant* badCfg = pub_cfg(_root, _base, bad.string().c_str());
+	EXPECT_FALSE(r3.init(badCfg, NULL, NULL));
+	badCfg->release();
+	EXPECT_TRUE(std::isnan(r3.calc_fee(kStk, 10.0, 100, 0)));
 }
 
 /*
@@ -330,7 +343,8 @@ TEST_F(R2PublicTest, stopBeforeRunQuitsReplayEarly)
 	main->release();
 
 	replayer.run();
-	EXPECT_EQ(0u, sink._doneCnt);
+	// K38 BT-B（2026-11-04 用户裁定）：回放状态 V1 每代恰好一次 handle_replay_done（含 prepare 被拒、停止、回调异常），状态可区分；原断言见证据 before/。
+	EXPECT_EQ(1u, sink._doneCnt);
 	EXPECT_LT(sink._barClose, kBarCnt);
 }
 
@@ -412,10 +426,12 @@ TEST_F(R2PublicTest, metadataAndTimelineQueries)
 	setup(replayer, sink, "");
 
 	EXPECT_NE(nullptr, replayer.get_commodity_info(kStk));
-	EXPECT_EQ(nullptr, replayer.get_commodity_info("SSE.STK.999999"));
+	// K38 BT-C（2026-11-04 用户裁定）：商品查询为品种级，未知合约按交易所+品种返回同一品种对象。
+	EXPECT_EQ(replayer.get_commodity_info(kStk), replayer.get_commodity_info("SSE.STK.999999"));
 
 	std::string raw = replayer.get_rawcode(kStk);
-	EXPECT_EQ(std::string("000001"), raw);
+	// K38 BT-A（2026-11-04 用户裁定）：无规则代码 rawcode 返回 ""（实盘、回测、HEAD 一致）。
+	EXPECT_EQ(std::string(""), raw);
 	// 非法代码不得崩，返回空或原样
 	EXPECT_TRUE(replayer.get_rawcode("").empty() || true);
 

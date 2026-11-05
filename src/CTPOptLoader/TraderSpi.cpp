@@ -202,6 +202,58 @@ inline double checkValid(double val)
 }
 
 
+#include <condition_variable>
+#include <mutex>
+
+namespace loader_completion
+{
+	namespace
+	{
+		std::mutex g_mtx;
+		std::condition_variable g_cv;
+		bool g_done = false;
+		int g_code = 0;
+	}
+	void reset()
+	{
+		std::lock_guard<std::mutex> lock(g_mtx);
+		g_done = false;
+		g_code = 0;
+	}
+	void finish(int code)
+	{
+		{
+			std::lock_guard<std::mutex> lock(g_mtx);
+			if (g_done)
+				return;	// the first terminal result wins
+			g_done = true;
+			g_code = code;
+		}
+		g_cv.notify_all();
+	}
+	bool finished(int* code)
+	{
+		std::lock_guard<std::mutex> lock(g_mtx);
+		if (g_done && code != nullptr)
+			*code = g_code;
+		return g_done;
+	}
+	bool wait_for(int& code, std::chrono::milliseconds timeout)
+	{
+		std::unique_lock<std::mutex> lock(g_mtx);
+		if (!g_cv.wait_for(lock, timeout, []() { return g_done; }))
+			return false;
+		code = g_code;
+		return true;
+	}
+	int wait()
+	{
+		std::unique_lock<std::mutex> lock(g_mtx);
+		g_cv.wait(lock, []() { return g_done; });
+		return g_code;
+	}
+}
+
 void CTraderSpi::OnFrontConnected()
 {
 	std::cerr << "--->>> " << "OnFrontConnected" << std::endl;
@@ -496,8 +548,17 @@ void CTraderSpi::OnRspQryInstrument(CThostFtdcInstrumentField *pInstrument, CTho
 
 	if(bIsLast)
 	{
+		// K02=B / BUG-T4-015 (2026-11-04): an error final packet is a failed terminal
+		// result and publishes nothing; a successful final packet dumps and reports
+		// success. The host process is never terminated from this callback.
+		if (pRspInfo != NULL && pRspInfo->ErrorID != 0)
+		{
+			std::cerr << "--->>> Instrument query failed by error final packet, no files published" << std::endl;
+			loader_completion::finish(EXIT_FAILURE);
+			return;
+		}
 		DumpToJson();
-		exit(0);
+		loader_completion::finish(EXIT_SUCCESS);
 	}
 }
 

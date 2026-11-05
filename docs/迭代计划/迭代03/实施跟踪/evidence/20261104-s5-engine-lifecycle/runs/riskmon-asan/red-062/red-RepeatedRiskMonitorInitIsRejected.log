@@ -1,0 +1,34 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = S5RiskMonQuiesce.RepeatedRiskMonitorInitIsRejected
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from S5RiskMonQuiesce
+[ RUN      ] S5RiskMonQuiesce.RepeatedRiskMonitorInitIsRejected
+[       OK ] S5RiskMonQuiesce.RepeatedRiskMonitorInitIsRejected (185 ms)
+[----------] 1 test from S5RiskMonQuiesce (185 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (189 ms total)
+[  PASSED  ] 1 test.
+
+=================================================================
+==56958==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 8 byte(s) in 1 object(s) allocated from:
+    #0 0x0001026a90e8 in _Znwm+0x6c (libclang_rt.asan_osx_dynamic.dylib:arm64+0x650e8)
+    #1 0x00010209c928 in createRiskMonFact fake_riskmon.cpp:95
+    #2 0x000100c764b8 in wtp::WtEngine::init_riskmon(wtp::WTSVariant*) WtEngine.cpp:1887
+    #3 0x000100c699f0 in wtp::WtEngine::init(wtp::WTSVariant*, wtp::IBaseDataMgr*, wtp::WtDtMgr*, wtp::IHotMgr*, wtp::EventNotifier*) WtEngine.cpp:546
+    #4 0x000100f83078 in wtp::WtSelEngine::init(wtp::WTSVariant*, wtp::IBaseDataMgr*, wtp::WtDtMgr*, wtp::IHotMgr*, wtp::EventNotifier*) WtSelEngine.cpp:407
+    #5 0x000100a52bb0 in S5RiskMonQuiesce_RepeatedRiskMonitorInitIsRejected_Test::TestBody() riskmon_test.cpp:126
+    #6 0x0001013feb6c in void testing::internal::HandleExceptionsInMethodIfSupported<testing::Test, void>(testing::Test*, void (testing::Test::*)(), char const*)+0x64 (red-riskmon:arm64+0x1009b2b6c)
+    #7 0x0001013feab4 in testing::Test::Run()+0xcc (red-riskmon:arm64+0x1009b2ab4)
+    #8 0x0001013ff694 in testing::TestInfo::Run()+0xd0 (red-riskmon:arm64+0x1009b3694)
+    #9 0x000101400118 in testing::TestSuite::Run()+0x1c4 (red-riskmon:arm64+0x1009b4118)
+    #10 0x00010140b540 in testing::internal::UnitTestImpl::RunAllTests()+0x52c (red-riskmon:arm64+0x1009bf540)
+    #11 0x00010140aeec in bool testing::internal::HandleExceptionsInMethodIfSupported<testing::internal::UnitTestImpl, bool>(testing::internal::UnitTestImpl*, bool (testing::internal::UnitTestImpl::*)(), char const*)+0x64 (red-riskmon:arm64+0x1009beeec)
+    #12 0x00010140ae50 in testing::UnitTest::Run()+0x78 (red-riskmon:arm64+0x1009bee50)
+    #13 0x0001013ec188 in main+0x40 (red-riskmon:arm64+0x1009a0188)
+    #14 0x00018800fdfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: AddressSanitizer: 8 byte(s) leaked in 1 allocation(s).

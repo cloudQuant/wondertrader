@@ -1,0 +1,7 @@
+# AD reader 对齐定向证据（候选，未验收）
+
+- 原始 AD reader 用的 `RTBlockHeader` 为 20 字节，`BarCacheItem::_bar` 偏移 48 字节；首条 bar 相对映射首地址偏移 68，不满足 `WTSBarStruct` 的 8 字节对齐。两个 `red-*` 为隔离副本使用改动前 reader 实际公开读取路径的 UBSan 红控，均在 reader.cpp:669 报未对齐，退出 -6。原始 reader cpp / h SHA256 分别为 `c220de229922d55a30c7e82b1fec1ba16b98f9929ceb756267fd2ab70d1d7c9d`、`c3e7df8d06bdda28b5ea63a28c606204ed88a6e044b816b6b724c3c0d5ac60fe`，原测试文件 SHA256 为 `b6d31f887ef3875def8e2c40f0339637de2e32419262d42572db7c0d937e9769`。
+- `final-tristate.log`：8/8 新增定向测试通过（ASan、UBSan、LSan），含三个周期/第二条记录、损坏及修复、同分钟时间门槛、已发出 LMDB 回调的非原子反例、同步回调重入触发底层环形缓冲扩容。`tristate-results.json`：15/15 既有相关测试逐个通过（ASan；旧 fixture 本身构造 packed 对象会触发 UBSan，故未据此声称旧测试通过 UBSan；这 15 项关闭 LSan）。`source-sha256.txt` 绑定当前候选源码及测试。文件均未提交。
+- 临时实体源码副本 `/tmp/wt-i03-adreader-align-20261102/src`，LLVM 22.1.8 与 Homebrew 依赖；未创建符号链接。`CMakeLists.txt` 是隔离测试工程，并非仓库共享构建配置。命令：`/opt/homebrew/bin/cmake --build /tmp/wt-i03-adreader-align-20261102/build --parallel 4`；`ASAN_OPTIONS=detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 /tmp/wt-i03-adreader-align-20261102/build/p05009 --gtest_filter='R4ReaderADTest.I03*'`。ASan 对照的隔离工程路径为 `/tmp/wt-i03-adreader-asan-20261102`，脚本 `rerun.py` 固定读取该工程和用例列表，运行使用用户 conda base Python。两个临时目录并非长期依赖。
+- 对齐快照在同步 callback 调用期间有效，不能外推至 callback 返回后保存的裸指针。已有 slice 借用环形缓冲的寿命、读线程之间对 bars 缓存的并发访问、writer 与 reader 之间跨进程一致快照/同时 truncate 均未解决或验证；RT mapping 的互斥锁不覆盖这些合同。未跑多线程并发或生产数据、真实交易。
+- 错误时可能已有其他合约回调，不能回滚；保持原先的单调时间门槛避免同一分钟重放，因此损坏时该分钟不发全部更新通知，同一分钟也不重试；后续分钟重试能否补齐取决于实际进度，不保证跨分钟无重复或完整。公开 ABI 和磁盘布局未改，但私有 helper 的 C++ 符号发生变化；未进行第三方二进制兼容认证。
