@@ -132,6 +132,56 @@ TEST_F(R200Fixture, R200His_BarReplaySkipsEmptyTickList)
 	EXPECT_EQ(1u, sink.doneCalls);
 }
 
+// K62（BUG-I02-NEW-090，用户裁定 2026-11-06）：用行覆盖确证 K 线回放时“tick 列表为空”的分支。
+// 只订阅 j 的 tick，j 的 tick 桶成功加载但为空（0 条）；cu 只提供主日线、不订阅 tick。
+// 回放中 replayHftInterval 的 enqueue 只会拿到 j 的空列表：游标初始化后 while 条件不成立，
+// 不产生任何事件。覆盖证据：enqueue 首行计数 > 0、读取条目的那一行计数 == 0
+// （见 evidence/20261106-decisions-k50-k63/k62/）。行为断言：不交付 j 的 tick、回放正常结束。
+TEST_F(R200Fixture, R200His_BarReplayWithOnlyEmptyTickListDispatchesNothing)
+{
+	R200Loader loader;
+	loader.successfulEmptyTickBuckets = {
+		std::string(kJ) + "#20200102",
+		std::string(kJ) + "#20200103"
+	};
+	loader.finalBars[kCu] = {
+		r200::make_daily(20191231u, 69990.0),
+		r200::make_daily(20200102u, 70000.0),
+		r200::make_daily(20200103u, 70010.0)
+	};
+
+	HisDataReplayer rp;
+	WTSVariant* cfg = r72::make_cfg(_root, _base, 202001020930ull, 202001031500ull, true);
+	ASSERT_TRUE(rp.init(cfg, nullptr, &loader));
+	cfg->release();
+
+	struct CodeSink : public r72::Sink
+	{
+		std::vector<std::string> codes;
+		void handle_tick(const char* stdCode, WTSTickData* curTick, uint32_t pxType) override
+		{
+			codes.emplace_back(stdCode == nullptr ? "" : stdCode);
+			r72::Sink::handle_tick(stdCode, curTick, pxType);
+		}
+	} sink;
+	rp.register_sink(&sink, "r200_only_empty");
+	ASSERT_TRUE(rp.prepare());
+
+	WTSKlineSlice* main = rp.get_kline_slice(kCu, "d", 5, 1, true);
+	ASSERT_NE(nullptr, main);
+	main->release();
+
+	rp.sub_tick(0, kJ);
+
+	rp.run(false);
+
+	EXPECT_GE(loader.tickCalls, 1u) << "the empty tick bucket of j must have been loaded";
+	// cu 的主日线在 K 线回放中会模拟出 tick（每根 OHLC 4 笔）；j 没有任何 tick 被交付
+	for (const std::string& code : sink.codes)
+		EXPECT_NE(std::string(kJ), code) << "a tick of the empty list was dispatched";
+	EXPECT_EQ(1u, sink.doneCalls);
+}
+
 // 生产: HisDataReplayer.cpp:1521（未订阅日线列表在模拟 tick 时游标到尾部 break）
 //       1453（未订阅分钟线列表在模拟 tick 时游标到尾部 break）
 // 日线段：主 K 线含 20191231 暖场 bar，回测从 02 开始；股票日线 03/04/05

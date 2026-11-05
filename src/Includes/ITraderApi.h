@@ -263,6 +263,12 @@ public:
 	 */
 	virtual void disconnect() {}
 
+	/*
+	 *	是否完全就绪（K55，BUG-R60-006，2026-11-06）
+	 *	只有登录成功且交易通道可用（可以下单）时返回 true；
+	 *	初始、仅连上通道未登录、登录失败、logout、断开、release 之后都返回 false。
+	 *	内置宿主不依赖本接口判断就绪，以 onLoginResult 为准；本合同供第三方调用方使用。
+	 */
 	virtual bool isConnected() { return false; }
 
 	/*

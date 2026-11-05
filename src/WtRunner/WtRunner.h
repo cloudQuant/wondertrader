@@ -36,6 +36,7 @@
 #include "../WtCore/WtDtMgr.h"
 #include "../WtCore/ActionPolicyMgr.h"
 #include "../WtCore/AccountResumeInbox.hpp"
+#include "../WtCore/ManualClaimInbox.hpp"
 
 #include "../WTSTools/WTSHotMgr.h"
 #include "../WTSTools/WTSBaseDataMgr.h"
@@ -101,6 +102,19 @@ public:
 	 * @return 本次处理的请求数
 	 */
 	uint32_t processAccountResumeRequests();
+
+	/**
+	 * @brief K50（I03-NEW-089）：处理人工合约归属释放请求目录里的全部 *.json 请求
+	 * @details 请求为 {"trader","code","operator","reason","reference"}；先改名为 .processing 再交账户门禁
+	 *          （审计落盘后才释放；该合约仍有未完成人工委托时拒绝），之后归档为 .done/.rejected/.invalid；
+	 *          run() 运行期间与恢复请求一起约每秒处理一次。操作员身份只记录不认证。
+	 * @return 本次处理的请求数
+	 */
+	uint32_t processManualClaimRequests();
+
+	/** 人工归属释放请求目录：配置项 claim_release_folder，缺省为生成目录下的 claim_release/ */
+	const std::string& manualClaimFolder() const { return _claim_folder; }
+	void setManualClaimFolder(const std::string& folder) { _claim_folder = folder; }
 
 	/** 恢复请求目录：配置项 resume_folder，缺省为生成目录下的 resume/ */
 	const std::string& accountResumeFolder() const { return _resume_folder; }
@@ -248,6 +262,7 @@ private:
 
 	std::atomic<bool> _to_exit;				//!< Exit flag shared by signal and control threads.
 	std::string			_resume_folder;		//!< 卡6 6b=A 账户恢复请求目录
+	std::string			_claim_folder;		//!< K50 人工合约归属释放请求目录
 	mutable std::recursive_mutex _lifecycle_mutex;
 	bool				_configuring = false;
 	bool				_runtime_starting = false;

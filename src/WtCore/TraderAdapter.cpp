@@ -1850,6 +1850,37 @@ AccountTradingGate::ResumeStatus TraderAdapter::resumeAccountTrading(
 	return status;
 }
 
+AccountTradingGate::ClaimReleaseStatus TraderAdapter::releaseManualClaim(
+	const AccountTradingGate::ClaimReleaseRequest& request, std::string* diagnostic)
+{
+	// K50 (I03-NEW-089, user decision 2026-11-06): manual/raw entries are recorded in the
+	// ledger without an owner scope. Any of them on this contract that is not terminal yet
+	// (submitting, or live before/after its first report) blocks the release.
+	bool liveManualOrders = !decimal::eq(getUndoneQtyForOwner(request.code.c_str(), std::string()), 0);
+	{
+		std::lock_guard<std::mutex> lock(_ledger_mutex);
+		for (const auto& item : _ledger)
+		{
+			const OrderLedgerEntry& entry = item.second;
+			if (entry.owner_id.empty() && entry.std_code == request.code &&
+				entry.state != OrderLedgerState::Terminal && entry.state != OrderLedgerState::Absent)
+			{
+				liveManualOrders = true;
+				break;
+			}
+		}
+	}
+	std::string text;
+	const AccountTradingGate::ClaimReleaseStatus status =
+		_account_gate->releaseContractClaim(kManualOrderOwner, request, liveManualOrders, &text);
+	WTSLogger::log_dyn("trader", _id.c_str(), status == AccountTradingGate::ClaimReleaseStatus::Ok ? LL_WARN : LL_ERROR,
+		"[{}] release of the manual claim on {} requested by {}: status {}, {}", _id.c_str(), request.code.c_str(),
+		request.operator_id.c_str(), (int)status, text.c_str());
+	if (diagnostic)
+		*diagnostic = text;
+	return status;
+}
+
 bool TraderAdapter::isTradingAdmissionClosed() const noexcept
 {
 	return _account_gate->paused() || _identity_recovery_pending.load(std::memory_order_acquire);
@@ -5525,6 +5556,19 @@ AccountTradingGate::ResumeStatus TraderAdapterMgr::resumeAccountTrading(const ch
 		return AccountTradingGate::ResumeStatus::InvalidRequest;
 	}
 	return adapter->resumeAccountTrading(request, diagnostic);
+}
+
+AccountTradingGate::ClaimReleaseStatus TraderAdapterMgr::releaseManualClaim(const char* tname,
+	const AccountTradingGate::ClaimReleaseRequest& request, std::string* diagnostic)
+{
+	TraderAdapterPtr adapter = getAdapter(tname ? tname : "");
+	if (!adapter)
+	{
+		if (diagnostic)
+			*diagnostic = std::string("unknown trader adapter ") + (tname ? tname : "");
+		return AccountTradingGate::ClaimReleaseStatus::InvalidRequest;
+	}
+	return adapter->releaseManualClaim(request, diagnostic);
 }
 
 uint64_t TraderAdapterMgr::accountPauseGeneration(const char* tname)

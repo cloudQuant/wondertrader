@@ -327,3 +327,117 @@ TEST(r7_twap_clear, flat_clear_and_ordinary_zero_difference_send_nothing)
 	EXPECT_TRUE(ctx.sells.empty());
 	EXPECT_TRUE(ctx.buys.empty());
 }
+
+// ---------------------------------------------------------------------------
+// K58（BUG-R7-004，用户裁定 2026-11-06）：清仓采用保守规则，不扩接口。
+//  (a) 只平可用数量（getPosition validOnly=true），不可用的部分（冻结 / T+1）保留清仓目标，
+//      后续 tick 继续尝试并记诊断，绝不超平；
+//  (b) 只有多空毛仓同时非零才发方向平仓（单向净持仓账户不会出现这种状态）；
+//  (c) 股票不卖空（StockVWAP 只卖可用多头，见 StockVWAP 既有 T+1 用例）。
+// 原验收的 5 类：净零锁仓、仅多、仅空、空仓、非零净额；另加冻结 / T+1 不足。
+// ---------------------------------------------------------------------------
+
+// 净零锁仓、多头全部冻结：先平可用的空头（带平仓标志），不卖冻结的多头。
+TEST(r7_twap_clear_k58, net_zero_with_frozen_long_closes_available_short_first)
+{
+	LotCtx ctx;
+	ctx.comm = mkLotComm(1.0, 1.0, TM_Both);
+	ctx.longTotal = 2.0;
+	ctx.longAvail = 0.0;
+	ctx.shortTotal = ctx.shortAvail = -2.0;
+	WtTWapExeUnit unit;
+	boot(unit, ctx, 1);
+	unit.set_position(kLotCode, DBL_MAX);
+	feed(unit, 100000000);
+	EXPECT_TRUE(ctx.sells.empty()) << "a frozen long must not be sold";
+	ASSERT_EQ(ctx.buys.size(), 1u);
+	EXPECT_DOUBLE_EQ(ctx.buys[0], 2.0);
+	EXPECT_TRUE(ctx.buyForce[0]);
+}
+
+// 净零锁仓、两边都不可用：不发单，记诊断；之后多头变为可用时继续清仓。
+TEST(r7_twap_clear_k58, unavailable_legs_wait_with_diagnostic_and_retry_later)
+{
+	LotCtx ctx;
+	ctx.comm = mkLotComm(1.0, 1.0, TM_Both);
+	ctx.longTotal = 2.0;
+	ctx.longAvail = 0.0;
+	ctx.shortTotal = -2.0;
+	ctx.shortAvail = 0.0;
+	WtTWapExeUnit unit;
+	boot(unit, ctx, 1);
+	unit.set_position(kLotCode, DBL_MAX);
+	feed(unit, 100000000);
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_GE(ctx.countLog("not yet available"), 1u);
+
+	ctx.longAvail = 2.0;	// 冻结解除
+	feed(unit, 100001000);
+	ASSERT_EQ(ctx.sells.size(), 1u) << "the clear target must survive and be retried";
+	EXPECT_DOUBLE_EQ(ctx.sells[0], 2.0);
+	EXPECT_TRUE(ctx.sellForce[0]);
+	EXPECT_TRUE(ctx.buys.empty());
+}
+
+// 仅多头、部分 T+1 冻结：只卖可用的部分，绝不超平；可用量为 0 时保留目标并记诊断。
+TEST(r7_twap_clear_k58, only_long_sells_available_part_only)
+{
+	LotCtx ctx;
+	ctx.comm = mkLotComm(1.0, 1.0, TM_Both);
+	ctx.longTotal = 3.0;
+	ctx.longAvail = 1.0;
+	WtTWapExeUnit unit;
+	boot(unit, ctx, 1);
+	unit.set_position(kLotCode, DBL_MAX);
+	feed(unit, 100000000);
+	ASSERT_EQ(ctx.sells.size(), 1u);
+	EXPECT_DOUBLE_EQ(ctx.sells[0], 1.0) << "never more than the available long";
+	EXPECT_TRUE(ctx.sellForce[0]);
+
+	ctx.longTotal = 2.0;	// 成交 1 手，剩余 2 手不可用
+	ctx.longAvail = 0.0;
+	feed(unit, 100001000);
+	EXPECT_EQ(ctx.sells.size(), 1u) << "unavailable long must not be sold";
+	EXPECT_TRUE(ctx.buys.empty()) << "a long-only clear never opens a short";
+}
+
+// 仅空头、部分冻结：只买回可用的部分，带平仓标志。
+TEST(r7_twap_clear_k58, only_short_buys_back_available_part_only)
+{
+	LotCtx ctx;
+	ctx.comm = mkLotComm(1.0, 1.0, TM_Both);
+	ctx.shortTotal = -3.0;
+	ctx.shortAvail = -1.0;
+	WtTWapExeUnit unit;
+	boot(unit, ctx, 1);
+	unit.set_position(kLotCode, DBL_MAX);
+	feed(unit, 100000000);
+	ASSERT_EQ(ctx.buys.size(), 1u);
+	EXPECT_DOUBLE_EQ(ctx.buys[0], 1.0);
+	EXPECT_TRUE(ctx.buyForce[0]);
+	EXPECT_TRUE(ctx.sells.empty());
+}
+
+// 非零净额且两边都有：先平多头（不超过可用），之后买回空头，全程带平仓标志。
+TEST(r7_twap_clear_k58, nonzero_net_with_both_legs_closes_each_leg_within_availability)
+{
+	LotCtx ctx;
+	ctx.comm = mkLotComm(1.0, 1.0, TM_Both);
+	ctx.longTotal = ctx.longAvail = 3.0;
+	ctx.shortTotal = ctx.shortAvail = -1.0;	// 净 +2
+	WtTWapExeUnit unit;
+	boot(unit, ctx, 1);
+	unit.set_position(kLotCode, DBL_MAX);
+	feed(unit, 100000000);
+	ASSERT_EQ(ctx.sells.size(), 1u);
+	EXPECT_LE(ctx.sells[0], 3.0);
+	EXPECT_TRUE(ctx.sellForce[0]);
+	EXPECT_TRUE(ctx.buys.empty());
+
+	ctx.longTotal = ctx.longAvail = 0.0;	// 多头平完，净 -1
+	feed(unit, 100001000);
+	ASSERT_EQ(ctx.buys.size(), 1u);
+	EXPECT_DOUBLE_EQ(ctx.buys[0], 1.0);
+	EXPECT_TRUE(ctx.buyForce[0]);
+}

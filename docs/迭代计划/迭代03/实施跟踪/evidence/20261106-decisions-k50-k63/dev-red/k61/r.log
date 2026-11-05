@@ -1,0 +1,224 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03K61KlinePeriodTest.*:R193StorageReaderTest.R193LoaderUnknownPeriodIsRejected
+[==========] Running 5 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 4 tests from I03K61KlinePeriodTest
+[ RUN      ] I03K61KlinePeriodTest.ReaderRejectsNonBasePeriodsWithoutTouchingLoader
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:103: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  slice
+    Which is: 0x106d3cd90
+period 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:106: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _sink.count_of(LL_ERROR)
+    Which is: 0
+period 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:107: Failure
+Expected: (string::npos) != (_sink.last_log().find("Unsupported kline period")), actual: 18446744073709551615 vs 18446744073709551615
+His tick bars of SSE.STK.600030 loaded, 1 from history, 0 from realtime
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:103: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  slice
+    Which is: 0x106d3d5d0
+period 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:106: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _sink.count_of(LL_ERROR)
+    Which is: 0
+period 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:107: Failure
+Expected: (string::npos) != (_sink.last_log().find("Unsupported kline period")), actual: 18446744073709551615 vs 18446744073709551615
+His hour bars of SSE.STK.600030 loaded, 1 from history, 0 from realtime
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:103: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  slice
+    Which is: 0x106d3cd90
+period 5
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:106: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _sink.count_of(LL_ERROR)
+    Which is: 0
+period 5
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:107: Failure
+Expected: (string::npos) != (_sink.last_log().find("Unsupported kline period")), actual: 18446744073709551615 vs 18446744073709551615
+His half bars of SSE.STK.600030 loaded, 1 from history, 0 from realtime
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:103: Failure
+Expected equality of these values:
+  nullptr
+    Which is: NULL
+  slice
+    Which is: 0x106d3e020
+period 99
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:106: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _sink.count_of(LL_ERROR)
+    Which is: 0
+period 99
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:107: Failure
+Expected: (string::npos) != (_sink.last_log().find("Unsupported kline period")), actual: 18446744073709551615 vs 18446744073709551615
+WtDataReader log formatting failed
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:109: Failure
+Expected equality of these values:
+  0u
+    Which is: 0
+  loader.calls()
+    Which is: 4
+
+[  FAILED  ] I03K61KlinePeriodTest.ReaderRejectsNonBasePeriodsWithoutTouchingLoader (5 ms)
+[ RUN      ] I03K61KlinePeriodTest.ReaderPassesBasePeriodsToLoaderUnchanged
+[       OK ] I03K61KlinePeriodTest.ReaderPassesBasePeriodsToLoaderUnchanged (0 ms)
+[ RUN      ] I03K61KlinePeriodTest.RdmReaderRejectsNonBasePeriodsByRangeAndByCount
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:141: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _qsink.count_of(LL_ERROR)
+    Which is: 0
+range period 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:142: Failure
+Expected: (string::npos) != (_qsink.last_log().find("Unsupported kline period")), actual: 18446744073709551615 vs 18446744073709551615
+0 history day data of SSE.STK.600030 cached
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:149: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _qsink.count_of(LL_ERROR)
+    Which is: 0
+count period 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:150: Failure
+Expected: (string::npos) != (_qsink.last_log().find("Unsupported kline period")), actual: 18446744073709551615 vs 18446744073709551615
+His tick bars of SSE.STK.600030 loaded, 0 from history, 0 from realtime
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:141: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _qsink.count_of(LL_ERROR)
+    Which is: 0
+range period 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:142: Failure
+Expected: (string::npos) != (_qsink.last_log().find("Unsupported kline period")), actual: 18446744073709551615 vs 18446744073709551615
+0 history day data of SSE.STK.600030 cached
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:149: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _qsink.count_of(LL_ERROR)
+    Which is: 0
+count period 4
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:150: Failure
+Expected: (string::npos) != (_qsink.last_log().find("Unsupported kline period")), actual: 18446744073709551615 vs 18446744073709551615
+His hour bars of SSE.STK.600030 loaded, 0 from history, 0 from realtime
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:141: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _qsink.count_of(LL_ERROR)
+    Which is: 0
+range period 5
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:142: Failure
+Expected: (string::npos) != (_qsink.last_log().find("Unsupported kline period")), actual: 18446744073709551615 vs 18446744073709551615
+0 history day data of SSE.STK.600030 cached
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:149: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _qsink.count_of(LL_ERROR)
+    Which is: 0
+count period 5
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:150: Failure
+Expected: (string::npos) != (_qsink.last_log().find("Unsupported kline period")), actual: 18446744073709551615 vs 18446744073709551615
+His half bars of SSE.STK.600030 loaded, 0 from history, 0 from realtime
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:141: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _qsink.count_of(LL_ERROR)
+    Which is: 0
+range period 99
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:142: Failure
+Expected: (string::npos) != (_qsink.last_log().find("Unsupported kline period")), actual: 18446744073709551615 vs 18446744073709551615
+0 history day data of SSE.STK.600030 cached
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:149: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _qsink.count_of(LL_ERROR)
+    Which is: 0
+count period 99
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k61_kline_period_contract_test.cpp:150: Failure
+Expected: (string::npos) != (_qsink.last_log().find("Unsupported kline period")), actual: 18446744073709551615 vs 18446744073709551615
+WtRdmDtReader log formatting failed
+
+[  FAILED  ] I03K61KlinePeriodTest.RdmReaderRejectsNonBasePeriodsByRangeAndByCount (0 ms)
+[ RUN      ] I03K61KlinePeriodTest.RdmReaderBasePeriodsAreNotRejected
+[       OK ] I03K61KlinePeriodTest.RdmReaderBasePeriodsAreNotRejected (0 ms)
+[----------] 4 tests from I03K61KlinePeriodTest (7 ms total)
+
+[----------] 1 test from R193StorageReaderTest
+[ RUN      ] R193StorageReaderTest.R193LoaderUnknownPeriodIsRejected
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r193_storage_reader_residual_test.cpp:82: Failure
+Value of: slice == __null
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/r193_storage_reader_residual_test.cpp:85: Failure
+Expected equality of these values:
+  errorsBefore + 1
+    Which is: 1
+  _sink.count_of(LL_ERROR)
+    Which is: 0
+
+[  FAILED  ] R193StorageReaderTest.R193LoaderUnknownPeriodIsRejected (0 ms)
+[----------] 1 test from R193StorageReaderTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 2 test suites ran. (8 ms total)
+[  PASSED  ] 2 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] I03K61KlinePeriodTest.ReaderRejectsNonBasePeriodsWithoutTouchingLoader
+[  FAILED  ] I03K61KlinePeriodTest.RdmReaderRejectsNonBasePeriodsByRangeAndByCount
+[  FAILED  ] R193StorageReaderTest.R193LoaderUnknownPeriodIsRejected
+
+ 3 FAILED TESTS

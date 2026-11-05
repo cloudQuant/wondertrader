@@ -879,6 +879,9 @@ namespace
 		ASSERT_EQ(0, api_.logout());
 		EXPECT_EQ(1, stub_.n_logout_);
 		EXPECT_EQ(67890u, stub_.logout_session_);
+		// K55（BUG-R60-006，2026-11-06）：isConnected 表示完全就绪，logout 之后为 false
+		EXPECT_FALSE(api_.isConnected());
+		EXPECT_EQ(TraderXTP::TS_NOTLOGIN, api_._state);
 	}
 
 	/* ------------------------------------------------------------------ */

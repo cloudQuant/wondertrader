@@ -966,16 +966,30 @@ void WtTWapExeUnit::do_calc()
 		if (!is_clear(_target_pos))
 			return;
 
-		// 如果是清仓指令，需要进一步检查多头仓位
-		// 获取多头仓位
-		double lPos = _ctx->getPosition(code, true, 1); 
-		
-		// 如果多头仓位已经为0，说明已经完全清仓，直接退出
-		if (decimal::eq(lPos, 0))
+		// K58 (BUG-R7-004, user decision 2026-11-06): clear only what is available. A net-zero
+		// locked position closes its available long first, otherwise its available short; legs
+		// that are frozen or T+1 keep the clear target and are retried on later ticks with a
+		// diagnostic. Directional closes only happen while both legs exist, which a net-position
+		// account never reports.
+		const double lPos = _ctx->getPosition(code, true, 1);
+		const double sAvail = _ctx->getPosition(code, true, 2);
+		if (decimal::gt(lPos, 0))
+		{
+			newVol = -min(lPos, _order_lots);
+		}
+		else if (decimal::lt(sAvail, 0))
+		{
+			newVol = min(-sAvail, _order_lots);
+		}
+		else
+		{
+			const double lTotal = _ctx->getPosition(code, false, 1);
+			const double sTotal = _ctx->getPosition(code, false, 2);
+			if (!decimal::eq(lTotal, 0) || !decimal::eq(sTotal, 0))
+				_ctx->writeLog(fmtutil::format("Clearing of {} waits: long {} and short {} are not yet available (frozen or T+1), retrying on later ticks",
+					_code.c_str(), lTotal, sTotal));
 			return;
-
-		// 如果还有多头仓位，则将目标仓位设置为卖出指令，强制触发清仓                      
-		newVol = -min(lPos, _order_lots);
+		}
 		// The slice below is sized from diffQty; keep it in step with the forced
 		// closing target (net is zero here, so this sells available longs first;
 		// the remaining short is then bought back through the ordinary path).

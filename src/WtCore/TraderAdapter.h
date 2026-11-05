@@ -111,6 +111,12 @@ public:
 	/** Explicit manual resume; audited, generation-checked, never automatic. */
 	AccountTradingGate::ResumeStatus resumeAccountTrading(
 		const AccountTradingGate::ResumeRequest& request, std::string* diagnostic = nullptr);
+	/**
+	 * K50 (I03-NEW-089): explicit, audited release of the account's manual owner claim on
+	 * request.code. Rejected (claim kept) while a manual order of that contract is live.
+	 */
+	AccountTradingGate::ClaimReleaseStatus releaseManualClaim(
+		const AccountTradingGate::ClaimReleaseRequest& request, std::string* diagnostic = nullptr);
 	/** Admission closed: account paused or startup identity recovery not finished. */
 	bool isTradingAdmissionClosed() const noexcept;
 	bool isIdentityRecoveryPending() const noexcept;
@@ -1134,6 +1140,9 @@ public:
 	 */
 	AccountTradingGate::ResumeStatus resumeAccountTrading(const char* tname,
 		const AccountTradingGate::ResumeRequest& request, std::string* diagnostic = nullptr);
+	/*! \brief K50: audited release of the manual owner claim on one contract of adapter tname. */
+	AccountTradingGate::ClaimReleaseStatus releaseManualClaim(const char* tname,
+		const AccountTradingGate::ClaimReleaseRequest& request, std::string* diagnostic = nullptr);
 	/*! \brief Current pause generation of the account gate of tname (0 if unknown). */
 	uint64_t accountPauseGeneration(const char* tname);
 

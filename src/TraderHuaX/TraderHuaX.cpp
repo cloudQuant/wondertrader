@@ -892,6 +892,9 @@ int TraderHuaX::logout()
 	CTORATstpUserLogoutField field;
 	strcpy_s(field.UserID, _user.c_str());
 	int ret = _api->ReqUserLogout(&field, genRequestID());
+	(void)ret;
+	// K55 (BUG-R60-006, user decision 2026-11-06): isConnected() means fully ready; logout ends it.
+	_state = TS_NOTLOGIN;
 	return 0;
 }
 

@@ -2208,6 +2208,13 @@ bool WtRtRunner::initEngine()
 		_engine = NULL;
 		return false;
 	}
+	if (!_engine->riskmon_config_valid())
+	{
+		// K54 (BUG-R211-001, user decision 2026-11-06)
+		WTSLogger::error("Runner initialization rejected: the active risk monitor failed to initialize");
+		_engine = NULL;
+		return false;
+	}
 
 	_engine->set_adapter_mgr(&_traders);
 	
@@ -2218,7 +2225,13 @@ bool WtRtRunner::initDataMgr()
 {
 	WTSVariant* cfg = _config->get("data");
 	if (cfg == NULL)
-		return true;
+	{
+		// K56 (BUG-R6-006, user decision 2026-11-06): like WtRunner, a configuration without a
+		// `data` section is rejected. `data: {}` without `store` stays valid: bars then come
+		// from the registered extended data loader.
+		WTSLogger::error("Configuration has no data section; add a data section (data: {{}} for an extended loader only)");
+		return false;
+	}
 
 	_data_mgr.regsiter_loader(this);
 	// K31=A: the runner owns the concrete base data manager; its V1 table is injected into the reader.
@@ -3361,6 +3374,25 @@ int32_t WtRtRunner::resumeAccountTrading(const char* traderId, const char* opera
 			request.operator_id.c_str(), (int)status, diagnostic.c_str());
 	else
 		WTSLogger::error("Account resume of trader {} by {}: status {}, {}", traderId ? traderId : "",
+			request.operator_id.c_str(), (int)status, diagnostic.c_str());
+	return (int32_t)status;
+}
+
+int32_t WtRtRunner::releaseManualClaim(const char* traderId, const char* code, const char* operatorId,
+	const char* reason, const char* reference)
+{
+	AccountTradingGate::ClaimReleaseRequest request;
+	request.code = code ? code : "";
+	request.operator_id = operatorId ? operatorId : "";
+	request.reason = reason ? reason : "";
+	request.reference = reference ? reference : "";
+	std::string diagnostic;
+	const AccountTradingGate::ClaimReleaseStatus status = _traders.releaseManualClaim(traderId, request, &diagnostic);
+	if (status == AccountTradingGate::ClaimReleaseStatus::Ok)
+		WTSLogger::warn("Manual claim release of trader {} by {}: status {}, {}", traderId ? traderId : "",
+			request.operator_id.c_str(), (int)status, diagnostic.c_str());
+	else
+		WTSLogger::error("Manual claim release of trader {} by {}: status {}, {}", traderId ? traderId : "",
 			request.operator_id.c_str(), (int)status, diagnostic.c_str());
 	return (int32_t)status;
 }

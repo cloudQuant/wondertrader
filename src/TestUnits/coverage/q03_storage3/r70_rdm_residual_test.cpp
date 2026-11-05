@@ -259,7 +259,7 @@ TEST_F(R70RdmResidualTest, R70RdmHisHftFilesBuildAndReject)
 	ASSERT_TRUE(write_bytes(his_hft_file("trans", 20240106),
 		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(trs)) + "X"));
 
-	// 委托队列：15:00 右边界取全部 3 条；09:31 命中 `>=` 回退只剩 09:30
+	// 委托队列：15:00 右边界取全部 3 条；K60（2026-11-06，闭区间）：右界 09:31 包含 09:31 那条
 	WTSOrdQueSlice* sq = _reader.readOrdQueSliceByRange("SSE.STK.600000",
 		20240108090000000ull, 20240108150000000ull);
 	ASSERT_TRUE(sq != NULL);
@@ -270,8 +270,9 @@ TEST_F(R70RdmResidualTest, R70RdmHisHftFilesBuildAndReject)
 	WTSOrdQueSlice* sq2 = _reader.readOrdQueSliceByRange("SSE.STK.600000",
 		20240108090000000ull, 20240108093100000ull);
 	ASSERT_TRUE(sq2 != NULL);
-	ASSERT_EQ(sq2->size(), 1u);
+	ASSERT_EQ(sq2->size(), 2u);
 	EXPECT_EQ(sq2->at(0)->action_time, 93000000u);
+	EXPECT_EQ(sq2->at(1)->action_time, 93100000u);
 	sq2->release();
 
 	const uint32_t err0 = _sink.count_of(LL_ERROR);
@@ -279,7 +280,7 @@ TEST_F(R70RdmResidualTest, R70RdmHisHftFilesBuildAndReject)
 		20240109090000000ull, 20240109150000000ull) == NULL);
 	EXPECT_GT(_sink.count_of(LL_ERROR), err0);
 
-	// 委托明细：15:00 三条、09:31 一条（右边界回退）
+	// 委托明细：15:00 三条；K60（2026-11-06，闭区间）：09:31 包含 09:31，两条
 	WTSOrdDtlSlice* sd = _reader.readOrdDtlSliceByRange("SSE.STK.600000",
 		20240107090000000ull, 20240107150000000ull);
 	ASSERT_TRUE(sd != NULL);
@@ -290,8 +291,9 @@ TEST_F(R70RdmResidualTest, R70RdmHisHftFilesBuildAndReject)
 	WTSOrdDtlSlice* sd2 = _reader.readOrdDtlSliceByRange("SSE.STK.600000",
 		20240107090000000ull, 20240107093100000ull);
 	ASSERT_TRUE(sd2 != NULL);
-	ASSERT_EQ(sd2->size(), 1u);
+	ASSERT_EQ(sd2->size(), 2u);
 	EXPECT_EQ(sd2->at(0)->index, dtl[0].index);
+	EXPECT_EQ(sd2->at(1)->index, dtl[1].index);
 	sd2->release();
 
 	// 逐笔成交：文件尾部多 1 字节 → `_size` 与文件长度不符

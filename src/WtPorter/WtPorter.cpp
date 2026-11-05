@@ -377,14 +377,15 @@ void feed_adj_factors(WtString stdCode, WtUInt32* dates, double* factors, WtUInt
  * @brief 输入原始tick数据
  * @param ticks tick数据结构指针
  * @param count tick数量
- * @details 将原始tick数据输入到交易引擎中
- *          tick数据通常是由外部数据源或自定义数据加载器提供的
- *          引擎会自动处理这些数据并分发给相应的策略
+ * @details 实盘 runner 不支持外部 tick 加载（K57，BUG-R134-004）：数据被丢弃，
+ *          并打一条 ERROR 写明丢弃的条数。回测请使用 WtBtPorter 的同名接口。
  *          实现了WtPorter.h中声明的feed_raw_ticks函数
  */
-void feed_raw_ticks(WTSTickStruct* /*ticks*/, WtUInt32 /*count*/)
+void feed_raw_ticks(WTSTickStruct* /*ticks*/, WtUInt32 count)
 {
-	WTSLogger::error("API not implemented");
+	// K57 (BUG-R134-004, user decision 2026-11-06): the live runner does not support
+	// external tick loading. The data is dropped and the call is reported, never silent.
+	WTSLogger::error("feed_raw_ticks is not supported by the live runner; {} ticks dropped", (uint32_t)count);
 }
 
 /**
@@ -459,6 +460,12 @@ int32_t resume_account_trading(WtString traderId, WtString operatorId, WtString 
 WtUInt64 get_account_pause_generation(WtString traderId)
 {
 	return getRunner().getAccountPauseGeneration(traderId);
+}
+
+int32_t release_manual_claim(WtString traderId, WtString code, WtString operatorId, WtString reason,
+	WtString reference)
+{
+	return getRunner().releaseManualClaim(traderId, code, operatorId, reason, reference);
 }
 
 /**

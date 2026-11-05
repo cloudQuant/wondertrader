@@ -1,0 +1,152 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03K60HftRangeEndpointTest.*
+[==========] Running 3 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 3 tests from I03K60HftRangeEndpointTest
+[ RUN      ] I03K60HftRangeEndpointTest.HistoricalRangeIncludesBothEnds
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:114: Failure
+Expected equality of these values:
+  3u
+    Which is: 3
+  count(kHisDate, 90000000u, 93100000u)
+    Which is: 1
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:115: Failure
+Expected equality of these values:
+  3u
+    Which is: 3
+  count(kHisDate, 93100000u, 93200000u)
+    Which is: 2
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:116: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  count(kHisDate, 93000000u, 93000000u)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:117: Failure
+Expected equality of these values:
+  2u
+    Which is: 2
+  count(kHisDate, 93100000u, 93100000u)
+    Which is: 0
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:118: Failure
+Expected equality of these values:
+  1u
+    Which is: 1
+  count(kHisDate, 93150000u, 93200000u)
+    Which is: 0
+
+[  FAILED  ] I03K60HftRangeEndpointTest.HistoricalRangeIncludesBothEnds (12 ms)
+[ RUN      ] I03K60HftRangeEndpointTest.RealtimeRangeIncludesBothEnds
+[       OK ] I03K60HftRangeEndpointTest.RealtimeRangeIncludesBothEnds (13 ms)
+[ RUN      ] I03K60HftRangeEndpointTest.HistoricalAndRealtimeAgreeOnEveryWindow
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:142: Failure
+Expected equality of these values:
+  count(kRtDate, s, e)
+    Which is: 1
+  count(kHisDate, s, e)
+    Which is: 0
+[90000000,93000000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:142: Failure
+Expected equality of these values:
+  count(kRtDate, s, e)
+    Which is: 3
+  count(kHisDate, s, e)
+    Which is: 1
+[90000000,93100000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:142: Failure
+Expected equality of these values:
+  count(kRtDate, s, e)
+    Which is: 4
+  count(kHisDate, s, e)
+    Which is: 3
+[90000000,93200000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:142: Failure
+Expected equality of these values:
+  count(kRtDate, s, e)
+    Which is: 1
+  count(kHisDate, s, e)
+    Which is: 0
+[93000000,93000000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:142: Failure
+Expected equality of these values:
+  count(kRtDate, s, e)
+    Which is: 3
+  count(kHisDate, s, e)
+    Which is: 1
+[93000000,93100000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:142: Failure
+Expected equality of these values:
+  count(kRtDate, s, e)
+    Which is: 4
+  count(kHisDate, s, e)
+    Which is: 3
+[93000000,93200000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:142: Failure
+Expected equality of these values:
+  count(kRtDate, s, e)
+    Which is: 2
+  count(kHisDate, s, e)
+    Which is: 0
+[93030000,93100000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:142: Failure
+Expected equality of these values:
+  count(kRtDate, s, e)
+    Which is: 3
+  count(kHisDate, s, e)
+    Which is: 2
+[93030000,93200000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:142: Failure
+Expected equality of these values:
+  count(kRtDate, s, e)
+    Which is: 2
+  count(kHisDate, s, e)
+    Which is: 0
+[93100000,93100000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:142: Failure
+Expected equality of these values:
+  count(kRtDate, s, e)
+    Which is: 3
+  count(kHisDate, s, e)
+    Which is: 2
+[93100000,93200000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:142: Failure
+Expected equality of these values:
+  count(kRtDate, s, e)
+    Which is: 1
+  count(kHisDate, s, e)
+    Which is: 0
+[93150000,93200000]
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q03_storage3/i03_k60_hft_range_endpoint_test.cpp:142: Failure
+Expected equality of these values:
+  count(kRtDate, s, e)
+    Which is: 1
+  count(kHisDate, s, e)
+    Which is: 0
+[93200000,93200000]
+
+[  FAILED  ] I03K60HftRangeEndpointTest.HistoricalAndRealtimeAgreeOnEveryWindow (8 ms)
+[----------] 3 tests from I03K60HftRangeEndpointTest (34 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 1 test suite ran. (34 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] I03K60HftRangeEndpointTest.HistoricalRangeIncludesBothEnds
+[  FAILED  ] I03K60HftRangeEndpointTest.HistoricalAndRealtimeAgreeOnEveryWindow
+
+ 2 FAILED TESTS

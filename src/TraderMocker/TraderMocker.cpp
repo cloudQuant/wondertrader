@@ -819,6 +819,7 @@ void TraderMocker::join_matcher_locked()
 	if (matcher && matcher->joinable())
 		matcher->join();
 	_match_started.store(false, std::memory_order_release);
+	_session_ready.store(false, std::memory_order_release);
 }
 
 void TraderMocker::detach_for_quarantine()
@@ -838,10 +839,14 @@ void TraderMocker::detach_for_quarantine()
 	if (_thrd_worker && _thrd_worker->joinable())
 		_thrd_worker->detach();
 	_match_started.store(false, std::memory_order_release);
+	_session_ready.store(false, std::memory_order_release);
 }
 
 void TraderMocker::release()
 {
+	// K55: readiness ends as soon as release starts, including the deferred callback case.
+	_session_ready.store(false, std::memory_order_release);
+	_session_gen.fetch_add(1, std::memory_order_acq_rel);
 	if (on_own_thread())
 	{
 		request_stop_from_callback();
@@ -980,7 +985,9 @@ void TraderMocker::disconnect()
 
 bool TraderMocker::isConnected()
 {
-	return _match_started.load(std::memory_order_acquire);
+	// K55 (BUG-R60-006, user decision 2026-11-06): "fully ready" = a successful login result
+	// was delivered and the session is still open (no logout/disconnect/release since).
+	return _session_ready.load(std::memory_order_acquire) && _match_started.load(std::memory_order_acquire);
 }
 
 int TraderMocker::login(const char* /*user*/, const char* /*pass*/, const char* /*productInfo*/)
@@ -1002,12 +1009,18 @@ int TraderMocker::login(const char* /*user*/, const char* /*pass*/, const char* 
 		t_mocker_owner = NULL;
 	}));
 	_match_started.store(true, std::memory_order_release);
+	const uint64_t loginGen = _session_gen.load(std::memory_order_acquire);
 
-	boost::asio::post(_io_service, [this](){
+	boost::asio::post(_io_service, [this, loginGen](){
 		// BUG-R60-001: serialized with the matcher like every other delivery.
 		StdUniqueLock stateLock(_mtx_awaits);
 		StdUniqueLock lock(_mutex_api);
 
+		// K55: the session is ready from the delivered login result on, unless a logout,
+		// disconnect or release happened after this login was queued.
+		if (_terminated.load(std::memory_order_acquire) || _session_gen.load(std::memory_order_acquire) != loginGen)
+			return;
+		_session_ready.store(true, std::memory_order_release);
 		if (ITraderSpi* listener = get_listener())
 			listener->onLoginResult(true, "", TimeUtils::getCurDate());
 	});
@@ -1017,6 +1030,9 @@ int TraderMocker::login(const char* /*user*/, const char* /*pass*/, const char* 
 
 int TraderMocker::logout()
 {
+	// K55: after logout the session is no longer ready.
+	_session_ready.store(false, std::memory_order_release);
+	_session_gen.fetch_add(1, std::memory_order_acq_rel);
 	return 0;
 }
 

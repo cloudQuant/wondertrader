@@ -824,6 +824,8 @@ int TraderHTS::logout()
 		[]() {SECITPDK_Exit(); }           //退出，不再使用ITPDK接口时调用
 	);
 
+	// K55 (BUG-R60-006, user decision 2026-11-06): isConnected() means fully ready; logout ends it.
+	m_wrapperState = WS_NOTLOGIN;
 	return 0;
 }
 

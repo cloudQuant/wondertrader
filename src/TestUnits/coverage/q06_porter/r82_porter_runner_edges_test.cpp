@@ -895,11 +895,12 @@ TEST(R82RunnerEdges, ConfigFailureArmsAcrossSections)
 	}
 
 	{
-		/* L884-896：缺 data 段，config 不检查 initDataMgr 返回值（BUG-R69-003）。 */
+		/* 缺 data 段。K56（BUG-R6-006，用户裁定 2026-11-06）：与 WtRunner 一致拒绝启动，
+		 * config 失败（原断言为 TRUE，反映“缺 data 照常启动”的旧行为）。 */
 		WtRtRunner* r = new_heap_runner(dir);
 		const std::string cfg = "{\"basefiles\":{},\"env\":{\"name\":\"cta\"},"
 			"\"bspolicy\":\"" + dir + "/actions.json\"}";
-		EXPECT_TRUE(r->config(cfg.c_str(), false));
+		EXPECT_FALSE(r->config(cfg.c_str(), false));
 	}
 
 	{

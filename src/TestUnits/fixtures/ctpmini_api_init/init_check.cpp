@@ -56,13 +56,41 @@ int main(int argc, char** argv) {
     if (argc != 2) return 2;
     scenario = argv[1];
     const bool success = scenario == "success" || scenario == "success-one";
-    if (!success && scenario != "missing-library" && scenario != "missing-symbol" && scenario != "null-api" && scenario != "null-config" && scenario != "cross-instance") return 2;
+    const bool k53Retry = scenario == "retry-after-missing-library" || scenario == "retry-after-null-config";
+    if (!success && !k53Retry && scenario != "missing-library" && scenario != "missing-symbol" && scenario != "null-api" && scenario != "null-config" && scenario != "cross-instance") return 2;
     Sink sink;
     ParserCTPMini parser;
     parser.registerSpi(&sink);
     WTSVariant* cfg = WTSVariant::createObject();
     cfg->append("front", "tcp://127.0.0.1:1"); cfg->append("broker", "9999");
     cfg->append("user", "test"); cfg->append("pass", "unused"); cfg->append("flowdir", "flow");
+    if (k53Retry) {
+        // Decision K53 (2026-11-06, I03-NEW-121 sub-item): a failure that loaded no module
+        // (missing library, null configuration) ran no vendor code, so the same instance may
+        // retry and succeed. After that successful init, card 9 9c=A applies as usual.
+        const bool nullCfg = scenario == "retry-after-null-config";
+        scenario = nullCfg ? "null-config" : "missing-library";
+        if (parser.init(nullCfg ? nullptr : cfg)) return 51;
+        const int opensAfterFailure = opens;
+        if (opensAfterFailure != (nullCfg ? 0 : 1) || symbols != 0 || creators != 0 || closes != 0) return 52;
+        scenario = "success";
+        WTSVariant* good = WTSVariant::createObject();
+        good->append("front", "tcp://127.0.0.1:1"); good->append("broker", "9999");
+        good->append("user", "test"); good->append("pass", "unused"); good->append("flowdir", "flow");
+        good->append("ctpmodule", "distinct_healthy_module");
+        if (!parser.init(good) || !parser.isConnected()) {
+            std::cerr << "K53: the same instance must be able to retry after a no-module failure\n";
+            return 53;
+        }
+        if (opens != opensAfterFailure + 1 || symbols != 1 || creators != 1) return 54;
+        if (parser.init(good) || opens != opensAfterFailure + 1) return 55;	// 9c after success
+        parser.release(); parser.release();
+        if (api.release_calls != 1 || closes != 0) return 56;
+        good->release();
+        cfg->release();
+        std::cout << "PASS " << argv[1] << " opens=" << opens << " creators=" << creators << "\n";
+        return 0;
+    }
     if (scenario == "cross-instance") {
         // Decision K16=A (2026-11-04, I03-NEW-003): after one instance failed on a
         // module, another instance may load the same module again; that failure is

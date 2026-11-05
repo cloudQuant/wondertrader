@@ -1,0 +1,602 @@
+{
+ "start": "2026-11-06T02:05:37+08:00",
+ "bin_dir": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g7/build-asan/build_x64/Debug/bin/TestUnits",
+ "workers": 6,
+ "timeout": 600.0,
+ "auto_env": {
+  "WT_R66_FAKE_MQ_DIR": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g7/build-asan/TestUnits/coverage/r160_fake_mq",
+  "R42_HFT_PLUGIN": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g7/build-asan/build_x64/Debug/bin/libWtHftStraFact.dylib"
+ },
+ "extra_env": [
+  "ASAN_OPTIONS=detect_leaks=0:halt_on_error=1:abort_on_error=0:symbolize=1",
+  "UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1",
+  "ASAN_SYMBOLIZER_PATH=/opt/homebrew/opt/llvm/bin/llvm-symbolizer"
+ ],
+ "no_profile_env": false,
+ "only_disabled": false,
+ "argv": [
+  "/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/regression-tools/run_regression.py",
+  "--bin-dir",
+  "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g7/build-asan/build_x64/Debug/bin/TestUnits",
+  "--out",
+  "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g7/run-asan",
+  "--timeout",
+  "600",
+  "--provision-modules",
+  "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g7/build-asan/build_x64/Debug/bin",
+  "--provision-only",
+  "CoverageTests_m_WtRunner",
+  "--provision-exclude",
+  "CoverageTests_m_WtRunner::r28_wtrunner_strategies.real_cta_factory_null_self_is_rejected_and_dual_thrust_configures",
+  "--workers",
+  "6",
+  "--env",
+  "ASAN_OPTIONS=detect_leaks=0:halt_on_error=1:abort_on_error=0:symbolize=1",
+  "--env",
+  "UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1",
+  "--env",
+  "ASAN_SYMBOLIZER_PATH=/opt/homebrew/opt/llvm/bin/llvm-symbolizer"
+ ],
+ "binaries": [
+  {
+   "name": "CoverageTests",
+   "sha256": "cab72bea08d42c837003c921816ee5ea54db099546c39ed8323cb7676027ebf8",
+   "list_status": "ok",
+   "enabled": 1378,
+   "disabled": 10,
+   "disabled_names": [
+    "l01_objectpool.DISABLED_destroy_null_is_undefined_and_rejected",
+    "l03_contract.DISABLED_get_long_margin_ratio_without_comm_info",
+    "P12TickFactory.DISABLED_CrashClassNotExecuted",
+    "S5StorageReaderTest.DISABLED_LongestLegalStdCodeHistoryTickKeyStaysExact",
+    "R22PorterCapiTest.DISABLED_write_log_with_null_category_hits_strlen_null",
+    "R22PorterCapiTest.DISABLED_capi_start_without_initialization_spawns_lifetime_monitor",
+    "R22RunnerInitTest.DISABLED_start_sync_branch_never_returns",
+    "R22RunnerInitTest.DISABLED_start_async_branch_spawns_state_monitor_thread",
+    "R23WriterTest.DISABLED_ClearCacheCommandMaySleepThreeHundredSeconds",
+    "R23WriterTest.DISABLED_SecondInitOnSameWriterTerminatesProcess"
+   ]
+  },
+  {
+   "name": "CoverageTests_adstorage",
+   "sha256": "c2f31249c1c233199f05cda7dfe6a454f0dc38c5921e6b86a30098ab21249ef0",
+   "list_status": "ok",
+   "enabled": 305,
+   "disabled": 8,
+   "disabled_names": [
+    "R4WriterADTest.DISABLED_TickDbPathOccupiedByRegularFileThrowsOutOfWriteTick",
+    "R122ReaderADTest.DISABLED_R122ReaderADKlineArrayTwoReturnsWrongTail",
+    "R21ReaderADTest.DISABLED_RdmInitWithNullSinkContractPending",
+    "R21ReaderADTest.DISABLED_EtimeOnExistingTickNeedsBoundaryContract",
+    "R21ReaderADTest.DISABLED_OrderDetailRangeSupportNeedsContract",
+    "R21ReaderADTest.DISABLED_OrderQueueRangeSupportNeedsContract",
+    "R21ReaderADTest.DISABLED_TransactionRangeSupportNeedsContract",
+    "R4ReaderADTest.DISABLED_AdvancingEtimeAfterTwoHandlesCrashesOnNullDb"
+   ]
+  },
+  {
+   "name": "CoverageTests_btcore",
+   "sha256": "14401b7f6d1de8ad6c355c95feebdea99b7f3e3340916582fd19a124b8064cbc",
+   "list_status": "ok",
+   "enabled": 696,
+   "disabled": 26,
+   "disabled_names": [
+    "CtaMockerStateTest.DISABLED_emptyStateCallsCrashOrHang",
+    "ExecMockerTest.DISABLED_matchSinkCallbacksCrashWithoutExecuterUnit",
+    "P03CtaTradePath.DISABLED_CalcFeeByAmountCrashesWhenCommodityMissing",
+    "R171ReplayFixture.DISABLED_R171Sel_ReplayDoneWithoutScheduleDividesByZero",
+    "R180LoaderFixture.DISABLED_R180Exec_TwapSecondTickReleasesDanglingLastTick",
+    "R72HftUftPaths.DISABLED_UftEnumPositionWithoutStrategyDerefsNull",
+    "R92MockerResidual.DISABLED_HftMarketOrderFirstTickDerefsErasedOrder",
+    "P04ReplayTermTest.DISABLED_taskFrequencyAndOutOfRangeReplayCrash",
+    "P07TickLoaderTest.DISABLED_mismatchedTickDateHangsReplayHftDatas",
+    "P08HftOrderCancel.DISABLED_BlockingHookAndNullDerefFamily",
+    "P08UftDispatchT1.DISABLED_TickPointerAndSessionDerefFamily",
+    "P08UftOrderPosition.DISABLED_NullStrategyAndNullCommDerefFamily",
+    "R201MockerFixture.DISABLED_R201UftMocker_ShortFrozenIsNotReleasedOnSessionBegin",
+    "R20EventNotifier.DISABLED_InitActiveLoadsMqModuleAndOpensServer",
+    "R20EventNotifier.DISABLED_InitNullConfigDerefsAndCrashes",
+    "R20ExecMocker.DISABLED_TickSwapReleasesPreviousTick",
+    "R20ExecMocker.DISABLED_BuyAfterTickAccumulatesUndone",
+    "R20ExecMocker.DISABLED_SellDecrementsUndone",
+    "R20ExecMocker.DISABLED_CancelByCodeSkipsUnfiredOrders",
+    "R20ExecMocker.DISABLED_SessionEndClearsMatcherAndUndone",
+    "R20ExecMocker.DISABLED_ExecUnitNullDerefFamily",
+    "R20ExecMocker.DISABLED_FireOrdersSinkNullAfterPendingOrderAndSecondTick",
+    "R20HisDataMgr.DISABLED_InitCrashesWhenReaderNullAfterLoadFailure",
+    "Q02CtaDumpTest.DISABLED_NullReplayerDerefAndBlockingHookFamily",
+    "Q02CtaIntegrationTest.DISABLED_RealTickAndBlockingHookFamily",
+    "R80TaskBars.DISABLED_DailyTaskSessionEndContractPending"
+   ]
+  },
+  {
+   "name": "CoverageTests_btporter",
+   "sha256": "6e9cd043087a93f688c258322ddad01f409799f88637d1624f641b7a25d1481c",
+   "list_status": "ok",
+   "enabled": 153,
+   "disabled": 5,
+   "disabled_names": [
+    "Q06BtPorterCapi.DISABLED_BacktestLifecycleNeedsStorageAndThreads",
+    "Q06BtRunner.DISABLED_BacktestRunPathsNeedStorage",
+    "R69BtPorterLifecycle.DISABLED_RunBacktestNeedsConfiguredReplayer",
+    "R69BtPorterLifecycle.DISABLED_ReleaseBacktestStopsGlobalLogger",
+    "R9WiredMockerCapi.DISABLED_OrderAndSlicePathsNeedLoadedStorage"
+   ]
+  },
+  {
+   "name": "CoverageTests_ctafact",
+   "sha256": "721b2b97597629f8446d82655626c754caf90d10bd7de91228341b2c8b8f6e07",
+   "list_status": "ok",
+   "enabled": 29,
+   "disabled": 2,
+   "disabled_names": [
+    "n06_cta_fact.DISABLED_NULL_NAME_AND_NULL_CFG_CRASH_CLASS",
+    "n06_cta_ctx.DISABLED_ZERO_PERIOD_DAYS_DIVIDE_CLASS"
+   ]
+  },
+  {
+   "name": "CoverageTests_dtcore",
+   "sha256": "7603fdbd3eeef8953e3a06932baca8f18bc04e861c6b2afaf05ab20735bc9c5b",
+   "list_status": "ok",
+   "enabled": 234,
+   "disabled": 17,
+   "disabled_names": [
+    "R145StateMonitorRunTest.DISABLED_SecondStopAfterRunThrows",
+    "R154UdpCasterTest.DISABLED_NullManagersAreAnInvalidDependencyProbe",
+    "R154UdpCasterTest.DISABLED_DestructorAfterActiveStartCrashes",
+    "R154UdpCasterTest.DISABLED_SecondStopAfterStartThrows",
+    "R18IdxWorkerMgrTest.DISABLED_HandleQuoteCrashesWhenContractInfoMissing",
+    "R18IdxWorkerMgrTest.DISABLED_SubTicksWithoutDotCrashesOnIndex",
+    "R18ParserAdapterTest.DISABLED_HandleQuoteCrashesWhenDataManagerIsNull",
+    "R44DataManagerEdgesTest.DISABLED_NullBaseDataManagerIsAnInvalidDependencyProbe",
+    "R44IndexWorkerFreshTest.DISABLED_InitCrashesWithNullConfig",
+    "R44IndexWorkerFreshTest.DISABLED_FreshPushTickCrashesOnUninitializedDataManager",
+    "R44ParserAdapterEdgesTest.DISABLED_RunAfterReleaseUsesFreedApi",
+    "R44StateMonitorLifecycleTest.DISABLED_ReinitializeSemanticsNeedContract",
+    "R44StateMonitorLifecycleTest.DISABLED_InitializeCrashesWithNullBdMgr",
+    "R5StateMonitorBdtTest.DISABLED_StateMachineAdvanceNeedsInjectableClockSeam",
+    "R5UDPCaster.DISABLED_AddMRecverWithValidAddressNeedsRealSocket",
+    "R68UdpCasterInitTest.DISABLED_InitCrashesWhenConfigIsNull",
+    "R84bStateMonitorPositiveOffsetTest.DISABLED_NullSessionIdContractUnproven"
+   ]
+  },
+  {
+   "name": "CoverageTests_dtservo",
+   "sha256": "2b336ee9ceea6fc1b0d7aba6e459b17870d9933b846917b438a5a3f226cedc11",
+   "list_status": "ok",
+   "enabled": 129,
+   "disabled": 1,
+   "disabled_names": [
+    "R45ParserAdapterFakeTest.DISABLED_ReleaseTwiceContractPending"
+   ]
+  },
+  {
+   "name": "CoverageTests_execv2",
+   "sha256": "67f7960e20fa3db7711c2d4f599811cdf098f39ec396d8b68b0c3b39d5ed835c",
+   "list_status": "ok",
+   "enabled": 55,
+   "disabled": 0,
+   "disabled_names": []
+  },
+  {
+   "name": "CoverageTests_exefact",
+   "sha256": "74f24dea6692ee5154d432b2f8d749a90e62668bc9929a333edf93dfcb6b6792",
+   "list_status": "ok",
+   "enabled": 427,
+   "disabled": 10,
+   "disabled_names": [
+    "r17_mon.DISABLED_simpdata_init_null_cfg_derefs",
+    "r17_mon.DISABLED_simpdata_push_quote_without_session_info",
+    "r17_mon.DISABLED_simpdata_basedata_mgr_null_runner",
+    "r17_mon.DISABLED_porter_run_exec_spawns_threads",
+    "r17_mon.DISABLED_porter_release_exec_stops_uninited_logger",
+    "r7_execrunner.DISABLED_release_stops_uninited_logger",
+    "r7_execrunner.DISABLED_add_exe_factories_dlopens_plugins",
+    "r24_runner.DISABLED_release_after_full_config_stops_logger",
+    "r24_stkvw.DISABLED_time_buckets_use_cumulative_aim_candidates",
+    "r24_stkvw.DISABLED_fire_at_once_zero_qty_and_sell_paths_need_safe_fixture"
+   ]
+  },
+  {
+   "name": "CoverageTests_i03_dtporter_start",
+   "sha256": "1ef07b373fadb4c12ae6f9c843ab63846dd33de37aec857cb6ac5acac2ab24eb",
+   "list_status": "ok",
+   "enabled": 6,
+   "disabled": 0,
+   "disabled_names": []
+  },
+  {
+   "name": "CoverageTests_idxfactory",
+   "sha256": "19a7278a85382121675886d95771c41ff307b89f73334a78f1356ee09dd874c8",
+   "list_status": "ok",
+   "enabled": 14,
+   "disabled": 0,
+   "disabled_names": []
+  },
+  {
+   "name": "CoverageTests_m_LoaderRunner",
+   "sha256": "9481705665743cc081be44e605eb5fc7083f2e422b5cf55c881883b4c94072fc",
+   "list_status": "ok",
+   "enabled": 1,
+   "disabled": 0,
+   "disabled_names": []
+  },
+  {
+   "name": "CoverageTests_m_QuoteFactory",
+   "sha256": "d1a90cf00d1aafd59c3e0e244bb85b7b95035a7b546864680e07e17c6220339a",
+   "list_status": "ok",
+   "enabled": 23,
+   "disabled": 3,
+   "disabled_names": [
+    "r104_quote_initialize.DISABLED_state_monitor_branch_starts_threads",
+    "r14_quote_entry.DISABLED_existing_config_enters_parsers_run_and_endless_loop",
+    "r14_quote_entry.DISABLED_bare_argv_with_existing_config_enters_runner"
+   ]
+  },
+  {
+   "name": "CoverageTests_m_WtBtRunner",
+   "sha256": "d6faf432a12f082fc96ddb9245db63bc3cc917a7607193bef4475f67de998b92",
+   "list_status": "ok",
+   "enabled": 21,
+   "disabled": 0,
+   "disabled_names": []
+  },
+  {
+   "name": "CoverageTests_m_WtLatencyHFT",
+   "sha256": "b0ca13ec1b1c31298a75f7beacabab91bfad14315b77165cca18ec616369008c",
+   "list_status": "ok",
+   "enabled": 21,
+   "disabled": 2,
+   "disabled_names": [
+    "r14_lazy_hft_tool.DISABLED_entry_blocks_on_getchar",
+    "r14_lazy_hft_tool.DISABLED_run_starts_threads_and_busy_loop"
+   ]
+  },
+  {
+   "name": "CoverageTests_m_WtLatencyUFT",
+   "sha256": "02274d6998689c6622859238f8e2c25c6a27aec2871571ef1c810666d96582c6",
+   "list_status": "ok",
+   "enabled": 24,
+   "disabled": 3,
+   "disabled_names": [
+    "r14_lazy_uft_tool.DISABLED_entry_blocks_on_getchar",
+    "r14_lazy_uft_tool.DISABLED_init_success_needs_real_config_and_engine",
+    "r14_lazy_uft_tool.DISABLED_run_starts_threads_and_busy_loop"
+   ]
+  },
+  {
+   "name": "CoverageTests_m_WtRunner",
+   "sha256": "8c944843ac65611fd3b553514d97fe2c406a214d79d2b83a27cd2b666e2f9183",
+   "list_status": "ok",
+   "enabled": 113,
+   "disabled": 8,
+   "disabled_names": [
+    "r104_wtrunner_config.DISABLED_run_starts_parsers_traders_engine_and_polls_forever",
+    "r28_wtrunner_entry.DISABLED_stack_allocated_runner_is_sigkilled",
+    "r28_wtrunner_entry.DISABLED_bare_argv_reaches_stack_runner_and_null_engine_run",
+    "r28_wtrunner_strategies.DISABLED_active_cta_entry_needs_real_factory_dir",
+    "r6_wtrunner_entry.DISABLED_short_help_returns_zero_before_touching_runner",
+    "r6_wtrunner_entry.DISABLED_long_help_returns_zero",
+    "r6_wtrunner_entry.DISABLED_help_wins_over_config_and_logcfg_words",
+    "r6_wtrunner_config.DISABLED_empty_object_config_derefs_null_basefiles"
+   ]
+  },
+  {
+   "name": "CoverageTests_m_WtUftRunner",
+   "sha256": "1a9bfca252ffc22668ad5b09bed1d7de041ed82813f1ffc75b8981113068c18e",
+   "list_status": "ok",
+   "enabled": 56,
+   "disabled": 4,
+   "disabled_names": [
+    "r14_uft_config.DISABLED_full_engine_config_needs_shm_and_vendor_libs",
+    "r14_uft_runner.DISABLED_run_false_loops_until_signal",
+    "r95_uft_strategy_child.DISABLED_probe",
+    "r85_uft_runner_child.DISABLED_log_capture_probe"
+   ]
+  },
+  {
+   "name": "CoverageTests_modulehelper_odr",
+   "sha256": "d02b3d8f82cf1a36878c7ebc20911047eab3532c6b12b8f7d7188bd74b4bd614",
+   "list_status": "ok",
+   "enabled": 1,
+   "disabled": 0,
+   "disabled_names": []
+  },
+  {
+   "name": "CoverageTests_mqshare",
+   "sha256": "b1a669f126edb8f247d67c00b8dfb7ea18b9cf37b096552cf8c72feec7c6e287",
+   "list_status": "ok",
+   "enabled": 53,
+   "disabled": 1,
+   "disabled_names": [
+    "n06_mq_capi.DISABLED_NULL_URL_CRASH_CLASS"
+   ]
+  },
+  {
+   "name": "CoverageTests_porter",
+   "sha256": "e19f607d65a9f9b0d9655e77ac7f204155cd7ce82a8057238df7ee2f702e5110",
+   "list_status": "ok",
+   "enabled": 283,
+   "disabled": 6,
+   "disabled_names": [
+    "Q06PorterCapi.DISABLED_UninitializedEngineGettersCrash",
+    "Q06PorterRunner.DISABLED_BlockingAndNullEnginePaths",
+    "R13ExpContextBlanks.DISABLED_init_and_session_end_and_hft_trader_paths_need_output_and_trader_seams",
+    "R35PorterRunnerLocal.DISABLED_stack_instance_destructor_crashes_after_testbody",
+    "R6PorterNullArgs.DISABLED_ctx_on_tick_null_tickdata_derefs",
+    "R6PorterRunRelease.DISABLED_run_without_engine_and_release_global_logger_stop"
+   ]
+  },
+  {
+   "name": "CoverageTests_riskmon",
+   "sha256": "0e002ff561e0cd42af09ee22f348302935adc8e7fbbe7faf908003e19cb726dc",
+   "list_status": "ok",
+   "enabled": 7,
+   "disabled": 0,
+   "disabled_names": []
+  },
+  {
+   "name": "CoverageTests_selfthft",
+   "sha256": "b115bbd486d0be58b979a7f1db469b20d3f942761962072e7513f2bf18af7ce4",
+   "list_status": "ok",
+   "enabled": 22,
+   "disabled": 1,
+   "disabled_names": [
+    "n06_sel_uft_hft.DISABLED_NULL_NAME_AND_NULL_CFG_CRASH_CLASS"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_CTPLoader",
+   "sha256": "4f370b3811b32c2eb070fded975a763e0026efcfeeb850d98c16e519e5efbe0c",
+   "list_status": "ok",
+   "enabled": 65,
+   "disabled": 4,
+   "disabled_names": [
+    "DISABLED_t26_ctploader_dump_crash.fees_dump_of_unknown_margin_code_dereferences_end_iterator",
+    "DISABLED_t6_ctploader_spi_crash.on_front_connected_dereferences_null_user_api",
+    "DISABLED_t6_ctploader_spi_exit.instrument_last_response_calls_exit_zero",
+    "DISABLED_t6_ctploader_run_net.complete_config_reaches_vendor_api_init"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_CTPLoaderYamlPositive",
+   "sha256": "7a15cee94503f30305d7c68ef68838f42873c59e5bda469cd62a7adc34236a0d",
+   "list_status": "ok",
+   "enabled": 1,
+   "disabled": 0,
+   "disabled_names": []
+  },
+  {
+   "name": "CoverageTests_t_CTPOptLoader",
+   "sha256": "8f4d632730e3f3dd73aa2bfdf04568ab53ec42bd764388398c0460a71676b91a",
+   "list_status": "ok",
+   "enabled": 40,
+   "disabled": 3,
+   "disabled_names": [
+    "CTPOptLoaderTest.DISABLED_last_instrument_packet_exits_the_process",
+    "CTPOptLoaderDisabled.DISABLED_complete_config_reaches_dlopen_and_null_creator",
+    "CTPOptLoaderDisabled.DISABLED_front_connected_and_login_success_require_vendor_api"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_ParserCTP",
+   "sha256": "d9fa4f52c8574bfe435e61327f7b67b103dea584ba19afed198b2c838c118b06",
+   "list_status": "ok",
+   "enabled": 24,
+   "disabled": 1,
+   "disabled_names": [
+    "ParserCTPTest.DISABLED_rsp_user_login_last_packet_dereferences_null_api"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_ParserCTPMini",
+   "sha256": "25304e03b8dc97b2cc088b64361e480592015ebcf8bfdf1c43a9e2b22ae2fc39",
+   "list_status": "ok",
+   "enabled": 30,
+   "disabled": 2,
+   "disabled_names": [
+    "ParserCTPMiniDisabled.DISABLED_login_success_branch_dereferences_null_api",
+    "ParserCTPMiniDisabled.DISABLED_init_dlopens_vendor_module"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_ParserCTPOpt",
+   "sha256": "50b70352689903e24b58e9c7fa04cc9fdd9e2723cbb0c2dc6cb789ca2c2c4a94",
+   "list_status": "ok",
+   "enabled": 32,
+   "disabled": 1,
+   "disabled_names": [
+    "T2ParserCTPOptTest.DISABLED_init_and_login_rsp_dereference_missing_ctpopt_library"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_ParserFemas",
+   "sha256": "07480e22483d0ebdbf1d230a5d5a0dcfc8cf2684fb5247ccf29b5f6084b19998",
+   "list_status": "ok",
+   "enabled": 32,
+   "disabled": 1,
+   "disabled_names": [
+    "femas_parser.DISABLED_login_rsp_last_true_calls_null_api"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_ParserShm",
+   "sha256": "73987afefea6ac4d909c4994208f502bb2bb8d1546aac4c407da91ec9298082c",
+   "list_status": "ok",
+   "enabled": 23,
+   "disabled": 2,
+   "disabled_names": [
+    "R76ParserShmTest.DISABLED_NullBaseDataMgrContractPending",
+    "ParserShmReceiveLoop.DISABLED_receive_path_needs_a_real_mapped_file"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_ParserUDP",
+   "sha256": "df66034ed48300a576db9c3ec6bde061f3e6e6b2d028d9139d64e7be5b0dda56",
+   "list_status": "ok",
+   "enabled": 45,
+   "disabled": 1,
+   "disabled_names": [
+    "DISABLED_t6_parserudp_net.connect_binds_ports_and_starts_io_thread"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_ParserXTP",
+   "sha256": "a9990bf5439f5164d2892f6c4563ad31fd3863eba000dfe64a9fbaebeee7c857",
+   "list_status": "ok",
+   "enabled": 74,
+   "disabled": 2,
+   "disabled_names": [
+    "XtpLoginF.DISABLED_init_dereferences_null_creator_when_vendor_dylib_is_absent",
+    "XtpData27.DISABLED_state_type_support_scope_is_not_confirmed"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_ParserXeleSkt",
+   "sha256": "c9c80c558c86ec00c3092c21947d9d57e1b2a951c303a92d8e36741afc7a535e",
+   "list_status": "ok",
+   "enabled": 37,
+   "disabled": 1,
+   "disabled_names": [
+    "T2ParserXeleSktTest.DISABLED_connect_joins_multicast_and_starts_parser_thread"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_TraderCTP",
+   "sha256": "2cd40cfebb894902d648e254b78fd1f711602ee36d22f6c1b96603243a418728",
+   "list_status": "ok",
+   "enabled": 91,
+   "disabled": 2,
+   "disabled_names": [
+    "T25TraderCTPTest.DISABLED_rsp_error_with_null_sink_crashes",
+    "T2TraderCTPTest.DISABLED_connect_starts_worker_thread_and_needs_real_front"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_TraderCTPMini",
+   "sha256": "5739ac08068f81c689cc8d78d62e86e0eb8f6344402cc7c0d65c54b34c445ebf",
+   "list_status": "ok",
+   "enabled": 54,
+   "disabled": 4,
+   "disabled_names": [
+    "ctpmini.DISABLED_disconnect_joins_worker_thread",
+    "ctpmini.DISABLED_order_insert_positive_path_needs_api",
+    "ctpmini.DISABLED_login_and_rsp_user_login_needs_api",
+    "ctpmini.DISABLED_qry_account_last_without_record_crashes"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_TraderCTPOpt",
+   "sha256": "44d3c81b23f5ae0f153b19de5e7560d7edbcc6335ea64c0c5a92926964df6685",
+   "list_status": "ok",
+   "enabled": 61,
+   "disabled": 1,
+   "disabled_names": [
+    "DISABLED_TraderCTPOpt.login_success_and_connect_require_real_ctp_lib"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_TraderDumper",
+   "sha256": "dfba3dc3a1c92519c7e08b8c045f64e8f4d81711fdcd462b755da08a84718746",
+   "list_status": "ok",
+   "enabled": 35,
+   "disabled": 3,
+   "disabled_names": [
+    "dumper.DISABLED_run_once_loops_forever_and_run_threaded_spawns_worker",
+    "trader_adapter.DISABLED_on_rsp_trades_always_derefs_null_api",
+    "trader_adapter.DISABLED_login_and_connect_success_paths_deref_null_api"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_TraderFemas",
+   "sha256": "f69e242013b7ac532e13cf975f9ecddc55a50617950d2381752dd480cd3ea24f",
+   "list_status": "ok",
+   "enabled": 77,
+   "disabled": 3,
+   "disabled_names": [
+    "TraderFemasTest.DISABLED_user_login_success_branch_needs_vendor_api",
+    "TraderFemasDisabled.DISABLED_query_account_before_connect_dereferences_null_strand",
+    "TraderFemasDisabled.DISABLED_init_dlopens_vendor_module"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_TraderMocker",
+   "sha256": "356e2d080a73d13d0f15b04d251e11f3a4b36307bcca224d01ebaa379bae2680",
+   "list_status": "ok",
+   "enabled": 80,
+   "disabled": 3,
+   "disabled_names": [
+    "R113MockerLoginRetry.DISABLED_ReentrantLoginConnectContractPending",
+    "R60MockerTest.DISABLED_OpenOrderSuccessMessageContractUnproven",
+    "DISABLED_t6_thread_paths.connect_binds_real_udp_socket_and_runs_io_context"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_TraderXTP",
+   "sha256": "39c7ef0a4c8816d671d08783a810c8770b544a84ace9d40c48d7d68363f8ca92",
+   "list_status": "ok",
+   "enabled": 60,
+   "disabled": 1,
+   "disabled_names": [
+    "TraderXTPTest.DISABLED_query_apis_dereference_null_api_without_guard"
+   ]
+  },
+  {
+   "name": "CoverageTests_t_TraderYD",
+   "sha256": "ec630f4e58a5856e8623bd4b4190dfeb8c4d9549a2847fb6bc176bc63b4d1ed5",
+   "list_status": "ok",
+   "enabled": 57,
+   "disabled": 2,
+   "disabled_names": [
+    "TraderYDTest.DISABLED_login_success_branch_needs_real_api",
+    "TraderYDTest.DISABLED_order_action_with_valid_entrustid_dereferences_null_api"
+   ]
+  },
+  {
+   "name": "CoverageTests_uftcore",
+   "sha256": "34d3a49fa8c3704a8d365d16ec990128b3f695b853a9191764176b8136ed533d",
+   "list_status": "ok",
+   "enabled": 311,
+   "disabled": 9,
+   "disabled_names": [
+    "DISABLED_n03_trader_adapter.uninitialized_deref_class",
+    "p06_uft_context.DISABLED_uninitialized_trader_and_param_class",
+    "p06_uft_engine.DISABLED_uninitialized_and_malformed_stdcode_class",
+    "DISABLED_q04_trader_entrust.bare_code_with_initialized_api_probe",
+    "DISABLED_q04_trader_push.null_base_datamgr_and_no_statmap_class",
+    "DISABLED_q04_trader_reply.uninitialized_and_null_deref_class",
+    "DISABLED_q04_uftctx_local.uninitialized_trader_and_shared_param_class",
+    "R123UftEngine.DISABLED_get_kline_slice_never_reaches_subscription",
+    "R163UftTrader.DISABLED_NullApiIsAnInvalidDependencyProbe"
+   ]
+  },
+  {
+   "name": "CoverageTests_wtcore",
+   "sha256": "10dd6484f07437b9c4acd3bd153c1adaf4b4d8c3a8af3fa370d8d77a3e69a55c",
+   "list_status": "ok",
+   "enabled": 1097,
+   "disabled": 10,
+   "disabled_names": [
+    "N01ParserAdapter.DISABLED_null_bd_mgr_level2_callback_crash",
+    "N01TraderAdapter.DISABLED_push_report_before_run_dereferences_null_stat_map",
+    "R71DtMgrTest.DISABLED_InitNullCfgCrashes",
+    "N02TickerDisabled.DISABLED_UnverifiedSelHftPreInitPaths",
+    "R73DtMgrTest.DISABLED_EmptyStoreTickSliceCrashesInReader",
+    "P02ExecuterCrashClass.DISABLED_ChannelReadyWithoutTraderAndBadPolicyConfigs",
+    "P02EngineCrashClass.DISABLED_NullHotMgrAndUnseededBaseDataPaths",
+    "P11CrashClass.DISABLED_report_paths_that_dereference_null_before_run",
+    "Q01SelPositionTest.DISABLED_SelCrashClass_null_history_mgr",
+    "r31_stra_mgr.DISABLED_hft_loads_cta_plugin_via_shared_symbol_name"
+   ]
+  },
+  {
+   "name": "TestUnits",
+   "sha256": "c4d4fbfc133ad8eea7ad16d8828ecc65efd1dc094ec348ba178b4c9170e27d83",
+   "list_status": "ok",
+   "enabled": 17,
+   "disabled": 0,
+   "disabled_names": []
+  }
+ ],
+ "end": "2026-11-06T02:14:27+08:00"
+}

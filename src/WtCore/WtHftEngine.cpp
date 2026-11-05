@@ -81,6 +81,15 @@ void WtHftEngine::run()
 		return;
 	}
 
+	// I03-NEW-142: env.product.session drives the ticker. A configuration without a
+	// product section used to dereference NULL here; refuse to start instead.
+	WTSVariant* cfgProd = _cfg == NULL ? NULL : _cfg->get("product");
+	if (cfgProd == NULL || cfgProd->type() != WTSVariant::VT_Object)
+	{
+		WTSLogger::error("HFT engine start rejected: env.product is missing");
+		return;
+	}
+
 	for (auto it = _ctx_map.begin(); it != _ctx_map.end(); it++)
 	{
 		HftContextPtr& ctx = (HftContextPtr&)it->second;
@@ -88,7 +97,6 @@ void WtHftEngine::run()
 	}
 
 	_tm_ticker = new WtHftRtTicker(this);
-	WTSVariant* cfgProd = _cfg->get("product");
 	_tm_ticker->init(_data_mgr->reader(), cfgProd->getCString("session"));
 
 	//启动之前,先把运行中的策略落地

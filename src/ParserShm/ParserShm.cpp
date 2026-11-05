@@ -342,7 +342,45 @@ bool ParserShm::connect()
 				lastIdx++;	//普通情况，下标递增
 			}
 
-			DataItem& item = _queue->_items[lastIdx % (8 * 1024)];
+			// K51 (BUG-R18-011, user decision 2026-11-06): the producer never waits for readers.
+			// A slot i is safe only while the producer has not reserved index i + capacity. Before
+			// reading, skip every already overwritten index (drop the oldest, warn); after copying,
+			// check again and discard a copy whose slot was overwritten while it was being read.
+			const uint64_t capacity = 8 * 1024;
+			const uint64_t writableBefore = _queue->_writable;
+			std::atomic_thread_fence(std::memory_order_acquire);
+			if (writableBefore > lastIdx + capacity)
+			{
+				const uint64_t resumeIdx = writableBefore - capacity;
+				const uint64_t dropped = resumeIdx - lastIdx;
+				const uint64_t total = _lag_dropped.fetch_add(dropped, std::memory_order_relaxed) + dropped;
+				withSpi([&](IParserSpi* sink) {
+					write_log(sink, LL_WARN, "[ParserShm] ShareMemory queue reader lagged behind the producer: {} items dropped ({} in total), resuming at {}",
+						dropped, total, resumeIdx);
+				});
+				lastIdx = resumeIdx;
+				if (lastIdx > readable)
+				{
+					// More than a capacity is reserved but not yet published; wait for it.
+					lastIdx = readable;
+					state.unlock();
+					continue;
+				}
+			}
+
+			DataItem item = _queue->_items[lastIdx % capacity];
+			std::atomic_thread_fence(std::memory_order_acquire);
+			const uint64_t writableAfter = _queue->_writable;
+			if (writableAfter > lastIdx + capacity)
+			{
+				const uint64_t total = _lag_dropped.fetch_add(1, std::memory_order_relaxed) + 1;
+				withSpi([&](IParserSpi* sink) {
+					write_log(sink, LL_WARN, "[ParserShm] ShareMemory queue reader lagged behind the producer: slot {} was overwritten while being read and is dropped ({} in total)",
+						lastIdx, total);
+				});
+				state.unlock();
+				continue;
+			}
 			switch (item._type)
 			{
 			case 0:

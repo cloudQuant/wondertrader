@@ -32,6 +32,36 @@ namespace
 {
 	thread_local StateMonitor* currentMonitorWorker = nullptr;
 
+	// K59 (BUG-I02-NEW-026, user decision 2026-11-06): only the part of a night section that
+	// runs past midnight (raw from > raw to, e.g. 21:00-02:30, times 00:00-02:30) continues the
+	// previous evening's session; every other time of the session belongs to the current date.
+	bool isNightContinuation(WTSSessionInfo* sInfo, uint32_t curMin)
+	{
+		for (const WTSSessionInfo::TradingSection& section : sInfo->getTradingSections())
+		{
+			if (section.first_raw > section.second_raw && curMin <= section.second_raw)
+				return true;
+		}
+		return false;
+	}
+
+	// Weekend/holiday rule of a session at curDate/curMin:
+	//  - offset <= 0: the offset date must be a trading date;
+	//  - offset > 0 (night belongs to the next trading day): a continuation time needs the
+	//    previous calendar date to be a trading date (Saturday 01:00 continues Friday night;
+	//    no Friday night exists when Friday is a holiday); any other time needs curDate itself.
+	bool isSessionHoliday(WTSBaseDataMgr* bdMgr, const char* pid, WTSSessionInfo* sInfo,
+		uint32_t curDate, uint32_t prevDate, uint32_t offDate, uint32_t curMin)
+	{
+		if (sInfo->getOffsetMins() > 0)
+		{
+			return isNightContinuation(sInfo, curMin)
+				? !bdMgr->isTradingDate(pid, prevDate)
+				: !bdMgr->isTradingDate(pid, curDate);
+		}
+		return !bdMgr->isTradingDate(pid, offDate);
+	}
+
 	// Reuse the checked session-date calculation for a calendar-day diagnostic.
 	struct PreviousCalendarDay : WTSSessionInfo
 	{
@@ -215,10 +245,7 @@ bool StateMonitor::initializeConfig(WTSVariant* config, WTSBaseDataMgr* bdMgr, D
 			if (result.status != wtp::DateMappingStatus::Ok || result.value == 0)
 				return false;
 			dates.emplace_back(pid, result.value);
-			if ((ssInfo->getOffsetMins() > 0 &&
-				(!bdMgr->isTradingDate(pid.c_str(), curDate) &&
-				 !(ssInfo->isInTradingTime(curMin) && bdMgr->isTradingDate(pid.c_str(), previousDate)))) ||
-				(ssInfo->getOffsetMins() <= 0 && !bdMgr->isTradingDate(pid.c_str(), offDate)))
+			if (isSessionHoliday(bdMgr, pid.c_str(), ssInfo, curDate, previousDate, offDate, curMin))
 				WTSLogger::info("Instrument {} is in holiday", pid);
 		}
 	}
@@ -310,18 +337,14 @@ void StateMonitor::advanceOnce(uint32_t curDate, uint32_t curMin)
 					{
 						const char* pid = (*it).c_str(); // 合约ID
 						/*
-						 * 节假日判断逻辑：
-						 * 1. 如果时间往后偏移（夜盘情况）：
-						 *    a. 当前日期不是交易日，且
-						 *    b. 非夜盘后半夜情况（即不满足：当前在交易时间且昨天是交易日）
-						 * 2. 如果时间没有往后偏移（白盘情况）：
-						 *    状态取决于算出的偏移日期是否为交易日
+						 * 节假日判断逻辑（K59，2026-11-06）：
+						 * 1. 时间往后偏移（夜盘归下一交易日）：
+						 *    a. 跨午夜的夜盘延续段（如 00:00-02:30）：前一天不是交易日即为节假日；
+						 *    b. 其余时刻（夜盘前半段、日盘）：当天不是交易日即为节假日。
+						 * 2. 时间没有往后偏移（白盘情况）：偏移日期不是交易日即为节假日。
 						 */
-						if ((sInfo->getOffsetMins() > 0 &&
-							(! _bd_mgr->isTradingDate(pid, curDate) &&	// 当前日期不是交易日
-							!(sInfo->isInTradingTime(curMin) &&  _bd_mgr->isTradingDate(pid, prevDate)))) ||	// 当前不在交易时间或昨天不是交易日
-							(sInfo->getOffsetMins() <= 0 && ! _bd_mgr->isTradingDate(pid, offDate)) // 白盘情况下偏移日期不是交易日
-							)
+						// K59：周末/节假日规则见 isSessionHoliday（只有跨午夜的夜盘延续段看前一天）
+						if (isSessionHoliday(_bd_mgr, pid, sInfo, curDate, prevDate, offDate, curMin))
 						{
 							// 当前合约处于节假日
 							ss_a << pid << ","; // 收集节假日合约ID

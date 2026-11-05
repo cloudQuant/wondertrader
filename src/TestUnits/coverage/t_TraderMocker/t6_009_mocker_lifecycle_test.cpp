@@ -292,7 +292,8 @@ TEST_F(T6009Mocker, ConcurrentExternalReleaseAndRequests)
 	api->registerSpi(&sink);
 	ASSERT_TRUE(init_and_connect(api, sink, 96096));
 	ASSERT_EQ(0, api->login("u", "p", ""));
-	EXPECT_TRUE(api->isConnected());
+	// K55：登录结果由 io 线程异步送达后才就绪
+	EXPECT_TRUE(r103m::wait_until([api]() { return api->isConnected(); }));
 
 	std::atomic<bool> go { false };
 	std::atomic<uint32_t> accepted { 0 };

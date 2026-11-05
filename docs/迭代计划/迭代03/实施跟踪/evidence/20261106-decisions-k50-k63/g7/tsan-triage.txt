@@ -1,0 +1,59 @@
+[96] signal-6 (after PASSED) SEGV DEADLYSIGNAL
+      CoverageTests_btcore::ExecMockerTest.passiveSellUsesNegativeUndoneSign
+      CoverageTests_btcore::R111ExecMocker.PluginQuiesceUsesFactoryPreflightRequestCanWaitWaitThenDestroy
+      CoverageTests_btcore::R111ExecMocker.OtherThreadPluginCallbackDoesNotBlockControlThreadPreflight
+      CoverageTests_btcore::R111ExecMocker.FailedQuiesceRequestRetainsAllPluginOwnersUntilRetrySucceeds
+[14] thread leak: wtp::WtLocalExecuter::init(wtp::WTSVariant*) [sanitizer-tsan(signal-6)]
+      CoverageTests_wtcore::R71LocalSerialTest.QuiesceDrainsAcceptedCallbacksAndRejectsNewIngress
+      CoverageTests_wtcore::R71LocalSerialTest.QuiesceWaitFromPluginCallbackReturnsFalseWithoutBlocking
+      CoverageTests_wtcore::R71LocalSerialTest.QuiesceWaitsForIngressProducerBeforeDrainingAcceptedTarget
+      CoverageTests_wtcore::R71LocalSerialTest.SameCodeCallbacksStayFifoAndReentrantCallbackDoesNotWait
+[14] thread leak: wtp::WtDiffExecuterConcurrencyTest::configurePool(wtp:: [sanitizer-tsan(signal-6)]
+      CoverageTests_wtcore::WtDiffExecuterConcurrencyTest.SameCodeCallbacksAreFifoAndReentryDoesNotDeadlock
+      CoverageTests_wtcore::WtDiffExecuterConcurrencyTest.DifferentCodesCanRunCallbacksInParallel
+      CoverageTests_wtcore::WtDiffExecuterConcurrencyTest.ReadyPrecedesRecoveryAndOldReadyEpochIsSkipped
+      CoverageTests_wtcore::WtDiffExecuterConcurrencyTest.RecoveryUsesDiffCapturedBeforeQueuedTrade
+[10] fail (after PASSED)  
+      CoverageTests::R100RdmCrossDayTest.R100RdmHisHftExclusiveEndBoundaries
+      CoverageTests::R70RdmResidualTest.R70RdmHisHftFilesBuildAndReject
+      CoverageTests::R74RdmHftHotTest.R74RdmHisQueueLoadsClipsAndRejects
+      CoverageTests::R74RdmHftHotTest.R74RdmHisDetailCrossDayAndRejects
+[8] thread leak: wtp::WtCtaEngine::init(wtp::WTSVariant*, [sanitizer-tsan(signal-6)]
+      CoverageTests_wtcore::R101CtaEngineHot.PooledScheduleMapsHotCode
+      CoverageTests_wtcore::R41EngineFixture.R120QfqSubscriptionDispatchesThroughPool
+      CoverageTests_wtcore::R41EngineFixture.R41OnScheduleWithPoolUsesThreadPool
+      CoverageTests_wtcore::R41EngineFixture.R41AdjustedTickDispatchMatchesDirectAndPoolModes
+[7] thread leak: wtp::WtArbiExecuterTestAccess::registerUnit(wtp::WtArbi [sanitizer-tsan(signal-6)]
+      CoverageTests_wtcore::WtArbiExecuterSerialization.SameCodePositionsAreFifoAndNeverOverlap
+      CoverageTests_wtcore::WtArbiExecuterSerialization.DifferentCodesCanRunInParallel
+      CoverageTests_wtcore::WtArbiExecuterSerialization.ReadyAndLostCallbacksRemainOrdered
+      CoverageTests_wtcore::WtArbiExecuterSerialization.QueuedReadyRecoveryIsDiscardedAfterChannelEpochChanges
+[4] skipped (after PASSED)  
+      CoverageTests::R22PorterCapiTest.ConfiguredStartChildChecksStateMonitor
+      CoverageTests_dtcore::R44ParserAdapterEdgesTest.RepeatedInitExtNeedsContract
+      CoverageTests_mqshare::R19ExecChild.protocol
+      CoverageTests_wtcore::UnresolvedReportJournal.SymlinkAndVisiblePathReplacementFailClosed
+[4] signal-6 (after PASSED) BUS DEADLYSIGNAL
+      CoverageTests_btcore::R198SelMockerFactory.rejectsUnknownStrategyAndFalseInitThenAllowsRetry
+      CoverageTests_btcore::R62SelMockerGap.RealSelFactoryIsDeletedThroughItsExportedAbi
+      CoverageTests_t_TraderCTPMini::T3_006_TraderCTPMini.failed_module_init_can_retry_with_a_valid_module
+      CoverageTests_wtcore::r31_stra_mgr.sel_real_plugin_exports_and_accepts_the_by_value_deleter_abi
+[3] thread leak: IndexWorkerMgr::init(wtp::WTSVariant*, [sanitizer-tsan(signal-6)]
+      CoverageTests_dtcore::R102IndexWorkerPoolTest.PoolsizeOneBuildsPoolAndAsyncDispatchReleasesTick
+      CoverageTests_dtcore::R18IdxWorkerMgrTest.AsyncQueuedDispatchKeepsTickAliveUntilWorkerCompletes
+      CoverageTests_dtcore::R68IndexWorkerFactoryTest.ReleaseDrainsPoolThenDeletesWorkersAndPinsFactoryModule
+[3] thread leak: wtp::WtDiffExecuter::init(wtp::WTSVariant*) [sanitizer-tsan(signal-6)]
+      CoverageTests_wtcore::R120DiffTest.PoolForwardsEveryCallbackAndPersistsDiff
+      CoverageTests_wtcore::R120DiffTest.SetPositionMigratesExpiredTargetToZero
+      CoverageTests_wtcore::R110ExecEnv.DiffPoolForwardsEverything
+[2] thread leak: wtp::WtDiffExecuterConcurrencyTest::configurePool(wtp:: | wtp::WtDiffExecuterConcurrencyTest::configurePool(wtp:: [sanitizer-tsan(signal-6)]
+      CoverageTests_wtcore::WtDiffExecuterConcurrencyTest.PositionChangedTargetAndDiffSurviveReload
+      CoverageTests_wtcore::WtDiffExecuterConcurrencyTest.SnapshotFailureBlocksPositionDispatchAndPersistsTombstoneWhenWritable
+[1] data race: CTraderSpi::ReqQryInstrument()::$_1::operator()() | CTraderSpi::OnFrontDisconnected(int) [sanitizer-tsan(signal-6)]
+      CoverageTests_t_CTPLoaderYamlPositive::t6_ctploader_yaml_smoke.valid_file_applies_config_and_initializes_fake_without_network
+[1] thread leak: wtp::WtLocalExecuter::init(wtp::WTSVariant*) | wtp::WtArbiExecuter::init(wtp::WTSVariant*) [sanitizer-tsan(signal-6)]
+      CoverageTests_wtcore::R59Exec.null_data_manager_and_pool_lifecycle
+[1] thread leak: wtp::WtArbiExecuter::init(wtp::WTSVariant*) [sanitizer-tsan(signal-6)]
+      CoverageTests_wtcore::R90ExecPool.ArbiPoolForwardsEverything
+[1] timeout (after PASSED)  
+      CoverageTests_m_WtUftRunner::r95_uft_parser.successful_fake_parser_registers_runs_and_quiesces_before_release

@@ -1,0 +1,219 @@
+{
+ "dev-red": {
+  "k51": {
+   "I03K51ShmSlowConsumer.LappedConsumerDropsOldestWarnsAndDeliversContiguousTail": "fail"
+  },
+  "k54pa": {
+   "I03K54PorterRiskmon.ActiveRiskmonLoadFailureFailsConfigAndRunIsRefused": "fail"
+  },
+  "k54pb": {
+   "I03K54PorterRiskmon.InactiveRiskmonStillConfigures": "pass"
+  },
+  "k54r": {
+   "I03K54WtRunnerRiskmon.ActiveRiskmonLoadFailureRejectsInitEngine": "fail",
+   "I03K54WtRunnerRiskmon.InactiveOrAbsentRiskmonKeepsInitEngine": "pass"
+  },
+  "k55": {
+   "I03K55MockerIsConnected.ReadyOnlyBetweenLoginResultAndLogout": "fail",
+   "I03K55MockerIsConnected.DisconnectAndReleaseClearReadiness": "pass",
+   "I03K55MockerIsConnected.LoginWithoutChannelIsNotReady": "fail",
+   "R214MockerBranches.DisconnectJoinsMatchThreadWithoutWorker": "fail",
+   "T6009Mocker.ConcurrentExternalReleaseAndRequests": "pass"
+  },
+  "k56a": {
+   "I03K56PorterMissingData.MissingDataSectionFailsConfigAndRunIsRefused": "fail"
+  },
+  "k56b": {
+   "I03K56PorterMissingData.EmptyDataSectionWithoutStoreStillConfigures": "pass"
+  },
+  "k57": {
+   "I03K57LiveTickLoader.NonNullTickLoaderIsWarnedAndNeverCalled": "pass",
+   "I03K57LiveTickLoader.FeedRawTicksReportsUnsupportedAndDropCount": "fail"
+  },
+  "k58": {
+   "r7_twap_clear.net_zero_locked_position_is_flattened_with_close_orders": "pass",
+   "r7_twap_clear.flat_clear_and_ordinary_zero_difference_send_nothing": "pass",
+   "r7_twap_clear_k58.net_zero_with_frozen_long_closes_available_short_first": "fail",
+   "r7_twap_clear_k58.unavailable_legs_wait_with_diagnostic_and_retry_later": "fail",
+   "r7_twap_clear_k58.only_long_sells_available_part_only": "pass",
+   "r7_twap_clear_k58.only_short_buys_back_available_part_only": "pass",
+   "r7_twap_clear_k58.nonzero_net_with_both_legs_closes_each_leg_within_availability": "pass",
+   "r7_vwap.clear_target_dbl_max_exits_without_order": "pass",
+   "r7_vwap.clear_target_flattens_net_zero_locked_position": "fail",
+   "r7_vwap_clear_k58.net_zero_with_frozen_long_buys_back_available_short": "fail",
+   "r7_vwap_clear_k58.unavailable_legs_wait_with_diagnostic_and_retry_later": "fail"
+  },
+  "k59": {
+   "I03K59WeekendTest.DaySessionWeekendIsHoliday": "pass",
+   "I03K59WeekendTest.FridayNightContinuationOnSaturdayIsTrading": "pass",
+   "I03K59WeekendTest.RestOfWeekendIsHolidayForNightSession": "fail",
+   "I03K59WeekendTest.FridayHolidayMeansNoSaturdayContinuation": "fail"
+  },
+  "k60": {
+   "I03K60HftRangeEndpointTest.HistoricalRangeIncludesBothEnds": "fail",
+   "I03K60HftRangeEndpointTest.RealtimeRangeIncludesBothEnds": "pass",
+   "I03K60HftRangeEndpointTest.HistoricalAndRealtimeAgreeOnEveryWindow": "fail"
+  },
+  "k61": {
+   "I03K61KlinePeriodTest.ReaderRejectsNonBasePeriodsWithoutTouchingLoader": "fail",
+   "I03K61KlinePeriodTest.ReaderPassesBasePeriodsToLoaderUnchanged": "pass",
+   "I03K61KlinePeriodTest.RdmReaderRejectsNonBasePeriodsByRangeAndByCount": "fail",
+   "I03K61KlinePeriodTest.RdmReaderBasePeriodsAreNotRejected": "pass",
+   "R193StorageReaderTest.R193LoaderUnknownPeriodIsRejected": "fail"
+  },
+  "k61ad": {
+   "I03K61AdKlinePeriodTest.NonBasePeriodsAreRejectedWithError": "fail",
+   "I03K61AdKlinePeriodTest.BasePeriodsAreNotRejected": "pass"
+  },
+  "new142_CtaRunWithProductStarts": {
+   "I03New142Fixture.CtaRunWithProductStarts": "pass"
+  },
+  "new142_CtaRunWithoutProductIsRejected": {
+   "<no xml: crashed>": "crash"
+  },
+  "new142_HftRunWithProductStarts": {
+   "I03New142Fixture.HftRunWithProductStarts": "pass"
+  },
+  "new142_HftRunWithoutProductIsRejected": {
+   "<no xml: crashed>": "crash"
+  },
+  "new142_SelRunWithProductStarts": {
+   "I03New142Fixture.SelRunWithProductStarts": "pass"
+  },
+  "new142_SelRunWithoutProductIsRejected": {
+   "<no xml: crashed>": "crash"
+  }
+ },
+ "dev-green": {
+  "k50_AuditedCommandReleasesTheManualClaimForExecuters": {
+   "I03K50ManualClaimRelease.AuditedCommandReleasesTheManualClaimForExecuters": "pass"
+  },
+  "k50_LiveManualOrderBlocksTheRelease": {
+   "I03K50ManualClaimRelease.LiveManualOrderBlocksTheRelease": "pass"
+  },
+  "k50_ReleaseWithoutDurableAuditKeepsTheClaim": {
+   "I03K50ManualClaimRelease.ReleaseWithoutDurableAuditKeepsTheClaim": "pass"
+  },
+  "k50_gate": {
+   "I03K50AccountGate.FailedAuditWriteKeepsTheClaimAndOtherOwnersAreUntouched": "pass",
+   "I03K50ManualClaimInbox.EachRequestIsTakenOnceAndArchivedByOutcome": "pass"
+  },
+  "k50_porter": {
+   "I03K50PorterReleaseClaim.UnknownTraderIsAnInvalidRequest": "pass"
+  },
+  "k50_runner": {
+   "I03K50WtRunnerClaimInbox.RequestsAreProcessedAndArchived": "pass"
+  },
+  "k51": {
+   "I03K51ShmSlowConsumer.LappedConsumerDropsOldestWarnsAndDeliversContiguousTail": "pass",
+   "I03S2ShmCrossProcess.ForkedProducerItemsArriveCompleteContiguousAndAcrossWrap": "pass"
+  },
+  "k54e_ActiveRiskmonWithIncompatibleModuleIsInvalid": {
+   "I03K54RiskmonFixture.ActiveRiskmonWithIncompatibleModuleIsInvalid": "pass"
+  },
+  "k54e_ActiveRiskmonWithMissingModuleIsInvalid": {
+   "I03K54RiskmonFixture.ActiveRiskmonWithMissingModuleIsInvalid": "pass"
+  },
+  "k54e_InactiveRiskmonIsValidWithoutLoading": {
+   "I03K54RiskmonFixture.InactiveRiskmonIsValidWithoutLoading": "pass"
+  },
+  "k54e_NoRiskmonSectionIsValid": {
+   "I03K54RiskmonFixture.NoRiskmonSectionIsValid": "pass"
+  },
+  "k54pa": {
+   "I03K54PorterRiskmon.ActiveRiskmonLoadFailureFailsConfigAndRunIsRefused": "pass"
+  },
+  "k54pb": {
+   "I03K54PorterRiskmon.InactiveRiskmonStillConfigures": "pass"
+  },
+  "k54r": {
+   "I03K54WtRunnerRiskmon.ActiveRiskmonLoadFailureRejectsInitEngine": "pass",
+   "I03K54WtRunnerRiskmon.InactiveOrAbsentRiskmonKeepsInitEngine": "pass"
+  },
+  "k55": {
+   "I03K55MockerIsConnected.ReadyOnlyBetweenLoginResultAndLogout": "pass",
+   "I03K55MockerIsConnected.DisconnectAndReleaseClearReadiness": "pass",
+   "I03K55MockerIsConnected.LoginWithoutChannelIsNotReady": "pass",
+   "R214MockerBranches.DisconnectJoinsMatchThreadWithoutWorker": "pass",
+   "T6009Mocker.ConcurrentExternalReleaseAndRequests": "pass"
+  },
+  "k55_xtp": {
+   "R93XtpTest.login_success_then_recovery_and_logout": "pass"
+  },
+  "k55_yd": {
+   "R93YdTest.k55_logout_ends_readiness": "pass"
+  },
+  "k56a": {
+   "I03K56PorterMissingData.MissingDataSectionFailsConfigAndRunIsRefused": "pass"
+  },
+  "k56b": {
+   "I03K56PorterMissingData.EmptyDataSectionWithoutStoreStillConfigures": "pass"
+  },
+  "k57": {
+   "I03K57LiveTickLoader.NonNullTickLoaderIsWarnedAndNeverCalled": "pass",
+   "I03K57LiveTickLoader.FeedRawTicksReportsUnsupportedAndDropCount": "pass"
+  },
+  "k58": {
+   "r7_twap_clear.net_zero_locked_position_is_flattened_with_close_orders": "pass",
+   "r7_twap_clear.flat_clear_and_ordinary_zero_difference_send_nothing": "pass",
+   "r7_twap_clear_k58.net_zero_with_frozen_long_closes_available_short_first": "pass",
+   "r7_twap_clear_k58.unavailable_legs_wait_with_diagnostic_and_retry_later": "pass",
+   "r7_twap_clear_k58.only_long_sells_available_part_only": "pass",
+   "r7_twap_clear_k58.only_short_buys_back_available_part_only": "pass",
+   "r7_twap_clear_k58.nonzero_net_with_both_legs_closes_each_leg_within_availability": "pass",
+   "r7_vwap.clear_target_dbl_max_exits_without_order": "pass",
+   "r7_vwap.clear_target_flattens_net_zero_locked_position": "pass",
+   "r7_vwap_clear_k58.net_zero_with_frozen_long_buys_back_available_short": "pass",
+   "r7_vwap_clear_k58.unavailable_legs_wait_with_diagnostic_and_retry_later": "pass"
+  },
+  "k59": {
+   "I03K59WeekendTest.DaySessionWeekendIsHoliday": "pass",
+   "I03K59WeekendTest.FridayNightContinuationOnSaturdayIsTrading": "pass",
+   "I03K59WeekendTest.RestOfWeekendIsHolidayForNightSession": "pass",
+   "I03K59WeekendTest.FridayHolidayMeansNoSaturdayContinuation": "pass"
+  },
+  "k60": {
+   "I03K60HftRangeEndpointTest.HistoricalRangeIncludesBothEnds": "pass",
+   "I03K60HftRangeEndpointTest.RealtimeRangeIncludesBothEnds": "pass",
+   "I03K60HftRangeEndpointTest.HistoricalAndRealtimeAgreeOnEveryWindow": "pass"
+  },
+  "k61": {
+   "I03K61KlinePeriodTest.ReaderRejectsNonBasePeriodsWithoutTouchingLoader": "pass",
+   "I03K61KlinePeriodTest.ReaderPassesBasePeriodsToLoaderUnchanged": "pass",
+   "I03K61KlinePeriodTest.RdmReaderRejectsNonBasePeriodsByRangeAndByCount": "pass",
+   "I03K61KlinePeriodTest.RdmReaderBasePeriodsAreNotRejected": "pass",
+   "R193StorageReaderTest.R193LoaderUnknownPeriodIsRejected": "pass"
+  },
+  "k61ad": {
+   "I03K61AdKlinePeriodTest.NonBasePeriodsAreRejectedWithError": "pass",
+   "I03K61AdKlinePeriodTest.BasePeriodsAreNotRejected": "pass"
+  },
+  "k62": {
+   "R200Fixture.R200His_BarReplayWithOnlyEmptyTickListDispatchesNothing": "pass"
+  },
+  "k63-run": {
+   "UnresolvedReportJournal.SymlinkAndVisiblePathReplacementFailClosed": "pass"
+  },
+  "k63-skip": {
+   "UnresolvedReportJournal.SymlinkAndVisiblePathReplacementFailClosed": "skipped"
+  },
+  "new142_CtaRunWithProductStarts": {
+   "I03New142Fixture.CtaRunWithProductStarts": "pass"
+  },
+  "new142_CtaRunWithoutProductIsRejected": {
+   "I03New142Fixture.CtaRunWithoutProductIsRejected": "pass"
+  },
+  "new142_HftRunWithProductStarts": {
+   "I03New142Fixture.HftRunWithProductStarts": "pass"
+  },
+  "new142_HftRunWithoutProductIsRejected": {
+   "I03New142Fixture.HftRunWithoutProductIsRejected": "pass"
+  },
+  "new142_SelRunWithProductStarts": {
+   "I03New142Fixture.SelRunWithProductStarts": "pass"
+  },
+  "new142_SelRunWithoutProductIsRejected": {
+   "I03New142Fixture.SelRunWithoutProductIsRejected": "pass"
+  }
+ }
+}

@@ -1,0 +1,82 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = r7_twap_clear*:r7_vwap_clear*:r7_vwap.clear_*
+[==========] Running 11 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 2 tests from r7_twap_clear
+[ RUN      ] r7_twap_clear.net_zero_locked_position_is_flattened_with_close_orders
+[       OK ] r7_twap_clear.net_zero_locked_position_is_flattened_with_close_orders (0 ms)
+[ RUN      ] r7_twap_clear.flat_clear_and_ordinary_zero_difference_send_nothing
+[       OK ] r7_twap_clear.flat_clear_and_ordinary_zero_difference_send_nothing (0 ms)
+[----------] 2 tests from r7_twap_clear (0 ms total)
+
+[----------] 5 tests from r7_twap_clear_k58
+[ RUN      ] r7_twap_clear_k58.net_zero_with_frozen_long_closes_available_short_first
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r7_exefact/r7_twap_legal_lot_test.cpp:353: Failure
+Expected equality of these values:
+  ctx.buys.size()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] r7_twap_clear_k58.net_zero_with_frozen_long_closes_available_short_first (0 ms)
+[ RUN      ] r7_twap_clear_k58.unavailable_legs_wait_with_diagnostic_and_retry_later
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r7_exefact/r7_twap_legal_lot_test.cpp:373: Failure
+Expected: (ctx.countLog("not yet available")) >= (1u), actual: 0 vs 1
+
+[  FAILED  ] r7_twap_clear_k58.unavailable_legs_wait_with_diagnostic_and_retry_later (0 ms)
+[ RUN      ] r7_twap_clear_k58.only_long_sells_available_part_only
+[       OK ] r7_twap_clear_k58.only_long_sells_available_part_only (0 ms)
+[ RUN      ] r7_twap_clear_k58.only_short_buys_back_available_part_only
+[       OK ] r7_twap_clear_k58.only_short_buys_back_available_part_only (0 ms)
+[ RUN      ] r7_twap_clear_k58.nonzero_net_with_both_legs_closes_each_leg_within_availability
+[       OK ] r7_twap_clear_k58.nonzero_net_with_both_legs_closes_each_leg_within_availability (0 ms)
+[----------] 5 tests from r7_twap_clear_k58 (0 ms total)
+
+[----------] 2 tests from r7_vwap
+[ RUN      ] r7_vwap.clear_target_dbl_max_exits_without_order
+[       OK ] r7_vwap.clear_target_dbl_max_exits_without_order (0 ms)
+[ RUN      ] r7_vwap.clear_target_flattens_net_zero_locked_position
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:662: Failure
+Value of: ctx.sells[0].force
+  Actual: false
+Expected: true
+K58: a clear-branch order is an explicit close
+
+[  FAILED  ] r7_vwap.clear_target_flattens_net_zero_locked_position (0 ms)
+[----------] 2 tests from r7_vwap (0 ms total)
+
+[----------] 2 tests from r7_vwap_clear_k58
+[ RUN      ] r7_vwap_clear_k58.net_zero_with_frozen_long_buys_back_available_short
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:679: Failure
+Expected equality of these values:
+  ctx.buys.size()
+    Which is: 0
+  1u
+    Which is: 1
+
+[  FAILED  ] r7_vwap_clear_k58.net_zero_with_frozen_long_buys_back_available_short (0 ms)
+[ RUN      ] r7_vwap_clear_k58.unavailable_legs_wait_with_diagnostic_and_retry_later
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:699: Failure
+Value of: ctx.hasLog("not yet available")
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/r7_exefact/r7_vwap_unit_test.cpp:704: Failure
+Value of: ctx.sells[0].force
+  Actual: false
+Expected: true
+
+[  FAILED  ] r7_vwap_clear_k58.unavailable_legs_wait_with_diagnostic_and_retry_later (0 ms)
+[----------] 2 tests from r7_vwap_clear_k58 (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 11 tests from 4 test suites ran. (2 ms total)
+[  PASSED  ] 6 tests.
+[  FAILED  ] 5 tests, listed below:
+[  FAILED  ] r7_twap_clear_k58.net_zero_with_frozen_long_closes_available_short_first
+[  FAILED  ] r7_twap_clear_k58.unavailable_legs_wait_with_diagnostic_and_retry_later
+[  FAILED  ] r7_vwap.clear_target_flattens_net_zero_locked_position
+[  FAILED  ] r7_vwap_clear_k58.net_zero_with_frozen_long_buys_back_available_short
+[  FAILED  ] r7_vwap_clear_k58.unavailable_legs_wait_with_diagnostic_and_retry_later
+
+ 5 FAILED TESTS

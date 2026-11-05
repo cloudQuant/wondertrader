@@ -1089,9 +1089,10 @@ WTSOrdQueSlice* WtRdmDtReader::readOrdQueSliceByRange(const char* stdCode, uint6
 		if (tcnt <= 0)
 			return NULL;
 
-		// Historical HFT ranges are end-exclusive. lower_bound also avoids
-		// decrementing begin() when the requested end precedes the first item.
-		WTSOrdQueStruct* pEnd = std::lower_bound(hisRecs, hisRecs + tcnt, eTick, hft_time_less<WTSOrdQueStruct>);
+		// K60 (BUG-I02-NEW-059, user decision 2026-11-06): ranges are closed on both ends,
+		// like ticks and the realtime path; upper_bound keeps every record at etime and
+		// never decrements begin() when the requested end precedes the first item.
+		WTSOrdQueStruct* pEnd = std::upper_bound(hisRecs, hisRecs + tcnt, eTick, hft_time_less<WTSOrdQueStruct>);
 		std::size_t eCount = pEnd - hisRecs;
 		if (eCount == 0)
 			return NULL;
@@ -1316,9 +1317,10 @@ WTSOrdDtlSlice* WtRdmDtReader::readOrdDtlSliceByRange(const char* stdCode, uint6
 		if (tcnt <= 0)
 			return NULL;
 
-		// Historical HFT ranges are end-exclusive. lower_bound also avoids
-		// decrementing begin() when the requested end precedes the first item.
-		WTSOrdDtlStruct* pEnd = std::lower_bound(hisRecs, hisRecs + tcnt, eTick, hft_time_less<WTSOrdDtlStruct>);
+		// K60 (BUG-I02-NEW-059, user decision 2026-11-06): ranges are closed on both ends,
+		// like ticks and the realtime path; upper_bound keeps every record at etime and
+		// never decrements begin() when the requested end precedes the first item.
+		WTSOrdDtlStruct* pEnd = std::upper_bound(hisRecs, hisRecs + tcnt, eTick, hft_time_less<WTSOrdDtlStruct>);
 		std::size_t eCount = pEnd - hisRecs;
 		if (eCount == 0)
 			return NULL;
@@ -1542,9 +1544,10 @@ WTSTransSlice* WtRdmDtReader::readTransSliceByRange(const char* stdCode, uint64_
 		if (tcnt <= 0)
 			return NULL;
 
-		// Historical HFT ranges are end-exclusive. lower_bound also avoids
-		// decrementing begin() when the requested end precedes the first item.
-		WTSTransStruct* pEnd = std::lower_bound(hisRecs, hisRecs + tcnt, eTick, hft_time_less<WTSTransStruct>);
+		// K60 (BUG-I02-NEW-059, user decision 2026-11-06): ranges are closed on both ends,
+		// like ticks and the realtime path; upper_bound keeps every record at etime and
+		// never decrements begin() when the requested end precedes the first item.
+		WTSTransStruct* pEnd = std::upper_bound(hisRecs, hisRecs + tcnt, eTick, hft_time_less<WTSTransStruct>);
 		std::size_t eCount = pEnd - hisRecs;
 		if (eCount == 0)
 			return NULL;
@@ -2274,6 +2277,14 @@ uint32_t WtRdmDtReader::readBarsFromCacheByRange(const std::string& key, uint64_
 
 WTSKlineSlice* WtRdmDtReader::readKlineSliceByRange(const char* stdCode, WTSKlinePeriod period, uint64_t stime, uint64_t etime /* = 0 */)
 {
+	// K61 (BUG-I02-NEW-060, user decision 2026-11-06): storage and external loaders only hold
+	// the base periods; other periods are resampled upstream and are rejected here.
+	if (period != KP_Minute1 && period != KP_Minute5 && period != KP_DAY)
+	{
+		pipe_rdmreader_log(_sink, LL_ERROR, "Unsupported kline period {} of {} requested, only m1/m5/d are stored", (uint32_t)period, stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
+
 	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	WTSCommodityInfo* commInfo = _base_data_mgr->getCommodity(cInfo._exchg, cInfo._product);
@@ -2736,6 +2747,14 @@ WtRdmDtReader::RTKlineBlockPair* WtRdmDtReader::getRTKilneBlock(const char* exch
 
 WTSKlineSlice* WtRdmDtReader::readKlineSliceByCount(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime /* = 0 */)
 {
+	// K61 (BUG-I02-NEW-060, user decision 2026-11-06): storage and external loaders only hold
+	// the base periods; other periods are resampled upstream and are rejected here.
+	if (period != KP_Minute1 && period != KP_Minute5 && period != KP_DAY)
+	{
+		pipe_rdmreader_log(_sink, LL_ERROR, "Unsupported kline period {} of {} requested, only m1/m5/d are stored", (uint32_t)period, stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
+
 	std::lock_guard<StdRecurMutex> cacheGuard(_cache_mtx);
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	pipe_rdmreader_log(_sink, LL_INFO, "CodeInfo of {}: {},{},{}", stdCode, cInfo._exchg, cInfo._product, cInfo._code);

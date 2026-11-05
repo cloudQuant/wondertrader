@@ -81,6 +81,10 @@ private:
 	std::mutex		_release_mutex;
 	bool			_released = false;
 	std::atomic<bool>	_match_started{ false };
+	// K55 (BUG-R60-006): fully ready only between a delivered successful login result and
+	// logout/disconnect/release. The generation discards a login result queued before logout.
+	std::atomic<bool>	_session_ready{ false };
+	std::atomic<uint64_t>	_session_gen{ 0 };
 	// BUG-R60-001: closed together with request admission; see get_listener().
 	std::atomic<bool>	_delivery_closed{ false };
 

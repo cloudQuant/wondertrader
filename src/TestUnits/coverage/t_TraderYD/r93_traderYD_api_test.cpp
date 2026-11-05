@@ -1014,6 +1014,16 @@ namespace
 
 	/// 卡8（BUG-P02-005，slice1 final gaps）：YD 只支持整手。小数、非有限、非正或超出 int 的数量
 	/// 在下单入口明确拒绝，不到 SDK（不经 (int) 静默截断）；整数量照常提交。
+	// K55（BUG-R60-006，用户裁定 2026-11-06）：isConnected 表示“完全就绪”，logout 之后为 false。
+	TEST_F(R93YdTest, k55_logout_ends_readiness)
+	{
+		api_.connect();
+		login_and_finish();
+		ASSERT_TRUE(api_.isConnected());
+		EXPECT_EQ(0, api_.logout());
+		EXPECT_FALSE(api_.isConnected());
+	}
+
 	TEST_F(R93YdTest, card8_non_whole_lot_quantity_is_rejected_before_the_sdk)
 	{
 		login_and_finish();

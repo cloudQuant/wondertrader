@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="1" failures="1" disabled="0" errors="0" time="0.004" timestamp="2026-11-06T02:05:42.833" name="AllTests">
+  <testsuite name="I03K50ManualClaimRelease" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="0.002" timestamp="2026-11-06T02:05:42.835">
+    <testcase name="LiveManualOrderBlocksTheRelease" file="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp" line="207" status="run" result="completed" time="0.002" timestamp="2026-11-06T02:05:42.835" classname="I03K50ManualClaimRelease">
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:217&#x0A;Expected equality of these values:&#x0A;  AccountTradingGate::ClaimReleaseStatus::LiveOrders&#x0A;    Which is: 4-byte object &lt;03-00 00-00&gt;&#x0A;  trader.releaseManualClaim(k50Request(kAg), &amp;diagnostic)&#x0A;    Which is: 4-byte object &lt;00-00 00-00&gt;&#x0A;claim of manual on SHFE.ag.2512 released by alice&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:217
+Expected equality of these values:
+  AccountTradingGate::ClaimReleaseStatus::LiveOrders
+    Which is: 4-byte object <03-00 00-00>
+  trader.releaseManualClaim(k50Request(kAg), &diagnostic)
+    Which is: 4-byte object <00-00 00-00>
+claim of manual on SHFE.ag.2512 released by alice
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:218&#x0A;Value of: trader.accountGate()-&gt;hasClaim(kAg, &quot;manual&quot;)&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:218
+Value of: trader.accountGate()->hasClaim(kAg, "manual")
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:219&#x0A;Value of: trader.buyAsOwner(&quot;exec:k50&quot;, true, kAg, 3500.0, 1.0, 0, false).empty()&#x0A;  Actual: false&#x0A;Expected: true&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:219
+Value of: trader.buyAsOwner("exec:k50", true, kAg, 3500.0, 1.0, 0, false).empty()
+  Actual: false
+Expected: true
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:221&#x0A;Expected: (std::string::npos) != (audit.find(&quot;\&quot;event\&quot;:\&quot;claim_release_rejected\&quot;&quot;)), actual: 18446744073709551615 vs 18446744073709551615&#x0A;{&quot;schema&quot;:1,&quot;seq&quot;:1,&quot;wall_ms&quot;:1793901942837,&quot;account&quot;:&quot;adapter-instance&quot;,&quot;event&quot;:&quot;claim_released&quot;,&quot;generation&quot;:0,&quot;actor&quot;:&quot;alice&quot;,&quot;detail&quot;:&quot;owner=manual code=SHFE.ag.2512&quot;,&quot;reason&quot;:&quot;manual hedge closed&quot;,&quot;reference&quot;:&quot;TICKET-K50&quot;}&#x0A;&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:221
+Expected: (std::string::npos) != (audit.find("\"event\":\"claim_release_rejected\"")), actual: 18446744073709551615 vs 18446744073709551615
+{"schema":1,"seq":1,"wall_ms":1793901942837,"account":"adapter-instance","event":"claim_released","generation":0,"actor":"alice","detail":"owner=manual code=SHFE.ag.2512","reason":"manual hedge closed","reference":"TICKET-K50"}
+
+]]></failure>
+      <failure message="/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:222&#x0A;Expected equality of these values:&#x0A;  std::string::npos&#x0A;    Which is: 18446744073709551615&#x0A;  audit.find(&quot;\&quot;event\&quot;:\&quot;claim_released\&quot;&quot;)&#x0A;    Which is: 73&#x0A;{&quot;schema&quot;:1,&quot;seq&quot;:1,&quot;wall_ms&quot;:1793901942837,&quot;account&quot;:&quot;adapter-instance&quot;,&quot;event&quot;:&quot;claim_released&quot;,&quot;generation&quot;:0,&quot;actor&quot;:&quot;alice&quot;,&quot;detail&quot;:&quot;owner=manual code=SHFE.ag.2512&quot;,&quot;reason&quot;:&quot;manual hedge closed&quot;,&quot;reference&quot;:&quot;TICKET-K50&quot;}&#x0A;&#x0A;" type=""><![CDATA[/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:222
+Expected equality of these values:
+  std::string::npos
+    Which is: 18446744073709551615
+  audit.find("\"event\":\"claim_released\"")
+    Which is: 73
+{"schema":1,"seq":1,"wall_ms":1793901942837,"account":"adapter-instance","event":"claim_released","generation":0,"actor":"alice","detail":"owner=manual code=SHFE.ag.2512","reason":"manual hedge closed","reference":"TICKET-K50"}
+
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

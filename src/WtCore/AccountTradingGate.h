@@ -64,6 +64,28 @@ public:
 		std::string reconciliation_reference;
 	};
 
+	/**
+	 * K50 (I03-NEW-089, user decision 2026-11-06): explicit, audited release of the account's
+	 * manual owner claim on one contract.
+	 */
+	struct ClaimReleaseRequest
+	{
+		std::string code;			// claimed contract (the code the manual entrust used)
+		std::string operator_id;
+		std::string reason;
+		std::string reference;		// free-text reference (ticket, reconciliation file ...)
+	};
+
+	enum class ClaimReleaseStatus
+	{
+		Ok,
+		NotClaimed,			// the owner holds no claim on that contract
+		InvalidRequest,		// code, operator_id and reason are required (or unknown trader)
+		LiveOrders,			// the owner still has live orders on that contract
+		AuditUnavailable,
+		AuditWriteFailed
+	};
+
 	enum class ResumeStatus
 	{
 		Ok,
@@ -410,6 +432,60 @@ public:
 		}
 		claims.owners[owner] = shared;
 		return true;
+	}
+
+	/**
+	 * K50: release `owner`'s claim on request.code. The release happens only after the
+	 * "claim_released" audit record is durable; a rejected request is audited as
+	 * "claim_release_rejected" and keeps the claim. `hasLiveOrders` is decided by the
+	 * caller (TraderAdapter owns the order ledger).
+	 */
+	ClaimReleaseStatus releaseContractClaim(const std::string& owner, const ClaimReleaseRequest& request,
+		bool hasLiveOrders, std::string* diagnostic = nullptr)
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		auto finish = [&](ClaimReleaseStatus status, const std::string& text) {
+			_diagnostic = text;
+			if (diagnostic)
+				*diagnostic = text;
+			return status;
+		};
+		if (owner.empty() || request.code.empty() || request.operator_id.empty() || request.reason.empty())
+			return finish(ClaimReleaseStatus::InvalidRequest, "code, operator_id and reason are required");
+		if (_audit_fd < 0)
+			return finish(ClaimReleaseStatus::AuditUnavailable, "account audit log is not configured");
+		const std::string detail = "owner=" + owner + " code=" + request.code;
+		auto it = _claims.find(request.code);
+		if (it == _claims.end() || it->second.owners.find(owner) == it->second.owners.end())
+		{
+			std::string ignored;
+			appendAuditLocked(auditLine("claim_release_rejected", _generation, request.operator_id,
+				detail + " not claimed", request.reason, request.reference), ignored);
+			return finish(ClaimReleaseStatus::NotClaimed, "contract " + request.code + " is not claimed by " + owner);
+		}
+		if (hasLiveOrders)
+		{
+			std::string ignored;
+			appendAuditLocked(auditLine("claim_release_rejected", _generation, request.operator_id,
+				detail + " live orders", request.reason, request.reference), ignored);
+			return finish(ClaimReleaseStatus::LiveOrders, owner + " still has live orders on " + request.code);
+		}
+		std::string error;
+		if (!appendAuditLocked(auditLine("claim_released", _generation, request.operator_id,
+			detail, request.reason, request.reference), error))
+			return finish(ClaimReleaseStatus::AuditWriteFailed, error);
+		it->second.owners.erase(owner);
+		if (it->second.owners.empty())
+			_claims.erase(it);
+		return finish(ClaimReleaseStatus::Ok, "claim of " + owner + " on " + request.code + " released by " + request.operator_id);
+	}
+
+	/** K50: whether `owner` currently holds a claim on `code` (diagnostics and tests). */
+	bool hasClaim(const std::string& code, const std::string& owner) const
+	{
+		std::lock_guard<std::mutex> lock(_mutex);
+		auto it = _claims.find(code);
+		return it != _claims.end() && it->second.owners.find(owner) != it->second.owners.end();
 	}
 
 	void releaseOwner(const std::string& owner)

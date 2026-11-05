@@ -194,9 +194,9 @@ TEST_F(R162ReaderEdgeTest, R162RdmReaderHisTransBlocksWithMixedActionDates)
 	trPair._block = reinterpret_cast<HisTransBlock*>(&trPair._buffer[0]);
 
 	const uint64_t stime = (uint64_t)date * 1000000000ULL + atime;
-	// Historical HFT ranges are end-exclusive; extend by one millisecond so the
-	// records exactly at the start timestamp are included.
-	const uint64_t etime = stime + 1;
+	// K60（BUG-I02-NEW-059 / I03-NEW-042，用户裁定 2026-11-06）：区间两端都包含，起止相等时返回
+	// 恰好在该时刻的记录（恢复 ccaad010 之前的原断言）。
+	const uint64_t etime = stime;
 
 	WTSOrdQueSlice* queSlice = reader.readOrdQueSliceByRange("SSE.600000", stime, etime);
 	ASSERT_TRUE(queSlice != NULL);
@@ -245,7 +245,7 @@ TEST_F(R162ReaderEdgeTest, R162RdmReaderHisTransBlocksWithMixedActionDatesFromFi
 	reader.init(NULL, &sink);
 
 	const uint64_t stime = (uint64_t)date * 1000000000ULL + atime;
-	const uint64_t etime = stime + 1;
+	const uint64_t etime = stime;	// K60 闭区间
 
 	WTSOrdQueSlice* queSlice = reader.readOrdQueSliceByRange("SSE.600000", stime, etime);
 	ASSERT_TRUE(queSlice != NULL);

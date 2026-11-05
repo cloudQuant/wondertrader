@@ -1,0 +1,51 @@
+{
+ "start": "2026-11-06T03:00:21+08:00",
+ "bin_dir": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g8/build-tsan/build_x64/Debug/bin/TestUnits",
+ "workers": 6,
+ "timeout": 600.0,
+ "auto_env": {
+  "WT_R66_FAKE_MQ_DIR": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g8/build-tsan/TestUnits/coverage/r160_fake_mq"
+ },
+ "extra_env": [
+  "TSAN_OPTIONS=halt_on_error=0:second_deadlock_stack=1:report_signal_unsafe=0",
+  "TSAN_SYMBOLIZER_PATH=/opt/homebrew/opt/llvm/bin/llvm-symbolizer"
+ ],
+ "no_profile_env": false,
+ "only_disabled": false,
+ "argv": [
+  "/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/regression-tools/run_regression.py",
+  "--bin-dir",
+  "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g8/build-tsan/build_x64/Debug/bin/TestUnits",
+  "--out",
+  "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g8/run-tsan",
+  "--timeout",
+  "600",
+  "--provision-modules",
+  "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g8/build-tsan/build_x64/Debug/bin",
+  "--provision-only",
+  "CoverageTests_m_WtRunner",
+  "--provision-exclude",
+  "CoverageTests_m_WtRunner::r28_wtrunner_strategies.real_cta_factory_null_self_is_rejected_and_dual_thrust_configures",
+  "--workers",
+  "6",
+  "--only",
+  "CoverageTests_dtservo",
+  "--env",
+  "TSAN_OPTIONS=halt_on_error=0:second_deadlock_stack=1:report_signal_unsafe=0",
+  "--env",
+  "TSAN_SYMBOLIZER_PATH=/opt/homebrew/opt/llvm/bin/llvm-symbolizer"
+ ],
+ "binaries": [
+  {
+   "name": "CoverageTests_dtservo",
+   "sha256": "629afd20b45fa5e9479e71aabca734679042480918f6286e5b9cf8eafbc63f6c",
+   "list_status": "ok",
+   "enabled": 129,
+   "disabled": 1,
+   "disabled_names": [
+    "R45ParserAdapterFakeTest.DISABLED_ReleaseTwiceContractPending"
+   ]
+  }
+ ],
+ "end": "2026-11-06T03:00:47+08:00"
+}

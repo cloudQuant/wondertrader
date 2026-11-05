@@ -1333,6 +1333,13 @@ bool WtRunner::initEngine()
 		_engine = NULL;
 		return false;
 	}
+	if (!_engine->riskmon_config_valid())
+	{
+		// K54 (BUG-R211-001, user decision 2026-11-06)
+		WTSLogger::error("Runner initialization rejected: the active risk monitor failed to initialize");
+		_engine = NULL;
+		return false;
+	}
 
 	_engine->set_adapter_mgr(&_traders);
 
@@ -1735,6 +1742,14 @@ void WtRunner::run(bool bAsync /* = false */)
 				: std::string(WtHelper::getBaseDir()) + "resume/";
 		}
 		WTSLogger::info("Account resume requests are read from {}", _resume_folder);
+		// K50（I03-NEW-089）：人工合约归属释放命令；配置 claim_release_folder，缺省 <生成目录>/claim_release/
+		if (_claim_folder.empty())
+		{
+			const char* folder = _config != NULL ? _config->getCString("claim_release_folder") : "";
+			_claim_folder = (folder != NULL && folder[0] != '\0') ? std::string(folder)
+				: std::string(WtHelper::getBaseDir()) + "claim_release/";
+		}
+		WTSLogger::info("Manual claim release requests are read from {}", _claim_folder);
 
 		if(!bAsync)
 		{
@@ -1746,6 +1761,7 @@ void WtRunner::run(bool bAsync /* = false */)
 				if (now >= nextResumePoll)
 				{
 					processAccountResumeRequests();
+					processManualClaimRequests();
 					nextResumePoll = now + std::chrono::seconds(1);
 				}
 			}
@@ -1774,6 +1790,26 @@ uint32_t WtRunner::processAccountResumeRequests()
 		else
 			WTSLogger::error("Account resume request {} for trader {} not applied ({}): {}; archived as {}",
 				outcome.request, outcome.trader, outcome.valid ? AccountResumeInbox::statusName(outcome.status) : "invalid",
+				outcome.diagnostic, outcome.archived.empty() ? std::string("<not claimed>") : outcome.archived);
+	}
+	return (uint32_t)outcomes.size();
+}
+
+uint32_t WtRunner::processManualClaimRequests()
+{
+	const std::vector<ManualClaimOutcome> outcomes = ManualClaimInbox::process(_claim_folder,
+		[this](const std::string& trader, const AccountTradingGate::ClaimReleaseRequest& request, std::string& diagnostic) {
+			return _traders.releaseManualClaim(trader.c_str(), request, &diagnostic);
+		});
+	for (const ManualClaimOutcome& outcome : outcomes)
+	{
+		if (outcome.valid && outcome.status == AccountTradingGate::ClaimReleaseStatus::Ok)
+			WTSLogger::warn("Manual claim release request {} for trader {} on {} applied (operator recorded, not authenticated): {}; archived as {}",
+				outcome.request, outcome.trader, outcome.code, outcome.diagnostic, outcome.archived);
+		else
+			WTSLogger::error("Manual claim release request {} for trader {} on {} not applied ({}): {}; archived as {}",
+				outcome.request, outcome.trader, outcome.code,
+				outcome.valid ? ManualClaimInbox::statusName(outcome.status) : "invalid",
 				outcome.diagnostic, outcome.archived.empty() ? std::string("<not claimed>") : outcome.archived);
 	}
 	return (uint32_t)outcomes.size();

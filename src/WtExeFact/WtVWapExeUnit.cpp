@@ -757,6 +757,8 @@ void WtVWapExeUnit::do_calc()
 		return;
 	}
 	double curPos = realPos;
+	// K58: orders of the clear branch are explicit closes (never left to the open/close policy).
+	bool clearClose = false;
 
 	if (decimal::eq(curPos, newVol))
 	{
@@ -764,13 +766,31 @@ void WtVWapExeUnit::do_calc()
 		if (!is_clear(_target_pos))
 			return;
 
-		//如果是清仓的需求，还要再进行对比
-		//如果多头为0，说明已经全部清理掉了，则直接退出
-		double lPos = _ctx->getPosition(code, true, 1);
-		if (decimal::eq(lPos, 0))
+		// K58 (BUG-R7-004, user decision 2026-11-06): clear only what is available. A net-zero
+		// locked position closes its available long first, otherwise its available short; legs
+		// that are frozen or T+1 keep the clear target and are retried on later ticks with a
+		// diagnostic. Directional closes only happen while both legs exist, which a net-position
+		// account never reports.
+		const double lPos = _ctx->getPosition(code, true, 1);
+		const double sAvail = _ctx->getPosition(code, true, 2);
+		if (decimal::gt(lPos, 0))
+		{
+			newVol = -min(lPos, _order_lots);
+		}
+		else if (decimal::lt(sAvail, 0))
+		{
+			newVol = min(-sAvail, _order_lots);
+		}
+		else
+		{
+			const double lTotal = _ctx->getPosition(code, false, 1);
+			const double sTotal = _ctx->getPosition(code, false, 2);
+			if (!decimal::eq(lTotal, 0) || !decimal::eq(sTotal, 0))
+				_ctx->writeLog(fmtutil::format("Clearing of {} waits: long {} and short {} are not yet available (frozen or T+1), retrying on later ticks",
+					_code.c_str(), lTotal, sTotal));
 			return;
-		//如果还有多头仓位，则将目标仓位设置为非0，强制触发    
-		newVol = -min(lPos, _order_lots);
+		}
+		clearClose = true;
 		// Size the slice from the forced closing target (net is zero here).
 		diffQty = newVol - curPos;
 		_ctx->writeLog(fmtutil::format("Clearing process triggered, target position of {} has been set to {}", _code.c_str(), newVol));
@@ -849,10 +869,10 @@ void WtVWapExeUnit::do_calc()
 		return;
 	if (curQty > 0)
 	{
-		ids = _ctx->buy(code, targetPx, abs(curQty));
+		ids = _ctx->buy(code, targetPx, abs(curQty), clearClose);
 	}
 	else {
-		ids = _ctx->sell(code, targetPx, abs(curQty));
+		ids = _ctx->sell(code, targetPx, abs(curQty), clearClose);
 	}
 	_orders_mon.push_order(ids.data(), ids.size(), now, isCanCancel);
 	_last_fire_session_time_ms = sessionTimeMs;

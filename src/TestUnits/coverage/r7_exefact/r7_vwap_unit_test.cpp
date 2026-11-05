@@ -48,7 +48,7 @@ const char* const kCode = "tv2403";
 class FakeCtx : public ExecuteContext
 {
 public:
-	struct Rec { std::string code; double price; double qty; };
+	struct Rec { std::string code; double price; double qty; bool force = false; };
 	FakeCtx()
 	{
 		sess = WTSSessionInfo::create("R7_DAY", "R7_DAY", 0);
@@ -84,15 +84,15 @@ public:
 	OrderMap* getOrders(const char*) override { return NULL; }
 	double getUndoneQty(const char*) override { return undone; }
 
-	OrderIDs buy(const char* stdCode, double price, double qty, bool) override
+	OrderIDs buy(const char* stdCode, double price, double qty, bool forceClose) override
 	{
-		buys.push_back({ stdCode, price, qty });
+		buys.push_back({ stdCode, price, qty, forceClose });
 		OrderIDs ids{ nextId++ };
 		return ids;
 	}
-	OrderIDs sell(const char* stdCode, double price, double qty, bool) override
+	OrderIDs sell(const char* stdCode, double price, double qty, bool forceClose) override
 	{
-		sells.push_back({ stdCode, price, qty });
+		sells.push_back({ stdCode, price, qty, forceClose });
 		OrderIDs ids{ nextId++ };
 		return ids;
 	}
@@ -659,7 +659,49 @@ TEST(r7_vwap, clear_target_flattens_net_zero_locked_position)
 	ASSERT_EQ(ctx.sells.size(), 1u) << "net zero must not hide the gross long under a clear command";
 	EXPECT_GT(ctx.sells[0].qty, 0.0);
 	EXPECT_LE(ctx.sells[0].qty, 2.0) << "never more than the available long";
+	EXPECT_TRUE(ctx.sells[0].force) << "K58: a clear-branch order is an explicit close";
 	EXPECT_TRUE(ctx.buys.empty());
+	ctx.comm->release();
+}
+
+// K58（BUG-R7-004，用户裁定 2026-11-06）：净零锁仓、多头全部冻结时先买回可用空头（带平仓标志），
+// 不卖冻结的多头。
+TEST(r7_vwap_clear_k58, net_zero_with_frozen_long_buys_back_available_short)
+{
+	VwapFile vf(25.0);
+	LockedVwapCtx ctx;
+	ctx.lockedLongAvail = 0.0;
+	ctx.comm = mkComm();
+	WtVWapExeUnit unit;
+	boot(unit, ctx, DBL_MAX, mkCfg());
+	sendTick(unit, mkTick(kCode, 100000000, 10.50, 10.49, 10.51));
+	EXPECT_TRUE(ctx.sells.empty()) << "a frozen long must not be sold";
+	ASSERT_EQ(ctx.buys.size(), 1u);
+	EXPECT_GT(ctx.buys[0].qty, 0.0);
+	EXPECT_LE(ctx.buys[0].qty, 2.0) << "never more than the available short";
+	EXPECT_TRUE(ctx.buys[0].force);
+	ctx.comm->release();
+}
+
+// K58：两边都不可用时不发单、记诊断，清仓目标保留；可用后在后续 tick 继续。
+TEST(r7_vwap_clear_k58, unavailable_legs_wait_with_diagnostic_and_retry_later)
+{
+	VwapFile vf(25.0);
+	LockedVwapCtx ctx;
+	ctx.lockedLongAvail = 0.0;
+	ctx.lockedShortAvail = 0.0;
+	ctx.comm = mkComm();
+	WtVWapExeUnit unit;
+	boot(unit, ctx, DBL_MAX, mkCfg());
+	sendTick(unit, mkTick(kCode, 100000000, 10.50, 10.49, 10.51));
+	EXPECT_TRUE(ctx.sells.empty());
+	EXPECT_TRUE(ctx.buys.empty());
+	EXPECT_TRUE(ctx.hasLog("not yet available"));
+
+	ctx.lockedLongAvail = 2.0;
+	sendTick(unit, mkTick(kCode, 100100000, 10.60, 10.59, 10.61));
+	ASSERT_EQ(ctx.sells.size(), 1u) << "the clear target must survive and be retried";
+	EXPECT_TRUE(ctx.sells[0].force);
 	ctx.comm->release();
 }
 

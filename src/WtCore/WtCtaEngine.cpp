@@ -76,8 +76,16 @@ void WtCtaEngine::run()
 		return;
 	}
 
+	// I03-NEW-142: env.product.session drives the ticker. A configuration without a
+	// product section used to dereference NULL here; refuse to start instead.
+	WTSVariant* cfgProd = _cfg == NULL ? NULL : _cfg->get("product");
+	if (cfgProd == NULL || cfgProd->type() != WTSVariant::VT_Object)
+	{
+		WTSLogger::error("CTA engine start rejected: env.product is missing");
+		return;
+	}
+
 	_tm_ticker = new WtCtaRtTicker(this);
-	WTSVariant* cfgProd = _cfg->get("product");
 	_tm_ticker->init(_data_mgr->reader(), cfgProd->getCString("session"));
 
 	//启动之前,先把运行中的策略落地

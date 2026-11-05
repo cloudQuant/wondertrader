@@ -1,0 +1,38 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03K59WeekendTest.*
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from I03K59WeekendTest
+[ RUN      ] I03K59WeekendTest.DaySessionWeekendIsHoliday
+[       OK ] I03K59WeekendTest.DaySessionWeekendIsHoliday (3 ms)
+[ RUN      ] I03K59WeekendTest.FridayNightContinuationOnSaturdayIsTrading
+[       OK ] I03K59WeekendTest.FridayNightContinuationOnSaturdayIsTrading (1 ms)
+[ RUN      ] I03K59WeekendTest.RestOfWeekendIsHolidayForNightSession
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/i03_k59_state_monitor_weekend_test.cpp:128: Failure
+Value of: holidayAt("K59NIGHT", kSat, 1000)
+  Actual: false
+Expected: true
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/i03_k59_state_monitor_weekend_test.cpp:129: Failure
+Value of: holidayAt("K59NIGHT", kSat, 2200)
+  Actual: false
+Expected: true
+
+[  FAILED  ] I03K59WeekendTest.RestOfWeekendIsHolidayForNightSession (1 ms)
+[ RUN      ] I03K59WeekendTest.FridayHolidayMeansNoSaturdayContinuation
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/q05_dtsrv/i03_k59_state_monitor_weekend_test.cpp:137: Failure
+Value of: holidayAt("K59NIGHTFH", kFri, 2200)
+  Actual: false
+Expected: true
+
+[  FAILED  ] I03K59WeekendTest.FridayHolidayMeansNoSaturdayContinuation (1 ms)
+[----------] 4 tests from I03K59WeekendTest (7 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (7 ms total)
+[  PASSED  ] 2 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] I03K59WeekendTest.RestOfWeekendIsHolidayForNightSession
+[  FAILED  ] I03K59WeekendTest.FridayHolidayMeansNoSaturdayContinuation
+
+ 2 FAILED TESTS

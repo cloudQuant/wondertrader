@@ -159,6 +159,12 @@ public:
 
 	double calc_fee(const char* stdCode, double price, double qty, uint32_t offset);
 	inline bool fee_config_valid() const { return _fee_config_valid; }
+	/**
+	 * K54 (BUG-R211-001, user decision 2026-11-06): false when riskmon.active=true but the
+	 * risk monitor could not be initialized. Runners refuse to start such an engine. Non-virtual
+	 * so the virtual init() signature and vtable stay unchanged.
+	 */
+	inline bool riskmon_config_valid() const { return _riskmon_config_valid; }
 
 	/*
 	 *	Checked fee of one live fill (I03-NEW-008, card 13d).
@@ -476,6 +482,7 @@ protected:
 	// init() keeps its existing virtual ABI; concrete runners inspect this state
 	// after initialization before accepting the engine for execution.
 	bool			_fee_config_valid;
+	bool			_riskmon_config_valid;
 };
 NS_WTP_END
 

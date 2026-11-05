@@ -1,0 +1,48 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03K50ManualClaimRelease.LiveManualOrderBlocksTheRelease
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03K50ManualClaimRelease
+[ RUN      ] I03K50ManualClaimRelease.LiveManualOrderBlocksTheRelease
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:217: Failure
+Expected equality of these values:
+  AccountTradingGate::ClaimReleaseStatus::LiveOrders
+    Which is: 4-byte object <03-00 00-00>
+  trader.releaseManualClaim(k50Request(kAg), &diagnostic)
+    Which is: 4-byte object <00-00 00-00>
+claim of manual on SHFE.ag.2512 released by alice
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:218: Failure
+Value of: trader.accountGate()->hasClaim(kAg, "manual")
+  Actual: false
+Expected: true
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:219: Failure
+Value of: trader.buyAsOwner("exec:k50", true, kAg, 3500.0, 1.0, 0, false).empty()
+  Actual: false
+Expected: true
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:221: Failure
+Expected: (std::string::npos) != (audit.find("\"event\":\"claim_release_rejected\"")), actual: 18446744073709551615 vs 18446744073709551615
+{"schema":1,"seq":1,"wall_ms":1793901942837,"account":"adapter-instance","event":"claim_released","generation":0,"actor":"alice","detail":"owner=manual code=SHFE.ag.2512","reason":"manual hedge closed","reference":"TICKET-K50"}
+
+
+/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/k50mut/tree/src/TestUnits/coverage/n01_wtcore_tradepaths/i03_k50_manual_claim_release_test.cpp:222: Failure
+Expected equality of these values:
+  std::string::npos
+    Which is: 18446744073709551615
+  audit.find("\"event\":\"claim_released\"")
+    Which is: 73
+{"schema":1,"seq":1,"wall_ms":1793901942837,"account":"adapter-instance","event":"claim_released","generation":0,"actor":"alice","detail":"owner=manual code=SHFE.ag.2512","reason":"manual hedge closed","reference":"TICKET-K50"}
+
+
+[  FAILED  ] I03K50ManualClaimRelease.LiveManualOrderBlocksTheRelease (2 ms)
+[----------] 1 test from I03K50ManualClaimRelease (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (4 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] I03K50ManualClaimRelease.LiveManualOrderBlocksTheRelease
+
+ 1 FAILED TEST

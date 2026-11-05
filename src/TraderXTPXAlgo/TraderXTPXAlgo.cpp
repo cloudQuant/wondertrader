@@ -1158,6 +1158,8 @@ int TraderXTPXAlgo::logout()
 		return -1;
 
 	_api->Logout(_sessionid);
+	// K55 (BUG-R60-006, user decision 2026-11-06): isConnected() means fully ready; logout ends it.
+	_state = TS_NOTLOGIN;
 	return 0;
 }
 

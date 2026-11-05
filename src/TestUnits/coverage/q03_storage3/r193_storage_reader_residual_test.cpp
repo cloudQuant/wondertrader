@@ -1,7 +1,7 @@
 // r193 / WtDataStorage 读端残余：loader 路径与后复权实时块裁剪
 //
 // 覆盖（src/WtDataStorage/WtDataReader.cpp）：
-//  - cacheFinalBarsFromLoader 的未知周期 pname 默认值 :948
+//  - 未知周期按 K61 被拒绝（原为 cacheFinalBarsFromLoader 的 pname 默认值 :948）
 // 覆盖（src/WtDataStorage/WtRdmDtReader.cpp）：
 //  - readKlineSliceByRange 后复权分支 eBar 落在 RT 两根 K 线之间时的回退 :1954-1957
 //  - readKlineSliceByCount 后复权分支 RT 缓存增长 oldSize!=0 与 eBar 回退 :2334 / :2361-2364
@@ -65,8 +65,10 @@ protected:
 	WtRdmDtReader				_rdm;
 };
 
-// WtDataReader.cpp:948；扩展 loader 对 KP_Tick 也返回数据，pname 走 default
-TEST_F(R193StorageReaderTest, R193LoaderUnknownPeriodUsesDayName)
+// K61（BUG-I02-NEW-060，用户裁定 2026-11-06）：读端只支持 m1/m5/day。原用例断言 KP_Tick 经扩展
+// loader 回退为日线并返回 1 根，该行为没有合同依据；按裁定改为 KP_Tick 被拒绝（返回 NULL、记 ERROR）。
+// 完整的拒绝矩阵与基础周期正控见 i03_k61_kline_period_contract_test.cpp。
+TEST_F(R193StorageReaderTest, R193LoaderUnknownPeriodIsRejected)
 {
 	r52::Loader loader;
 	vector<WTSBarStruct> bars;
@@ -74,11 +76,13 @@ TEST_F(R193StorageReaderTest, R193LoaderUnknownPeriodUsesDayName)
 	loader.add_final("SSE.STK.600030", bars);
 	init_reader(&loader);
 
+	const uint32_t errorsBefore = _sink.count_of(LL_ERROR);
 	WTSKlineSlice* slice = _reader.readKlineSlice("SSE.STK.600030", KP_Tick, 10,
 		202401081500ull);
-	ASSERT_TRUE(slice != NULL);
-	ASSERT_EQ(slice->size(), 1);
-	slice->release();
+	EXPECT_TRUE(slice == NULL);
+	if (slice != NULL)
+		slice->release();
+	EXPECT_EQ(errorsBefore + 1, _sink.count_of(LL_ERROR));
 }
 
 // WtRdmDtReader.cpp:1954-1957；后复权：RT 为 09:30/09:32，查询截止 09:31

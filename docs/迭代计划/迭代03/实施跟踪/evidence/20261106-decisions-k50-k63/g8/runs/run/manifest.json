@@ -1,0 +1,79 @@
+{
+ "start": "2026-11-06T02:47:50+08:00",
+ "bin_dir": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g8/build/build_x64/Debug/bin/TestUnits",
+ "workers": 8,
+ "timeout": 600.0,
+ "auto_env": {
+  "WT_R66_FAKE_MQ_DIR": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g8/build/TestUnits/coverage/r160_fake_mq",
+  "R42_HFT_PLUGIN": "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g8/build/build_x64/Debug/bin/libWtHftStraFact.dylib"
+ },
+ "extra_env": [],
+ "no_profile_env": false,
+ "only_disabled": false,
+ "argv": [
+  "/Users/yunjinqi/Documents/new_projects/wondertrader/docs/迭代计划/迭代03/实施跟踪/evidence/regression-tools/run_regression.py",
+  "--bin-dir",
+  "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g8/build/build_x64/Debug/bin/TestUnits",
+  "--out",
+  "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g8/run",
+  "--timeout",
+  "600",
+  "--provision-modules",
+  "/private/tmp/claude-501/-Users-yunjinqi-Documents-new-projects-wondertrader/6eec4fa0-1d68-45f7-92f0-284edb551a79/scratchpad/g8/build/build_x64/Debug/bin",
+  "--provision-only",
+  "CoverageTests_m_WtRunner",
+  "--provision-exclude",
+  "CoverageTests_m_WtRunner::r28_wtrunner_strategies.real_cta_factory_null_self_is_rejected_and_dual_thrust_configures",
+  "--workers",
+  "8",
+  "--only",
+  "CoverageTests,CoverageTests_porter,CoverageTests_dtservo"
+ ],
+ "binaries": [
+  {
+   "name": "CoverageTests",
+   "sha256": "12dc44b92c86566535d7f657c790731d6b893950aeda55cb1f5f14606af5e579",
+   "list_status": "ok",
+   "enabled": 1378,
+   "disabled": 10,
+   "disabled_names": [
+    "l01_objectpool.DISABLED_destroy_null_is_undefined_and_rejected",
+    "l03_contract.DISABLED_get_long_margin_ratio_without_comm_info",
+    "P12TickFactory.DISABLED_CrashClassNotExecuted",
+    "S5StorageReaderTest.DISABLED_LongestLegalStdCodeHistoryTickKeyStaysExact",
+    "R22PorterCapiTest.DISABLED_write_log_with_null_category_hits_strlen_null",
+    "R22PorterCapiTest.DISABLED_capi_start_without_initialization_spawns_lifetime_monitor",
+    "R22RunnerInitTest.DISABLED_start_sync_branch_never_returns",
+    "R22RunnerInitTest.DISABLED_start_async_branch_spawns_state_monitor_thread",
+    "R23WriterTest.DISABLED_ClearCacheCommandMaySleepThreeHundredSeconds",
+    "R23WriterTest.DISABLED_SecondInitOnSameWriterTerminatesProcess"
+   ]
+  },
+  {
+   "name": "CoverageTests_dtservo",
+   "sha256": "eced59ee48ebcf14447ebcfe776cc0c73d48833ac929831a8df1a60d54f59af0",
+   "list_status": "ok",
+   "enabled": 129,
+   "disabled": 1,
+   "disabled_names": [
+    "R45ParserAdapterFakeTest.DISABLED_ReleaseTwiceContractPending"
+   ]
+  },
+  {
+   "name": "CoverageTests_porter",
+   "sha256": "02c4114702ba0c49380e22cf97a180cc18ccf6cfcbda0d8f9e396cae23f46652",
+   "list_status": "ok",
+   "enabled": 283,
+   "disabled": 6,
+   "disabled_names": [
+    "Q06PorterCapi.DISABLED_UninitializedEngineGettersCrash",
+    "Q06PorterRunner.DISABLED_BlockingAndNullEnginePaths",
+    "R13ExpContextBlanks.DISABLED_init_and_session_end_and_hft_trader_paths_need_output_and_trader_seams",
+    "R35PorterRunnerLocal.DISABLED_stack_instance_destructor_crashes_after_testbody",
+    "R6PorterNullArgs.DISABLED_ctx_on_tick_null_tickdata_derefs",
+    "R6PorterRunRelease.DISABLED_run_without_engine_and_release_global_logger_stop"
+   ]
+  }
+ ],
+ "end": "2026-11-06T02:49:02+08:00"
+}

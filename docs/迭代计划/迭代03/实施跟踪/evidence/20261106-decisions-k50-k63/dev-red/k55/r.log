@@ -1,0 +1,47 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03K55MockerIsConnected.*:R214MockerBranches.DisconnectJoinsMatchThreadWithoutWorker:T6009Mocker.ConcurrentExternalReleaseAndRequests
+[==========] Running 5 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from I03K55MockerIsConnected
+[ RUN      ] I03K55MockerIsConnected.ReadyOnlyBetweenLoginResultAndLogout
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/i03_k55_isconnected_state_test.cpp:73: Failure
+Value of: api->isConnected()
+  Actual: true
+Expected: false
+
+[  FAILED  ] I03K55MockerIsConnected.ReadyOnlyBetweenLoginResultAndLogout (11 ms)
+[ RUN      ] I03K55MockerIsConnected.DisconnectAndReleaseClearReadiness
+[       OK ] I03K55MockerIsConnected.DisconnectAndReleaseClearReadiness (10 ms)
+[ RUN      ] I03K55MockerIsConnected.LoginWithoutChannelIsNotReady
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/i03_k55_isconnected_state_test.cpp:103: Failure
+Value of: api->isConnected()
+  Actual: true
+Expected: false
+
+[  FAILED  ] I03K55MockerIsConnected.LoginWithoutChannelIsNotReady (8 ms)
+[----------] 3 tests from I03K55MockerIsConnected (30 ms total)
+
+[----------] 1 test from R214MockerBranches
+[ RUN      ] R214MockerBranches.DisconnectJoinsMatchThreadWithoutWorker
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_TraderMocker/r214_mocker_branch_test.cpp:317: Failure
+Value of: api_.isConnected()
+  Actual: true
+Expected: false
+
+[  FAILED  ] R214MockerBranches.DisconnectJoinsMatchThreadWithoutWorker (6 ms)
+[----------] 1 test from R214MockerBranches (6 ms total)
+
+[----------] 1 test from T6009Mocker
+[ RUN      ] T6009Mocker.ConcurrentExternalReleaseAndRequests
+[       OK ] T6009Mocker.ConcurrentExternalReleaseAndRequests (11 ms)
+[----------] 1 test from T6009Mocker (11 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 3 test suites ran. (47 ms total)
+[  PASSED  ] 2 tests.
+[  FAILED  ] 3 tests, listed below:
+[  FAILED  ] I03K55MockerIsConnected.ReadyOnlyBetweenLoginResultAndLogout
+[  FAILED  ] I03K55MockerIsConnected.LoginWithoutChannelIsNotReady
+[  FAILED  ] R214MockerBranches.DisconnectJoinsMatchThreadWithoutWorker
+
+ 3 FAILED TESTS

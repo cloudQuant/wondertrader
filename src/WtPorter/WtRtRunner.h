@@ -673,6 +673,12 @@ public:
 		uint64_t expectedGeneration, const char* reference);
 	/** @brief 账户门禁当前暂停代数；未知 trader 返回 0。 */
 	uint64_t getAccountPauseGeneration(const char* traderId);
+	/**
+	 * K50 (I03-NEW-089): explicit, audited release of the manual owner claim on one contract.
+	 * Returns AccountTradingGate::ClaimReleaseStatus as int32 (0 = Ok).
+	 */
+	int32_t releaseManualClaim(const char* traderId, const char* code, const char* operatorId,
+		const char* reason, const char* reference);
 
 private:
 	/**

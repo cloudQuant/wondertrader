@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="1" failures="1" disabled="0" errors="0" time="0.278" timestamp="2026-11-06T00:58:04.663" name="AllTests">
+  <testsuite name="I03K51ShmSlowConsumer" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="0.278" timestamp="2026-11-06T00:58:04.663">
+    <testcase name="LappedConsumerDropsOldestWarnsAndDeliversContiguousTail" file="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp" line="174" status="run" result="completed" time="0.278" timestamp="2026-11-06T00:58:04.663" classname="I03K51ShmSlowConsumer">
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:235&#x0A;Failed&#x0A;out-of-order or duplicate delivery at 8193: 24576 then 16385&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:235
+Failed
+out-of-order or duplicate delivery at 8193: 24576 then 16385
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:242&#x0A;Expected equality of these values:&#x0A;  seqs.size() - 1&#x0A;    Which is: 24576&#x0A;  (size_t)(kLapped - tailStart + 1)&#x0A;    Which is: 8192&#x0A;tail is not contiguous&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:242
+Expected equality of these values:
+  seqs.size() - 1
+    Which is: 24576
+  (size_t)(kLapped - tailStart + 1)
+    Which is: 8192
+tail is not contiguous
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:243&#x0A;Expected: (seqs.size() - 1) &lt;= ((size_t)kCapacity), actual: 24576 vs 8192&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:243
+Expected: (seqs.size() - 1) <= ((size_t)kCapacity), actual: 24576 vs 8192
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:258&#x0A;Expected: (lagWarns) &gt;= (1u), actual: 0 vs 1&#x0A;no lag warning was logged&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:258
+Expected: (lagWarns) >= (1u), actual: 0 vs 1
+no lag warning was logged
+]]></failure>
+      <failure message="/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:259&#x0A;Value of: countMentioned&#x0A;  Actual: false&#x0A;Expected: true&#x0A;lag warning does not mention the 16384 dropped items&#x0A;" type=""><![CDATA[/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:259
+Value of: countMentioned
+  Actual: false
+Expected: true
+lag warning does not mention the 16384 dropped items
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

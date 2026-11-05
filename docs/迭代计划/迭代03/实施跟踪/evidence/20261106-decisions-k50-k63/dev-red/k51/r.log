@@ -1,0 +1,41 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+Note: Google Test filter = I03K51ShmSlowConsumer.*
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from I03K51ShmSlowConsumer
+[ RUN      ] I03K51ShmSlowConsumer.LappedConsumerDropsOldestWarnsAndDeliversContiguousTail
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:235: Failure
+Failed
+out-of-order or duplicate delivery at 8193: 24576 then 16385
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:242: Failure
+Expected equality of these values:
+  seqs.size() - 1
+    Which is: 24576
+  (size_t)(kLapped - tailStart + 1)
+    Which is: 8192
+tail is not contiguous
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:243: Failure
+Expected: (seqs.size() - 1) <= ((size_t)kCapacity), actual: 24576 vs 8192
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:258: Failure
+Expected: (lagWarns) >= (1u), actual: 0 vs 1
+no lag warning was logged
+
+/Users/yunjinqi/Documents/new_projects/wondertrader/src/TestUnits/coverage/t_ParserShm/i03_k51_shm_slow_consumer_test.cpp:259: Failure
+Value of: countMentioned
+  Actual: false
+Expected: true
+lag warning does not mention the 16384 dropped items
+
+[  FAILED  ] I03K51ShmSlowConsumer.LappedConsumerDropsOldestWarnsAndDeliversContiguousTail (278 ms)
+[----------] 1 test from I03K51ShmSlowConsumer (278 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (278 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] I03K51ShmSlowConsumer.LappedConsumerDropsOldestWarnsAndDeliversContiguousTail
+
+ 1 FAILED TEST

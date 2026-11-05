@@ -97,12 +97,13 @@ TEST_F(R74RdmHftHotTest, R74RdmHisQueueLoadsClipsAndRejects)
 	EXPECT_EQ(all->at(2)->action_time, 93200000u);
 	all->release();
 
-	// etime=09:31 → lower_bound 命中 09:31 后 `>=` 回退，只剩 09:30
+	// K60（2026-11-06，闭区间）：etime=09:31 包含 09:31 那条，共 09:30、09:31 两条
 	WTSOrdQueSlice* one = _reader->readOrdQueSliceByRange("SSE.STK.600000",
 		20240108090000000ull, 20240108093100000ull);
 	ASSERT_TRUE(one != NULL);
-	ASSERT_EQ(one->size(), 1u);
+	ASSERT_EQ(one->size(), 2u);
 	EXPECT_EQ(one->at(0)->action_time, 93000000u);
+	EXPECT_EQ(one->at(1)->action_time, 93100000u);
 	one->release();
 
 	// header-only 压缩块：解压后 tcnt==0 → :744-746 返回 NULL
@@ -144,12 +145,13 @@ TEST_F(R74RdmHftHotTest, R74RdmHisDetailCrossDayAndRejects)
 	EXPECT_EQ(all->at(1)->index, dtl[1].index);
 	all->release();
 
-	// 同日窗口 09:00~09:31 → `>=` 回退后仅 09:30（:946-957）
+	// 同日窗口 09:00~09:31：K60（2026-11-06，闭区间）包含 09:31，共两条
 	WTSOrdDtlSlice* one = _reader->readOrdDtlSliceByRange("SSE.STK.600000",
 		20240105090000000ull, 20240105093100000ull);
 	ASSERT_TRUE(one != NULL);
-	ASSERT_EQ(one->size(), 1u);
+	ASSERT_EQ(one->size(), 2u);
 	EXPECT_EQ(one->at(0)->index, dtl[0].index);
+	EXPECT_EQ(one->at(1)->index, dtl[1].index);
 	one->release();
 
 	// 8 字节短文件
@@ -190,11 +192,13 @@ TEST_F(R74RdmHftHotTest, R74RdmHisTransCrossDayAndRejects)
 	EXPECT_EQ(all->at(2)->index, trs[2].index);
 	all->release();
 
+	// K60（2026-11-06，闭区间）：右界 09:31 包含 09:31 那条
 	WTSTransSlice* one = _reader->readTransSliceByRange("SSE.STK.600000",
 		20231229090000000ull, 20231229093100000ull);
 	ASSERT_TRUE(one != NULL);
-	ASSERT_EQ(one->size(), 1u);
+	ASSERT_EQ(one->size(), 2u);
 	EXPECT_EQ(one->at(0)->index, trs[0].index);
+	EXPECT_EQ(one->at(1)->index, trs[1].index);
 	one->release();
 
 	ASSERT_TRUE(q03::write_bytes(his_hft_file("trans", 20231228),

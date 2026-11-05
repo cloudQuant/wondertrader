@@ -667,6 +667,24 @@ void WtDataManager::subscribe_bar(const char* stdCode, WTSKlinePeriod period, ui
 
 	std::string key = fmtutil::format("{}-{}-{}", stdCode, (uint32_t)period, times);
 
+	if (period == KP_Tick)
+	{
+		// I03-NEW-143 (K61, 2026-11-06): second bars are never stored and readers reject
+		// KP_Tick, so the realtime second-bar cache starts empty and is built from ticks in
+		// update_bars. It used to be seeded from a reader query that could only return
+		// unrelated (day-file) bars or nothing.
+		WTSKlineData* kline = WTSKlineData::create(stdCode, 0);
+		kline->setPeriod(KP_Tick, times);
+		{
+			StdUniqueLock lock(_mtx_rtbars);
+			if (_rt_bars == NULL)
+				_rt_bars = RtBarMap::create();
+			_rt_bars->add(key, kline, false);
+		}
+		WTSLogger::info("Realtime bar {} has subscribed", key);
+		return;
+	}
+
 	uint32_t curDate = TimeUtils::getCurDate();
 	uint64_t etime = (uint64_t)curDate * 10000 + 2359;
 

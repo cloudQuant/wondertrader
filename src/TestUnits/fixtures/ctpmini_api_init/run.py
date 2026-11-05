@@ -39,4 +39,10 @@ for mode in ('missing-library','missing-symbol','null-api','null-config','succes
 if not baseline:
  wd=out/'cross-instance';wd.mkdir();env=os.environ.copy();env['LLVM_PROFILE_FILE']=str(wd/'profile.profraw')
  if run('cross-instance',[str(out/'focused'),'cross-instance'],wd,env)!=0: bad.append('cross-instance')
+# K53 (2026-11-06): a failure that loaded no module may be retried on the same instance.
+# WT_K53_FORCE=1 also runs these modes for a supplied source (mutation red control).
+if not baseline or os.environ.get('WT_K53_FORCE') == '1':
+ for mode in ('retry-after-missing-library','retry-after-null-config'):
+  wd=out/mode;wd.mkdir();env=os.environ.copy();env['LLVM_PROFILE_FILE']=str(wd/'profile.profraw')
+  if run(mode,[str(out/'focused'),mode],wd,env)!=0: bad.append(mode)
 if bad: raise SystemExit('Unexpected test outcome: '+', '.join(bad))

@@ -95,8 +95,8 @@ extern "C"
 	 * @param fnlBarLoader 最终K线数据加载器
 	 * @param rawBarLoader 原始K线数据加载器
 	 * @param fctLoader 复权因子加载器
-	 * @param tickLoader Tick数据加载器（实盘 runner 当前不支持：数据管理器没有向外部加载器请求 tick 的路径，
-	 *        非空时只记录告警、永不调用；见 BUG-R134-004）
+	 * @param tickLoader Tick数据加载器。实盘 runner 不支持外部 tick 加载（K57，BUG-R134-004）：
+	 *        参数只为 ABI 兼容保留，非空时打一条 WARN，永不调用
 	 * @details 用于注册外部数据加载器，实现自定义数据源的接入
 	 *          当系统需要加载历史数据时，会调用这些加载器函数
 	 *          支持加载K线数据与复权因子；Tick 加载器不受支持
@@ -116,10 +116,9 @@ extern "C"
 	 * @brief 输入原始Tick数据
 	 * @param ticks Tick数据指针，指向Tick数据数组
 	 * @param count Tick数据数量
-	 * @details 用于直接向框架输入原始Tick数据，主要在使用外部数据源时使用
-	 *          这些数据会被框架内部处理并提供给策略使用
-	 *          Tick数据是最小的行情单元，包含最近一笔成交的价格和数量等信息
-	 *          注意：实盘 runner 未实现该接口，调用只记录错误日志、数据被丢弃（BUG-R134-004）
+	 * @details 实盘 runner 不支持外部 tick 加载（K57，BUG-R134-004）：保留该接口只为 ABI 兼容，
+	 *          调用会打一条 ERROR（写明丢弃的条数）并丢弃数据，不会交给策略。
+	 *          回测请使用 WtBtPorter 的 feed_raw_ticks。
 	 */
 	EXPORT_FLAG void		feed_raw_ticks(WTSTickStruct* ticks, WtUInt32 count);
 
@@ -238,6 +237,17 @@ extern "C"
 
 	/** @brief 账户门禁当前暂停代数（操作员复核用）；未知 trader 返回 0 */
 	EXPORT_FLAG	WtUInt64	get_account_pause_generation(WtString traderId);
+
+	/**
+	 * @brief 显式、可审计的人工合约归属释放命令（迭代03 K50，I03-NEW-089）
+	 * @details 开启 owner 路由后，人工/裸 API 下单会让账户的 `manual` 独占该合约。本命令在审计记录
+	 *          落盘后释放 code 上的这份归属；操作员、原因、合约必填；该合约仍有未完成的人工委托时拒绝。
+	 *          返回 AccountTradingGate::ClaimReleaseStatus（0=Ok，1=NotClaimed，2=InvalidRequest/未知 trader，
+	 *          3=LiveOrders，4=AuditUnavailable，5=AuditWriteFailed）。
+	 *          注意：释放后执行器会把人工建立的仓位当作账户持仓，按目标仓位调整。
+	 */
+	EXPORT_FLAG	int32_t		release_manual_claim(WtString traderId, WtString code, WtString operatorId,
+		WtString reason, WtString reference);
 
 	/* Fixed-width values used by the versioned execution-unit status API. */
 	#define WT_EXEC_ENGINE_CTA_V2 UINT32_C(999)

@@ -116,6 +116,9 @@ private:
 	static constexpr uint64_t API_V2_STOP = UINT64_C(1) << 62;
 	static constexpr uint64_t API_COUNT_MASK = API_V2_STOP - 1;
 	std::atomic<uint64_t> _api_state{0};
+	// K51 (BUG-R18-011, user decision 2026-11-06): items dropped because this consumer fell
+	// more than one queue capacity behind the producer (reported with a WARN each time).
+	std::atomic<uint64_t> _lag_dropped{0};
 	std::atomic<bool> _v2_stop{false}, _v2_drained{false}, _v2_joined{false};
 	std::atomic<bool> _worker_created{false}, _worker_failed{false}, _connected{false};
 	std::promise<bool> _exit_promise;

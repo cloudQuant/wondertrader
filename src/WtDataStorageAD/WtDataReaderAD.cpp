@@ -963,6 +963,14 @@ WtDataReaderAD::RTBarRead WtDataReaderAD::get_rt_cache_bar(const char* exchg, co
 
 WTSKlineSlice* WtDataReaderAD::readKlineSlice(const char* stdCode, WTSKlinePeriod period, uint32_t count, uint64_t etime /* = 0 */)
 {
+	// K61 (BUG-I02-NEW-060, user decision 2026-11-06): storage and external loaders only hold
+	// the base periods; other periods are resampled upstream and are rejected here.
+	if (period != KP_Minute1 && period != KP_Minute5 && period != KP_DAY)
+	{
+		pipe_reader_log(_sink, LL_ERROR, "Unsupported kline period {} of {} requested, only m1/m5/d are stored", (uint32_t)period, stdCode == NULL ? "" : stdCode);
+		return NULL;
+	}
+
 	CodeHelper::CodeInfo cInfo = CodeHelper::extractStdCode(stdCode, _hot_mgr);
 	if (!accept_key_identity(_sink, cInfo._exchg, cInfo._code, "readKlineSlice"))
 		return NULL;

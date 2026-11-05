@@ -61,6 +61,7 @@ struct R133CapturedBar
 	std::string period;
 	uintptr_t address;
 	WTSBarStruct bar;
+	std::size_t lifetime_events_seen;	// number of bar-lifetime events recorded before this callback
 };
 
 std::vector<R133CapturedBar> g_r133CapturedBars;
@@ -107,15 +108,23 @@ bool r133_bar_lifetimes_balanced(std::size_t expectedCount)
 
 bool r133_callbacks_use_cached_bars()
 {
-	std::set<uintptr_t> detachedAddresses;
-	for (const auto& event : g_r133BarLifetimeEvents)
-	{
-		if (event.event == WT_DM_BAR_FACTORY_RETURNED)
-			detachedAddresses.insert(event.address);
-	}
+	// A callback must never observe a detached factory bar that is still alive at callback
+	// time. Comparing against every detached address ever returned was a false positive once
+	// the allocator reused a freed detached bar's block for cache storage: with the empty
+	// second-bar cache of I03-NEW-143 (K61, 2026-11-06) the first cache allocation has exactly
+	// one bar's size. Use-after-free of a deleted detached bar is covered by the ASan run.
 	for (const auto& captured : g_r133CapturedBars)
 	{
-		if (detachedAddresses.find(captured.address) != detachedAddresses.end())
+		std::set<uintptr_t> outstanding;
+		for (std::size_t i = 0; i < captured.lifetime_events_seen && i < g_r133BarLifetimeEvents.size(); i++)
+		{
+			const auto& event = g_r133BarLifetimeEvents[i];
+			if (event.event == WT_DM_BAR_FACTORY_RETURNED)
+				outstanding.insert(event.address);
+			else if (event.event == WT_DM_BAR_DELETED)
+				outstanding.erase(event.address);
+		}
+		if (outstanding.find(captured.address) != outstanding.end())
 			return false;
 	}
 	return true;
@@ -144,6 +153,7 @@ void r133_capture_bar(const char* stdCode, const char* period, WTSBarStruct* bar
 	item.period = period == NULL ? "" : period;
 	item.address = (uintptr_t)bar;
 	item.bar = *bar;
+	item.lifetime_events_seen = g_r133BarLifetimeEvents.size();
 	g_r133CapturedBars.push_back(item);
 }
 

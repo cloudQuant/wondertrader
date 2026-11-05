@@ -212,6 +212,7 @@ WtEngine::WtEngine()
 	, _adapter_mgr(NULL)
 	, _ready(false)
 	, _fee_config_valid(true)
+	, _riskmon_config_valid(true)
 {
 	_risk_fact._module_inst = NULL;
 	_risk_fact._fact = NULL;
@@ -618,9 +619,17 @@ void WtEngine::init(WTSVariant* cfg, IBaseDataMgr* bdMgr, WtDtMgr* dataMgr, IHot
 	init_outputs();
 
 	WTSVariant* cfgRisk = cfg->get("riskmon");
+	_riskmon_config_valid = true;
 	if(cfgRisk)
 	{
-		init_riskmon(cfgRisk);
+		const bool riskActive = cfgRisk->getBoolean("active");
+		if (!init_riskmon(cfgRisk) && riskActive)
+		{
+			// K54 (BUG-R211-001): an active risk monitor that failed to load must not be
+			// silently skipped; the runner rejects this engine.
+			_riskmon_config_valid = false;
+			WTSLogger::log_by_cat("risk", LL_ERROR, "Active risk monitor failed to initialize; the engine will not be started");
+		}
 	}
 	else
 	{

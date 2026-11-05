@@ -1,0 +1,11 @@
+build-m1=1
+m1-ignore-live AuditedCommandReleasesTheManualClaimForExecuters exit=127
+m1-ignore-live LiveManualOrderBlocksTheRelease exit=127
+m1-ignore-live ReleaseWithoutDurableAuditKeepsTheClaim exit=127
+m1-ignore-live gate exit=127
+build-m2=0
+m2-release-before-audit AuditedCommandReleasesTheManualClaimForExecuters exit=0
+m2-release-before-audit LiveManualOrderBlocksTheRelease exit=0
+m2-release-before-audit ReleaseWithoutDurableAuditKeepsTheClaim exit=1
+m2-release-before-audit gate exit=1
+restored-identical

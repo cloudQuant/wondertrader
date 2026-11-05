@@ -350,9 +350,10 @@ TEST_F(R100RdmCrossDayTest, R100RdmHisTickAndKlineBoundaries)
 	k->release();
 }
 
-// BUG-R100-002：历史 queue/detail/trans 保持现有排他右界；在首条之前或
-// 恰好等于首条时返回空，右界等于重复记录时排除该时间戳的全部记录。
-TEST_F(R100RdmCrossDayTest, R100RdmHisHftExclusiveEndBoundaries)
+// BUG-R100-002 / K60（BUG-I02-NEW-059，用户裁定 2026-11-06）：历史 queue/detail/trans 统一为闭区间。
+// 原用例断言“排他右界”，该语义没有合同依据（I03-NEW-042），按 K60 改为：在首条之前返回空且
+// begin() 不被递减；右界等于某个时间戳时包含该时间戳的全部（重复）记录。
+TEST_F(R100RdmCrossDayTest, R100RdmHisHftClosedEndBoundaries)
 {
 	const char* const stdCode = "SSE.STK.610198";
 	const uint32_t actionTimes[] = { 93000000, 93000000, 93100000, 93200000, 93200000 };
@@ -381,40 +382,48 @@ TEST_F(R100RdmCrossDayTest, R100RdmHisHftExclusiveEndBoundaries)
 	EXPECT_TRUE(_reader.readTransSliceByRange(stdCode,
 		20240109090000000ull, 20240109091500000ull) == NULL);
 
-	// 右界等于首条时，排他语义产生空结果；不能回退到 begin() 之前。
-	EXPECT_TRUE(_reader.readOrdQueSliceByRange(stdCode,
-		20240109090000000ull, 20240109093000000ull) == NULL);
-	EXPECT_TRUE(_reader.readOrdDtlSliceByRange(stdCode,
-		20240109090000000ull, 20240109093000000ull) == NULL);
-	EXPECT_TRUE(_reader.readTransSliceByRange(stdCode,
-		20240109090000000ull, 20240109093000000ull) == NULL);
-
-	// 右界等于末条的重复时间戳时，排除全部同时间记录，仅保留更早的三条。
+	// 右界等于首条时间戳：包含该时间戳的两条重复记录。
 	WTSOrdQueSlice* q = _reader.readOrdQueSliceByRange(stdCode,
-		20240109090000000ull, 20240109093200000ull);
+		20240109090000000ull, 20240109093000000ull);
 	ASSERT_TRUE(q != NULL);
-	ASSERT_EQ(q->size(), 3u);
+	ASSERT_EQ(q->size(), 2u);
 	EXPECT_DOUBLE_EQ(q->at(0)->price, queues[0].price);
 	EXPECT_DOUBLE_EQ(q->at(1)->price, queues[1].price);
+	q->release();
+	WTSOrdDtlSlice* d = _reader.readOrdDtlSliceByRange(stdCode,
+		20240109090000000ull, 20240109093000000ull);
+	ASSERT_TRUE(d != NULL);
+	EXPECT_EQ(d->size(), 2u);
+	d->release();
+	WTSTransSlice* tr = _reader.readTransSliceByRange(stdCode,
+		20240109090000000ull, 20240109093000000ull);
+	ASSERT_TRUE(tr != NULL);
+	EXPECT_EQ(tr->size(), 2u);
+	tr->release();
+
+	// 右界等于末条的重复时间戳：包含全部同时间记录，共 5 条。
+	q = _reader.readOrdQueSliceByRange(stdCode,
+		20240109090000000ull, 20240109093200000ull);
+	ASSERT_TRUE(q != NULL);
+	ASSERT_EQ(q->size(), 5u);
 	EXPECT_EQ(q->at(2)->action_time, 93100000u);
+	EXPECT_EQ(q->at(4)->action_time, 93200000u);
 	q->release();
 
-	WTSOrdDtlSlice* d = _reader.readOrdDtlSliceByRange(stdCode,
+	d = _reader.readOrdDtlSliceByRange(stdCode,
 		20240109090000000ull, 20240109093200000ull);
 	ASSERT_TRUE(d != NULL);
-	ASSERT_EQ(d->size(), 3u);
+	ASSERT_EQ(d->size(), 5u);
 	EXPECT_EQ(d->at(0)->index, details[0].index);
-	EXPECT_EQ(d->at(1)->index, details[1].index);
-	EXPECT_EQ(d->at(2)->action_time, 93100000u);
+	EXPECT_EQ(d->at(4)->index, details[4].index);
 	d->release();
 
-	WTSTransSlice* tr = _reader.readTransSliceByRange(stdCode,
+	tr = _reader.readTransSliceByRange(stdCode,
 		20240109090000000ull, 20240109093200000ull);
 	ASSERT_TRUE(tr != NULL);
-	ASSERT_EQ(tr->size(), 3u);
+	ASSERT_EQ(tr->size(), 5u);
 	EXPECT_EQ(tr->at(0)->index, transactions[0].index);
-	EXPECT_EQ(tr->at(1)->index, transactions[1].index);
-	EXPECT_EQ(tr->at(2)->action_time, 93100000u);
+	EXPECT_EQ(tr->at(4)->index, transactions[4].index);
 	tr->release();
 
 	// 右界晚于末条时仍返回完整数据，不丢最后一条。
@@ -436,7 +445,7 @@ TEST_F(R100RdmCrossDayTest, R100RdmHisHftExclusiveEndBoundaries)
 	EXPECT_EQ(tr->size(), transactions.size());
 	tr->release();
 
-	// 单条历史数据：右界恰好命中记录时排除；右界稍晚时只返回该记录。
+	// 单条历史数据（K60 闭区间）：右界恰好命中记录或稍晚时都只返回该记录。
 	const char* const singleStdCode = "SSE.STK.610197";
 	vector<WTSOrdQueStruct> singleQueue(1, make_ordque(20240109, 20240109, 93000000, 120));
 	vector<WTSOrdDtlStruct> singleDetail(1, make_orddtl(20240109, 20240109, 93000000, 121));
@@ -448,8 +457,12 @@ TEST_F(R100RdmCrossDayTest, R100RdmHisHftExclusiveEndBoundaries)
 	ASSERT_TRUE(write_bytes("his/trans/SSE/20240109/610197.dsb",
 		make_block(BT_HIS_Trnsctn, BLOCK_VERSION_CMP_V2, pack_items(singleTrans))));
 
-	EXPECT_TRUE(_reader.readOrdQueSliceByRange(singleStdCode,
-		20240109090000000ull, 20240109093000000ull) == NULL);
+	q = _reader.readOrdQueSliceByRange(singleStdCode,
+		20240109090000000ull, 20240109093000000ull);
+	ASSERT_TRUE(q != NULL);		// K60：右界恰好命中记录时包含该记录
+	ASSERT_EQ(q->size(), 1u);
+	EXPECT_DOUBLE_EQ(q->at(0)->price, singleQueue[0].price);
+	q->release();
 	q = _reader.readOrdQueSliceByRange(singleStdCode,
 		20240109090000000ull, 20240109093100000ull);
 	ASSERT_TRUE(q != NULL);
@@ -457,8 +470,12 @@ TEST_F(R100RdmCrossDayTest, R100RdmHisHftExclusiveEndBoundaries)
 	EXPECT_DOUBLE_EQ(q->at(0)->price, singleQueue[0].price);
 	q->release();
 
-	EXPECT_TRUE(_reader.readOrdDtlSliceByRange(singleStdCode,
-		20240109090000000ull, 20240109093000000ull) == NULL);
+	d = _reader.readOrdDtlSliceByRange(singleStdCode,
+		20240109090000000ull, 20240109093000000ull);
+	ASSERT_TRUE(d != NULL);		// K60：右界恰好命中记录时包含该记录
+	ASSERT_EQ(d->size(), 1u);
+	EXPECT_EQ(d->at(0)->index, singleDetail[0].index);
+	d->release();
 	d = _reader.readOrdDtlSliceByRange(singleStdCode,
 		20240109090000000ull, 20240109093100000ull);
 	ASSERT_TRUE(d != NULL);
@@ -466,8 +483,12 @@ TEST_F(R100RdmCrossDayTest, R100RdmHisHftExclusiveEndBoundaries)
 	EXPECT_EQ(d->at(0)->index, singleDetail[0].index);
 	d->release();
 
-	EXPECT_TRUE(_reader.readTransSliceByRange(singleStdCode,
-		20240109090000000ull, 20240109093000000ull) == NULL);
+	tr = _reader.readTransSliceByRange(singleStdCode,
+		20240109090000000ull, 20240109093000000ull);
+	ASSERT_TRUE(tr != NULL);		// K60：右界恰好命中记录时包含该记录
+	ASSERT_EQ(tr->size(), 1u);
+	EXPECT_EQ(tr->at(0)->index, singleTrans[0].index);
+	tr->release();
 	tr = _reader.readTransSliceByRange(singleStdCode,
 		20240109090000000ull, 20240109093100000ull);
 	ASSERT_TRUE(tr != NULL);

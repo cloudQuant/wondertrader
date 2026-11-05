@@ -829,6 +829,8 @@ int TraderDD::logout()
 		return -1;
 	}
 
+	// K55 (BUG-R60-006, user decision 2026-11-06): isConnected() means fully ready; logout ends it.
+	m_wrapperState = WS_NOTLOGIN;
 	return 0;
 }
 

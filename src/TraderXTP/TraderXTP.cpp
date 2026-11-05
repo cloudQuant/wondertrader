@@ -1634,6 +1634,11 @@ int TraderXTP::logout()
 		sessionid = _sessionid;
 	}
 	_api->Logout(sessionid);
+	{
+		// K55 (BUG-R60-006, user decision 2026-11-06): isConnected() means fully ready; logout ends it.
+		std::lock_guard<std::mutex> stateLock(_login_state_mutex);
+		_state = TS_NOTLOGIN;
+	}
 	return 0;
 }
 

@@ -312,7 +312,9 @@ TEST_F(R214MockerBranches, DisconnectJoinsMatchThreadWithoutWorker)
 {
 	init_api(9824, 0);
 	ASSERT_EQ(0, api_.login("", "", ""));
-	EXPECT_TRUE(api_.isConnected());
+	/* K55（2026-11-06）：isConnected 表示“完全就绪”。未 connect() 时没有 io 线程，登录结果送不达，
+	 * 交易通道不可用，因此为 false（原断言 true 反映的是“撮合线程已启动”）。 */
+	EXPECT_FALSE(api_.isConnected());
 
 	EXPECT_NO_THROW(api_.disconnect());
 
