@@ -13,3 +13,18 @@ build-cov/
 # Python 缓存
 __pycache__/
 *.pyc
+
+# 在仓库根目录直接运行测试留下的产物（迭代02/03，2026-10-29～11-01）。
+# 只匹配根目录（前导 /）；文件保留在磁盘上不删除，部分可能被旧证据引用。
+# 以后请在 scratch 目录中运行测试二进制。
+/r28wt_*
+/r104qf_*
+/r14_uft_*
+/*.log
+/Vwap_*.txt
+/mocker_*/
+/Logs/
+/generated/
+/active-plugin-callback.gate
+/ctpopt_creator_unloaded
+/ctpopt_successful_creator_unloaded
